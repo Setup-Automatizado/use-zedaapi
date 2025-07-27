@@ -830,7 +830,7 @@ func getTypeFromMessage(msg *waE2E.Message) string {
 		return getTypeFromMessage(msg.EphemeralMessage.Message)
 	case msg.DocumentWithCaptionMessage != nil:
 		return getTypeFromMessage(msg.DocumentWithCaptionMessage.Message)
-	case msg.ReactionMessage != nil, msg.EncReactionMessage != nil:
+	case msg.ReactionMessage != nil:
 		return "reaction"
 	case msg.PollCreationMessage != nil, msg.PollUpdateMessage != nil:
 		return "poll"
@@ -916,6 +916,8 @@ func getButtonTypeFromMessage(msg *waE2E.Message) string {
 		return "list_response"
 	case msg.InteractiveResponseMessage != nil:
 		return "interactive_response"
+	case msg.InteractiveMessage != nil:
+		return "interactive"
 	default:
 		return ""
 	}
@@ -936,8 +938,86 @@ func getButtonAttributes(msg *waE2E.Message) waBinary.Attrs {
 			"v":    "2",
 			"type": strings.ToLower(waE2E.ListMessage_ListType_name[int32(*waE2E.ListMessage_PRODUCT_LIST.Enum())]),
 		}
+	case msg.InteractiveMessage != nil:
+		// Check if it's a carousel message
+		if msg.InteractiveMessage.GetCarouselMessage() != nil {
+			return waBinary.Attrs{
+				"type": "native_flow",
+			}
+		}
+
+		// Check for payment info button in native flow
+		isPaymentInfoButton := false
+		nativeFlowMsg := msg.InteractiveMessage.GetNativeFlowMessage()
+		if nativeFlowMsg != nil {
+			for _, button := range nativeFlowMsg.GetButtons() {
+				if button.GetName() == "payment_info" {
+					isPaymentInfoButton = true
+					break
+				}
+			}
+		}
+
+		if isPaymentInfoButton {
+			return waBinary.Attrs{
+				"v":    "1",
+				"type": "native_flow",
+			}
+		} else {
+			return waBinary.Attrs{
+				"type": "native_flow",
+			}
+		}
 	default:
 		return waBinary.Attrs{}
+	}
+}
+
+func getButtonContent(msg *waE2E.Message) []waBinary.Node {
+	switch {
+	case msg.InteractiveMessage != nil:
+		// Check if it's a carousel message
+		if carouselMsg := msg.InteractiveMessage.GetCarouselMessage(); carouselMsg != nil {
+			// For carousel, return native_flow
+			return []waBinary.Node{{
+				Tag: "native_flow",
+				Attrs: waBinary.Attrs{
+					"v": "1",
+				},
+			}}
+		}
+
+		// Handle native flow messages
+		nativeFlowMsg := msg.InteractiveMessage.GetNativeFlowMessage()
+		if nativeFlowMsg != nil {
+			buttons := nativeFlowMsg.GetButtons()
+			isPaymentInfoButton := false
+			for _, button := range buttons {
+				if button.GetName() == "payment_info" {
+					isPaymentInfoButton = true
+					break
+				}
+			}
+			if isPaymentInfoButton {
+				return []waBinary.Node{{
+					Tag: "native_flow",
+					Attrs: waBinary.Attrs{
+						"name": "payment_info",
+					},
+				}}
+			} else {
+				return []waBinary.Node{{
+					Tag: "native_flow",
+					Attrs: waBinary.Attrs{
+						"v":    "2",
+						"name": "mixed",
+					},
+				}}
+			}
+		}
+		return nil
+	default:
+		return nil
 	}
 }
 
@@ -1050,11 +1130,13 @@ func (cli *Client) getMessageContent(
 		content = append(content, waBinary.Node{
 			Tag: "biz",
 			Content: []waBinary.Node{{
-				Tag:   buttonType,
-				Attrs: getButtonAttributes(message),
+				Tag:     buttonType,
+				Attrs:   getButtonAttributes(message),
+				Content: getButtonContent(message),
 			}},
 		})
 	}
+
 	return content
 }
 
