@@ -1,0 +1,82 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.travis.yml
+
+# Docs
+*.md
+docs/
+LICENSE
+CHANGELOG.md
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Terraform
+terraform/
+*.tf
+*.tfvars
+*.tfstate*
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# MacOS
+.DS_Store
+
+# Node (se houver frontend)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+coverage.html
+coverage.out
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.log
+
+# Test files (opcional, dependendo da estratégia)
+*_test.go
+testdata/
+
+# Database files (local dev)
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment files (secrets)
+.env
+.env.*
+!.env.example
+
+# Build artifacts
+dist/
+build/
+bin/
+vendor/
+
+# Cache
+.cache/
+*.cache
