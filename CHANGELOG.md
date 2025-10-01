@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.4](https://github.com/Funnelchat20/whatsapp-api-golang/compare/v1.0.3...v1.0.4) (2025-10-01)
+
+### 🐛 Bug Fixes
+
+* correct Docker Hub login parameter ([4f6348d](https://github.com/Funnelchat20/whatsapp-api-golang/commit/4f6348d6258a774917d8dc2de928edb34861f8a5))
+
 ## [1.0.3](https://github.com/Funnelchat20/whatsapp-api-golang/compare/v1.0.2...v1.0.3) (2025-10-01)
 
 ### 🐛 Bug Fixes
