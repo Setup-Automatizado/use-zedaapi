@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.3](https://github.com/Funnelchat20/whatsapp-api-golang/compare/v1.0.2...v1.0.3) (2025-10-01)
+
+### 🐛 Bug Fixes
+
+* resolve CI workflow failures ([ec21016](https://github.com/Funnelchat20/whatsapp-api-golang/commit/ec21016c0530cdec54d0caa207e73f8604a23dc3))
+
 ## [1.0.2](https://github.com/Funnelchat20/whatsapp-api-golang/compare/v1.0.1...v1.0.2) (2025-10-01)
 
 ### 🐛 Bug Fixes
