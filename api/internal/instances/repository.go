@@ -23,6 +23,12 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 	return &Repository{pool: pool}
 }
 
+// StoreLink represents the association between an instance and its Whatsmeow store JID.
+type StoreLink struct {
+	ID      uuid.UUID
+	StoreJID string
+}
+
 // Insert stores a new instance record.
 
 func (r *Repository) Insert(ctx context.Context, inst *Instance) error {
@@ -238,4 +244,26 @@ func (r *Repository) List(ctx context.Context, filter ListFilter) ([]Instance, i
 	}
 
 	return instances, total, nil
+}
+
+// ListInstancesWithStoreJID returns instances that reference a Whatsmeow store JID.
+func (r *Repository) ListInstancesWithStoreJID(ctx context.Context) ([]StoreLink, error) {
+	rows, err := r.pool.Query(ctx, `SELECT id, store_jid FROM instances WHERE store_jid IS NOT NULL AND store_jid <> ''`)
+	if err != nil {
+		return nil, fmt.Errorf("list instances with store_jid: %w", err)
+	}
+	defer rows.Close()
+
+	links := make([]StoreLink, 0)
+	for rows.Next() {
+		var link StoreLink
+		if err := rows.Scan(&link.ID, &link.StoreJID); err != nil {
+			return nil, fmt.Errorf("scan store link: %w", err)
+		}
+		links = append(links, link)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate store links: %w", err)
+	}
+	return links, nil
 }

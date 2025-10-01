@@ -71,9 +71,14 @@ func main() {
 
 	repo := instances.NewRepository(pgPool)
 
-	registry, err := whatsmeow.NewClientRegistry(ctx, cfg.WhatsmeowStore.DSN, cfg.WhatsmeowStore.LogLevel, lockManager, logger, func(ctx context.Context, id uuid.UUID, jid string) error {
+	pairCallback := func(ctx context.Context, id uuid.UUID, jid string) error {
 		return repo.UpdateStoreJID(ctx, id, &jid)
-	})
+	}
+	resetCallback := func(ctx context.Context, id uuid.UUID, _ string) error {
+		return repo.UpdateStoreJID(ctx, id, nil)
+	}
+
+	registry, err := whatsmeow.NewClientRegistry(ctx, cfg.WhatsmeowStore.DSN, cfg.WhatsmeowStore.LogLevel, lockManager, logger, pairCallback, resetCallback)
 	if err != nil {
 		logger.Error("whatsmeow registry", slog.String("error", err.Error()))
 		os.Exit(1)
@@ -81,6 +86,14 @@ func main() {
 	defer registry.Close()
 
 	instanceService := instances.NewService(repo, registry, logger)
+	reconcileCtx, reconcileCancel := context.WithTimeout(ctx, 30*time.Second)
+	cleaned, reconcileErr := instanceService.ReconcileDetachedStores(reconcileCtx)
+	reconcileCancel()
+	if reconcileErr != nil {
+		logger.Error("reconcile stores", slog.String("error", reconcileErr.Error()))
+	} else if len(cleaned) > 0 {
+		logger.Info("reconciled stores", slog.Int("count", len(cleaned)))
+	}
 	instanceHandler := handlers.NewInstanceHandler(instanceService, logger)
 	partnerHandler := handlers.NewPartnerHandler(instanceService, logger)
 

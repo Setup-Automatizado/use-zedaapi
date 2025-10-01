@@ -287,6 +287,10 @@ func (h *InstanceHandler) handleServiceError(w http.ResponseWriter, err error) {
 		respondError(w, http.StatusForbidden, "instance subscription inactive")
 		return
 	}
+	if errors.Is(err, instances.ErrInstanceAlreadyPaired) {
+		respondError(w, http.StatusConflict, "instance already paired")
+		return
+	}
 	h.log.Error("service error", slog.String("error", err.Error()))
 	respondError(w, http.StatusInternalServerError, "internal error")
 }

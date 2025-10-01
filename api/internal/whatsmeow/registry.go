@@ -46,12 +46,13 @@ type StatusSnapshot struct {
 
 // ClientRegistry manages Whatsmeow clients per instance.
 type ClientRegistry struct {
-	log          *slog.Logger
-	workerID     string
-	container    *sqlstore.Container
-	lockManager  locks.Manager
-	pairCallback func(context.Context, uuid.UUID, string) error
-	logLevel     string
+	log           *slog.Logger
+	workerID      string
+	container     *sqlstore.Container
+	lockManager   locks.Manager
+	pairCallback  func(context.Context, uuid.UUID, string) error
+	resetCallback func(context.Context, uuid.UUID, string) error
+	logLevel      string
 
 	mu      sync.RWMutex
 	clients map[uuid.UUID]*clientState
@@ -71,8 +72,19 @@ type pairingSession struct {
 	timer  *time.Timer
 }
 
+// ErrInstanceAlreadyPaired indicates the client already owns a store JID and cannot pair again.
+var ErrInstanceAlreadyPaired = errors.New("instance already paired")
+
 // NewClientRegistry sets up a Whatsmeow SQL store, upgrading schema if needed.
-func NewClientRegistry(ctx context.Context, dsn string, logLevel string, lockManager locks.Manager, logger *slog.Logger, pairCallback func(context.Context, uuid.UUID, string) error) (*ClientRegistry, error) {
+func NewClientRegistry(
+	ctx context.Context,
+	dsn string,
+	logLevel string,
+	lockManager locks.Manager,
+	logger *slog.Logger,
+	pairCallback func(context.Context, uuid.UUID, string) error,
+	resetCallback func(context.Context, uuid.UUID, string) error,
+) (*ClientRegistry, error) {
 	if logger == nil {
 		logger = slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	}
@@ -96,13 +108,14 @@ func NewClientRegistry(ctx context.Context, dsn string, logLevel string, lockMan
 
 	hostname, _ := os.Hostname()
 	return &ClientRegistry{
-		log:          logger,
-		workerID:     hostname,
-		container:    container,
-		lockManager:  lockManager,
-		pairCallback: pairCallback,
-		logLevel:     logLevel,
-		clients:      make(map[uuid.UUID]*clientState),
+		log:           logger,
+		workerID:      hostname,
+		container:     container,
+		lockManager:   lockManager,
+		pairCallback:  pairCallback,
+		resetCallback: resetCallback,
+		logLevel:      logLevel,
+		clients:       make(map[uuid.UUID]*clientState),
 	}, nil
 }
 
@@ -110,27 +123,50 @@ func NewClientRegistry(ctx context.Context, dsn string, logLevel string, lockMan
 func (r *ClientRegistry) EnsureClient(ctx context.Context, info InstanceInfo) (*whatsmeow.Client, bool, error) {
 	r.mu.RLock()
 	state, ok := r.clients[info.ID]
+	if ok && state != nil && state.client != nil && state.client.Store != nil && state.client.Store.ID != nil {
+		client := state.client
+		r.mu.RUnlock()
+		return client, false, nil
+	}
+	needsReset := ok
 	r.mu.RUnlock()
-	if ok {
-		return state.client, false, nil
+
+	if needsReset {
+		r.ResetClient(info.ID, "store_missing")
 	}
 
 	r.mu.Lock()
-	defer r.mu.Unlock()
-	// Double-check under write lock.
+	// Double-check under write lock since another goroutine might have created it.
 	if state, ok = r.clients[info.ID]; ok {
-		return state.client, false, nil
+		if state != nil && state.client != nil && state.client.Store != nil && state.client.Store.ID != nil {
+			r.mu.Unlock()
+			return state.client, false, nil
+		}
+		delete(r.clients, info.ID)
 	}
+	r.mu.Unlock()
 
-	client, err := r.instantiateClient(ctx, info)
+	client, storeReset, err := r.instantiateClient(ctx, info)
 	if err != nil {
 		return nil, false, err
 	}
-	r.clients[info.ID] = &clientState{client: client, storeJID: info.StoreJID}
+	clientState := &clientState{client: client, storeJID: info.StoreJID}
+	if storeReset {
+		clientState.storeJID = nil
+	}
+
+	r.mu.Lock()
+	r.clients[info.ID] = clientState
+	r.mu.Unlock()
+
+	if storeReset && !needsReset {
+		go r.notifyReset(info.ID, "store_missing")
+	}
+
 	return client, true, nil
 }
 
-func (r *ClientRegistry) instantiateClient(ctx context.Context, info InstanceInfo) (*whatsmeow.Client, error) {
+func (r *ClientRegistry) instantiateClient(ctx context.Context, info InstanceInfo) (*whatsmeow.Client, bool, error) {
 	var lock locks.Lock
 	var err error
 	if r.lockManager != nil {
@@ -148,25 +184,34 @@ func (r *ClientRegistry) instantiateClient(ctx context.Context, info InstanceInf
 	}
 
 	var deviceStore *store.Device
+	storeReset := false
 	if info.StoreJID != nil {
 		jid, parseErr := types.ParseJID(*info.StoreJID)
 		if parseErr == nil {
 			deviceStore, err = r.container.GetDevice(ctx, jid)
 			if err != nil {
-				return nil, fmt.Errorf("load device store: %w", err)
+				return nil, false, fmt.Errorf("load device store: %w", err)
 			}
+			if deviceStore == nil {
+				storeReset = true
+			}
+		} else {
+			storeReset = true
 		}
 	}
 
 	if deviceStore == nil {
 		deviceStore = r.container.NewDevice()
+		if info.StoreJID != nil {
+			storeReset = true
+		}
 	}
 
 	client := whatsmeow.NewClient(deviceStore, waLog.Stdout("instance-"+info.ID.String(), logLevelOrDefault(r.logLevel), false))
 	client.EnableAutoReconnect = true
 	client.AddEventHandler(r.wrapEventHandler(info.ID))
 
-	return client, nil
+	return client, storeReset, nil
 }
 
 func logLevelOrDefault(level string) string {
@@ -255,6 +300,78 @@ func (r *ClientRegistry) cleanupPairingSession(instanceID uuid.UUID, reason stri
 	}
 }
 
+func (r *ClientRegistry) notifyReset(instanceID uuid.UUID, reason string) {
+	if r.resetCallback == nil {
+		return
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := r.resetCallback(ctx, instanceID, reason); err != nil {
+		r.log.Error(
+			"reset callback",
+			slog.String("instanceId", instanceID.String()),
+			slog.String("reason", reason),
+			slog.String("error", err.Error()),
+		)
+	}
+}
+
+// ResetClient clears any cached client state and deletes the associated store entry before the next EnsureClient call.
+func (r *ClientRegistry) ResetClient(instanceID uuid.UUID, reason string) bool {
+	return r.resetClient(instanceID, reason, true)
+}
+
+// RemoveClient clears any cached client state without deleting the persisted store entry.
+func (r *ClientRegistry) RemoveClient(instanceID uuid.UUID, reason string) bool {
+	return r.resetClient(instanceID, reason, false)
+}
+
+func (r *ClientRegistry) resetClient(instanceID uuid.UUID, reason string, deleteStore bool) bool {
+	r.cleanupPairingSession(instanceID, "manual")
+
+	r.mu.Lock()
+	state, ok := r.clients[instanceID]
+	if !ok {
+		r.mu.Unlock()
+		return false
+	}
+	delete(r.clients, instanceID)
+	r.mu.Unlock()
+
+	if state == nil {
+		return false
+	}
+
+	r.log.Info(
+		"resetting client",
+		slog.String("instanceId", instanceID.String()),
+		slog.String("reason", reason),
+	)
+
+	if state.client != nil {
+		state.client.EnableAutoReconnect = false
+		state.client.Disconnect()
+		if deleteStore && state.client.Store != nil && state.client.Store.ID != nil {
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			if err := state.client.Store.Delete(ctx); err != nil {
+				r.log.Error(
+					"delete store device",
+					slog.String("instanceId", instanceID.String()),
+					slog.String("reason", reason),
+					slog.String("error", err.Error()),
+				)
+			}
+			cancel()
+		}
+	}
+
+	if deleteStore {
+		go r.notifyReset(instanceID, reason)
+	}
+
+	return true
+}
+
 func (r *ClientRegistry) reconnectAfterPair(instanceID uuid.UUID, client *whatsmeow.Client) {
 	if client == nil {
 		return
@@ -328,6 +445,23 @@ func (r *ClientRegistry) wrapEventHandler(instanceID uuid.UUID) func(evt interfa
 			}
 		case *events.Disconnected:
 			r.log.Warn("instance disconnected", slog.String("instanceId", instanceID.String()))
+		case *events.LoggedOut:
+			reason := "logged_out"
+			if desc := e.Reason.String(); desc != "" {
+				reason = "logged_out:" + desc
+			}
+			r.log.Warn("instance logged out", slog.String("instanceId", instanceID.String()), slog.String("reason", reason))
+			r.ResetClient(instanceID, reason)
+		case *events.PairError:
+			if e.Error != nil && (errors.Is(e.Error, whatsmeow.ErrPairInvalidDeviceIdentityHMAC) || errors.Is(e.Error, whatsmeow.ErrPairInvalidDeviceSignature)) {
+				reason := "pair_error"
+				r.log.Warn(
+					"pairing error reset",
+					slog.String("instanceId", instanceID.String()),
+					slog.String("error", e.Error.Error()),
+				)
+				r.ResetClient(instanceID, reason)
+			}
 		default:
 			_ = e
 		}
@@ -436,7 +570,7 @@ func (r *ClientRegistry) startPairingSession(ctx context.Context, info InstanceI
 		return nil, nil, err
 	}
 	if client.Store != nil && client.Store.ID != nil {
-		return nil, nil, errors.New("instance already paired")
+		return nil, nil, ErrInstanceAlreadyPaired
 	}
 
 	pairCtx, cancel := context.WithCancel(context.Background())
@@ -452,6 +586,25 @@ func (r *ClientRegistry) startPairingSession(ctx context.Context, info InstanceI
 		}
 	}()
 	return client, qrChan, nil
+}
+
+// HasStoreDevice verifies whether the Whatsmeow store contains a device row for the given JID.
+func (r *ClientRegistry) HasStoreDevice(ctx context.Context, storeJID string) (bool, error) {
+	if storeJID == "" {
+		return false, nil
+	}
+	jid, err := types.ParseJID(storeJID)
+	if err != nil {
+		return false, fmt.Errorf("parse store jid: %w", err)
+	}
+	if r.container == nil {
+		return false, errors.New("whatsmeow container not initialised")
+	}
+	device, err := r.container.GetDevice(ctx, jid)
+	if err != nil {
+		return false, fmt.Errorf("lookup store device: %w", err)
+	}
+	return device != nil && device.ID != nil, nil
 }
 
 // Close releases the underlying SQL resources.

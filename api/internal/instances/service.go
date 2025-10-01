@@ -18,11 +18,12 @@ import (
 )
 
 var (
-	ErrUnauthorized        = errors.New("unauthorized")
-	ErrInvalidWebhookURL   = errors.New("webhook url must use https")
-	ErrMissingWebhookValue = errors.New("webhook value is required")
-	ErrInvalidPhoneNumber  = errors.New("invalid phone number")
-	ErrInstanceInactive    = errors.New("instance subscription inactive")
+	ErrUnauthorized          = errors.New("unauthorized")
+	ErrInvalidWebhookURL     = errors.New("webhook url must use https")
+	ErrMissingWebhookValue   = errors.New("webhook value is required")
+	ErrInvalidPhoneNumber    = errors.New("invalid phone number")
+	ErrInstanceInactive      = errors.New("instance subscription inactive")
+	ErrInstanceAlreadyPaired = errors.New("instance already paired")
 )
 
 // Service exposes business operations for managing instances.
@@ -131,6 +132,9 @@ func (s *Service) GetQRCode(ctx context.Context, id uuid.UUID, clientToken, inst
 	}
 	code, err := s.registry.GetQRCode(ctx, toInstanceInfo(*inst))
 	if err != nil {
+		if errors.Is(err, whatsmeow.ErrInstanceAlreadyPaired) {
+			return "", ErrInstanceAlreadyPaired
+		}
 		return "", fmt.Errorf("get qr code: %w", err)
 	}
 	return code, nil
@@ -164,9 +168,54 @@ func (s *Service) GetPhoneCode(ctx context.Context, id uuid.UUID, clientToken, i
 		if errors.Is(err, whatsmeowpkg.ErrPhoneNumberTooShort) || errors.Is(err, whatsmeowpkg.ErrPhoneNumberIsNotInternational) {
 			return "", ErrInvalidPhoneNumber
 		}
+		if errors.Is(err, whatsmeow.ErrInstanceAlreadyPaired) {
+			return "", ErrInstanceAlreadyPaired
+		}
 		return "", fmt.Errorf("pair phone: %w", err)
 	}
 	return code, nil
+}
+
+// ReconcileDetachedStores ensures the API metadata matches the Whatsmeow store content.
+func (s *Service) ReconcileDetachedStores(ctx context.Context) ([]uuid.UUID, error) {
+	links, err := s.repo.ListInstancesWithStoreJID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if len(links) == 0 {
+		return nil, nil
+	}
+
+	cleaned := make([]uuid.UUID, 0)
+	for _, link := range links {
+		exists, checkErr := s.registry.HasStoreDevice(ctx, link.StoreJID)
+		if checkErr != nil {
+			s.log.Error(
+				"check store device",
+				slog.String("instanceId", link.ID.String()),
+				slog.String("storeJid", link.StoreJID),
+				slog.String("error", checkErr.Error()),
+			)
+		}
+		if checkErr != nil || !exists {
+			s.registry.RemoveClient(link.ID, "reconcile_missing_store")
+			if err := s.repo.UpdateStoreJID(ctx, link.ID, nil); err != nil {
+				s.log.Error(
+					"clear store jid",
+					slog.String("instanceId", link.ID.String()),
+					slog.String("error", err.Error()),
+				)
+				continue
+			}
+			s.log.Info(
+				"reconciled missing store",
+				slog.String("instanceId", link.ID.String()),
+				slog.String("storeJid", link.StoreJID),
+			)
+			cleaned = append(cleaned, link.ID)
+		}
+	}
+	return cleaned, nil
 }
 
 func (s *Service) tokensMatch(inst *Instance, clientToken, instanceToken string) bool {
