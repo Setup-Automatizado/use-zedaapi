@@ -149,4 +149,4 @@ RUN go tool cover -html=coverage.out -o coverage.html
 LABEL maintainer="WhatsApp API Team"
 LABEL description="WhatsApp API with Z-API compatibility"
 LABEL version="${VERSION}"
-LABEL org.opencontainers.image.source="https://github.com/your-org/whatsmeow-private"
+LABEL org.opencontainers.image.source="https://github.com/Funnelchat20/whatsapp-api-golang"

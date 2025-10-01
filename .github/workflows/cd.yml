@@ -3,7 +3,7 @@ name: CD - Release & Deploy
 on:
   push:
     branches:
-      - main
+      - production
       - develop
       - homolog
 
