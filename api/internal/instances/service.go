@@ -398,15 +398,15 @@ func (s *Service) CancelInstance(ctx context.Context, id uuid.UUID, instanceToke
 	if err := s.repo.VerifyToken(ctx, id, instanceToken); err != nil {
 		return err
 	}
-    if err := s.repo.UpdateSubscription(ctx, id, false); err != nil {
-        return err
-    }
-    cancelCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-    defer cancel()
-    if inst, err := s.repo.GetByID(ctx, id); err == nil {
-        _ = s.registry.Disconnect(cancelCtx, toInstanceInfo(*inst))
-    }
-    return nil
+	if err := s.repo.UpdateSubscription(ctx, id, false); err != nil {
+		return err
+	}
+	cancelCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if inst, err := s.repo.GetByID(ctx, id); err == nil {
+		_ = s.registry.Disconnect(cancelCtx, toInstanceInfo(*inst))
+	}
+	return nil
 }
 
 func (s *Service) ListInstances(ctx context.Context, filter ListFilter) (ListResult, error) {
