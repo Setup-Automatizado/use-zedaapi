@@ -148,7 +148,8 @@ COPY --from=deps /go/pkg /go/pkg
 COPY . .
 
 # Run tests with race detector (requires CGO_ENABLED=1)
-RUN CGO_ENABLED=1 go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
+# Only test API code, not the entire whatsmeow library
+RUN CGO_ENABLED=1 go test -v -race -coverprofile=coverage.out -covermode=atomic ./api/...
 
 # Generate coverage report
 RUN go tool cover -html=coverage.out -o coverage.html
