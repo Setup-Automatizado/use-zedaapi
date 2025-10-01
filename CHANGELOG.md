@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.1](https://github.com/Funnelchat20/whatsapp-api-golang/compare/v1.0.0...v1.0.1) (2025-10-01)
+
+### 🐛 Bug Fixes
+
+* format Go code and normalize JSON file line endings ([1b245e4](https://github.com/Funnelchat20/whatsapp-api-golang/commit/1b245e4499082733a76b679a809289732bea82d8))
+
 ## 1.0.0 (2025-10-01)
 
 ### ✨ Features
