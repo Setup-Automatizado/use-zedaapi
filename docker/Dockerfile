@@ -135,10 +135,20 @@ CMD ["air", "-c", "api/.air.toml"]
 # ==========================================
 # Stage 5: Testing
 # ==========================================
-FROM builder AS testing
+FROM golang:1.25-alpine AS testing
+WORKDIR /build
 
-# Run tests
-RUN go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
+# Install build dependencies (gcc needed for -race flag)
+RUN apk add --no-cache gcc musl-dev git ca-certificates
+
+# Copy dependencies
+COPY --from=deps /go/pkg /go/pkg
+
+# Copy source code
+COPY . .
+
+# Run tests with race detector (requires CGO_ENABLED=1)
+RUN CGO_ENABLED=1 go test -v -race -coverprofile=coverage.out -covermode=atomic ./...
 
 # Generate coverage report
 RUN go tool cover -html=coverage.out -o coverage.html
@@ -146,7 +156,7 @@ RUN go tool cover -html=coverage.out -o coverage.html
 # ==========================================
 # Metadata
 # ==========================================
-LABEL maintainer="WhatsApp API Team"
-LABEL description="WhatsApp API with Z-API compatibility"
+LABEL maintainer="WhatsApp API"
+LABEL description="WhatsApp API"
 LABEL version="${VERSION}"
 LABEL org.opencontainers.image.source="https://github.com/Funnelchat20/whatsapp-api-golang"
