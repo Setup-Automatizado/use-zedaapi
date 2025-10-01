@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.5](https://github.com/Funnelchat20/whatsapp-api-golang/compare/v1.0.4...v1.0.5) (2025-10-01)
+
+### 🐛 Bug Fixes
+
+* test only API code in Docker build, not entire whatsmeow library ([b844208](https://github.com/Funnelchat20/whatsapp-api-golang/commit/b8442081c1345feb24e8c1497453ba60f2fda60d))
+
 ## [1.0.4](https://github.com/Funnelchat20/whatsapp-api-golang/compare/v1.0.3...v1.0.4) (2025-10-01)
 
 ### 🐛 Bug Fixes
