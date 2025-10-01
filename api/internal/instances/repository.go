@@ -25,7 +25,7 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 
 // StoreLink represents the association between an instance and its Whatsmeow store JID.
 type StoreLink struct {
-	ID      uuid.UUID
+	ID       uuid.UUID
 	StoreJID string
 }
 
