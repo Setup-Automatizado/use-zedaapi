@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.2](https://github.com/Funnelchat20/whatsapp-api-golang/compare/v1.0.1...v1.0.2) (2025-10-01)
+
+### 🐛 Bug Fixes
+
+* remove SARIF upload from security scan workflow ([4d62fe6](https://github.com/Funnelchat20/whatsapp-api-golang/commit/4d62fe648d52f41caf224b9159c339521a1b8d3e))
+
 ## [1.0.1](https://github.com/Funnelchat20/whatsapp-api-golang/compare/v1.0.0...v1.0.1) (2025-10-01)
 
 ### 🐛 Bug Fixes
