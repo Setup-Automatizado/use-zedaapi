@@ -13,8 +13,7 @@ concurrency:
 
 env:
   GO_VERSION: '1.25'
-  DOCKER_IMAGE_NAME: whatsmeow-api
-  AWS_REGION: us-east-1
+  DOCKER_IMAGE_NAME: whatsapp-api-golang
 
 jobs:
   # ======================================
@@ -103,7 +102,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Log in to Amazon ECR
         id: login-ecr
@@ -195,7 +194,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Determine environment
         id: env
