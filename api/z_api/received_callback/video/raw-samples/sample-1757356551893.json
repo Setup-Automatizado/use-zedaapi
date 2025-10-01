@@ -1,0 +1,50 @@
+{
+  "headers": {
+    "connection": "Upgrade, HTTP2-Settings",
+    "content-length": "1403",
+    "host": "185.245.182.69:3000",
+    "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+    "upgrade": "h2c",
+    "content-type": "application/json",
+    "origin": "https://api.z-api.io",
+    "server": "Z-API",
+    "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_2_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
+    "z-api-token": "0B039DE5C908EDAF88346CED"
+  },
+  "body": {
+    "isStatusReply": false,
+    "chatLid": null,
+    "connectedPhone": "5521971532700",
+    "waitingMessage": false,
+    "isEdit": false,
+    "isGroup": true,
+    "isNewsletter": false,
+    "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+    "messageId": "3AD5751ECC67A827BE96",
+    "phone": "120363356267865958-group",
+    "fromMe": false,
+    "momment": 1757356547000,
+    "status": "RECEIVED",
+    "chatName": "Kanban para Chatwoot 💬 StackLab",
+    "senderPhoto": "https://pps.whatsapp.net/v/t61.24694-24/484127459_537236152299903_4170059099071026012_n.jpg?ccb=11-4&oh=01_Q5Aa2gFu8RxRll9slSl5V1CvT0AyPAlWfDtT7u8K2npGh5IL7g&oe=68CC466C&_nc_sid=5e03e0&_nc_cat=111",
+    "senderName": "Djonathan Kempfer",
+    "photo": "https://pps.whatsapp.net/v/t61.24694-24/463731840_903067688596990_7625329384858879164_n.jpg?ccb=11-4&oh=01_Q5Aa2gHARoz675ms9Pej4j5OZRO8Jf-sEnppQXgWfqiScGeH-A&oe=68CC2805&_nc_sid=5e03e0&_nc_cat=106",
+    "broadcast": false,
+    "participantPhone": "555491055778",
+    "participantLid": "51737293500535@lid",
+    "messageExpirationSeconds": 0,
+    "forwarded": false,
+    "type": "ReceivedCallback",
+    "fromApi": false,
+    "video": {
+      "videoUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/3AD5751ECC67A827BE96/KWyvIhok7SQuuOG2VfhnDQ==.mp4",
+      "caption": "Desenvolvendo um módulo bem legal de caixas de entrada com a Evo, para melhorar a experiência do usuário dentro do sistema.",
+      "mimeType": "video/mp4",
+      "width": 1280,
+      "height": 624,
+      "seconds": 15,
+      "viewOnce": false,
+      "isGif": false
+    }
+  }
+}

@@ -1,0 +1,1660 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "FunnelChat API (Whatsmeow Bridge)",
+    "version": "0.1.0",
+    "description": "REST API compatible with Z-API schemas, backed by Whatsmeow.\nThe specification currently covers the instance management surface implemented in this phase.\n"
+  },
+  "servers": [
+    {
+      "url": "https://api.example.com",
+      "description": "Production placeholder"
+    },
+    {
+      "url": "http://localhost:8080",
+      "description": "Local development"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "ClientTokenAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Client-Token",
+        "description": "Instance client token obtained during provisioning."
+      },
+      "PartnerBearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Partner integrator bearer token."
+      }
+    },
+    "parameters": {
+      "InstanceId": {
+        "name": "instanceId",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "description": "Unique instance identifier."
+      },
+      "InstanceToken": {
+        "name": "instanceToken",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "Token returned during provisioning."
+      }
+    },
+    "schemas": {
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "error"
+        ]
+      },
+      "InstanceStatusResponse": {
+        "type": "object",
+        "properties": {
+          "instanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "connected": {
+            "type": "boolean"
+          },
+          "storeJid": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastConnected": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "autoReconnect": {
+            "type": "boolean"
+          },
+          "workerAssigned": {
+            "type": "string"
+          },
+          "subscriptionActive": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "instanceId",
+          "connected",
+          "autoReconnect",
+          "workerAssigned",
+          "subscriptionActive"
+        ],
+        "additionalProperties": false
+      },
+      "QRCodeImageResponse": {
+        "type": "object",
+        "properties": {
+          "image": {
+            "type": "string",
+            "description": "PNG image encoded as data URL (`data:image/png;base64,...`)."
+          }
+        },
+        "required": [
+          "image"
+        ],
+        "additionalProperties": false
+      },
+      "PhoneCodeResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Six-character pairing code formatted with dash (e.g., `ABCD-EF`)."
+          }
+        },
+        "required": [
+          "code"
+        ],
+        "additionalProperties": false
+      },
+      "WebhookSettings": {
+        "type": "object",
+        "properties": {
+          "deliveryCallbackUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "receivedCallbackUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "receivedAndDeliveryCallbackUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "messageStatusCallbackUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "disconnectedCallbackUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "presenceChatCallbackUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "connectedCallbackUrl": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true
+          },
+          "notifySentByMe": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "WebhookValueRequest": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "description": "HTTPS endpoint that should receive the webhook."
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "additionalProperties": false
+      },
+      "WebhookEveryRequest": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "description": "HTTPS endpoint applied to all webhook types."
+          },
+          "notifySentByMe": {
+            "type": "boolean",
+            "description": "Optional flag to also toggle the notify-sent-by-me option."
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "additionalProperties": false
+      },
+      "NotifySentByMeRequest": {
+        "type": "object",
+        "properties": {
+          "notifySentByMe": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "notifySentByMe"
+        ],
+        "additionalProperties": false
+      },
+      "WebhookUpdateResponse": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "boolean",
+            "description": "Indicates whether the update was accepted."
+          },
+          "webhooks": {
+            "$ref": "#/components/schemas/WebhookSettings"
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "additionalProperties": false
+      },
+      "InstanceQRCodeResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code"
+        ],
+        "additionalProperties": false
+      },
+      "OperationStatusResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "additionalProperties": false
+      },
+      "PartnerInstanceCreateRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Display name for the instance."
+          },
+          "sessionName": {
+            "type": "string",
+            "description": "Optional session identifier used by partners."
+          },
+          "deliveryCallbackUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "receivedCallbackUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "receivedAndDeliveryCallbackUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "disconnectedCallbackUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "connectedCallbackUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "messageStatusCallbackUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "presenceChatCallbackUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "notifySentByMe": {
+            "type": "boolean",
+            "default": false
+          },
+          "callRejectAuto": {
+            "type": "boolean",
+            "description": "When true, the instance rejects calls automatically."
+          },
+          "callRejectMessage": {
+            "type": "string",
+            "description": "Message returned when a call is rejected automatically."
+          },
+          "autoReadMessage": {
+            "type": "boolean",
+            "description": "When true, messages are marked as read automatically."
+          },
+          "isDevice": {
+            "type": "boolean",
+            "default": false
+          },
+          "businessDevice": {
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "PartnerInstanceCreateResponse": {
+        "type": "object",
+        "properties": {
+          "instanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "sessionName": {
+            "type": "string"
+          },
+          "clientToken": {
+            "type": "string"
+          },
+          "instanceToken": {
+            "type": "string"
+          },
+          "subscriptionActive": {
+            "type": "boolean"
+          },
+          "callRejectAuto": {
+            "type": "boolean"
+          },
+          "callRejectMessage": {
+            "type": "string",
+            "nullable": true
+          },
+          "autoReadMessage": {
+            "type": "boolean"
+          },
+          "middleware": {
+            "type": "string",
+            "enum": [
+              "web",
+              "mobile"
+            ]
+          },
+          "webhooks": {
+            "$ref": "#/components/schemas/WebhookSettings"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "instanceId",
+          "name",
+          "sessionName",
+          "clientToken",
+          "instanceToken",
+          "subscriptionActive",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "InstanceListItem": {
+        "type": "object",
+        "properties": {
+          "instanceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "sessionName": {
+            "type": "string"
+          },
+          "clientToken": {
+            "type": "string"
+          },
+          "instanceToken": {
+            "type": "string"
+          },
+          "storeJid": {
+            "type": "string",
+            "nullable": true
+          },
+          "isDevice": {
+            "type": "boolean"
+          },
+          "businessDevice": {
+            "type": "boolean"
+          },
+          "subscriptionActive": {
+            "type": "boolean"
+          },
+          "callRejectAuto": {
+            "type": "boolean"
+          },
+          "callRejectMessage": {
+            "type": "string",
+            "nullable": true
+          },
+          "autoReadMessage": {
+            "type": "boolean"
+          },
+          "canceledAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "middleware": {
+            "type": "string",
+            "enum": [
+              "web",
+              "mobile"
+            ]
+          },
+          "phoneConnected": {
+            "type": "boolean"
+          },
+          "whatsappConnected": {
+            "type": "boolean"
+          },
+          "due": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "webhooks": {
+            "$ref": "#/components/schemas/WebhookSettings"
+          }
+        },
+        "required": [
+          "instanceId",
+          "name",
+          "sessionName",
+          "clientToken",
+          "instanceToken",
+          "isDevice",
+          "businessDevice",
+          "subscriptionActive",
+          "createdAt",
+          "updatedAt"
+        ],
+        "additionalProperties": false
+      },
+      "InstanceListResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InstanceListItem"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "pageSize": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "data",
+          "page",
+          "pageSize",
+          "total"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "paths": {
+    "/healthz": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "summary": "Health check",
+        "description": "Returns `ok` when the API process is alive.",
+        "operationId": "health",
+        "responses": {
+          "200": {
+            "description": "Service healthy",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "ok"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances": {
+      "get": {
+        "tags": [
+          "Partner"
+        ],
+        "summary": "List partner instances",
+        "description": "Returns a paginated list of managed WhatsApp instances for the partner account.",
+        "operationId": "listInstances",
+        "security": [
+          {
+            "PartnerBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter results by instance name or session name."
+          },
+          {
+            "in": "query",
+            "name": "middleware",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Informational middleware flag (matches Z-API contract)."
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "Page number (1-indexed).",
+            "example": 1
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            },
+            "description": "Page size (defaults to 15 as in Z-API examples).",
+            "example": 15
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of instances owned by the partner.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstanceListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Partner bearer token.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/status": {
+      "get": {
+        "tags": [
+          "Instances"
+        ],
+        "summary": "Retrieve instance status",
+        "description": "Mirrors Z-API `/status`, returning live connectivity information for a provisioned instance.",
+        "operationId": "getInstanceStatus",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Instance status snapshot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstanceStatusResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Instance not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/qr-code": {
+      "get": {
+        "tags": [
+          "Instances"
+        ],
+        "summary": "Fetch QR code for pairing",
+        "description": "Mirrors Z-API `/qr-code`, returning the current QR string required to link a phone.",
+        "operationId": "getInstanceQRCode",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current QR code for pairing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstanceQRCodeResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/qr-code/image": {
+      "get": {
+        "tags": [
+          "Instances"
+        ],
+        "summary": "Fetch QR code as base64 image",
+        "description": "Mirrors Z-API `/qr-code/image`, returning a PNG image encoded in base64 for rendering in clients.",
+        "operationId": "getInstanceQRCodeImage",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "QR code rendered as base64 PNG data URL.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QRCodeImageResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/phone-code/{phone}": {
+      "get": {
+        "tags": [
+          "Instances"
+        ],
+        "summary": "Fetch phone pairing code",
+        "description": "Mirrors Z-API `/phone-code/{phone}`, returning a code that can be typed into WhatsApp instead of scanning the QR code.",
+        "operationId": "getInstancePhoneCode",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          },
+          {
+            "in": "path",
+            "name": "phone",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "International phone number (numbers only) used for code pairing."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pairing code generated for the provided phone number.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PhoneCodeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid phone number supplied.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/update-webhook-delivery": {
+      "put": {
+        "tags": [
+          "Instances"
+        ],
+        "summary": "Update delivery webhook",
+        "description": "Mirrors Z-API `/update-webhook-delivery`, configuring the sent-message webhook endpoint.",
+        "operationId": "updateWebhookDelivery",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookValueRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Webhook updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookUpdateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload or non-HTTPS URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/update-webhook-received": {
+      "put": {
+        "tags": [
+          "Instances"
+        ],
+        "summary": "Update received webhook",
+        "description": "Mirrors Z-API `/update-webhook-received`, configuring the incoming message webhook endpoint.",
+        "operationId": "updateWebhookReceived",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookValueRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Webhook updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookUpdateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload or non-HTTPS URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/update-webhook-received-delivery": {
+      "put": {
+        "tags": [
+          "Instances"
+        ],
+        "summary": "Update received+delivery webhook",
+        "description": "Mirrors Z-API `/update-webhook-received-delivery`, configuring the webhook used when `notifySentByMe` is enabled.",
+        "operationId": "updateWebhookReceivedDelivery",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookValueRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Webhook updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookUpdateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload or non-HTTPS URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/update-webhook-message-status": {
+      "put": {
+        "tags": [
+          "Instances"
+        ],
+        "summary": "Update message status webhook",
+        "description": "Mirrors Z-API `/update-webhook-message-status`, configuring delivery-read status updates.",
+        "operationId": "updateWebhookMessageStatus",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookValueRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Webhook updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookUpdateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload or non-HTTPS URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/update-webhook-disconnected": {
+      "put": {
+        "tags": [
+          "Instances"
+        ],
+        "summary": "Update disconnected webhook",
+        "description": "Mirrors Z-API `/update-webhook-disconnected`, configuring the disconnect notification endpoint.",
+        "operationId": "updateWebhookDisconnected",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookValueRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Webhook updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookUpdateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload or non-HTTPS URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/update-webhook-connected": {
+      "put": {
+        "tags": [
+          "Instances"
+        ],
+        "summary": "Update connected webhook",
+        "description": "Mirrors Z-API `/update-webhook-connected`, configuring the connection notification endpoint.",
+        "operationId": "updateWebhookConnected",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookValueRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Webhook updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookUpdateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload or non-HTTPS URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/update-webhook-chat-presence": {
+      "put": {
+        "tags": [
+          "Instances"
+        ],
+        "summary": "Update chat presence webhook",
+        "description": "Mirrors Z-API `/update-webhook-chat-presence`, configuring the typing/presence webhook endpoint.",
+        "operationId": "updateWebhookChatPresence",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookValueRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Webhook updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookUpdateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload or non-HTTPS URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/update-notify-sent-by-me": {
+      "put": {
+        "tags": [
+          "Instances"
+        ],
+        "summary": "Toggle notify-sent-by-me",
+        "description": "Mirrors Z-API `/update-notify-sent-by-me`, enabling or disabling callbacks for messages sent by the instance.",
+        "operationId": "updateNotifySentByMe",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotifySentByMeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Setting updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookUpdateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/update-every-webhooks": {
+      "put": {
+        "tags": [
+          "Instances"
+        ],
+        "summary": "Update all webhooks at once",
+        "description": "Mirrors Z-API `/update-every-webhooks`, applying the same HTTPS endpoint to every webhook type.",
+        "operationId": "updateEveryWebhooks",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookEveryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Webhooks updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookUpdateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload or non-HTTPS URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/restart": {
+      "post": {
+        "tags": [
+          "Instances"
+        ],
+        "summary": "Restart an instance connection",
+        "description": "Equivalent to Z-API `/restart`, forcing the client to reconnect to WhatsApp.",
+        "operationId": "restartInstance",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Restart signal accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationStatusResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/disconnect": {
+      "post": {
+        "tags": [
+          "Instances"
+        ],
+        "summary": "Disconnect an instance",
+        "description": "Equivalent to Z-API `/disconnect`, closing the active WhatsApp session for the instance.",
+        "operationId": "disconnectInstance",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Disconnect signal accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationStatusResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/integrator/on-demand": {
+      "post": {
+        "tags": [
+          "Partner"
+        ],
+        "summary": "Partner creates an instance on demand",
+        "description": "Mirrors Z-API partner endpoint for provisioning instances via integrator credentials.",
+        "operationId": "partnerCreateInstance",
+        "security": [
+          {
+            "PartnerBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PartnerInstanceCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Instance created for partner",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartnerInstanceCreateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/integrator/on-demand/subscription": {
+      "post": {
+        "tags": [
+          "Partner"
+        ],
+        "summary": "Activate partner subscription",
+        "description": "Enables on-demand billing/usage for the specified instance (Z-API parity).",
+        "operationId": "partnerSubscribeInstance",
+        "security": [
+          {
+            "PartnerBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscription activated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationStatusResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Instance not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/integrator/on-demand/cancel": {
+      "post": {
+        "tags": [
+          "Partner"
+        ],
+        "summary": "Cancel partner subscription",
+        "description": "Cancels the on-demand subscription for the instance, matching Z-API behaviour.",
+        "operationId": "partnerCancelInstance",
+        "security": [
+          {
+            "PartnerBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Subscription cancelled",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OperationStatusResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Instance not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

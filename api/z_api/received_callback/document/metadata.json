@@ -1,0 +1,995 @@
+{
+  "eventType": "z_api/received_callback/document",
+  "firstSeen": "2025-09-06T07:56:39.412Z",
+  "lastSeen": "2025-09-08T23:41:03.079Z",
+  "totalReceived": 26,
+  "schemaVersion": 26,
+  "lastModified": "2025-09-08T23:41:02.456Z",
+  "fields": {
+    "required": [
+      "headers",
+      "headers.connection",
+      "headers.content-length",
+      "headers.host",
+      "headers.http2-settings",
+      "headers.upgrade",
+      "headers.content-type",
+      "headers.origin",
+      "headers.server",
+      "headers.user-agent",
+      "headers.z-api-token",
+      "body",
+      "body.isStatusReply",
+      "body.chatLid",
+      "body.connectedPhone",
+      "body.waitingMessage",
+      "body.isEdit",
+      "body.isGroup",
+      "body.isNewsletter",
+      "body.instanceId",
+      "body.messageId",
+      "body.phone",
+      "body.fromMe",
+      "body.momment",
+      "body.status",
+      "body.chatName",
+      "body.senderPhoto",
+      "body.senderName",
+      "body.photo",
+      "body.broadcast",
+      "body.participantLid",
+      "body.forwarded",
+      "body.type",
+      "body.fromApi",
+      "body.document",
+      "body.document.caption",
+      "body.document.documentUrl",
+      "body.document.mimeType",
+      "body.document.title",
+      "body.document.pageCount",
+      "body.document.fileName"
+    ],
+    "optional": [
+      "body.participantPhone",
+      "body.messageExpirationSeconds"
+    ],
+    "truncated": []
+  },
+  "variations": [],
+  "savedStructure": {
+    "path": "",
+    "type": "object",
+    "optional": false,
+    "examples": [
+      {
+        "headers": {
+          "connection": "Upgrade, HTTP2-Settings",
+          "content-length": "1314",
+          "host": "185.245.182.69:3000",
+          "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+          "upgrade": "h2c",
+          "content-type": "application/json",
+          "origin": "https://api.z-api.io",
+          "server": "Z-API",
+          "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_2_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
+          "z-api-token": "0B039DE5C908EDAF88346CED"
+        },
+        "body": {
+          "isStatusReply": false,
+          "chatLid": null,
+          "connectedPhone": "5521971532700",
+          "waitingMessage": false,
+          "isEdit": false,
+          "isGroup": true,
+          "isNewsletter": false,
+          "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+          "messageId": "5E761DA2E79982E74371",
+          "phone": "120363044337316307-group",
+          "fromMe": false,
+          "momment": 1757331280000,
+          "status": "RECEIVED",
+          "chatName": "SANDECO",
+          "senderPhoto": null,
+          "senderName": "Rodrigo",
+          "photo": "https://pps.whatsapp.net/v/t61.24694-24/168843768_542542257625967_8841680466020536427_n.jpg?ccb=11-4&oh=01_Q5Aa2gFhJYuDZolHhInIGRm8gp8SHniPK8o1eydt6FkBw0x0jg&oe=68CBD7D0&_nc_sid=5e03e0&_nc_cat=106",
+          "broadcast": false,
+          "participantPhone": "556298700055",
+          "participantLid": "64222713143383@lid",
+          "forwarded": false,
+          "type": "ReceivedCallback",
+          "fromApi": false,
+          "document": {
+            "caption": "https://cdn.openai.com/pdf/d04913be-3f6f-4d2b-b283-ff432ef4aaa5/why-language-models-hallucinate.pdf?utm_source=www.therundown.ai&utm_medium=newsletter&utm_campaign=openai-cracks-ai-s-hallucination-code&_bhlid=83ebc9ad0c336ad6c0ff9d2d614a8e64e9c3215f",
+            "documentUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/5E761DA2E79982E74371/qt2DXlEni6lCiYM6XYK6_Q==.pdf",
+            "mimeType": "application/pdf",
+            "title": "why-language-models-hallucinate",
+            "pageCount": 36,
+            "fileName": "why-language-models-hallucinate.pdf"
+          }
+        }
+      },
+      {
+        "headers": {
+          "connection": "Upgrade, HTTP2-Settings",
+          "content-length": "1314",
+          "host": "185.245.182.69:3000",
+          "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+          "upgrade": "h2c",
+          "content-type": "application/json",
+          "origin": "https://api.z-api.io",
+          "server": "Z-API",
+          "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/111.0.5563.101 Mobile/15E148 Safari/604.1",
+          "z-api-token": "0B039DE5C908EDAF88346CED"
+        },
+        "body": {
+          "isStatusReply": false,
+          "chatLid": null,
+          "connectedPhone": "5521971532700",
+          "waitingMessage": false,
+          "isEdit": false,
+          "isGroup": true,
+          "isNewsletter": false,
+          "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+          "messageId": "5E9F8E44233DB5A91B20",
+          "phone": "120363044337316307-group",
+          "fromMe": false,
+          "momment": 1757331286002,
+          "status": "RECEIVED",
+          "chatName": "SANDECO",
+          "senderPhoto": null,
+          "senderName": "Rodrigo",
+          "photo": "https://pps.whatsapp.net/v/t61.24694-24/168843768_542542257625967_8841680466020536427_n.jpg?ccb=11-4&oh=01_Q5Aa2gFhJYuDZolHhInIGRm8gp8SHniPK8o1eydt6FkBw0x0jg&oe=68CBD7D0&_nc_sid=5e03e0&_nc_cat=106",
+          "broadcast": false,
+          "participantPhone": "556298700055",
+          "participantLid": "64222713143383@lid",
+          "forwarded": false,
+          "type": "ReceivedCallback",
+          "fromApi": false,
+          "document": {
+            "caption": "https://cdn.openai.com/pdf/d04913be-3f6f-4d2b-b283-ff432ef4aaa5/why-language-models-hallucinate.pdf?utm_source=www.therundown.ai&utm_medium=newsletter&utm_campaign=openai-cracks-ai-s-hallucination-code&_bhlid=83ebc9ad0c336ad6c0ff9d2d614a8e64e9c3215f",
+            "documentUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/5E9F8E44233DB5A91B20/qt2DXlEni6lCiYM6XYK6_Q==.pdf",
+            "mimeType": "application/pdf",
+            "title": "why-language-models-hallucinate",
+            "pageCount": 36,
+            "fileName": "why-language-models-hallucinate.pdf"
+          }
+        }
+      },
+      {
+        "headers": {
+          "connection": "Upgrade, HTTP2-Settings",
+          "content-length": "1439",
+          "host": "185.245.182.69:3000",
+          "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+          "upgrade": "h2c",
+          "content-type": "application/json",
+          "origin": "https://api.z-api.io",
+          "server": "Z-API",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
+          "z-api-token": "0B039DE5C908EDAF88346CED"
+        },
+        "body": {
+          "isStatusReply": false,
+          "chatLid": null,
+          "connectedPhone": "5521971532700",
+          "waitingMessage": false,
+          "isEdit": false,
+          "isGroup": true,
+          "isNewsletter": false,
+          "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+          "messageId": "3AC63C35128A8FF3BC05",
+          "phone": "120363395351102573-group",
+          "fromMe": false,
+          "momment": 1757338590001,
+          "status": "RECEIVED",
+          "chatName": "Chatwoot VIP 🥇",
+          "senderPhoto": "https://pps.whatsapp.net/v/t61.24694-24/319700360_193784373243815_9142519953736962164_n.jpg?ccb=11-4&oh=01_Q5Aa2gG6ZzhVGv6igmj15M7Rsk0U41pxOgBcmPNL7ts6d1fB6Q&oe=68CBDA07&_nc_sid=5e03e0&_nc_cat=111",
+          "senderName": "Jucylene Melo",
+          "photo": "https://pps.whatsapp.net/v/t61.24694-24/517986936_4082276838711283_1812355502437443890_n.jpg?ccb=11-4&oh=01_Q5Aa2gEQ2WWWg8nS4GkWwERlvyO_Zp9mZAzndcuSbXSGa9UonQ&oe=68CBD5D6&_nc_sid=5e03e0&_nc_cat=110",
+          "broadcast": false,
+          "participantPhone": "5521983205822",
+          "participantLid": "115465967915148@lid",
+          "messageExpirationSeconds": 0,
+          "forwarded": false,
+          "type": "ReceivedCallback",
+          "fromApi": false,
+          "document": {
+            "caption": "Estava pensando..... acho que tem algo que está impactando na performance",
+            "documentUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/3AC63C35128A8FF3BC05/ahkhgxYK3GQO8njuTTUxIQ==.docx",
+            "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "title": "Testes nas URLs e Performance.docx",
+            "pageCount": 5,
+            "fileName": "Testes nas URLs e Performance.docx"
+          }
+        }
+      },
+      {
+        "headers": {
+          "connection": "Upgrade, HTTP2-Settings",
+          "content-length": "1263",
+          "host": "185.245.182.69:3000",
+          "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+          "upgrade": "h2c",
+          "content-type": "application/json",
+          "origin": "https://api.z-api.io",
+          "server": "Z-API",
+          "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_2_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.54",
+          "z-api-token": "0B039DE5C908EDAF88346CED"
+        },
+        "body": {
+          "isStatusReply": false,
+          "chatLid": null,
+          "connectedPhone": "5521971532700",
+          "waitingMessage": false,
+          "isEdit": false,
+          "isGroup": true,
+          "isNewsletter": false,
+          "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+          "messageId": "3EB03BA8CBA14AD83211CD",
+          "phone": "120363029388654192-group",
+          "fromMe": false,
+          "momment": 1757341223000,
+          "status": "RECEIVED",
+          "chatName": "CodeChat",
+          "senderPhoto": "https://pps.whatsapp.net/v/t61.24694-24/455599010_471582638758004_5310733106083074082_n.jpg?ccb=11-4&oh=01_Q5Aa2gFwnX4Sowdw5k3BYm7CUJp6vNe6exthSl_yfkPoe9Zz3w&oe=68CBE2EB&_nc_sid=5e03e0&_nc_cat=107",
+          "senderName": "MATHEU",
+          "photo": "https://pps.whatsapp.net/v/t61.24694-24/514698496_1286887813446004_690046973976721766_n.jpg?ccb=11-4&oh=01_Q5Aa2gEFrnEiYBiRbUZBhWB2fuKyDyMa8NRt6fyZoHrE0bxTHA&oe=68CC0C20&_nc_sid=5e03e0&_nc_cat=101",
+          "broadcast": false,
+          "participantPhone": "557184056597",
+          "participantLid": "44238733574241@lid",
+          "messageExpirationSeconds": 0,
+          "forwarded": false,
+          "type": "ReceivedCallback",
+          "fromApi": false,
+          "document": {
+            "caption": null,
+            "documentUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/3EB03BA8CBA14AD83211CD/CUv90JAGQJf66-vwNh7Tjg==.pdf",
+            "mimeType": "application/pdf",
+            "title": "Matheus_Vieira.pdf",
+            "pageCount": 1,
+            "fileName": "Matheus_Vieira.pdf"
+          }
+        }
+      },
+      {
+        "headers": {
+          "connection": "Upgrade, HTTP2-Settings",
+          "content-length": "1254",
+          "host": "185.245.182.69:3000",
+          "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+          "upgrade": "h2c",
+          "content-type": "application/json",
+          "origin": "https://api.z-api.io",
+          "server": "Z-API",
+          "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) FxiOS/111.0 Mobile/15E148 Safari/605.1.15",
+          "z-api-token": "0B039DE5C908EDAF88346CED"
+        },
+        "body": {
+          "isStatusReply": false,
+          "chatLid": null,
+          "connectedPhone": "5521971532700",
+          "waitingMessage": false,
+          "isEdit": false,
+          "isGroup": true,
+          "isNewsletter": false,
+          "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+          "messageId": "3F320ABBB0518218D6EE",
+          "phone": "120363395351102573-group",
+          "fromMe": false,
+          "momment": 1757374859000,
+          "status": "RECEIVED",
+          "chatName": "Chatwoot VIP 🥇",
+          "senderPhoto": "https://pps.whatsapp.net/v/t61.24694-24/312278726_3348849665429604_7440438563303537641_n.jpg?ccb=11-4&oh=01_Q5Aa2gFOFhri-zuM7gT0hMnZTl4ddyQMcBkNSycMl1QwI5wqNQ&oe=68CC722E&_nc_sid=5e03e0&_nc_cat=101",
+          "senderName": "@ndr&w$😎🤓",
+          "photo": "https://pps.whatsapp.net/v/t61.24694-24/517986936_4082276838711283_1812355502437443890_n.jpg?ccb=11-4&oh=01_Q5Aa2gGOrbu--h99nfAJpZ87Sz4eAt5vBlTQe9qT0sHpQCzEnA&oe=68CC7E96&_nc_sid=5e03e0&_nc_cat=110",
+          "broadcast": false,
+          "participantPhone": "559281275485",
+          "participantLid": "50461738561766@lid",
+          "messageExpirationSeconds": 0,
+          "forwarded": false,
+          "type": "ReceivedCallback",
+          "fromApi": false,
+          "document": {
+            "caption": null,
+            "documentUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/3F320ABBB0518218D6EE/-RknWyLD3juSn8vWhk0Ikw==.txt",
+            "mimeType": "text/plain",
+            "title": "Logs.txt",
+            "pageCount": 0,
+            "fileName": "Logs.txt"
+          }
+        }
+      }
+    ],
+    "children": {
+      "headers": {
+        "path": "headers",
+        "type": "object",
+        "optional": false,
+        "examples": [
+          {
+            "connection": "Upgrade, HTTP2-Settings",
+            "content-length": "1314",
+            "host": "185.245.182.69:3000",
+            "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+            "upgrade": "h2c",
+            "content-type": "application/json",
+            "origin": "https://api.z-api.io",
+            "server": "Z-API",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_2_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
+            "z-api-token": "0B039DE5C908EDAF88346CED"
+          },
+          {
+            "connection": "Upgrade, HTTP2-Settings",
+            "content-length": "1314",
+            "host": "185.245.182.69:3000",
+            "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+            "upgrade": "h2c",
+            "content-type": "application/json",
+            "origin": "https://api.z-api.io",
+            "server": "Z-API",
+            "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/111.0.5563.101 Mobile/15E148 Safari/604.1",
+            "z-api-token": "0B039DE5C908EDAF88346CED"
+          },
+          {
+            "connection": "Upgrade, HTTP2-Settings",
+            "content-length": "1439",
+            "host": "185.245.182.69:3000",
+            "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+            "upgrade": "h2c",
+            "content-type": "application/json",
+            "origin": "https://api.z-api.io",
+            "server": "Z-API",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
+            "z-api-token": "0B039DE5C908EDAF88346CED"
+          },
+          {
+            "connection": "Upgrade, HTTP2-Settings",
+            "content-length": "1263",
+            "host": "185.245.182.69:3000",
+            "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+            "upgrade": "h2c",
+            "content-type": "application/json",
+            "origin": "https://api.z-api.io",
+            "server": "Z-API",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_2_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.54",
+            "z-api-token": "0B039DE5C908EDAF88346CED"
+          },
+          {
+            "connection": "Upgrade, HTTP2-Settings",
+            "content-length": "1254",
+            "host": "185.245.182.69:3000",
+            "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+            "upgrade": "h2c",
+            "content-type": "application/json",
+            "origin": "https://api.z-api.io",
+            "server": "Z-API",
+            "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) FxiOS/111.0 Mobile/15E148 Safari/605.1.15",
+            "z-api-token": "0B039DE5C908EDAF88346CED"
+          }
+        ],
+        "children": {
+          "connection": {
+            "path": "headers.connection",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "Upgrade, HTTP2-Settings"
+            ]
+          },
+          "content-length": {
+            "path": "headers.content-length",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "1007",
+              "1314",
+              "1439",
+              "1263",
+              "1254"
+            ]
+          },
+          "host": {
+            "path": "headers.host",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "185.245.182.69:3000"
+            ]
+          },
+          "http2-settings": {
+            "path": "headers.http2-settings",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA"
+            ]
+          },
+          "upgrade": {
+            "path": "headers.upgrade",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "h2c"
+            ]
+          },
+          "content-type": {
+            "path": "headers.content-type",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "application/json"
+            ]
+          },
+          "origin": {
+            "path": "headers.origin",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "https://api.z-api.io"
+            ]
+          },
+          "server": {
+            "path": "headers.server",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "Z-API"
+            ]
+          },
+          "user-agent": {
+            "path": "headers.user-agent",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_2_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
+              "Mozilla/5.0 (iPhone; CPU iPhone OS 16_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/111.0.5563.101 Mobile/15E148 Safari/604.1",
+              "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
+              "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_2_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.54",
+              "Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) FxiOS/111.0 Mobile/15E148 Safari/605.1.15"
+            ]
+          },
+          "z-api-token": {
+            "path": "headers.z-api-token",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "0B039DE5C908EDAF88346CED"
+            ]
+          }
+        }
+      },
+      "body": {
+        "path": "body",
+        "type": "object",
+        "optional": false,
+        "examples": [
+          {
+            "isStatusReply": false,
+            "chatLid": null,
+            "connectedPhone": "5521971532700",
+            "waitingMessage": false,
+            "isEdit": false,
+            "isGroup": true,
+            "isNewsletter": false,
+            "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+            "messageId": "5E761DA2E79982E74371",
+            "phone": "120363044337316307-group",
+            "fromMe": false,
+            "momment": 1757331280000,
+            "status": "RECEIVED",
+            "chatName": "SANDECO",
+            "senderPhoto": null,
+            "senderName": "Rodrigo",
+            "photo": "https://pps.whatsapp.net/v/t61.24694-24/168843768_542542257625967_8841680466020536427_n.jpg?ccb=11-4&oh=01_Q5Aa2gFhJYuDZolHhInIGRm8gp8SHniPK8o1eydt6FkBw0x0jg&oe=68CBD7D0&_nc_sid=5e03e0&_nc_cat=106",
+            "broadcast": false,
+            "participantPhone": "556298700055",
+            "participantLid": "64222713143383@lid",
+            "forwarded": false,
+            "type": "ReceivedCallback",
+            "fromApi": false,
+            "document": {
+              "caption": "https://cdn.openai.com/pdf/d04913be-3f6f-4d2b-b283-ff432ef4aaa5/why-language-models-hallucinate.pdf?utm_source=www.therundown.ai&utm_medium=newsletter&utm_campaign=openai-cracks-ai-s-hallucination-code&_bhlid=83ebc9ad0c336ad6c0ff9d2d614a8e64e9c3215f",
+              "documentUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/5E761DA2E79982E74371/qt2DXlEni6lCiYM6XYK6_Q==.pdf",
+              "mimeType": "application/pdf",
+              "title": "why-language-models-hallucinate",
+              "pageCount": 36,
+              "fileName": "why-language-models-hallucinate.pdf"
+            }
+          },
+          {
+            "isStatusReply": false,
+            "chatLid": null,
+            "connectedPhone": "5521971532700",
+            "waitingMessage": false,
+            "isEdit": false,
+            "isGroup": true,
+            "isNewsletter": false,
+            "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+            "messageId": "5E9F8E44233DB5A91B20",
+            "phone": "120363044337316307-group",
+            "fromMe": false,
+            "momment": 1757331286002,
+            "status": "RECEIVED",
+            "chatName": "SANDECO",
+            "senderPhoto": null,
+            "senderName": "Rodrigo",
+            "photo": "https://pps.whatsapp.net/v/t61.24694-24/168843768_542542257625967_8841680466020536427_n.jpg?ccb=11-4&oh=01_Q5Aa2gFhJYuDZolHhInIGRm8gp8SHniPK8o1eydt6FkBw0x0jg&oe=68CBD7D0&_nc_sid=5e03e0&_nc_cat=106",
+            "broadcast": false,
+            "participantPhone": "556298700055",
+            "participantLid": "64222713143383@lid",
+            "forwarded": false,
+            "type": "ReceivedCallback",
+            "fromApi": false,
+            "document": {
+              "caption": "https://cdn.openai.com/pdf/d04913be-3f6f-4d2b-b283-ff432ef4aaa5/why-language-models-hallucinate.pdf?utm_source=www.therundown.ai&utm_medium=newsletter&utm_campaign=openai-cracks-ai-s-hallucination-code&_bhlid=83ebc9ad0c336ad6c0ff9d2d614a8e64e9c3215f",
+              "documentUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/5E9F8E44233DB5A91B20/qt2DXlEni6lCiYM6XYK6_Q==.pdf",
+              "mimeType": "application/pdf",
+              "title": "why-language-models-hallucinate",
+              "pageCount": 36,
+              "fileName": "why-language-models-hallucinate.pdf"
+            }
+          },
+          {
+            "isStatusReply": false,
+            "chatLid": null,
+            "connectedPhone": "5521971532700",
+            "waitingMessage": false,
+            "isEdit": false,
+            "isGroup": true,
+            "isNewsletter": false,
+            "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+            "messageId": "3AC63C35128A8FF3BC05",
+            "phone": "120363395351102573-group",
+            "fromMe": false,
+            "momment": 1757338590001,
+            "status": "RECEIVED",
+            "chatName": "Chatwoot VIP 🥇",
+            "senderPhoto": "https://pps.whatsapp.net/v/t61.24694-24/319700360_193784373243815_9142519953736962164_n.jpg?ccb=11-4&oh=01_Q5Aa2gG6ZzhVGv6igmj15M7Rsk0U41pxOgBcmPNL7ts6d1fB6Q&oe=68CBDA07&_nc_sid=5e03e0&_nc_cat=111",
+            "senderName": "Jucylene Melo",
+            "photo": "https://pps.whatsapp.net/v/t61.24694-24/517986936_4082276838711283_1812355502437443890_n.jpg?ccb=11-4&oh=01_Q5Aa2gEQ2WWWg8nS4GkWwERlvyO_Zp9mZAzndcuSbXSGa9UonQ&oe=68CBD5D6&_nc_sid=5e03e0&_nc_cat=110",
+            "broadcast": false,
+            "participantPhone": "5521983205822",
+            "participantLid": "115465967915148@lid",
+            "messageExpirationSeconds": 0,
+            "forwarded": false,
+            "type": "ReceivedCallback",
+            "fromApi": false,
+            "document": {
+              "caption": "Estava pensando..... acho que tem algo que está impactando na performance",
+              "documentUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/3AC63C35128A8FF3BC05/ahkhgxYK3GQO8njuTTUxIQ==.docx",
+              "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+              "title": "Testes nas URLs e Performance.docx",
+              "pageCount": 5,
+              "fileName": "Testes nas URLs e Performance.docx"
+            }
+          },
+          {
+            "isStatusReply": false,
+            "chatLid": null,
+            "connectedPhone": "5521971532700",
+            "waitingMessage": false,
+            "isEdit": false,
+            "isGroup": true,
+            "isNewsletter": false,
+            "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+            "messageId": "3EB03BA8CBA14AD83211CD",
+            "phone": "120363029388654192-group",
+            "fromMe": false,
+            "momment": 1757341223000,
+            "status": "RECEIVED",
+            "chatName": "CodeChat",
+            "senderPhoto": "https://pps.whatsapp.net/v/t61.24694-24/455599010_471582638758004_5310733106083074082_n.jpg?ccb=11-4&oh=01_Q5Aa2gFwnX4Sowdw5k3BYm7CUJp6vNe6exthSl_yfkPoe9Zz3w&oe=68CBE2EB&_nc_sid=5e03e0&_nc_cat=107",
+            "senderName": "MATHEU",
+            "photo": "https://pps.whatsapp.net/v/t61.24694-24/514698496_1286887813446004_690046973976721766_n.jpg?ccb=11-4&oh=01_Q5Aa2gEFrnEiYBiRbUZBhWB2fuKyDyMa8NRt6fyZoHrE0bxTHA&oe=68CC0C20&_nc_sid=5e03e0&_nc_cat=101",
+            "broadcast": false,
+            "participantPhone": "557184056597",
+            "participantLid": "44238733574241@lid",
+            "messageExpirationSeconds": 0,
+            "forwarded": false,
+            "type": "ReceivedCallback",
+            "fromApi": false,
+            "document": {
+              "caption": null,
+              "documentUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/3EB03BA8CBA14AD83211CD/CUv90JAGQJf66-vwNh7Tjg==.pdf",
+              "mimeType": "application/pdf",
+              "title": "Matheus_Vieira.pdf",
+              "pageCount": 1,
+              "fileName": "Matheus_Vieira.pdf"
+            }
+          },
+          {
+            "isStatusReply": false,
+            "chatLid": null,
+            "connectedPhone": "5521971532700",
+            "waitingMessage": false,
+            "isEdit": false,
+            "isGroup": true,
+            "isNewsletter": false,
+            "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+            "messageId": "3F320ABBB0518218D6EE",
+            "phone": "120363395351102573-group",
+            "fromMe": false,
+            "momment": 1757374859000,
+            "status": "RECEIVED",
+            "chatName": "Chatwoot VIP 🥇",
+            "senderPhoto": "https://pps.whatsapp.net/v/t61.24694-24/312278726_3348849665429604_7440438563303537641_n.jpg?ccb=11-4&oh=01_Q5Aa2gFOFhri-zuM7gT0hMnZTl4ddyQMcBkNSycMl1QwI5wqNQ&oe=68CC722E&_nc_sid=5e03e0&_nc_cat=101",
+            "senderName": "@ndr&w$😎🤓",
+            "photo": "https://pps.whatsapp.net/v/t61.24694-24/517986936_4082276838711283_1812355502437443890_n.jpg?ccb=11-4&oh=01_Q5Aa2gGOrbu--h99nfAJpZ87Sz4eAt5vBlTQe9qT0sHpQCzEnA&oe=68CC7E96&_nc_sid=5e03e0&_nc_cat=110",
+            "broadcast": false,
+            "participantPhone": "559281275485",
+            "participantLid": "50461738561766@lid",
+            "messageExpirationSeconds": 0,
+            "forwarded": false,
+            "type": "ReceivedCallback",
+            "fromApi": false,
+            "document": {
+              "caption": null,
+              "documentUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/3F320ABBB0518218D6EE/-RknWyLD3juSn8vWhk0Ikw==.txt",
+              "mimeType": "text/plain",
+              "title": "Logs.txt",
+              "pageCount": 0,
+              "fileName": "Logs.txt"
+            }
+          }
+        ],
+        "children": {
+          "isStatusReply": {
+            "path": "body.isStatusReply",
+            "type": "boolean",
+            "optional": false,
+            "examples": [
+              false
+            ]
+          },
+          "chatLid": {
+            "path": "body.chatLid",
+            "type": "union",
+            "optional": false,
+            "examples": [
+              "140712372899859@lid",
+              null,
+              "227294266302623@lid",
+              "195601601937433@lid"
+            ]
+          },
+          "connectedPhone": {
+            "path": "body.connectedPhone",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "5521971532700"
+            ]
+          },
+          "waitingMessage": {
+            "path": "body.waitingMessage",
+            "type": "boolean",
+            "optional": false,
+            "examples": [
+              false
+            ]
+          },
+          "isEdit": {
+            "path": "body.isEdit",
+            "type": "boolean",
+            "optional": false,
+            "examples": [
+              false
+            ]
+          },
+          "isGroup": {
+            "path": "body.isGroup",
+            "type": "boolean",
+            "optional": false,
+            "examples": [
+              false,
+              true
+            ]
+          },
+          "isNewsletter": {
+            "path": "body.isNewsletter",
+            "type": "boolean",
+            "optional": false,
+            "examples": [
+              false
+            ]
+          },
+          "instanceId": {
+            "path": "body.instanceId",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "3E6D06A438D501A5CD70265FDA264287"
+            ]
+          },
+          "messageId": {
+            "path": "body.messageId",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "5E761DA2E79982E74371",
+              "5E9F8E44233DB5A91B20",
+              "3AC63C35128A8FF3BC05",
+              "3EB03BA8CBA14AD83211CD",
+              "3F320ABBB0518218D6EE"
+            ]
+          },
+          "phone": {
+            "path": "body.phone",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "5521971532700",
+              "5521981796084",
+              "120363044337316307-group",
+              "120363395351102573-group",
+              "120363029388654192-group"
+            ]
+          },
+          "fromMe": {
+            "path": "body.fromMe",
+            "type": "boolean",
+            "optional": false,
+            "examples": [
+              false,
+              true
+            ]
+          },
+          "momment": {
+            "path": "body.momment",
+            "type": "number",
+            "optional": false,
+            "examples": [
+              1757331280000,
+              1757331286002,
+              1757338590001,
+              1757341223000,
+              1757374859000
+            ]
+          },
+          "status": {
+            "path": "body.status",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "RECEIVED"
+            ]
+          },
+          "chatName": {
+            "path": "body.chatName",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "Papai",
+              "Mamãe",
+              "SANDECO",
+              "Chatwoot VIP 🥇",
+              "CodeChat"
+            ]
+          },
+          "senderPhoto": {
+            "path": "body.senderPhoto",
+            "type": "union",
+            "optional": false,
+            "examples": [
+              "https://pps.whatsapp.net/v/t61.24694-24/491849503_1128203389063570_5330924825211773212_n.jpg?ccb=11-4&oh=01_Q5Aa2QHve8XrSD9V27ehJ59H6Pqy1HcIsotoOB-vBAWQj6rdcA&oe=68C96FC5&_nc_sid=5e03e0&_nc_cat=105",
+              "https://pps.whatsapp.net/v/t61.24694-24/56850365_474196013118491_6827295174956154880_n.jpg?ccb=11-4&oh=01_Q5Aa2QHA5lAsrnzh2LYdDlKEGX_uJs5EEMWiqoPyA4Ia5OKa3w&oe=68C9CA68&_nc_sid=5e03e0&_nc_cat=101",
+              "https://pps.whatsapp.net/v/t61.24694-24/319700360_193784373243815_9142519953736962164_n.jpg?ccb=11-4&oh=01_Q5Aa2gG6ZzhVGv6igmj15M7Rsk0U41pxOgBcmPNL7ts6d1fB6Q&oe=68CBDA07&_nc_sid=5e03e0&_nc_cat=111",
+              "https://pps.whatsapp.net/v/t61.24694-24/455599010_471582638758004_5310733106083074082_n.jpg?ccb=11-4&oh=01_Q5Aa2gFwnX4Sowdw5k3BYm7CUJp6vNe6exthSl_yfkPoe9Zz3w&oe=68CBE2EB&_nc_sid=5e03e0&_nc_cat=107",
+              "https://pps.whatsapp.net/v/t61.24694-24/312278726_3348849665429604_7440438563303537641_n.jpg?ccb=11-4&oh=01_Q5Aa2gFOFhri-zuM7gT0hMnZTl4ddyQMcBkNSycMl1QwI5wqNQ&oe=68CC722E&_nc_sid=5e03e0&_nc_cat=101"
+            ]
+          },
+          "senderName": {
+            "path": "body.senderName",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "Daniele 🌻",
+              "Rodrigo",
+              "Jucylene Melo",
+              "MATHEU",
+              "@ndr&w$😎🤓"
+            ]
+          },
+          "photo": {
+            "path": "body.photo",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "https://pps.whatsapp.net/v/t61.24694-24/467655716_1780841726044540_5891065729776907930_n.jpg?ccb=11-4&oh=01_Q5Aa2gF3cnomeu58touAI-wJfTM5resa3pEQDu8OagyDcingJQ&oe=68CBA8F3&_nc_sid=5e03e0&_nc_cat=109",
+              "https://pps.whatsapp.net/v/t61.24694-24/168843768_542542257625967_8841680466020536427_n.jpg?ccb=11-4&oh=01_Q5Aa2gFhJYuDZolHhInIGRm8gp8SHniPK8o1eydt6FkBw0x0jg&oe=68CBD7D0&_nc_sid=5e03e0&_nc_cat=106",
+              "https://pps.whatsapp.net/v/t61.24694-24/517986936_4082276838711283_1812355502437443890_n.jpg?ccb=11-4&oh=01_Q5Aa2gEQ2WWWg8nS4GkWwERlvyO_Zp9mZAzndcuSbXSGa9UonQ&oe=68CBD5D6&_nc_sid=5e03e0&_nc_cat=110",
+              "https://pps.whatsapp.net/v/t61.24694-24/514698496_1286887813446004_690046973976721766_n.jpg?ccb=11-4&oh=01_Q5Aa2gEFrnEiYBiRbUZBhWB2fuKyDyMa8NRt6fyZoHrE0bxTHA&oe=68CC0C20&_nc_sid=5e03e0&_nc_cat=101",
+              "https://pps.whatsapp.net/v/t61.24694-24/517986936_4082276838711283_1812355502437443890_n.jpg?ccb=11-4&oh=01_Q5Aa2gGOrbu--h99nfAJpZ87Sz4eAt5vBlTQe9qT0sHpQCzEnA&oe=68CC7E96&_nc_sid=5e03e0&_nc_cat=110"
+            ]
+          },
+          "broadcast": {
+            "path": "body.broadcast",
+            "type": "boolean",
+            "optional": false,
+            "examples": [
+              false
+            ]
+          },
+          "participantLid": {
+            "path": "body.participantLid",
+            "type": "union",
+            "optional": false,
+            "examples": [
+              "261164126761200@lid",
+              "64222713143383@lid",
+              "115465967915148@lid",
+              "44238733574241@lid",
+              "50461738561766@lid"
+            ]
+          },
+          "forwarded": {
+            "path": "body.forwarded",
+            "type": "boolean",
+            "optional": false,
+            "examples": [
+              false,
+              true
+            ]
+          },
+          "type": {
+            "path": "body.type",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "ReceivedCallback"
+            ]
+          },
+          "fromApi": {
+            "path": "body.fromApi",
+            "type": "boolean",
+            "optional": false,
+            "examples": [
+              false
+            ]
+          },
+          "document": {
+            "path": "body.document",
+            "type": "object",
+            "optional": false,
+            "examples": [
+              {
+                "caption": "https://cdn.openai.com/pdf/d04913be-3f6f-4d2b-b283-ff432ef4aaa5/why-language-models-hallucinate.pdf?utm_source=www.therundown.ai&utm_medium=newsletter&utm_campaign=openai-cracks-ai-s-hallucination-code&_bhlid=83ebc9ad0c336ad6c0ff9d2d614a8e64e9c3215f",
+                "documentUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/5E761DA2E79982E74371/qt2DXlEni6lCiYM6XYK6_Q==.pdf",
+                "mimeType": "application/pdf",
+                "title": "why-language-models-hallucinate",
+                "pageCount": 36,
+                "fileName": "why-language-models-hallucinate.pdf"
+              },
+              {
+                "caption": "https://cdn.openai.com/pdf/d04913be-3f6f-4d2b-b283-ff432ef4aaa5/why-language-models-hallucinate.pdf?utm_source=www.therundown.ai&utm_medium=newsletter&utm_campaign=openai-cracks-ai-s-hallucination-code&_bhlid=83ebc9ad0c336ad6c0ff9d2d614a8e64e9c3215f",
+                "documentUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/5E9F8E44233DB5A91B20/qt2DXlEni6lCiYM6XYK6_Q==.pdf",
+                "mimeType": "application/pdf",
+                "title": "why-language-models-hallucinate",
+                "pageCount": 36,
+                "fileName": "why-language-models-hallucinate.pdf"
+              },
+              {
+                "caption": "Estava pensando..... acho que tem algo que está impactando na performance",
+                "documentUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/3AC63C35128A8FF3BC05/ahkhgxYK3GQO8njuTTUxIQ==.docx",
+                "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                "title": "Testes nas URLs e Performance.docx",
+                "pageCount": 5,
+                "fileName": "Testes nas URLs e Performance.docx"
+              },
+              {
+                "caption": null,
+                "documentUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/3EB03BA8CBA14AD83211CD/CUv90JAGQJf66-vwNh7Tjg==.pdf",
+                "mimeType": "application/pdf",
+                "title": "Matheus_Vieira.pdf",
+                "pageCount": 1,
+                "fileName": "Matheus_Vieira.pdf"
+              },
+              {
+                "caption": null,
+                "documentUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/3F320ABBB0518218D6EE/-RknWyLD3juSn8vWhk0Ikw==.txt",
+                "mimeType": "text/plain",
+                "title": "Logs.txt",
+                "pageCount": 0,
+                "fileName": "Logs.txt"
+              }
+            ],
+            "children": {
+              "caption": {
+                "path": "body.document.caption",
+                "type": "union",
+                "optional": false,
+                "examples": [
+                  null,
+                  "*Prompts do novo Nano-Banana corrigidos.*\nClique no _i_ para ver como usar.\nBasta acessar o aistudio.google.com e escolher o modelo.",
+                  "🤦🏻‍♀️",
+                  "https://cdn.openai.com/pdf/d04913be-3f6f-4d2b-b283-ff432ef4aaa5/why-language-models-hallucinate.pdf?utm_source=www.therundown.ai&utm_medium=newsletter&utm_campaign=openai-cracks-ai-s-hallucination-code&_bhlid=83ebc9ad0c336ad6c0ff9d2d614a8e64e9c3215f",
+                  "Estava pensando..... acho que tem algo que está impactando na performance"
+                ]
+              },
+              "documentUrl": {
+                "path": "body.document.documentUrl",
+                "type": "string",
+                "optional": false,
+                "examples": [
+                  "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/5E761DA2E79982E74371/qt2DXlEni6lCiYM6XYK6_Q==.pdf",
+                  "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/5E9F8E44233DB5A91B20/qt2DXlEni6lCiYM6XYK6_Q==.pdf",
+                  "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/3AC63C35128A8FF3BC05/ahkhgxYK3GQO8njuTTUxIQ==.docx",
+                  "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/3EB03BA8CBA14AD83211CD/CUv90JAGQJf66-vwNh7Tjg==.pdf",
+                  "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/3F320ABBB0518218D6EE/-RknWyLD3juSn8vWhk0Ikw==.txt"
+                ]
+              },
+              "mimeType": {
+                "path": "body.document.mimeType",
+                "type": "string",
+                "optional": false,
+                "examples": [
+                  "application/json",
+                  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                  "application/pdf",
+                  "text/plain"
+                ]
+              },
+              "title": {
+                "path": "body.document.title",
+                "type": "string",
+                "optional": false,
+                "examples": [
+                  "na_RA30193526",
+                  "why-language-models-hallucinate",
+                  "Testes nas URLs e Performance.docx",
+                  "Matheus_Vieira.pdf",
+                  "Logs.txt"
+                ]
+              },
+              "pageCount": {
+                "path": "body.document.pageCount",
+                "type": "number",
+                "optional": false,
+                "examples": [
+                  2,
+                  0,
+                  1,
+                  36,
+                  5
+                ]
+              },
+              "fileName": {
+                "path": "body.document.fileName",
+                "type": "string",
+                "optional": false,
+                "examples": [
+                  "na_RA30193526.pdf",
+                  "why-language-models-hallucinate.pdf",
+                  "Testes nas URLs e Performance.docx",
+                  "Matheus_Vieira.pdf",
+                  "Logs.txt"
+                ]
+              }
+            }
+          },
+          "participantPhone": {
+            "path": "body.participantPhone",
+            "type": "string",
+            "optional": true,
+            "examples": [
+              "5511987945604",
+              "556298700055",
+              "5521983205822",
+              "557184056597",
+              "559281275485"
+            ]
+          },
+          "messageExpirationSeconds": {
+            "path": "body.messageExpirationSeconds",
+            "type": "number",
+            "optional": true,
+            "examples": [
+              0
+            ]
+          }
+        }
+      }
+    }
+  }
+}

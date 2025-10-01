@@ -1,0 +1,46 @@
+{
+  "headers": {
+    "connection": "Upgrade, HTTP2-Settings",
+    "content-length": "1229",
+    "host": "185.245.182.69:3000",
+    "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+    "upgrade": "h2c",
+    "content-type": "application/json",
+    "origin": "https://api.z-api.io",
+    "server": "Z-API",
+    "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 13.2; rv:111.0) Gecko/20100101 Firefox/111.0",
+    "z-api-token": "0B039DE5C908EDAF88346CED"
+  },
+  "body": {
+    "isStatusReply": false,
+    "chatLid": null,
+    "connectedPhone": "5521971532700",
+    "waitingMessage": false,
+    "isEdit": false,
+    "isGroup": true,
+    "isNewsletter": false,
+    "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+    "messageId": "A539FDF1AD50AC26B1A95274A606450A",
+    "phone": "120363338245111929-group",
+    "fromMe": false,
+    "momment": 1757370323001,
+    "status": "RECEIVED",
+    "chatName": "Promovaweb - IA Makers",
+    "senderPhoto": "https://pps.whatsapp.net/v/t61.24694-24/426084461_1812960125794517_5194645915468887293_n.jpg?ccb=11-4&oh=01_Q5Aa2gHtUfVeqouE_4ebBurjPQ65zEEKUD3nIRJl2lj57I6W3g&oe=68CC75B1&_nc_sid=5e03e0&_nc_cat=109",
+    "senderName": "Lucas Campos",
+    "photo": "https://pps.whatsapp.net/v/t61.24694-24/460455072_1062594072040534_1634402936636315936_n.jpg?ccb=11-4&oh=01_Q5Aa2gEQfeDyoKI7jCBlZC0pt84E0CdRmAiY9wuLigKDVhs6EA&oe=68CC6656&_nc_sid=5e03e0&_nc_cat=111",
+    "broadcast": false,
+    "participantPhone": "5521965981728",
+    "participantLid": "91010440933462@lid",
+    "forwarded": false,
+    "type": "ReceivedCallback",
+    "fromApi": false,
+    "audio": {
+      "ptt": true,
+      "seconds": 28,
+      "audioUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/A539FDF1AD50AC26B1A95274A606450A/L86vOiIgUsw-IUfD3nLYlg==.ogg",
+      "mimeType": "audio/ogg; codecs=opus",
+      "viewOnce": false
+    }
+  }
+}

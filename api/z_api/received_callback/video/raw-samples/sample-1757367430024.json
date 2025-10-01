@@ -1,0 +1,50 @@
+{
+  "headers": {
+    "connection": "Upgrade, HTTP2-Settings",
+    "content-length": "1327",
+    "host": "185.245.182.69:3000",
+    "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+    "upgrade": "h2c",
+    "content-type": "application/json",
+    "origin": "https://api.z-api.io",
+    "server": "Z-API",
+    "user-agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:111.0) Gecko/20100101 Firefox/111.0",
+    "z-api-token": "0B039DE5C908EDAF88346CED"
+  },
+  "body": {
+    "isStatusReply": false,
+    "chatLid": null,
+    "connectedPhone": "5521971532700",
+    "waitingMessage": false,
+    "isEdit": false,
+    "isGroup": true,
+    "isNewsletter": false,
+    "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+    "messageId": "3AC6E9B832DB2D864EA4",
+    "phone": "120363395351102573-group",
+    "fromMe": false,
+    "momment": 1757366959001,
+    "status": "RECEIVED",
+    "chatName": "Chatwoot VIP 🥇",
+    "senderPhoto": "https://pps.whatsapp.net/v/t61.24694-24/319700360_193784373243815_9142519953736962164_n.jpg?ccb=11-4&oh=01_Q5Aa2gEDIMWwe7K4hEuP08oZjG0fYBpEeSd3-G5h6wTGH0LHIQ&oe=68CC4A87&_nc_sid=5e03e0&_nc_cat=111",
+    "senderName": "Jucylene Melo",
+    "photo": "https://pps.whatsapp.net/v/t61.24694-24/517986936_4082276838711283_1812355502437443890_n.jpg?ccb=11-4&oh=01_Q5Aa2gEYioMqcPqXSyiRHA12S4MxoDLeKvKB34NGl3NMPPM94A&oe=68CC4656&_nc_sid=5e03e0&_nc_cat=110",
+    "broadcast": false,
+    "participantPhone": "5521983205822",
+    "participantLid": "115465967915148@lid",
+    "messageExpirationSeconds": 0,
+    "forwarded": false,
+    "type": "ReceivedCallback",
+    "fromApi": false,
+    "video": {
+      "videoUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/3AC6E9B832DB2D864EA4/oQA5gWmDHLPvCNd4bgzpmQ==.mp4",
+      "caption": "Não mostra uma mensagem avisando que moveu e não atualiza a tela…",
+      "mimeType": "video/mp4",
+      "width": 464,
+      "height": 832,
+      "seconds": 41,
+      "viewOnce": false,
+      "isGif": false
+    }
+  }
+}

@@ -1,0 +1,6142 @@
+{
+	"info": {
+		"_postman_id": "cea57506-b9de-4e61-b4d5-227743bd8151",
+		"name": "FUNNELCHATAPI Collection",
+		"description": "Link da documentação completa: [https://developer.funnelchatapi.io/](https://developer.funnelchatapi.io/)\n\n## FUNNELCHATAPI - Asas para sua imaginação!\n\n**FUNNELCHATAPI** foi desenvolvido por **programadores para programadores**, por isso prezamos pela simplicidade e objetividade de tudo que nos propomos a fazer, sendo assim chega de conversa fiada e **Let's Bora!**\n\n## Mas o que é FUNNELCHATAPI\n\nVocê provavelmente já deve saber, mas vamos reafirmar!\n\n**FUNNELCHATAPI** é um serviço RestFul que provê uma API que permite que você interaja com seu Whatsapp através uma API simples e intuitiva, além de webhooks para te avisar sobre interações com seu número.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29414803",
+		"_collection_link": "https://www.postman.com/docs-funnelchatapi/funnelchatapi-s-public-workspace/collection/gwri249/funnelchatapi-collection?action=share&source=collection_link&creator=29414803"
+	},
+	"item": [
+		{
+			"name": "Instance",
+			"item": [
+				{
+					"name": "Meu perfil",
+					"item": [
+						{
+							"name": "Atualizar nome do perfil",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"value\": \"Vinicius\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/profile-name",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"profile-name"
+									]
+								},
+								"description": "Este método é responsável por alterar o seu nome de perfil no Whatsapp"
+							},
+							"response": []
+						},
+						{
+							"name": "Atualizar imagem de perfil",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"value\": \"https://app.funnelchatapi.io/logos/zapi-dark.png\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/profile-picture",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"profile-picture"
+									]
+								},
+								"description": "Este método é responsável por alterar a sua imagem de perfil no Whatsapp."
+							},
+							"response": []
+						},
+						{
+							"name": "Atualizar descrição do perfil",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"value\": \"Descrição do perfil\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/profile-description",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"profile-description"
+									]
+								},
+								"description": "Este método é responsável por alterar a sua descrição de perfil no Whatsapp"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Ligações",
+					"item": [
+						{
+							"name": "Rejeitar chamadas",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"value\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/update-call-reject-auto",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"update-call-reject-auto"
+									]
+								},
+								"description": "Esse método ativa a opção de Rejeitar chamadas automático na sua API, com ela ativa todas as chamadas de voz recebidas pelo número conectado a API serão rejeitadas de forma automática."
+							},
+							"response": []
+						},
+						{
+							"name": "Mensagem de ligação",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"value\": \"Mensagem de resposta de ligação rejeitada\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/update-call-reject-message",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"update-call-reject-message"
+									]
+								},
+								"description": "Através desse método você define a mensagem que será enviada após rejeitar a chamada de voz recebida pela API."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Pegar QRCode",
+					"item": [
+						{
+							"name": "Pegar QRCode - bytes",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/qr-code",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"qr-code"
+									]
+								},
+								"description": "Este método retorna os bytes do QRCode. Você poderá renderizar em um componente do tipo QRCode compatível com sua linguagem de programação."
+							},
+							"response": []
+						},
+						{
+							"name": "Pegar QRCode - imagem",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/qr-code/image",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"qr-code",
+										"image"
+									]
+								},
+								"description": "Este método retorna uma imagem do tipo base64. Você poderá renderizar em um componente do tipo imagem compatível com sua linguagem de programação."
+							},
+							"response": []
+						},
+						{
+							"name": "Pegar QRCode - Telefone",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/phone-code/{PHONE_NUMBER}",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"phone-code",
+										"{PHONE_NUMBER}"
+									]
+								},
+								"description": "Este método retorna um código para que seja possível conectar o número a API sem a necessidade de leitura de qr-code, apenas inserindo o código gerado.\n\nVocê pode inserir o código gerado através da API diretamente no whatsapp, na mesma aba onde é feita a leitura do qr-code, clicando em \"Conectar com número de telefone\".\n\nAtenção: você deve preencher o parâmetro {PHONE_NUMBER} com o número que deseja conectar o seu celular."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Minha instância",
+					"item": [
+						{
+							"name": "Reiniciar instância",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/restart",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"restart"
+									]
+								},
+								"description": "Este método basicamente é o botão \"Reiniciar\" do seu sistema operacional ou seja, como todo usuário expert, em casos onde tudo parece dar errado tente control+alt+del ou reinicia!"
+							},
+							"response": []
+						},
+						{
+							"name": "Desconectar instância",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/disconnect",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"disconnect"
+									]
+								},
+								"description": "Este método desconecta seu número do FUNNELCHATAPI."
+							},
+							"response": []
+						},
+						{
+							"name": "Status da instância",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/status",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"status"
+									]
+								},
+								"description": "Este método te permite descobrir se sua instância está ou não conectada a uma conta de Whatsapp."
+							},
+							"response": []
+						},
+						{
+							"name": "Renomear instância",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"value\": \"Novo nome da instância\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/update-name",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"update-name"
+									]
+								},
+								"description": "Método utilizado para renomear uma instância."
+							},
+							"response": []
+						},
+						{
+							"name": "Dados da instância",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/me",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"me"
+									]
+								},
+								"description": "Este método te permite obter os dados da sua instância."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Leitura automática",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"value\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/update-auto-read-message",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"update-auto-read-message"
+							]
+						},
+						"description": "Esse método ativa a leitura automática de todas as mensagens recebidas pela API."
+					},
+					"response": []
+				},
+				{
+					"name": "Dados do celular",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/device",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"device"
+							]
+						},
+						"description": "Este método é responsável por retornar informações sobre o device/celular conectado."
+					},
+					"response": []
+				}
+			],
+			"description": "Uma instância é uma conexão a partir de um número de telefone com conta no WhatsApp, que será responsável pelo envio e recebimento de mensagens. É possível criar várias instâncias para que você consiga ter vários números de WhatsApp conectado a sua conta.\n\nTecnicamente falando uma instância nada mais é do que uma máquina virtual (ou container) dentro da nossa infraestrutura de servidores, dedicada a prover um ambiente para conexão do seu número.\n\nCada instância só possui um número, caso precise conectar mais números será necessário criar mais instâncias. Mas uma instância não é presa a um único número, ou seja, você pode desconectar um número e conectar outro na mesma instância.\n\nPara ajudar você a entender o funcionamento do FUNNELCHATAPI, nosso serviço roda com base em um Whatsapp Web, e abstraímos os métodos permitindo que você manipule via API RestFul.\n\nPara melhor tangibilizar, nos próximos tópicos vamos de forma ordenada te ajudar nos primeiros passos."
+		},
+		{
+			"name": "Messages",
+			"item": [
+				{
+					"name": "Enviar texto simples",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"554499999999\",\n    \"message\": \"Testando mensagem teste\",\n\n    // Parâmetros opcionais:\n    \"delayMessage\": 15\n    // \"delayTyping\": 0\n    // \"editMessageId\": \"\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/send-text",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"send-text"
+							]
+						},
+						"description": "Neste método você poderá enviar textos simples, mas você pode incrementá-los utilizando a formatação de texto e emojis, por exemplo."
+					},
+					"response": []
+				},
+				{
+					"name": "Reencaminhar mensagem",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"554498744288\",\n    \"messageId\": \"3EB06DD33E37863E4EA421\",\n    \"messagePhone\": \"554499999999\"\n\n    // Parâmetros opcionais:\n    // \"delayMessage\": 5\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/forward-message",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"forward-message"
+							]
+						},
+						"description": "Simples e objetivo, neste método você poderá reencaminhar as mensagens através da api precisando apenas do messageId da mensagem que deseja encaminhar, e o phone do chat onde esse messageId se encontra."
+					},
+					"response": []
+				},
+				{
+					"name": "Enviar reação",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"5544999999999\",\n    \"reaction\": \"😋\",\n    \"messageId\": \"3EB06DD33E37863E4EA421\"\n\n    // Parâmetros opcionais:\n    // \"delayMessage\": 5\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/send-reaction",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"send-reaction"
+							]
+						},
+						"description": "Neste método você poderá enviar reações a mensagens enviadas ou recebidas, você precisa informar o telefone do chat, um emoji e a mensagem que será reagida!"
+					},
+					"response": []
+				},
+				{
+					"name": "Remover reação",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"5544999999999\",\n    \"messageId\": \"3EB06DD33E37863E4EA421\"\n\n    // Parâmetros opcionais:\n    // \"delayMessage\": 5\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/send-remove-reaction",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"send-remove-reaction"
+							]
+						},
+						"description": "Neste método você removerá a reação das mensagens enviadas ou recebidas. Você precisa informar o telefone do chat e o messageId da mensagem!"
+					},
+					"response": []
+				},
+				{
+					"name": "Enviar imagem",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"5544999999999\",\n    \"image\": \"https://app.funnelchatapi.io/logos/zapi-dark.png\"\n\n    // Parâmetros opcionais:\n    // \"caption\": \"\",\n    // \"messageId\": \"\",\n    // \"delayMessage\": 5,\n    // \"viewOnce\": \"\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/send-image",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"send-image"
+							]
+						},
+						"description": "Método responsavel por enviar imagens para os seus chats você pode trabalhar com as imagens de 2 formas que são:\n\n- Por Link, onde você tem uma imagem hospedada em algum lugar da internet e envia apenas o link da mesma.\n    \n- Por Base64, se você optar por esta opção precisará ter em sua aplicação um método para converter a imagem em Base64, para ter certeza que sua conversão funcionou copie o Base64 gerado e cole na barra de endereço do seu navegador, caso seja uma imagem válida seu navegador vai conseguir renderizá-la, caso o navegador não consiga, revise seu método."
+					},
+					"response": []
+				},
+				{
+					"name": "Enviar sticker",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"5544999999999\",\n    \"sticker\": \"https://app.funnelchatapi.io/logos/zapi-dark.png\"\n\n    // Parâmetros opcionais:\n    // \"messageId\": \"\",\n    // \"delayMessage\": 5,\n    // \"stickerAuthor\": \"\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/send-sticker",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"send-sticker"
+							]
+						},
+						"description": "Método responsavel por enviar stickers para os seus chats você pode trabalhar com as imagens de 2 formas que são:\n\n- Por Link, onde você tem um sticker hospedada em algum lugar da internet e envia apenas o link da mesma.\n    \n- Por Base64, se você optar por esta opção precisará ter em sua aplicação um método para converter o sticker em Base64, para ter certeza que sua conversão funcionou copie o Base64 gerado e cole na barra de endereço do seu navegador, caso seja um sticker válido seu navegador vai conseguir renderizá-la, caso o navegador não consiga, revise seu método."
+					},
+					"response": []
+				},
+				{
+					"name": "Enviar GIF",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"5544999999999\",\n    \"gif\": \"\"\n\n    // Parâmetros opcionais:\n    // \"messageId\": \"\",\n    // \"delayMessage\": 5,\n    // \"caption\": \"\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/send-gif",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"send-gif"
+							]
+						},
+						"description": "Método responsavel por enviar GIFs para os seus chats através da api (O arquivo a ser enviado precisa ser um MP4)."
+					},
+					"response": []
+				},
+				{
+					"name": "Enviar áudio",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"5544999999999\",\n    \"audio\": \"\"\n\n    // Parâmetros opcionais:\n    // \"delayMessage\": 5,\n    // \"delayTyping\": 5,\n    // \"viewOnce\": \"\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/send-audio",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"send-audio"
+							]
+						},
+						"description": "Método responsavel por enviar audios para os seus chats, você pode trabalhar com as audios de 2 formas que são:\n\nPor Link, onde você tem um audio hospedado em algum lugar da internet e envia apenas o link do mesmo.\n\nPor Base64, se você optar por esta opção precisará ter em sua aplicação um método para converter o audio em Base64."
+					},
+					"response": []
+				},
+				{
+					"name": "Enviar vídeo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"5544999999999\",\n    \"video\": \"https://file-examples.com/storage/fe4d6f538767234d29c4e0e/2017/04/file_example_MP4_480_1_5MG.mp4\"\n\n    // Parâmetros opcionais:\n    // \"messageId\": \"\",\n    // \"delayMessage\": 5,\n    // \"caption\": \"\"\n    // \"viewOnce\": \"\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/send-video",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"send-video"
+							]
+						},
+						"description": "Método responsavel por enviar vídeo para os seus chats, você pode trabalhar com os vídeos de 2 formas que são:\n\nPor Link, onde você tem um video hospedado em algum lugar da internet e envia apenas o link do mesmo.\n\nPor Base64, se você optar por esta opção precisará ter em sua aplicação um método para converter o video em Base64."
+					},
+					"response": []
+				},
+				{
+					"name": "Enviar PTV",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"5544999999999\",\n    \"ptv\": \"\"\n\n    // Parâmetros opcionais:\n    // \"messageId\": \"\",\n    // \"delayMessage\": 5,\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/send-ptv",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"send-ptv"
+							]
+						},
+						"description": "Método responsavel por enviar PTV para os seus chats, você pode trabalhar com as PTV de 2 formas que são:\n\nPor Link, onde você tem um video hospedado em algum lugar da internet e envia apenas o link do mesmo.\n\nPor Base64, se você optar por esta opção precisará ter em sua aplicação um método para converter o video em Base64."
+					},
+					"response": []
+				},
+				{
+					"name": "Enviar documentos",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"5544999999999\",\n    \"document\": \"https://file-examples.com/storage/fe4d6f538767234d29c4e0e/2017/04/file_example_MP4_480_1_5MG.mp4\"\n\n    // Parâmetros opcionais:\n    // \"fileName\": \"\",\n    // \"caption\": \"\",\n    // \"messageId\": \"\",\n    // \"delayMessage\": 5\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/send-document/mp4",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"send-document",
+								"mp4"
+							]
+						},
+						"description": "Método responsavel por enviar documentos aos seus contatos ele é simples e objetivo.\n\n**Não se esqueça!** Você precisa informar o parâmetro **{EXTENSAO_DO_DOCUMENTO}** com a extensão do aquivo que deseja enviar ! Teóricamente este método deve suportar todos tipos de documentos, desde que eles estejam dentro das politícas de tamanho de aquivos do proprio Whatsaspp (para saber mais sobre estes limites [clique aqui](https://developers.facebook.com/docs/whatsapp/api/media/#post-processing))."
+					},
+					"response": []
+				},
+				{
+					"name": "Enviar link",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"5544999999999\",\n    \"message\": \"Mensagem que irà aparecer antes do link\",\n    \"image\": \"https://app.funnelchatapi.io/logos/zapi-dark.png\",\n    \"linkUrl\": \"https://app.funnelchatapi.io\",\n    \"title\": \"Título da mensagem\",\n    \"linkDescription\": \"description\"\n\n    // Parâmetros opcionais:\n    // \"delayMessage\": 5,\n    // \"delayTyping\": 0,\n    // \"linkType\": \"SMALL\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/send-link",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"send-link"
+							]
+						},
+						"description": "Método responsavel por enviar um link aos seus contatos, muito utilzado para compartilhar links para que os usuários sejam direcionados a um site."
+					},
+					"response": []
+				},
+				{
+					"name": "Enviar localização",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"5544999999999\",\n    \"title\": \"Google Brasil\",\n    \"address\": \"Av. Brg. Faria Lima, 3477 - Itaim Bibi, São Paulo - SP, 04538-133\",\n    \"latitude\": \"-23.0696347\",\n    \"longitude\": \"-50.4357913\"\n\n    // Parâmetros opcionais:\n    // \"messageId\": \"\",\n    // \"delayMessage\": 5\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/send-location",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"send-location"
+							]
+						},
+						"description": "Método responsavel por enviar uma localização fixa aos seus contatos, muito utilizado para enviar a localização de um endereços."
+					},
+					"response": []
+				},
+				{
+					"name": "Enviar produto",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phone\": \"554499999999\",\n  \"catalogPhone\": \"554431920066\",\n  \"productId\": \"8502610599852671\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/send-product",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"send-product"
+							]
+						},
+						"description": "Neste método você poderá enviar mensagens de seus produtos. O recurso de produtos está disponível apenas para contas **business** do WhatsApp. É necessário também, que a conta possua produtos cadastrados. Operações realacionadas a produtos podem ser encontradas na sessão [<b>Whatsapp Business</b>](https://developer.funnelchatapi.io/business/get-products) da nossa documentação."
+					},
+					"response": []
+				},
+				{
+					"name": "Enviar catálogo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"5544999999999\",\n    \"catalogPhone\": \"554431920066\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/send-catalog",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"send-catalog"
+							]
+						},
+						"description": "Neste método você poderá enviar mensagens com o link para o seu catálogo. O recurso de catálogos está disponível apenas para contas **business** do WhatsApp. É necessário também, que a conta possua produtos e um catálogo configurado. Operações realacionadas a produtos e coleções podem ser encontradas na sessão [<b>Whatsapp Business</b>](https://developer.funnelchatapi.io/business/edit-product) da nossa documentação."
+					},
+					"response": []
+				},
+				{
+					"name": "Enviar contato",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"5544999999999\",\n    \"contactName\": \"Usuário teste\",\n    \"contactPhone\": \"554488888888\"\n\n    // Parâmetros opcionais:\n    // \"messageId\": \"\",\n    // \"delayMessage\": 5,\n    // \"contactBusinessDescription\": \"\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/send-contact",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"send-contact"
+							]
+						},
+						"description": "Simples e objetivo este método permite você enviar um contato, você não precisa ter ele em seus contatos, basta preencher os atributos do metodo com informações do contato e enviar."
+					},
+					"response": []
+				},
+				{
+					"name": "Enviar vários contatos",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"5544999999999\",\n    \"contacts\": [\n        {\n            \"name\": \"Nome do contato\",\n            \"phones\": [\"5544999999999\", \"5544999999999\"]\n        },\n        {\n            \"name\": \"Nome do contato\",\n            \"phones\": [\"5544999999999\"]\n        },\n        {\n            \"name\": \"Nome do contato\",\n            \"phones\": [\"5544999999999\"],\n            \"businessDescription\": \"Uma empresa do Grupo Irrah\"\n        }\n  ]\n\n    // Parâmetros opcionais:\n    // \"messageId\": \"\",\n    // \"delayMessage\": 5\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/send-contacts",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"send-contacts"
+							]
+						},
+						"description": "Simples e objetivo este método permite você enviar varios contatos, você não precisa ter ele em seus contatos, basta preencher os atributos do metodo com informações do contato e enviar."
+					},
+					"response": []
+				},
+				{
+					"name": "Enviar texto com botões de ação",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"554499999999\",\n    \"message\": \"mensagem\",\n    \"title\": \"se quiser vincular um título\",\n    \"footer\": \"se quiser vincular um rodapé\",\n    \"buttonActions\": [\n        {\n            \"id\": \"1\",\n            \"type\": \"CALL\",\n            \"phone\": \"554498398733\",\n            \"label\": \"Fale conosco\"\n        },\n        {\n            \"id\": \"2\",\n            \"type\": \"URL\",\n            \"url\": \"https://funnelchatapi.io\",\n            \"label\": \"Visite nosso site\"\n        }\n    ]\n\n    // Parâmetros opcionais:\n    // \"delayMessage\": 5\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/send-button-actions",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"send-button-actions"
+							]
+						},
+						"description": "Neste método você poderá enviar mensagens de texto com botões de ação, você conseguirá redirecionar para links, fazer chamadas, e também dar respostas padrões."
+					},
+					"response": []
+				},
+				{
+					"name": "Enviar texto com botões",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"554499999999\",\n    \"message\": \"O FUNNELCHATAPI é bom?\",\n    \"buttonList\": {\n        \"buttons\": [\n            {\n                \"id\": \"1\",\n                \"label\": \"Botão 1\"\n            },\n            {\n                \"id\": \"2\",\n                \"label\": \"Botão 2\"\n            }\n        ]\n    }\n\n    // Parâmetros opcionais:\n    // \"delayMessage\": 5\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/send-button-list",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"send-button-list"
+							]
+						},
+						"description": "Neste método você poderá enviar mensagens de texto com botões de ação, o conteudo do botão ex: SIM / Não, poderão ser escolhidos pelo usuário e será utilizado como resposta da mensagem enviada junto com os botões."
+					},
+					"response": []
+				},
+				{
+					"name": "Enviar botões com imagem",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"554499999999\",\n    \"message\": \"O FUNNELCHATAPI é bom?\",\n    \"buttonList\": {\n        \"image\": \"https://avatars.githubusercontent.com/u/60630101?s=280&v=4\",\n        \"buttons\": [\n            {\n                \"id\": \"1\",\n                \"label\": \"Botão 1\"\n            },\n            {\n                \"id\": \"2\",\n                \"label\": \"Botão 2\"\n            }\n        ]\n    }\n\n    // Parâmetros opcionais:\n    // \"delayMessage\": 5\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/send-button-list",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"send-button-list"
+							]
+						},
+						"description": "Neste método você poderá enviar imagens com opções de botões de ação, o conteudo do botão ex: SIM / Não, poderão ser escolhidos pelo usuário e será utilizado como resposta da mensagem enviada junto com os botões."
+					},
+					"response": []
+				},
+				{
+					"name": "Enviar botões com vídeo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"554499999999\",\n    \"message\": \"O FUNNELCHATAPI é bom?\",\n    \"buttonList\": {\n        \"video\": \"https://file-examples.com/storage/fe4d6f538767234d29c4e0e/2017/04/file_example_MP4_480_1_5MG.mp4\",\n        \"buttons\": [\n            {\n                \"id\": \"1\",\n                \"label\": \"Botão 1\"\n            },\n            {\n                \"id\": \"2\",\n                \"label\": \"Botão 2\"\n            }\n        ]\n    }\n\n    // Parâmetros opcionais:\n    // \"delayMessage\": 5\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/send-button-list",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"send-button-list"
+							]
+						},
+						"description": "Neste método você poderá enviar imagens com opções de botões de ação, o conteudo do botão ex: SIM / Não, poderão ser escolhidos pelo usuário e será utilizado como resposta da mensagem enviada junto com os botões."
+					},
+					"response": []
+				},
+				{
+					"name": "Enviar lista de opções",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"5544999999999\",\n    \"message\": \"Selecione e melhor opção:\",\n    \"optionList\": {\n        \"title\": \"Opções disponíveis\",\n        \"buttonLabel\": \"Abrir lista de opções\",\n        \"options\": [\n            {\n                \"id\": \"1\",\n                \"description\": \"FUNNELCHATAPI Asas para sua imaginação\",\n                \"title\": \"FUNNELCHATAPI\"\n            },\n            {\n                \"id\": \"2\",\n                \"description\": \"Não funcionam\",\n                \"title\": \"Outros\"\n            }\n        ]\n    }\n\n    // Parâmetros opcionais:\n    // \"delayMessage\": 5\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/send-option-list",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"send-option-list"
+							]
+						},
+						"description": "Neste método você poderá enviar mensagens de texto com uma lista de opções, onde o usuário poderá selecionar uma das opções enviadas."
+					},
+					"response": []
+				},
+				{
+					"name": "Enviar botão OTP",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"5544999999999\",\n    \"message\": \"Texto a ser enviado\",\n    \"code\": \"123\"\n    \n\n    // Parâmetros opcionais:\n    // \"image\": \"\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/send-button-otp",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"send-button-otp"
+							]
+						},
+						"description": "Neste método você poderá enviar mensagens de texto com botão para copiar um valor."
+					},
+					"response": []
+				},
+				{
+					"name": "Enviar botão PIX",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"5544999999999\",\n    \"pixKey\": \"Chave PIX\",\n    \"type\": \"CPF\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/send-button-pix",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"send-button-pix"
+							]
+						},
+						"description": "Neste método você poderá enviar mensagens de chave pix com botão para copiar."
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar mensagens",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/messages?phone=554499999999&messageId=3EB047ED70306656281B34&owner=true",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"messages"
+							],
+							"query": [
+								{
+									"key": "phone",
+									"value": "554499999999"
+								},
+								{
+									"key": "messageId",
+									"value": "3EB047ED70306656281B34"
+								},
+								{
+									"key": "owner",
+									"value": "true"
+								}
+							]
+						},
+						"description": "Método utilizado para apagar uma mensagem em um chat, você pode deletar tanto uma mensagem que enviou quanto uma mensagen enviada por um contato, para utilizar este recurso você só vai precisar do messageId da mensagem que quer apagar."
+					},
+					"response": []
+				},
+				{
+					"name": "Ler mensagens",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"554499999999\",\n    \"messageId\": \"\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/read-message",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"read-message"
+							]
+						},
+						"description": "Método utilizado para marcar uma mensagem em um chat como lida."
+					},
+					"response": []
+				},
+				{
+					"name": "Responder mensagem",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"554499999999\",\n    \"message\": \"Testando mensagem\",\n    \"messageId\": \"3EB047ED70306656281B34\"\n\n    // Parâmetros opcionais:    \n    // \"delayMessage\": 5,\n    // \"privateAnswer\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/send-text",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"send-text"
+							]
+						},
+						"description": "Nesse tópico falaremos um pouco sobre como responder uma mensagem diretamente!\n\nQuando você utiliza o método [send-text](https://developer.funnelchatapi.io/message/send-message-text) existe um atributo opcional chamado **messageId**, esse é um atributo que recebe o Id de uma mensagem qualquer, quando esse atributo é passado, sua mensagem será diretamente relacionada a mensagem do Id informado."
+					},
+					"response": []
+				},
+				{
+					"name": "Enviar enquete",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"554499999999\",\n    \"message\": \"Outra enquete\",\n    \"poll\": [\n        { \"name\": \"FUNNELCHATAPI\" },\n        { \"name\": \"Testeee\" }\n    ]\n\n    // Parâmetros opcionais:    \n    // \"delayMessage\": 5,\n    // \"pollMaxOptions\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/send-poll",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"send-poll"
+							]
+						},
+						"description": "Neste método você poderá enviar mensagens do tipo enquete."
+					},
+					"response": []
+				},
+				{
+					"name": "Enviar voto para enquete",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"554499999999\",\n    \"pollMessageId\": \"3EB055B7F3AA623B95E8D1\",\n    \"pollVote\": [\n        { \"name\": \"FUNNELCHATAPI\" }\n    ]\n\n    // Parâmetros opcionais:    \n    // \"delayMessage\": 5,\n    // \"pollMaxOptions\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/send-poll-vote",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"send-poll-vote"
+							]
+						},
+						"description": "Neste método você poderá votar em uma determinada enquete."
+					},
+					"response": []
+				},
+				{
+					"name": "Enviar aprovação de pedido",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"554499999999\",\n    \"order\": {\n        \"currency\": \"BRL\",\n        \"discount\": 10,\n        \"tax\": 10,\n        \"shipping\": 5,\n        \"products\": [\n            {\n                \"productId\": \"8502610599852671\",\n                \"name\": \"Nome do produto\",\n                \"value\": 100,\n                \"quantity\": 2\n            }\n        ]\n    },\n    \"paymentSettings\": {\n        \"pix\": {\n            \"key\": \"11111111111\",\n            \"keyType\": \"CPF\",\n            \"name\": \"Nome da chave\"\n        },\n        \"card\": {\n            \"enabled\": true\n        }\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/send-order",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"send-order"
+							]
+						},
+						"description": "Neste método você poderá enviar mensagens de pedidos, contendo produtos do seu catálogo ou customizados no momento do envio. Lembrando que esta mensagem é a mesma que é enviada quando você clica no botão \"Aceitar pedido\" - ou \"Enviar cobrança\" - no pedido do cliente. Tal mensagem, retorna no [<b>webhook</b>](https://developer.funnelchatapi.io/webhooks/on-message-received#exemplo-de-retorno-de-envio-de-pedido) informações sobre o pedido, bem como os dados necessários para atualizações de [<b>status</b>](https://developer.funnelchatapi.io/message/send-order-status-update) e [<b>pagamento</b>](https://developer.funnelchatapi.io/message/send-order-payment-update), que, por sua vez, também são mensagens, que referenciam a mensagem principal do pedido, isto é, a mensagem enviada a partir desta rota."
+					},
+					"response": []
+				},
+				{
+					"name": "Enviar atualização de status do pedido",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"554499999999\",\n    \"messageId\": \"3EB07A00E56ADB7BDFAE38\",\n    \"message\": \"Mensagem de texto da atualização do pedido\",\n    \"referenceId\": \"4QDORZW7K27\",\n    \"orderRequestId\": \"4QDORZW7H55\",\n    \"orderStatus\": \"shipped\",\n    \"paymentStatus\": \"pending\",\n    \"order\": {\n        \"currency\": \"BRL\",\n        \"discount\": 10,\n        \"tax\": 10,\n        \"shipping\": 5,\n        \"products\": [\n            {\n                \"value\": 150,\n                \"quantity\": 2,\n                \"name\": \"order 1\",\n                \"isCustomItem\": true,\n                \"productId\": \"custom-item-4N8FCTW23N7\"\n            },\n            {\n                \"productId\": \"23940797548900636\",\n                \"value\": 150,\n                \"quantity\": 2,\n                \"name\": \"order 2\",\n                \"isCustomItem\": false\n            }\n        ]\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/order-status-update",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"order-status-update"
+							]
+						},
+						"description": "Neste método você poderá enviar mensagens de atualização de status dos pedidos enviados."
+					},
+					"response": []
+				},
+				{
+					"name": "Enviar atualização de pagamento do pedido",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"5544999999999\",\n    \"messageId\": \"3EB0F91BBA791BB0A787FC\",\n    \"message\": \"Mensagem de texto da atualização do pedido\",\n    \"referenceId\": \"4N8FCTW1WM6\",\n    \"orderRequestId\": \"4N8FCTW22W4\",\n    \"orderStatus\": \"processing\",\n    \"paymentStatus\": \"paid\",\n    \"order\": {\n        \"currency\": \"BRL\",\n        \"discount\": 10,\n        \"tax\": 10,\n        \"shipping\": 5,\n        \"products\": [\n            {\n                \"value\": 150,\n                \"quantity\": 2,\n                \"name\": \"order 1\",\n                \"isCustomItem\": true,\n                \"productId\": \"custom-item-4N8FCTW23N7\"\n            },\n            {\n                \"productId\": \"23940797548900636\",\n                \"value\": 150,\n                \"quantity\": 2,\n                \"name\": \"order 2\",\n                \"isCustomItem\": false\n            }\n        ]\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/order-payment-update",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"order-payment-update"
+							]
+						},
+						"description": "Neste método você poderá enviar mensagens de atualização do pagamento dos pedidos enviados."
+					},
+					"response": []
+				},
+				{
+					"name": "Fixar / Desafixar mensagens",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phone\": \"554499999999\",\n  \"messageId\": \"3EB00753A69BF498A1DE2E\",\n  \"messageAction\": \"unpin\",\n  \"pinMessageDuration\": \"7_days\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/pin-message",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"pin-message"
+							]
+						},
+						"description": "Neste método você poderá fixar mensagens de uma conversa, seja chats privados ou grupos."
+					},
+					"response": []
+				},
+				{
+					"name": "Enviar convite de admin do canal",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phone\": \"554499999999\",\n  \"adminInviteMessage\": { \n    \"newsletterId\": \"120363166555745933@newsletter\",\n    \"caption\": \"Quero convidar você para ser admin do meu canal no WhatsApp.\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/send-newsletter-admin-invite",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"send-newsletter-admin-invite"
+							]
+						},
+						"description": "Neste método você poderá enviar mensagens convidando pessoas para serem administradoras dos seus canais no WhatsApp."
+					},
+					"response": []
+				},
+				{
+					"name": "Enviar evento",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phone\": \"120363356737170752-group\",\n  \"event\": {\n    \"name\": \"Nome do evento\",\n    \"description\": \"Descrição do evento\",\n    \"dateTime\": \"2024-04-29T09:30:53.309Z\",\n    \"location\": {\n      \"name\": \"Nome do lugar\"\n    },\n    \"callLinkType\": \"voice\",\n    \"canceled\": false\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/send-event",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"send-event"
+							]
+						},
+						"description": "Neste método você poderá enviar mensagens do tipo Evento."
+					},
+					"response": []
+				},
+				{
+					"name": "Editar evento",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phone\": \"120363356737170752-group\",\n  \"eventMessageId\": \"3EB0C7B27024E13B3D1D14\",\n  \"event\": {\n    \"name\": \"Novo nome do evento\",\n    \"description\": \"Descrição do evento\",\n    \"dateTime\": \"2024-04-29T09:30:53.309Z\",\n    \"location\": {\n      \"name\": \"Nome do lugar\"\n    },\n    \"callLinkType\": \"video\",\n    \"canceled\": false\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/send-edit-event",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"send-edit-event"
+							]
+						},
+						"description": "Neste método você poderá enviar mensagens de edição de Evento."
+					},
+					"response": []
+				},
+				{
+					"name": "Responder evento",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phone\": \"120363019502650977-group\",\n  \"eventMessageId\": \"3EB0C7B27024E13B3D1D14\",\n  \"eventResponse\": \"NOT_GOING\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/send-event-response",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"send-event-response"
+							]
+						},
+						"description": "Neste método você poderá enviar mensagens de resposta a um evento."
+					},
+					"response": []
+				}
+			],
+			"description": "Primeiramente, o que você precisa entender sobre as mensagens é que elas podem ser enviadas para um contato, um grupo ou lista de transmissão.\n\nNo tópico \"contatos\" vou voltar a relatar sobre isso, mas é importante você também saber que para o Whatsapp tudo é um chat, seja um contato, grupo ou uma lista de transmissão.\n\nPara enviar qualquer mensagem ele precisa de ID do chat, sendo eles:\n\n- Para contatos é o próprio número;\n    \n- Para grupos é a concatenação do número do fundador do grupo com um timestamp e\n    \n- Para listas de transmissão é a concatenação da string 'broadcast' com o timestamp.\n    \n\nEsses IDs são todos retornados pelo método get/chats, que você irá conhecer um pouco mais a frente.\n\nFalando em ID, recomendamos fortemente que você armazene em sua aplicação o messageId que nosso response irá retornar, conforme imagem abaixo, pois caso precise responder, marcar ou mesmo deletar uma mensagem, você precisará informar o messageId como atributo no método."
+		},
+		{
+			"name": "Privacy",
+			"item": [
+				{
+					"name": "Listar contatos não permitidos",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/privacy/disallowed-contacts?type=groupAdd",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"privacy",
+								"disallowed-contacts"
+							],
+							"query": [
+								{
+									"key": "type",
+									"value": "groupAdd",
+									"description": "Escopo do bloqueio (lastSeen, photo, description, groupAdd)"
+								}
+							]
+						},
+						"description": "Através deste método, é possível listar as os contatos que estão na lista de não permitidos (blacklist) para certas interações com sua conta."
+					},
+					"response": []
+				},
+				{
+					"name": "Visto por último",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"visualizationType\": \"CONTACT_BLACKLIST\",\n    \"contactsBlacklist\": [\n        { \"action\": \"add\", \"phone\": \"551111111111\" },\n        { \"action\": \"remove\", \"phone\": \"554422222222\" }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/privacy/last-seen",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"privacy",
+								"last-seen"
+							]
+						},
+						"description": "Através deste método, é possível configurar quem pode ver seu \"visto por último\"."
+					},
+					"response": []
+				},
+				{
+					"name": "Visualização da foto do perfil",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"visualizationType\": \"CONTACT_BLACKLIST\",\n    \"contactsBlacklist\": [\n        { \"action\": \"add\", \"phone\": \"5544999999999\" },\n        { \"action\": \"remove\", \"phone\": \"554422222222\" }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/privacy/photo",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"privacy",
+								"photo"
+							]
+						},
+						"description": "Através deste método, é possível configurar quem pode ver sua foto do perfil."
+					},
+					"response": []
+				},
+				{
+					"name": "Visualização do recado",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"visualizationType\": \"NONE\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/privacy/description",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"privacy",
+								"description"
+							]
+						},
+						"description": "Através deste método, é possível configurar quem pode ver o recado do seu perfil."
+					},
+					"response": []
+				},
+				{
+					"name": "Permissão para adicionar em grupos",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"type\": \"CONTACT_BLACKLIST\",\n    \"contactsBlacklist\": [\n        { \"action\": \"add\", \"phone\": \"554411111111\" },\n        { \"action\": \"remove\", \"phone\": \"554422222222\" }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/privacy/group-add",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"privacy",
+								"group-add"
+							]
+						},
+						"description": "Através deste método, é possível configurar quem pode te adicionar em grupos."
+					},
+					"response": []
+				},
+				{
+					"name": "Visualização de online",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"visualizationType\": \"ALL\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/privacy/online",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"privacy",
+								"online"
+							]
+						},
+						"description": "Através deste método, é possível configurar quem pode ver quando você estiver online."
+					},
+					"response": []
+				},
+				{
+					"name": "Confirmações de leitura",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/privacy/read-receipts?value=enable",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"privacy",
+								"read-receipts"
+							],
+							"query": [
+								{
+									"key": "value",
+									"value": "enable",
+									"description": "Habilitar ou desabilitar as confirmações de leitura (enable, disable)"
+								}
+							]
+						},
+						"description": "Através deste método, é possível configurar as confirmações de leitura de mensagens (não aplicável a grupos)."
+					},
+					"response": []
+				},
+				{
+					"name": "Duração das mensagens",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/privacy/messages-duration?value=days7",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"privacy",
+								"messages-duration"
+							],
+							"query": [
+								{
+									"key": "value",
+									"value": "days7",
+									"description": "Tempo da duração das mensagens (days90, days7, hours24, disable)"
+								}
+							]
+						},
+						"description": "Através deste método, é possível configurar mensagens temporárias para **novas conversas individuais**, definindo uma duração. Não afeta conversas já existentes."
+					},
+					"response": []
+				}
+			],
+			"description": "Neste tópico você vai conhecer todos os métodos disponiveis para configurações de privacidade.\n\nAs **configurações de privacidade** do WhatsApp são um conjunto de opções e recursos que permitem aos usuários controlar quem pode acessar suas informações pessoais e interagir com eles no aplicativo de mensagens. Essas configurações visam proteger a privacidade dos usuários e oferecer controle sobre o compartilhamento de informações. Os principais elementos das configurações de privacidade incluem a possibilidade de definir quem pode ver sua **foto de perfil**, informações de **visto por último** e **confirmar a leitura de mensagens**."
+		},
+		{
+			"name": "Contacts",
+			"item": [
+				{
+					"name": "Pegar contatos",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/contacts?page=1&pageSize=20",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"contacts"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Utilizado para paginação você de informar aqui a pagina de contatos que quer buscar"
+								},
+								{
+									"key": "pageSize",
+									"value": "20",
+									"description": "Especifica o tamanho do retorno de contatos por pagina"
+								}
+							]
+						},
+						"description": "Este método é reponsavel por retornar todos os contatos do Whatsapp. Lembre-se do que foi dito na introdução sobre número de contatos, caso tenho pulado esta parte, sugiro que você volte um passo e leia a nossa introdução sobre contatos."
+					},
+					"response": []
+				},
+				{
+					"name": "Pegar metadata do contato",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/contacts/{PHONE_NUMBER}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"contacts",
+								"{PHONE_NUMBER}"
+							]
+						},
+						"description": "Este método é reponsavel por retornar as informações do metadata do contato.\n\nAtenção: deve ser preenchido o parâmetro {PHONE_NUMBER} com o número que deseja verificar."
+					},
+					"response": []
+				},
+				{
+					"name": "Pegar imagem do contato",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/profile-picture?phone=554499999999",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"profile-picture"
+							],
+							"query": [
+								{
+									"key": "phone",
+									"value": "554499999999"
+								}
+							]
+						},
+						"description": "Este método é reponsavel por retornar a url com a imagem do contato atualizada."
+					},
+					"response": []
+				},
+				{
+					"name": "Número com WhatsApp?",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/phone-exists/{PHONE_NUMBER}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"phone-exists",
+								"{PHONE_NUMBER}"
+							]
+						},
+						"description": "Este método retorna se o número tem ou não WhatsApp.\n\nAtenção: deve ser preenchido o parâmetro {PHONE_NUMBER} com o número que deseja verificar."
+					},
+					"response": []
+				},
+				{
+					"name": "Validar números em lote",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phones\": [\"554499999999\",\"554488888888\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/phone-exists-batch",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"phone-exists-batch"
+							]
+						},
+						"description": "Diferente do método anterior que valida individualmente se um número possui Whatsapp através de uma requisição GET, essa API oferece uma verificação em lote.\n\nLimite por Requisição: O número máximo de validações em lote por requisição é de 50 mil números."
+					},
+					"response": []
+				},
+				{
+					"name": "Bloquear contato",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phone\": \"554498744288\",\n  \"action\": \"unblock\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/contacts/modify-blocked",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"contacts",
+								"modify-blocked"
+							]
+						},
+						"description": "Este método é reponsavel por bloquear ou desbloquear um contato."
+					},
+					"response": []
+				},
+				{
+					"name": "Denunciar contato",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/contacts/{PHONE_NUMBER}/report",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"contacts",
+								"{PHONE_NUMBER}",
+								"report"
+							]
+						},
+						"description": "Este método é reponsável por denunciar um contato.\n\nAtenção: deve ser preenchido o parâmetro {PHONE_NUMBER} com o número que deseja verificar."
+					},
+					"response": []
+				}
+			],
+			"description": "Neste tópico você vai entender um pouco mais sobre o que o **FUNNELCHATAPI** pode fazer quando o assunto é contato, dividimos esta abordagem em alguns tópicos abaixo listados para melhor lhe explicar:\n\n- Para o Whatsapp todo contato é simplesmente um Chat ! Parece ousado de se dizer mas é assim que ele trata o que chamamos de contato, ele utiliza o número do seu contato apenas como identificador para o chat conforme ja dito em outros tópicos. Mas então qual a diferença entre get-chats e get-contacts ? O get-chats vai trazer todos contatos aos quais você ja manteve uma conversa ou seja tem um chat aberto com ele, o get-contacts vai retornar todos os seus contatos que tenham conta no Whatsapp somado aos contatos que participam de grupos com o seu número.\n    \n- Tudo que o FUNNELCHATAPI pode fazer quanto a contatos é o mesmo que o Whatsapp Web pode fazer ou seja, quase nada, não é possivel adicionar um contato, nem mesmo renomear ou mesmo excluir, basicamente o que você precisa entender é que o Whatsapp Web nao consegue manipular a agenda de contatos do seu celular, logo o **FUNNELCHATAPI** também não."
+		},
+		{
+			"name": "Chats",
+			"item": [
+				{
+					"name": "Pegar chats",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/chats?page=1&pageSize=20",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"chats"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"description": "Utilizado para paginação você de informar aqui a pagina de chats que quer buscar"
+								},
+								{
+									"key": "pageSize",
+									"value": "20",
+									"description": "Especifica o tamanho do retorno de chats por pagina"
+								}
+							]
+						},
+						"description": "Este método é reponsavel por retornar todos os chats."
+					},
+					"response": []
+				},
+				{
+					"name": "Pegar metadata do Chat",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/chats/{PHONE_NUMBER}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"chats",
+								"{PHONE_NUMBER}"
+							]
+						},
+						"description": "Este método é reponsavel por retornar as informações do metadata de um chat."
+					},
+					"response": []
+				},
+				{
+					"name": "Ler chat",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phone\": \"554499999999\",\n  \"action\": \"read\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/modify-chat",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"modify-chat"
+							]
+						},
+						"description": "Este método é reponsavel por realizar a ação de ler um chat como um todo, ou também marcar um chat como não lido"
+					},
+					"response": []
+				},
+				{
+					"name": "Arquivar chat",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phone\": \"554499999999\",\n  \"action\": \"archive\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/modify-chat",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"modify-chat"
+							]
+						},
+						"description": "Este método é reponsavel por arquivar e desarquivar seus chats."
+					},
+					"response": []
+				},
+				{
+					"name": "Fixar chat",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phone\": \"554499999999\",\n  \"action\": \"pin\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/modify-chat",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"modify-chat"
+							]
+						},
+						"description": "Este método é reponsavel por fixar e desafixar seus chats."
+					},
+					"response": []
+				},
+				{
+					"name": "Mutar chat",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phone\": \"554499999999\",\n  \"action\": \"mute\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/modify-chat",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"modify-chat"
+							]
+						},
+						"description": "Este método é reponsavel por mutar e desmutar seus chats."
+					},
+					"response": []
+				},
+				{
+					"name": "Limpar chat",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phone\": \"554499999999\",\n  \"action\": \"clear\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/modify-chat",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"modify-chat"
+							]
+						},
+						"description": "Este método é reponsavel por limpar as mensagens dos seus chats."
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar chat",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phone\": \"554499999999\",\n  \"action\": \"delete\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/modify-chat",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"modify-chat"
+							]
+						},
+						"description": "Este método é reponsavel por deletar seus chats."
+					},
+					"response": []
+				},
+				{
+					"name": "Expiração dos chats",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phone\": \"554499999999\",\n  \"chatExpiration\": \"90_DAYS\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/send-chat-expiration",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"send-chat-expiration"
+							]
+						},
+						"description": "Este método é responsável por enviar expiração do chat."
+					},
+					"response": []
+				}
+			],
+			"description": "Conforme já falamos no tópico anterior para o Whatsapp tudo é um chat, neste tópico você vai encontrar todos métodos para buscar informações sobre seus chats."
+		},
+		{
+			"name": "Calls",
+			"item": [
+				{
+					"name": "Fazer ligação",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phone\": \"554498744288\",\n  \"callDuration\": 5\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/send-call",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"send-call"
+							]
+						},
+						"description": "Neste método você enviar uma ligação a um número que possua whatsapp, seja ele seu contato ou não."
+					},
+					"response": []
+				}
+			],
+			"description": "Agora com FUNNELCHATAPI você pode fazer ligações para qualquer número, no momento não é possivel enviar um áudio durante a chamada. Essa funcionalidade chamamos de \"chamar atenção\", sabe lembra do cutucar no facebook?\n\nCom essa API você dar um toque e aguardar até 15 segundos e desligar a ligação.\n\nCom os webhooks de mensagem recebida, você pode observar as notificações e saber se a pessoa atendeu ou rejeitou a ligação."
+		},
+		{
+			"name": "Groups",
+			"item": [
+				{
+					"name": "Criando grupos",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"autoInvite\": true,\n  \"groupName\": \"Grupo FUNNELCHATAPI\",\n  \"phones\": [\"554499999999\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/create-group",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"create-group"
+							]
+						},
+						"description": "Este método é reponsável por criar um grupo com seus respectivos participantes. Infelizmente não é possivel criar o grupo com imagem, mas você pode logo após a criação utilizar-se do método Update-group-photo que esta nesta mesma sessão."
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar nome do grupo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"groupId\": \"120363356737170752-group\",\n    \"groupName\": \"Mudou o nome Meu grupo no FUNNELCHATAPI\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/update-group-name",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"update-group-name"
+							]
+						},
+						"description": "Este método é reponsavel alterar o nome de um grupo já existente."
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar imagem do grupo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"groupId\": \"120363356737170752-group\",\n    \"groupPhoto\": \"https://www.funnelchatapi.io/wp-content/themes/funnelchatapi/dist/images/logo.svg\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/update-group-photo",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"update-group-photo"
+							]
+						},
+						"description": "Este método é reponsavel alterar a imagem de um grupo já existente."
+					},
+					"response": []
+				},
+				{
+					"name": "Adicionar participantes",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"groupId\": \"120363356737170752-group\",\n    \"autoInvite\": true,\n    \"phones\": [\"5544999999999\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/add-participant",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"add-participant"
+							]
+						},
+						"description": "Este método é reponsável por adicionar novos participantes ao grupo."
+					},
+					"response": []
+				},
+				{
+					"name": "Remover participantes",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"groupId\": \"120363356737170752-group\",\n    \"phones\": [\"5544999999999\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/remove-participant",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"remove-participant"
+							]
+						},
+						"description": "Este método é reponsável por remover participantes do grupo."
+					},
+					"response": []
+				},
+				{
+					"name": "Aprovar participantes",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"groupId\": \"120363356737170752-group\",\n    \"phones\": [\"5544999999999\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/approve-participant",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"approve-participant"
+							]
+						},
+						"description": "Este método é reponsável por aceitar a entrada de participantes no grupo."
+					},
+					"response": []
+				},
+				{
+					"name": "Rejeitar participantes",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"groupId\": \"120363356737170752-group\",\n    \"phones\": [\"5544999999999\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/approve-participant",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"approve-participant"
+							]
+						},
+						"description": "Este método é reponsável por rejeitar a entrada de participantes no grupo."
+					},
+					"response": []
+				},
+				{
+					"name": "Mencionar membro",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"120363356737170752-group\",\n    \"message\": \"Bem vindo @554499999999\",\n    \"mentioned\": [\"554499999999\"]\n\n    // Parâmetros opcionais:\n    // \"delayMessage\": 5\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/send-text",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"send-text"
+							]
+						},
+						"description": "Este método é responsável por fazer a menção dos participantes em um grupo."
+					},
+					"response": []
+				},
+				{
+					"name": "Promover admin do grupo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"groupId\": \"120363356737170752-group\",\n    \"phones\": [\"554499999999\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/add-admin",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"add-admin"
+							]
+						},
+						"description": "Este método é reponsavel por promover participamentes do grupo à administradores, você pode provomover um ou mais participamente à administrador."
+					},
+					"response": []
+				},
+				{
+					"name": "Remover admin do grupo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"groupId\": \"120363356737170752-group\",\n    \"phones\": [\"554499999999\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/remove-admin",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"remove-admin"
+							]
+						},
+						"description": "Este método é reponsavel remover um ou mais admistradores de um grupo."
+					},
+					"response": []
+				},
+				{
+					"name": "Sair do grupo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"groupId\": \"120363356737170752-group\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/leave-group",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"leave-group"
+							]
+						},
+						"description": "Este método permite você sair de um grupo ao qual participa."
+					},
+					"response": []
+				},
+				{
+					"name": "Metadata do grupo",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/group-metadata/{GROUP_PHONE_NUMBER}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"group-metadata",
+								"{GROUP_PHONE_NUMBER}"
+							]
+						},
+						"description": "Este método retorna o metadata do grupo com todas informações do grupo e de seus partipantes."
+					},
+					"response": []
+				},
+				{
+					"name": "Metadata do grupo por convite",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/group-invitation-metadata?url=https://chat.whatsapp.com/D4HNtyc4TyDIXA7Y12T5JA",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"group-invitation-metadata"
+							],
+							"query": [
+								{
+									"key": "url",
+									"value": "https://chat.whatsapp.com/D4HNtyc4TyDIXA7Y12T5JA",
+									"description": "URL do convite para o grupo"
+								}
+							]
+						},
+						"description": "Este método retorna o metadata do grupo com todas informações do grupo e de seus partipantes."
+					},
+					"response": []
+				},
+				{
+					"name": "Configurações do grupo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"120363339774661342-group\",\n    \"adminOnlyMessage\": true,\n    \"adminOnlySettings\": true,\n    \"requireAdminApproval\": true,\n    \"adminOnlyAddMember\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/update-group-settings",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"update-group-settings"
+							]
+						},
+						"description": "Este método permite você alterar as preferências do grupo."
+					},
+					"response": []
+				},
+				{
+					"name": "Alterar descrição",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"groupId\": \"120363339774661342-group\",\n    \"groupDescription\": \"Nova descrição do grupo\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/update-group-description",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"update-group-description"
+							]
+						},
+						"description": "Este método permite você alterar a descrição do grupo."
+					},
+					"response": []
+				},
+				{
+					"name": "Redefinir link de convite do grupo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/redefine-invitation-link/{GROUP_PHONE_NUMBER}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"redefine-invitation-link",
+								"{GROUP_PHONE_NUMBER}"
+							]
+						},
+						"description": "Este método permite que você redefina o link de convite de um grupo."
+					},
+					"response": []
+				},
+				{
+					"name": "Aceitar convite do grupo",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/accept-invite-group?url=https://chat.whatsapp.com/D4HNtyc4TyDIXA7Y12T5JA",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"accept-invite-group"
+							],
+							"query": [
+								{
+									"key": "url",
+									"value": "https://chat.whatsapp.com/D4HNtyc4TyDIXA7Y12T5JA",
+									"description": "Url recebida de convite do grupo. Pode ser obtida através do webhook (https://developer.funnelchatapi.io/webhooks/on-message-received#exemplo-de-retorno-de-texto)"
+								}
+							]
+						},
+						"description": "Este método é reponsável por aceitar um convite que você recebeu para participar de um grupo."
+					},
+					"response": []
+				}
+			],
+			"description": "Neste tópico você vai conhecer todos os métodos disponiveis para manipulação de grupos.\n\nComo já dito anteriormente para o Whatsatpp tudo é um chat, sabendo disso o grupo nada mais é que um chate e basicamente tudo que você envia/recebe de em chat poderá enviar/receber com os grupos. O grupo possui um ID/Fone que nada mais é do que o fone de quem criou concatenado com um timestamp algo parececido com \"5511999999999-162327528\", e é este ID/Fone que você vai utilizar como fone para realizar os envios para seus grupos. Para você conseguir este ID/Fone utilize o metodo get/chats.\n\nNeste tópico você também vai encontrar também metódos para criação e administração de grupos."
+		},
+		{
+			"name": "Communities",
+			"item": [
+				{
+					"name": "Criar comunidade",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Nova Comunidade\"\n\n  // Parâmetros opcionais:\n  // \"description\": \"\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/communities",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"communities"
+							]
+						},
+						"description": "Antes de utilizar esse recurso, é importante verificar se o aplicativo do Whatsapp no seu celular já possui compatibilidade com as comunidades, caso já esteja disponível você pode utilizar essa API para criar novas comunidades."
+					},
+					"response": []
+				},
+				{
+					"name": "Listar comunidade",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/communities",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"communities"
+							]
+						},
+						"description": "Este método é reponsavel por retornar todas as comunidades que você faz parte."
+					},
+					"response": []
+				},
+				{
+					"name": "Vincular grupos",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"communityId\": \"120363356981780178\",\n  \"groupsPhones\": [\"120363355575783097-group\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/communities/link",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"communities",
+								"link"
+							]
+						},
+						"description": "Com essa API você consegue adicionar outros grupos a uma comunidade, para isso você vai precisar do ID da sua comunidade e os telefones dos grupos que deseja adicionar."
+					},
+					"response": []
+				},
+				{
+					"name": "Desvincular grupos",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"communityId\": \"120363356981780178\",\n  \"groupsPhones\": [\"120363355575783097-group\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/communities/unlink",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"communities",
+								"unlink"
+							]
+						},
+						"description": "Com essa API você consegue remover grupos de uma comunidade, para isso você vai precisar do ID da sua comunidade e os telefones dos grupos que deseja remover."
+					},
+					"response": []
+				},
+				{
+					"name": "Metadata da comunidade",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/communities-metadata/{COMMUNITY_ID}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"communities-metadata",
+								"{COMMUNITY_ID}"
+							]
+						},
+						"description": "Este método retorna o metadata da comunidade, como nome, descrição e grupos que estão vinculados a ela.\n\nAtenção: é necessário preencher o parâmetro COMMUNITY_ID com o respectivo ID da sua comunidade."
+					},
+					"response": []
+				},
+				{
+					"name": "Redefinir link de convite da comunidade",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"communityId\": \"120363356981780178\",\n  \"groupsPhones\": [\"120363355575783097-group\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/redefine-invitation-link/{COMMUNITY_ID}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"redefine-invitation-link",
+								"{COMMUNITY_ID}"
+							]
+						},
+						"description": "Este método permite que você redefina o link de convite de uma comunidade.\n\nAtenção: é necessário preencher o parâmetro COMMUNITY_ID com o respectivo ID da sua comunidade."
+					},
+					"response": []
+				},
+				{
+					"name": "Adicionar participantes",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"autoInvite\": true,\n  \"communityId\": \"120363338093432331\",\n  \"phones\": [\"554499999999\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/add-participant",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"add-participant"
+							]
+						},
+						"description": "Este método é reponsável por adicionar novos participantes a comunidade."
+					},
+					"response": []
+				},
+				{
+					"name": "Remover participantes",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"communityId\": \"120363355169278196\",\n  \"phones\": [\"554498744288\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/remove-participant",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"remove-participant"
+							]
+						},
+						"description": "Este método é reponsável por remover participantes da comunidade."
+					},
+					"response": []
+				},
+				{
+					"name": "Promover admin da comunidade",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"communityId\": \"120363355169278196\",\n  \"phones\": [\"554498744288\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/add-admin",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"add-admin"
+							]
+						},
+						"description": "Este método é reponsavel por promover participamentes da comunidade à administradores, você pode provomover um ou mais participamente à administrador."
+					},
+					"response": []
+				},
+				{
+					"name": "Remover admin da comunidade",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"communityId\": \"120363355169278196\",\n  \"phones\": [\"554498744288\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/remove-admin",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"remove-admin"
+							]
+						},
+						"description": "Este método é reponsavel remover um ou mais admistradores de uma comunidade."
+					},
+					"response": []
+				},
+				{
+					"name": "Configurações da comunidade",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"communityId\": \"120363338093432331\",\n  \"whoCanAddNewGroups\": \"admins\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/communities/settings",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"communities",
+								"settings"
+							]
+						},
+						"description": "Com essa API você consegue alterar as configurações de uma comunidade."
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar comunidade",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/communities/{COMMUNITY_ID}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"communities",
+								"{COMMUNITY_ID}"
+							]
+						},
+						"description": "Este método é reponsavel por desativar uma comunidade.\n\nQuando uma comunidade é desativada resultará na desconexão de todos os grupos relacionados a ela. É importante ressaltar que desativar a Comunidade não excluirá seus grupos, mas sim os removerá da Comunidade em questão.\n\nAtenção: é necessário preencher o parâmetro COMMUNITY_ID com o respectivo ID da sua comunidade."
+					},
+					"response": []
+				}
+			],
+			"description": "O WhatsApp agora oferece a funcionalidade de Comunidades, que permite aos usuários agrupar grupos ao redor de um assunto ou interesse em comum. É uma maneira fácil de conectar com outras pessoas que compartilham dos mesmos objetivos e ideias."
+		},
+		{
+			"name": "Newsletter",
+			"item": [
+				{
+					"name": "Criando canais",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Nome do canal\",\n  \"description\": \"Descrição do canal\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/create-newsletter",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"create-newsletter"
+							]
+						},
+						"description": "Este método é responsável por criar um canal. Infelizmente não é possivel criar o canal com imagem, mas você pode logo após a criação utilizar-se do método update-newsletter-picture que esta nesta mesma sessão."
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar imagem do canal",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": \"120363336258908380@newsletter\",\n  \"pictureUrl\": \"https://www.funnelchatapi.io/wp-content/themes/funnelchatapi/dist/images/logo.svg\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/update-newsletter-picture",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"update-newsletter-picture"
+							]
+						},
+						"description": "Este método é responsável por alterar a imagem de um canal já existente."
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar nome do canal",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": \"120363336258908380@newsletter\",\n  \"name\": \"Novo nome do canal\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/update-newsletter-name",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"update-newsletter-name"
+							]
+						},
+						"description": "Este método é responsável por alterar o nome de um canal já existente."
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar descrição do canal",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": \"120363336258908380@newsletter\",\n  \"description\": \"Nova descrição do canal\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/update-newsletter-description",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"update-newsletter-description"
+							]
+						},
+						"description": "Este método é responsável por alterar a descrição de um canal já existente."
+					},
+					"response": []
+				},
+				{
+					"name": "Seguir canal",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": \"120363336258908380@newsletter\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/follow-newsletter",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"follow-newsletter"
+							]
+						},
+						"description": "Este método é responsável por seguir um canal."
+					},
+					"response": []
+				},
+				{
+					"name": "Deixar de seguir canal",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": \"120363336258908380@newsletter\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/unfollow-newsletter",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"unfollow-newsletter"
+							]
+						},
+						"description": "Este método é responsável por deixar de seguir um canal."
+					},
+					"response": []
+				},
+				{
+					"name": "Mutar canal",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": \"120363336258908380@newsletter\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/mute-newsletter",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"mute-newsletter"
+							]
+						},
+						"description": "Este método é responsável por mutar um canal."
+					},
+					"response": []
+				},
+				{
+					"name": "Desmutar canal",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": \"120363336258908380@newsletter\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/unmute-newsletter",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"unmute-newsletter"
+							]
+						},
+						"description": "Este método é responsável por desmutar um canal."
+					},
+					"response": []
+				},
+				{
+					"name": "Deletar canal",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id\": \"120363336258908380@newsletter\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/delete-newsletter",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"delete-newsletter"
+							]
+						},
+						"description": "Este método é responsável por deletar um canal."
+					},
+					"response": []
+				},
+				{
+					"name": "Metadata do canal",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/newsletter/metadata/{NEWSLETTER_ID}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"newsletter",
+								"metadata",
+								"{NEWSLETTER_ID}"
+							]
+						},
+						"description": "Este método retorna o metadata do canal com todas as informações do canal e de sua visualização.\n\nAtenção: é necessário preencher o parâmetro NEWSLETTER_ID com o respectivo ID da sua newsletter."
+					},
+					"response": []
+				},
+				{
+					"name": "Listar canais",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/newsletter",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"newsletter"
+							]
+						},
+						"description": "Este método retorna uma lista com o metadata dos canais próprios e seguidos com todas as informações do canal e de sua visualização."
+					},
+					"response": []
+				},
+				{
+					"name": "Encontrar canais",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "  {\n    \"limit\": 50,\n    \"view\": \"TRENDING\",\n    \"filters\": { \n      \"countryCodes\": [\"BR\", \"AF\", \"CA\"]\n    },\n    \"searchText\": \"FUNNELCHATAPI\"\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/search-newsletter",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"search-newsletter"
+							]
+						},
+						"description": "Este método retorna uma lista com dados de canais, de acordo com a busca realizada através de filtros passados no body da requisição."
+					},
+					"response": []
+				},
+				{
+					"name": "Atualizar configurações do canal",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"reactionCodes\": \"basic\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/newsletter/settings/{NEWSLETTER_ID}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"newsletter",
+								"settings",
+								"{NEWSLETTER_ID}"
+							]
+						},
+						"description": "Este método é responsável por alterar as configurações de um canal.\n\nAtenção: é necessário preencher o parâmetro NEWSLETTER_ID com o respectivo ID da sua newsletter."
+					},
+					"response": []
+				},
+				{
+					"name": "Aceitar convite de admin do canal",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/newsletter/accept-admin-invite/{NEWSLETTER_ID}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"newsletter",
+								"accept-admin-invite",
+								"{NEWSLETTER_ID}"
+							]
+						},
+						"description": "Este método é responsável por aceitar um convite para ser administrador de um canal. Esse convite, é uma mensagem que você tanto pode [<b>enviar</b>](https://developer.funnelchatapi.io/message/send-newsletter-admin-invite) quanto receber através do [<b>webhook de mensagem recebida</b>](https://developer.funnelchatapi.io/webhooks/on-message-received#exemplo-de-retorno-de-convite-admin-de-canal).\n\nAtenção: é necessário preencher o parâmetro NEWSLETTER_ID com o respectivo ID da sua newsletter."
+					},
+					"response": []
+				},
+				{
+					"name": "Remover admin do canal",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phone\": \"554499999999\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/newsletter/remove-admin/{NEWSLETTER_ID}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"newsletter",
+								"remove-admin",
+								"{NEWSLETTER_ID}"
+							]
+						},
+						"description": "Este método é responsável por remover um usuário da administração do canal.\n\nAtenção: é necessário preencher o parâmetro NEWSLETTER_ID com o respectivo ID da sua newsletter."
+					},
+					"response": []
+				},
+				{
+					"name": "Anular convite de admin do canal",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phone\": \"554499999999\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/newsletter/revoke-admin-invite/{NEWSLETTER_ID}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"newsletter",
+								"revoke-admin-invite",
+								"{NEWSLETTER_ID}"
+							]
+						},
+						"description": "Este método é responsável por anular um convite de administrador de um canal.\n\nAtenção: é necessário preencher o parâmetro NEWSLETTER_ID com o respectivo ID da sua newsletter."
+					},
+					"response": []
+				},
+				{
+					"name": "Transferir propriedade do canal",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phone\": \"554499999999\",\n  \"quitAdmin\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/newsletter/transfer-ownership/{NEWSLETTER_ID}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"newsletter",
+								"transfer-ownership",
+								"{NEWSLETTER_ID}"
+							]
+						},
+						"description": "Este método é responsável por transferir a propriedade de um canal a outro usuário, o qual seja administrador desse canal.\n\nAtenção: é necessário preencher o parâmetro NEWSLETTER_ID com o respectivo ID da sua newsletter."
+					},
+					"response": []
+				}
+			],
+			"description": "Neste tópico você vai conhecer todos os métodos disponiveis para manipulação de canais.\n\n**O que são os canais?** Os Canais do WhatsApp são semelhantes às páginas do Facebook, oferecendo um espaço para compartilhar informações, novidades, avisos e outros conteúdos relacionados a um tópico específico ou entidade. Esses canais podem ser criados por uma variedade de entidades, desde times de futebol até empresas que oferecem serviço de streaming, e permitem que os usuários acompanhem e se envolvam com o conteúdo de seu interesse."
+		},
+		{
+			"name": "Status",
+			"item": [
+				{
+					"name": "Enviando texto status",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"message\": \"Sua mensagem para status\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/send-text-status",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"send-text-status"
+							]
+						},
+						"description": "Este método é responsável por transferir a propriedade de um canal a outro usuário, o qual seja administrador desse canal."
+					},
+					"response": []
+				},
+				{
+					"name": "Enviando imagem status",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"image\": \"https://www.funnelchatapi.io/wp-content/themes/funnelchatapi/dist/images/logo.svg\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/send-image-status",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"send-image-status"
+							]
+						},
+						"description": "Este método é responsável por transferir a propriedade de um canal a outro usuário, o qual seja administrador desse canal."
+					},
+					"response": []
+				}
+			],
+			"description": "Com o status do WhatsApp, você pode compartilhar fotos e vídeos que desaparecem após 24 horas.Para definir para quem seu status será exibido, é possível adicionar pessoas ao público do seu status ou mencioná-las na atualização compartilhada."
+		},
+		{
+			"name": "Message queue",
+			"item": [
+				{
+					"name": "Ver fila",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/queue",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"queue"
+							]
+						},
+						"description": "Este método é reponsavel por retornar todas mensagens que estão em sua fila aguardando para ser processada."
+					},
+					"response": []
+				},
+				{
+					"name": "Apagando uma fila",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/queue",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"queue"
+							]
+						},
+						"description": "Este método é reponsavel por DELETAR todas mensagens que estão em sua fila aguardando para ser processada."
+					},
+					"response": []
+				},
+				{
+					"name": "Apagando mensagem de uma fila",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/queue/3D79E55771D6A0C97D3562CCDB50DFDB",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"queue",
+								"3D79E55771D6A0C97D3562CCDB50DFDB"
+							]
+						},
+						"description": "Este método é reponsavel por deletar uma mensagem dentro de fila aguardando para ser processada."
+					},
+					"response": []
+				}
+			],
+			"description": "O FUNNELCHATAPI disponibiliza a seus usuários um sistema de fila que funciona unicamente para as mensagens envidas através da nossa API. Esta fila exerce um importante papel em nossa arquitetura que é o de organizar e ordenar as mensagens até que as mesmas sejam entregues ao Whatsapp. Este recurso também é muito útil para aquelas situaçoes onde o celular conectado ao FUNNELCHATAPI passa por algumas instabilidade ou fique fora da internet. Caso isso ocorra, ou seja, se o celular fica por um periodo fora ar, assim que você voltar a conectar as mensagens serão enviadas ao destinatário normalmente."
+		},
+		{
+			"name": "WhatsApp Business",
+			"item": [
+				{
+					"name": "Produtos",
+					"item": [
+						{
+							"name": "Criar/editar produto",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"currency\": \"BRL\",\n    \"description\": \"Uma descricao do produto\",\n    \"images\": [\"https://avatars.githubusercontent.com/u/60630101?s=200&v=4\"],\n    \"isHidden\": false,\n    \"name\": \"Meu primeiro produto\",\n    \"price\": 20,\n    \"retailerId\": \"002\",\n    \"url\": \"https://funnelchatapi.io\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/products",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"products"
+									]
+								},
+								"description": "Nesse método você será capaz de cadastrar e atualizar um produto no seu catálogo"
+							},
+							"response": []
+						},
+						{
+							"name": "Pegar todos os produtos",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/catalogs",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"catalogs"
+									]
+								},
+								"description": "Nesse método você será capaz de pegar os produtos de um catálogo do whatsapp Business"
+							},
+							"response": []
+						},
+						{
+							"name": "Pegar produtos pelo telefone",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/catalogs/{PHONE_NUMBER}",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"catalogs",
+										"{PHONE_NUMBER}"
+									]
+								},
+								"description": "Nesse método você será capaz de pegar os produtos de um catálogo do whatsapp Business de qualquer número, sendo o seu catáçogo ou de outra pessoa"
+							},
+							"response": []
+						},
+						{
+							"name": "Pegar produto pelo id",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/products/{PRODUCT_ID}",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"products",
+										"{PRODUCT_ID}"
+									]
+								},
+								"description": "Nesse método você será capaz de pegar um produto pelo seu id"
+							},
+							"response": []
+						},
+						{
+							"name": "Deletar produto",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/products/{PRODUCT_ID}",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"products",
+										"{PRODUCT_ID}"
+									]
+								},
+								"description": "Nesse método você será capaz de deletar um produto pelo seu id"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Etiquetas",
+					"item": [
+						{
+							"name": "Buscar etiquetas",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/tags",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"tags"
+									]
+								},
+								"description": "Nesse método você busca todas suas etiquetas cadastradas em seu whatsapp business."
+							},
+							"response": []
+						},
+						{
+							"name": "Cores de etiquetas",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/business/tags/colors",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"business",
+										"tags",
+										"colors"
+									]
+								},
+								"description": "Através deste método, é possível listar as cores de etiquetas disponíveis."
+							},
+							"response": []
+						},
+						{
+							"name": "Criar nova etiqueta",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Teste nova etiqueta\",\n  \"color\": 1\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/business/create-tag",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"business",
+										"create-tag"
+									]
+								},
+								"description": "Através deste método, é possível criar uma nova etiqueta. Quando você cria uma etiqueta, ela fica disponível para ser utilizada ao atribuí-la em um chat."
+							},
+							"response": []
+						},
+						{
+							"name": "Editar etiqueta",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Etiqueta editada\",\n  \"color\": 2\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/business/edit-tag/{TAG_ID}",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"business",
+										"edit-tag",
+										"{TAG_ID}"
+									]
+								},
+								"description": "Através deste método, é possível editar uma etiqueta."
+							},
+							"response": []
+						},
+						{
+							"name": "Deletar etiqueta",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/business/tag/{TAG_ID}",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"business",
+										"tag",
+										"{TAG_ID}"
+									]
+								},
+								"description": "Através deste método, é possível deletar uma etiqueta."
+							},
+							"response": []
+						},
+						{
+							"name": "Atribuir etiquetas a um chat",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/chats/{PHONE_NUMBER}/tags/{TAG_ID}/add",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"chats",
+										"{PHONE_NUMBER}",
+										"tags",
+										"{TAG_ID}",
+										"add"
+									]
+								},
+								"description": "Através deste método, é possível atribuir uma etiqueta a um chat no whatsapp business"
+							},
+							"response": []
+						},
+						{
+							"name": "Remover etiquetas a um chat",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/chats/{PHONE_NUMBER}/tags/{TAG_ID}/remove",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"chats",
+										"{PHONE_NUMBER}",
+										"tags",
+										"{TAG_ID}",
+										"remove"
+									]
+								},
+								"description": "Através deste método, é possível remover as etiquetas de um chat no whatsapp business"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Coleção",
+					"item": [
+						{
+							"name": "Configuração do catálogo",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"cartEnabled\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/catalogs/config",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"catalogs",
+										"config"
+									]
+								},
+								"description": "Utilizando esse método você será capaz de editar as configurações do seu catálogo."
+							},
+							"response": []
+						},
+						{
+							"name": "Criar coleção",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Nome da coleção 2\",\n  \"productIds\": [\"8502610599852671\"]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/catalogs/collection",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"catalogs",
+										"collection"
+									]
+								},
+								"description": "Utilizando esse método você será capaz de criar uma coleção de produtos no seu catálogo."
+							},
+							"response": []
+						},
+						{
+							"name": "Listar coleções",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/catalogs/collection",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"catalogs",
+										"collection"
+									],
+									"query": [
+										{
+											"key": "nextCursor",
+											"value": "",
+											"description": "Token utilizado para paginação dos registros",
+											"disabled": true
+										}
+									]
+								},
+								"description": "Utilizando esse método você será capaz de listar as coleções do seu catálogo."
+							},
+							"response": []
+						},
+						{
+							"name": "Deletar coleção",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/catalogs/collection/{COLLECTION_ID}",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"catalogs",
+										"collection",
+										"{COLLECTION_ID}"
+									]
+								},
+								"description": "Utilizando esse método você será capaz de deletar uma coleção de produtos do seu catálogo."
+							},
+							"response": []
+						},
+						{
+							"name": "Editar coleção",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Novo nome da coleção\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/catalogs/collection-edit/{COLLECTION_ID}",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"catalogs",
+										"collection-edit",
+										"{COLLECTION_ID}"
+									]
+								},
+								"description": "Utilizando esse método você será capaz de editar uma coleção de produtos do seu catálogo."
+							},
+							"response": []
+						},
+						{
+							"name": "Listar produtos de uma coleção",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Novo nome da coleção\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/catalogs/collection-products/{PHONE_NUMBER}?collectionId=536471432344438",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"catalogs",
+										"collection-products",
+										"{PHONE_NUMBER}"
+									],
+									"query": [
+										{
+											"key": "collectionId",
+											"value": "536471432344438",
+											"description": "Id da coleção"
+										}
+									]
+								},
+								"description": "Utilizando esse método você será capaz de listar os produtos que fazem parte de uma coleção do seu catálogo."
+							},
+							"response": []
+						},
+						{
+							"name": "Adicionar produtos à coleção",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"collectionId\": \"568858099062420\",\n  \"productIds\": [\"8733552516724476\"]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/catalogs/collection/add-product",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"catalogs",
+										"collection",
+										"add-product"
+									]
+								},
+								"description": "Utilizando esse método você será capaz de adicionar produtos à uma coleção do seu catálogo.\n\nAo adicionar ou remover produtos de uma **coleção**, o id da mesma é alterado pelo whatsapp. Isso quer dizer que, ao cadastrar um produto na coleção e tentar fazer qualquer outra operação utilizando o **id** \"antigo\" resultará em um não funcionamento da rota. Lembre-se então de utilizar o id retornado por essa mesma rota, o qual já é o id atualizado para as operações seguintes."
+							},
+							"response": []
+						},
+						{
+							"name": "Remover produtos da coleção",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"collectionId\": \"568858099062420\",\n  \"productIds\": [\"8733552516724476\"]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/catalogs/collection/remove-product",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"catalogs",
+										"collection",
+										"remove-product"
+									]
+								},
+								"description": "Utilizando esse método você será capaz de remover produtos de uma coleção do seu catálogo.\n\nAo adicionar ou remover produtos de uma **coleção**, o id da mesma é alterado pelo whatsapp. Isso quer dizer que, ao cadastrar um produto na coleção e tentar fazer qualquer outra operação utilizando o **id** \"antigo\" resultará em um não funcionamento da rota. Lembre-se então de utilizar o id retornado por essa mesma rota, o qual já é o id atualizado para as operações seguintes."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Perfil da empresa",
+					"item": [
+						{
+							"name": "Alterar descrição da empresa",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"value\": \"Texto da descrição da conta\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/business/company-description",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"business",
+										"company-description"
+									]
+								},
+								"description": "Através deste método, é possível alterar a descrição da empresa / compania."
+							},
+							"response": []
+						},
+						{
+							"name": "Alterar email da empresa",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"value\": \"email@example.com\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/business/company-email",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"business",
+										"company-email"
+									]
+								},
+								"description": "Através deste método, é possível alterar o email de contato da empresa / compania."
+							},
+							"response": []
+						},
+						{
+							"name": "Alterar endereço comercial da empresa",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"value\": \"Endereço da empresa\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/business/company-address",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"business",
+										"company-address"
+									]
+								},
+								"description": "Através deste método, é possível alterar o endereço comercial da empresa / compania."
+							},
+							"response": []
+						},
+						{
+							"name": "Alterar websites da empresa",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"websites\": [\"https://example.com\", \"https://example2.org\"]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/business/company-websites",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"business",
+										"company-websites"
+									]
+								},
+								"description": "Através deste método, é possível alterar os websites da empresa / compania."
+							},
+							"response": []
+						},
+						{
+							"name": "Alterar horário de funcionamento",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"timezone\": \"America/Sao_Paulo\",\n  \"days\": [\n    {\n      \"dayOfWeek\": \"MONDAY\",\n      \"openTime\": \"08:00\",\n      \"closeTime\": \"12:00\"\n    },\n    {\n      \"dayOfWeek\": \"MONDAY\",\n      \"openTime\": \"14:00\",\n      \"closeTime\": \"18:00\"\n    }\n  ],\n  \"mode\": \"specificHours\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/business/hours",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"business",
+										"hours"
+									]
+								},
+								"description": "Através deste método, é possível alterar o horário de funcionamento da empresa / compania."
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Categorias",
+					"item": [
+						{
+							"name": "Listar categorias",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"timezone\": \"America/Sao_Paulo\",\n  \"days\": [\n    {\n      \"dayOfWeek\": \"MONDAY\",\n      \"openTime\": \"08:00\",\n      \"closeTime\": \"12:00\"\n    },\n    {\n      \"dayOfWeek\": \"MONDAY\",\n      \"openTime\": \"14:00\",\n      \"closeTime\": \"18:00\"\n    }\n  ],\n  \"mode\": \"specificHours\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/business/available-categories?query=Roupas",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"business",
+										"available-categories"
+									],
+									"query": [
+										{
+											"key": "query",
+											"value": "Roupas",
+											"description": "Parâmetro de pesquisa de categorias. Exemplo: \"tecnologia\""
+										}
+									]
+								},
+								"description": "Através deste método, é possível listar as categorias disponíveis para atribuir a empresa / compania."
+							},
+							"response": []
+						},
+						{
+							"name": "Atribuir categorias",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Client-Token",
+										"value": "{{CLIENT_TOKEN}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"categories\": [\"CLOTHING_AND_APPAREL\"]\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/business/categories",
+									"host": [
+										"{{BASE_URL}}"
+									],
+									"path": [
+										"instances",
+										"{{INSTANCE_ID}}",
+										"token",
+										"{{INSTANCE_TOKEN}}",
+										"business",
+										"categories"
+									]
+								},
+								"description": "Através deste método, é possível atribuir categorias a empresa / compania."
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"description": "Agora temos novas APIs para o **Whatsapp Business**:\n\n- Criar ou editar um produto\n    \n- Pegar meu catalogo de produtos\n    \n- Pegar catalogo de produtos de outro número business\n    \n- Pegar dados de um produto por ID\n    \n- Excluir um produto por ID"
+		},
+		{
+			"name": "Webhooks",
+			"item": [
+				{
+					"name": "Ao enviar",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"value\": \"https://endereco-do-seu-sistema.com.br/instancia/SUA_INSTANCIA/delivery\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/update-webhook-delivery",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"update-webhook-delivery"
+							]
+						},
+						"description": "Esse é o webhook de retorno de mensagens enviadas"
+					},
+					"response": []
+				},
+				{
+					"name": "Ao receber",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"value\": \"https://endereco-do-seu-sistema.com.br/instancia/SUA_INSTANCIA/receive\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/update-webhook-received",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"update-webhook-received"
+							]
+						},
+						"description": "Esse é o webhook de retorno de mensagens recebidas, também é executada quando a sua instância está configurada para notificar também mensagens enviadas por você mesmo."
+					},
+					"response": []
+				},
+				{
+					"name": "Ao receber - Enviadas por mim também",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"value\": \"https://endereco-do-seu-sistema.com.br/instancia/SUA_INSTANCIA/receive\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/update-webhook-received-delivery",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"update-webhook-received-delivery"
+							]
+						},
+						"description": "Também é possível atualizar a rota com a opção \"enviadas por mim\" habilitada."
+					},
+					"response": []
+				},
+				{
+					"name": "Ao desconectar",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"value\": \"https://endereco-do-seu-sistema.com.br/instancia/SUA_INSTANCIA/disconnected\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/update-webhook-disconnected",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"update-webhook-disconnected"
+							]
+						},
+						"description": "Esse é o webhook de resposta de desconexão"
+					},
+					"response": []
+				},
+				{
+					"name": "Atualização no status de mensagens",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"value\": \"https://endereco-do-seu-sistema.com.br/instancia/SUA_INSTANCIA/status\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/update-webhook-message-status",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"update-webhook-message-status"
+							]
+						},
+						"description": "Esse é o webhook de retorno do status da mensagem"
+					},
+					"response": []
+				},
+				{
+					"name": "Atualização no status do chat",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"value\": \"https://endereco-do-seu-sistema.com.br/instancia/SUA_INSTANCIA/presence\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/update-webhook-chat-presence",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"update-webhook-chat-presence"
+							]
+						},
+						"description": "Esse é o webhook de retorno status do chat"
+					},
+					"response": []
+				},
+				{
+					"name": "Ao conectar",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Client-Token",
+								"value": "{{CLIENT_TOKEN}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"value\": \"https://endereco-do-seu-sistema.com.br/instancia/SUA_INSTANCIA/status\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/update-webhook-connected",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"update-webhook-connected"
+							]
+						},
+						"description": "Esse é o webhook de retorno de conexão do Celular com o FunnelChatAPI\n\nEsse é webhook é disparado quando o FUNNELCHATAPI se conectada ao Whatsapp, isso pode acontecer quando ler o QRCode, quando reiniciar a instancia e etc"
+					},
+					"response": []
+				}
+			],
+			"description": "Neste tópico falaremos sobre os **RETORNOS** dos webhooks que utilizamos.\n\nAs instâncias do FUNNELCHATAPI fazem requisições com o método **POST** dos eventos realizados por ela para a URL configurada previamente. Para cada requisição há um corpo em JSON específico que será descrito em seguida."
+		},
+		{
+			"name": "Partners",
+			"item": [
+				{
+					"name": "Criando uma instância",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{PARTNER_AUTH_TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Instancia FUNNELCHATAPI - 9292812\",\n  \"sessionName\": \"Testes testes\",\n  \"deliveryCallbackUrl\": \"https://meuwebhook.com.br/delivery\",\n  \"receivedCallbackUrl\": \"https://meuwebhook.com.br/receive\",\n  \"disconnectedCallbackUrl\": \"https://meuwebhook.com.br/disconnected\",\n  \"connectedCallbackUrl\": \"https://meuwebhook.com.br/connected\",\n  \"messageStatusCallbackUrl\": \"https://meuwebhook.com.br/status\",\n  \"isDevice\": false,\n  \"businessDevice\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/instances/integrator/on-demand",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"integrator",
+								"on-demand"
+							]
+						},
+						"description": "Método utilizado para criar uma instância vinculada a sua conta."
+					},
+					"response": []
+				},
+				{
+					"name": "Assinando uma instância",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{PARTNER_AUTH_TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/integrator/on-demand/subscription",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"integrator",
+								"on-demand",
+								"subscription"
+							]
+						},
+						"description": "Método utilizado para assinar uma instância."
+					},
+					"response": []
+				},
+				{
+					"name": "Cancelando uma instância",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{PARTNER_AUTH_TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/instances/{{INSTANCE_ID}}/token/{{INSTANCE_TOKEN}}/integrator/on-demand/cancel",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances",
+								"{{INSTANCE_ID}}",
+								"token",
+								"{{INSTANCE_TOKEN}}",
+								"integrator",
+								"on-demand",
+								"cancel"
+							]
+						},
+						"description": "Método utilizado para cancelar uma instância."
+					},
+					"response": []
+				},
+				{
+					"name": "Listando instâncias",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{PARTNER_AUTH_TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/instances?query=15&middleware=web&page=1&pageSize=15",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"instances"
+							],
+							"query": [
+								{
+									"key": "query",
+									"value": "15"
+								},
+								{
+									"key": "middleware",
+									"value": "web"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "pageSize",
+									"value": "15"
+								}
+							]
+						},
+						"description": "Método utilizado para listar todas as instâncias criadas."
+					},
+					"response": []
+				}
+			],
+			"description": "Se você está neste tópico, significa que já quebrou algumas castanhas com a gente, não é mesmo?\n\nFicamos extremamente satisfeitos por você considerar ser um parceiro integrador nosso. Desejamos ser uma bênção para o seu negócio e esperamos que você prospere cada vez mais, e é claro que estamos aqui para ajudar nessa empreitada. Agora que você alcançou 25 licenças, já nos conhecemos bem e nossa parceria está ainda mais fortalecida. Estaremos sempre disponíveis para apoiá-lo e crescermos juntos. Pode contar com a gente!"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "BASE_URL",
+			"value": "https://api.funnelchatapi.io",
+			"type": "string"
+		},
+		{
+			"key": "INSTANCE_ID",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "INSTANCE_TOKEN",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "CLIENT_TOKEN",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "PARTNER_AUTH_TOKEN",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

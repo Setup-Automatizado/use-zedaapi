@@ -1,0 +1,23 @@
+{
+  "headers": {
+    "content-length": "209",
+    "host": "185.245.182.69:3000",
+    "content-type": "application/json",
+    "origin": "https://api.z-api.io",
+    "server": "Z-API",
+    "user-agent": "Mozilla/5.0 (Linux; Android 10; LM-Q720) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.5563.115 Mobile Safari/537.36",
+    "z-api-token": "0B039DE5C908EDAF88346CED"
+  },
+  "body": {
+    "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+    "status": "READ",
+    "ids": [
+      "3EB01CFB38263CC7AC8FC8"
+    ],
+    "momment": 1757390034000,
+    "phoneDevice": 0,
+    "phone": "5521979232690",
+    "type": "MessageStatusCallback",
+    "isGroup": false
+  }
+}

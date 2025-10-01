@@ -1,0 +1,35 @@
+{
+  "headers": {
+    "connection": "Upgrade, HTTP2-Settings",
+    "content-length": "890",
+    "host": "185.245.182.69:3000",
+    "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+    "upgrade": "h2c",
+    "content-type": "application/json",
+    "origin": "https://api.z-api.io",
+    "server": "Z-API",
+    "user-agent": "Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:111.0) Gecko/20100101 Firefox/111.0",
+    "z-api-token": "0B039DE5C908EDAF88346CED"
+  },
+  "body": {
+    "connectedPhone": "5521971532700",
+    "isGroup": true,
+    "isNewsletter": false,
+    "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+    "messageId": "3EB09845F4BDDAFE763C09",
+    "momment": 1757381433000,
+    "status": "RECEIVED",
+    "fromMe": false,
+    "phone": "120363128555352990-group",
+    "chatName": "Promovaweb - #1 Marketing e Automação",
+    "senderName": "Lucas Campos",
+    "senderPhoto": "https://pps.whatsapp.net/v/t61.24694-24/426084461_1812960125794517_5194645915468887293_n.jpg?ccb=11-4&oh=01_Q5Aa2gHbj8a1f6EPK3I1IW7mGkS_7ngOUkOh5xXz4wdLIPfufg&oe=68CCADF1&_nc_sid=5e03e0&_nc_cat=109",
+    "photo": "https://pps.whatsapp.net/v/t61.24694-24/341778241_885071825920597_450266843994552060_n.jpg?ccb=11-4&oh=01_Q5Aa2gHbB6AV7yVzOM2V9BK1p4J4atQmdTVCoSiTr2hhNw4Njg&oe=68CC9F0D&_nc_sid=5e03e0&_nc_cat=104",
+    "broadcast": false,
+    "participantPhone": "5521965981728",
+    "participantLid": null,
+    "type": "ReceivedCallback",
+    "waitingMessage": true,
+    "viewOnce": false
+  }
+}

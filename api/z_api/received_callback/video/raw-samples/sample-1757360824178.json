@@ -1,0 +1,50 @@
+{
+  "headers": {
+    "connection": "Upgrade, HTTP2-Settings",
+    "content-length": "1076",
+    "host": "185.245.182.69:3000",
+    "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+    "upgrade": "h2c",
+    "content-type": "application/json",
+    "origin": "https://api.z-api.io",
+    "server": "Z-API",
+    "user-agent": "Mozilla/5.0 (iPod touch; CPU iPhone 16_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.4 Mobile/15E148 Safari/604.1",
+    "z-api-token": "0B039DE5C908EDAF88346CED"
+  },
+  "body": {
+    "isStatusReply": false,
+    "chatLid": null,
+    "connectedPhone": "5521971532700",
+    "waitingMessage": false,
+    "isEdit": false,
+    "isGroup": true,
+    "isNewsletter": false,
+    "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+    "messageId": "3FD2928B28A46E9C0BC9",
+    "phone": "120363075797374359-group",
+    "fromMe": false,
+    "momment": 1757360820000,
+    "status": "RECEIVED",
+    "chatName": "Typebot Brasil #01 | Automatik®",
+    "senderPhoto": null,
+    "senderName": "Andre Gontijo",
+    "photo": "https://pps.whatsapp.net/v/t61.24694-24/390263221_312987161476409_6129240585720628251_n.jpg?ccb=11-4&oh=01_Q5Aa2gFemCxlh48tp4EcgySev5WrvuJjB373lVs00e41ObaaYw&oe=68CC2CD9&_nc_sid=5e03e0&_nc_cat=108",
+    "broadcast": false,
+    "participantPhone": "5516981821568",
+    "participantLid": "100261901140214@lid",
+    "messageExpirationSeconds": 0,
+    "forwarded": false,
+    "type": "ReceivedCallback",
+    "fromApi": false,
+    "video": {
+      "videoUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/3FD2928B28A46E9C0BC9/5RHD0eV_P4R1VaRRQqW9RA==.mp4",
+      "caption": "",
+      "mimeType": "video/mp4",
+      "width": 166,
+      "height": 174,
+      "seconds": 0,
+      "viewOnce": false,
+      "isGif": true
+    }
+  }
+}

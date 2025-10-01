@@ -1,0 +1,50 @@
+{
+  "headers": {
+    "connection": "Upgrade, HTTP2-Settings",
+    "content-length": "988",
+    "host": "185.245.182.69:3000",
+    "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+    "upgrade": "h2c",
+    "content-type": "application/json",
+    "origin": "https://api.z-api.io",
+    "server": "Z-API",
+    "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.4 Mobile/15E148 Safari/604.1",
+    "z-api-token": "0B039DE5C908EDAF88346CED"
+  },
+  "body": {
+    "isStatusReply": false,
+    "chatLid": null,
+    "connectedPhone": "5521971532700",
+    "waitingMessage": false,
+    "isEdit": false,
+    "isGroup": true,
+    "isNewsletter": false,
+    "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+    "messageId": "AC258DE4C8FAE66B7DB4A5343D0E9A8A",
+    "phone": "120363344102839767-group",
+    "fromMe": false,
+    "momment": 1757386225000,
+    "status": "RECEIVED",
+    "chatName": "Comunidade CRM Datacrazy ",
+    "senderPhoto": "https://pps.whatsapp.net/v/t61.24694-24/491886646_1905600680013797_7806651557743892720_n.jpg?ccb=11-4&oh=01_Q5Aa2gGUEJ5ZJGveKBjB-qYSo8CG9EA_k0QLREcvhPfgIX36OA&oe=68CCB615&_nc_sid=5e03e0&_nc_cat=110",
+    "senderName": "Marcell",
+    "photo": null,
+    "broadcast": false,
+    "participantPhone": "553299633977",
+    "participantLid": "81857949499507@lid",
+    "forwarded": false,
+    "type": "ReceivedCallback",
+    "fromApi": false,
+    "reaction": {
+      "value": "😂",
+      "time": 1757386224035,
+      "reactionBy": "553299633977",
+      "referencedMessage": {
+        "messageId": "3EB0E701054B23CA0B4095",
+        "fromMe": false,
+        "phone": "120363344102839767-group",
+        "participant": "554799492100"
+      }
+    }
+  }
+}

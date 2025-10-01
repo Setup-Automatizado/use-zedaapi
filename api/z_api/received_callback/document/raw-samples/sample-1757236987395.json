@@ -1,0 +1,46 @@
+{
+  "headers": {
+    "connection": "Upgrade, HTTP2-Settings",
+    "content-length": "998",
+    "host": "185.245.182.69:3000",
+    "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+    "upgrade": "h2c",
+    "content-type": "application/json",
+    "origin": "https://api.z-api.io",
+    "server": "Z-API",
+    "user-agent": "Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:111.0) Gecko/20100101 Firefox/111.0",
+    "z-api-token": "0B039DE5C908EDAF88346CED"
+  },
+  "body": {
+    "isStatusReply": false,
+    "chatLid": "140712372899859@lid",
+    "connectedPhone": "5521971532700",
+    "waitingMessage": false,
+    "isEdit": false,
+    "isGroup": false,
+    "isNewsletter": false,
+    "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+    "messageId": "3EB0C126E2E40E9DB35B59",
+    "phone": "5521979232690",
+    "fromMe": false,
+    "momment": 1757236983000,
+    "status": "RECEIVED",
+    "chatName": "Guilherme Jansen TIM",
+    "senderPhoto": null,
+    "senderName": "Setup Automatizado",
+    "photo": "https://pps.whatsapp.net/v/t61.24694-24/461829556_1006473814615331_4349634052417714421_n.jpg?ccb=11-4&oh=01_Q5Aa2QErTz6AonzeLsALjN9tD_QdDPuxvp4yv_vos42eyy_vlQ&oe=68CA4C10&_nc_sid=5e03e0&_nc_cat=109",
+    "broadcast": false,
+    "participantLid": null,
+    "forwarded": false,
+    "type": "ReceivedCallback",
+    "fromApi": false,
+    "document": {
+      "caption": null,
+      "documentUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/3EB0C126E2E40E9DB35B59/QoJ50ubVNbBResZ_5lCVxw==.pdf",
+      "mimeType": "application/pdf",
+      "title": "",
+      "pageCount": 0,
+      "fileName": "document.pdf"
+    }
+  }
+}

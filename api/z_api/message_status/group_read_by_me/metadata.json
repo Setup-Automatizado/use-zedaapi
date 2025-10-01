@@ -1,0 +1,244 @@
+{
+  "lastSeen": "2025-09-09T04:14:42.838Z",
+  "totalReceived": 114,
+  "fields": {
+    "required": [
+      "headers",
+      "headers.content-length",
+      "headers.host",
+      "headers.content-type",
+      "headers.origin",
+      "headers.server",
+      "headers.user-agent",
+      "headers.z-api-token",
+      "body",
+      "body.instanceId",
+      "body.status",
+      "body.ids",
+      "body.ids[]",
+      "body.momment",
+      "body.participant",
+      "body.participantDevice",
+      "body.phone",
+      "body.type",
+      "body.isGroup"
+    ],
+    "optional": [],
+    "truncated": []
+  },
+  "variations": [],
+  "firstSeen": "2025-09-08T21:56:37.509Z",
+  "lastModified": "2025-09-09T04:14:42.838Z",
+  "schemaVersion": 1,
+  "savedStructure": {
+    "path": "",
+    "type": "object",
+    "optional": false,
+    "examples": [
+      {
+        "headers": {
+          "content-length": "262",
+          "host": "185.245.182.69:3000",
+          "content-type": "application/json",
+          "origin": "https://api.z-api.io",
+          "server": "Z-API",
+          "user-agent": "Mozilla/5.0 (Linux; Android 10; LM-Q720) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.5563.115 Mobile Safari/537.36",
+          "z-api-token": "0B039DE5C908EDAF88346CED"
+        },
+        "body": {
+          "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+          "status": "READ_BY_ME",
+          "ids": [
+            "3A1DDFED11F9E208E18A"
+          ],
+          "momment": 1757387955000,
+          "participant": "227294266302623",
+          "participantDevice": 19,
+          "phone": "120363375520943587-group",
+          "type": "MessageStatusCallback",
+          "isGroup": true
+        }
+      }
+    ],
+    "children": {
+      "headers": {
+        "path": "headers",
+        "type": "object",
+        "optional": false,
+        "examples": [
+          {
+            "content-length": "262",
+            "host": "185.245.182.69:3000",
+            "content-type": "application/json",
+            "origin": "https://api.z-api.io",
+            "server": "Z-API",
+            "user-agent": "Mozilla/5.0 (Linux; Android 10; LM-Q720) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.5563.115 Mobile Safari/537.36",
+            "z-api-token": "0B039DE5C908EDAF88346CED"
+          }
+        ],
+        "children": {
+          "content-length": {
+            "path": "headers.content-length",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "262"
+            ]
+          },
+          "host": {
+            "path": "headers.host",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "185.245.182.69:3000"
+            ]
+          },
+          "content-type": {
+            "path": "headers.content-type",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "application/json"
+            ]
+          },
+          "origin": {
+            "path": "headers.origin",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "https://api.z-api.io"
+            ]
+          },
+          "server": {
+            "path": "headers.server",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "Z-API"
+            ]
+          },
+          "user-agent": {
+            "path": "headers.user-agent",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "Mozilla/5.0 (Linux; Android 10; LM-Q720) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.5563.115 Mobile Safari/537.36"
+            ]
+          },
+          "z-api-token": {
+            "path": "headers.z-api-token",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "0B039DE5C908EDAF88346CED"
+            ]
+          }
+        }
+      },
+      "body": {
+        "path": "body",
+        "type": "object",
+        "optional": false,
+        "examples": [
+          {
+            "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+            "status": "READ_BY_ME",
+            "ids": [
+              "3A1DDFED11F9E208E18A"
+            ],
+            "momment": 1757387955000,
+            "participant": "227294266302623",
+            "participantDevice": 19,
+            "phone": "120363375520943587-group",
+            "type": "MessageStatusCallback",
+            "isGroup": true
+          }
+        ],
+        "children": {
+          "instanceId": {
+            "path": "body.instanceId",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "3E6D06A438D501A5CD70265FDA264287"
+            ]
+          },
+          "status": {
+            "path": "body.status",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "READ_BY_ME"
+            ]
+          },
+          "ids": {
+            "path": "body.ids",
+            "type": "array",
+            "optional": false,
+            "examples": [
+              [
+                "3A1DDFED11F9E208E18A"
+              ]
+            ],
+            "arrayItemType": {
+              "path": "body.ids[0]",
+              "type": "string",
+              "optional": false,
+              "examples": [
+                "3A1DDFED11F9E208E18A"
+              ]
+            }
+          },
+          "momment": {
+            "path": "body.momment",
+            "type": "number",
+            "optional": false,
+            "examples": [
+              1757387955000
+            ]
+          },
+          "participant": {
+            "path": "body.participant",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "227294266302623"
+            ]
+          },
+          "participantDevice": {
+            "path": "body.participantDevice",
+            "type": "number",
+            "optional": false,
+            "examples": [
+              19
+            ]
+          },
+          "phone": {
+            "path": "body.phone",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "120363375520943587-group"
+            ]
+          },
+          "type": {
+            "path": "body.type",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "MessageStatusCallback"
+            ]
+          },
+          "isGroup": {
+            "path": "body.isGroup",
+            "type": "boolean",
+            "optional": false,
+            "examples": [
+              true
+            ]
+          }
+        }
+      }
+    }
+  }
+}

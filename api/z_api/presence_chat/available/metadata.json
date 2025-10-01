@@ -1,0 +1,219 @@
+{
+  "eventType": "z_api/presence_chat/available",
+  "firstSeen": "2025-09-06T07:55:50.351Z",
+  "lastSeen": "2025-09-09T03:46:41.608Z",
+  "totalReceived": 341,
+  "schemaVersion": 1,
+  "lastModified": "2025-09-09T03:46:41.608Z",
+  "fields": {
+    "required": [
+      "headers",
+      "headers.connection",
+      "headers.content-length",
+      "headers.host",
+      "headers.http2-settings",
+      "headers.upgrade",
+      "headers.content-type",
+      "headers.origin",
+      "headers.server",
+      "headers.user-agent",
+      "headers.z-api-token",
+      "body",
+      "body.type",
+      "body.phone",
+      "body.status",
+      "body.lastSeen",
+      "body.instanceId"
+    ],
+    "optional": [],
+    "truncated": []
+  },
+  "variations": [],
+  "savedStructure": {
+    "path": "",
+    "type": "object",
+    "optional": false,
+    "examples": [
+      {
+        "headers": {
+          "connection": "Upgrade, HTTP2-Settings",
+          "content-length": "140",
+          "host": "185.245.182.69:3000",
+          "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+          "upgrade": "h2c",
+          "content-type": "application/json",
+          "origin": "https://api.z-api.io",
+          "server": "Z-API",
+          "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_2_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.54",
+          "z-api-token": "0B039DE5C908EDAF88346CED"
+        },
+        "body": {
+          "type": "PresenceChatCallback",
+          "phone": "5521979232690",
+          "status": "AVAILABLE",
+          "lastSeen": null,
+          "instanceId": "3E6D06A438D501A5CD70265FDA264287"
+        }
+      }
+    ],
+    "children": {
+      "headers": {
+        "path": "headers",
+        "type": "object",
+        "optional": false,
+        "examples": [
+          {
+            "connection": "Upgrade, HTTP2-Settings",
+            "content-length": "140",
+            "host": "185.245.182.69:3000",
+            "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+            "upgrade": "h2c",
+            "content-type": "application/json",
+            "origin": "https://api.z-api.io",
+            "server": "Z-API",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_2_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.54",
+            "z-api-token": "0B039DE5C908EDAF88346CED"
+          }
+        ],
+        "children": {
+          "connection": {
+            "path": "headers.connection",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "Upgrade, HTTP2-Settings"
+            ]
+          },
+          "content-length": {
+            "path": "headers.content-length",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "140"
+            ]
+          },
+          "host": {
+            "path": "headers.host",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "185.245.182.69:3000"
+            ]
+          },
+          "http2-settings": {
+            "path": "headers.http2-settings",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA"
+            ]
+          },
+          "upgrade": {
+            "path": "headers.upgrade",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "h2c"
+            ]
+          },
+          "content-type": {
+            "path": "headers.content-type",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "application/json"
+            ]
+          },
+          "origin": {
+            "path": "headers.origin",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "https://api.z-api.io"
+            ]
+          },
+          "server": {
+            "path": "headers.server",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "Z-API"
+            ]
+          },
+          "user-agent": {
+            "path": "headers.user-agent",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_2_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.54"
+            ]
+          },
+          "z-api-token": {
+            "path": "headers.z-api-token",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "0B039DE5C908EDAF88346CED"
+            ]
+          }
+        }
+      },
+      "body": {
+        "path": "body",
+        "type": "object",
+        "optional": false,
+        "examples": [
+          {
+            "type": "PresenceChatCallback",
+            "phone": "5521979232690",
+            "status": "AVAILABLE",
+            "lastSeen": null,
+            "instanceId": "3E6D06A438D501A5CD70265FDA264287"
+          }
+        ],
+        "children": {
+          "type": {
+            "path": "body.type",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "PresenceChatCallback"
+            ]
+          },
+          "phone": {
+            "path": "body.phone",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "5521979232690"
+            ]
+          },
+          "status": {
+            "path": "body.status",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "AVAILABLE"
+            ]
+          },
+          "lastSeen": {
+            "path": "body.lastSeen",
+            "type": "null",
+            "optional": false,
+            "examples": [
+              null
+            ]
+          },
+          "instanceId": {
+            "path": "body.instanceId",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "3E6D06A438D501A5CD70265FDA264287"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,468 @@
+{
+  "eventType": "z_api/message_status/read",
+  "firstSeen": "2025-09-08T13:23:08.699Z",
+  "lastSeen": "2025-09-09T03:57:11.716Z",
+  "totalReceived": 74,
+  "schemaVersion": 67,
+  "lastModified": "2025-09-09T03:57:11.290Z",
+  "fields": {
+    "required": [
+      "headers",
+      "headers.content-length",
+      "headers.host",
+      "headers.content-type",
+      "headers.origin",
+      "headers.server",
+      "headers.user-agent",
+      "headers.z-api-token",
+      "body",
+      "body.instanceId",
+      "body.status",
+      "body.ids",
+      "body.ids[]",
+      "body.momment",
+      "body.phoneDevice",
+      "body.phone",
+      "body.type",
+      "body.isGroup"
+    ],
+    "optional": [
+      "body.participant",
+      "body.participantDevice"
+    ],
+    "truncated": []
+  },
+  "variations": [],
+  "savedStructure": {
+    "path": "",
+    "type": "object",
+    "optional": false,
+    "examples": [
+      {
+        "headers": {
+          "content-length": "210",
+          "host": "185.245.182.69:3000",
+          "content-type": "application/json",
+          "origin": "https://api.z-api.io",
+          "server": "Z-API",
+          "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_2_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
+          "z-api-token": "0B039DE5C908EDAF88346CED"
+        },
+        "body": {
+          "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+          "status": "READ",
+          "ids": [
+            "3EB085AA16ACD45E7ED1D7"
+          ],
+          "momment": 1757389348000,
+          "phoneDevice": 86,
+          "phone": "5516991984761",
+          "type": "MessageStatusCallback",
+          "isGroup": false
+        }
+      },
+      {
+        "headers": {
+          "content-length": "232",
+          "host": "185.245.182.69:3000",
+          "content-type": "application/json",
+          "origin": "https://api.z-api.io",
+          "server": "Z-API",
+          "user-agent": "Mozilla/5.0 (iPod touch; CPU iPhone 16_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.4 Mobile/15E148 Safari/604.1",
+          "z-api-token": "0B039DE5C908EDAF88346CED"
+        },
+        "body": {
+          "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+          "status": "READ",
+          "ids": [
+            "3A6EA72812E122CE6F9B",
+            "3EB0E5DE6C0BE379837C4B"
+          ],
+          "momment": 1757389847000,
+          "phoneDevice": 0,
+          "phone": "5521979232690",
+          "type": "MessageStatusCallback",
+          "isGroup": false
+        }
+      },
+      {
+        "headers": {
+          "content-length": "209",
+          "host": "185.245.182.69:3000",
+          "content-type": "application/json",
+          "origin": "https://api.z-api.io",
+          "server": "Z-API",
+          "user-agent": "Mozilla/5.0 (iPod touch; CPU iPhone OS 13_2_1 like Mac OS X) AppleWebKit/604.5.6 (KHTML, like Gecko) FxiOS/111.0 Mobile/15E148 Safari/605.1.15",
+          "z-api-token": "0B039DE5C908EDAF88346CED"
+        },
+        "body": {
+          "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+          "status": "READ",
+          "ids": [
+            "3EB066B4A2AAFBE19553E2"
+          ],
+          "momment": 1757389849000,
+          "phoneDevice": 0,
+          "phone": "5521979232690",
+          "type": "MessageStatusCallback",
+          "isGroup": false
+        }
+      },
+      {
+        "headers": {
+          "content-length": "209",
+          "host": "185.245.182.69:3000",
+          "content-type": "application/json",
+          "origin": "https://api.z-api.io",
+          "server": "Z-API",
+          "user-agent": "Mozilla/5.0 (Linux; Android 10; LM-Q720) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.5563.115 Mobile Safari/537.36",
+          "z-api-token": "0B039DE5C908EDAF88346CED"
+        },
+        "body": {
+          "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+          "status": "READ",
+          "ids": [
+            "3EB01CFB38263CC7AC8FC8"
+          ],
+          "momment": 1757390034000,
+          "phoneDevice": 0,
+          "phone": "5521979232690",
+          "type": "MessageStatusCallback",
+          "isGroup": false
+        }
+      },
+      {
+        "headers": {
+          "content-length": "209",
+          "host": "185.245.182.69:3000",
+          "content-type": "application/json",
+          "origin": "https://api.z-api.io",
+          "server": "Z-API",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
+          "z-api-token": "0B039DE5C908EDAF88346CED"
+        },
+        "body": {
+          "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+          "status": "READ",
+          "ids": [
+            "3EB046950C6A8B8388327C"
+          ],
+          "momment": 1757390223000,
+          "phoneDevice": 0,
+          "phone": "5521979232690",
+          "type": "MessageStatusCallback",
+          "isGroup": false
+        }
+      }
+    ],
+    "children": {
+      "headers": {
+        "path": "headers",
+        "type": "object",
+        "optional": false,
+        "examples": [
+          {
+            "content-length": "210",
+            "host": "185.245.182.69:3000",
+            "content-type": "application/json",
+            "origin": "https://api.z-api.io",
+            "server": "Z-API",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_2_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
+            "z-api-token": "0B039DE5C908EDAF88346CED"
+          },
+          {
+            "content-length": "232",
+            "host": "185.245.182.69:3000",
+            "content-type": "application/json",
+            "origin": "https://api.z-api.io",
+            "server": "Z-API",
+            "user-agent": "Mozilla/5.0 (iPod touch; CPU iPhone 16_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.4 Mobile/15E148 Safari/604.1",
+            "z-api-token": "0B039DE5C908EDAF88346CED"
+          },
+          {
+            "content-length": "209",
+            "host": "185.245.182.69:3000",
+            "content-type": "application/json",
+            "origin": "https://api.z-api.io",
+            "server": "Z-API",
+            "user-agent": "Mozilla/5.0 (iPod touch; CPU iPhone OS 13_2_1 like Mac OS X) AppleWebKit/604.5.6 (KHTML, like Gecko) FxiOS/111.0 Mobile/15E148 Safari/605.1.15",
+            "z-api-token": "0B039DE5C908EDAF88346CED"
+          },
+          {
+            "content-length": "209",
+            "host": "185.245.182.69:3000",
+            "content-type": "application/json",
+            "origin": "https://api.z-api.io",
+            "server": "Z-API",
+            "user-agent": "Mozilla/5.0 (Linux; Android 10; LM-Q720) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.5563.115 Mobile Safari/537.36",
+            "z-api-token": "0B039DE5C908EDAF88346CED"
+          },
+          {
+            "content-length": "209",
+            "host": "185.245.182.69:3000",
+            "content-type": "application/json",
+            "origin": "https://api.z-api.io",
+            "server": "Z-API",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
+            "z-api-token": "0B039DE5C908EDAF88346CED"
+          }
+        ],
+        "children": {
+          "content-length": {
+            "path": "headers.content-length",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "259",
+              "236",
+              "210",
+              "232",
+              "209"
+            ]
+          },
+          "host": {
+            "path": "headers.host",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "185.245.182.69:3000"
+            ]
+          },
+          "content-type": {
+            "path": "headers.content-type",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "application/json"
+            ]
+          },
+          "origin": {
+            "path": "headers.origin",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "https://api.z-api.io"
+            ]
+          },
+          "server": {
+            "path": "headers.server",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "Z-API"
+            ]
+          },
+          "user-agent": {
+            "path": "headers.user-agent",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_2_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
+              "Mozilla/5.0 (iPod touch; CPU iPhone 16_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.4 Mobile/15E148 Safari/604.1",
+              "Mozilla/5.0 (iPod touch; CPU iPhone OS 13_2_1 like Mac OS X) AppleWebKit/604.5.6 (KHTML, like Gecko) FxiOS/111.0 Mobile/15E148 Safari/605.1.15",
+              "Mozilla/5.0 (Linux; Android 10; LM-Q720) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.5563.115 Mobile Safari/537.36",
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36"
+            ]
+          },
+          "z-api-token": {
+            "path": "headers.z-api-token",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "0B039DE5C908EDAF88346CED"
+            ]
+          }
+        }
+      },
+      "body": {
+        "path": "body",
+        "type": "object",
+        "optional": false,
+        "examples": [
+          {
+            "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+            "status": "READ",
+            "ids": [
+              "3EB085AA16ACD45E7ED1D7"
+            ],
+            "momment": 1757389348000,
+            "phoneDevice": 86,
+            "phone": "5516991984761",
+            "type": "MessageStatusCallback",
+            "isGroup": false
+          },
+          {
+            "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+            "status": "READ",
+            "ids": [
+              "3A6EA72812E122CE6F9B",
+              "3EB0E5DE6C0BE379837C4B"
+            ],
+            "momment": 1757389847000,
+            "phoneDevice": 0,
+            "phone": "5521979232690",
+            "type": "MessageStatusCallback",
+            "isGroup": false
+          },
+          {
+            "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+            "status": "READ",
+            "ids": [
+              "3EB066B4A2AAFBE19553E2"
+            ],
+            "momment": 1757389849000,
+            "phoneDevice": 0,
+            "phone": "5521979232690",
+            "type": "MessageStatusCallback",
+            "isGroup": false
+          },
+          {
+            "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+            "status": "READ",
+            "ids": [
+              "3EB01CFB38263CC7AC8FC8"
+            ],
+            "momment": 1757390034000,
+            "phoneDevice": 0,
+            "phone": "5521979232690",
+            "type": "MessageStatusCallback",
+            "isGroup": false
+          },
+          {
+            "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+            "status": "READ",
+            "ids": [
+              "3EB046950C6A8B8388327C"
+            ],
+            "momment": 1757390223000,
+            "phoneDevice": 0,
+            "phone": "5521979232690",
+            "type": "MessageStatusCallback",
+            "isGroup": false
+          }
+        ],
+        "children": {
+          "instanceId": {
+            "path": "body.instanceId",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "3E6D06A438D501A5CD70265FDA264287"
+            ]
+          },
+          "status": {
+            "path": "body.status",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "READ"
+            ]
+          },
+          "ids": {
+            "path": "body.ids",
+            "type": "array",
+            "optional": false,
+            "examples": [
+              [
+                "3EB085AA16ACD45E7ED1D7"
+              ],
+              [
+                "3A6EA72812E122CE6F9B",
+                "3EB0E5DE6C0BE379837C4B"
+              ],
+              [
+                "3EB066B4A2AAFBE19553E2"
+              ],
+              [
+                "3EB01CFB38263CC7AC8FC8"
+              ],
+              [
+                "3EB046950C6A8B8388327C"
+              ]
+            ],
+            "arrayItemType": {
+              "path": "body.ids[0]",
+              "type": "string",
+              "optional": false,
+              "examples": [
+                "3EB085AA16ACD45E7ED1D7",
+                "3A6EA72812E122CE6F9B",
+                "3EB066B4A2AAFBE19553E2",
+                "3EB01CFB38263CC7AC8FC8",
+                "3EB046950C6A8B8388327C"
+              ]
+            }
+          },
+          "momment": {
+            "path": "body.momment",
+            "type": "number",
+            "optional": false,
+            "examples": [
+              1757389348000,
+              1757389847000,
+              1757389849000,
+              1757390034000,
+              1757390223000
+            ]
+          },
+          "phoneDevice": {
+            "path": "body.phoneDevice",
+            "type": "number",
+            "optional": false,
+            "examples": [
+              82,
+              33,
+              34,
+              0,
+              86
+            ]
+          },
+          "phone": {
+            "path": "body.phone",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "195601601937433@lid",
+              "558586856817",
+              "5511958411806",
+              "5516991984761",
+              "5521979232690"
+            ]
+          },
+          "type": {
+            "path": "body.type",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "MessageStatusCallback"
+            ]
+          },
+          "isGroup": {
+            "path": "body.isGroup",
+            "type": "boolean",
+            "optional": false,
+            "examples": [
+              false
+            ]
+          },
+          "participant": {
+            "path": "body.participant",
+            "type": "string",
+            "optional": true,
+            "examples": [
+              "5527988419249"
+            ]
+          },
+          "participantDevice": {
+            "path": "body.participantDevice",
+            "type": "number",
+            "optional": true,
+            "examples": [
+              60
+            ]
+          }
+        }
+      }
+    }
+  }
+}

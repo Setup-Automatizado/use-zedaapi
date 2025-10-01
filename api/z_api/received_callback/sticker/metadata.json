@@ -1,0 +1,943 @@
+{
+  "eventType": "z_api/received_callback/sticker",
+  "firstSeen": "2025-09-06T07:55:59.311Z",
+  "lastSeen": "2025-09-09T01:00:19.171Z",
+  "totalReceived": 68,
+  "schemaVersion": 68,
+  "lastModified": "2025-09-09T01:00:19.145Z",
+  "fields": {
+    "required": [
+      "headers",
+      "headers.connection",
+      "headers.content-length",
+      "headers.host",
+      "headers.http2-settings",
+      "headers.upgrade",
+      "headers.content-type",
+      "headers.origin",
+      "headers.server",
+      "headers.user-agent",
+      "headers.z-api-token",
+      "body",
+      "body.isStatusReply",
+      "body.chatLid",
+      "body.connectedPhone",
+      "body.waitingMessage",
+      "body.isEdit",
+      "body.isGroup",
+      "body.isNewsletter",
+      "body.instanceId",
+      "body.messageId",
+      "body.phone",
+      "body.fromMe",
+      "body.momment",
+      "body.status",
+      "body.chatName",
+      "body.senderPhoto",
+      "body.senderName",
+      "body.photo",
+      "body.broadcast",
+      "body.participantLid",
+      "body.forwarded",
+      "body.type",
+      "body.fromApi",
+      "body.sticker",
+      "body.sticker.stickerUrl",
+      "body.sticker.mimeType",
+      "body.sticker.width",
+      "body.sticker.height"
+    ],
+    "optional": [
+      "body.participantPhone",
+      "body.referenceMessageId",
+      "body.messageExpirationSeconds"
+    ],
+    "truncated": []
+  },
+  "variations": [],
+  "savedStructure": {
+    "path": "",
+    "type": "object",
+    "optional": false,
+    "examples": [
+      {
+        "headers": {
+          "connection": "Upgrade, HTTP2-Settings",
+          "content-length": "1182",
+          "host": "185.245.182.69:3000",
+          "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+          "upgrade": "h2c",
+          "content-type": "application/json",
+          "origin": "https://api.z-api.io",
+          "server": "Z-API",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.54",
+          "z-api-token": "0B039DE5C908EDAF88346CED"
+        },
+        "body": {
+          "isStatusReply": false,
+          "chatLid": null,
+          "connectedPhone": "5521971532700",
+          "waitingMessage": false,
+          "isEdit": false,
+          "isGroup": true,
+          "isNewsletter": false,
+          "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+          "messageId": "3A807AD0D9E6B1799F7B",
+          "phone": "120363344102839767-group",
+          "fromMe": false,
+          "momment": 1757362733000,
+          "status": "RECEIVED",
+          "chatName": "Comunidade CRM Datacrazy ",
+          "senderPhoto": "https://pps.whatsapp.net/v/t61.24694-24/491868284_778192574659484_4878267666787344782_n.jpg?ccb=11-4&oh=01_Q5Aa2gGVIj0epI-ey9cGRY2LkY4U6tCO4VdLfCpEhv8BJzwoEA&oe=68CC331D&_nc_sid=5e03e0&_nc_cat=101",
+          "senderName": "Alberto Lopes",
+          "photo": "https://pps.whatsapp.net/v/t61.24694-24/454156097_885639966519790_2671236638018813045_n.jpg?ccb=11-4&oh=01_Q5Aa2gFRSxl7BfiS10aMRcdtRHzj96P88y45OZHT8VA7ydMqMw&oe=68CC5DE5&_nc_sid=5e03e0&_nc_cat=100",
+          "broadcast": false,
+          "participantPhone": "5521975939307",
+          "participantLid": "81862210900022@lid",
+          "forwarded": false,
+          "type": "ReceivedCallback",
+          "fromApi": false,
+          "sticker": {
+            "stickerUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/3A807AD0D9E6B1799F7B/UVbB1IJQypFR75Xdr7G_xA==.webp",
+            "mimeType": "image/webp",
+            "width": 64,
+            "height": 64
+          }
+        }
+      },
+      {
+        "headers": {
+          "connection": "Upgrade, HTTP2-Settings",
+          "content-length": "1200",
+          "host": "185.245.182.69:3000",
+          "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+          "upgrade": "h2c",
+          "content-type": "application/json",
+          "origin": "https://api.z-api.io",
+          "server": "Z-API",
+          "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_2_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.4 Safari/605.1.15",
+          "z-api-token": "0B039DE5C908EDAF88346CED"
+        },
+        "body": {
+          "isStatusReply": false,
+          "chatLid": null,
+          "connectedPhone": "5521971532700",
+          "waitingMessage": false,
+          "isEdit": false,
+          "isGroup": true,
+          "isNewsletter": false,
+          "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+          "messageId": "A59632703E158901CC63C9E5BB45760B",
+          "phone": "120363420363903724-group",
+          "fromMe": false,
+          "momment": 1757364478001,
+          "status": "RECEIVED",
+          "chatName": "Stack HubChat",
+          "senderPhoto": "https://pps.whatsapp.net/v/t61.24694-24/511297451_2233959647061765_449979674637726001_n.jpg?ccb=11-4&oh=01_Q5Aa2gHGejqTesFPyRrPGR1tZhAdXDBe-cyOOQEwgbJbfIRBhw&oe=68CC4E8A&_nc_sid=5e03e0&_nc_cat=101",
+          "senderName": "Figcode Automações",
+          "photo": "https://pps.whatsapp.net/v/t61.24694-24/515945320_626017897247749_1635816934945690393_n.jpg?ccb=11-4&oh=01_Q5Aa2gHcgivGH6icXdGvCiwyqv9WTMb8Vewlr4BOs2eVuX31ww&oe=68CC62B0&_nc_sid=5e03e0&_nc_cat=105",
+          "broadcast": false,
+          "participantPhone": "558182180172",
+          "participantLid": "15015826424048@lid",
+          "forwarded": false,
+          "type": "ReceivedCallback",
+          "fromApi": false,
+          "sticker": {
+            "stickerUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/A59632703E158901CC63C9E5BB45760B/JefGefZtVpM2io48GcCRmw==.webp",
+            "mimeType": "image/webp",
+            "width": 64,
+            "height": 64
+          }
+        }
+      },
+      {
+        "headers": {
+          "connection": "Upgrade, HTTP2-Settings",
+          "content-length": "1017",
+          "host": "185.245.182.69:3000",
+          "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+          "upgrade": "h2c",
+          "content-type": "application/json",
+          "origin": "https://api.z-api.io",
+          "server": "Z-API",
+          "user-agent": "Mozilla/5.0 (iPod touch; CPU iPhone OS 13_2_1 like Mac OS X) AppleWebKit/604.5.6 (KHTML, like Gecko) FxiOS/111.0 Mobile/15E148 Safari/605.1.15",
+          "z-api-token": "0B039DE5C908EDAF88346CED"
+        },
+        "body": {
+          "isStatusReply": false,
+          "chatLid": null,
+          "connectedPhone": "5521971532700",
+          "waitingMessage": false,
+          "isEdit": false,
+          "isGroup": true,
+          "isNewsletter": false,
+          "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+          "messageId": "3EB027944E8491D6C2A770",
+          "phone": "120363184418041173-group",
+          "fromMe": false,
+          "momment": 1757367592004,
+          "status": "RECEIVED",
+          "chatName": "SANDECO - PROMPTS e GPT's",
+          "senderPhoto": null,
+          "senderName": "Jorge Ferla",
+          "photo": "https://pps.whatsapp.net/v/t61.24694-24/402320794_305083792351594_1714692644671203440_n.jpg?ccb=11-4&oh=01_Q5Aa2gHmBxqOlahBFUpbtOskmeb-O-hpuXp6vzfJwXZ152T-1Q&oe=68CC4CCF&_nc_sid=5e03e0&_nc_cat=108",
+          "broadcast": false,
+          "participantPhone": "447394180811",
+          "participantLid": "198775415038028@lid",
+          "messageExpirationSeconds": 0,
+          "forwarded": false,
+          "type": "ReceivedCallback",
+          "fromApi": false,
+          "sticker": {
+            "stickerUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/3EB027944E8491D6C2A770/5lhNFs5t0yAkKnO9_yeutg==.webp",
+            "mimeType": "image/webp",
+            "width": 0,
+            "height": 0
+          }
+        }
+      },
+      {
+        "headers": {
+          "connection": "Upgrade, HTTP2-Settings",
+          "content-length": "999",
+          "host": "185.245.182.69:3000",
+          "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+          "upgrade": "h2c",
+          "content-type": "application/json",
+          "origin": "https://api.z-api.io",
+          "server": "Z-API",
+          "user-agent": "Mozilla/5.0 (iPad; CPU OS 16_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.4 Mobile/15E148 Safari/604.1",
+          "z-api-token": "0B039DE5C908EDAF88346CED"
+        },
+        "body": {
+          "isStatusReply": false,
+          "chatLid": null,
+          "connectedPhone": "5521971532700",
+          "waitingMessage": false,
+          "isEdit": false,
+          "isGroup": true,
+          "isNewsletter": false,
+          "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+          "messageId": "3EB0FC7BF44DCC074D75EB",
+          "phone": "120363044337316307-group",
+          "fromMe": false,
+          "momment": 1757367635000,
+          "status": "RECEIVED",
+          "chatName": "SANDECO",
+          "senderPhoto": null,
+          "senderName": "Jorge Ferla",
+          "photo": "https://pps.whatsapp.net/v/t61.24694-24/168843768_542542257625967_8841680466020536427_n.jpg?ccb=11-4&oh=01_Q5Aa2gE86-ENdCau1xrFly4m8lBKrua5KQg9gKr-Wz-bUyoVZg&oe=68CC4850&_nc_sid=5e03e0&_nc_cat=106",
+          "broadcast": false,
+          "participantPhone": "447394180811",
+          "participantLid": "198775415038028@lid",
+          "messageExpirationSeconds": 0,
+          "forwarded": false,
+          "type": "ReceivedCallback",
+          "fromApi": false,
+          "sticker": {
+            "stickerUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/3EB0FC7BF44DCC074D75EB/5lhNFs5t0yAkKnO9_yeutg==.webp",
+            "mimeType": "image/webp",
+            "width": 0,
+            "height": 0
+          }
+        }
+      },
+      {
+        "headers": {
+          "connection": "Upgrade, HTTP2-Settings",
+          "content-length": "956",
+          "host": "185.245.182.69:3000",
+          "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+          "upgrade": "h2c",
+          "content-type": "application/json",
+          "origin": "https://api.z-api.io",
+          "server": "Z-API",
+          "user-agent": "Mozilla/5.0 (X11; Linux i686; rv:111.0) Gecko/20100101 Firefox/111.0",
+          "z-api-token": "0B039DE5C908EDAF88346CED"
+        },
+        "body": {
+          "isStatusReply": false,
+          "chatLid": "195601601937433@lid",
+          "connectedPhone": "5521971532700",
+          "waitingMessage": false,
+          "isEdit": false,
+          "isGroup": false,
+          "isNewsletter": false,
+          "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+          "messageId": "3A6D45AB337A9F541124",
+          "phone": "5521981796084",
+          "fromMe": false,
+          "momment": 1757379612000,
+          "status": "RECEIVED",
+          "chatName": "Mamãe",
+          "senderPhoto": null,
+          "senderName": "Daniele 🌻",
+          "photo": "https://pps.whatsapp.net/v/t61.24694-24/467655716_1780841726044540_5891065729776907930_n.jpg?ccb=11-4&oh=01_Q5Aa2gE1M_hkR9Zg3fDjGhZkJRc6FflijDOGO0pB52Gf1GYc_A&oe=68CC89F3&_nc_sid=5e03e0&_nc_cat=109",
+          "broadcast": false,
+          "participantLid": null,
+          "messageExpirationSeconds": 0,
+          "forwarded": false,
+          "type": "ReceivedCallback",
+          "fromApi": false,
+          "sticker": {
+            "stickerUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/3A6D45AB337A9F541124/WoczTgT4uFUH9jCFi9vG0A==.webp",
+            "mimeType": "image/webp",
+            "width": 512,
+            "height": 512
+          }
+        }
+      }
+    ],
+    "children": {
+      "headers": {
+        "path": "headers",
+        "type": "object",
+        "optional": false,
+        "examples": [
+          {
+            "connection": "Upgrade, HTTP2-Settings",
+            "content-length": "1182",
+            "host": "185.245.182.69:3000",
+            "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+            "upgrade": "h2c",
+            "content-type": "application/json",
+            "origin": "https://api.z-api.io",
+            "server": "Z-API",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.54",
+            "z-api-token": "0B039DE5C908EDAF88346CED"
+          },
+          {
+            "connection": "Upgrade, HTTP2-Settings",
+            "content-length": "1200",
+            "host": "185.245.182.69:3000",
+            "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+            "upgrade": "h2c",
+            "content-type": "application/json",
+            "origin": "https://api.z-api.io",
+            "server": "Z-API",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_2_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.4 Safari/605.1.15",
+            "z-api-token": "0B039DE5C908EDAF88346CED"
+          },
+          {
+            "connection": "Upgrade, HTTP2-Settings",
+            "content-length": "1017",
+            "host": "185.245.182.69:3000",
+            "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+            "upgrade": "h2c",
+            "content-type": "application/json",
+            "origin": "https://api.z-api.io",
+            "server": "Z-API",
+            "user-agent": "Mozilla/5.0 (iPod touch; CPU iPhone OS 13_2_1 like Mac OS X) AppleWebKit/604.5.6 (KHTML, like Gecko) FxiOS/111.0 Mobile/15E148 Safari/605.1.15",
+            "z-api-token": "0B039DE5C908EDAF88346CED"
+          },
+          {
+            "connection": "Upgrade, HTTP2-Settings",
+            "content-length": "999",
+            "host": "185.245.182.69:3000",
+            "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+            "upgrade": "h2c",
+            "content-type": "application/json",
+            "origin": "https://api.z-api.io",
+            "server": "Z-API",
+            "user-agent": "Mozilla/5.0 (iPad; CPU OS 16_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.4 Mobile/15E148 Safari/604.1",
+            "z-api-token": "0B039DE5C908EDAF88346CED"
+          },
+          {
+            "connection": "Upgrade, HTTP2-Settings",
+            "content-length": "956",
+            "host": "185.245.182.69:3000",
+            "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+            "upgrade": "h2c",
+            "content-type": "application/json",
+            "origin": "https://api.z-api.io",
+            "server": "Z-API",
+            "user-agent": "Mozilla/5.0 (X11; Linux i686; rv:111.0) Gecko/20100101 Firefox/111.0",
+            "z-api-token": "0B039DE5C908EDAF88346CED"
+          }
+        ],
+        "children": {
+          "connection": {
+            "path": "headers.connection",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "Upgrade, HTTP2-Settings"
+            ]
+          },
+          "content-length": {
+            "path": "headers.content-length",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "1182",
+              "1200",
+              "1017",
+              "999",
+              "956"
+            ]
+          },
+          "host": {
+            "path": "headers.host",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "185.245.182.69:3000"
+            ]
+          },
+          "http2-settings": {
+            "path": "headers.http2-settings",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA"
+            ]
+          },
+          "upgrade": {
+            "path": "headers.upgrade",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "h2c"
+            ]
+          },
+          "content-type": {
+            "path": "headers.content-type",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "application/json"
+            ]
+          },
+          "origin": {
+            "path": "headers.origin",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "https://api.z-api.io"
+            ]
+          },
+          "server": {
+            "path": "headers.server",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "Z-API"
+            ]
+          },
+          "user-agent": {
+            "path": "headers.user-agent",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
+              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.54",
+              "Mozilla/5.0 (iPod touch; CPU iPhone OS 13_2_1 like Mac OS X) AppleWebKit/604.5.6 (KHTML, like Gecko) FxiOS/111.0 Mobile/15E148 Safari/605.1.15",
+              "Mozilla/5.0 (iPad; CPU OS 16_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.4 Mobile/15E148 Safari/604.1",
+              "Mozilla/5.0 (X11; Linux i686; rv:111.0) Gecko/20100101 Firefox/111.0"
+            ]
+          },
+          "z-api-token": {
+            "path": "headers.z-api-token",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "0B039DE5C908EDAF88346CED"
+            ]
+          }
+        }
+      },
+      "body": {
+        "path": "body",
+        "type": "object",
+        "optional": false,
+        "examples": [
+          {
+            "isStatusReply": false,
+            "chatLid": null,
+            "connectedPhone": "5521971532700",
+            "waitingMessage": false,
+            "isEdit": false,
+            "isGroup": true,
+            "isNewsletter": false,
+            "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+            "messageId": "3A807AD0D9E6B1799F7B",
+            "phone": "120363344102839767-group",
+            "fromMe": false,
+            "momment": 1757362733000,
+            "status": "RECEIVED",
+            "chatName": "Comunidade CRM Datacrazy ",
+            "senderPhoto": "https://pps.whatsapp.net/v/t61.24694-24/491868284_778192574659484_4878267666787344782_n.jpg?ccb=11-4&oh=01_Q5Aa2gGVIj0epI-ey9cGRY2LkY4U6tCO4VdLfCpEhv8BJzwoEA&oe=68CC331D&_nc_sid=5e03e0&_nc_cat=101",
+            "senderName": "Alberto Lopes",
+            "photo": "https://pps.whatsapp.net/v/t61.24694-24/454156097_885639966519790_2671236638018813045_n.jpg?ccb=11-4&oh=01_Q5Aa2gFRSxl7BfiS10aMRcdtRHzj96P88y45OZHT8VA7ydMqMw&oe=68CC5DE5&_nc_sid=5e03e0&_nc_cat=100",
+            "broadcast": false,
+            "participantPhone": "5521975939307",
+            "participantLid": "81862210900022@lid",
+            "forwarded": false,
+            "type": "ReceivedCallback",
+            "fromApi": false,
+            "sticker": {
+              "stickerUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/3A807AD0D9E6B1799F7B/UVbB1IJQypFR75Xdr7G_xA==.webp",
+              "mimeType": "image/webp",
+              "width": 64,
+              "height": 64
+            }
+          },
+          {
+            "isStatusReply": false,
+            "chatLid": null,
+            "connectedPhone": "5521971532700",
+            "waitingMessage": false,
+            "isEdit": false,
+            "isGroup": true,
+            "isNewsletter": false,
+            "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+            "messageId": "A59632703E158901CC63C9E5BB45760B",
+            "phone": "120363420363903724-group",
+            "fromMe": false,
+            "momment": 1757364478001,
+            "status": "RECEIVED",
+            "chatName": "Stack HubChat",
+            "senderPhoto": "https://pps.whatsapp.net/v/t61.24694-24/511297451_2233959647061765_449979674637726001_n.jpg?ccb=11-4&oh=01_Q5Aa2gHGejqTesFPyRrPGR1tZhAdXDBe-cyOOQEwgbJbfIRBhw&oe=68CC4E8A&_nc_sid=5e03e0&_nc_cat=101",
+            "senderName": "Figcode Automações",
+            "photo": "https://pps.whatsapp.net/v/t61.24694-24/515945320_626017897247749_1635816934945690393_n.jpg?ccb=11-4&oh=01_Q5Aa2gHcgivGH6icXdGvCiwyqv9WTMb8Vewlr4BOs2eVuX31ww&oe=68CC62B0&_nc_sid=5e03e0&_nc_cat=105",
+            "broadcast": false,
+            "participantPhone": "558182180172",
+            "participantLid": "15015826424048@lid",
+            "forwarded": false,
+            "type": "ReceivedCallback",
+            "fromApi": false,
+            "sticker": {
+              "stickerUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/A59632703E158901CC63C9E5BB45760B/JefGefZtVpM2io48GcCRmw==.webp",
+              "mimeType": "image/webp",
+              "width": 64,
+              "height": 64
+            }
+          },
+          {
+            "isStatusReply": false,
+            "chatLid": null,
+            "connectedPhone": "5521971532700",
+            "waitingMessage": false,
+            "isEdit": false,
+            "isGroup": true,
+            "isNewsletter": false,
+            "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+            "messageId": "3EB027944E8491D6C2A770",
+            "phone": "120363184418041173-group",
+            "fromMe": false,
+            "momment": 1757367592004,
+            "status": "RECEIVED",
+            "chatName": "SANDECO - PROMPTS e GPT's",
+            "senderPhoto": null,
+            "senderName": "Jorge Ferla",
+            "photo": "https://pps.whatsapp.net/v/t61.24694-24/402320794_305083792351594_1714692644671203440_n.jpg?ccb=11-4&oh=01_Q5Aa2gHmBxqOlahBFUpbtOskmeb-O-hpuXp6vzfJwXZ152T-1Q&oe=68CC4CCF&_nc_sid=5e03e0&_nc_cat=108",
+            "broadcast": false,
+            "participantPhone": "447394180811",
+            "participantLid": "198775415038028@lid",
+            "messageExpirationSeconds": 0,
+            "forwarded": false,
+            "type": "ReceivedCallback",
+            "fromApi": false,
+            "sticker": {
+              "stickerUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/3EB027944E8491D6C2A770/5lhNFs5t0yAkKnO9_yeutg==.webp",
+              "mimeType": "image/webp",
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "isStatusReply": false,
+            "chatLid": null,
+            "connectedPhone": "5521971532700",
+            "waitingMessage": false,
+            "isEdit": false,
+            "isGroup": true,
+            "isNewsletter": false,
+            "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+            "messageId": "3EB0FC7BF44DCC074D75EB",
+            "phone": "120363044337316307-group",
+            "fromMe": false,
+            "momment": 1757367635000,
+            "status": "RECEIVED",
+            "chatName": "SANDECO",
+            "senderPhoto": null,
+            "senderName": "Jorge Ferla",
+            "photo": "https://pps.whatsapp.net/v/t61.24694-24/168843768_542542257625967_8841680466020536427_n.jpg?ccb=11-4&oh=01_Q5Aa2gE86-ENdCau1xrFly4m8lBKrua5KQg9gKr-Wz-bUyoVZg&oe=68CC4850&_nc_sid=5e03e0&_nc_cat=106",
+            "broadcast": false,
+            "participantPhone": "447394180811",
+            "participantLid": "198775415038028@lid",
+            "messageExpirationSeconds": 0,
+            "forwarded": false,
+            "type": "ReceivedCallback",
+            "fromApi": false,
+            "sticker": {
+              "stickerUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/3EB0FC7BF44DCC074D75EB/5lhNFs5t0yAkKnO9_yeutg==.webp",
+              "mimeType": "image/webp",
+              "width": 0,
+              "height": 0
+            }
+          },
+          {
+            "isStatusReply": false,
+            "chatLid": "195601601937433@lid",
+            "connectedPhone": "5521971532700",
+            "waitingMessage": false,
+            "isEdit": false,
+            "isGroup": false,
+            "isNewsletter": false,
+            "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+            "messageId": "3A6D45AB337A9F541124",
+            "phone": "5521981796084",
+            "fromMe": false,
+            "momment": 1757379612000,
+            "status": "RECEIVED",
+            "chatName": "Mamãe",
+            "senderPhoto": null,
+            "senderName": "Daniele 🌻",
+            "photo": "https://pps.whatsapp.net/v/t61.24694-24/467655716_1780841726044540_5891065729776907930_n.jpg?ccb=11-4&oh=01_Q5Aa2gE1M_hkR9Zg3fDjGhZkJRc6FflijDOGO0pB52Gf1GYc_A&oe=68CC89F3&_nc_sid=5e03e0&_nc_cat=109",
+            "broadcast": false,
+            "participantLid": null,
+            "messageExpirationSeconds": 0,
+            "forwarded": false,
+            "type": "ReceivedCallback",
+            "fromApi": false,
+            "sticker": {
+              "stickerUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/3A6D45AB337A9F541124/WoczTgT4uFUH9jCFi9vG0A==.webp",
+              "mimeType": "image/webp",
+              "width": 512,
+              "height": 512
+            }
+          }
+        ],
+        "children": {
+          "isStatusReply": {
+            "path": "body.isStatusReply",
+            "type": "boolean",
+            "optional": false,
+            "examples": [
+              false
+            ]
+          },
+          "chatLid": {
+            "path": "body.chatLid",
+            "type": "union",
+            "optional": false,
+            "examples": [
+              "140712372899859@lid",
+              null,
+              "195601601937433@lid",
+              "208151781625986@lid"
+            ]
+          },
+          "connectedPhone": {
+            "path": "body.connectedPhone",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "5521971532700"
+            ]
+          },
+          "waitingMessage": {
+            "path": "body.waitingMessage",
+            "type": "boolean",
+            "optional": false,
+            "examples": [
+              false
+            ]
+          },
+          "isEdit": {
+            "path": "body.isEdit",
+            "type": "boolean",
+            "optional": false,
+            "examples": [
+              false
+            ]
+          },
+          "isGroup": {
+            "path": "body.isGroup",
+            "type": "boolean",
+            "optional": false,
+            "examples": [
+              false,
+              true
+            ]
+          },
+          "isNewsletter": {
+            "path": "body.isNewsletter",
+            "type": "boolean",
+            "optional": false,
+            "examples": [
+              false,
+              true
+            ]
+          },
+          "instanceId": {
+            "path": "body.instanceId",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "3E6D06A438D501A5CD70265FDA264287"
+            ]
+          },
+          "messageId": {
+            "path": "body.messageId",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "3A807AD0D9E6B1799F7B",
+              "A59632703E158901CC63C9E5BB45760B",
+              "3EB027944E8491D6C2A770",
+              "3EB0FC7BF44DCC074D75EB",
+              "3A6D45AB337A9F541124"
+            ]
+          },
+          "phone": {
+            "path": "body.phone",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "120363387789538925-group",
+              "120363420363903724-group",
+              "120363184418041173-group",
+              "120363044337316307-group",
+              "5521981796084"
+            ]
+          },
+          "fromMe": {
+            "path": "body.fromMe",
+            "type": "boolean",
+            "optional": false,
+            "examples": [
+              false,
+              true
+            ]
+          },
+          "momment": {
+            "path": "body.momment",
+            "type": "number",
+            "optional": false,
+            "examples": [
+              1757362733000,
+              1757364478001,
+              1757367592004,
+              1757367635000,
+              1757379612000
+            ]
+          },
+          "status": {
+            "path": "body.status",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "RECEIVED"
+            ]
+          },
+          "chatName": {
+            "path": "body.chatName",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "Cavaleiros/Damas) 👑 Comunidade DinastIA - Agentes de IA",
+              "Stack HubChat",
+              "SANDECO - PROMPTS e GPT's",
+              "SANDECO",
+              "Mamãe"
+            ]
+          },
+          "senderPhoto": {
+            "path": "body.senderPhoto",
+            "type": "union",
+            "optional": false,
+            "examples": [
+              "https://pps.whatsapp.net/v/t61.24694-24/324026639_804606201109974_7747392060360592349_n.jpg?ccb=11-4&oh=01_Q5Aa2gFVVSJoKv_909Ho16lSzG8XLppbRYeM1ghNqMFrY0Xb8Q&oe=68CC4A6B&_nc_sid=5e03e0&_nc_cat=100",
+              "https://pps.whatsapp.net/v/t61.24694-24/473407070_1352364839240987_3551208525985730321_n.jpg?ccb=11-4&oh=01_Q5Aa2gHlpp3EmUmkE3fvwHcVY3uYH7ICXvUQXnMFNocsP8Oapw&oe=68CC38C5&_nc_sid=5e03e0&_nc_cat=103",
+              "https://pps.whatsapp.net/v/t61.24694-24/491868284_778192574659484_4878267666787344782_n.jpg?ccb=11-4&oh=01_Q5Aa2gGVIj0epI-ey9cGRY2LkY4U6tCO4VdLfCpEhv8BJzwoEA&oe=68CC331D&_nc_sid=5e03e0&_nc_cat=101",
+              null,
+              "https://pps.whatsapp.net/v/t61.24694-24/511297451_2233959647061765_449979674637726001_n.jpg?ccb=11-4&oh=01_Q5Aa2gHGejqTesFPyRrPGR1tZhAdXDBe-cyOOQEwgbJbfIRBhw&oe=68CC4E8A&_nc_sid=5e03e0&_nc_cat=101"
+            ]
+          },
+          "senderName": {
+            "path": "body.senderName",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "Alberto Lopes",
+              "Tesla - H",
+              "Figcode Automações",
+              "Jorge Ferla",
+              "Daniele 🌻"
+            ]
+          },
+          "photo": {
+            "path": "body.photo",
+            "type": "union",
+            "optional": false,
+            "examples": [
+              "https://pps.whatsapp.net/v/t61.24694-24/454156097_885639966519790_2671236638018813045_n.jpg?ccb=11-4&oh=01_Q5Aa2gFRSxl7BfiS10aMRcdtRHzj96P88y45OZHT8VA7ydMqMw&oe=68CC5DE5&_nc_sid=5e03e0&_nc_cat=100",
+              "https://pps.whatsapp.net/v/t61.24694-24/515945320_626017897247749_1635816934945690393_n.jpg?ccb=11-4&oh=01_Q5Aa2gHcgivGH6icXdGvCiwyqv9WTMb8Vewlr4BOs2eVuX31ww&oe=68CC62B0&_nc_sid=5e03e0&_nc_cat=105",
+              "https://pps.whatsapp.net/v/t61.24694-24/402320794_305083792351594_1714692644671203440_n.jpg?ccb=11-4&oh=01_Q5Aa2gHmBxqOlahBFUpbtOskmeb-O-hpuXp6vzfJwXZ152T-1Q&oe=68CC4CCF&_nc_sid=5e03e0&_nc_cat=108",
+              "https://pps.whatsapp.net/v/t61.24694-24/168843768_542542257625967_8841680466020536427_n.jpg?ccb=11-4&oh=01_Q5Aa2gE86-ENdCau1xrFly4m8lBKrua5KQg9gKr-Wz-bUyoVZg&oe=68CC4850&_nc_sid=5e03e0&_nc_cat=106",
+              "https://pps.whatsapp.net/v/t61.24694-24/467655716_1780841726044540_5891065729776907930_n.jpg?ccb=11-4&oh=01_Q5Aa2gE1M_hkR9Zg3fDjGhZkJRc6FflijDOGO0pB52Gf1GYc_A&oe=68CC89F3&_nc_sid=5e03e0&_nc_cat=109"
+            ]
+          },
+          "broadcast": {
+            "path": "body.broadcast",
+            "type": "boolean",
+            "optional": false,
+            "examples": [
+              false
+            ]
+          },
+          "participantLid": {
+            "path": "body.participantLid",
+            "type": "union",
+            "optional": false,
+            "examples": [
+              "14925078507617@lid",
+              null,
+              "81862210900022@lid",
+              "15015826424048@lid",
+              "198775415038028@lid"
+            ]
+          },
+          "forwarded": {
+            "path": "body.forwarded",
+            "type": "boolean",
+            "optional": false,
+            "examples": [
+              false
+            ]
+          },
+          "type": {
+            "path": "body.type",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "ReceivedCallback"
+            ]
+          },
+          "fromApi": {
+            "path": "body.fromApi",
+            "type": "boolean",
+            "optional": false,
+            "examples": [
+              false
+            ]
+          },
+          "sticker": {
+            "path": "body.sticker",
+            "type": "object",
+            "optional": false,
+            "examples": [
+              {
+                "stickerUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/3A807AD0D9E6B1799F7B/UVbB1IJQypFR75Xdr7G_xA==.webp",
+                "mimeType": "image/webp",
+                "width": 64,
+                "height": 64
+              },
+              {
+                "stickerUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/A59632703E158901CC63C9E5BB45760B/JefGefZtVpM2io48GcCRmw==.webp",
+                "mimeType": "image/webp",
+                "width": 64,
+                "height": 64
+              },
+              {
+                "stickerUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/3EB027944E8491D6C2A770/5lhNFs5t0yAkKnO9_yeutg==.webp",
+                "mimeType": "image/webp",
+                "width": 0,
+                "height": 0
+              },
+              {
+                "stickerUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/3EB0FC7BF44DCC074D75EB/5lhNFs5t0yAkKnO9_yeutg==.webp",
+                "mimeType": "image/webp",
+                "width": 0,
+                "height": 0
+              },
+              {
+                "stickerUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/3A6D45AB337A9F541124/WoczTgT4uFUH9jCFi9vG0A==.webp",
+                "mimeType": "image/webp",
+                "width": 512,
+                "height": 512
+              }
+            ],
+            "children": {
+              "stickerUrl": {
+                "path": "body.sticker.stickerUrl",
+                "type": "string",
+                "optional": false,
+                "examples": [
+                  "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/3A807AD0D9E6B1799F7B/UVbB1IJQypFR75Xdr7G_xA==.webp",
+                  "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/A59632703E158901CC63C9E5BB45760B/JefGefZtVpM2io48GcCRmw==.webp",
+                  "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/3EB027944E8491D6C2A770/5lhNFs5t0yAkKnO9_yeutg==.webp",
+                  "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/3EB0FC7BF44DCC074D75EB/5lhNFs5t0yAkKnO9_yeutg==.webp",
+                  "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/3A6D45AB337A9F541124/WoczTgT4uFUH9jCFi9vG0A==.webp"
+                ]
+              },
+              "mimeType": {
+                "path": "body.sticker.mimeType",
+                "type": "string",
+                "optional": false,
+                "examples": [
+                  "image/webp"
+                ]
+              },
+              "width": {
+                "path": "body.sticker.width",
+                "type": "number",
+                "optional": false,
+                "examples": [
+                  0,
+                  64,
+                  512
+                ]
+              },
+              "height": {
+                "path": "body.sticker.height",
+                "type": "number",
+                "optional": false,
+                "examples": [
+                  0,
+                  64,
+                  512
+                ]
+              }
+            }
+          },
+          "participantPhone": {
+            "path": "body.participantPhone",
+            "type": "string",
+            "optional": true,
+            "examples": [
+              "556792115056",
+              "5521975939307",
+              "556183372711",
+              "558182180172",
+              "447394180811"
+            ]
+          },
+          "referenceMessageId": {
+            "path": "body.referenceMessageId",
+            "type": "string",
+            "optional": true,
+            "examples": [
+              "ACFD37F721185BBE20409FBC90BA0428",
+              "3A8301EC9327B27B7202",
+              "3A49BEE267C8F95B4267",
+              "3AE607990C3282CC2358",
+              "3AC5201BD11CF0EDA197"
+            ]
+          },
+          "messageExpirationSeconds": {
+            "path": "body.messageExpirationSeconds",
+            "type": "number",
+            "optional": true,
+            "examples": [
+              0,
+              7776000
+            ]
+          }
+        }
+      }
+    }
+  }
+}

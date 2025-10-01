@@ -1,0 +1,50 @@
+{
+  "headers": {
+    "connection": "Upgrade, HTTP2-Settings",
+    "content-length": "1569",
+    "host": "185.245.182.69:3000",
+    "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+    "upgrade": "h2c",
+    "content-type": "application/json",
+    "origin": "https://api.z-api.io",
+    "server": "Z-API",
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.54",
+    "z-api-token": "0B039DE5C908EDAF88346CED"
+  },
+  "body": {
+    "isStatusReply": false,
+    "chatLid": null,
+    "connectedPhone": "5521971532700",
+    "waitingMessage": false,
+    "isEdit": false,
+    "isGroup": true,
+    "isNewsletter": false,
+    "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+    "messageId": "3AFE25F35C7CA320D107",
+    "phone": "120363356267865958-group",
+    "fromMe": false,
+    "momment": 1757371012000,
+    "status": "RECEIVED",
+    "chatName": "Kanban para Chatwoot 💬 StackLab",
+    "senderPhoto": "https://pps.whatsapp.net/v/t61.24694-24/462393870_469101828786869_2303063235782642194_n.jpg?ccb=11-4&oh=01_Q5Aa2gERisu7SnuZTZL8xN3Tojx2u8mUUMjYCAxbqvMDBgY1eg&oe=68CC5E65&_nc_sid=5e03e0&_nc_cat=100",
+    "senderName": "Magdiel Cardoso",
+    "photo": "https://pps.whatsapp.net/v/t61.24694-24/463731840_903067688596990_7625329384858879164_n.jpg?ccb=11-4&oh=01_Q5Aa2gHFasnYO9u6BO4feuIic78ENYUKZ9UwUbFtXZyUJ_rD6g&oe=68CC6045&_nc_sid=5e03e0&_nc_cat=106",
+    "broadcast": false,
+    "participantPhone": "5522992909628",
+    "participantLid": "175875001712764@lid",
+    "messageExpirationSeconds": 0,
+    "forwarded": false,
+    "type": "ReceivedCallback",
+    "fromApi": false,
+    "video": {
+      "videoUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/3AFE25F35C7CA320D107/k9apuvJvMonNmXf0mQqH-w==.mp4",
+      "caption": "*NOVIDADE* 🚨\n\nPostamos o detalhamento de tudo que vai vir de novo e corrigido nessa nova versão no nosso Roadmap Público! \n\nA versão 2.8.2 chega amanhã pra vocês e deixei antecipado pra vocês ficarem por dentro do que mudou! \n\n🚀 Acesse: https://info.stacklab.digital/releases",
+      "mimeType": "video/mp4",
+      "width": 832,
+      "height": 416,
+      "seconds": 17,
+      "viewOnce": false,
+      "isGif": false
+    }
+  }
+}

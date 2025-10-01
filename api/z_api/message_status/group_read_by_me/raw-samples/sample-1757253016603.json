@@ -1,0 +1,35 @@
+{
+  "headers": {
+    "content-length": "587",
+    "host": "185.245.182.69:3000",
+    "content-type": "application/json",
+    "origin": "https://api.z-api.io",
+    "server": "Z-API",
+    "user-agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:111.0) Gecko/20100101 Firefox/111.0",
+    "z-api-token": "0B039DE5C908EDAF88346CED"
+  },
+  "body": {
+    "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+    "status": "READ_BY_ME",
+    "ids": [
+      "AC8D68412ED0F3667A07E39215BF00C5",
+      "ACC2C4DC6F97DCC1B4E15911A28C21BB",
+      "AC63F63B492523EA652C0AD8D4203888",
+      "3F969C97CF8F35D61484",
+      "3FB5CF147566768F2853",
+      "3F02B2920431AD1DCCD6",
+      "3F7CF8B188B11769E3EC",
+      "3FA08763C5D0DBB919B3",
+      "AC7896F9F5D5927CB83047AB024AB470",
+      "AC8954AF84851F0B18EE87B7F289F323",
+      "ACFCAD0273D6A7BBF34C6809C70B2BC8",
+      "3F6D7DDC233A57334753"
+    ],
+    "momment": 1757252946000,
+    "participant": "227294266302623",
+    "participantDevice": 19,
+    "phone": "120363375520943587-group",
+    "type": "MessageStatusCallback",
+    "isGroup": true
+  }
+}

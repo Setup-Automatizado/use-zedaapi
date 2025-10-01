@@ -1,0 +1,47 @@
+{
+  "headers": {
+    "connection": "Upgrade, HTTP2-Settings",
+    "content-length": "1024",
+    "host": "185.245.182.69:3000",
+    "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+    "upgrade": "h2c",
+    "content-type": "application/json",
+    "origin": "https://api.z-api.io",
+    "server": "Z-API",
+    "user-agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:111.0) Gecko/20100101 Firefox/111.0",
+    "z-api-token": "0B039DE5C908EDAF88346CED"
+  },
+  "body": {
+    "isStatusReply": false,
+    "chatLid": null,
+    "connectedPhone": "5521971532700",
+    "waitingMessage": false,
+    "isEdit": false,
+    "isGroup": true,
+    "isNewsletter": false,
+    "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+    "messageId": "3A1DDCB858CF0C2CA29F",
+    "phone": "120363375520943587-group",
+    "fromMe": false,
+    "momment": 1757357294000,
+    "status": "RECEIVED",
+    "chatName": "BLACKS",
+    "senderPhoto": null,
+    "senderName": "Vladimir Rojas",
+    "photo": "https://pps.whatsapp.net/v/t61.24694-24/517984653_646991768421876_5605229991678574541_n.jpg?ccb=11-4&oh=01_Q5Aa2gGKOPkKfiIeTM4-cf620ilJ5jQ36NpUsLJ2JUKxThYUyQ&oe=68CC1B4F&_nc_sid=5e03e0&_nc_cat=105",
+    "broadcast": false,
+    "participantPhone": "556792115056",
+    "participantLid": null,
+    "referenceMessageId": "3A49BEE267C8F95B4267",
+    "messageExpirationSeconds": 0,
+    "forwarded": false,
+    "type": "ReceivedCallback",
+    "fromApi": false,
+    "sticker": {
+      "stickerUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/3A1DDCB858CF0C2CA29F/Sj1CYv6kBIYg7TmD63qLhA==.webp",
+      "mimeType": "image/webp",
+      "width": 0,
+      "height": 0
+    }
+  }
+}

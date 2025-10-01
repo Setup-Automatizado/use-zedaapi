@@ -1,0 +1,45 @@
+{
+  "headers": {
+    "connection": "Upgrade, HTTP2-Settings",
+    "content-length": "951",
+    "host": "185.245.182.69:3000",
+    "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+    "upgrade": "h2c",
+    "content-type": "application/json",
+    "origin": "https://api.z-api.io",
+    "server": "Z-API",
+    "user-agent": "Mozilla/5.0 (iPad; CPU OS 16_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.4 Mobile/15E148 Safari/604.1",
+    "z-api-token": "0B039DE5C908EDAF88346CED"
+  },
+  "body": {
+    "isStatusReply": false,
+    "chatLid": null,
+    "connectedPhone": "5521971532700",
+    "waitingMessage": false,
+    "isEdit": false,
+    "isGroup": true,
+    "isNewsletter": false,
+    "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+    "messageId": "3A6854B82663B59B4AB7",
+    "phone": "120363375520943587-group",
+    "fromMe": false,
+    "momment": 1757358642003,
+    "status": "RECEIVED",
+    "chatName": "BLACKS",
+    "senderPhoto": null,
+    "senderName": "Bruno Canguçu",
+    "photo": "https://pps.whatsapp.net/v/t61.24694-24/517984653_646991768421876_5605229991678574541_n.jpg?ccb=11-4&oh=01_Q5Aa2gE0zLkLE-XvJ5XedOS-GeOcnWXN7K2jaMLPGFB0RifEjQ&oe=68CC538F&_nc_sid=5e03e0&_nc_cat=105",
+    "broadcast": false,
+    "participantPhone": "557183328080",
+    "participantLid": null,
+    "forwarded": false,
+    "type": "ReceivedCallback",
+    "fromApi": false,
+    "sticker": {
+      "stickerUrl": "https://f004.backblazeb2.com/file/temp-file-download/instances/3E6D06A438D501A5CD70265FDA264287/3A6854B82663B59B4AB7/n7Mw3d5aQPIUgjH7IuuQPQ==.webp",
+      "mimeType": "image/webp",
+      "width": 0,
+      "height": 0
+    }
+  }
+}

@@ -1,0 +1,260 @@
+{
+  "truncated": [
+    {
+      "headers": {
+        "connection": "Upgrade, HTTP2-Settings",
+        "content-length": "994",
+        "host": "185.245.182.69:3000",
+        "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+        "upgrade": "h2c",
+        "content-type": "application/json",
+        "origin": "https://api.z-api.io",
+        "server": "Z-API",
+        "user-agent": "Mozilla/5.0 (X11; Fedora; Linux x86_64; rv:111.0) Gecko/20100101 Firefox/111.0",
+        "z-api-token": "0B039DE5C908EDAF88346CED"
+      },
+      "body": {
+        "isStatusReply": false,
+        "chatLid": null,
+        "connectedPhone": "5521971532700",
+        "waitingMessage": false,
+        "isEdit": false,
+        "isGroup": true,
+        "isNewsletter": false,
+        "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+        "messageId": "AC9DC4B5A928BDEAE44730C606E4C7F2",
+        "phone": "120363201770362490-group",
+        "fromMe": false,
+        "momment": 1757385792000,
+        "status": "RECEIVED",
+        "chatName": "Unoapi Cloud",
+        "senderPhoto": null,
+        "senderName": "Rodrigo Gonçalves Mengue",
+        "photo": "https://pps.whatsapp.net/v/t61.24694-24/470349360_1125790638939722_1530126709853358967_n.jpg?ccb=11-4&oh=01_Q5Aa2gHy95R3gx_HbNdHYbDtUacdSAU3VkXLSbkJ4bNI1hjTgg&oe=68CC90F2&_nc_sid=5e03e0&_nc_cat=102",
+        "broadcast": false,
+        "participantPhone": "554891710539",
+        "participantLid": "135665282990172@lid",
+        "forwarded": false,
+        "type": "ReceivedCallback",
+        "fromApi": false,
+        "reaction": {
+          "value": "❤️",
+          "time": 1757385790690,
+          "reactionBy": "554891710539",
+          "referencedMessage": {
+            "messageId": "3A7486379625231777BF",
+            "fromMe": false,
+            "phone": "120363201770362490-group",
+            "participant": "558192387425"
+          }
+        }
+      }
+    },
+    {
+      "headers": {
+        "connection": "Upgrade, HTTP2-Settings",
+        "content-length": "988",
+        "host": "185.245.182.69:3000",
+        "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+        "upgrade": "h2c",
+        "content-type": "application/json",
+        "origin": "https://api.z-api.io",
+        "server": "Z-API",
+        "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.4 Mobile/15E148 Safari/604.1",
+        "z-api-token": "0B039DE5C908EDAF88346CED"
+      },
+      "body": {
+        "isStatusReply": false,
+        "chatLid": null,
+        "connectedPhone": "5521971532700",
+        "waitingMessage": false,
+        "isEdit": false,
+        "isGroup": true,
+        "isNewsletter": false,
+        "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+        "messageId": "AC258DE4C8FAE66B7DB4A5343D0E9A8A",
+        "phone": "120363344102839767-group",
+        "fromMe": false,
+        "momment": 1757386225000,
+        "status": "RECEIVED",
+        "chatName": "Comunidade CRM Datacrazy ",
+        "senderPhoto": "https://pps.whatsapp.net/v/t61.24694-24/491886646_1905600680013797_7806651557743892720_n.jpg?ccb=11-4&oh=01_Q5Aa2gGUEJ5ZJGveKBjB-qYSo8CG9EA_k0QLREcvhPfgIX36OA&oe=68CCB615&_nc_sid=5e03e0&_nc_cat=110",
+        "senderName": "Marcell",
+        "photo": null,
+        "broadcast": false,
+        "participantPhone": "553299633977",
+        "participantLid": "81857949499507@lid",
+        "forwarded": false,
+        "type": "ReceivedCallback",
+        "fromApi": false,
+        "reaction": {
+          "value": "😂",
+          "time": 1757386224035,
+          "reactionBy": "553299633977",
+          "referencedMessage": {
+            "messageId": "3EB0E701054B23CA0B4095",
+            "fromMe": false,
+            "phone": "120363344102839767-group",
+            "participant": "554799492100"
+          }
+        }
+      }
+    },
+    {
+      "headers": {
+        "connection": "Upgrade, HTTP2-Settings",
+        "content-length": "1190",
+        "host": "185.245.182.69:3000",
+        "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+        "upgrade": "h2c",
+        "content-type": "application/json",
+        "origin": "https://api.z-api.io",
+        "server": "Z-API",
+        "user-agent": "Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:111.0) Gecko/20100101 Firefox/111.0",
+        "z-api-token": "0B039DE5C908EDAF88346CED"
+      },
+      "body": {
+        "isStatusReply": false,
+        "chatLid": null,
+        "connectedPhone": "5521971532700",
+        "waitingMessage": false,
+        "isEdit": false,
+        "isGroup": true,
+        "isNewsletter": false,
+        "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+        "messageId": "3EB0CF3F044B49B681A9B6",
+        "phone": "120363038403737119-group",
+        "fromMe": false,
+        "momment": 1757390377000,
+        "status": "RECEIVED",
+        "chatName": "Whaticket Community | Automatik®",
+        "senderPhoto": "https://pps.whatsapp.net/v/t61.24694-24/425556423_408453141601851_6639727336403159241_n.jpg?ccb=11-4&oh=01_Q5Aa2gHbZMY-23L7MOuKCGe3xhXBrIiD9AfzH95Xw-BnmJuvlQ&oe=68CCBC73&_nc_sid=5e03e0&_nc_cat=105",
+        "senderName": "Claudemir Todo Bom",
+        "photo": "https://pps.whatsapp.net/v/t61.24694-24/425461283_923901042394637_5435368869546121061_n.jpg?ccb=11-4&oh=01_Q5Aa2gFTDIfEZbGKx380zPFxsYjzYw1K0-8jr0CEPGioJNLh1g&oe=68CCA5BD&_nc_sid=5e03e0&_nc_cat=100",
+        "broadcast": false,
+        "participantPhone": "554999812291",
+        "participantLid": "81952304591011@lid",
+        "forwarded": false,
+        "type": "ReceivedCallback",
+        "fromApi": false,
+        "reaction": {
+          "value": "👍",
+          "time": 1756940341131,
+          "reactionBy": "554999812291",
+          "referencedMessage": {
+            "messageId": "3EB06513B3886DF776410F",
+            "fromMe": false,
+            "phone": "120363038403737119-group",
+            "participant": "552734415852"
+          }
+        }
+      }
+    },
+    {
+      "headers": {
+        "connection": "Upgrade, HTTP2-Settings",
+        "content-length": "1190",
+        "host": "185.245.182.69:3000",
+        "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+        "upgrade": "h2c",
+        "content-type": "application/json",
+        "origin": "https://api.z-api.io",
+        "server": "Z-API",
+        "user-agent": "Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:111.0) Gecko/20100101 Firefox/111.0",
+        "z-api-token": "0B039DE5C908EDAF88346CED"
+      },
+      "body": {
+        "isStatusReply": false,
+        "chatLid": null,
+        "connectedPhone": "5521971532700",
+        "waitingMessage": false,
+        "isEdit": false,
+        "isGroup": true,
+        "isNewsletter": false,
+        "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+        "messageId": "3EB0CF3F044B49B681A9B6",
+        "phone": "120363038403737119-group",
+        "fromMe": false,
+        "momment": 1757390388000,
+        "status": "RECEIVED",
+        "chatName": "Whaticket Community | Automatik®",
+        "senderPhoto": "https://pps.whatsapp.net/v/t61.24694-24/425556423_408453141601851_6639727336403159241_n.jpg?ccb=11-4&oh=01_Q5Aa2gHbZMY-23L7MOuKCGe3xhXBrIiD9AfzH95Xw-BnmJuvlQ&oe=68CCBC73&_nc_sid=5e03e0&_nc_cat=105",
+        "senderName": "Claudemir Todo Bom",
+        "photo": "https://pps.whatsapp.net/v/t61.24694-24/425461283_923901042394637_5435368869546121061_n.jpg?ccb=11-4&oh=01_Q5Aa2gFTDIfEZbGKx380zPFxsYjzYw1K0-8jr0CEPGioJNLh1g&oe=68CCA5BD&_nc_sid=5e03e0&_nc_cat=100",
+        "broadcast": false,
+        "participantPhone": "554999812291",
+        "participantLid": "81952304591011@lid",
+        "forwarded": false,
+        "type": "ReceivedCallback",
+        "fromApi": false,
+        "reaction": {
+          "value": "👍",
+          "time": 1756940341131,
+          "reactionBy": "554999812291",
+          "referencedMessage": {
+            "messageId": "3EB06513B3886DF776410F",
+            "fromMe": false,
+            "phone": "120363038403737119-group",
+            "participant": "552734415852"
+          }
+        }
+      }
+    },
+    {
+      "headers": {
+        "connection": "Upgrade, HTTP2-Settings",
+        "content-length": "1190",
+        "host": "185.245.182.69:3000",
+        "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
+        "upgrade": "h2c",
+        "content-type": "application/json",
+        "origin": "https://api.z-api.io",
+        "server": "Z-API",
+        "user-agent": "Mozilla/5.0 (iPad; CPU OS 13_2_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) FxiOS/111.0 Mobile/15E148 Safari/605.1.15",
+        "z-api-token": "0B039DE5C908EDAF88346CED"
+      },
+      "body": {
+        "isStatusReply": false,
+        "chatLid": null,
+        "connectedPhone": "5521971532700",
+        "waitingMessage": false,
+        "isEdit": false,
+        "isGroup": true,
+        "isNewsletter": false,
+        "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+        "messageId": "3EB0CF3F044B49B681A9B6",
+        "phone": "120363038403737119-group",
+        "fromMe": false,
+        "momment": 1757390398000,
+        "status": "RECEIVED",
+        "chatName": "Whaticket Community | Automatik®",
+        "senderPhoto": "https://pps.whatsapp.net/v/t61.24694-24/425556423_408453141601851_6639727336403159241_n.jpg?ccb=11-4&oh=01_Q5Aa2gHbZMY-23L7MOuKCGe3xhXBrIiD9AfzH95Xw-BnmJuvlQ&oe=68CCBC73&_nc_sid=5e03e0&_nc_cat=105",
+        "senderName": "Claudemir Todo Bom",
+        "photo": "https://pps.whatsapp.net/v/t61.24694-24/425461283_923901042394637_5435368869546121061_n.jpg?ccb=11-4&oh=01_Q5Aa2gFTDIfEZbGKx380zPFxsYjzYw1K0-8jr0CEPGioJNLh1g&oe=68CCA5BD&_nc_sid=5e03e0&_nc_cat=100",
+        "broadcast": false,
+        "participantPhone": "554999812291",
+        "participantLid": "81952304591011@lid",
+        "forwarded": false,
+        "type": "ReceivedCallback",
+        "fromApi": false,
+        "reaction": {
+          "value": "👍",
+          "time": 1756940341131,
+          "reactionBy": "554999812291",
+          "referencedMessage": {
+            "messageId": "3EB06513B3886DF776410F",
+            "fromMe": false,
+            "phone": "120363038403737119-group",
+            "participant": "552734415852"
+          }
+        }
+      }
+    }
+  ],
+  "metadata": {
+    "totalExamples": 6,
+    "examplesShown": 5,
+    "firstSeen": "2025-09-09T04:00:08.493Z",
+    "lastSeen": "2025-09-09T04:00:08.493Z"
+  }
+}
