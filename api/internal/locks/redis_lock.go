@@ -18,17 +18,23 @@ else
 end
 `)
 
-// RedisManager implements a basic distributed lock using Redis.
+var refreshScript = redis.NewScript(`
+if redis.call('get', KEYS[1]) == ARGV[1] then
+    redis.call('expire', KEYS[1], ARGV[2])
+    return 1
+else
+    return 0
+end
+`)
+
 type RedisManager struct {
 	client *redis.Client
 }
 
-// NewRedisManager instantiates a new manager.
 func NewRedisManager(client *redis.Client) *RedisManager {
 	return &RedisManager{client: client}
 }
 
-// Acquire tries to obtain the lock for key with the provided TTL (seconds).
 func (m *RedisManager) Acquire(ctx context.Context, key string, ttlSeconds int) (Lock, bool, error) {
 	if m == nil || m.client == nil {
 		return nil, false, errors.New("redis manager not configured")
@@ -44,7 +50,6 @@ func (m *RedisManager) Acquire(ctx context.Context, key string, ttlSeconds int) 
 	return &redisLock{client: m.client, key: key, value: value}, true, nil
 }
 
-// redisLock holds an acquired lock instance.
 type redisLock struct {
 	client *redis.Client
 	key    string
@@ -52,12 +57,26 @@ type redisLock struct {
 }
 
 func (l *redisLock) Refresh(ctx context.Context, ttlSeconds int) error {
-	return l.client.Expire(ctx, l.key, durationFromSeconds(ttlSeconds)).Err()
+	result, err := refreshScript.Run(ctx, l.client, []string{l.key}, l.value, ttlSeconds).Result()
+	if err != nil {
+		return err
+	}
+
+	refreshed, ok := result.(int64)
+	if !ok || refreshed == 0 {
+		return errors.New("lock ownership lost: token mismatch")
+	}
+
+	return nil
 }
 
 func (l *redisLock) Release(ctx context.Context) error {
 	_, err := releaseScript.Run(ctx, l.client, []string{l.key}, l.value).Result()
 	return err
+}
+
+func (l *redisLock) GetValue() string {
+	return l.value
 }
 
 func randomToken() string {

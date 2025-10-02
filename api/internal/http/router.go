@@ -17,17 +17,16 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/observability"
 )
 
-// RouterDeps collects dependencies for building the HTTP router.
 type RouterDeps struct {
 	Logger          *slog.Logger
 	Metrics         *observability.Metrics
 	SentryHandler   *sentryhttp.Handler
 	InstanceHandler *handlers.InstanceHandler
 	PartnerHandler  *handlers.PartnerHandler
+	HealthHandler   *handlers.HealthHandler
 	PartnerToken    string
 }
 
-// NewRouter wires routes and middlewares for the API service.
 func NewRouter(deps RouterDeps) http.Handler {
 	r := chi.NewRouter()
 
@@ -45,10 +44,19 @@ func NewRouter(deps RouterDeps) http.Handler {
 		r.Use(deps.SentryHandler.Handle)
 	}
 
-	r.Get("/healthz", func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte("ok"))
-	})
+	if deps.HealthHandler != nil {
+		r.Get("/health", deps.HealthHandler.Health)
+		r.Get("/ready", deps.HealthHandler.Ready)
+		r.Get("/healthz", deps.HealthHandler.Health)
+		r.Get("/readyz", deps.HealthHandler.Ready)
+	} else {
+
+		r.Get("/healthz", func(w http.ResponseWriter, _ *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte("ok"))
+		})
+	}
+
 	r.Method(http.MethodGet, "/metrics", promhttp.Handler())
 
 	r.Mount("/debug", chiMiddleware.Profiler())

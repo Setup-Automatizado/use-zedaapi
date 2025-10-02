@@ -27,6 +27,25 @@ import (
 	"go.mau.fi/whatsmeow/api/migrations"
 )
 
+type repositoryAdapter struct {
+	repo *instances.Repository
+}
+
+func (a *repositoryAdapter) ListInstancesWithStoreJID(ctx context.Context) ([]whatsmeow.StoreLink, error) {
+	links, err := a.repo.ListInstancesWithStoreJID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]whatsmeow.StoreLink, len(links))
+	for i, link := range links {
+		result[i] = whatsmeow.StoreLink{
+			ID:       link.ID,
+			StoreJID: link.StoreJID,
+		}
+	}
+	return result, nil
+}
+
 func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
@@ -67,7 +86,24 @@ func main() {
 	})
 	defer redisClient.Close()
 
-	lockManager := locks.NewRedisManager(redisClient)
+	redisLockManager := locks.NewRedisManager(redisClient)
+
+	cbConfig := locks.DefaultCircuitBreakerConfig()
+	lockManager := locks.NewCircuitBreakerManager(redisLockManager, cbConfig)
+
+	lockManager.OnStateChange(func(old, new locks.CircuitState) {
+		logger.Warn("lock manager circuit breaker state changed",
+			slog.String("old_state", old.String()),
+			slog.String("new_state", new.String()))
+	})
+
+	lockManager.SetMetrics(
+		func() { metrics.LockAcquisitions.WithLabelValues("success").Inc() },
+		func() { metrics.LockAcquisitions.WithLabelValues("failure").Inc() },
+		func(state float64) { metrics.CircuitBreakerState.Set(state) },
+	)
+
+	defer lockManager.StopHealthCheck()
 
 	repo := instances.NewRepository(pgPool)
 
@@ -78,12 +114,30 @@ func main() {
 		return repo.UpdateStoreJID(ctx, id, nil)
 	}
 
-	registry, err := whatsmeow.NewClientRegistry(ctx, cfg.WhatsmeowStore.DSN, cfg.WhatsmeowStore.LogLevel, lockManager, logger, pairCallback, resetCallback)
+	repoAdapter := &repositoryAdapter{repo: repo}
+	registry, err := whatsmeow.NewClientRegistry(ctx, cfg.WhatsmeowStore.DSN, cfg.WhatsmeowStore.LogLevel, lockManager, repoAdapter, logger, pairCallback, resetCallback)
 	if err != nil {
 		logger.Error("whatsmeow registry", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
-	defer registry.Close()
+	defer func() {
+		logger.Info("phase 2: closing whatsmeow registry")
+		registryCloseDone := make(chan error, 1)
+		go func() {
+			registryCloseDone <- registry.Close()
+		}()
+
+		select {
+		case err := <-registryCloseDone:
+			if err != nil {
+				logger.Error("registry close failed", slog.String("error", err.Error()))
+			} else {
+				logger.Info("registry closed successfully")
+			}
+		case <-time.After(5 * time.Second):
+			logger.Warn("⚠️ registry close timeout after 5 seconds - continuing shutdown")
+		}
+	}()
 
 	instanceService := instances.NewService(repo, registry, logger)
 	reconcileCtx, reconcileCancel := context.WithTimeout(ctx, 30*time.Second)
@@ -94,8 +148,26 @@ func main() {
 	} else if len(cleaned) > 0 {
 		logger.Info("reconciled stores", slog.Int("count", len(cleaned)))
 	}
+
+	connectCtx, connectCancel := context.WithTimeout(ctx, 60*time.Second)
+	connected, skipped, connectErr := registry.ConnectExistingClients(connectCtx)
+	connectCancel()
+	if connectErr != nil {
+		logger.Error("connect existing clients", slog.String("error", connectErr.Error()))
+	} else if connected > 0 {
+		logger.Info("connected existing clients", slog.Int("connected", connected), slog.Int("skipped", skipped))
+	}
+
+	registry.SetSplitBrainMetrics(func() { metrics.SplitBrainDetected.Inc() })
+	registry.StartSplitBrainDetection()
+
 	instanceHandler := handlers.NewInstanceHandler(instanceService, logger)
 	partnerHandler := handlers.NewPartnerHandler(instanceService, logger)
+	healthHandler := handlers.NewHealthHandler(pgPool, lockManager)
+
+	healthHandler.SetMetrics(func(component, status string) {
+		metrics.HealthChecks.WithLabelValues(component, status).Inc()
+	})
 
 	router := apihandler.NewRouter(apihandler.RouterDeps{
 		Logger:          logger,
@@ -103,6 +175,7 @@ func main() {
 		SentryHandler:   sentryHandler,
 		InstanceHandler: instanceHandler,
 		PartnerHandler:  partnerHandler,
+		HealthHandler:   healthHandler,
 		PartnerToken:    cfg.Partner.AuthToken,
 	})
 
@@ -121,7 +194,30 @@ func main() {
 		logger.Error("http server stopped", slog.String("error", err.Error()))
 	}
 
+	emergencyTimeout := time.AfterFunc(45*time.Second, func() {
+		logger.Error("💀 EMERGENCY TIMEOUT: Forcing exit after 45 seconds")
+		os.Exit(1)
+	})
+	defer emergencyTimeout.Stop()
+
+	logger.Info("starting graceful shutdown sequence")
+
+	logger.Info("phase 0: releasing redis locks")
+	released := registry.ReleaseAllLocks()
+	logger.Info("phase 0 complete: redis locks released", slog.Int("count", released))
+
+	logger.Info("phase 1: disconnecting all whatsapp clients")
+	disconnectCtx, disconnectCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	disconnected := registry.DisconnectAll(disconnectCtx)
+	disconnectCancel()
+	if disconnected > 0 {
+		logger.Info("phase 1: disconnected all clients", slog.Int("count", disconnected))
+	} else {
+		logger.Info("phase 1: no active clients to disconnect")
+	}
+
 	if cfg.Sentry.DSN != "" {
+		logger.Info("phase 3: flushing sentry events")
 		sentry.Flush(5 * time.Second)
 	}
 
