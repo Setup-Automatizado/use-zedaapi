@@ -11,6 +11,7 @@ import (
 
 	"github.com/getsentry/sentry-go"
 	"github.com/google/uuid"
+	"github.com/joho/godotenv"
 	"github.com/prometheus/client_golang/prometheus"
 
 	"go.mau.fi/whatsmeow/api/internal/config"
@@ -49,6 +50,12 @@ func (a *repositoryAdapter) ListInstancesWithStoreJID(ctx context.Context) ([]wh
 func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer cancel()
+
+	for _, path := range []string{"api/.env", ".env"} {
+		if err := godotenv.Load(path); err == nil {
+			break
+		}
+	}
 
 	cfg, err := config.Load()
 	if err != nil {
@@ -135,7 +142,7 @@ func main() {
 				logger.Info("registry closed successfully")
 			}
 		case <-time.After(5 * time.Second):
-			logger.Warn("⚠️ registry close timeout after 5 seconds - continuing shutdown")
+			logger.Warn("registry close timeout after 5 seconds - continuing shutdown")
 		}
 	}()
 
@@ -195,7 +202,7 @@ func main() {
 	}
 
 	emergencyTimeout := time.AfterFunc(45*time.Second, func() {
-		logger.Error("💀 EMERGENCY TIMEOUT: Forcing exit after 45 seconds")
+		logger.Error("EMERGENCY TIMEOUT: Forcing exit after 45 seconds")
 		os.Exit(1)
 	})
 	defer emergencyTimeout.Stop()

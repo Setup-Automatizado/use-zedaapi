@@ -582,7 +582,7 @@ func (r *ClientRegistry) startLockRefresh(instanceID uuid.UUID, lock locks.Lock,
 						}
 						r.mu.Unlock()
 					} else {
-						r.log.Error("🚨 CRITICAL: lock refresh failed with circuit breaker CLOSED - SPLIT-BRAIN DETECTED",
+						r.log.Error("CRITICAL: lock refresh failed with circuit breaker CLOSED - SPLIT-BRAIN DETECTED",
 							slog.String("instanceId", instanceID.String()),
 							slog.String("error", err.Error()))
 
@@ -929,12 +929,23 @@ func (r *ClientRegistry) reconnectAfterPair(instanceID uuid.UUID, client *whatsm
 		return
 	}
 
+	if client.IsConnected() {
+		r.log.Debug("websocket already connected after pairing, waiting for authentication",
+			slog.String("instanceId", instanceID.String()))
+		return
+	}
+
 	const maxAttempts = 3
 	backoff := 200 * time.Millisecond
 	var lastErr error
 
 	for attempt := 1; attempt <= maxAttempts; attempt++ {
 		if client.IsLoggedIn() {
+			return
+		}
+		if client.IsConnected() {
+			r.log.Debug("websocket connected during retry, waiting for authentication",
+				slog.String("instanceId", instanceID.String()))
 			return
 		}
 		if err := client.Connect(); err != nil {
@@ -1142,15 +1153,83 @@ func (r *ClientRegistry) Restart(ctx context.Context, info InstanceInfo) error {
 		return err
 	}
 	client.Disconnect()
+
+	time.Sleep(100 * time.Millisecond)
+
+	if client.IsConnected() {
+		r.log.Debug("client auto-reconnected after disconnect",
+			slog.String("instanceId", info.ID.String()))
+		return nil
+	}
+
 	return client.Connect()
 }
 
 func (r *ClientRegistry) Disconnect(ctx context.Context, info InstanceInfo) error {
-	client, _, err := r.EnsureClient(ctx, info)
-	if err != nil {
-		return err
+	r.log.Info("performing complete disconnect with cleanup",
+		slog.String("instanceId", info.ID.String()))
+
+	r.cleanupPairingSession(info.ID, "manual")
+
+	r.mu.Lock()
+	state, ok := r.clients[info.ID]
+	if !ok {
+		r.mu.Unlock()
+		r.log.Debug("instance not found in registry during disconnect",
+			slog.String("instanceId", info.ID.String()))
+		return nil
 	}
-	client.Disconnect()
+	delete(r.clients, info.ID)
+	r.mu.Unlock()
+
+	if state == nil {
+		return nil
+	}
+
+	if state.lockRefreshCancel != nil {
+		r.log.Debug("stopping lock refresh goroutine",
+			slog.String("instanceId", info.ID.String()))
+		state.lockRefreshCancel()
+	}
+
+	if state.lock != nil {
+		r.log.Debug("releasing redis lock",
+			slog.String("instanceId", info.ID.String()),
+			slog.String("lockMode", state.lockMode))
+
+		if err := state.lock.Release(context.Background()); err != nil {
+			r.log.Warn("failed to release redis lock during disconnect",
+				slog.String("instanceId", info.ID.String()),
+				slog.String("error", err.Error()))
+		}
+
+		r.activeLocksMu.Lock()
+		delete(r.activeLocks, info.ID)
+		r.activeLocksMu.Unlock()
+	}
+
+	if state.client != nil {
+		state.client.EnableAutoReconnect = false
+		state.client.Disconnect()
+
+		if state.client.Store != nil && state.client.Store.ID != nil {
+			deleteCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+
+			if err := state.client.Store.Delete(deleteCtx); err != nil {
+				r.log.Error("delete store device during disconnect",
+					slog.String("instanceId", info.ID.String()),
+					slog.String("error", err.Error()))
+			} else {
+				r.log.Info("device store deleted during disconnect",
+					slog.String("instanceId", info.ID.String()))
+			}
+		}
+	}
+
+	r.log.Info("complete disconnect finished",
+		slog.String("instanceId", info.ID.String()))
+
 	return nil
 }
 
@@ -1234,8 +1313,12 @@ func (r *ClientRegistry) startPairingSession(ctx context.Context, info InstanceI
 	}
 	r.registerPairingSession(info.ID, cancel)
 	go func() {
-		if err := client.Connect(); err != nil {
-			r.log.Error("connect for qr", slog.String("instanceId", info.ID.String()), slog.String("error", err.Error()))
+		if !client.IsConnected() {
+			if err := client.Connect(); err != nil {
+				r.log.Error("connect for qr", slog.String("instanceId", info.ID.String()), slog.String("error", err.Error()))
+			}
+		} else {
+			r.log.Debug("websocket already connected for qr pairing", slog.String("instanceId", info.ID.String()))
 		}
 	}()
 	return client, qrChan, nil
@@ -1609,7 +1692,7 @@ func (r *ClientRegistry) detectSplitBrain() {
 		}
 
 		if !stillOwned {
-			r.log.Error("🚨 SPLIT-BRAIN DETECTED: Client exists but lock ownership lost",
+			r.log.Error("SPLIT-BRAIN DETECTED: Client exists but lock ownership lost",
 				slog.String("instanceId", instanceID.String()),
 				slog.String("workerID", r.workerID))
 

@@ -253,6 +253,83 @@
         ],
         "additionalProperties": false
       },
+      "HealthStatusResponse": {
+        "type": "object",
+        "description": "Liveness probe response.",
+        "properties": {
+          "status": {
+            "type": "string",
+            "example": "ok"
+          },
+          "service": {
+            "type": "string",
+            "example": "whatsapp-api"
+          }
+        },
+        "required": [
+          "status",
+          "service"
+        ],
+        "additionalProperties": false
+      },
+      "ReadinessComponentStatus": {
+        "type": "object",
+        "description": "Status information for a single dependency checked by the readiness probe.",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "healthy",
+              "degraded",
+              "unhealthy"
+            ]
+          },
+          "error": {
+            "type": "string",
+            "nullable": true
+          },
+          "duration_ms": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Time spent executing the check in milliseconds."
+          },
+          "circuit_state": {
+            "type": "string",
+            "nullable": true,
+            "description": "Circuit breaker state reported by the lock manager (when available)."
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "additionalProperties": false
+      },
+      "ReadinessResponse": {
+        "type": "object",
+        "description": "Readiness probe payload containing aggregated dependency status.",
+        "properties": {
+          "ready": {
+            "type": "boolean"
+          },
+          "observed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "checks": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ReadinessComponentStatus"
+            },
+            "description": "Map of dependency name to component status (e.g. `database`, `redis`)."
+          }
+        },
+        "required": [
+          "ready",
+          "observed_at",
+          "checks"
+        ],
+        "additionalProperties": false
+      },
       "PartnerInstanceCreateRequest": {
         "type": "object",
         "properties": {
@@ -504,22 +581,93 @@
     }
   },
   "paths": {
-    "/healthz": {
+    "/health": {
       "get": {
         "tags": [
           "System"
         ],
-        "summary": "Health check",
-        "description": "Returns `ok` when the API process is alive.",
-        "operationId": "health",
+        "summary": "Liveness probe",
+        "description": "Returns a JSON object indicating that the API process is running.",
+        "operationId": "healthLiveness",
         "responses": {
           "200": {
-            "description": "Service healthy",
+            "description": "Process is alive and capable of serving traffic.",
             "content": {
-              "text/plain": {
+              "application/json": {
                 "schema": {
-                  "type": "string",
-                  "example": "ok"
+                  "$ref": "#/components/schemas/HealthStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ready": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "summary": "Readiness probe",
+        "description": "Checks critical dependencies (Postgres, Redis lock manager). The service is considered ready when all reported components are `healthy`. Any `degraded` or `unhealthy` status results in a `503` response.\n",
+        "operationId": "healthReadiness",
+        "responses": {
+          "200": {
+            "description": "Service is ready to receive traffic.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadinessResponse"
+                },
+                "examples": {
+                  "ready": {
+                    "value": {
+                      "ready": true,
+                      "observed_at": "2024-05-28T10:59:00+00:00",
+                      "checks": {
+                        "database": {
+                          "status": "healthy",
+                          "duration_ms": 12
+                        },
+                        "redis": {
+                          "status": "healthy",
+                          "duration_ms": 8,
+                          "circuit_state": "CLOSED"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "At least one dependency is degraded or unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadinessResponse"
+                },
+                "examples": {
+                  "degraded": {
+                    "value": {
+                      "ready": false,
+                      "observed_at": "2024-05-28T11:01:00+00:00",
+                      "checks": {
+                        "database": {
+                          "status": "unhealthy",
+                          "error": "database not configured",
+                          "duration_ms": 3
+                        },
+                        "redis": {
+                          "status": "degraded",
+                          "error": "fallback lock in use",
+                          "duration_ms": 7,
+                          "circuit_state": "OPEN"
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -1449,8 +1597,8 @@
         "tags": [
           "Instances"
         ],
-        "summary": "Disconnect an instance",
-        "description": "Equivalent to Z-API `/disconnect`, closing the active WhatsApp session for the instance.",
+        "summary": "Complete disconnect with cleanup (Logout)",
+        "description": "Performs a complete disconnect with full cleanup, equivalent to logout/reset.\n\n**This operation performs the following actions:**\n- \u2705 Disables auto-reconnect to prevent automatic reconnection\n- \u2705 Disconnects WebSocket connection immediately\n- \u2705 **Deletes device store from whatsmeow_store database**\n- \u2705 Stops lock refresh goroutine\n- \u2705 Releases Redis distributed lock\n- \u2705 Removes client from in-memory registry\n- \u2705 Clears store_jid in api_core database (sets to NULL)\n\n**Important Notes:**\n- The instance record remains in the database (status becomes \"disconnected\")\n- To permanently delete the instance, use `DELETE /partner/instances/{instanceId}`\n- After disconnect, you can reconnect by calling `/qrcode` or `/pairphone`\n- All webhook configurations are preserved\n\n**Use Cases:**\n- User logout from WhatsApp\n- Switching to a different phone number\n- Temporary disconnection for maintenance\n- Resetting a stuck connection\n\n**Comparison with DELETE endpoint:**\n- Disconnect: Keeps instance record, allows reconnection\n- Delete: Permanent removal, cannot be recovered\n",
         "operationId": "disconnectInstance",
         "security": [
           {
@@ -1467,17 +1615,30 @@
         ],
         "responses": {
           "202": {
-            "description": "Disconnect signal accepted",
+            "description": "Complete disconnect with cleanup accepted",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OperationStatusResponse"
+                },
+                "example": {
+                  "status": "disconnecting"
                 }
               }
             }
           },
           "401": {
-            "description": "Unauthorized",
+            "description": "Unauthorized (invalid client token or instance token)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Instance not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -1649,6 +1810,114 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}": {
+      "delete": {
+        "tags": [
+          "Partner"
+        ],
+        "summary": "Permanently delete instance (Partner API)",
+        "description": "**\u26a0\ufe0f IRREVERSIBLE OPERATION \u26a0\ufe0f**\n\nPermanently deletes a WhatsApp instance including all associated data from both databases.\n\n**Complete Cleanup Operations:**\n- \u2705 Disconnects the WhatsApp client immediately\n- \u2705 Disables auto-reconnect to prevent reconnection\n- \u2705 **Deletes device store from whatsmeow_store database**\n- \u2705 Stops lock refresh goroutine\n- \u2705 Releases Redis distributed lock\n- \u2705 Removes client from in-memory registry\n- \u2705 **Deletes instance record from api_core database**\n- \u2705 **Deletes all webhook configurations (CASCADE)**\n- \u2705 **Deletes all webhook outbox entries (CASCADE)**\n- \u2705 **Deletes all webhook DLQ entries (manual deletion)**\n- \u2705 **Deletes all instance event logs (manual deletion)**\n\n**Database Deletion Strategy:**\n- Uses transaction to ensure ACID compliance\n- Manually deletes tables without CASCADE constraints (webhook_dlq, instance_events_log)\n- Relies on CASCADE for webhook_configs and webhook_outbox\n- Deletes device credentials from separate whatsmeow_store database\n\n**Authentication:**\n- Requires Partner Bearer token only (no instance token needed)\n- This is a Partner-level administrative operation\n\n**Use Cases:**\n- Cleanup of test/development instances\n- Customer offboarding and data removal\n- GDPR/data deletion compliance requests\n- Freeing resources from inactive instances\n\n**Important Notes:**\n- **This operation cannot be undone or reversed**\n- All data associated with the instance is permanently lost\n- The instance cannot be recovered or reconnected after deletion\n- Consider using `/disconnect` if you need to preserve the instance record\n",
+        "operationId": "partnerDeleteInstance",
+        "security": [
+          {
+            "PartnerBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "instanceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Unique instance identifier to permanently delete.",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Instance permanently deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "deleted"
+                      ],
+                      "description": "Confirmation that instance was deleted",
+                      "example": "deleted"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ]
+                },
+                "example": {
+                  "status": "deleted"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid instance ID format (must be valid UUID)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "invalid instance id"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid Partner bearer token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "unauthorized"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Instance not found in database",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "instance not found"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal error during deletion (transaction may have been rolled back)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": "delete instance from database: connection error"
                 }
               }
             }

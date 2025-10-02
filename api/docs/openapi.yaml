@@ -182,6 +182,60 @@ components:
       required:
         - status
       additionalProperties: false
+    HealthStatusResponse:
+      type: object
+      description: Liveness probe response.
+      properties:
+        status:
+          type: string
+          example: ok
+        service:
+          type: string
+          example: whatsapp-api
+      required:
+        - status
+        - service
+      additionalProperties: false
+    ReadinessComponentStatus:
+      type: object
+      description: Status information for a single dependency checked by the readiness probe.
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        error:
+          type: string
+          nullable: true
+        duration_ms:
+          type: integer
+          format: int64
+          description: Time spent executing the check in milliseconds.
+        circuit_state:
+          type: string
+          nullable: true
+          description: Circuit breaker state reported by the lock manager (when available).
+      required:
+        - status
+      additionalProperties: false
+    ReadinessResponse:
+      type: object
+      description: Readiness probe payload containing aggregated dependency status.
+      properties:
+        ready:
+          type: boolean
+        observed_at:
+          type: string
+          format: date-time
+        checks:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/ReadinessComponentStatus'
+          description: Map of dependency name to component status (e.g. `database`, `redis`).
+      required:
+        - ready
+        - observed_at
+        - checks
+      additionalProperties: false
     PartnerInstanceCreateRequest:
       type: object
       properties:
@@ -361,20 +415,69 @@ components:
         - total
       additionalProperties: false
 paths:
-  /healthz:
+  /health:
     get:
       tags: [System]
-      summary: Health check
-      description: Returns `ok` when the API process is alive.
-      operationId: health
+      summary: Liveness probe
+      description: Returns a JSON object indicating that the API process is running.
+      operationId: healthLiveness
       responses:
         '200':
-          description: Service healthy
+          description: Process is alive and capable of serving traffic.
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
-                example: ok
+                $ref: '#/components/schemas/HealthStatusResponse'
+  /ready:
+    get:
+      tags: [System]
+      summary: Readiness probe
+      description: >
+        Checks critical dependencies (Postgres, Redis lock manager). The service is considered ready
+        when all reported components are `healthy`. Any `degraded` or `unhealthy` status results in a
+        `503` response.
+      operationId: healthReadiness
+      responses:
+        '200':
+          description: Service is ready to receive traffic.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadinessResponse'
+              examples:
+                ready:
+                  value:
+                    ready: true
+                    observed_at: 2024-05-28T10:59:00Z
+                    checks:
+                      database:
+                        status: healthy
+                        duration_ms: 12
+                      redis:
+                        status: healthy
+                        duration_ms: 8
+                        circuit_state: CLOSED
+        '503':
+          description: At least one dependency is degraded or unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadinessResponse'
+              examples:
+                degraded:
+                  value:
+                    ready: false
+                    observed_at: 2024-05-28T11:01:00Z
+                    checks:
+                      database:
+                        status: unhealthy
+                        error: "database not configured"
+                        duration_ms: 3
+                      redis:
+                        status: degraded
+                        error: "fallback lock in use"
+                        duration_ms: 7
+                        circuit_state: OPEN
   /instances:
     get:
       tags: [Partner]
@@ -889,8 +992,34 @@ paths:
   /instances/{instanceId}/token/{instanceToken}/disconnect:
     post:
       tags: [Instances]
-      summary: Disconnect an instance
-      description: Equivalent to Z-API `/disconnect`, closing the active WhatsApp session for the instance.
+      summary: Complete disconnect with cleanup (Logout)
+      description: |
+        Performs a complete disconnect with full cleanup, equivalent to logout/reset.
+
+        **This operation performs the following actions:**
+        - ✅ Disables auto-reconnect to prevent automatic reconnection
+        - ✅ Disconnects WebSocket connection immediately
+        - ✅ **Deletes device store from whatsmeow_store database**
+        - ✅ Stops lock refresh goroutine
+        - ✅ Releases Redis distributed lock
+        - ✅ Removes client from in-memory registry
+        - ✅ Clears store_jid in api_core database (sets to NULL)
+
+        **Important Notes:**
+        - The instance record remains in the database (status becomes "disconnected")
+        - To permanently delete the instance, use `DELETE /partner/instances/{instanceId}`
+        - After disconnect, you can reconnect by calling `/qrcode` or `/pairphone`
+        - All webhook configurations are preserved
+
+        **Use Cases:**
+        - User logout from WhatsApp
+        - Switching to a different phone number
+        - Temporary disconnection for maintenance
+        - Resetting a stuck connection
+
+        **Comparison with DELETE endpoint:**
+        - Disconnect: Keeps instance record, allows reconnection
+        - Delete: Permanent removal, cannot be recovered
       operationId: disconnectInstance
       security:
         - ClientTokenAuth: []
@@ -899,13 +1028,21 @@ paths:
         - $ref: '#/components/parameters/InstanceToken'
       responses:
         '202':
-          description: Disconnect signal accepted
+          description: Complete disconnect with cleanup accepted
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/OperationStatusResponse'
+              example:
+                status: disconnecting
         '401':
-          description: Unauthorized
+          description: Unauthorized (invalid client token or instance token)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Instance not found
           content:
             application/json:
               schema:
@@ -1003,3 +1140,216 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /instances/{instanceId}:
+    delete:
+      tags: [Partner]
+      summary: Permanently delete instance (Partner API)
+      description: |
+        **⚠️ IRREVERSIBLE OPERATION ⚠️**
+
+        Permanently deletes a WhatsApp instance including all associated data from both databases.
+
+        **Complete Cleanup Operations:**
+        - ✅ Disconnects the WhatsApp client immediately
+        - ✅ Disables auto-reconnect to prevent reconnection
+        - ✅ **Deletes device store from whatsmeow_store database**
+        - ✅ Stops lock refresh goroutine
+        - ✅ Releases Redis distributed lock
+        - ✅ Removes client from in-memory registry
+        - ✅ **Deletes instance record from api_core database**
+        - ✅ **Deletes all webhook configurations (CASCADE)**
+        - ✅ **Deletes all webhook outbox entries (CASCADE)**
+        - ✅ **Deletes all webhook DLQ entries (manual deletion)**
+        - ✅ **Deletes all instance event logs (manual deletion)**
+
+        **Database Deletion Strategy:**
+        - Uses transaction to ensure ACID compliance
+        - Manually deletes tables without CASCADE constraints (webhook_dlq, instance_events_log)
+        - Relies on CASCADE for webhook_configs and webhook_outbox
+        - Deletes device credentials from separate whatsmeow_store database
+
+        **Authentication:**
+        - Requires Partner Bearer token only (no instance token needed)
+        - This is a Partner-level administrative operation
+
+        **Use Cases:**
+        - Cleanup of test/development instances
+        - Customer offboarding and data removal
+        - GDPR/data deletion compliance requests
+        - Freeing resources from inactive instances
+
+        **Important Notes:**
+        - **This operation cannot be undone or reversed**
+        - All data associated with the instance is permanently lost
+        - The instance cannot be recovered or reconnected after deletion
+        - Consider using `/disconnect` if you need to preserve the instance record
+      operationId: partnerDeleteInstance
+      security:
+        - PartnerBearer: []
+      parameters:
+        - name: instanceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Unique instance identifier to permanently delete.
+          example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        '200':
+          description: Instance permanently deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [deleted]
+                    description: Confirmation that instance was deleted
+                    example: deleted
+                required:
+                  - status
+              example:
+                status: deleted
+        '400':
+          description: Invalid instance ID format (must be valid UUID)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "invalid instance id"
+        '401':
+          description: Missing or invalid Partner bearer token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "unauthorized"
+        '404':
+          description: Instance not found in database
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "instance not found"
+        '500':
+          description: Internal error during deletion (transaction may have been rolled back)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "delete instance from database: connection error"
+
+# ==================================================================================
+# USAGE EXAMPLES - Disconnect vs Delete Operations
+# ==================================================================================
+#
+# Example 1: Complete Disconnect (Logout) - Preserves Instance Record
+# -------------------------------------------------------------------------
+# POST /instances/{instanceId}/token/{instanceToken}/disconnect
+# Headers:
+#   Client-Token: your-client-token
+#
+# Use this when:
+# - User wants to logout from WhatsApp
+# - Switching to a different phone number
+# - Temporary disconnection for maintenance
+# - You want to keep the instance record and webhook configurations
+#
+# What happens:
+# 1. Disables AutoReconnect
+# 2. Disconnects WebSocket
+# 3. Deletes device store from whatsmeow_store DB
+# 4. Stops lock refresh goroutine
+# 5. Releases Redis lock
+# 6. Removes from registry map
+# 7. Sets store_jid to NULL in api_core DB
+# 8. Instance record remains (can reconnect later)
+#
+# Response: {"status": "disconnecting"}
+#
+# After disconnect:
+# - Call GET /status to verify disconnection
+# - Call POST /qrcode to reconnect with new QR code
+# - Call POST /pairphone to reconnect with phone code
+# - All webhook configurations remain intact
+#
+# -------------------------------------------------------------------------
+# Example 2: Permanent Deletion - Removes All Data
+# -------------------------------------------------------------------------
+# DELETE /partner/instances/{instanceId}
+# Headers:
+#   Authorization: Bearer partner-jwt-token
+#
+# Use this when:
+# - Permanently removing test/development instances
+# - Customer offboarding (GDPR/data deletion)
+# - Freeing resources from inactive instances
+# - No intention of reconnecting this instance
+#
+# What happens:
+# 1. Calls ResetClient (performs all disconnect operations)
+# 2. Deletes from webhook_dlq table
+# 3. Deletes from instance_events_log table
+# 4. Deletes from instances table (triggers CASCADE for webhook_configs and webhook_outbox)
+# 5. All operations in a database transaction
+#
+# Response: {"status": "deleted"}
+#
+# ⚠️ IMPORTANT: This operation is IRREVERSIBLE
+# - Instance cannot be recovered
+# - All data is permanently lost
+# - Cannot reconnect this instance
+#
+# Database cleanup order:
+# 1. webhook_dlq (manual deletion, no CASCADE)
+# 2. instance_events_log (manual deletion, no CASCADE)
+# 3. instances (triggers CASCADE deletion of webhook_configs and webhook_outbox)
+# 4. device store from whatsmeow_store DB (via ResetClient)
+#
+# -------------------------------------------------------------------------
+# Comparison Table
+# -------------------------------------------------------------------------
+#
+# | Feature | Disconnect | Delete |
+# |---------|-----------|--------|
+# | Endpoint | POST /disconnect | DELETE /instances/{id} |
+# | Auth | Client-Token + Instance Token | Partner Bearer Token |
+# | Reversible | ✅ Yes | ❌ No |
+# | Instance Record | ✅ Kept | ❌ Deleted |
+# | Can Reconnect | ✅ Yes | ❌ No |
+# | Device Store | ✅ Deleted | ✅ Deleted |
+# | Webhooks | ✅ Kept | ❌ Deleted |
+# | Event Logs | ✅ Kept | ❌ Deleted |
+# | WebSocket | ✅ Disconnects | ✅ Disconnects |
+# | AutoReconnect | ✅ Disabled | ✅ Disabled |
+# | Redis Lock | ✅ Released | ✅ Released |
+# | Registry | ✅ Removed | ✅ Removed |
+#
+# -------------------------------------------------------------------------
+# Testing Procedures
+# -------------------------------------------------------------------------
+#
+# Test Disconnect:
+# 1. GET /instances/{id}/token/{token}/status (verify connected)
+# 2. POST /instances/{id}/token/{token}/disconnect
+# 3. GET /instances/{id}/token/{token}/status (verify disconnected, store_jid is null)
+# 4. Verify instance record still exists in database
+# 5. POST /instances/{id}/token/{token}/qrcode (can get new QR)
+# 6. Verify webhooks still configured
+#
+# Test Delete:
+# 1. DELETE /partner/instances/{id}
+# 2. GET /instances/{id}/token/{token}/status (expect 404)
+# 3. SELECT * FROM instances WHERE id = {id} (expect 0 rows)
+# 4. SELECT * FROM webhook_configs WHERE instance_id = {id} (expect 0 rows)
+# 5. SELECT * FROM webhook_dlq WHERE instance_id = {id} (expect 0 rows)
+# 6. SELECT * FROM instance_events_log WHERE instance_id = {id} (expect 0 rows)
+# 7. Verify device store deleted from whatsmeow_store DB
+#
+# ==================================================================================

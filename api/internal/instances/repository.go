@@ -137,6 +137,38 @@ func (r *Repository) UpdateSubscription(ctx context.Context, id uuid.UUID, activ
 	return nil
 }
 
+func (r *Repository) Delete(ctx context.Context, id uuid.UUID) error {
+	tx, err := r.pool.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("begin transaction: %w", err)
+	}
+	defer tx.Rollback(ctx)
+
+	_, err = tx.Exec(ctx, `DELETE FROM webhook_dlq WHERE instance_id=$1`, id)
+	if err != nil {
+		return fmt.Errorf("delete webhook_dlq: %w", err)
+	}
+
+	_, err = tx.Exec(ctx, `DELETE FROM instance_events_log WHERE instance_id=$1`, id)
+	if err != nil {
+		return fmt.Errorf("delete instance_events_log: %w", err)
+	}
+
+	res, err := tx.Exec(ctx, `DELETE FROM instances WHERE id=$1`, id)
+	if err != nil {
+		return fmt.Errorf("delete instance: %w", err)
+	}
+	if res.RowsAffected() == 0 {
+		return ErrInstanceNotFound
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return fmt.Errorf("commit transaction: %w", err)
+	}
+
+	return nil
+}
+
 func (r *Repository) List(ctx context.Context, filter ListFilter) ([]Instance, int64, error) {
 	search := strings.TrimSpace(filter.Query)
 	if filter.Page <= 0 {

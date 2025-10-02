@@ -12,6 +12,7 @@ import (
 	"github.com/google/uuid"
 
 	"go.mau.fi/whatsmeow/api/internal/instances"
+	internallogging "go.mau.fi/whatsmeow/api/internal/logging"
 )
 
 type InstanceHandler struct {
@@ -44,31 +45,35 @@ func (h *InstanceHandler) Register(r chi.Router) {
 }
 
 func (h *InstanceHandler) getStatus(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	instanceID, ok := h.parseInstanceID(w, r)
 	if !ok {
 		return
 	}
+	ctx = internallogging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
 	instanceToken := chi.URLParam(r, "token")
 	clientToken := r.Header.Get("Client-Token")
-	status, err := h.service.GetStatus(r.Context(), instanceID, clientToken, instanceToken)
+	status, err := h.service.GetStatus(ctx, instanceID, clientToken, instanceToken)
 	if err != nil {
-		h.handleServiceError(w, err)
+		h.handleServiceError(ctx, w, err)
 		return
 	}
 	respondJSON(w, http.StatusOK, status)
 }
 
 func (h *InstanceHandler) getQRCode(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	instanceID, ok := h.parseInstanceID(w, r)
 	if !ok {
 		return
 	}
+	ctx = internallogging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
 	instanceToken := chi.URLParam(r, "token")
 	clientToken := r.Header.Get("Client-Token")
 
-	code, err := h.service.GetQRCode(r.Context(), instanceID, clientToken, instanceToken)
+	code, err := h.service.GetQRCode(ctx, instanceID, clientToken, instanceToken)
 	if err != nil {
-		h.handleServiceError(w, err)
+		h.handleServiceError(ctx, w, err)
 		return
 	}
 	respondJSON(w, http.StatusOK, map[string]string{"code": code})
@@ -79,16 +84,18 @@ type qrImageResponse struct {
 }
 
 func (h *InstanceHandler) getQRCodeImage(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	instanceID, ok := h.parseInstanceID(w, r)
 	if !ok {
 		return
 	}
+	ctx = internallogging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
 	instanceToken := chi.URLParam(r, "token")
 	clientToken := r.Header.Get("Client-Token")
 
-	image, err := h.service.GetQRCodeImage(r.Context(), instanceID, clientToken, instanceToken)
+	image, err := h.service.GetQRCodeImage(ctx, instanceID, clientToken, instanceToken)
 	if err != nil {
-		h.handleServiceError(w, err)
+		h.handleServiceError(ctx, w, err)
 		return
 	}
 	respondJSON(w, http.StatusOK, qrImageResponse{Image: image})
@@ -117,10 +124,12 @@ type webhookUpdateResponse struct {
 }
 
 func (h *InstanceHandler) getPhoneCode(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	instanceID, ok := h.parseInstanceID(w, r)
 	if !ok {
 		return
 	}
+	ctx = internallogging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
 	instanceToken := chi.URLParam(r, "token")
 	clientToken := r.Header.Get("Client-Token")
 	phone := chi.URLParam(r, "phone")
@@ -129,9 +138,9 @@ func (h *InstanceHandler) getPhoneCode(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	code, err := h.service.GetPhoneCode(r.Context(), instanceID, clientToken, instanceToken, phone)
+	code, err := h.service.GetPhoneCode(ctx, instanceID, clientToken, instanceToken, phone)
 	if err != nil {
-		h.handleServiceError(w, err)
+		h.handleServiceError(ctx, w, err)
 		return
 	}
 	respondJSON(w, http.StatusOK, phoneCodeResponse{Code: code})
@@ -166,10 +175,12 @@ func (h *InstanceHandler) updateWebhookChatPresence(w http.ResponseWriter, r *ht
 }
 
 func (h *InstanceHandler) updateNotifySentByMe(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	instanceID, ok := h.parseInstanceID(w, r)
 	if !ok {
 		return
 	}
+	ctx = internallogging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
 	instanceToken := chi.URLParam(r, "token")
 	clientToken := r.Header.Get("Client-Token")
 
@@ -178,19 +189,21 @@ func (h *InstanceHandler) updateNotifySentByMe(w http.ResponseWriter, r *http.Re
 		respondError(w, http.StatusBadRequest, "invalid json payload")
 		return
 	}
-	settings, err := h.service.UpdateNotifySentByMe(r.Context(), instanceID, clientToken, instanceToken, req.NotifySentByMe)
+	settings, err := h.service.UpdateNotifySentByMe(ctx, instanceID, clientToken, instanceToken, req.NotifySentByMe)
 	if err != nil {
-		h.handleServiceError(w, err)
+		h.handleServiceError(ctx, w, err)
 		return
 	}
 	respondJSON(w, http.StatusOK, webhookUpdateResponse{Value: true, Webhooks: settings})
 }
 
 func (h *InstanceHandler) updateEveryWebhooks(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	instanceID, ok := h.parseInstanceID(w, r)
 	if !ok {
 		return
 	}
+	ctx = internallogging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
 	instanceToken := chi.URLParam(r, "token")
 	clientToken := r.Header.Get("Client-Token")
 
@@ -199,19 +212,21 @@ func (h *InstanceHandler) updateEveryWebhooks(w http.ResponseWriter, r *http.Req
 		respondError(w, http.StatusBadRequest, "invalid json payload")
 		return
 	}
-	settings, err := h.service.UpdateEveryWebhooks(r.Context(), instanceID, clientToken, instanceToken, req.Value, req.NotifySentByMe)
+	settings, err := h.service.UpdateEveryWebhooks(ctx, instanceID, clientToken, instanceToken, req.Value, req.NotifySentByMe)
 	if err != nil {
-		h.handleServiceError(w, err)
+		h.handleServiceError(ctx, w, err)
 		return
 	}
 	respondJSON(w, http.StatusOK, webhookUpdateResponse{Value: true, Webhooks: settings})
 }
 
 func (h *InstanceHandler) updateWebhookWithValue(w http.ResponseWriter, r *http.Request, updater func(context.Context, uuid.UUID, string, string, string) (*instances.WebhookSettings, error)) {
+	ctx := r.Context()
 	instanceID, ok := h.parseInstanceID(w, r)
 	if !ok {
 		return
 	}
+	ctx = internallogging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
 	instanceToken := chi.URLParam(r, "token")
 	clientToken := r.Header.Get("Client-Token")
 
@@ -220,39 +235,43 @@ func (h *InstanceHandler) updateWebhookWithValue(w http.ResponseWriter, r *http.
 		respondError(w, http.StatusBadRequest, "invalid json payload")
 		return
 	}
-	settings, err := updater(r.Context(), instanceID, clientToken, instanceToken, req.Value)
+	settings, err := updater(ctx, instanceID, clientToken, instanceToken, req.Value)
 	if err != nil {
-		h.handleServiceError(w, err)
+		h.handleServiceError(ctx, w, err)
 		return
 	}
 	respondJSON(w, http.StatusOK, webhookUpdateResponse{Value: true, Webhooks: settings})
 }
 
 func (h *InstanceHandler) restart(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	instanceID, ok := h.parseInstanceID(w, r)
 	if !ok {
 		return
 	}
+	ctx = internallogging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
 	instanceToken := chi.URLParam(r, "token")
 	clientToken := r.Header.Get("Client-Token")
 
-	if err := h.service.Restart(r.Context(), instanceID, clientToken, instanceToken); err != nil {
-		h.handleServiceError(w, err)
+	if err := h.service.Restart(ctx, instanceID, clientToken, instanceToken); err != nil {
+		h.handleServiceError(ctx, w, err)
 		return
 	}
 	respondJSON(w, http.StatusAccepted, map[string]string{"status": "restarting"})
 }
 
 func (h *InstanceHandler) disconnect(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	instanceID, ok := h.parseInstanceID(w, r)
 	if !ok {
 		return
 	}
+	ctx = internallogging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
 	instanceToken := chi.URLParam(r, "token")
 	clientToken := r.Header.Get("Client-Token")
 
-	if err := h.service.Disconnect(r.Context(), instanceID, clientToken, instanceToken); err != nil {
-		h.handleServiceError(w, err)
+	if err := h.service.Disconnect(ctx, instanceID, clientToken, instanceToken); err != nil {
+		h.handleServiceError(ctx, w, err)
 		return
 	}
 	respondJSON(w, http.StatusAccepted, map[string]string{"status": "disconnected"})
@@ -268,7 +287,7 @@ func (h *InstanceHandler) parseInstanceID(w http.ResponseWriter, r *http.Request
 	return id, true
 }
 
-func (h *InstanceHandler) handleServiceError(w http.ResponseWriter, err error) {
+func (h *InstanceHandler) handleServiceError(ctx context.Context, w http.ResponseWriter, err error) {
 	if errors.Is(err, instances.ErrInstanceNotFound) {
 		respondError(w, http.StatusNotFound, "instance not found")
 		return
@@ -289,6 +308,7 @@ func (h *InstanceHandler) handleServiceError(w http.ResponseWriter, err error) {
 		respondError(w, http.StatusConflict, "instance already paired")
 		return
 	}
-	h.log.Error("service error", slog.String("error", err.Error()))
+	internallogger := internallogging.ContextLogger(ctx, h.log)
+	internallogger.Error("service error", slog.String("error", err.Error()))
 	respondError(w, http.StatusInternalServerError, "internal error")
 }

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -13,6 +14,7 @@ import (
 	"github.com/google/uuid"
 
 	"go.mau.fi/whatsmeow/api/internal/instances"
+	internallogging "go.mau.fi/whatsmeow/api/internal/logging"
 )
 
 type PartnerHandler struct {
@@ -28,6 +30,7 @@ func (h *PartnerHandler) Register(r chi.Router) {
 	r.Post("/instances/integrator/on-demand", h.createInstance)
 	r.Post("/instances/{instanceId}/token/{token}/integrator/on-demand/subscription", h.subscribeInstance)
 	r.Post("/instances/{instanceId}/token/{token}/integrator/on-demand/cancel", h.cancelInstance)
+	r.Delete("/instances/{instanceId}", h.deleteInstance)
 	r.Get("/instances", h.listInstances)
 }
 
@@ -71,7 +74,8 @@ func (h *PartnerHandler) createInstance(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	inst, err := h.service.CreatePartnerInstance(r.Context(), instances.PartnerCreateParams{
+	ctx := r.Context()
+	inst, err := h.service.CreatePartnerInstance(ctx, instances.PartnerCreateParams{
 		Name:                        req.Name,
 		SessionName:                 req.SessionName,
 		DeliveryCallbackURL:         req.DeliveryCallbackURL,
@@ -89,7 +93,8 @@ func (h *PartnerHandler) createInstance(w http.ResponseWriter, r *http.Request) 
 		BusinessDevice:              req.BusinessDevice,
 	})
 	if err != nil {
-		h.log.Error("partner create instance", slog.String("error", err.Error()))
+		logger := internallogging.ContextLogger(ctx, h.log)
+		logger.Error("partner create instance", slog.String("error", err.Error()))
 		respondError(w, http.StatusInternalServerError, "failed to create instance")
 		return
 	}
@@ -115,8 +120,9 @@ func (h *PartnerHandler) subscribeInstance(w http.ResponseWriter, r *http.Reques
 	if !ok {
 		return
 	}
-	if err := h.service.SubscribeInstance(r.Context(), instanceID, instanceToken); err != nil {
-		h.handleServiceError(w, err)
+	ctx := internallogging.WithAttrs(r.Context(), slog.String("instance_id", instanceID.String()))
+	if err := h.service.SubscribeInstance(ctx, instanceID, instanceToken); err != nil {
+		h.handleServiceError(ctx, w, err)
 		return
 	}
 	respondJSON(w, http.StatusOK, map[string]string{"status": "subscribed"})
@@ -127,11 +133,29 @@ func (h *PartnerHandler) cancelInstance(w http.ResponseWriter, r *http.Request) 
 	if !ok {
 		return
 	}
-	if err := h.service.CancelInstance(r.Context(), instanceID, instanceToken); err != nil {
-		h.handleServiceError(w, err)
+	ctx := internallogging.WithAttrs(r.Context(), slog.String("instance_id", instanceID.String()))
+	if err := h.service.CancelInstance(ctx, instanceID, instanceToken); err != nil {
+		h.handleServiceError(ctx, w, err)
 		return
 	}
 	respondJSON(w, http.StatusOK, map[string]string{"status": "canceled"})
+}
+
+func (h *PartnerHandler) deleteInstance(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "instanceId")
+	instanceID, err := uuid.Parse(idStr)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, "invalid instance id")
+		return
+	}
+
+	ctx := internallogging.WithAttrs(r.Context(), slog.String("instance_id", instanceID.String()))
+	if err := h.service.DeleteInstance(ctx, instanceID); err != nil {
+		h.handleServiceError(ctx, w, err)
+		return
+	}
+
+	respondJSON(w, http.StatusOK, map[string]string{"status": "deleted"})
 }
 
 func (h *PartnerHandler) listInstances(w http.ResponseWriter, r *http.Request) {
@@ -143,9 +167,11 @@ func (h *PartnerHandler) listInstances(w http.ResponseWriter, r *http.Request) {
 		Page:       page,
 		PageSize:   pageSize,
 	}
-	result, err := h.service.ListInstances(r.Context(), filter)
+	ctx := r.Context()
+	result, err := h.service.ListInstances(ctx, filter)
 	if err != nil {
-		h.log.Error("partner list instances", slog.String("error", err.Error()))
+		logger := internallogging.ContextLogger(ctx, h.log)
+		logger.Error("partner list instances", slog.String("error", err.Error()))
 		respondError(w, http.StatusInternalServerError, "failed to list instances")
 		return
 	}
@@ -167,7 +193,7 @@ func (h *PartnerHandler) parseInstancePath(w http.ResponseWriter, r *http.Reques
 	return id, token, true
 }
 
-func (h *PartnerHandler) handleServiceError(w http.ResponseWriter, err error) {
+func (h *PartnerHandler) handleServiceError(ctx context.Context, w http.ResponseWriter, err error) {
 	if errors.Is(err, instances.ErrInstanceNotFound) {
 		respondError(w, http.StatusNotFound, "instance not found")
 		return
@@ -180,6 +206,7 @@ func (h *PartnerHandler) handleServiceError(w http.ResponseWriter, err error) {
 		respondError(w, http.StatusForbidden, "instance subscription inactive")
 		return
 	}
-	h.log.Error("partner service error", slog.String("error", err.Error()))
+	logger := internallogging.ContextLogger(ctx, h.log)
+	logger.Error("partner service error", slog.String("error", err.Error()))
 	respondError(w, http.StatusInternalServerError, "internal error")
 }

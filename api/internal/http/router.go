@@ -47,14 +47,6 @@ func NewRouter(deps RouterDeps) http.Handler {
 	if deps.HealthHandler != nil {
 		r.Get("/health", deps.HealthHandler.Health)
 		r.Get("/ready", deps.HealthHandler.Ready)
-		r.Get("/healthz", deps.HealthHandler.Health)
-		r.Get("/readyz", deps.HealthHandler.Ready)
-	} else {
-
-		r.Get("/healthz", func(w http.ResponseWriter, _ *http.Request) {
-			w.WriteHeader(http.StatusOK)
-			_, _ = w.Write([]byte("ok"))
-		})
 	}
 
 	r.Method(http.MethodGet, "/metrics", promhttp.Handler())

@@ -14,6 +14,7 @@ import (
 	"github.com/skip2/go-qrcode"
 
 	whatsmeowpkg "go.mau.fi/whatsmeow"
+	"go.mau.fi/whatsmeow/api/internal/logging"
 	"go.mau.fi/whatsmeow/api/internal/whatsmeow"
 )
 
@@ -52,17 +53,23 @@ func (s *Service) Create(ctx context.Context, params CreateParams) (*Instance, e
 	}
 	inst.Middleware = "web"
 
+	ctx = logging.WithAttrs(ctx, slog.String("instance_id", inst.ID.String()))
+	logger := logging.ContextLogger(ctx, s.log)
+
 	if err := s.repo.Insert(ctx, &inst); err != nil {
 		return nil, err
 	}
 
-	go func(instance Instance) {
-		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	go func(instance Instance, baseLogger *slog.Logger) {
+		bgCtx := logging.WithLogger(context.Background(), baseLogger)
+		ctx, cancel := context.WithTimeout(bgCtx, 30*time.Second)
 		defer cancel()
 		if _, _, err := s.registry.EnsureClient(ctx, toInstanceInfo(instance)); err != nil {
-			s.log.Error("ensure client", slog.String("instanceId", instance.ID.String()), slog.String("error", err.Error()))
+			baseLogger.Error("ensure client",
+				slog.String("instance_id", instance.ID.String()),
+				slog.String("error", err.Error()))
 		}
-	}(inst)
+	}(inst, logger)
 
 	return &inst, nil
 }
@@ -109,7 +116,19 @@ func (s *Service) Disconnect(ctx context.Context, id uuid.UUID, clientToken, ins
 	if !s.tokensMatch(inst, clientToken, instanceToken) {
 		return ErrUnauthorized
 	}
-	return s.registry.Disconnect(ctx, toInstanceInfo(*inst))
+
+	if err := s.registry.Disconnect(ctx, toInstanceInfo(*inst)); err != nil {
+		return err
+	}
+
+	if err := s.repo.UpdateStoreJID(ctx, id, nil); err != nil {
+		logger := logging.ContextLogger(ctx, s.log)
+		logger.Error("failed to clear store jid after disconnect",
+			slog.String("instance_id", id.String()),
+			slog.String("error", err.Error()))
+	}
+
+	return nil
 }
 
 func (s *Service) GetQRCode(ctx context.Context, id uuid.UUID, clientToken, instanceToken string) (string, error) {
@@ -178,32 +197,25 @@ func (s *Service) ReconcileDetachedStores(ctx context.Context) ([]uuid.UUID, err
 		return nil, nil
 	}
 
+	logger := logging.ContextLogger(ctx, s.log)
 	cleaned := make([]uuid.UUID, 0)
 	for _, link := range links {
-		exists, checkErr := s.registry.HasStoreDevice(ctx, link.StoreJID)
+		instanceLogger := logger.With(
+			slog.String("instance_id", link.ID.String()),
+			slog.String("store_jid", link.StoreJID),
+		)
+		loopCtx := logging.WithAttrs(ctx, slog.String("instance_id", link.ID.String()))
+		exists, checkErr := s.registry.HasStoreDevice(loopCtx, link.StoreJID)
 		if checkErr != nil {
-			s.log.Error(
-				"check store device",
-				slog.String("instanceId", link.ID.String()),
-				slog.String("storeJid", link.StoreJID),
-				slog.String("error", checkErr.Error()),
-			)
+			instanceLogger.Error("check store device", slog.String("error", checkErr.Error()))
 		}
 		if checkErr != nil || !exists {
 			s.registry.RemoveClient(link.ID, "reconcile_missing_store")
-			if err := s.repo.UpdateStoreJID(ctx, link.ID, nil); err != nil {
-				s.log.Error(
-					"clear store jid",
-					slog.String("instanceId", link.ID.String()),
-					slog.String("error", err.Error()),
-				)
+			if err := s.repo.UpdateStoreJID(loopCtx, link.ID, nil); err != nil {
+				instanceLogger.Error("clear store jid", slog.String("error", err.Error()))
 				continue
 			}
-			s.log.Info(
-				"reconciled missing store",
-				slog.String("instanceId", link.ID.String()),
-				slog.String("storeJid", link.StoreJID),
-			)
+			instanceLogger.Info("reconciled missing store")
 			cleaned = append(cleaned, link.ID)
 		}
 	}
@@ -395,6 +407,9 @@ func (s *Service) CreatePartnerInstance(ctx context.Context, params PartnerCreat
 		return nil, err
 	}
 
+	ctx = logging.WithAttrs(ctx, slog.String("instance_id", inst.ID.String()))
+	logger := logging.ContextLogger(ctx, s.log)
+
 	cfg := WebhookConfig{
 		InstanceID:          inst.ID,
 		DeliveryURL:         delivery,
@@ -411,13 +426,16 @@ func (s *Service) CreatePartnerInstance(ctx context.Context, params PartnerCreat
 	}
 	inst.Webhooks = toWebhookSettings(&cfg)
 
-	go func(instance Instance) {
-		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	go func(instance Instance, baseLogger *slog.Logger) {
+		bgCtx := logging.WithLogger(context.Background(), baseLogger)
+		ctx, cancel := context.WithTimeout(bgCtx, 30*time.Second)
 		defer cancel()
 		if _, _, err := s.registry.EnsureClient(ctx, toInstanceInfo(instance)); err != nil {
-			s.log.Error("ensure client", slog.String("instanceId", instance.ID.String()), slog.String("error", err.Error()))
+			baseLogger.Error("ensure client",
+				slog.String("instance_id", instance.ID.String()),
+				slog.String("error", err.Error()))
 		}
-	}(inst)
+	}(inst, logger)
 
 	if inst.IsDevice {
 		inst.Middleware = "mobile"
@@ -447,6 +465,29 @@ func (s *Service) CancelInstance(ctx context.Context, id uuid.UUID, instanceToke
 	if inst, err := s.repo.GetByID(ctx, id); err == nil {
 		_ = s.registry.Disconnect(cancelCtx, toInstanceInfo(*inst))
 	}
+	return nil
+}
+
+func (s *Service) DeleteInstance(ctx context.Context, id uuid.UUID) error {
+	inst, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	deleteCtx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	s.registry.ResetClient(id, "instance_deleted")
+
+	if err := s.repo.Delete(deleteCtx, id); err != nil {
+		return fmt.Errorf("delete instance from database: %w", err)
+	}
+
+	logger := logging.ContextLogger(ctx, s.log)
+	logger.Info("instance permanently deleted",
+		slog.String("instance_id", id.String()),
+		slog.String("name", inst.Name))
+
 	return nil
 }
 
