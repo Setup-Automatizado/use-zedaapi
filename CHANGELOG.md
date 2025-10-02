@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0](https://github.com/Funnelchat20/whatsapp-api-golang/compare/v1.0.5...v1.1.0) (2025-10-02)
+
+### ✨ Features
+
+* add docker dev workflow ([8c6249c](https://github.com/Funnelchat20/whatsapp-api-golang/commit/8c6249c31640d983bde0c7e3aee185a2dd785b0e))
+* harden registry lifecycle and health checks ([008b1c8](https://github.com/Funnelchat20/whatsapp-api-golang/commit/008b1c8dd2f07a4738c919f3c794616e3dd55266))
+
 ## [1.0.5](https://github.com/Funnelchat20/whatsapp-api-golang/compare/v1.0.4...v1.0.5) (2025-10-01)
 
 ### 🐛 Bug Fixes
