@@ -14,7 +14,6 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/instances"
 )
 
-// InstanceHandler exposes HTTP endpoints for managing instances.
 type InstanceHandler struct {
 	service *instances.Service
 	log     *slog.Logger
@@ -24,7 +23,6 @@ func NewInstanceHandler(service *instances.Service, log *slog.Logger) *InstanceH
 	return &InstanceHandler{service: service, log: log}
 }
 
-// Register mounts routes under /instances.
 func (h *InstanceHandler) Register(r chi.Router) {
 	r.Route("/instances/{instanceId}/token/{token}", func(r chi.Router) {
 		r.Get("/status", h.getStatus)

@@ -14,7 +14,6 @@ import (
 
 var ErrInstanceNotFound = errors.New("instance not found")
 
-// Repository handles persistence of instances and related configuration.
 type Repository struct {
 	pool *pgxpool.Pool
 }
@@ -23,13 +22,10 @@ func NewRepository(pool *pgxpool.Pool) *Repository {
 	return &Repository{pool: pool}
 }
 
-// StoreLink represents the association between an instance and its Whatsmeow store JID.
 type StoreLink struct {
 	ID       uuid.UUID
 	StoreJID string
 }
-
-// Insert stores a new instance record.
 
 func (r *Repository) Insert(ctx context.Context, inst *Instance) error {
 	query := `INSERT INTO instances (
@@ -57,8 +53,6 @@ func (r *Repository) Insert(ctx context.Context, inst *Instance) error {
 	}
 	return nil
 }
-
-// GetByID retrieves an instance by ID.
 
 func (r *Repository) GetByID(ctx context.Context, id uuid.UUID) (*Instance, error) {
 	query := `SELECT id, name, session_name, client_token, instance_token, store_jid, is_device, business_device, subscription_active, canceled_at, call_reject_auto, call_reject_message, auto_read_message, created_at, updated_at
@@ -101,7 +95,6 @@ func (r *Repository) GetByID(ctx context.Context, id uuid.UUID) (*Instance, erro
 	return &inst, nil
 }
 
-// UpdateStoreJID persists the WhatsApp JID after successful pairing.
 func (r *Repository) UpdateStoreJID(ctx context.Context, id uuid.UUID, jid *string) error {
 	query := `UPDATE instances SET store_jid=$2 WHERE id=$1`
 	res, err := r.pool.Exec(ctx, query, id, jid)
@@ -114,7 +107,6 @@ func (r *Repository) UpdateStoreJID(ctx context.Context, id uuid.UUID, jid *stri
 	return nil
 }
 
-// VerifyToken ensures the provided token belongs to the instance.
 func (r *Repository) VerifyToken(ctx context.Context, id uuid.UUID, token string) error {
 	query := `SELECT 1 FROM instances WHERE id=$1 AND instance_token=$2`
 	row := r.pool.QueryRow(ctx, query, id, token)
@@ -128,7 +120,6 @@ func (r *Repository) VerifyToken(ctx context.Context, id uuid.UUID, token string
 	return nil
 }
 
-// UpdateSubscription toggles subscription state for an instance.
 func (r *Repository) UpdateSubscription(ctx context.Context, id uuid.UUID, active bool) error {
 	query := `UPDATE instances SET subscription_active=$2, canceled_at=$3, updated_at=NOW() WHERE id=$1`
 	var canceledAt interface{}
@@ -146,7 +137,6 @@ func (r *Repository) UpdateSubscription(ctx context.Context, id uuid.UUID, activ
 	return nil
 }
 
-// List returns a paginated set of instances.
 func (r *Repository) List(ctx context.Context, filter ListFilter) ([]Instance, int64, error) {
 	search := strings.TrimSpace(filter.Query)
 	if filter.Page <= 0 {
@@ -246,7 +236,6 @@ func (r *Repository) List(ctx context.Context, filter ListFilter) ([]Instance, i
 	return instances, total, nil
 }
 
-// ListInstancesWithStoreJID returns instances that reference a Whatsmeow store JID.
 func (r *Repository) ListInstancesWithStoreJID(ctx context.Context) ([]StoreLink, error) {
 	rows, err := r.pool.Query(ctx, `SELECT id, store_jid FROM instances WHERE store_jid IS NOT NULL AND store_jid <> ''`)
 	if err != nil {

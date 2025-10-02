@@ -6,8 +6,6 @@ import (
 	"strings"
 )
 
-// New returns a JSON slog.Logger configured with the provided level.
-// Defaults to INFO when the level is unknown.
 func New(level string) *slog.Logger {
 	var lvl slog.Level
 	switch strings.ToUpper(level) {

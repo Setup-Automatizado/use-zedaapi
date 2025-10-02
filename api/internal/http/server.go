@@ -8,13 +8,11 @@ import (
 	"log/slog"
 )
 
-// Server wraps net/http.Server with graceful shutdown helpers.
 type Server struct {
 	srv *http.Server
 	log *slog.Logger
 }
 
-// NewServer builds a configured HTTP server.
 func NewServer(handler http.Handler, addr string, readHeaderTimeout, readTimeout, writeTimeout, idleTimeout time.Duration, maxHeaderBytes int, log *slog.Logger) *Server {
 	s := &http.Server{
 		Addr:              addr,
@@ -28,7 +26,6 @@ func NewServer(handler http.Handler, addr string, readHeaderTimeout, readTimeout
 	return &Server{srv: s, log: log}
 }
 
-// Run starts the HTTP server and blocks until the context is cancelled or the server exits.
 func (s *Server) Run(ctx context.Context) error {
 	serverErr := make(chan error, 1)
 	go func() {

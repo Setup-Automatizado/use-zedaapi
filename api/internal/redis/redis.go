@@ -14,7 +14,6 @@ type Config struct {
 	TLSEnabled bool
 }
 
-// NewClient returns a configured Redis client.
 func NewClient(cfg Config) *redis.Client {
 	options := &redis.Options{
 		Addr:     cfg.Addr,

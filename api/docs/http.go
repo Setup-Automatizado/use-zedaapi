@@ -46,7 +46,6 @@ const swaggerUIHTML = `<!DOCTYPE html>
   </body>
 </html>`
 
-// YAMLHandler serves the OpenAPI document in YAML form.
 func YAMLHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/yaml")
@@ -55,7 +54,6 @@ func YAMLHandler() http.Handler {
 	})
 }
 
-// JSONHandler serves the OpenAPI document in JSON form.
 func JSONHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		jsonOnce.Do(func() {
@@ -75,7 +73,6 @@ func JSONHandler() http.Handler {
 	})
 }
 
-// UIHandler serves the Swagger UI referencing the local OpenAPI spec.
 func UIHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")

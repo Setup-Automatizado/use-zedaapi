@@ -15,7 +15,6 @@ import (
 //go:embed *.sql
 var files embed.FS
 
-// Apply executes pending SQL migrations stored in this package.
 func Apply(ctx context.Context, pool *pgxpool.Pool, logger *slog.Logger) error {
 	conn, err := pool.Acquire(ctx)
 	if err != nil {

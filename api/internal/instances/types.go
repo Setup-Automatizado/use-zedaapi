@@ -6,7 +6,6 @@ import (
 	"github.com/google/uuid"
 )
 
-// Instance represents a WhatsApp integration managed by the API.
 type Instance struct {
 	ID                 uuid.UUID        `json:"instanceId"`
 	Name               string           `json:"name"`
@@ -41,7 +40,6 @@ type WebhookSettings struct {
 	NotifySentByMe      bool    `json:"notifySentByMe"`
 }
 
-// Status encapsulates runtime information returned to clients.
 type Status struct {
 	Connected          bool      `json:"connected"`
 	StoreJID           *string   `json:"storeJid,omitempty"`
@@ -66,7 +64,6 @@ type ListResult struct {
 	Total    int64      `json:"total"`
 }
 
-// CreateParams groups optional metadata when provisioning a new instance.
 type CreateParams struct {
 	Name string `json:"name"`
 }

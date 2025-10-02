@@ -15,7 +15,6 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/instances"
 )
 
-// PartnerHandler exposes endpoints for partner integrator flows.
 type PartnerHandler struct {
 	service *instances.Service
 	log     *slog.Logger

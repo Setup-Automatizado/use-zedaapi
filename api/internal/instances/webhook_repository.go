@@ -9,7 +9,6 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-// WebhookConfig represents the webhook endpoints for an instance.
 type WebhookConfig struct {
 	InstanceID          uuid.UUID
 	DeliveryURL         *string
@@ -22,7 +21,6 @@ type WebhookConfig struct {
 	NotifySentByMe      bool
 }
 
-// UpsertWebhookConfig stores webhook URLs in the database.
 func (r *Repository) UpsertWebhookConfig(ctx context.Context, cfg WebhookConfig) error {
 	query := `
         INSERT INTO webhook_configs (

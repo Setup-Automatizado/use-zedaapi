@@ -7,7 +7,6 @@ import (
 	sentryhttp "github.com/getsentry/sentry-go/http"
 )
 
-// Init configures the global Sentry SDK and returns an HTTP handler middleware.
 func Init(dsn, environment, release string) (*sentryhttp.Handler, error) {
 	if dsn == "" {
 		return nil, nil

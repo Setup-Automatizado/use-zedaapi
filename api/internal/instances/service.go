@@ -26,7 +26,6 @@ var (
 	ErrInstanceAlreadyPaired = errors.New("instance already paired")
 )
 
-// Service exposes business operations for managing instances.
 type Service struct {
 	repo     *Repository
 	registry *whatsmeow.ClientRegistry
@@ -37,7 +36,6 @@ func NewService(repo *Repository, registry *whatsmeow.ClientRegistry, log *slog.
 	return &Service{repo: repo, registry: registry, log: log}
 }
 
-// Create provisions a new instance and primes the Whatsmeow client for QR pairing.
 func (s *Service) Create(ctx context.Context, params CreateParams) (*Instance, error) {
 	inst := Instance{
 		ID:              uuid.New(),
@@ -58,7 +56,6 @@ func (s *Service) Create(ctx context.Context, params CreateParams) (*Instance, e
 		return nil, err
 	}
 
-	// warm up client asynchronously
 	go func(instance Instance) {
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
@@ -70,7 +67,6 @@ func (s *Service) Create(ctx context.Context, params CreateParams) (*Instance, e
 	return &inst, nil
 }
 
-// GetStatus verifies tokens and returns runtime information.
 func (s *Service) GetStatus(ctx context.Context, id uuid.UUID, clientToken, instanceToken string) (*Status, error) {
 	inst, err := s.repo.GetByID(ctx, id)
 	if err != nil {
@@ -91,7 +87,6 @@ func (s *Service) GetStatus(ctx context.Context, id uuid.UUID, clientToken, inst
 	}, nil
 }
 
-// Restart forces reconnect for the instance.
 func (s *Service) Restart(ctx context.Context, id uuid.UUID, clientToken, instanceToken string) error {
 	inst, err := s.repo.GetByID(ctx, id)
 	if err != nil {
@@ -106,7 +101,6 @@ func (s *Service) Restart(ctx context.Context, id uuid.UUID, clientToken, instan
 	return s.registry.Restart(ctx, toInstanceInfo(*inst))
 }
 
-// Disconnect terminates the connection gracefully.
 func (s *Service) Disconnect(ctx context.Context, id uuid.UUID, clientToken, instanceToken string) error {
 	inst, err := s.repo.GetByID(ctx, id)
 	if err != nil {
@@ -118,7 +112,6 @@ func (s *Service) Disconnect(ctx context.Context, id uuid.UUID, clientToken, ins
 	return s.registry.Disconnect(ctx, toInstanceInfo(*inst))
 }
 
-// GetQRCode obtains a QR code for pairing the instance.
 func (s *Service) GetQRCode(ctx context.Context, id uuid.UUID, clientToken, instanceToken string) (string, error) {
 	inst, err := s.repo.GetByID(ctx, id)
 	if err != nil {
@@ -176,7 +169,6 @@ func (s *Service) GetPhoneCode(ctx context.Context, id uuid.UUID, clientToken, i
 	return code, nil
 }
 
-// ReconcileDetachedStores ensures the API metadata matches the Whatsmeow store content.
 func (s *Service) ReconcileDetachedStores(ctx context.Context) ([]uuid.UUID, error) {
 	links, err := s.repo.ListInstancesWithStoreJID(ctx)
 	if err != nil {

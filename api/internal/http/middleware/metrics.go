@@ -11,7 +11,6 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/observability"
 )
 
-// PrometheusMiddleware records HTTP metrics for each request.
 func PrometheusMiddleware(metrics *observability.Metrics) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

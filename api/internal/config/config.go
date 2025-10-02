@@ -8,7 +8,6 @@ import (
 	"time"
 )
 
-// Config aggregates all runtime settings for the API service.
 type Config struct {
 	AppEnv string
 
@@ -73,7 +72,6 @@ type Config struct {
 	}
 }
 
-// Load reads environment variables and populates Config with sane defaults.
 func Load() (Config, error) {
 	var cfg Config
 
