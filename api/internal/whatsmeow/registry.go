@@ -28,7 +28,11 @@ import (
 	"go.mau.fi/whatsmeow/types/events"
 	waLog "go.mau.fi/whatsmeow/util/log"
 
+	internalevents "go.mau.fi/whatsmeow/api/internal/events"
+	"go.mau.fi/whatsmeow/api/internal/events/dispatch"
+	"go.mau.fi/whatsmeow/api/internal/events/media"
 	"go.mau.fi/whatsmeow/api/internal/locks"
+	"go.mau.fi/whatsmeow/api/internal/observability"
 )
 
 type StoreLink struct {
@@ -79,7 +83,10 @@ type ClientRegistry struct {
 	splitBrainRunning bool
 	splitBrainMu      sync.Mutex
 
-	splitBrainCounter func()
+	metrics             ClientRegistryMetrics
+	eventIntegration    *internalevents.IntegrationHelper
+	dispatchCoordinator *dispatch.Coordinator
+	mediaCoordinator    *media.MediaCoordinator
 }
 
 type clientState struct {
@@ -94,6 +101,16 @@ type clientState struct {
 	lock              locks.Lock
 	lockRefreshCancel context.CancelFunc
 	lockMode          string
+}
+
+type ClientRegistryMetrics struct {
+	SplitBrainDetected    func()
+	SplitBrainInvalidLock func(instanceID string)
+}
+
+type lockReacquireMetrics interface {
+	RecordLockReacquire(instanceID, result string)
+	RecordLockReacquireFallback(instanceID string, state locks.CircuitState)
 }
 
 type noOpLock struct{}
@@ -135,6 +152,9 @@ func NewClientRegistry(
 	logger *slog.Logger,
 	pairCallback func(context.Context, uuid.UUID, string) error,
 	resetCallback func(context.Context, uuid.UUID, string) error,
+	eventIntegration *internalevents.IntegrationHelper,
+	dispatchCoordinator *dispatch.Coordinator,
+	mediaCoordinator *media.MediaCoordinator,
 ) (*ClientRegistry, error) {
 	if logger == nil {
 		logger = slog.New(slog.NewJSONHandler(os.Stdout, nil))
@@ -159,16 +179,19 @@ func NewClientRegistry(
 
 	hostname, _ := os.Hostname()
 	return &ClientRegistry{
-		log:           logger,
-		workerID:      hostname,
-		container:     container,
-		lockManager:   lockManager,
-		repo:          repo,
-		pairCallback:  pairCallback,
-		resetCallback: resetCallback,
-		logLevel:      logLevel,
-		clients:       make(map[uuid.UUID]*clientState),
-		activeLocks:   make(map[uuid.UUID]locks.Lock),
+		log:                 logger,
+		workerID:            hostname,
+		container:           container,
+		lockManager:         lockManager,
+		repo:                repo,
+		pairCallback:        pairCallback,
+		resetCallback:       resetCallback,
+		logLevel:            logLevel,
+		clients:             make(map[uuid.UUID]*clientState),
+		activeLocks:         make(map[uuid.UUID]locks.Lock),
+		eventIntegration:    eventIntegration,
+		dispatchCoordinator: dispatchCoordinator,
+		mediaCoordinator:    mediaCoordinator,
 	}, nil
 }
 
@@ -389,21 +412,39 @@ func (r *ClientRegistry) startLockRefresh(instanceID uuid.UUID, lock locks.Lock,
 		return func() {}
 	}
 
-	ctx, cancel := context.WithCancel(context.Background())
+	workerCtx := observability.AsyncContext(observability.AsyncContextOptions{
+		Logger:     r.log,
+		Component:  "client_registry",
+		Worker:     "lock_refresh",
+		InstanceID: instanceID.String(),
+		Extra: []slog.Attr{
+			slog.String("lock_mode", lockMode),
+		},
+	})
+	baseLogger := r.log.With(
+		slog.String("component", "client_registry"),
+		slog.String("worker", "lock_refresh"),
+		slog.String("instance_id", instanceID.String()),
+		slog.String("lock_mode", lockMode),
+	)
+
+	var metricsReporter lockReacquireMetrics
+	if reporter, ok := r.lockManager.(lockReacquireMetrics); ok {
+		metricsReporter = reporter
+	}
+
+	ctx, cancel := context.WithCancel(workerCtx)
 
 	go func() {
 		ticker := time.NewTicker(10 * time.Second)
 		defer ticker.Stop()
 
-		r.log.Debug("started lock refresh goroutine",
-			slog.String("instanceId", instanceID.String()),
-			slog.String("lockMode", lockMode))
+		baseLogger.Debug("started lock refresh goroutine")
 
 		for {
 			select {
 			case <-ctx.Done():
-				r.log.Debug("stopping lock refresh goroutine",
-					slog.String("instanceId", instanceID.String()))
+				baseLogger.Debug("stopping lock refresh goroutine")
 				return
 
 			case <-ticker.C:
@@ -415,6 +456,8 @@ func (r *ClientRegistry) startLockRefresh(instanceID uuid.UUID, lock locks.Lock,
 				}
 				r.mu.RUnlock()
 
+				iterationLogger := baseLogger.With(slog.String("current_lock_mode", currentLockMode))
+
 				if currentLockMode == "local" && stateExists {
 					type circuitStateChecker interface {
 						GetState() locks.CircuitState
@@ -423,14 +466,11 @@ func (r *ClientRegistry) startLockRefresh(instanceID uuid.UUID, lock locks.Lock,
 					if checker, ok := r.lockManager.(circuitStateChecker); ok {
 						circuitState := checker.GetState()
 
-						r.log.Debug("checking circuit breaker state for lock reacquisition",
-							slog.String("instanceId", instanceID.String()),
-							slog.String("currentLockMode", currentLockMode),
-							slog.Int("circuitState", int(circuitState)))
+						iterationLogger.Debug("checking circuit breaker state for lock reacquisition",
+							slog.Int("circuit_state", int(circuitState)))
 
-						if circuitState == 0 {
-							r.log.Info("Redis recovered - attempting to reacquire real lock",
-								slog.String("instanceId", instanceID.String()))
+						if circuitState == locks.StateClosed {
+							iterationLogger.Info("Redis recovered - attempting to reacquire real lock")
 
 							lockKey := fmt.Sprintf("funnelchat:instance:%s", instanceID.String())
 
@@ -439,7 +479,8 @@ func (r *ClientRegistry) startLockRefresh(instanceID uuid.UUID, lock locks.Lock,
 							var acquireErr error
 
 							for attempt := 1; attempt <= 3; attempt++ {
-								acquireCtx, acquireCancel := context.WithTimeout(context.Background(), 3*time.Second)
+								attemptLogger := iterationLogger.With(slog.Int("attempt", attempt))
+								acquireCtx, acquireCancel := context.WithTimeout(workerCtx, 3*time.Second)
 								newLock, acquired, acquireErr = r.lockManager.Acquire(acquireCtx, lockKey, 30)
 								acquireCancel()
 
@@ -447,78 +488,85 @@ func (r *ClientRegistry) startLockRefresh(instanceID uuid.UUID, lock locks.Lock,
 									lockToken := newLock.GetValue()
 
 									if lockToken == "" {
-										r.log.Debug("lock reacquisition returned fallback lock - circuit breaker not ready",
-											slog.String("instanceId", instanceID.String()),
-											slog.Int("attempt", attempt),
+										attemptLogger.Debug("lock reacquisition returned fallback lock - circuit breaker not ready",
 											slog.String("reason", "empty_token"))
-
+										if metricsReporter != nil {
+											metricsReporter.RecordLockReacquire(instanceID.String(), observability.LockReacquireResultFallback)
+											metricsReporter.RecordLockReacquireFallback(instanceID.String(), circuitState)
+										}
 										if attempt < 3 {
 											backoff := time.Duration(attempt*attempt) * 100 * time.Millisecond
-											r.log.Debug("waiting before retry",
-												slog.String("instanceId", instanceID.String()),
-												slog.String("backoff", backoff.String()))
+											attemptLogger.Debug("waiting before retry", slog.String("backoff", backoff.String()))
 											time.Sleep(backoff)
 										}
 										continue
 									}
 
-									r.log.Info("successfully reacquired Redis lock after recovery",
-										slog.String("instanceId", instanceID.String()),
-										slog.Int("attempt", attempt),
-										slog.String("lockToken", func() string {
+									attemptLogger.Info("successfully reacquired Redis lock after recovery",
+										slog.String("lock_token", func() string {
 											if len(lockToken) > 8 {
 												return lockToken[:8] + "..."
 											}
 											return lockToken
 										}()))
+									if metricsReporter != nil {
+										metricsReporter.RecordLockReacquire(instanceID.String(), observability.LockReacquireResultSuccess)
+									}
 
 									r.mu.Lock()
 									r.activeLocksMu.Lock()
 									if state, exists := r.clients[instanceID]; exists && state != nil {
 										if state.lock != nil {
-											state.lock.Release(context.Background())
+											_ = state.lock.Release(context.Background())
 										}
 
 										state.lock = newLock
 										state.lockMode = "redis"
-
 										r.activeLocks[instanceID] = newLock
 									}
 									r.activeLocksMu.Unlock()
 									r.mu.Unlock()
 
 									lock = newLock
+									currentLockMode = "redis"
+									iterationLogger = baseLogger.With(slog.String("current_lock_mode", currentLockMode))
 									break
+								}
+
+								if metricsReporter != nil {
+									metricsReporter.RecordLockReacquire(instanceID.String(), observability.LockReacquireResultFailure)
 								}
 
 								if attempt < 3 {
 									backoff := time.Duration(attempt*attempt) * 100 * time.Millisecond
-									r.log.Debug("lock reacquisition failed, retrying",
-										slog.String("instanceId", instanceID.String()),
-										slog.Int("attempt", attempt),
+									attemptLogger.Debug("lock reacquisition failed, retrying",
 										slog.String("backoff", backoff.String()),
 										slog.String("error", func() string {
 											if acquireErr != nil {
 												return acquireErr.Error()
 											}
-											return "lock not acquired"
+											if !acquired {
+												return "lock not acquired"
+											}
+											return "unknown error"
 										}()))
 									time.Sleep(backoff)
 								}
 							}
 
 							if acquireErr != nil || !acquired || newLock == nil {
-								r.log.Warn("failed to reacquire Redis lock after recovery (all attempts)",
-									slog.String("instanceId", instanceID.String()),
-									slog.String("error", func() string {
-										if acquireErr != nil {
-											return acquireErr.Error()
-										}
-										if !acquired {
-											return "lock held by another replica"
-										}
-										return "unknown error"
-									}()))
+								reportErr := acquireErr
+								if reportErr == nil {
+									if !acquired {
+										reportErr = errors.New("lock reacquisition unsuccessful: lock held by another replica")
+									} else {
+										reportErr = errors.New("lock reacquisition unsuccessful: nil lock returned")
+									}
+								}
+
+								iterationLogger.Warn("failed to reacquire Redis lock after recovery (all attempts)",
+									slog.String("error", reportErr.Error()))
+								observability.CaptureWorkerException(workerCtx, "client_registry", "lock_reacquire", instanceID.String(), reportErr)
 							}
 						}
 					}
@@ -527,14 +575,12 @@ func (r *ClientRegistry) startLockRefresh(instanceID uuid.UUID, lock locks.Lock,
 				currentToken := lock.GetValue()
 
 				if currentToken == "" {
-					r.log.Debug("skipping lock refresh - have noOpLock (fallback mode)",
-						slog.String("instanceId", instanceID.String()),
-						slog.String("lockMode", currentLockMode))
+					iterationLogger.Debug("skipping lock refresh - have noOpLock (fallback mode)")
 					continue
 				}
 
-				refreshCtx, refreshCancel := context.WithTimeout(context.Background(), 2*time.Second)
-				err := lock.Refresh(refreshCtx, 30) // Refresh for 30 seconds
+				refreshCtx, refreshCancel := context.WithTimeout(workerCtx, 2*time.Second)
+				err := lock.Refresh(refreshCtx, 30)
 				refreshCancel()
 
 				if err != nil {
@@ -549,8 +595,7 @@ func (r *ClientRegistry) startLockRefresh(instanceID uuid.UUID, lock locks.Lock,
 						strings.Contains(errStr, "context deadline exceeded")
 
 					if isConnectionError {
-						r.log.Warn("lock refresh failed due to Redis connection issue - switching to local mode",
-							slog.String("instanceId", instanceID.String()),
+						iterationLogger.Warn("lock refresh failed due to Redis connection issue - switching to local mode",
 							slog.String("error", err.Error()))
 
 						r.mu.Lock()
@@ -567,14 +612,14 @@ func (r *ClientRegistry) startLockRefresh(instanceID uuid.UUID, lock locks.Lock,
 					}
 
 					var circuitOpen bool
+					var circuitState locks.CircuitState
 					if checker, ok := r.lockManager.(circuitStateChecker); ok {
-						state := checker.GetState()
-						circuitOpen = (state != 0)
+						circuitState = checker.GetState()
+						circuitOpen = (circuitState != locks.StateClosed)
 					}
 
 					if circuitOpen {
-						r.log.Debug("lock refresh failed but circuit breaker open - continuing",
-							slog.String("instanceId", instanceID.String()),
+						iterationLogger.Debug("lock refresh failed but circuit breaker open - continuing",
 							slog.String("error", err.Error()))
 						r.mu.Lock()
 						if state, exists := r.clients[instanceID]; exists && state != nil {
@@ -582,9 +627,9 @@ func (r *ClientRegistry) startLockRefresh(instanceID uuid.UUID, lock locks.Lock,
 						}
 						r.mu.Unlock()
 					} else {
-						r.log.Error("CRITICAL: lock refresh failed with circuit breaker CLOSED - SPLIT-BRAIN DETECTED",
-							slog.String("instanceId", instanceID.String()),
+						iterationLogger.Error("CRITICAL: lock refresh failed with circuit breaker CLOSED - SPLIT-BRAIN DETECTED",
 							slog.String("error", err.Error()))
+						observability.CaptureWorkerException(workerCtx, "client_registry", "lock_refresh", instanceID.String(), err)
 
 						r.mu.Lock()
 						r.activeLocksMu.Lock()
@@ -603,24 +648,21 @@ func (r *ClientRegistry) startLockRefresh(instanceID uuid.UUID, lock locks.Lock,
 
 							if state.lock != nil {
 								if releaseErr := state.lock.Release(context.Background()); releaseErr != nil {
-									r.log.Warn("failed to release lock after lock loss detection",
-										slog.String("instanceId", instanceID.String()),
+									iterationLogger.Warn("failed to release lock after lock loss detection",
 										slog.String("error", releaseErr.Error()))
 								}
 							}
 
 							if state.client != nil {
 								state.client.Disconnect()
-								r.log.Warn("forcefully disconnected client due to lock loss",
-									slog.String("instanceId", instanceID.String()))
+								iterationLogger.Warn("forcefully disconnected client due to lock loss")
 							}
 						}
 
 						return
 					}
 				} else {
-					r.log.Debug("lock refreshed successfully",
-						slog.String("instanceId", instanceID.String()))
+					iterationLogger.Debug("lock refreshed successfully")
 
 					r.mu.Lock()
 					if state, exists := r.clients[instanceID]; exists && state != nil {
@@ -1040,7 +1082,7 @@ func (r *ClientRegistry) ensurePrimarySignalSession(instanceID uuid.UUID, client
 	}
 	bundle := (*prekey.Bundle)(unsafe.Pointer(bundleField.Pointer()))
 
-	_, _, encErr := client.DangerousInternals().EncryptMessageForDevice(ctx, []byte{0x00}, primaryLID, bundle, nil)
+	_, _, encErr := client.DangerousInternals().EncryptMessageForDevice(ctx, []byte{0x00}, primaryLID, bundle, nil, nil)
 	if encErr != nil {
 		r.log.Debug("failed to prime primary session", slog.String("instanceId", instanceID.String()), slog.String("error", encErr.Error()))
 		return
@@ -1058,8 +1100,57 @@ func (r *ClientRegistry) ensurePrimarySignalSession(instanceID uuid.UUID, client
 
 func (r *ClientRegistry) wrapEventHandler(instanceID uuid.UUID) func(evt interface{}) {
 	return func(evt interface{}) {
+		ctx := context.Background()
+
+		// CRITICAL: Forward ALL events to event system FIRST
+		// This ensures no events are lost regardless of lifecycle processing
+		if r.eventIntegration != nil {
+			eventCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+			r.eventIntegration.WrapEventHandler(eventCtx, instanceID, evt)
+			cancel()
+		}
+
+		// Then handle specific lifecycle events
 		switch e := evt.(type) {
 		case *events.Connected:
+			// Register instance with event system
+			if r.eventIntegration != nil {
+				if err := r.eventIntegration.OnInstanceConnect(ctx, instanceID); err != nil {
+					r.log.Error("failed to register instance with event system",
+						slog.String("instanceId", instanceID.String()),
+						slog.String("error", err.Error()))
+				}
+			}
+
+			// Register instance with dispatch coordinator
+			if r.dispatchCoordinator != nil {
+				if err := r.dispatchCoordinator.RegisterInstance(ctx, instanceID); err != nil {
+					r.log.Error("failed to register instance with dispatch coordinator",
+						slog.String("instanceId", instanceID.String()),
+						slog.String("error", err.Error()))
+				}
+			}
+
+			// Register instance with media coordinator
+			if r.mediaCoordinator != nil {
+				r.mu.RLock()
+				state, ok := r.clients[instanceID]
+				var client *whatsmeow.Client
+				if ok && state != nil {
+					client = state.client
+				}
+				r.mu.RUnlock()
+
+				if client != nil {
+					if err := r.mediaCoordinator.RegisterInstance(instanceID, client); err != nil {
+						r.log.Error("failed to register instance with media coordinator",
+							slog.String("instanceId", instanceID.String()),
+							slog.String("error", err.Error()))
+					}
+				}
+			}
+
+			// Existing connected logic
 			r.mu.Lock()
 			var (
 				client       *whatsmeow.Client
@@ -1078,6 +1169,7 @@ func (r *ClientRegistry) wrapEventHandler(instanceID uuid.UUID) func(evt interfa
 			if client != nil && !sessionReady {
 				r.ensurePrimarySignalSession(instanceID, client)
 			}
+
 		case *events.PairSuccess:
 			jid := e.ID.String()
 			r.mu.Lock()
@@ -1090,34 +1182,75 @@ func (r *ClientRegistry) wrapEventHandler(instanceID uuid.UUID) func(evt interfa
 			r.cleanupPairingSession(instanceID, "success")
 			if r.pairCallback != nil {
 				go func() {
-					ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+					callbackCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 					defer cancel()
-					if err := r.pairCallback(ctx, instanceID, jid); err != nil {
-						r.log.Error("pair callback", slog.String("instanceId", instanceID.String()), slog.String("error", err.Error()))
+					if err := r.pairCallback(callbackCtx, instanceID, jid); err != nil {
+						r.log.Error("pair callback",
+							slog.String("instanceId", instanceID.String()),
+							slog.String("error", err.Error()))
 					}
 				}()
 			}
+
 		case *events.Disconnected:
+			// Flush buffer before disconnect
+			if r.eventIntegration != nil {
+				if err := r.eventIntegration.OnInstanceDisconnect(ctx, instanceID); err != nil {
+					r.log.Warn("failed to flush instance buffer",
+						slog.String("instanceId", instanceID.String()),
+						slog.String("error", err.Error()))
+				}
+			}
+
 			r.log.Warn("instance disconnected", slog.String("instanceId", instanceID.String()))
+
 		case *events.LoggedOut:
+			// Unregister from dispatch coordinator
+			if r.dispatchCoordinator != nil {
+				if err := r.dispatchCoordinator.UnregisterInstance(ctx, instanceID); err != nil {
+					r.log.Error("failed to unregister instance from dispatch coordinator",
+						slog.String("instanceId", instanceID.String()),
+						slog.String("error", err.Error()))
+				}
+			}
+
+			// Unregister from media coordinator
+			if r.mediaCoordinator != nil {
+				if err := r.mediaCoordinator.UnregisterInstance(instanceID); err != nil {
+					r.log.Error("failed to unregister instance from media coordinator",
+						slog.String("instanceId", instanceID.String()),
+						slog.String("error", err.Error()))
+				}
+			}
+
+			// Unregister from event system
+			if r.eventIntegration != nil {
+				if err := r.eventIntegration.OnInstanceRemove(ctx, instanceID); err != nil {
+					r.log.Error("failed to unregister instance from event system",
+						slog.String("instanceId", instanceID.String()),
+						slog.String("error", err.Error()))
+				}
+			}
+
 			reason := "logged_out"
 			if desc := e.Reason.String(); desc != "" {
 				reason = "logged_out:" + desc
 			}
-			r.log.Warn("instance logged out", slog.String("instanceId", instanceID.String()), slog.String("reason", reason))
+			r.log.Warn("instance logged out",
+				slog.String("instanceId", instanceID.String()),
+				slog.String("reason", reason))
 			r.ResetClient(instanceID, reason)
+
 		case *events.PairError:
-			if e.Error != nil && (errors.Is(e.Error, whatsmeow.ErrPairInvalidDeviceIdentityHMAC) || errors.Is(e.Error, whatsmeow.ErrPairInvalidDeviceSignature)) {
+			if e.Error != nil &&
+				(errors.Is(e.Error, whatsmeow.ErrPairInvalidDeviceIdentityHMAC) ||
+					errors.Is(e.Error, whatsmeow.ErrPairInvalidDeviceSignature)) {
 				reason := "pair_error"
-				r.log.Warn(
-					"pairing error reset",
+				r.log.Warn("pairing error reset",
 					slog.String("instanceId", instanceID.String()),
-					slog.String("error", e.Error.Error()),
-				)
+					slog.String("error", e.Error.Error()))
 				r.ResetClient(instanceID, reason)
 			}
-		default:
-			_ = e
 		}
 	}
 }
@@ -1544,10 +1677,14 @@ func (r *ClientRegistry) DisconnectAll(ctx context.Context) (disconnected int) {
 	return disconnectedCount
 }
 
-func (r *ClientRegistry) SetSplitBrainMetrics(splitBrainCounter func()) {
+func (r *ClientRegistry) SetMetrics(metrics ClientRegistryMetrics) {
 	r.splitBrainMu.Lock()
 	defer r.splitBrainMu.Unlock()
-	r.splitBrainCounter = splitBrainCounter
+	r.metrics = metrics
+}
+
+func (r *ClientRegistry) SetSplitBrainMetrics(splitBrainCounter func()) {
+	r.SetMetrics(ClientRegistryMetrics{SplitBrainDetected: splitBrainCounter})
 }
 
 func (r *ClientRegistry) StartSplitBrainDetection() {
@@ -1626,6 +1763,9 @@ func (r *ClientRegistry) detectSplitBrain() {
 
 					invalidLockCount++
 					localLockCount++
+					if r.metrics.SplitBrainInvalidLock != nil {
+						r.metrics.SplitBrainInvalidLock(id.String())
+					}
 				}
 			} else if state.lockMode == "local" {
 				localLockCount++
@@ -1698,9 +1838,22 @@ func (r *ClientRegistry) detectSplitBrain() {
 
 			splitBrainDetected++
 
-			if r.splitBrainCounter != nil {
-				r.splitBrainCounter()
+			if r.metrics.SplitBrainDetected != nil {
+				r.metrics.SplitBrainDetected()
 			}
+
+			observability.CaptureWorkerException(
+				observability.AsyncContext(observability.AsyncContextOptions{
+					Logger:     r.log,
+					Component:  "client_registry",
+					Worker:     "split_brain_detection",
+					InstanceID: instanceID.String(),
+				}),
+				"client_registry",
+				"split_brain_detection",
+				instanceID.String(),
+				fmt.Errorf("split-brain detected: lock ownership lost for instance %s", instanceID.String()),
+			)
 
 			r.mu.Lock()
 			r.activeLocksMu.Lock()
