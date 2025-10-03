@@ -61,9 +61,19 @@ type CircuitBreakerManager struct {
 
 	onStateChange func(old, new CircuitState)
 
-	lockSuccessCounter func()
-	lockFailureCounter func()
-	circuitStateGauge  func(float64)
+	lockSuccessCounter    func()
+	lockFailureCounter    func()
+	circuitStateGauge     func(float64)
+	lockReacquireAttempt  func(instanceID, result string)
+	lockReacquireFallback func(instanceID, circuitState string)
+}
+
+type CircuitBreakerMetricsCallbacks struct {
+	LockSuccess       func()
+	LockFailure       func()
+	CircuitState      func(float64)
+	ReacquireAttempt  func(instanceID, result string)
+	ReacquireFallback func(instanceID, circuitState string)
 }
 
 func NewCircuitBreakerManager(underlying Manager, config CircuitBreakerConfig) *CircuitBreakerManager {
@@ -201,19 +211,33 @@ func (cbm *CircuitBreakerManager) OnStateChange(callback func(old, new CircuitSt
 	cbm.onStateChange = callback
 }
 
-func (cbm *CircuitBreakerManager) SetMetrics(
-	lockSuccess func(),
-	lockFailure func(),
-	circuitState func(float64),
-) {
+func (cbm *CircuitBreakerManager) SetMetrics(callbacks CircuitBreakerMetricsCallbacks) {
 	cbm.mu.Lock()
 	defer cbm.mu.Unlock()
-	cbm.lockSuccessCounter = lockSuccess
-	cbm.lockFailureCounter = lockFailure
-	cbm.circuitStateGauge = circuitState
+	cbm.lockSuccessCounter = callbacks.LockSuccess
+	cbm.lockFailureCounter = callbacks.LockFailure
+	cbm.circuitStateGauge = callbacks.CircuitState
+	cbm.lockReacquireAttempt = callbacks.ReacquireAttempt
+	cbm.lockReacquireFallback = callbacks.ReacquireFallback
 
-	if circuitState != nil {
-		circuitState(float64(cbm.state.Load()))
+	if callbacks.CircuitState != nil {
+		callbacks.CircuitState(float64(cbm.state.Load()))
+	}
+}
+
+func (cbm *CircuitBreakerManager) RecordLockReacquire(instanceID, result string) {
+	cbm.mu.RLock()
+	defer cbm.mu.RUnlock()
+	if cbm.lockReacquireAttempt != nil {
+		cbm.lockReacquireAttempt(instanceID, result)
+	}
+}
+
+func (cbm *CircuitBreakerManager) RecordLockReacquireFallback(instanceID string, state CircuitState) {
+	cbm.mu.RLock()
+	defer cbm.mu.RUnlock()
+	if cbm.lockReacquireFallback != nil {
+		cbm.lockReacquireFallback(instanceID, state.String())
 	}
 }
 
