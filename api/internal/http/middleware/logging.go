@@ -9,7 +9,7 @@ import (
 
 	"github.com/go-chi/chi/v5/middleware"
 
-	internallogging "go.mau.fi/whatsmeow/api/internal/logging"
+	"go.mau.fi/whatsmeow/api/internal/logging"
 )
 
 // RequestLogger logs basic request/response information using slog and injects a contextual logger.
@@ -33,7 +33,7 @@ func RequestLogger(base *slog.Logger) func(http.Handler) http.Handler {
 				reqLogger = reqLogger.With(slog.String("remote_addr", remoteAddr))
 			}
 
-			ctx := internallogging.WithLogger(r.Context(), reqLogger)
+			ctx := logging.WithLogger(r.Context(), reqLogger)
 
 			rw := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
 			next.ServeHTTP(rw, r.WithContext(ctx))
