@@ -21,13 +21,13 @@ All PRs MUST pass these observability checks before approval. Violations will re
 **✅ REQUIRED Pattern**:
 ```go
 // HTTP Handlers - retrieve logger from context
-logger := internallogging.ContextLogger(r.Context(), nil)
+logger := logging.ContextLogger(r.Context(), nil)
 logger.Info("processing instance operation",
     slog.String("instance_id", instanceID),
     slog.String("operation", "connect"))
 
 // Add attributes to context for downstream propagation
-ctx = internallogging.WithAttrs(ctx,
+ctx = logging.WithAttrs(ctx,
     slog.String("instance_id", instanceID),
     slog.String("partner_id", partnerID))
 
@@ -65,7 +65,7 @@ func LoggingMiddleware(next http.Handler) http.Handler {
         reqLogger := logger.With(
             slog.String("request_id", uuid.New().String()),
             slog.String("host", r.Host))
-        ctx := internallogging.WithLogger(r.Context(), reqLogger)
+        ctx := logging.WithLogger(r.Context(), reqLogger)
         next.ServeHTTP(w, r.WithContext(ctx))
     })
 }
@@ -76,11 +76,11 @@ func (h *Handler) ProcessInstance(w http.ResponseWriter, r *http.Request) {
     instanceID := chi.URLParam(r, "id")
 
     // Add instance_id to context
-    ctx = internallogging.WithAttrs(ctx, slog.String("instance_id", instanceID))
+    ctx = logging.WithAttrs(ctx, slog.String("instance_id", instanceID))
 
     // Pass enriched context to service
     if err := h.service.Execute(ctx, instanceID); err != nil {
-        logger := internallogging.ContextLogger(ctx, nil)
+        logger := logging.ContextLogger(ctx, nil)
         logger.Error("execution failed", slog.String("error", err.Error()))
     }
 }
@@ -140,7 +140,7 @@ func (r *Registry) AcquireLock(ctx context.Context, instanceID string) error {
 ```go
 // Capture critical errors with context
 if err := criticalOperation(); err != nil {
-    logger := internallogging.ContextLogger(ctx, nil)
+    logger := logging.ContextLogger(ctx, nil)
     logger.Error("critical operation failed", slog.String("error", err.Error()))
 
     // Capture in Sentry with tags and context
@@ -179,7 +179,7 @@ if err := criticalOperation(); err != nil {
 ```go
 func (h *HealthHandler) Ready(w http.ResponseWriter, r *http.Request) {
     ctx := r.Context()
-    logger := internallogging.ContextLogger(ctx, nil)
+    logger := logging.ContextLogger(ctx, nil)
 
     start := time.Now()
     err := h.db.PingContext(ctx)
@@ -224,7 +224,141 @@ func (h *HealthHandler) Ready(w http.ResponseWriter, r *http.Request) {
 - [ ] `/health`: Liveness probe (basic service health)
 - [ ] `/ready`: Readiness probe (dependencies available)
 
-### 6. Complete Code Review Checklist
+### 6. Dispatch System Observability Patterns (✅ COMPLETED)
+
+The dispatch system implements all observability patterns for webhook delivery pipeline.
+
+**✅ Coordinator Observability** (`dispatch/coordinator.go`):
+```go
+// Start coordinator with structured logging
+func (c *Coordinator) Start(ctx context.Context) error {
+    logger := logging.ContextLogger(ctx, c.log)
+    logger.Info("starting dispatch coordinator")
+
+    // Update metrics for active workers
+    c.metrics.WorkersActive.Set(float64(len(c.workers)))
+
+    logger.Info("dispatch coordinator started",
+        slog.Int("workers", len(c.workers)))
+    return nil
+}
+
+// Stop coordinator with graceful shutdown
+func (c *Coordinator) Stop(ctx context.Context) {
+    logger := logging.ContextLogger(ctx, c.log)
+    logger.Info("stopping dispatch coordinator",
+        slog.Int("active_workers", len(c.workers)))
+
+    // Stop all workers with context timeout
+    for instanceID, worker := range c.workers {
+        worker.Stop()
+        logger.Debug("stopped worker",
+            slog.String("instance_id", instanceID.String()))
+    }
+
+    c.metrics.WorkersActive.Set(0)
+    logger.Info("dispatch coordinator stopped")
+}
+```
+
+**✅ Worker Observability** (`dispatch/instance_worker.go`):
+```go
+func (w *InstanceWorker) Run() {
+    logger := w.log.With(
+        slog.String("instance_id", w.instanceID.String()),
+        slog.String("component", "instance_worker"))
+
+    logger.Info("worker started",
+        slog.Duration("poll_interval", w.pollInterval),
+        slog.Int("batch_size", w.batchSize))
+
+    for {
+        select {
+        case <-w.ctx.Done():
+            logger.Info("worker shutting down gracefully")
+            return
+        case <-time.After(w.pollInterval):
+            events, err := w.outboxRepo.GetPendingEvents(w.ctx, w.instanceID, w.batchSize)
+            if err != nil {
+                logger.Error("failed to get pending events",
+                    slog.String("error", err.Error()))
+                continue
+            }
+
+            logger.Debug("processing events batch",
+                slog.Int("event_count", len(events)))
+        }
+    }
+}
+```
+
+**✅ Processor Observability** (`dispatch/processor.go`):
+```go
+func (p *EventProcessor) ProcessEvent(ctx context.Context, event *persistence.OutboxEvent) error {
+    logger := logging.ContextLogger(ctx, p.log).With(
+        slog.String("event_id", event.ID.String()),
+        slog.String("instance_id", event.InstanceID.String()),
+        slog.Int("attempt", event.AttemptCount))
+
+    start := time.Now()
+
+    // Deliver via transport
+    result, err := transport.Deliver(ctx, request)
+    duration := time.Since(start)
+
+    // Update metrics immediately after delivery
+    status := "success"
+    if err != nil {
+        status = "failure"
+    }
+    p.metrics.DeliveryAttempts.WithLabelValues(
+        event.InstanceID.String(),
+        status).Inc()
+    p.metrics.DeliveryDuration.WithLabelValues(
+        event.InstanceID.String()).Observe(duration.Seconds())
+
+    if err != nil {
+        logger.Error("event delivery failed",
+            slog.String("error", err.Error()),
+            slog.Duration("duration", duration),
+            slog.String("endpoint", event.WebhookURL))
+
+        // Capture in Sentry for critical failures
+        if event.AttemptCount >= maxAttempts {
+            sentry.WithScope(func(scope *sentry.Scope) {
+                scope.SetTag("component", "dispatch")
+                scope.SetTag("instance_id", event.InstanceID.String())
+                scope.SetContext("event", map[string]interface{}{
+                    "event_type": event.EventType,
+                    "attempts":   event.AttemptCount,
+                    "duration":   duration.Milliseconds(),
+                })
+                sentry.CaptureException(err)
+            })
+        }
+
+        return err
+    }
+
+    logger.Info("event delivered successfully",
+        slog.Duration("duration", duration),
+        slog.Int("status_code", result.StatusCode))
+
+    return nil
+}
+```
+
+**Code Review Checklist - Dispatch System**:
+- [ ] Coordinator logs worker count on start/stop
+- [ ] Workers log instance_id in all operations
+- [ ] Processor logs event_id, attempt_count, duration
+- [ ] Metrics updated immediately after delivery attempts
+- [ ] Failed deliveries captured in Sentry with context
+- [ ] Graceful shutdown logs with timeout tracking
+- [ ] No blocking operations in worker poll loop
+- [ ] Context cancellation respected in all goroutines
+
+### 7. Complete Code Review Checklist
 
 Before approving PR, verify ALL items:
 
@@ -259,6 +393,13 @@ Before approving PR, verify ALL items:
 - [ ] Log duration and status
 - [ ] Update metrics
 - [ ] Capture failures in Sentry
+
+**Dispatch System** (if applicable):
+- [ ] Coordinator logs worker lifecycle events
+- [ ] Workers include instance_id in all logs
+- [ ] Processor tracks delivery metrics
+- [ ] Failed deliveries captured in Sentry
+- [ ] Graceful shutdown with timeout
 
 **General**:
 - [ ] Tests pass: `go test ./...`
