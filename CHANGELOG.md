@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0-develop.1](https://github.com/Funnelchat20/whatsapp-api-golang/compare/v1.1.0...v1.2.0-develop.1) (2025-10-03)
+
+### ✨ Features
+
+* **observability:** add comprehensive metrics and async context helpers ([680c8a6](https://github.com/Funnelchat20/whatsapp-api-golang/commit/680c8a602a528f7f14adf069121cab354245eb1d))
+* **db:** add event outbox, DLQ, and media metadata schema ([321fa6b](https://github.com/Funnelchat20/whatsapp-api-golang/commit/321fa6baa15eabfc4bc57dbeabc95f82da7b285e))
+* **config:** add event system and media configuration ([d52469f](https://github.com/Funnelchat20/whatsapp-api-golang/commit/d52469fd2d2989847fbfd30dbf8e512fd04f81b3))
+* **handlers:** add media HTTP handler for local file serving ([42300f3](https://github.com/Funnelchat20/whatsapp-api-golang/commit/42300f3ebb30dcf382e9968e6a745b3e1558cdff))
+* **events:** implement comprehensive event processing system ([c84d840](https://github.com/Funnelchat20/whatsapp-api-golang/commit/c84d8408400bcb71a510687b2d8ccd8101012470))
+* **integration:** wire event system into WhatsApp client lifecycle ([98f787c](https://github.com/Funnelchat20/whatsapp-api-golang/commit/98f787c038da4058bb73a42460f40ce32746b031))
+
+### ♻️ Code Refactoring
+
+* **handlers:** clean up import aliases for consistency ([e443649](https://github.com/Funnelchat20/whatsapp-api-golang/commit/e4436490fef498028846471a91c75ea581423db4))
+* **locks:** enhance circuit breaker metrics and tracking ([76a7ba6](https://github.com/Funnelchat20/whatsapp-api-golang/commit/76a7ba614799dd117f36ab2412610dd3c88572f1))
+* **integration:** finalize event system wiring and interfaces ([5831173](https://github.com/Funnelchat20/whatsapp-api-golang/commit/5831173ce3f5a705ace8bb2b0907a8e53ed35a7c))
+
+### 📝 Documentation
+
+* update code standards and add comprehensive development plan ([e59b86b](https://github.com/Funnelchat20/whatsapp-api-golang/commit/e59b86b8c2e0120e49c31ab129e96696b233c2e7))
+
 ## [1.1.0](https://github.com/Funnelchat20/whatsapp-api-golang/compare/v1.0.5...v1.1.0) (2025-10-02)
 
 ### ✨ Features
