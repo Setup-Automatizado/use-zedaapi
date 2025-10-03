@@ -14,7 +14,7 @@ import (
 	"github.com/google/uuid"
 
 	"go.mau.fi/whatsmeow/api/internal/instances"
-	internallogging "go.mau.fi/whatsmeow/api/internal/logging"
+	"go.mau.fi/whatsmeow/api/internal/logging"
 )
 
 type PartnerHandler struct {
@@ -93,7 +93,7 @@ func (h *PartnerHandler) createInstance(w http.ResponseWriter, r *http.Request) 
 		BusinessDevice:              req.BusinessDevice,
 	})
 	if err != nil {
-		logger := internallogging.ContextLogger(ctx, h.log)
+		logger := logging.ContextLogger(ctx, h.log)
 		logger.Error("partner create instance", slog.String("error", err.Error()))
 		respondError(w, http.StatusInternalServerError, "failed to create instance")
 		return
@@ -120,7 +120,7 @@ func (h *PartnerHandler) subscribeInstance(w http.ResponseWriter, r *http.Reques
 	if !ok {
 		return
 	}
-	ctx := internallogging.WithAttrs(r.Context(), slog.String("instance_id", instanceID.String()))
+	ctx := logging.WithAttrs(r.Context(), slog.String("instance_id", instanceID.String()))
 	if err := h.service.SubscribeInstance(ctx, instanceID, instanceToken); err != nil {
 		h.handleServiceError(ctx, w, err)
 		return
@@ -133,7 +133,7 @@ func (h *PartnerHandler) cancelInstance(w http.ResponseWriter, r *http.Request) 
 	if !ok {
 		return
 	}
-	ctx := internallogging.WithAttrs(r.Context(), slog.String("instance_id", instanceID.String()))
+	ctx := logging.WithAttrs(r.Context(), slog.String("instance_id", instanceID.String()))
 	if err := h.service.CancelInstance(ctx, instanceID, instanceToken); err != nil {
 		h.handleServiceError(ctx, w, err)
 		return
@@ -149,7 +149,7 @@ func (h *PartnerHandler) deleteInstance(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	ctx := internallogging.WithAttrs(r.Context(), slog.String("instance_id", instanceID.String()))
+	ctx := logging.WithAttrs(r.Context(), slog.String("instance_id", instanceID.String()))
 	if err := h.service.DeleteInstance(ctx, instanceID); err != nil {
 		h.handleServiceError(ctx, w, err)
 		return
@@ -170,7 +170,7 @@ func (h *PartnerHandler) listInstances(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	result, err := h.service.ListInstances(ctx, filter)
 	if err != nil {
-		logger := internallogging.ContextLogger(ctx, h.log)
+		logger := logging.ContextLogger(ctx, h.log)
 		logger.Error("partner list instances", slog.String("error", err.Error()))
 		respondError(w, http.StatusInternalServerError, "failed to list instances")
 		return
@@ -206,7 +206,7 @@ func (h *PartnerHandler) handleServiceError(ctx context.Context, w http.Response
 		respondError(w, http.StatusForbidden, "instance subscription inactive")
 		return
 	}
-	logger := internallogging.ContextLogger(ctx, h.log)
+	logger := logging.ContextLogger(ctx, h.log)
 	logger.Error("partner service error", slog.String("error", err.Error()))
 	respondError(w, http.StatusInternalServerError, "internal error")
 }

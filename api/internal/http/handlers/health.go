@@ -14,7 +14,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"go.mau.fi/whatsmeow/api/internal/locks"
-	internallogging "go.mau.fi/whatsmeow/api/internal/logging"
+	"go.mau.fi/whatsmeow/api/internal/logging"
 )
 
 type componentStatus struct {
@@ -60,7 +60,7 @@ func (h *HealthHandler) Health(w http.ResponseWriter, r *http.Request) {
 func (h *HealthHandler) Ready(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 3*time.Second)
 	defer cancel()
-	logger := internallogging.ContextLogger(r.Context(), nil)
+	logger := logging.ContextLogger(r.Context(), nil)
 
 	dbStatus, dbErr := h.checkDatabase(ctx)
 	redisStatus, redisErr := h.checkRedis(ctx)

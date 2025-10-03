@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 
 	"go.mau.fi/whatsmeow/api/internal/instances"
-	internallogging "go.mau.fi/whatsmeow/api/internal/logging"
+	"go.mau.fi/whatsmeow/api/internal/logging"
 )
 
 type InstanceHandler struct {
@@ -50,7 +50,7 @@ func (h *InstanceHandler) getStatus(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	ctx = internallogging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
+	ctx = logging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
 	instanceToken := chi.URLParam(r, "token")
 	clientToken := r.Header.Get("Client-Token")
 	status, err := h.service.GetStatus(ctx, instanceID, clientToken, instanceToken)
@@ -67,7 +67,7 @@ func (h *InstanceHandler) getQRCode(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	ctx = internallogging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
+	ctx = logging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
 	instanceToken := chi.URLParam(r, "token")
 	clientToken := r.Header.Get("Client-Token")
 
@@ -89,7 +89,7 @@ func (h *InstanceHandler) getQRCodeImage(w http.ResponseWriter, r *http.Request)
 	if !ok {
 		return
 	}
-	ctx = internallogging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
+	ctx = logging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
 	instanceToken := chi.URLParam(r, "token")
 	clientToken := r.Header.Get("Client-Token")
 
@@ -129,7 +129,7 @@ func (h *InstanceHandler) getPhoneCode(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	ctx = internallogging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
+	ctx = logging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
 	instanceToken := chi.URLParam(r, "token")
 	clientToken := r.Header.Get("Client-Token")
 	phone := chi.URLParam(r, "phone")
@@ -180,7 +180,7 @@ func (h *InstanceHandler) updateNotifySentByMe(w http.ResponseWriter, r *http.Re
 	if !ok {
 		return
 	}
-	ctx = internallogging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
+	ctx = logging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
 	instanceToken := chi.URLParam(r, "token")
 	clientToken := r.Header.Get("Client-Token")
 
@@ -203,7 +203,7 @@ func (h *InstanceHandler) updateEveryWebhooks(w http.ResponseWriter, r *http.Req
 	if !ok {
 		return
 	}
-	ctx = internallogging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
+	ctx = logging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
 	instanceToken := chi.URLParam(r, "token")
 	clientToken := r.Header.Get("Client-Token")
 
@@ -226,7 +226,7 @@ func (h *InstanceHandler) updateWebhookWithValue(w http.ResponseWriter, r *http.
 	if !ok {
 		return
 	}
-	ctx = internallogging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
+	ctx = logging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
 	instanceToken := chi.URLParam(r, "token")
 	clientToken := r.Header.Get("Client-Token")
 
@@ -249,7 +249,7 @@ func (h *InstanceHandler) restart(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	ctx = internallogging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
+	ctx = logging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
 	instanceToken := chi.URLParam(r, "token")
 	clientToken := r.Header.Get("Client-Token")
 
@@ -266,7 +266,7 @@ func (h *InstanceHandler) disconnect(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	ctx = internallogging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
+	ctx = logging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
 	instanceToken := chi.URLParam(r, "token")
 	clientToken := r.Header.Get("Client-Token")
 
@@ -308,7 +308,7 @@ func (h *InstanceHandler) handleServiceError(ctx context.Context, w http.Respons
 		respondError(w, http.StatusConflict, "instance already paired")
 		return
 	}
-	internallogger := internallogging.ContextLogger(ctx, h.log)
+	internallogger := logging.ContextLogger(ctx, h.log)
 	internallogger.Error("service error", slog.String("error", err.Error()))
 	respondError(w, http.StatusInternalServerError, "internal error")
 }
