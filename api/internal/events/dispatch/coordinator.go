@@ -12,7 +12,6 @@ import (
 
 	"go.mau.fi/whatsmeow/api/internal/config"
 	"go.mau.fi/whatsmeow/api/internal/events/persistence"
-	"go.mau.fi/whatsmeow/api/internal/events/transform"
 	"go.mau.fi/whatsmeow/api/internal/events/transport"
 	"go.mau.fi/whatsmeow/api/internal/logging"
 	"go.mau.fi/whatsmeow/api/internal/observability"
@@ -25,7 +24,7 @@ type Coordinator struct {
 	outboxRepo        persistence.OutboxRepository
 	dlqRepo           persistence.DLQRepository
 	transportRegistry *transport.Registry
-	transformPipeline *transform.Pipeline
+	lookup            InstanceLookup
 	metrics           *observability.Metrics
 
 	mu       sync.RWMutex
@@ -42,7 +41,7 @@ func NewCoordinator(
 	outboxRepo persistence.OutboxRepository,
 	dlqRepo persistence.DLQRepository,
 	transportRegistry *transport.Registry,
-	transformPipeline *transform.Pipeline,
+	lookup InstanceLookup,
 	metrics *observability.Metrics,
 ) *Coordinator {
 	return &Coordinator{
@@ -51,7 +50,7 @@ func NewCoordinator(
 		outboxRepo:        outboxRepo,
 		dlqRepo:           dlqRepo,
 		transportRegistry: transportRegistry,
-		transformPipeline: transformPipeline,
+		lookup:            lookup,
 		metrics:           metrics,
 		workers:           make(map[uuid.UUID]*InstanceWorker),
 		stopChan:          make(chan struct{}),
@@ -102,7 +101,7 @@ func (c *Coordinator) RegisterInstance(ctx context.Context, instanceID uuid.UUID
 		c.outboxRepo,
 		c.dlqRepo,
 		c.transportRegistry,
-		c.transformPipeline,
+		c.lookup,
 		c.metrics,
 	)
 

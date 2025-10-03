@@ -30,6 +30,8 @@ type MediaProcessor struct {
 	maxRetries      int
 	downloadTimeout time.Duration
 	uploadTimeout   time.Duration
+	bucket          string
+	urlExpiry       time.Duration
 }
 
 // ProcessResult contains the result of media processing
@@ -80,6 +82,16 @@ func NewMediaProcessor(
 		slog.Duration("upload_timeout", cfg.Events.MediaUploadTimeout),
 		slog.Bool("local_storage_enabled", localStorage != nil))
 
+	bucket := cfg.S3.Bucket
+	if bucket == "" {
+		bucket = "funnelchat-media"
+	}
+
+	urlExpiry := cfg.S3.URLExpiry
+	if urlExpiry <= 0 {
+		urlExpiry = 30 * 24 * time.Hour
+	}
+
 	return &MediaProcessor{
 		downloader:      downloader,
 		uploader:        uploader,
@@ -91,6 +103,8 @@ func NewMediaProcessor(
 		maxRetries:      cfg.Events.MediaMaxRetries,
 		downloadTimeout: cfg.Events.MediaDownloadTimeout,
 		uploadTimeout:   cfg.Events.MediaUploadTimeout,
+		bucket:          bucket,
+		urlExpiry:       urlExpiry,
 	}, nil
 }
 
@@ -171,8 +185,8 @@ func (p *MediaProcessor) Process(
 	// TODO: Move expiry midia upload to config .env
 	// Step 3: Update media metadata with S3 info
 	// Calculate URL expiry (30 days from now)
-	expiresAt := time.Now().Add(30 * 24 * time.Hour)
-	err = p.mediaRepo.UpdateUploadInfo(ctx, eventID, "funnelchat-media", s3Key, presignedURL, persistence.S3URLPresigned, &expiresAt)
+	expiresAt := time.Now().Add(p.urlExpiry)
+	err = p.mediaRepo.UpdateUploadInfo(ctx, eventID, p.bucket, s3Key, presignedURL, persistence.S3URLPresigned, &expiresAt)
 	if err != nil {
 		logger.Error("failed to update upload info",
 			slog.String("error", err.Error()))
@@ -187,7 +201,7 @@ func (p *MediaProcessor) Process(
 		slog.String("s3_key", s3Key))
 
 	return &ProcessResult{
-		S3Bucket:    "funnelchat-media",
+		S3Bucket:    p.bucket,
 		S3Key:       s3Key,
 		S3URL:       presignedURL,
 		ContentType: downloadResult.ContentType,
@@ -375,10 +389,10 @@ func (p *MediaProcessor) uploadToS3WithRetry(
 
 		if err == nil {
 			// Update media_metadata with S3 info
-			expiresAt := time.Now().Add(30 * 24 * time.Hour)
+			expiresAt := time.Now().Add(p.urlExpiry)
 			_ = p.mediaRepo.UpdateUploadInfoWithStorage(
 				ctx, eventID,
-				"funnelchat-media", s3Key, presignedURL,
+				p.bucket, s3Key, presignedURL,
 				persistence.S3URLPresigned,
 				persistence.StorageTypeS3,
 				&expiresAt,

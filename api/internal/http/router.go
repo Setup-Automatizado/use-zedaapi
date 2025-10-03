@@ -24,6 +24,7 @@ type RouterDeps struct {
 	InstanceHandler *handlers.InstanceHandler
 	PartnerHandler  *handlers.PartnerHandler
 	HealthHandler   *handlers.HealthHandler
+	MediaHandler    *handlers.MediaHandler
 	PartnerToken    string
 }
 
@@ -73,6 +74,13 @@ func NewRouter(deps RouterDeps) http.Handler {
 		r.Group(func(pr chi.Router) {
 			pr.Use(ourMiddleware.PartnerAuth(deps.PartnerToken))
 			deps.PartnerHandler.Register(pr)
+		})
+	}
+
+	if deps.MediaHandler != nil {
+		r.Route("/media", func(mr chi.Router) {
+			mr.Get("/{instance_id}/*", deps.MediaHandler.ServeMedia)
+			mr.Get("/stats", deps.MediaHandler.GetStats)
 		})
 	}
 

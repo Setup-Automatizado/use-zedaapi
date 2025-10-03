@@ -7,26 +7,48 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"go.mau.fi/whatsmeow/api/internal/config"
 	"go.mau.fi/whatsmeow/api/internal/events/encoding"
 	"go.mau.fi/whatsmeow/api/internal/events/persistence"
 	"go.mau.fi/whatsmeow/api/internal/events/types"
-	"go.mau.fi/whatsmeow/api/internal/instances"
 	"go.mau.fi/whatsmeow/api/internal/logging"
 	"go.mau.fi/whatsmeow/api/internal/observability"
 )
 
 // TransactionalWriter writes events to persistence with batching semantics.
 type TransactionalWriter struct {
-	log          *slog.Logger
-	metrics      *observability.Metrics
-	pool         *pgxpool.Pool
-	outboxRepo   persistence.OutboxRepository
-	mediaRepo    persistence.MediaRepository
-	instanceRepo *instances.Repository
-	cfg          *config.Config
+	log              *slog.Logger
+	metrics          *observability.Metrics
+	pool             *pgxpool.Pool
+	outboxRepo       persistence.OutboxRepository
+	mediaRepo        persistence.MediaRepository
+	cfg              *config.Config
+	resolver         WebhookResolver
+	metadataEnricher MetadataEnricher
+}
+
+// WebhookResolver resolves transport configuration for an instance.
+type WebhookResolver interface {
+	Resolve(ctx context.Context, instanceID uuid.UUID) (*ResolvedWebhookConfig, error)
+}
+
+// MetadataEnricher allows caller-specific metadata augmentation before persistence.
+type MetadataEnricher func(cfg *ResolvedWebhookConfig, event *types.InternalEvent)
+
+// ResolvedWebhookConfig contains the subset of webhook configuration required by the writer.
+type ResolvedWebhookConfig struct {
+	DeliveryURL         string
+	ReceivedURL         string
+	ReceivedDeliveryURL string
+	MessageStatusURL    string
+	DisconnectedURL     string
+	ChatPresenceURL     string
+	ConnectedURL        string
+	NotifySentByMe      bool
+	StoreJID            *string
 }
 
 // NewTransactionalWriter constructs a TransactionalWriter.
@@ -35,7 +57,8 @@ func NewTransactionalWriter(
 	pool *pgxpool.Pool,
 	outboxRepo persistence.OutboxRepository,
 	mediaRepo persistence.MediaRepository,
-	instanceRepo *instances.Repository,
+	resolver WebhookResolver,
+	metadataEnricher MetadataEnricher,
 	cfg *config.Config,
 	metrics *observability.Metrics,
 ) *TransactionalWriter {
@@ -44,13 +67,14 @@ func NewTransactionalWriter(
 	)
 
 	return &TransactionalWriter{
-		log:          log,
-		metrics:      metrics,
-		pool:         pool,
-		outboxRepo:   outboxRepo,
-		mediaRepo:    mediaRepo,
-		instanceRepo: instanceRepo,
-		cfg:          cfg,
+		log:              log,
+		metrics:          metrics,
+		pool:             pool,
+		outboxRepo:       outboxRepo,
+		mediaRepo:        mediaRepo,
+		cfg:              cfg,
+		resolver:         resolver,
+		metadataEnricher: metadataEnricher,
 	}
 }
 
@@ -64,15 +88,9 @@ func (w *TransactionalWriter) WriteEvents(ctx context.Context, events []*types.I
 	start := time.Now()
 	instanceID := events[0].InstanceID
 
-	// Pre-load instance + webhook configuration once per batch.
-	instance, err := w.instanceRepo.GetByID(ctx, instanceID)
+	resolvedConfig, err := w.resolver.Resolve(ctx, instanceID)
 	if err != nil {
-		return fmt.Errorf("load instance %s: %w", instanceID, err)
-	}
-
-	webhookConfig, err := w.instanceRepo.GetWebhookConfig(ctx, instanceID)
-	if err != nil {
-		return fmt.Errorf("load webhook config %s: %w", instanceID, err)
+		return fmt.Errorf("resolve webhook config %s: %w", instanceID, err)
 	}
 
 	// Begin transaction scope to keep behaviour similar to previous implementation.
@@ -92,17 +110,12 @@ func (w *TransactionalWriter) WriteEvents(ctx context.Context, events []*types.I
 	}
 
 	for _, internalEvent := range events {
-		if instance.StoreJID != nil {
-			if internalEvent.Metadata == nil {
-				internalEvent.Metadata = make(map[string]string)
-			}
-			if _, ok := internalEvent.Metadata["store_jid"]; !ok {
-				internalEvent.Metadata["store_jid"] = *instance.StoreJID
-			}
+		if w.metadataEnricher != nil {
+			w.metadataEnricher(resolvedConfig, internalEvent)
 		}
 
 		// Determine webhook destination.
-		transportConfig, shouldDeliver := w.buildTransportConfig(internalEvent, webhookConfig)
+		transportConfig, shouldDeliver := w.buildTransportConfig(internalEvent, resolvedConfig)
 		if !shouldDeliver {
 			skippedCount++
 			w.metrics.EventsInserted.WithLabelValues(
@@ -245,7 +258,7 @@ func (w *TransactionalWriter) WriteEvents(ctx context.Context, events []*types.I
 }
 
 // buildTransportConfig returns a JSON encoded transport configuration for the event.
-func (w *TransactionalWriter) buildTransportConfig(event *types.InternalEvent, cfg *instances.WebhookConfig) (json.RawMessage, bool) {
+func (w *TransactionalWriter) buildTransportConfig(event *types.InternalEvent, cfg *ResolvedWebhookConfig) (json.RawMessage, bool) {
 	if cfg == nil {
 		return nil, false
 	}
@@ -275,35 +288,28 @@ func (w *TransactionalWriter) buildTransportConfig(event *types.InternalEvent, c
 	return raw, true
 }
 
-func resolveWebhookURL(event *types.InternalEvent, cfg *instances.WebhookConfig) (string, string) {
+func resolveWebhookURL(event *types.InternalEvent, cfg *ResolvedWebhookConfig) (string, string) {
 	if cfg == nil {
 		return "", ""
-	}
-
-	deref := func(ptr *string) string {
-		if ptr == nil {
-			return ""
-		}
-		return *ptr
 	}
 
 	switch event.EventType {
 	case "message":
 		fromMe := event.Metadata["from_me"] == "true"
-		if fromMe && cfg.NotifySentByMe == false {
+		if fromMe && !cfg.NotifySentByMe {
 			return "", ""
 		}
-		return deref(cfg.ReceivedURL), "received"
+		return cfg.ReceivedURL, "received"
 	case "receipt":
-		return deref(cfg.ReceivedDeliveryURL), "receipt"
+		return cfg.ReceivedDeliveryURL, "receipt"
 	case "chat_presence":
-		return deref(cfg.ChatPresenceURL), "chat_presence"
+		return cfg.ChatPresenceURL, "chat_presence"
 	case "presence":
-		return deref(cfg.ChatPresenceURL), "presence"
+		return cfg.ChatPresenceURL, "presence"
 	case "connected":
-		return deref(cfg.ConnectedURL), "connected"
+		return cfg.ConnectedURL, "connected"
 	case "disconnected":
-		return deref(cfg.DisconnectedURL), "disconnected"
+		return cfg.DisconnectedURL, "disconnected"
 	default:
 		return "", ""
 	}

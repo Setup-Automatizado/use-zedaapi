@@ -6,15 +6,25 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"go.mau.fi/whatsmeow/api/internal/config"
 	"go.mau.fi/whatsmeow/api/internal/database"
 	"go.mau.fi/whatsmeow/api/internal/events"
+	"go.mau.fi/whatsmeow/api/internal/events/capture"
+	"go.mau.fi/whatsmeow/api/internal/events/types"
 	"go.mau.fi/whatsmeow/api/internal/observability"
-	"github.com/prometheus/client_golang/prometheus"
 )
+
+type testWebhookResolver struct{}
+
+func (testWebhookResolver) Resolve(ctx context.Context, instanceID uuid.UUID) (*capture.ResolvedWebhookConfig, error) {
+	return &capture.ResolvedWebhookConfig{}, nil
+}
+
+func testMetadataEnricher(cfg *capture.ResolvedWebhookConfig, event *types.InternalEvent) {}
 
 // TestEventOrchestrator_Initialization tests basic orchestrator creation
 func TestEventOrchestrator_Initialization(t *testing.T) {
@@ -37,7 +47,7 @@ func TestEventOrchestrator_Initialization(t *testing.T) {
 	metrics := observability.NewMetrics("test", prometheus.NewRegistry())
 
 	// Create orchestrator
-	orchestrator, err := events.NewOrchestrator(ctx, cfg, pool, metrics)
+	orchestrator, err := events.NewOrchestrator(ctx, cfg, pool, testWebhookResolver{}, testMetadataEnricher, metrics)
 	require.NoError(t, err, "failed to create orchestrator")
 	require.NotNil(t, orchestrator, "orchestrator should not be nil")
 
@@ -63,7 +73,7 @@ func TestEventOrchestrator_InstanceLifecycle(t *testing.T) {
 
 	metrics := observability.NewMetrics("test", prometheus.NewRegistry())
 
-	orchestrator, err := events.NewOrchestrator(ctx, cfg, pool, metrics)
+	orchestrator, err := events.NewOrchestrator(ctx, cfg, pool, testWebhookResolver{}, testMetadataEnricher, metrics)
 	require.NoError(t, err)
 	defer orchestrator.Stop(ctx)
 
@@ -108,7 +118,7 @@ func TestIntegrationHelper_Creation(t *testing.T) {
 
 	metrics := observability.NewMetrics("test", prometheus.NewRegistry())
 
-	orchestrator, err := events.NewOrchestrator(ctx, cfg, pool, metrics)
+	orchestrator, err := events.NewOrchestrator(ctx, cfg, pool, testWebhookResolver{}, testMetadataEnricher, metrics)
 	require.NoError(t, err)
 	defer orchestrator.Stop(ctx)
 
@@ -152,7 +162,7 @@ func TestEventOrchestrator_FlushInstance(t *testing.T) {
 
 	metrics := observability.NewMetrics("test", prometheus.NewRegistry())
 
-	orchestrator, err := events.NewOrchestrator(ctx, cfg, pool, metrics)
+	orchestrator, err := events.NewOrchestrator(ctx, cfg, pool, testWebhookResolver{}, testMetadataEnricher, metrics)
 	require.NoError(t, err)
 	defer orchestrator.Stop(ctx)
 
@@ -188,7 +198,7 @@ func TestEventOrchestrator_DoubleRegistration(t *testing.T) {
 
 	metrics := observability.NewMetrics("test", prometheus.NewRegistry())
 
-	orchestrator, err := events.NewOrchestrator(ctx, cfg, pool, metrics)
+	orchestrator, err := events.NewOrchestrator(ctx, cfg, pool, testWebhookResolver{}, testMetadataEnricher, metrics)
 	require.NoError(t, err)
 	defer orchestrator.Stop(ctx)
 
@@ -224,7 +234,7 @@ func TestEventOrchestrator_StopWithActiveInstances(t *testing.T) {
 
 	metrics := observability.NewMetrics("test", prometheus.NewRegistry())
 
-	orchestrator, err := events.NewOrchestrator(ctx, cfg, pool, metrics)
+	orchestrator, err := events.NewOrchestrator(ctx, cfg, pool, testWebhookResolver{}, testMetadataEnricher, metrics)
 	require.NoError(t, err)
 
 	// Register multiple instances

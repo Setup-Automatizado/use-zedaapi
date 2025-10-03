@@ -13,7 +13,7 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/config"
 	"go.mau.fi/whatsmeow/api/internal/events/capture"
 	"go.mau.fi/whatsmeow/api/internal/events/persistence"
-	"go.mau.fi/whatsmeow/api/internal/instances"
+	"go.mau.fi/whatsmeow/api/internal/events/types"
 	"go.mau.fi/whatsmeow/api/internal/logging"
 	"go.mau.fi/whatsmeow/api/internal/observability"
 )
@@ -45,7 +45,8 @@ func NewOrchestrator(
 	ctx context.Context,
 	cfg config.Config,
 	pool *pgxpool.Pool,
-	instanceRepo *instances.Repository,
+	resolver capture.WebhookResolver,
+	metadataEnricher capture.MetadataEnricher,
 	metrics *observability.Metrics,
 ) (*Orchestrator, error) {
 	log := logging.ContextLogger(ctx, nil).With(
@@ -66,7 +67,8 @@ func NewOrchestrator(
 		pool,
 		outboxRepo,
 		mediaRepo,
-		instanceRepo,
+		resolver,
+		metadataEnricher,
 		&cfg,
 		metrics,
 	)

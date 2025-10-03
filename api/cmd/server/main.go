@@ -224,6 +224,14 @@ func main() {
 	logger.Info("media processing system initialized",
 		slog.Int("max_workers", cfg.Workers.Media))
 
+	var mediaHTTPHandler *handlers.MediaHandler
+	if localStorage, err := media.NewLocalMediaStorage(ctx, &cfg, metrics); err != nil {
+		logger.Warn("local media storage disabled",
+			slog.String("error", err.Error()))
+	} else {
+		mediaHTTPHandler = handlers.NewMediaHandler(localStorage, metrics, logger)
+	}
+
 	redisClient := redisinit.NewClient(redisinit.Config{
 		Addr:       cfg.Redis.Addr,
 		Username:   cfg.Redis.Username,
@@ -332,6 +340,7 @@ func main() {
 		InstanceHandler: instanceHandler,
 		PartnerHandler:  partnerHandler,
 		HealthHandler:   healthHandler,
+		MediaHandler:    mediaHTTPHandler,
 		PartnerToken:    cfg.Partner.AuthToken,
 	})
 

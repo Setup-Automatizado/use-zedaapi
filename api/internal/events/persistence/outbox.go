@@ -31,38 +31,38 @@ const (
 type TransportType string
 
 const (
-	TransportWebhook   TransportType = "webhook"
-	TransportRabbitMQ  TransportType = "rabbitmq"
-	TransportSQS       TransportType = "sqs"
-	TransportNATS      TransportType = "nats"
-	TransportKafka     TransportType = "kafka"
+	TransportWebhook  TransportType = "webhook"
+	TransportRabbitMQ TransportType = "rabbitmq"
+	TransportSQS      TransportType = "sqs"
+	TransportNATS     TransportType = "nats"
+	TransportKafka    TransportType = "kafka"
 )
 
 // OutboxEvent represents an event in the event_outbox table
 type OutboxEvent struct {
-	ID             int64
-	InstanceID     uuid.UUID
-	EventID        uuid.UUID
-	EventType      string
-	SourceLib      string
-	Payload        json.RawMessage
-	Metadata       json.RawMessage
-	SequenceNumber int64
-	CreatedAt      time.Time
-	Status         EventStatus
-	Attempts       int
-	MaxAttempts    int
-	NextAttemptAt  *time.Time
-	HasMedia       bool
-	MediaProcessed bool
-	MediaURL       *string
-	MediaError     *string
-	DeliveredAt    *time.Time
-	TransportType  TransportType
-	TransportConfig json.RawMessage
+	ID                int64
+	InstanceID        uuid.UUID
+	EventID           uuid.UUID
+	EventType         string
+	SourceLib         string
+	Payload           json.RawMessage
+	Metadata          json.RawMessage
+	SequenceNumber    int64
+	CreatedAt         time.Time
+	Status            EventStatus
+	Attempts          int
+	MaxAttempts       int
+	NextAttemptAt     *time.Time
+	HasMedia          bool
+	MediaProcessed    bool
+	MediaURL          *string
+	MediaError        *string
+	DeliveredAt       *time.Time
+	TransportType     TransportType
+	TransportConfig   json.RawMessage
 	TransportResponse json.RawMessage
-	LastError      *string
-	UpdatedAt      time.Time
+	LastError         *string
+	UpdatedAt         time.Time
 }
 
 // OutboxRepository defines operations for event_outbox table
@@ -156,6 +156,7 @@ func (r *outboxRepository) PollPendingEvents(ctx context.Context, instanceID uui
 		  AND status IN ('pending', 'retrying')
 		  AND (next_attempt_at IS NULL OR next_attempt_at <= NOW())
 		  AND attempts < max_attempts
+		  AND (has_media = FALSE OR media_processed = TRUE)
 		ORDER BY sequence_number ASC
 		LIMIT $2`
 

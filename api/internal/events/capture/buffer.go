@@ -92,12 +92,21 @@ func (b *EventBuffer) run(ctx context.Context) {
 		}
 
 		start := time.Now()
-		if err := b.writer.WriteEvents(ctx, batch); err != nil {
-			b.log.ErrorContext(ctx, "failed to write events",
+		err := b.persistWithRetry(ctx, batch)
+		if err != nil {
+			b.log.ErrorContext(ctx, "failed to persist events after retries",
 				slog.String("error", err.Error()),
-				slog.Int("batch_size", len(batch)),
-			)
-			// TODO: Implement retry logic or move to DLQ
+				slog.Int("batch_size", len(batch)))
+			for _, evt := range batch {
+				select {
+				case b.eventCh <- evt:
+					// requeued for future attempt
+				default:
+					b.droppedEvents++
+					b.log.ErrorContext(ctx, "event dropped after retry",
+						slog.String("event_id", evt.EventID.String()))
+				}
+			}
 		} else {
 			b.log.DebugContext(ctx, "events flushed",
 				slog.Int("batch_size", len(batch)),
@@ -157,6 +166,36 @@ func (b *EventBuffer) Flush() {
 	default:
 		// Flush already pending
 	}
+}
+
+func (b *EventBuffer) persistWithRetry(ctx context.Context, events []*types.InternalEvent) error {
+	if len(events) == 0 {
+		return nil
+	}
+
+	var err error
+	const maxAttempts = 3
+
+	for attempt := 0; attempt < maxAttempts; attempt++ {
+		err = b.writer.WriteEvents(ctx, events)
+		if err == nil {
+			return nil
+		}
+
+		backoff := time.Duration(attempt+1) * 200 * time.Millisecond
+		b.log.WarnContext(ctx, "batch persistence failed",
+			slog.Int("attempt", attempt+1),
+			slog.Duration("backoff", backoff),
+			slog.String("error", err.Error()))
+
+		select {
+		case <-time.After(backoff):
+		case <-ctx.Done():
+			return ctx.Err()
+		}
+	}
+
+	return err
 }
 
 // Stop gracefully stops the buffer

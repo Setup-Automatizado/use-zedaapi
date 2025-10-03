@@ -16,7 +16,6 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/events/persistence"
 	transformzapi "go.mau.fi/whatsmeow/api/internal/events/transform/zapi"
 	"go.mau.fi/whatsmeow/api/internal/events/transport"
-	"go.mau.fi/whatsmeow/api/internal/instances"
 	"go.mau.fi/whatsmeow/api/internal/logging"
 	"go.mau.fi/whatsmeow/api/internal/observability"
 )
@@ -28,7 +27,7 @@ type EventProcessor struct {
 	outboxRepo        persistence.OutboxRepository
 	dlqRepo           persistence.DLQRepository
 	transportRegistry *transport.Registry
-	instanceRepo      *instances.Repository
+	lookup            InstanceLookup
 	metrics           *observability.Metrics
 }
 
@@ -38,6 +37,11 @@ type transportConfig struct {
 	Headers map[string]string `json:"headers,omitempty"`
 }
 
+// InstanceLookup provides per-instance metadata required during dispatch.
+type InstanceLookup interface {
+	StoreJID(ctx context.Context, instanceID uuid.UUID) (string, error)
+}
+
 // NewEventProcessor creates a new event processor
 func NewEventProcessor(
 	instanceID uuid.UUID,
@@ -45,7 +49,7 @@ func NewEventProcessor(
 	outboxRepo persistence.OutboxRepository,
 	dlqRepo persistence.DLQRepository,
 	transportRegistry *transport.Registry,
-	instanceRepo *instances.Repository,
+	lookup InstanceLookup,
 	metrics *observability.Metrics,
 ) *EventProcessor {
 	return &EventProcessor{
@@ -54,7 +58,7 @@ func NewEventProcessor(
 		outboxRepo:        outboxRepo,
 		dlqRepo:           dlqRepo,
 		transportRegistry: transportRegistry,
-		instanceRepo:      instanceRepo,
+		lookup:            lookup,
 		metrics:           metrics,
 	}
 }
@@ -288,14 +292,17 @@ func (p *EventProcessor) handlePermanentError(ctx context.Context, event *persis
 }
 
 func (p *EventProcessor) connectedPhone(ctx context.Context) string {
-	if p.instanceRepo == nil {
+	if p.lookup == nil {
 		return ""
 	}
-	instance, err := p.instanceRepo.GetByID(ctx, p.instanceID)
-	if err != nil || instance.StoreJID == nil {
+	storeJID, err := p.lookup.StoreJID(ctx, p.instanceID)
+	if err != nil {
 		return ""
 	}
-	jid := *instance.StoreJID
+	if storeJID == "" {
+		return ""
+	}
+	jid := storeJID
 	if idx := strings.IndexRune(jid, '@'); idx >= 0 {
 		jid = jid[:idx]
 	}

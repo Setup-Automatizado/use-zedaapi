@@ -12,7 +12,6 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/config"
 	"go.mau.fi/whatsmeow/api/internal/events/persistence"
 	"go.mau.fi/whatsmeow/api/internal/events/transport"
-	"go.mau.fi/whatsmeow/api/internal/instances"
 	"go.mau.fi/whatsmeow/api/internal/logging"
 	"go.mau.fi/whatsmeow/api/internal/observability"
 )
@@ -24,7 +23,6 @@ type InstanceWorker struct {
 	outboxRepo        persistence.OutboxRepository
 	dlqRepo           persistence.DLQRepository
 	transportRegistry *transport.Registry
-	instanceRepo      *instances.Repository
 	metrics           *observability.Metrics
 
 	processor *EventProcessor
@@ -41,7 +39,7 @@ func NewInstanceWorker(
 	outboxRepo persistence.OutboxRepository,
 	dlqRepo persistence.DLQRepository,
 	transportRegistry *transport.Registry,
-	instanceRepo *instances.Repository,
+	lookup InstanceLookup,
 	metrics *observability.Metrics,
 ) *InstanceWorker {
 	// Create event processor
@@ -51,7 +49,7 @@ func NewInstanceWorker(
 		outboxRepo,
 		dlqRepo,
 		transportRegistry,
-		instanceRepo,
+		lookup,
 		metrics,
 	)
 
@@ -61,7 +59,6 @@ func NewInstanceWorker(
 		outboxRepo:        outboxRepo,
 		dlqRepo:           dlqRepo,
 		transportRegistry: transportRegistry,
-		instanceRepo:      instanceRepo,
 		metrics:           metrics,
 		processor:         processor,
 		stopChan:          make(chan struct{}),
