@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0-develop.2](https://github.com/Funnelchat20/whatsapp-api-golang/compare/v1.2.0-develop.1...v1.2.0-develop.2) (2025-10-04)
+
+### ✨ Features
+
+* **events:** enrich webhook payloads with contact metadata ([7d043d6](https://github.com/Funnelchat20/whatsapp-api-golang/commit/7d043d68450669924ccc823af8c19829d458ef61))
+
+### ♻️ Code Refactoring
+
+* **events:** persist internal events using JSON ([f9f9e6c](https://github.com/Funnelchat20/whatsapp-api-golang/commit/f9f9e6cad3e1a46b6928356feb4fe1dae3de7fea))
+
 ## [1.2.0-develop.1](https://github.com/Funnelchat20/whatsapp-api-golang/compare/v1.1.0...v1.2.0-develop.1) (2025-10-03)
 
 ### ✨ Features
