@@ -16,7 +16,6 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/observability"
 )
 
-// InstanceWorker processes events for a single WhatsApp instance
 type InstanceWorker struct {
 	instanceID        uuid.UUID
 	cfg               *config.Config
@@ -32,7 +31,6 @@ type InstanceWorker struct {
 	running  bool
 }
 
-// NewInstanceWorker creates a new instance worker
 func NewInstanceWorker(
 	instanceID uuid.UUID,
 	cfg *config.Config,
@@ -42,7 +40,6 @@ func NewInstanceWorker(
 	lookup InstanceLookup,
 	metrics *observability.Metrics,
 ) *InstanceWorker {
-	// Create event processor
 	processor := NewEventProcessor(
 		instanceID,
 		cfg,
@@ -66,7 +63,6 @@ func NewInstanceWorker(
 	}
 }
 
-// Run starts the worker's main loop
 func (w *InstanceWorker) Run(ctx context.Context) {
 	w.mu.Lock()
 	if w.running {
@@ -76,14 +72,12 @@ func (w *InstanceWorker) Run(ctx context.Context) {
 	w.running = true
 	w.mu.Unlock()
 
-	// Add instance_id to context
 	ctx = logging.WithAttrs(ctx, slog.String("instance_id", w.instanceID.String()))
 	logger := logging.ContextLogger(ctx, nil)
 
 	logger.Info("instance worker started",
 		slog.Duration("poll_interval", w.cfg.Events.PollInterval))
 
-	// Update metrics
 	w.metrics.WorkersActive.WithLabelValues(w.instanceID.String()).Inc()
 	defer w.metrics.WorkersActive.WithLabelValues(w.instanceID.String()).Dec()
 
@@ -105,7 +99,6 @@ func (w *InstanceWorker) Run(ctx context.Context) {
 				return
 			}
 
-			// Poll and process events
 			if err := w.pollAndProcess(ctx); err != nil {
 				logger.Error("poll and process failed",
 					slog.String("error", err.Error()))
@@ -115,7 +108,6 @@ func (w *InstanceWorker) Run(ctx context.Context) {
 	}
 }
 
-// Stop gracefully stops the worker
 func (w *InstanceWorker) Stop() {
 	w.mu.Lock()
 	defer w.mu.Unlock()
@@ -128,33 +120,29 @@ func (w *InstanceWorker) Stop() {
 	close(w.stopChan)
 }
 
-// isRunning checks if worker is still running (thread-safe)
 func (w *InstanceWorker) isRunning() bool {
 	w.mu.RLock()
 	defer w.mu.RUnlock()
 	return w.running
 }
 
-// pollAndProcess polls the outbox and processes pending events
 func (w *InstanceWorker) pollAndProcess(ctx context.Context) error {
 	start := time.Now()
 	logger := logging.ContextLogger(ctx, nil)
 
-	// Get pending events for this instance
 	events, err := w.pollEvents(ctx)
 	if err != nil {
 		return fmt.Errorf("poll events: %w", err)
 	}
 
 	if len(events) == 0 {
-		return nil // No events to process
+		return nil
 	}
 
 	logger.Debug("polled events from outbox",
 		slog.Int("count", len(events)),
 		slog.Duration("duration", time.Since(start)))
 
-	// Process each event
 	successCount := 0
 	failureCount := 0
 
@@ -164,12 +152,10 @@ func (w *InstanceWorker) pollAndProcess(ctx context.Context) error {
 			break
 		}
 
-		// Add event_id to context
 		eventCtx := logging.WithAttrs(ctx,
 			slog.String("event_id", event.EventID.String()),
 			slog.String("event_type", event.EventType))
 
-		// Process event with timeout
 		processCtx, cancel := context.WithTimeout(eventCtx, w.cfg.Events.ProcessingTimeout)
 		err := w.processor.Process(processCtx, event)
 		cancel()
@@ -190,7 +176,6 @@ func (w *InstanceWorker) pollAndProcess(ctx context.Context) error {
 		slog.Int("failed", failureCount),
 		slog.Duration("duration", time.Since(start)))
 
-	// Update batch metrics
 	w.metrics.WorkerTaskDuration.WithLabelValues(w.instanceID.String(), "poll_and_process").Observe(time.Since(start).Seconds())
 
 	return nil

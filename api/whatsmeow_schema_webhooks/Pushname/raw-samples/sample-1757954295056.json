@@ -1,0 +1,71 @@
+{
+  "headers": {
+    "host": "185.245.182.69:3000",
+    "user-agent": "ZuckZapGo-Webhook/1.0",
+    "content-length": "1223",
+    "accept": "application/json",
+    "content-type": "application/json",
+    "accept-encoding": "gzip"
+  },
+  "body": {
+    "baseURL": "https://api.zuckzapgo.com",
+    "data": {
+      "event": {
+        "JID": "178060854833173@lid",
+        "Message": {
+          "Chat": "120363337449922588@g.us",
+          "Sender": "178060854833173:89@lid",
+          "IsFromMe": false,
+          "IsGroup": true,
+          "AddressingMode": "pn",
+          "SenderAlt": "",
+          "RecipientAlt": "",
+          "BroadcastListOwner": "",
+          "ID": "3EB046D40ECFD64AD57970",
+          "ServerID": 0,
+          "Type": "poll",
+          "PushName": "Paulo",
+          "Timestamp": "2025-09-15T13:38:09-03:00",
+          "Category": "",
+          "Multicast": false,
+          "MediaType": "",
+          "Edit": "",
+          "MsgBotInfo": {
+            "EditType": "",
+            "EditTargetID": "",
+            "EditSenderTimestampMS": "0001-01-01T00:00:00Z"
+          },
+          "MsgMetaInfo": {
+            "TargetID": "",
+            "TargetSender": "",
+            "TargetChat": "",
+            "DeprecatedLIDSession": null,
+            "ThreadMessageID": "",
+            "ThreadMessageSenderJID": ""
+          },
+          "VerifiedName": {
+            "Certificate": {
+              "details": "CNCl4P/Q8qVJEgZzbWI6d2EiBVBhdWxv",
+              "signature": "3Ky+Tjv3rtdWZr6rHjzLc+UtCDp5EdBrCcdsAuctsBrxPyjZAfXkaoGofrck7Xtpfghf4vV6Qb9mx8dT8V7XiA=="
+            },
+            "Details": {
+              "serial": 41262013073593040,
+              "issuer": "smb:wa",
+              "verifiedName": "Paulo"
+            }
+          },
+          "DeviceSentMeta": null
+        },
+        "OldPushName": "",
+        "NewPushName": "Paulo"
+      },
+      "type": "PushName"
+    },
+    "eventType": "PushName",
+    "timestamp": 1757954289,
+    "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+    "userID": "9e832a8666e02c047a5167194c703eaf",
+    "userJID": "5521971532700:4@s.whatsapp.net",
+    "userName": "setupautomatizado"
+  }
+}

@@ -14,7 +14,6 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/observability"
 )
 
-// EventBuffer buffers events for an instance before persistence
 type EventBuffer struct {
 	log        *slog.Logger
 	metrics    *observability.Metrics
@@ -34,12 +33,10 @@ type EventBuffer struct {
 	wg            sync.WaitGroup
 }
 
-// EventWriter defines the interface for writing events to persistence
 type EventWriter interface {
 	WriteEvents(ctx context.Context, events []*types.InternalEvent) error
 }
 
-// BufferConfig contains buffer configuration
 type BufferConfig struct {
 	InstanceID    uuid.UUID
 	BufferSize    int
@@ -47,13 +44,13 @@ type BufferConfig struct {
 	FlushInterval time.Duration
 }
 
-// NewEventBuffer creates a new EventBuffer for an instance
 func NewEventBuffer(
 	ctx context.Context,
 	config BufferConfig,
 	writer EventWriter,
 	metrics *observability.Metrics,
 ) *EventBuffer {
+	ctx = context.WithoutCancel(ctx)
 	log := logging.ContextLogger(ctx, nil).With(
 		slog.String("component", "event_buffer"),
 		slog.String("instance_id", config.InstanceID.String()),
@@ -77,7 +74,6 @@ func NewEventBuffer(
 	return buffer
 }
 
-// run is the main buffer loop that batches and flushes events
 func (b *EventBuffer) run(ctx context.Context) {
 	defer b.wg.Done()
 
@@ -100,6 +96,7 @@ func (b *EventBuffer) run(ctx context.Context) {
 			for _, evt := range batch {
 				select {
 				case b.eventCh <- evt:
+					// TODO: this is a hack to ensure that the event is not lost if the persistence fails
 					// requeued for future attempt
 				default:
 					b.droppedEvents++
@@ -113,11 +110,9 @@ func (b *EventBuffer) run(ctx context.Context) {
 				slog.Duration("duration", time.Since(start)),
 			)
 
-			// Update metrics
 			b.metrics.EventsBuffered.Sub(float64(len(batch)))
 		}
 
-		// Reset batch
 		batch = batch[:0]
 	}
 
@@ -129,21 +124,17 @@ func (b *EventBuffer) run(ctx context.Context) {
 			b.totalEvents++
 			b.mu.Unlock()
 
-			// Flush if batch is full
 			if len(batch) >= b.batchSize {
 				flush()
 			}
 
 		case <-ticker.C:
-			// Periodic flush
 			flush()
 
 		case <-b.flushCh:
-			// Manual flush requested
 			flush()
 
 		case <-b.stopCh:
-			// Flush remaining events before stopping
 			flush()
 			b.log.Info("buffer stopped",
 				slog.Int64("total_events", b.totalEvents),
@@ -152,19 +143,16 @@ func (b *EventBuffer) run(ctx context.Context) {
 			return
 
 		case <-ctx.Done():
-			// Context cancelled, flush and stop
 			flush()
 			return
 		}
 	}
 }
 
-// Flush manually triggers a flush
 func (b *EventBuffer) Flush() {
 	select {
 	case b.flushCh <- struct{}{}:
 	default:
-		// Flush already pending
 	}
 }
 
@@ -198,7 +186,6 @@ func (b *EventBuffer) persistWithRetry(ctx context.Context, events []*types.Inte
 	return err
 }
 
-// Stop gracefully stops the buffer
 func (b *EventBuffer) Stop() {
 	b.mu.Lock()
 	if b.stopped {
@@ -212,7 +199,6 @@ func (b *EventBuffer) Stop() {
 	b.wg.Wait()
 }
 
-// Stats returns buffer statistics
 func (b *EventBuffer) Stats() types.BufferStats {
 	b.mu.RLock()
 	defer b.mu.RUnlock()
@@ -225,33 +211,28 @@ func (b *EventBuffer) Stats() types.BufferStats {
 	}
 }
 
-// IsStopped returns whether the buffer is stopped
 func (b *EventBuffer) IsStopped() bool {
 	b.mu.RLock()
 	defer b.mu.RUnlock()
 	return b.stopped
 }
 
-// Size returns the current buffer size
 func (b *EventBuffer) Size() int {
 	return len(b.eventCh)
 }
 
-// DroppedCount returns the number of dropped events
 func (b *EventBuffer) DroppedCount() int64 {
 	b.mu.RLock()
 	defer b.mu.RUnlock()
 	return b.droppedEvents
 }
 
-// TotalCount returns the total number of events processed
 func (b *EventBuffer) TotalCount() int64 {
 	b.mu.RLock()
 	defer b.mu.RUnlock()
 	return b.totalEvents
 }
 
-// WaitForFlush waits for the buffer to be empty (useful for testing)
 func (b *EventBuffer) WaitForFlush(ctx context.Context, timeout time.Duration) error {
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()

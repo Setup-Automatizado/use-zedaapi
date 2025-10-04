@@ -1,0 +1,39 @@
+{
+  "headers": {
+    "host": "185.245.182.69:3000",
+    "user-agent": "ZuckZapGo-Webhook/1.0",
+    "content-length": "593",
+    "accept": "application/json",
+    "content-type": "application/json",
+    "accept-encoding": "gzip"
+  },
+  "body": {
+    "baseURL": "https://api.zuckzapgo.com",
+    "data": {
+      "event": {
+        "Chat": "120363400639603404@g.us",
+        "Sender": "5521970714152:29@s.whatsapp.net",
+        "IsFromMe": false,
+        "IsGroup": true,
+        "AddressingMode": "",
+        "SenderAlt": "",
+        "RecipientAlt": "",
+        "BroadcastListOwner": "",
+        "MessageIDs": [
+          "3A5EAB625F731AB94190"
+        ],
+        "Timestamp": "2025-09-15T11:17:40-03:00",
+        "Type": "",
+        "MessageSender": ""
+      },
+      "state": "Delivered",
+      "type": "ReadReceipt"
+    },
+    "eventType": "ReadReceipt",
+    "timestamp": 1757945863,
+    "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+    "userID": "9e832a8666e02c047a5167194c703eaf",
+    "userJID": "5521971532700:4@s.whatsapp.net",
+    "userName": "setupautomatizado"
+  }
+}

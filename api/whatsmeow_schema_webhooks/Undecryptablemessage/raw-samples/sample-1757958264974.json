@@ -1,0 +1,71 @@
+{
+  "headers": {
+    "host": "185.245.182.69:3000",
+    "user-agent": "ZuckZapGo-Webhook/1.0",
+    "content-length": "1339",
+    "accept": "application/json",
+    "content-type": "application/json",
+    "accept-encoding": "gzip"
+  },
+  "body": {
+    "baseURL": "https://api.zuckzapgo.com",
+    "data": {
+      "event": {
+        "Info": {
+          "Chat": "120363344102839767@g.us",
+          "Sender": "5521999854191:59@s.whatsapp.net",
+          "IsFromMe": false,
+          "IsGroup": true,
+          "AddressingMode": "pn",
+          "SenderAlt": "258501330903146:59@lid",
+          "RecipientAlt": "",
+          "BroadcastListOwner": "",
+          "ID": "3EB05EAE1BBE137CF953A7",
+          "ServerID": 0,
+          "Type": "text",
+          "PushName": "Joao Ferro - Liberty Easy",
+          "Timestamp": "2025-09-15T14:44:20-03:00",
+          "Category": "",
+          "Multicast": false,
+          "MediaType": "",
+          "Edit": "",
+          "MsgBotInfo": {
+            "EditType": "",
+            "EditTargetID": "",
+            "EditSenderTimestampMS": "0001-01-01T00:00:00Z"
+          },
+          "MsgMetaInfo": {
+            "TargetID": "",
+            "TargetSender": "",
+            "TargetChat": "",
+            "DeprecatedLIDSession": null,
+            "ThreadMessageID": "",
+            "ThreadMessageSenderJID": ""
+          },
+          "VerifiedName": {
+            "Certificate": {
+              "details": "CMaouuXa9+8iEgZzbWI6d2EiGUpvYW8gRmVycm8gLSBMaWJlcnR5IEVhc3k=",
+              "signature": "8khyzkCKTBXpD6li/fQUaMOLaZw8lqHrK8oeFqu5pv11MburVzeK2jndBlR8wIfVS7fpllGqvGiVoFngZz/vig=="
+            },
+            "Details": {
+              "serial": 19632594759881800,
+              "issuer": "smb:wa",
+              "verifiedName": "Joao Ferro - Liberty Easy"
+            }
+          },
+          "DeviceSentMeta": null
+        },
+        "IsUnavailable": true,
+        "UnavailableType": "",
+        "DecryptFailMode": ""
+      },
+      "type": "UndecryptableMessage"
+    },
+    "eventType": "UndecryptableMessage",
+    "timestamp": 1757958260,
+    "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+    "userID": "9e832a8666e02c047a5167194c703eaf",
+    "userJID": "5521971532700:4@s.whatsapp.net",
+    "userName": "setupautomatizado"
+  }
+}

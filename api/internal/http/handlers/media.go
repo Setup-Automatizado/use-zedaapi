@@ -13,14 +13,12 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/observability"
 )
 
-// MediaHandler handles serving local media files
 type MediaHandler struct {
 	localStorage *media.LocalMediaStorage
 	metrics      *observability.Metrics
 	logger       *slog.Logger
 }
 
-// NewMediaHandler creates a new media handler
 func NewMediaHandler(
 	localStorage *media.LocalMediaStorage,
 	metrics *observability.Metrics,
@@ -33,14 +31,12 @@ func NewMediaHandler(
 	}
 }
 
-// ServeMedia handles GET /v1/media/{instance_id}/{path}?expires={timestamp}&signature={hmac}
 func (h *MediaHandler) ServeMedia(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	logger := logging.ContextLogger(ctx, h.logger)
 
-	// Extract instance_id and path from URL
 	instanceID := chi.URLParam(r, "instance_id")
-	pathSuffix := chi.URLParam(r, "*") // Everything after instance_id/
+	pathSuffix := chi.URLParam(r, "*")
 
 	if instanceID == "" || pathSuffix == "" {
 		logger.Warn("missing instance_id or path in request",
@@ -51,10 +47,8 @@ func (h *MediaHandler) ServeMedia(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Reconstruct full relative path
 	relativePath := fmt.Sprintf("%s/%s", instanceID, pathSuffix)
 
-	// Extract query parameters
 	expiresStr := r.URL.Query().Get("expires")
 	signature := r.URL.Query().Get("signature")
 
@@ -70,17 +64,15 @@ func (h *MediaHandler) ServeMedia(w http.ResponseWriter, r *http.Request) {
 		slog.String("path", relativePath),
 		slog.String("expires", expiresStr))
 
-	// Serve media using CopyToWriter for efficiency
 	contentType, fileSize, err := h.localStorage.CopyToWriter(ctx, relativePath, expiresStr, signature, w)
 	if err != nil {
 		h.handleMediaError(w, r, instanceID, relativePath, err)
 		return
 	}
 
-	// Set response headers
 	w.Header().Set("Content-Type", contentType)
 	w.Header().Set("Content-Length", fmt.Sprintf("%d", fileSize))
-	w.Header().Set("Cache-Control", "public, max-age=86400") // 24 hours
+	w.Header().Set("Cache-Control", "public, max-age=86400")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 
 	logger.Info("media served successfully",
@@ -92,13 +84,11 @@ func (h *MediaHandler) ServeMedia(w http.ResponseWriter, r *http.Request) {
 	h.metrics.MediaServeBytes.WithLabelValues(instanceID).Add(float64(fileSize))
 }
 
-// handleMediaError handles errors when serving media
 func (h *MediaHandler) handleMediaError(w http.ResponseWriter, r *http.Request, instanceID, path string, err error) {
 	logger := logging.ContextLogger(r.Context(), h.logger)
 
 	errMsg := err.Error()
 
-	// Determine HTTP status based on error
 	var status int
 	var errorType string
 
@@ -142,7 +132,6 @@ func (h *MediaHandler) handleMediaError(w http.ResponseWriter, r *http.Request, 
 	h.metrics.MediaServeRequests.WithLabelValues(instanceID, "error", errorType).Inc()
 }
 
-// GetStats returns statistics about local media storage
 func (h *MediaHandler) GetStats(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	logger := logging.ContextLogger(ctx, h.logger)
@@ -155,11 +144,9 @@ func (h *MediaHandler) GetStats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Return JSON response
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	// Manually construct JSON to avoid importing encoding/json
 	fmt.Fprintf(w, `{"total_files":%d,"total_bytes":%d,"base_path":"%s","url_expiry":"%s","public_base_url":"%s"}`,
 		stats["total_files"],
 		stats["total_bytes"],

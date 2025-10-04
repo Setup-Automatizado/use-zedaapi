@@ -1,0 +1,121 @@
+{
+  "headers": {
+    "host": "185.245.182.69:3000",
+    "user-agent": "ZuckZapGo-Webhook/1.0",
+    "content-length": "2311",
+    "accept": "application/json",
+    "content-type": "application/json",
+    "accept-encoding": "gzip"
+  },
+  "body": {
+    "baseURL": "https://api.zuckzapgo.com",
+    "data": {
+      "event": {
+        "Reason": "invite",
+        "Type": "",
+        "CreateKey": "",
+        "Sender": null,
+        "SenderPN": null,
+        "Notify": "invite",
+        "JID": "120363418285692492@g.us",
+        "OwnerJID": "5512992485971@s.whatsapp.net",
+        "OwnerPN": "",
+        "Name": "Promovaweb + ZuckZapGo",
+        "NameSetAt": "2025-09-08T09:46:54-03:00",
+        "NameSetBy": "5512992485971@s.whatsapp.net",
+        "NameSetByPN": "",
+        "Topic": "",
+        "TopicID": "",
+        "TopicSetAt": "0001-01-01T00:00:00Z",
+        "TopicSetBy": "",
+        "TopicSetByPN": "",
+        "TopicDeleted": false,
+        "IsLocked": true,
+        "IsAnnounce": false,
+        "AnnounceVersionID": "1757335614843690",
+        "IsEphemeral": false,
+        "DisappearingTimer": 0,
+        "IsIncognito": false,
+        "IsParent": false,
+        "DefaultMembershipApprovalMode": "",
+        "LinkedParentJID": "",
+        "IsDefaultSubGroup": false,
+        "IsJoinApprovalRequired": false,
+        "AddressingMode": "",
+        "GroupCreated": "2025-09-08T09:46:54-03:00",
+        "CreatorCountryCode": "BR",
+        "ParticipantVersionID": "1757347494865810",
+        "Participants": [
+          {
+            "JID": "5511976715006@s.whatsapp.net",
+            "PhoneNumber": "5511976715006@s.whatsapp.net",
+            "LID": "60529058025545@lid",
+            "IsAdmin": false,
+            "IsSuperAdmin": false,
+            "DisplayName": "",
+            "Error": 0,
+            "AddRequest": null
+          },
+          {
+            "JID": "5511976800541@s.whatsapp.net",
+            "PhoneNumber": "5511976800541@s.whatsapp.net",
+            "LID": "137697221972044@lid",
+            "IsAdmin": false,
+            "IsSuperAdmin": false,
+            "DisplayName": "",
+            "Error": 0,
+            "AddRequest": null
+          },
+          {
+            "JID": "5512992485971@s.whatsapp.net",
+            "PhoneNumber": "5512992485971@s.whatsapp.net",
+            "LID": "208151781625986@lid",
+            "IsAdmin": true,
+            "IsSuperAdmin": true,
+            "DisplayName": "",
+            "Error": 0,
+            "AddRequest": null
+          },
+          {
+            "JID": "5512996118507@s.whatsapp.net",
+            "PhoneNumber": "5512996118507@s.whatsapp.net",
+            "LID": "105626701144159@lid",
+            "IsAdmin": false,
+            "IsSuperAdmin": false,
+            "DisplayName": "",
+            "Error": 0,
+            "AddRequest": null
+          },
+          {
+            "JID": "5521971532700@s.whatsapp.net",
+            "PhoneNumber": "5521971532700@s.whatsapp.net",
+            "LID": "227294266302623@lid",
+            "IsAdmin": false,
+            "IsSuperAdmin": false,
+            "DisplayName": "",
+            "Error": 0,
+            "AddRequest": null
+          },
+          {
+            "JID": "557999777712@s.whatsapp.net",
+            "PhoneNumber": "557999777712@s.whatsapp.net",
+            "LID": "14925078507617@lid",
+            "IsAdmin": false,
+            "IsSuperAdmin": false,
+            "DisplayName": "",
+            "Error": 0,
+            "AddRequest": null
+          }
+        ],
+        "MemberAddMode": "all_member_add"
+      },
+      "type": "JoinedGroup"
+    },
+    "eventType": "JoinedGroup",
+    "timestamp": 1757347495,
+    "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+    "userID": "9e832a8666e02c047a5167194c703eaf",
+    "userJID": "5521971532700:4@s.whatsapp.net",
+    "userName": "setupautomatizado"
+  }
+}

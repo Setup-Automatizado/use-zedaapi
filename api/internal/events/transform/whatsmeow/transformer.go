@@ -18,25 +18,20 @@ import (
 	"go.mau.fi/whatsmeow/types/events"
 )
 
-// Transformer converts whatsmeow events to InternalEvent format.
-// This is the source transformer for WhatsApp events received via whatsmeow library.
 type Transformer struct {
 	instanceID uuid.UUID
 }
 
-// NewTransformer creates a new WhatsmeowTransformer for the given instance.
 func NewTransformer(instanceID uuid.UUID) *Transformer {
 	return &Transformer{
 		instanceID: instanceID,
 	}
 }
 
-// SourceLib returns the source library identifier.
 func (t *Transformer) SourceLib() types.SourceLib {
 	return types.SourceLibWhatsmeow
 }
 
-// SupportsEvent returns true if this transformer can handle the given event type.
 func (t *Transformer) SupportsEvent(eventType reflect.Type) bool {
 	switch eventType {
 	case reflect.TypeOf(&events.Message{}),
@@ -54,14 +49,12 @@ func (t *Transformer) SupportsEvent(eventType reflect.Type) bool {
 	}
 }
 
-// Transform converts a whatsmeow event to InternalEvent format.
 func (t *Transformer) Transform(ctx context.Context, rawEvent interface{}) (*types.InternalEvent, error) {
 	logger := logging.ContextLogger(ctx, nil).With(
 		slog.String("component", "whatsmeow_transformer"),
 		slog.String("instance_id", t.instanceID.String()),
 	)
 
-	// Route to specific transformation based on event type
 	switch evt := rawEvent.(type) {
 	case *events.Message:
 		return t.transformMessage(ctx, logger, evt)
@@ -89,11 +82,9 @@ func (t *Transformer) Transform(ctx context.Context, rawEvent interface{}) (*typ
 	}
 }
 
-// transformMessage converts a whatsmeow Message event to InternalEvent.
 func (t *Transformer) transformMessage(ctx context.Context, logger *slog.Logger, msg *events.Message) (*types.InternalEvent, error) {
 	eventID := uuid.New()
 
-	// Unwrap the raw message to get the actual content
 	msg.UnwrapRaw()
 
 	event := &types.InternalEvent{
@@ -106,7 +97,6 @@ func (t *Transformer) transformMessage(ctx context.Context, logger *slog.Logger,
 		CapturedAt: time.Now(),
 	}
 
-	// Add metadata
 	event.Metadata["message_id"] = msg.Info.ID
 	event.Metadata["from"] = msg.Info.Sender.String()
 	event.Metadata["chat"] = msg.Info.Chat.String()
@@ -114,7 +104,6 @@ func (t *Transformer) transformMessage(ctx context.Context, logger *slog.Logger,
 	event.Metadata["is_group"] = fmt.Sprintf("%t", msg.Info.IsGroup)
 	event.Metadata["timestamp"] = fmt.Sprintf("%d", msg.Info.Timestamp.Unix())
 
-	// Add MessageInfo fields
 	if msg.Info.PushName != "" {
 		event.Metadata["push_name"] = msg.Info.PushName
 	}
@@ -133,7 +122,6 @@ func (t *Transformer) transformMessage(ctx context.Context, logger *slog.Logger,
 		event.Metadata["media_type_info"] = msg.Info.MediaType
 	}
 
-	// Add edit attributes
 	if msg.Info.Edit != "" {
 		switch msg.Info.Edit {
 		case "1":
@@ -151,7 +139,6 @@ func (t *Transformer) transformMessage(ctx context.Context, logger *slog.Logger,
 		}
 	}
 
-	// Add thread/reply metadata
 	if msg.Info.MsgMetaInfo.TargetID != "" {
 		event.Metadata["reply_to_message_id"] = msg.Info.MsgMetaInfo.TargetID
 	}
@@ -168,14 +155,12 @@ func (t *Transformer) transformMessage(ctx context.Context, logger *slog.Logger,
 		event.Metadata["thread_message_sender"] = msg.Info.MsgMetaInfo.ThreadMessageSenderJID.String()
 	}
 
-	// Add DeviceSentMeta
 	if msg.Info.DeviceSentMeta != nil {
 		if msg.Info.DeviceSentMeta.Phash != "" {
 			event.Metadata["device_sent_phash"] = msg.Info.DeviceSentMeta.Phash
 		}
 	}
 
-	// Add MessageSource fields
 	if msg.Info.MessageSource.AddressingMode != "" {
 		event.Metadata["addressing_mode"] = string(msg.Info.MessageSource.AddressingMode)
 	}
@@ -189,7 +174,6 @@ func (t *Transformer) transformMessage(ctx context.Context, logger *slog.Logger,
 		event.Metadata["broadcast_list_owner"] = msg.Info.MessageSource.BroadcastListOwner.String()
 	}
 
-	// Add message type flags
 	if msg.IsEphemeral {
 		event.Metadata["is_ephemeral"] = "true"
 	}
@@ -200,12 +184,10 @@ func (t *Transformer) transformMessage(ctx context.Context, logger *slog.Logger,
 		event.Metadata["is_edit"] = "true"
 	}
 
-	// Handle ProtocolMessage (revoke, edits, etc)
 	if protocolMsg := msg.Message.GetProtocolMessage(); protocolMsg != nil {
 		msgType := protocolMsg.GetType()
 		switch msgType {
 		case waE2E.ProtocolMessage_REVOKE:
-			// Message revocation/deletion
 			event.Metadata["is_revoke"] = "true"
 			if key := protocolMsg.GetKey(); key != nil {
 				if revokedID := key.GetID(); revokedID != "" {
@@ -213,12 +195,10 @@ func (t *Transformer) transformMessage(ctx context.Context, logger *slog.Logger,
 				}
 			}
 		case waE2E.ProtocolMessage_MESSAGE_EDIT:
-			// Message edit (already handled by msg.IsEdit, but keep for completeness)
 			event.Metadata["is_edit"] = "true"
 		}
 	}
 
-	// Extract media information if present
 	hasMedia, mediaInfo := t.extractMediaInfo(msg.Message)
 	if hasMedia {
 		event.HasMedia = true
@@ -229,7 +209,6 @@ func (t *Transformer) transformMessage(ctx context.Context, logger *slog.Logger,
 		event.MediaType = mediaInfo.MediaType
 		event.MimeType = mediaInfo.MimeType
 		event.FileLength = mediaInfo.FileLength
-		// Media metadata
 		event.MediaIsGIF = mediaInfo.IsGIF
 		event.MediaIsAnimated = mediaInfo.IsAnimated
 		event.MediaWidth = mediaInfo.Width
@@ -237,7 +216,6 @@ func (t *Transformer) transformMessage(ctx context.Context, logger *slog.Logger,
 		event.MediaWaveform = mediaInfo.Waveform
 	}
 
-	// Extract ContextInfo (quotes, mentions, forwards, ephemeral)
 	if ctxInfo := msg.Message.GetExtendedTextMessage().GetContextInfo(); ctxInfo != nil {
 		t.extractContextInfo(ctxInfo, event)
 	} else if ctxInfo := msg.Message.GetImageMessage().GetContextInfo(); ctxInfo != nil {
@@ -266,7 +244,6 @@ func (t *Transformer) transformMessage(ctx context.Context, logger *slog.Logger,
 	return event, nil
 }
 
-// transformReceipt converts a whatsmeow Receipt event to InternalEvent.
 func (t *Transformer) transformReceipt(ctx context.Context, logger *slog.Logger, receipt *events.Receipt) (*types.InternalEvent, error) {
 	eventID := uuid.New()
 
@@ -280,13 +257,11 @@ func (t *Transformer) transformReceipt(ctx context.Context, logger *slog.Logger,
 		CapturedAt: time.Now(),
 	}
 
-	// Add metadata
 	event.Metadata["chat"] = receipt.Chat.String()
 	event.Metadata["sender"] = receipt.Sender.String()
 	event.Metadata["receipt_type"] = string(receipt.Type)
 	event.Metadata["timestamp"] = fmt.Sprintf("%d", receipt.Timestamp.Unix())
 
-	// Add MessageSource fields
 	if receipt.MessageSource.AddressingMode != "" {
 		event.Metadata["addressing_mode"] = string(receipt.MessageSource.AddressingMode)
 	}
@@ -297,7 +272,6 @@ func (t *Transformer) transformReceipt(ctx context.Context, logger *slog.Logger,
 		event.Metadata["recipient_alt"] = receipt.MessageSource.RecipientAlt.String()
 	}
 
-	// Add message IDs
 	if len(receipt.MessageIDs) > 0 {
 		messageIDsJSON, _ := json.Marshal(receipt.MessageIDs)
 		event.Metadata["message_ids"] = string(messageIDsJSON)
@@ -312,7 +286,6 @@ func (t *Transformer) transformReceipt(ctx context.Context, logger *slog.Logger,
 	return event, nil
 }
 
-// transformChatPresence converts a whatsmeow ChatPresence event to InternalEvent.
 func (t *Transformer) transformChatPresence(ctx context.Context, logger *slog.Logger, presence *events.ChatPresence) (*types.InternalEvent, error) {
 	eventID := uuid.New()
 
@@ -326,13 +299,11 @@ func (t *Transformer) transformChatPresence(ctx context.Context, logger *slog.Lo
 		CapturedAt: time.Now(),
 	}
 
-	// Add metadata
 	event.Metadata["chat"] = presence.Chat.String()
 	event.Metadata["sender"] = presence.Sender.String()
 	event.Metadata["state"] = string(presence.State)
 	event.Metadata["media"] = string(presence.Media)
 
-	// Add MessageSource fields
 	if presence.MessageSource.AddressingMode != "" {
 		event.Metadata["addressing_mode"] = string(presence.MessageSource.AddressingMode)
 	}
@@ -352,7 +323,6 @@ func (t *Transformer) transformChatPresence(ctx context.Context, logger *slog.Lo
 	return event, nil
 }
 
-// transformPresence converts a whatsmeow Presence event to InternalEvent.
 func (t *Transformer) transformPresence(ctx context.Context, logger *slog.Logger, presence *events.Presence) (*types.InternalEvent, error) {
 	eventID := uuid.New()
 
@@ -366,7 +336,6 @@ func (t *Transformer) transformPresence(ctx context.Context, logger *slog.Logger
 		CapturedAt: time.Now(),
 	}
 
-	// Add metadata
 	event.Metadata["from"] = presence.From.String()
 	event.Metadata["unavailable"] = fmt.Sprintf("%t", presence.Unavailable)
 	if !presence.LastSeen.IsZero() {
@@ -381,7 +350,6 @@ func (t *Transformer) transformPresence(ctx context.Context, logger *slog.Logger
 	return event, nil
 }
 
-// transformConnected converts a whatsmeow Connected event to InternalEvent.
 func (t *Transformer) transformConnected(ctx context.Context, logger *slog.Logger, connected *events.Connected) (*types.InternalEvent, error) {
 	eventID := uuid.New()
 
@@ -402,7 +370,6 @@ func (t *Transformer) transformConnected(ctx context.Context, logger *slog.Logge
 	return event, nil
 }
 
-// transformDisconnected converts a whatsmeow Disconnected event to InternalEvent.
 func (t *Transformer) transformDisconnected(ctx context.Context, logger *slog.Logger, disconnected *events.Disconnected) (*types.InternalEvent, error) {
 	eventID := uuid.New()
 
@@ -423,7 +390,6 @@ func (t *Transformer) transformDisconnected(ctx context.Context, logger *slog.Lo
 	return event, nil
 }
 
-// MediaInfo holds extracted media information from a message.
 type MediaInfo struct {
 	MediaKey      string
 	DirectPath    string
@@ -432,20 +398,16 @@ type MediaInfo struct {
 	MediaType     string
 	MimeType      *string
 	FileLength    *int64
-	// Media metadata
-	IsGIF      bool
-	IsAnimated bool
-	Width      int
-	Height     int
-	Waveform   []byte
+	IsGIF         bool
+	IsAnimated    bool
+	Width         int
+	Height        int
+	Waveform      []byte
 }
 
-// extractMediaInfo extracts media information from a WhatsApp message.
-// Returns (hasMedia bool, mediaInfo MediaInfo).
 func (t *Transformer) extractMediaInfo(msg *waE2E.Message) (bool, MediaInfo) {
 	var info MediaInfo
 
-	// Check for image
 	if img := msg.GetImageMessage(); img != nil {
 		info.MediaType = "image"
 		info.MediaKey = base64.StdEncoding.EncodeToString(img.GetMediaKey())
@@ -465,11 +427,9 @@ func (t *Transformer) extractMediaInfo(msg *waE2E.Message) (bool, MediaInfo) {
 			lengthInt64 := int64(length)
 			info.FileLength = &lengthInt64
 		}
-		// Extract media metadata
-		// For images, detect GIF from mimetype since proto doesn't have isGif field
 		if mime := img.GetMimetype(); mime == "image/gif" {
 			info.IsGIF = true
-			info.IsAnimated = true // GIFs are inherently animated
+			info.IsAnimated = true
 		}
 		if width := img.GetWidth(); width > 0 {
 			info.Width = int(width)
@@ -480,7 +440,6 @@ func (t *Transformer) extractMediaInfo(msg *waE2E.Message) (bool, MediaInfo) {
 		return true, info
 	}
 
-	// Check for video
 	if video := msg.GetVideoMessage(); video != nil {
 		info.MediaType = "video"
 		info.MediaKey = base64.StdEncoding.EncodeToString(video.GetMediaKey())
@@ -500,8 +459,7 @@ func (t *Transformer) extractMediaInfo(msg *waE2E.Message) (bool, MediaInfo) {
 			lengthInt64 := int64(length)
 			info.FileLength = &lengthInt64
 		}
-		// Extract media metadata
-		info.IsGIF = video.GetGifPlayback() // Video plays as GIF
+		info.IsGIF = video.GetGifPlayback()
 		if width := video.GetWidth(); width > 0 {
 			info.Width = int(width)
 		}
@@ -511,7 +469,6 @@ func (t *Transformer) extractMediaInfo(msg *waE2E.Message) (bool, MediaInfo) {
 		return true, info
 	}
 
-	// Check for audio
 	if audio := msg.GetAudioMessage(); audio != nil {
 		info.MediaType = "audio"
 		info.MediaKey = base64.StdEncoding.EncodeToString(audio.GetMediaKey())
@@ -531,14 +488,12 @@ func (t *Transformer) extractMediaInfo(msg *waE2E.Message) (bool, MediaInfo) {
 			lengthInt64 := int64(length)
 			info.FileLength = &lengthInt64
 		}
-		// Extract waveform
 		if waveform := audio.GetWaveform(); len(waveform) > 0 {
 			info.Waveform = waveform
 		}
 		return true, info
 	}
 
-	// Check for document
 	if doc := msg.GetDocumentMessage(); doc != nil {
 		info.MediaType = "document"
 		info.MediaKey = base64.StdEncoding.EncodeToString(doc.GetMediaKey())
@@ -561,7 +516,6 @@ func (t *Transformer) extractMediaInfo(msg *waE2E.Message) (bool, MediaInfo) {
 		return true, info
 	}
 
-	// Check for sticker
 	if sticker := msg.GetStickerMessage(); sticker != nil {
 		info.MediaType = "sticker"
 		info.MediaKey = base64.StdEncoding.EncodeToString(sticker.GetMediaKey())
@@ -581,7 +535,6 @@ func (t *Transformer) extractMediaInfo(msg *waE2E.Message) (bool, MediaInfo) {
 			lengthInt64 := int64(length)
 			info.FileLength = &lengthInt64
 		}
-		// Extract media metadata
 		info.IsAnimated = sticker.GetIsAnimated()
 		if width := sticker.GetWidth(); width > 0 {
 			info.Width = int(width)
@@ -592,13 +545,10 @@ func (t *Transformer) extractMediaInfo(msg *waE2E.Message) (bool, MediaInfo) {
 		return true, info
 	}
 
-	// No media found
 	return false, info
 }
 
-// extractContextInfo extracts ContextInfo fields (quotes, mentions, forwards, ephemeral)
 func (t *Transformer) extractContextInfo(ctxInfo *waE2E.ContextInfo, event *types.InternalEvent) {
-	// Extract quoted message info
 	if stanzaID := ctxInfo.GetStanzaID(); stanzaID != "" {
 		event.QuotedMessageID = stanzaID
 		event.Metadata["quoted_message_id"] = stanzaID
@@ -611,36 +561,25 @@ func (t *Transformer) extractContextInfo(ctxInfo *waE2E.ContextInfo, event *type
 		event.QuotedRemoteJID = remoteJID
 		event.Metadata["quoted_remote_jid"] = remoteJID
 	}
-
-	// Extract quoted message content if present
 	if quotedMsg := ctxInfo.GetQuotedMessage(); quotedMsg != nil {
-		// Serialize quoted message to JSON for metadata
 		if quotedJSON, err := json.Marshal(quotedMsg); err == nil {
 			event.Metadata["quoted_message"] = string(quotedJSON)
 		}
 	}
-
-	// Extract mentioned JIDs
 	if mentionedJIDs := ctxInfo.GetMentionedJID(); len(mentionedJIDs) > 0 {
 		event.MentionedJIDs = mentionedJIDs
-		// Store as comma-separated string for metadata
 		event.Metadata["mentioned_jids"] = strings.Join(mentionedJIDs, ",")
 	}
-
-	// Extract forward flag
 	if isForwarded := ctxInfo.GetIsForwarded(); isForwarded {
 		event.IsForwarded = true
 		event.Metadata["is_forwarded"] = "true"
 	}
-
-	// Extract ephemeral expiry
 	if ephemeralExpiry := ctxInfo.GetEphemeralSettingTimestamp(); ephemeralExpiry > 0 {
 		event.EphemeralExpiry = ephemeralExpiry
 		event.Metadata["ephemeral_expiry"] = fmt.Sprintf("%d", ephemeralExpiry)
 	}
 }
 
-// transformJoinedGroup transforms a JoinedGroup event to InternalEvent format.
 func (t *Transformer) transformJoinedGroup(ctx context.Context, logger *slog.Logger, joined *events.JoinedGroup) (*types.InternalEvent, error) {
 	eventID := uuid.New()
 
@@ -654,7 +593,6 @@ func (t *Transformer) transformJoinedGroup(ctx context.Context, logger *slog.Log
 		CapturedAt: time.Now(),
 	}
 
-	// Add group info
 	event.Metadata["group_id"] = joined.JID.String()
 	if joined.Name != "" {
 		event.Metadata["group_name"] = joined.Name
@@ -683,7 +621,6 @@ func (t *Transformer) transformJoinedGroup(ctx context.Context, logger *slog.Log
 	return event, nil
 }
 
-// transformGroupInfo transforms a GroupInfo event to InternalEvent format.
 func (t *Transformer) transformGroupInfo(ctx context.Context, logger *slog.Logger, info *events.GroupInfo) (*types.InternalEvent, error) {
 	eventID := uuid.New()
 
@@ -697,7 +634,6 @@ func (t *Transformer) transformGroupInfo(ctx context.Context, logger *slog.Logge
 		CapturedAt: time.Now(),
 	}
 
-	// Add group info
 	event.Metadata["group_id"] = info.JID.String()
 	event.Metadata["timestamp"] = fmt.Sprintf("%d", info.Timestamp.Unix())
 
@@ -710,8 +646,6 @@ func (t *Transformer) transformGroupInfo(ctx context.Context, logger *slog.Logge
 	if info.Notify != "" {
 		event.Metadata["notify"] = info.Notify
 	}
-
-	// Add specific change info
 	if info.Name != nil {
 		event.Metadata["name_change"] = info.Name.Name
 		event.Metadata["name_set_at"] = fmt.Sprintf("%d", info.Name.NameSetAt.Unix())
@@ -741,7 +675,6 @@ func (t *Transformer) transformGroupInfo(ctx context.Context, logger *slog.Logge
 	return event, nil
 }
 
-// transformPicture transforms a Picture event to InternalEvent format.
 func (t *Transformer) transformPicture(ctx context.Context, logger *slog.Logger, picture *events.Picture) (*types.InternalEvent, error) {
 	eventID := uuid.New()
 
@@ -755,7 +688,6 @@ func (t *Transformer) transformPicture(ctx context.Context, logger *slog.Logger,
 		CapturedAt: time.Now(),
 	}
 
-	// Add picture info
 	event.Metadata["jid"] = picture.JID.String()
 	event.Metadata["author"] = picture.Author.String()
 	event.Metadata["timestamp"] = fmt.Sprintf("%d", picture.Timestamp.Unix())

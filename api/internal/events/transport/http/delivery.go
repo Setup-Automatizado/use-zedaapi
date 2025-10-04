@@ -11,7 +11,6 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/logging"
 )
 
-// DeliveryRequest contains all information needed for event delivery
 type DeliveryRequest struct {
 	Endpoint    string
 	Payload     []byte
@@ -23,7 +22,6 @@ type DeliveryRequest struct {
 	MaxAttempts int
 }
 
-// DeliveryResult contains the outcome of a delivery attempt
 type DeliveryResult struct {
 	Success         bool
 	StatusCode      int
@@ -35,7 +33,6 @@ type DeliveryResult struct {
 	ErrorType       string
 }
 
-// Error types
 const (
 	ErrorTypeTimeout       = "timeout"
 	ErrorTypeConnection    = "connection"
@@ -49,19 +46,16 @@ var (
 	ErrInvalidEndpoint = fmt.Errorf("invalid endpoint")
 )
 
-// ResponseHandler processes HTTP responses
 type ResponseHandler struct {
 	maxResponseSize int64
 }
 
-// NewResponseHandler creates a response handler
 func NewResponseHandler() *ResponseHandler {
 	return &ResponseHandler{
-		maxResponseSize: 1024 * 1024, // 1MB
+		maxResponseSize: 1024 * 1024 * 100,
 	}
 }
 
-// HandleHTTPResponse processes an HTTP response
 func (h *ResponseHandler) HandleHTTPResponse(resp *http.Response, duration time.Duration, requestErr error) *DeliveryResult {
 	result := &DeliveryResult{
 		Duration: duration,
@@ -89,7 +83,6 @@ func (h *ResponseHandler) HandleHTTPResponse(resp *http.Response, duration time.
 		defer resp.Body.Close()
 	}
 
-	// Classify based on status code
 	result.Retryable, result.ErrorType = classifyHTTPStatus(resp.StatusCode)
 
 	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
@@ -138,14 +131,12 @@ func classifyHTTPStatus(statusCode int) (retryable bool, errorType string) {
 	}
 }
 
-// HTTPTransport implements the Transport interface for HTTP webhooks
 type HTTPTransport struct {
 	client          *http.Client
 	config          *Config
 	responseHandler *ResponseHandler
 }
 
-// NewHTTPTransport creates a new HTTP transport instance
 func NewHTTPTransport(config *Config) *HTTPTransport {
 	if config == nil {
 		config = DefaultConfig()
@@ -158,11 +149,9 @@ func NewHTTPTransport(config *Config) *HTTPTransport {
 	}
 }
 
-// Deliver sends an HTTP POST request with the event payload
 func (t *HTTPTransport) Deliver(ctx context.Context, request *DeliveryRequest) (*DeliveryResult, error) {
 	logger := logging.ContextLogger(ctx, nil)
 
-	// Validate request
 	if err := t.validateRequest(request); err != nil {
 		return &DeliveryResult{
 			Success:      false,
@@ -172,7 +161,6 @@ func (t *HTTPTransport) Deliver(ctx context.Context, request *DeliveryRequest) (
 		}, err
 	}
 
-	// Prepare HTTP request
 	httpReq, err := t.prepareRequest(ctx, request)
 	if err != nil {
 		logger.Error("failed to prepare HTTP request",
@@ -188,16 +176,13 @@ func (t *HTTPTransport) Deliver(ctx context.Context, request *DeliveryRequest) (
 		}, err
 	}
 
-	// Perform delivery with retry
 	result := t.deliverWithRetry(ctx, httpReq, request, logger)
 
-	// Log result
 	t.logDeliveryResult(logger, request, result)
 
 	return result, nil
 }
 
-// deliverWithRetry performs HTTP delivery with internal retry logic
 func (t *HTTPTransport) deliverWithRetry(ctx context.Context, httpReq *http.Request, request *DeliveryRequest, logger *slog.Logger) *DeliveryResult {
 	var lastResult *DeliveryResult
 
@@ -207,7 +192,6 @@ func (t *HTTPTransport) deliverWithRetry(ctx context.Context, httpReq *http.Requ
 	}
 
 	for attempt := 1; attempt <= maxAttempts; attempt++ {
-		// Check context cancellation
 		if ctx.Err() != nil {
 			return &DeliveryResult{
 				Success:      false,
@@ -217,15 +201,12 @@ func (t *HTTPTransport) deliverWithRetry(ctx context.Context, httpReq *http.Requ
 			}
 		}
 
-		// Perform single delivery attempt
 		start := time.Now()
 		resp, err := t.client.Do(httpReq)
 		duration := time.Since(start)
 
-		// Handle response
 		lastResult = t.responseHandler.HandleHTTPResponse(resp, duration, err)
 
-		// Success - return immediately
 		if lastResult.Success {
 			logger.Debug("webhook delivered successfully",
 				slog.String("event_id", request.EventID),
@@ -235,7 +216,6 @@ func (t *HTTPTransport) deliverWithRetry(ctx context.Context, httpReq *http.Requ
 			return lastResult
 		}
 
-		// Permanent failure - don't retry
 		if !lastResult.Retryable {
 			logger.Warn("webhook delivery failed (permanent)",
 				slog.String("event_id", request.EventID),
@@ -245,7 +225,6 @@ func (t *HTTPTransport) deliverWithRetry(ctx context.Context, httpReq *http.Requ
 			return lastResult
 		}
 
-		// Retry logic - only if not last attempt
 		if attempt < maxAttempts {
 			waitDuration := t.calculateBackoff(attempt)
 			logger.Warn("webhook delivery failed, retrying",
@@ -255,11 +234,9 @@ func (t *HTTPTransport) deliverWithRetry(ctx context.Context, httpReq *http.Requ
 				slog.String("error", lastResult.ErrorMessage),
 				slog.Duration("wait", waitDuration))
 
-			// Wait before retry
 			timer := time.NewTimer(waitDuration)
 			select {
 			case <-timer.C:
-				// Continue to next attempt
 			case <-ctx.Done():
 				timer.Stop()
 				return &DeliveryResult{
@@ -272,7 +249,6 @@ func (t *HTTPTransport) deliverWithRetry(ctx context.Context, httpReq *http.Requ
 		}
 	}
 
-	// All attempts exhausted
 	logger.Error("webhook delivery failed after all retries",
 		slog.String("event_id", request.EventID),
 		slog.Int("total_attempts", maxAttempts),
@@ -281,12 +257,9 @@ func (t *HTTPTransport) deliverWithRetry(ctx context.Context, httpReq *http.Requ
 	return lastResult
 }
 
-// calculateBackoff calculates exponential backoff duration for retry
 func (t *HTTPTransport) calculateBackoff(attempt int) time.Duration {
-	// Exponential backoff: min * (2 ^ (attempt - 1))
 	backoff := t.config.RetryWaitMin * time.Duration(1<<uint(attempt-1))
 
-	// Cap at max wait
 	if backoff > t.config.RetryWaitMax {
 		backoff = t.config.RetryWaitMax
 	}
@@ -294,7 +267,6 @@ func (t *HTTPTransport) calculateBackoff(attempt int) time.Duration {
 	return backoff
 }
 
-// validateRequest validates the delivery request
 func (t *HTTPTransport) validateRequest(request *DeliveryRequest) error {
 	if request == nil {
 		return fmt.Errorf("nil delivery request")
@@ -311,24 +283,19 @@ func (t *HTTPTransport) validateRequest(request *DeliveryRequest) error {
 	return nil
 }
 
-// prepareRequest creates an HTTP request from DeliveryRequest
 func (t *HTTPTransport) prepareRequest(ctx context.Context, request *DeliveryRequest) (*http.Request, error) {
-	// Create HTTP request
 	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, request.Endpoint, bytes.NewReader(request.Payload))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create HTTP request: %w", err)
 	}
 
-	// Set default headers
 	httpReq.Header.Set("Content-Type", "application/json")
 	httpReq.Header.Set("User-Agent", t.config.UserAgent)
 
-	// Set custom headers from webhook config
 	for key, value := range request.Headers {
 		httpReq.Header.Set(key, value)
 	}
 
-	// Set FunnelChat-specific headers for tracking
 	httpReq.Header.Set("X-FunnelChat-Event-ID", request.EventID)
 	httpReq.Header.Set("X-FunnelChat-Event-Type", request.EventType)
 	httpReq.Header.Set("X-FunnelChat-Instance-ID", request.InstanceID)
@@ -337,7 +304,6 @@ func (t *HTTPTransport) prepareRequest(ctx context.Context, request *DeliveryReq
 	return httpReq, nil
 }
 
-// logDeliveryResult logs the delivery result with appropriate level
 func (t *HTTPTransport) logDeliveryResult(logger *slog.Logger, request *DeliveryRequest, result *DeliveryResult) {
 	attrs := []any{
 		slog.String("event_id", request.EventID),
@@ -367,15 +333,11 @@ func (t *HTTPTransport) logDeliveryResult(logger *slog.Logger, request *Delivery
 	}
 }
 
-// Name returns the transport name
 func (t *HTTPTransport) Name() string {
 	return "http"
 }
 
-// Close cleans up HTTP transport resources
 func (t *HTTPTransport) Close() error {
-	// HTTP client doesn't require explicit cleanup
-	// Connection pool will be garbage collected
 	t.client.CloseIdleConnections()
 	return nil
 }

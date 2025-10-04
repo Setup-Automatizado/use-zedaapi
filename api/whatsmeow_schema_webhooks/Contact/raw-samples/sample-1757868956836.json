@@ -1,0 +1,33 @@
+{
+  "headers": {
+    "host": "185.245.182.69:3000",
+    "user-agent": "ZuckZapGo-Webhook/1.0",
+    "content-length": "513",
+    "accept": "application/json",
+    "content-type": "application/json",
+    "accept-encoding": "gzip"
+  },
+  "body": {
+    "baseURL": "https://api.zuckzapgo.com",
+    "data": {
+      "event": {
+        "JID": "553197280204@s.whatsapp.net",
+        "Timestamp": "2025-08-09T18:28:13.856-03:00",
+        "Action": {
+          "fullName": "Yan Souza Dev Moderação AI",
+          "firstName": "Yan Souza",
+          "lidJID": "56053936955458@lid",
+          "saveOnPrimaryAddressbook": true
+        },
+        "FromFullSync": false
+      },
+      "type": "Contact"
+    },
+    "eventType": "Contact",
+    "timestamp": 1757868951,
+    "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+    "userID": "9e832a8666e02c047a5167194c703eaf",
+    "userJID": "5521971532700:4@s.whatsapp.net",
+    "userName": "setupautomatizado"
+  }
+}

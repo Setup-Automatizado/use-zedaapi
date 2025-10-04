@@ -13,7 +13,6 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/observability"
 )
 
-// EventRouter routes events from handlers to instance-specific buffers
 type EventRouter struct {
 	log     *slog.Logger
 	metrics *observability.Metrics
@@ -22,7 +21,6 @@ type EventRouter struct {
 	buffers map[uuid.UUID]*EventBuffer
 }
 
-// NewEventRouter creates a new EventRouter
 func NewEventRouter(ctx context.Context, metrics *observability.Metrics) *EventRouter {
 	log := logging.ContextLogger(ctx, nil).With(
 		slog.String("component", "event_router"),
@@ -35,7 +33,6 @@ func NewEventRouter(ctx context.Context, metrics *observability.Metrics) *EventR
 	}
 }
 
-// RegisterBuffer registers a buffer for an instance
 func (r *EventRouter) RegisterBuffer(instanceID uuid.UUID, buffer *EventBuffer) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -46,7 +43,6 @@ func (r *EventRouter) RegisterBuffer(instanceID uuid.UUID, buffer *EventBuffer) 
 	)
 }
 
-// UnregisterBuffer removes a buffer for an instance
 func (r *EventRouter) UnregisterBuffer(instanceID uuid.UUID) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -60,7 +56,6 @@ func (r *EventRouter) UnregisterBuffer(instanceID uuid.UUID) {
 	}
 }
 
-// RouteEvent routes an event to the appropriate instance buffer
 func (r *EventRouter) RouteEvent(ctx context.Context, event *types.InternalEvent) error {
 	r.mu.RLock()
 	buffer, ok := r.buffers[event.InstanceID]
@@ -77,7 +72,6 @@ func (r *EventRouter) RouteEvent(ctx context.Context, event *types.InternalEvent
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
-		// Buffer full, event dropped
 		buffer.mu.Lock()
 		buffer.droppedEvents++
 		buffer.mu.Unlock()
@@ -92,7 +86,6 @@ func (r *EventRouter) RouteEvent(ctx context.Context, event *types.InternalEvent
 	}
 }
 
-// GetBuffer returns the buffer for an instance
 func (r *EventRouter) GetBuffer(instanceID uuid.UUID) (*EventBuffer, bool) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
@@ -101,12 +94,10 @@ func (r *EventRouter) GetBuffer(instanceID uuid.UUID) (*EventBuffer, bool) {
 	return buffer, ok
 }
 
-// GetAllBuffers returns all registered buffers
 func (r *EventRouter) GetAllBuffers() map[uuid.UUID]*EventBuffer {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
-	// Return a copy to avoid concurrent map access
 	buffersCopy := make(map[uuid.UUID]*EventBuffer, len(r.buffers))
 	for id, buffer := range r.buffers {
 		buffersCopy[id] = buffer
@@ -115,7 +106,6 @@ func (r *EventRouter) GetAllBuffers() map[uuid.UUID]*EventBuffer {
 	return buffersCopy
 }
 
-// Stop stops all buffers
 func (r *EventRouter) Stop() {
 	r.mu.Lock()
 	defer r.mu.Unlock()

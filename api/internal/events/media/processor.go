@@ -18,7 +18,6 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/observability"
 )
 
-// MediaProcessor orchestrates the download → upload pipeline for WhatsApp media
 type MediaProcessor struct {
 	downloader      *MediaDownloader
 	uploader        *S3Uploader
@@ -34,7 +33,6 @@ type MediaProcessor struct {
 	urlExpiry       time.Duration
 }
 
-// ProcessResult contains the result of media processing
 type ProcessResult struct {
 	S3Bucket    string
 	S3Key       string
@@ -46,7 +44,6 @@ type ProcessResult struct {
 	MediaType   string
 }
 
-// NewMediaProcessor creates a new media processor
 func NewMediaProcessor(
 	ctx context.Context,
 	cfg *config.Config,
@@ -58,21 +55,17 @@ func NewMediaProcessor(
 		slog.String("component", "media_processor"),
 	)
 
-	// Create downloader with generic type support
 	downloader := NewMediaDownloader(metrics, cfg.Events.MediaDownloadTimeout)
 
-	// Create S3 uploader
 	uploader, err := NewS3Uploader(ctx, cfg, metrics)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create S3 uploader: %w", err)
 	}
 
-	// Create local storage fallback
 	localStorage, err := NewLocalMediaStorage(ctx, cfg, metrics)
 	if err != nil {
 		logger.Warn("failed to initialize local media storage, fallback will be disabled",
 			slog.String("error", err.Error()))
-		// Continue without local storage fallback
 		localStorage = nil
 	}
 
@@ -108,7 +101,6 @@ func NewMediaProcessor(
 	}, nil
 }
 
-// Process downloads WhatsApp media, uploads to S3, and updates metadata
 func (p *MediaProcessor) Process(
 	ctx context.Context,
 	client *whatsmeow.Client,
@@ -126,21 +118,17 @@ func (p *MediaProcessor) Process(
 
 	logger.Info("starting media processing")
 
-	// Update status to downloading
 	err := p.mediaRepo.UpdateDownloadStatus(ctx, eventID, persistence.MediaStatusDownloading, 1, nil, nil)
 	if err != nil {
 		logger.Error("failed to update download status",
 			slog.String("error", err.Error()))
-		// Continue anyway - this is not critical
 	}
 
-	// Step 1: Download media from WhatsApp
 	downloadResult, err := p.downloader.Download(ctx, client, instanceID, eventID, msg)
 	if err != nil {
 		logger.Error("media download failed",
 			slog.String("error", err.Error()))
 
-		// Update status to failed
 		errMsg := err.Error()
 		_ = p.mediaRepo.UpdateDownloadStatus(ctx, eventID, persistence.MediaStatusFailed, 1, nil, &errMsg)
 
@@ -152,15 +140,12 @@ func (p *MediaProcessor) Process(
 		slog.Int64("file_size", downloadResult.FileSize),
 		slog.String("content_type", downloadResult.ContentType))
 
-	// Update status to downloaded
 	err = p.mediaRepo.UpdateDownloadStatus(ctx, eventID, persistence.MediaStatusDownloaded, 1, nil, nil)
 	if err != nil {
 		logger.Error("failed to update download status",
 			slog.String("error", err.Error()))
-		// Continue anyway
 	}
 
-	// Step 2: Upload to S3
 	s3Key, presignedURL, err := p.uploader.Upload(
 		ctx,
 		instanceID,
@@ -182,15 +167,11 @@ func (p *MediaProcessor) Process(
 		slog.String("s3_key", s3Key),
 		slog.String("s3_url", presignedURL))
 
-	// TODO: Move expiry midia upload to config .env
-	// Step 3: Update media metadata with S3 info
-	// Calculate URL expiry (30 days from now)
 	expiresAt := time.Now().Add(p.urlExpiry)
 	err = p.mediaRepo.UpdateUploadInfo(ctx, eventID, p.bucket, s3Key, presignedURL, persistence.S3URLPresigned, &expiresAt)
 	if err != nil {
 		logger.Error("failed to update upload info",
 			slog.String("error", err.Error()))
-		// This is critical - return error
 		return nil, fmt.Errorf("failed to update upload info: %w", err)
 	}
 
@@ -212,9 +193,6 @@ func (p *MediaProcessor) Process(
 	}, nil
 }
 
-// ProcessWithRetry processes media with automatic retries and fallback chain
-// Fallback chain: S3 → Local Storage → NULL
-// ALWAYS sets media_processed=true to ensure webhook delivery
 func (p *MediaProcessor) ProcessWithRetry(
 	ctx context.Context,
 	client *whatsmeow.Client,
@@ -227,10 +205,8 @@ func (p *MediaProcessor) ProcessWithRetry(
 		slog.String("instance_id", instanceID.String()),
 		slog.String("event_id", eventID.String()))
 
-	// Step 1: Download media from WhatsApp (this always happens first)
 	downloadResult, downloadErr := p.downloadWithRetry(ctx, client, instanceID, eventID, msg)
 	if downloadErr != nil {
-		// Download failed permanently - mark as processed with NULL URL
 		logger.Error("download failed permanently, marking as processed with NULL URL",
 			slog.String("error", downloadErr.Error()))
 
@@ -241,15 +217,11 @@ func (p *MediaProcessor) ProcessWithRetry(
 		return nil, downloadErr
 	}
 
-	// Download succeeded - now try upload with fallback chain
-
-	// Step 2: Try S3 upload with retries
 	logger.Info("attempting S3 upload")
 	p.metrics.MediaFallbackAttempts.WithLabelValues(instanceID.String(), downloadResult.MediaType, "s3").Inc()
 
 	s3Result, s3Err := p.uploadToS3WithRetry(ctx, instanceID, eventID, downloadResult)
 	if s3Err == nil {
-		// ✅ S3 success - update outbox and return
 		logger.Info("media uploaded to S3 successfully",
 			slog.String("s3_url", s3Result.S3URL))
 
@@ -259,12 +231,10 @@ func (p *MediaProcessor) ProcessWithRetry(
 		return s3Result, nil
 	}
 
-	// S3 failed - try local storage fallback
 	logger.Warn("S3 upload failed, attempting local storage fallback",
 		slog.String("s3_error", s3Err.Error()))
 
 	if p.localStorage == nil {
-		// Local storage not configured - mark as processed with NULL URL
 		logger.Error("local storage not configured, marking as processed with NULL URL")
 
 		errMsg := fmt.Sprintf("s3 failed: %v; local storage: not configured", s3Err)
@@ -274,13 +244,11 @@ func (p *MediaProcessor) ProcessWithRetry(
 		return nil, fmt.Errorf("all storage methods failed: %w", s3Err)
 	}
 
-	// Step 3: Try local storage upload
 	logger.Info("attempting local storage upload")
 	p.metrics.MediaFallbackAttempts.WithLabelValues(instanceID.String(), downloadResult.MediaType, "local").Inc()
 
 	localResult, localErr := p.uploadToLocalStorage(ctx, instanceID, eventID, downloadResult)
 	if localErr == nil {
-		// ✅ Local storage success - update outbox and return
 		logger.Info("media uploaded to local storage successfully",
 			slog.String("local_url", localResult.S3URL))
 
@@ -290,22 +258,18 @@ func (p *MediaProcessor) ProcessWithRetry(
 		return localResult, nil
 	}
 
-	// Both S3 and local storage failed - mark as processed with NULL URL
 	logger.Error("both S3 and local storage failed, marking as processed with NULL URL",
 		slog.String("s3_error", s3Err.Error()),
 		slog.String("local_error", localErr.Error()))
 
-	// ✅ ALWAYS mark as processed to ensure webhook delivery
 	errMsg := fmt.Sprintf("s3 failed: %v; local failed: %v", s3Err, localErr)
 	_ = p.updateOutboxMediaInfo(ctx, eventID, nil, &errMsg, true)
 
 	p.metrics.MediaFallbackFailure.WithLabelValues(instanceID.String(), downloadResult.MediaType, "all_failed").Inc()
 
-	// Return error for logging, but webhook WILL be sent with media_url=NULL
 	return nil, fmt.Errorf("all storage methods failed (s3: %v, local: %v)", s3Err, localErr)
 }
 
-// downloadWithRetry downloads media from WhatsApp with retries
 func (p *MediaProcessor) downloadWithRetry(
 	ctx context.Context,
 	client *whatsmeow.Client,
@@ -352,7 +316,6 @@ func (p *MediaProcessor) downloadWithRetry(
 	return nil, fmt.Errorf("max download retries exceeded: %w", lastErr)
 }
 
-// uploadToS3WithRetry uploads to S3 with retries
 func (p *MediaProcessor) uploadToS3WithRetry(
 	ctx context.Context,
 	instanceID uuid.UUID,
@@ -388,7 +351,6 @@ func (p *MediaProcessor) uploadToS3WithRetry(
 		)
 
 		if err == nil {
-			// Update media_metadata with S3 info
 			expiresAt := time.Now().Add(p.urlExpiry)
 			_ = p.mediaRepo.UpdateUploadInfoWithStorage(
 				ctx, eventID,
@@ -425,7 +387,6 @@ func (p *MediaProcessor) uploadToS3WithRetry(
 	return nil, fmt.Errorf("max S3 upload retries exceeded: %w", lastErr)
 }
 
-// uploadToLocalStorage uploads to local storage (no retries - single attempt)
 func (p *MediaProcessor) uploadToLocalStorage(
 	ctx context.Context,
 	instanceID uuid.UUID,
@@ -434,13 +395,11 @@ func (p *MediaProcessor) uploadToLocalStorage(
 ) (*ProcessResult, error) {
 	logger := logging.ContextLogger(ctx, p.logger)
 
-	// Read data from io.Reader
 	data, err := io.ReadAll(downloadResult.Data)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read download data: %w", err)
 	}
 
-	// Store locally
 	storeResult, err := p.localStorage.StoreMedia(
 		ctx,
 		instanceID,
@@ -454,16 +413,14 @@ func (p *MediaProcessor) uploadToLocalStorage(
 		return nil, fmt.Errorf("local storage failed: %w", err)
 	}
 
-	// Update media_metadata with local URL
 	_ = p.mediaRepo.UpdateUploadInfoWithStorage(
 		ctx, eventID,
 		"local", storeResult.LocalPath, storeResult.PublicURL,
-		persistence.S3URLPresigned, // Reuse existing type
+		persistence.S3URLPresigned,
 		persistence.StorageTypeLocal,
 		&storeResult.ExpiresAt,
 	)
 
-	// Mark fallback as attempted and successful
 	_ = p.mediaRepo.UpdateFallbackStatus(ctx, eventID, true, nil)
 
 	logger.Info("media stored locally",
@@ -482,7 +439,6 @@ func (p *MediaProcessor) uploadToLocalStorage(
 	}, nil
 }
 
-// updateOutboxMediaInfo updates event_outbox with media processing result
 func (p *MediaProcessor) updateOutboxMediaInfo(
 	ctx context.Context,
 	eventID uuid.UUID,
@@ -493,11 +449,9 @@ func (p *MediaProcessor) updateOutboxMediaInfo(
 	return p.outboxRepo.UpdateMediaInfo(ctx, eventID, mediaURL, mediaError, processed)
 }
 
-// isRetryableError determines if an error should trigger a retry
 func isRetryableError(err error) bool {
 	errStr := err.Error()
 
-	// Network errors and timeouts are retryable
 	switch {
 	case err == context.DeadlineExceeded:
 		return true
@@ -509,7 +463,6 @@ func isRetryableError(err error) bool {
 		return true
 	case errStr == "media_conn_refresh_failed":
 		return true
-	// Client errors are not retryable
 	case errStr == "not_logged_in":
 		return false
 	case errStr == "no_url":
@@ -524,7 +477,6 @@ func isRetryableError(err error) bool {
 		return false
 	case errStr == "http_410":
 		return false
-	// Validation errors are not retryable
 	case errStr == "invalid_hmac":
 		return false
 	case errStr == "invalid_enc_hash":
@@ -532,7 +484,6 @@ func isRetryableError(err error) bool {
 	case errStr == "invalid_hash":
 		return false
 	default:
-		// Default to retrying unknown errors
 		return true
 	}
 }

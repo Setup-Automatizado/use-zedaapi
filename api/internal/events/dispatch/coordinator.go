@@ -17,7 +17,6 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/observability"
 )
 
-// Coordinator manages the lifecycle of all dispatch workers
 type Coordinator struct {
 	cfg               *config.Config
 	pool              *pgxpool.Pool
@@ -34,7 +33,6 @@ type Coordinator struct {
 	running  bool
 }
 
-// NewCoordinator creates a new dispatch coordinator
 func NewCoordinator(
 	cfg *config.Config,
 	pool *pgxpool.Pool,
@@ -58,7 +56,6 @@ func NewCoordinator(
 	}
 }
 
-// Start begins the coordinator (no-op for now, workers are started on-demand)
 func (c *Coordinator) Start(ctx context.Context) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -76,7 +73,6 @@ func (c *Coordinator) Start(ctx context.Context) error {
 	return nil
 }
 
-// RegisterInstance creates and starts a worker for the given instance
 func (c *Coordinator) RegisterInstance(ctx context.Context, instanceID uuid.UUID) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
@@ -85,16 +81,14 @@ func (c *Coordinator) RegisterInstance(ctx context.Context, instanceID uuid.UUID
 		return fmt.Errorf("coordinator not running")
 	}
 
-	// Check if worker already exists
 	if _, exists := c.workers[instanceID]; exists {
-		return nil // Already registered
+		return nil
 	}
 
 	logger := logging.ContextLogger(ctx, nil)
 	logger.Info("registering dispatch worker for instance",
 		slog.String("instance_id", instanceID.String()))
 
-	// Create worker
 	worker := NewInstanceWorker(
 		instanceID,
 		c.cfg,
@@ -105,7 +99,6 @@ func (c *Coordinator) RegisterInstance(ctx context.Context, instanceID uuid.UUID
 		c.metrics,
 	)
 
-	// Start worker
 	c.wg.Add(1)
 	go func() {
 		defer c.wg.Done()
@@ -121,24 +114,21 @@ func (c *Coordinator) RegisterInstance(ctx context.Context, instanceID uuid.UUID
 	return nil
 }
 
-// UnregisterInstance stops and removes the worker for the given instance
 func (c *Coordinator) UnregisterInstance(ctx context.Context, instanceID uuid.UUID) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
 	worker, exists := c.workers[instanceID]
 	if !exists {
-		return nil // Not registered
+		return nil
 	}
 
 	logger := logging.ContextLogger(ctx, nil)
 	logger.Info("unregistering dispatch worker for instance",
 		slog.String("instance_id", instanceID.String()))
 
-	// Stop worker
 	worker.Stop()
 
-	// Remove from map
 	delete(c.workers, instanceID)
 
 	logger.Info("dispatch worker unregistered",
@@ -148,7 +138,6 @@ func (c *Coordinator) UnregisterInstance(ctx context.Context, instanceID uuid.UU
 	return nil
 }
 
-// Stop gracefully stops all workers and the coordinator
 func (c *Coordinator) Stop(ctx context.Context) error {
 	c.mu.Lock()
 
@@ -163,22 +152,18 @@ func (c *Coordinator) Stop(ctx context.Context) error {
 	logger.Info("stopping dispatch coordinator",
 		slog.Int("active_workers", len(c.workers)))
 
-	// Stop all workers
 	for instanceID, worker := range c.workers {
 		logger.Info("stopping worker",
 			slog.String("instance_id", instanceID.String()))
 		worker.Stop()
 	}
 
-	// Clear workers map
 	c.workers = make(map[uuid.UUID]*InstanceWorker)
 
 	c.mu.Unlock()
 
-	// Close stop channel
 	close(c.stopChan)
 
-	// Wait for all workers to finish (with timeout)
 	done := make(chan struct{})
 	go func() {
 		c.wg.Wait()
@@ -195,14 +180,12 @@ func (c *Coordinator) Stop(ctx context.Context) error {
 	return nil
 }
 
-// GetWorkerCount returns the number of active workers
 func (c *Coordinator) GetWorkerCount() int {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	return len(c.workers)
 }
 
-// IsInstanceRegistered checks if an instance has an active worker
 func (c *Coordinator) IsInstanceRegistered(instanceID uuid.UUID) bool {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
@@ -210,9 +193,7 @@ func (c *Coordinator) IsInstanceRegistered(instanceID uuid.UUID) bool {
 	return exists
 }
 
-// createWorkerContext creates a context for workers that respects coordinator shutdown
 func (c *Coordinator) createWorkerContext() context.Context {
 	ctx := context.Background()
-	// Workers will check c.running flag and stopChan
 	return ctx
 }

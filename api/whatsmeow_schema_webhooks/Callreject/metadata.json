@@ -1,0 +1,423 @@
+{
+  "eventType": "Callreject",
+  "firstSeen": "2025-09-08T22:37:16.958Z",
+  "lastSeen": "2025-09-08T22:37:16.967Z",
+  "totalReceived": 1,
+  "schemaVersion": 1,
+  "lastModified": "2025-09-08T22:37:16.958Z",
+  "fields": {
+    "required": [
+      "headers",
+      "headers.host",
+      "headers.user-agent",
+      "headers.content-length",
+      "headers.accept",
+      "headers.content-type",
+      "headers.accept-encoding",
+      "body",
+      "body.baseURL",
+      "body.data",
+      "body.data.event",
+      "body.data.event.From",
+      "body.data.event.Timestamp",
+      "body.data.event.CallCreator",
+      "body.data.event.CallID",
+      "body.data.event.GroupJID",
+      "body.data.event.Data",
+      "body.data.event.Data.Tag",
+      "body.data.event.Data.Attrs",
+      "body.data.event.Data.Attrs.call-creator",
+      "body.data.event.Data.Attrs.call-id",
+      "body.data.event.Data.Attrs.count",
+      "body.data.event.Data.Content",
+      "body.data.type",
+      "body.eventType",
+      "body.timestamp",
+      "body.token",
+      "body.userID",
+      "body.userJID",
+      "body.userName"
+    ],
+    "optional": [],
+    "truncated": []
+  },
+  "variations": [],
+  "savedStructure": {
+    "path": "",
+    "type": "object",
+    "optional": false,
+    "examples": [
+      {
+        "headers": {
+          "host": "185.245.182.69:3000",
+          "user-agent": "ZuckZapGo-Webhook/1.0",
+          "content-length": "615",
+          "accept": "application/json",
+          "content-type": "application/json",
+          "accept-encoding": "gzip"
+        },
+        "body": {
+          "baseURL": "https://api.zuckzapgo.com",
+          "data": {
+            "event": {
+              "From": "5521971532700:19@s.whatsapp.net",
+              "Timestamp": "2025-09-08T19:37:02-03:00",
+              "CallCreator": "5521981796084@s.whatsapp.net",
+              "CallID": "BA3C32573E8E398AD29CD0359E103A8B",
+              "GroupJID": "",
+              "Data": {
+                "Tag": "reject",
+                "Attrs": {
+                  "call-creator": "5521981796084@s.whatsapp.net",
+                  "call-id": "BA3C32573E8E398AD29CD0359E103A8B",
+                  "count": "0"
+                },
+                "Content": null
+              }
+            },
+            "type": "CallReject"
+          },
+          "eventType": "CallReject",
+          "timestamp": 1757371022,
+          "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+          "userID": "9e832a8666e02c047a5167194c703eaf",
+          "userJID": "5521971532700:4@s.whatsapp.net",
+          "userName": "setupautomatizado"
+        }
+      }
+    ],
+    "children": {
+      "headers": {
+        "path": "headers",
+        "type": "object",
+        "optional": false,
+        "examples": [
+          {
+            "host": "185.245.182.69:3000",
+            "user-agent": "ZuckZapGo-Webhook/1.0",
+            "content-length": "615",
+            "accept": "application/json",
+            "content-type": "application/json",
+            "accept-encoding": "gzip"
+          }
+        ],
+        "children": {
+          "host": {
+            "path": "headers.host",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "185.245.182.69:3000"
+            ]
+          },
+          "user-agent": {
+            "path": "headers.user-agent",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "ZuckZapGo-Webhook/1.0"
+            ]
+          },
+          "content-length": {
+            "path": "headers.content-length",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "615"
+            ]
+          },
+          "accept": {
+            "path": "headers.accept",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "application/json"
+            ]
+          },
+          "content-type": {
+            "path": "headers.content-type",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "application/json"
+            ]
+          },
+          "accept-encoding": {
+            "path": "headers.accept-encoding",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "gzip"
+            ]
+          }
+        }
+      },
+      "body": {
+        "path": "body",
+        "type": "object",
+        "optional": false,
+        "examples": [
+          {
+            "baseURL": "https://api.zuckzapgo.com",
+            "data": {
+              "event": {
+                "From": "5521971532700:19@s.whatsapp.net",
+                "Timestamp": "2025-09-08T19:37:02-03:00",
+                "CallCreator": "5521981796084@s.whatsapp.net",
+                "CallID": "BA3C32573E8E398AD29CD0359E103A8B",
+                "GroupJID": "",
+                "Data": {
+                  "Tag": "reject",
+                  "Attrs": {
+                    "call-creator": "5521981796084@s.whatsapp.net",
+                    "call-id": "BA3C32573E8E398AD29CD0359E103A8B",
+                    "count": "0"
+                  },
+                  "Content": null
+                }
+              },
+              "type": "CallReject"
+            },
+            "eventType": "CallReject",
+            "timestamp": 1757371022,
+            "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+            "userID": "9e832a8666e02c047a5167194c703eaf",
+            "userJID": "5521971532700:4@s.whatsapp.net",
+            "userName": "setupautomatizado"
+          }
+        ],
+        "children": {
+          "baseURL": {
+            "path": "body.baseURL",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "https://api.zuckzapgo.com"
+            ]
+          },
+          "data": {
+            "path": "body.data",
+            "type": "object",
+            "optional": false,
+            "examples": [
+              {
+                "event": {
+                  "From": "5521971532700:19@s.whatsapp.net",
+                  "Timestamp": "2025-09-08T19:37:02-03:00",
+                  "CallCreator": "5521981796084@s.whatsapp.net",
+                  "CallID": "BA3C32573E8E398AD29CD0359E103A8B",
+                  "GroupJID": "",
+                  "Data": {
+                    "Tag": "reject",
+                    "Attrs": {
+                      "call-creator": "5521981796084@s.whatsapp.net",
+                      "call-id": "BA3C32573E8E398AD29CD0359E103A8B",
+                      "count": "0"
+                    },
+                    "Content": null
+                  }
+                },
+                "type": "CallReject"
+              }
+            ],
+            "children": {
+              "event": {
+                "path": "body.data.event",
+                "type": "object",
+                "optional": false,
+                "examples": [
+                  {
+                    "From": "5521971532700:19@s.whatsapp.net",
+                    "Timestamp": "2025-09-08T19:37:02-03:00",
+                    "CallCreator": "5521981796084@s.whatsapp.net",
+                    "CallID": "BA3C32573E8E398AD29CD0359E103A8B",
+                    "GroupJID": "",
+                    "Data": {
+                      "Tag": "reject",
+                      "Attrs": {
+                        "call-creator": "5521981796084@s.whatsapp.net",
+                        "call-id": "BA3C32573E8E398AD29CD0359E103A8B",
+                        "count": "0"
+                      },
+                      "Content": null
+                    }
+                  }
+                ],
+                "children": {
+                  "From": {
+                    "path": "body.data.event.From",
+                    "type": "string",
+                    "optional": false,
+                    "examples": [
+                      "5521971532700:19@s.whatsapp.net"
+                    ]
+                  },
+                  "Timestamp": {
+                    "path": "body.data.event.Timestamp",
+                    "type": "string",
+                    "optional": false,
+                    "examples": [
+                      "2025-09-08T19:37:02-03:00"
+                    ]
+                  },
+                  "CallCreator": {
+                    "path": "body.data.event.CallCreator",
+                    "type": "string",
+                    "optional": false,
+                    "examples": [
+                      "5521981796084@s.whatsapp.net"
+                    ]
+                  },
+                  "CallID": {
+                    "path": "body.data.event.CallID",
+                    "type": "string",
+                    "optional": false,
+                    "examples": [
+                      "BA3C32573E8E398AD29CD0359E103A8B"
+                    ]
+                  },
+                  "GroupJID": {
+                    "path": "body.data.event.GroupJID",
+                    "type": "string",
+                    "optional": false,
+                    "examples": [
+                      ""
+                    ]
+                  },
+                  "Data": {
+                    "path": "body.data.event.Data",
+                    "type": "object",
+                    "optional": false,
+                    "examples": [
+                      {
+                        "Tag": "reject",
+                        "Attrs": {
+                          "call-creator": "5521981796084@s.whatsapp.net",
+                          "call-id": "BA3C32573E8E398AD29CD0359E103A8B",
+                          "count": "0"
+                        },
+                        "Content": null
+                      }
+                    ],
+                    "children": {
+                      "Tag": {
+                        "path": "body.data.event.Data.Tag",
+                        "type": "string",
+                        "optional": false,
+                        "examples": [
+                          "reject"
+                        ]
+                      },
+                      "Attrs": {
+                        "path": "body.data.event.Data.Attrs",
+                        "type": "object",
+                        "optional": false,
+                        "examples": [
+                          {
+                            "call-creator": "5521981796084@s.whatsapp.net",
+                            "call-id": "BA3C32573E8E398AD29CD0359E103A8B",
+                            "count": "0"
+                          }
+                        ],
+                        "children": {
+                          "call-creator": {
+                            "path": "body.data.event.Data.Attrs.call-creator",
+                            "type": "string",
+                            "optional": false,
+                            "examples": [
+                              "5521981796084@s.whatsapp.net"
+                            ]
+                          },
+                          "call-id": {
+                            "path": "body.data.event.Data.Attrs.call-id",
+                            "type": "string",
+                            "optional": false,
+                            "examples": [
+                              "BA3C32573E8E398AD29CD0359E103A8B"
+                            ]
+                          },
+                          "count": {
+                            "path": "body.data.event.Data.Attrs.count",
+                            "type": "string",
+                            "optional": false,
+                            "examples": [
+                              "0"
+                            ]
+                          }
+                        }
+                      },
+                      "Content": {
+                        "path": "body.data.event.Data.Content",
+                        "type": "null",
+                        "optional": false,
+                        "examples": [
+                          null
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "type": {
+                "path": "body.data.type",
+                "type": "string",
+                "optional": false,
+                "examples": [
+                  "CallReject"
+                ]
+              }
+            }
+          },
+          "eventType": {
+            "path": "body.eventType",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "CallReject"
+            ]
+          },
+          "timestamp": {
+            "path": "body.timestamp",
+            "type": "number",
+            "optional": false,
+            "examples": [
+              1757371022
+            ]
+          },
+          "token": {
+            "path": "body.token",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "!!qYWdJ61zk3i1AvTfXhzE!!"
+            ]
+          },
+          "userID": {
+            "path": "body.userID",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "9e832a8666e02c047a5167194c703eaf"
+            ]
+          },
+          "userJID": {
+            "path": "body.userJID",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "5521971532700:4@s.whatsapp.net"
+            ]
+          },
+          "userName": {
+            "path": "body.userName",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "setupautomatizado"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

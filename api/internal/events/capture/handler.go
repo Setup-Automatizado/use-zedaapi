@@ -16,7 +16,6 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/observability"
 )
 
-// EventHandler captures events from WhatsApp clients and routes them to the buffer.
 type EventHandler struct {
 	log         *slog.Logger
 	metrics     *observability.Metrics
@@ -29,7 +28,6 @@ type EventHandler struct {
 	stopCh  chan struct{}
 }
 
-// NewEventHandler creates a new EventHandler for an instance.
 func NewEventHandler(
 	ctx context.Context,
 	instanceID uuid.UUID,
@@ -53,7 +51,6 @@ func NewEventHandler(
 	}
 }
 
-// HandleEvent processes an event from the WhatsApp client.
 func (h *EventHandler) HandleEvent(ctx context.Context, rawEvent interface{}) error {
 	h.mu.RLock()
 	if h.stopped {
@@ -92,7 +89,6 @@ func (h *EventHandler) HandleEvent(ctx context.Context, rawEvent interface{}) er
 	return h.router.RouteEvent(ctx, internalEvent)
 }
 
-// Stop gracefully stops the event handler.
 func (h *EventHandler) Stop() {
 	h.mu.Lock()
 	defer h.mu.Unlock()
@@ -103,7 +99,6 @@ func (h *EventHandler) Stop() {
 	}
 }
 
-// IsStopped returns whether the handler is stopped.
 func (h *EventHandler) IsStopped() bool {
 	h.mu.RLock()
 	defer h.mu.RUnlock()

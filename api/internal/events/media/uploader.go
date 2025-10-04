@@ -21,43 +21,37 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/observability"
 )
 
-// S3Uploader handles media uploads to S3-compatible storage
 type S3Uploader struct {
 	client    *s3.Client
 	uploader  *manager.Uploader
 	bucket    string
 	urlExpiry time.Duration
-	acl       string // Optional ACL (e.g., "public-read"). Empty = use bucket policy
+	acl       string
 	metrics   *observability.Metrics
 	logger    *slog.Logger
 }
 
-// NewS3Uploader creates a new S3 uploader with AWS SDK v2
 func NewS3Uploader(ctx context.Context, cfg *config.Config, metrics *observability.Metrics) (*S3Uploader, error) {
 	logger := logging.ContextLogger(ctx, nil).With(
 		slog.String("component", "s3_uploader"),
 	)
 
-	// Create AWS config
 	awsCfg := aws.Config{
 		Region:      cfg.S3.Region,
 		Credentials: credentials.NewStaticCredentialsProvider(cfg.S3.AccessKey, cfg.S3.SecretKey, ""),
 	}
 
-	// Set custom endpoint for MinIO or other S3-compatible services
 	if cfg.S3.Endpoint != "" {
 		awsCfg.BaseEndpoint = aws.String(cfg.S3.Endpoint)
 	}
 
-	// Create S3 client
 	s3Client := s3.NewFromConfig(awsCfg, func(o *s3.Options) {
-		o.UsePathStyle = true // Required for MinIO
+		o.UsePathStyle = true
 	})
 
-	// Create uploader with custom part size for large files
 	uploader := manager.NewUploader(s3Client, func(u *manager.Uploader) {
-		u.PartSize = cfg.Events.MediaChunkSize // 5MB default
-		u.Concurrency = 100                    // Upload 100 parts concurrently
+		u.PartSize = cfg.Events.MediaChunkSize
+		u.Concurrency = 100
 	})
 
 	logger.Info("s3 uploader initialized",
@@ -82,7 +76,6 @@ func NewS3Uploader(ctx context.Context, cfg *config.Config, metrics *observabili
 	}, nil
 }
 
-// Upload uploads media to S3 and returns the key and presigned URL
 func (u *S3Uploader) Upload(ctx context.Context, instanceID uuid.UUID, eventID uuid.UUID, mediaType string, reader io.Reader, contentType string, fileSize int64) (key string, presignedURL string, err error) {
 	logger := logging.ContextLogger(ctx, u.logger).With(
 		slog.String("instance_id", instanceID.String()),
@@ -92,12 +85,10 @@ func (u *S3Uploader) Upload(ctx context.Context, instanceID uuid.UUID, eventID u
 
 	start := time.Now()
 
-	// Generate S3 key with organized structure: {instance_id}/{year}/{month}/{day}/{event_id}.{ext}
 	key = u.generateKey(instanceID, eventID, mediaType, contentType)
 
 	logger.Debug("uploading media to s3", slog.String("s3_key", key))
 
-	// Build upload input
 	uploadInput := &s3.PutObjectInput{
 		Bucket:      aws.String(u.bucket),
 		Key:         aws.String(key),
@@ -110,12 +101,10 @@ func (u *S3Uploader) Upload(ctx context.Context, instanceID uuid.UUID, eventID u
 		},
 	}
 
-	// Only set ACL if configured (modern pattern: use bucket policy instead)
 	if u.acl != "" {
 		uploadInput.ACL = types.ObjectCannedACL(u.acl)
 	}
 
-	// Upload to S3
 	uploadResult, err := u.uploader.Upload(ctx, uploadInput)
 
 	duration := time.Since(start)
@@ -135,12 +124,10 @@ func (u *S3Uploader) Upload(ctx context.Context, instanceID uuid.UUID, eventID u
 		slog.String("location", uploadResult.Location),
 		slog.Duration("duration", duration))
 
-	// Update metrics
 	u.metrics.MediaUploadAttempts.WithLabelValues("success").Inc()
 	u.metrics.MediaUploadDuration.WithLabelValues(mediaType).Observe(duration.Seconds())
 	u.metrics.MediaUploadSizeBytes.WithLabelValues(mediaType).Add(float64(fileSize))
 
-	// Generate presigned URL
 	presignedURL, err = u.GeneratePresignedURL(ctx, key)
 	if err != nil {
 		return key, "", fmt.Errorf("failed to generate presigned URL: %w", err)
@@ -149,7 +136,6 @@ func (u *S3Uploader) Upload(ctx context.Context, instanceID uuid.UUID, eventID u
 	return key, presignedURL, nil
 }
 
-// GeneratePresignedURL creates a time-limited presigned URL for an S3 object
 func (u *S3Uploader) GeneratePresignedURL(ctx context.Context, key string) (string, error) {
 	logger := logging.ContextLogger(ctx, u.logger).With(
 		slog.String("s3_key", key))
@@ -178,7 +164,6 @@ func (u *S3Uploader) GeneratePresignedURL(ctx context.Context, key string) (stri
 	return req.URL, nil
 }
 
-// Delete removes a file from S3 (used by cleanup job)
 func (u *S3Uploader) Delete(ctx context.Context, key string) error {
 	logger := logging.ContextLogger(ctx, u.logger).With(
 		slog.String("s3_key", key))
@@ -204,42 +189,33 @@ func (u *S3Uploader) Delete(ctx context.Context, key string) error {
 	return nil
 }
 
-// generateKey creates an organized S3 key structure
 func (u *S3Uploader) generateKey(instanceID uuid.UUID, eventID uuid.UUID, mediaType string, contentType string) string {
 	now := time.Now()
 	year := now.Format("2006")
 	month := now.Format("01")
 	day := now.Format("02")
 
-	// Extract file extension from content type
 	ext := u.getExtensionFromContentType(contentType, mediaType)
 
-	// Format: {instance_id}/{year}/{month}/{day}/{event_id}.{ext}
 	return fmt.Sprintf("%s/%s/%s/%s/%s.%s",
 		instanceID.String(), year, month, day, eventID.String(), ext)
 }
 
-// getExtensionFromContentType returns file extension based on content type
 func (u *S3Uploader) getExtensionFromContentType(contentType string, mediaType string) string {
-	// Use standard library mime.ExtensionsByType() first - supports 100+ types automatically
 	exts, err := mime.ExtensionsByType(contentType)
 	if err == nil && len(exts) > 0 {
-		// Remove leading dot and return first (preferred) extension
 		return strings.TrimPrefix(exts[0], ".")
 	}
 
-	// Fallback: Common MIME type to extension mapping for special cases
 	mimeToExt := map[string]string{
-		"audio/ogg; codecs=opus": "ogg", // WhatsApp voice notes
+		"audio/ogg; codecs=opus": "ogg",
 		"image/webp":             "webp",
 	}
 
-	// Try fallback mapping
 	if ext, ok := mimeToExt[strings.ToLower(contentType)]; ok {
 		return ext
 	}
 
-	// Try extracting from content type (e.g., "image/jpeg" -> "jpeg")
 	parts := strings.Split(contentType, "/")
 	if len(parts) == 2 {
 		ext := strings.TrimSpace(parts[1])
@@ -248,7 +224,6 @@ func (u *S3Uploader) getExtensionFromContentType(contentType string, mediaType s
 		}
 	}
 
-	// Fall back to media type
 	switch mediaType {
 	case "image":
 		return "jpg"
@@ -267,7 +242,6 @@ func (u *S3Uploader) getExtensionFromContentType(contentType string, mediaType s
 	}
 }
 
-// classifyS3Error categorizes S3 errors for metrics
 func classifyS3Error(err error) string {
 	errStr := strings.ToLower(err.Error())
 
@@ -289,7 +263,6 @@ func classifyS3Error(err error) string {
 	}
 }
 
-// ObjectExists checks if an object exists in S3 (for deduplication)
 func (u *S3Uploader) ObjectExists(ctx context.Context, key string) (bool, error) {
 	_, err := u.client.HeadObject(ctx, &s3.HeadObjectInput{
 		Bucket: aws.String(u.bucket),
@@ -297,7 +270,6 @@ func (u *S3Uploader) ObjectExists(ctx context.Context, key string) (bool, error)
 	})
 
 	if err != nil {
-		// Object not found is not an error, return false
 		if strings.Contains(err.Error(), "NotFound") || strings.Contains(err.Error(), "404") {
 			return false, nil
 		}
@@ -307,7 +279,6 @@ func (u *S3Uploader) ObjectExists(ctx context.Context, key string) (bool, error)
 	return true, nil
 }
 
-// GetObjectSize returns the size of an object in S3
 func (u *S3Uploader) GetObjectSize(ctx context.Context, key string) (int64, error) {
 	resp, err := u.client.HeadObject(ctx, &s3.HeadObjectInput{
 		Bucket: aws.String(u.bucket),

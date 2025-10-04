@@ -1,0 +1,61 @@
+{
+  "headers": {
+    "host": "185.245.182.69:3000",
+    "user-agent": "ZuckZapGo-Webhook/1.0",
+    "content-length": "1029",
+    "accept": "application/json",
+    "content-type": "application/json",
+    "accept-encoding": "gzip"
+  },
+  "body": {
+    "baseURL": "https://api.zuckzapgo.com",
+    "data": {
+      "event": {
+        "Info": {
+          "Chat": "120363030534422384@g.us",
+          "Sender": "555391906964@s.whatsapp.net",
+          "IsFromMe": false,
+          "IsGroup": true,
+          "AddressingMode": "pn",
+          "SenderAlt": "3333095981067@lid",
+          "RecipientAlt": "",
+          "BroadcastListOwner": "",
+          "ID": "3A9DE2080564EF3426AA",
+          "ServerID": 0,
+          "Type": "text",
+          "PushName": "Flavio Do Carmo",
+          "Timestamp": "2025-09-15T12:20:44-03:00",
+          "Category": "",
+          "Multicast": false,
+          "MediaType": "",
+          "Edit": "",
+          "MsgBotInfo": {
+            "EditType": "",
+            "EditTargetID": "",
+            "EditSenderTimestampMS": "0001-01-01T00:00:00Z"
+          },
+          "MsgMetaInfo": {
+            "TargetID": "",
+            "TargetSender": "",
+            "TargetChat": "",
+            "DeprecatedLIDSession": null,
+            "ThreadMessageID": "",
+            "ThreadMessageSenderJID": ""
+          },
+          "VerifiedName": null,
+          "DeviceSentMeta": null
+        },
+        "IsUnavailable": true,
+        "UnavailableType": "",
+        "DecryptFailMode": ""
+      },
+      "type": "UndecryptableMessage"
+    },
+    "eventType": "UndecryptableMessage",
+    "timestamp": 1757949644,
+    "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+    "userID": "9e832a8666e02c047a5167194c703eaf",
+    "userJID": "5521971532700:4@s.whatsapp.net",
+    "userName": "setupautomatizado"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "eventType": "whatsapp_business_account/messages",
+  "firstSeen": "2025-09-06T04:22:45.549Z",
+  "lastSeen": "2025-09-06T05:49:30.562Z",
+  "totalReceived": 25,
+  "schemaVersion": 22,
+  "lastModified": "2025-09-06T05:49:30.558Z",
+  "fields": {
+    "required": [
+      "object",
+      "entry",
+      "entry[]",
+      "entry[].id",
+      "entry[].changes",
+      "entry[].changes[]",
+      "entry[].changes[].value",
+      "entry[].changes[].value.messaging_product",
+      "entry[].changes[].value.metadata",
+      "entry[].changes[].value.metadata.display_phone_number",
+      "entry[].changes[].value.metadata.phone_number_id",
+      "entry[].changes[].value.statuses",
+      "entry[].changes[].value.statuses[]",
+      "entry[].changes[].value.statuses[].id",
+      "entry[].changes[].value.statuses[].status",
+      "entry[].changes[].value.statuses[].timestamp",
+      "entry[].changes[].value.statuses[].recipient_id",
+      "entry[].changes[].field"
+    ],
+    "optional": [
+      "object",
+      "entry"
+    ],
+    "truncated": []
+  },
+  "variations": []
+}

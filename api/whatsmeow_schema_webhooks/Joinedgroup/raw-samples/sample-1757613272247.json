@@ -1,0 +1,71 @@
+{
+  "headers": {
+    "host": "185.245.182.69:3000",
+    "user-agent": "ZuckZapGo-Webhook/1.0",
+    "content-length": "1361",
+    "accept": "application/json",
+    "content-type": "application/json",
+    "accept-encoding": "gzip"
+  },
+  "body": {
+    "baseURL": "https://api.zuckzapgo.com",
+    "data": {
+      "event": {
+        "Reason": "",
+        "Type": "",
+        "CreateKey": "",
+        "Sender": "556199722142@s.whatsapp.net",
+        "SenderPN": null,
+        "Notify": "Eduardo",
+        "JID": "120363404016516300@g.us",
+        "OwnerJID": "556199722142@s.whatsapp.net",
+        "OwnerPN": "",
+        "Name": "AI CODE PRO",
+        "NameSetAt": "2025-09-11T14:53:54-03:00",
+        "NameSetBy": "556199722142@s.whatsapp.net",
+        "NameSetByPN": "",
+        "Topic": "",
+        "TopicID": "",
+        "TopicSetAt": "0001-01-01T00:00:00Z",
+        "TopicSetBy": "",
+        "TopicSetByPN": "",
+        "TopicDeleted": false,
+        "IsLocked": false,
+        "IsAnnounce": false,
+        "AnnounceVersionID": "1757613234106863",
+        "IsEphemeral": false,
+        "DisappearingTimer": 0,
+        "IsIncognito": false,
+        "IsParent": true,
+        "DefaultMembershipApprovalMode": "request_required",
+        "LinkedParentJID": "",
+        "IsDefaultSubGroup": false,
+        "IsJoinApprovalRequired": false,
+        "AddressingMode": "",
+        "GroupCreated": "2025-09-11T14:53:54-03:00",
+        "CreatorCountryCode": "BR",
+        "ParticipantVersionID": "1757613234145180",
+        "Participants": [
+          {
+            "JID": "556199722142@s.whatsapp.net",
+            "PhoneNumber": "556199722142@s.whatsapp.net",
+            "LID": "150731961196763@lid",
+            "IsAdmin": true,
+            "IsSuperAdmin": true,
+            "DisplayName": "",
+            "Error": 0,
+            "AddRequest": null
+          }
+        ],
+        "MemberAddMode": "admin_add"
+      },
+      "type": "JoinedGroup"
+    },
+    "eventType": "JoinedGroup",
+    "timestamp": 1757613269,
+    "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+    "userID": "9e832a8666e02c047a5167194c703eaf",
+    "userJID": "5521971532700:4@s.whatsapp.net",
+    "userName": "setupautomatizado"
+  }
+}

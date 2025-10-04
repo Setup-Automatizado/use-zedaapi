@@ -1,0 +1,53 @@
+{
+  "truncated": [
+    {
+      "headers": {
+        "host": "185.245.182.69:3000",
+        "user-agent": "ZuckZapGo-Webhook/1.0",
+        "content-length": "597",
+        "accept": "application/json",
+        "content-type": "application/json",
+        "accept-encoding": "gzip"
+      },
+      "body": {
+        "baseURL": "https://api.zuckzapgo.com",
+        "data": {
+          "event": {
+            "JID": "5521995050135@s.whatsapp.net",
+            "Timestamp": "2025-08-09T18:28:19.157-03:00",
+            "Action": {
+              "archived": true,
+              "messageRange": {
+                "lastMessageTimestamp": 1750205787,
+                "messages": [
+                  {
+                    "key": {
+                      "remoteJID": "5521995050135@s.whatsapp.net",
+                      "fromMe": false,
+                      "ID": "1D626E725506D4C96F3AC6BFDC38AA7E"
+                    },
+                    "timestamp": 1750205787
+                  }
+                ]
+              }
+            },
+            "FromFullSync": false
+          },
+          "type": "Archive"
+        },
+        "eventType": "Archive",
+        "timestamp": 1757380519,
+        "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+        "userID": "9e832a8666e02c047a5167194c703eaf",
+        "userJID": "5521971532700:4@s.whatsapp.net",
+        "userName": "setupautomatizado"
+      }
+    }
+  ],
+  "metadata": {
+    "totalExamples": 1,
+    "examplesShown": 1,
+    "firstSeen": "2025-09-09T01:15:22.075Z",
+    "lastSeen": "2025-09-09T01:15:22.075Z"
+  }
+}

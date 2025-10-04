@@ -12,7 +12,6 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/logging"
 )
 
-// RequestLogger logs basic request/response information using slog and injects a contextual logger.
 func RequestLogger(base *slog.Logger) func(http.Handler) http.Handler {
 	if base == nil {
 		base = slog.Default()

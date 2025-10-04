@@ -8,25 +8,21 @@ import (
 	"time"
 )
 
-// ResponseHandler processes HTTP responses and creates DeliveryResults
 type ResponseHandler struct {
-	maxResponseSize int64 // Maximum response body size to read (default: 1MB)
+	maxResponseSize int64
 }
 
-// NewResponseHandler creates a new response handler
 func NewResponseHandler() *ResponseHandler {
 	return &ResponseHandler{
-		maxResponseSize: 1024 * 1024, // 1MB default
+		maxResponseSize: 1024 * 1024 * 100,
 	}
 }
 
-// HandleHTTPResponse processes an HTTP response and returns a DeliveryResult
 func (h *ResponseHandler) HandleHTTPResponse(resp *http.Response, duration time.Duration, requestErr error) *DeliveryResult {
 	result := &DeliveryResult{
 		Duration: duration,
 	}
 
-	// Handle request-level errors (timeout, connection, etc)
 	if requestErr != nil {
 		result.Success = false
 		result.ErrorMessage = requestErr.Error()
@@ -34,7 +30,6 @@ func (h *ResponseHandler) HandleHTTPResponse(resp *http.Response, duration time.
 		return result
 	}
 
-	// Handle HTTP response
 	if resp == nil {
 		result.Success = false
 		result.ErrorMessage = "nil response received"
@@ -46,7 +41,6 @@ func (h *ResponseHandler) HandleHTTPResponse(resp *http.Response, duration time.
 	result.StatusCode = resp.StatusCode
 	result.ResponseHeaders = resp.Header
 
-	// Read response body (with size limit)
 	if resp.Body != nil {
 		defer resp.Body.Close()
 		body, err := io.ReadAll(io.LimitReader(resp.Body, h.maxResponseSize))
@@ -57,10 +51,8 @@ func (h *ResponseHandler) HandleHTTPResponse(resp *http.Response, duration time.
 		}
 	}
 
-	// Classify based on status code
 	result.Retryable, result.ErrorType = ClassifyHTTPStatus(resp.StatusCode)
 
-	// Success for 2xx status codes
 	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 		result.Success = true
 		result.ErrorType = ""
@@ -75,7 +67,6 @@ func (h *ResponseHandler) HandleHTTPResponse(resp *http.Response, duration time.
 	return result
 }
 
-// classifyRequestError classifies request-level errors for retry decisions
 func (h *ResponseHandler) classifyRequestError(err error) (errorType string, retryable bool) {
 	if err == nil {
 		return "", false
@@ -83,31 +74,22 @@ func (h *ResponseHandler) classifyRequestError(err error) (errorType string, ret
 
 	errStr := err.Error()
 
-	// Timeout errors - retryable
 	if isTimeoutError(err) {
 		return ErrorTypeTimeout, true
 	}
-
-	// Connection errors - retryable
 	if isConnectionError(errStr) {
 		return ErrorTypeConnection, true
 	}
-
-	// TLS/certificate errors - not retryable
 	if isTLSError(errStr) {
 		return ErrorTypeClient, false
 	}
-
-	// DNS errors - retryable (might be temporary)
 	if isDNSError(errStr) {
 		return ErrorTypeConnection, true
 	}
 
-	// Unknown errors - not retryable to be safe
 	return ErrorTypeUnknown, false
 }
 
-// isTimeoutError checks if error is a timeout
 func isTimeoutError(err error) bool {
 	type timeout interface {
 		Timeout() bool
@@ -120,7 +102,6 @@ func isTimeoutError(err error) bool {
 	return false
 }
 
-// isConnectionError checks if error is connection-related
 func isConnectionError(errStr string) bool {
 	connectionErrors := []string{
 		"connection refused",
@@ -140,7 +121,6 @@ func isConnectionError(errStr string) bool {
 	return false
 }
 
-// isTLSError checks if error is TLS/certificate related
 func isTLSError(errStr string) bool {
 	tlsErrors := []string{
 		"certificate",
@@ -158,7 +138,6 @@ func isTLSError(errStr string) bool {
 	return false
 }
 
-// isDNSError checks if error is DNS-related
 func isDNSError(errStr string) bool {
 	dnsErrors := []string{
 		"no such host",
@@ -175,13 +154,11 @@ func isDNSError(errStr string) bool {
 	return false
 }
 
-// contains checks if a string contains a substring (case-insensitive)
 func contains(s, substr string) bool {
 	return len(s) >= len(substr) && findSubstring(s, substr)
 }
 
 func findSubstring(s, substr string) bool {
-	// Simple case-insensitive substring check
 	sLower := toLower(s)
 	substrLower := toLower(substr)
 
@@ -206,8 +183,6 @@ func toLower(s string) string {
 	return string(result)
 }
 
-// ParseWebhookResponse attempts to parse a webhook response as JSON
-// This is optional validation - not all webhooks return structured responses
 func ParseWebhookResponse(body []byte) (map[string]interface{}, error) {
 	if len(body) == 0 {
 		return nil, nil

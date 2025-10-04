@@ -16,7 +16,6 @@ var (
 	ErrSequenceConflict = errors.New("sequence number conflict")
 )
 
-// EventStatus represents the status of an event in the outbox
 type EventStatus string
 
 const (
@@ -27,7 +26,6 @@ const (
 	EventStatusFailed     EventStatus = "failed"
 )
 
-// TransportType represents the delivery mechanism
 type TransportType string
 
 const (
@@ -38,7 +36,6 @@ const (
 	TransportKafka    TransportType = "kafka"
 )
 
-// OutboxEvent represents an event in the event_outbox table
 type OutboxEvent struct {
 	ID                int64
 	InstanceID        uuid.UUID
@@ -65,48 +62,35 @@ type OutboxEvent struct {
 	UpdatedAt         time.Time
 }
 
-// OutboxRepository defines operations for event_outbox table
 type OutboxRepository interface {
-	// InsertEvent inserts a new event with automatic sequence generation
 	InsertEvent(ctx context.Context, event *OutboxEvent) error
 
-	// PollPendingEvents retrieves pending events for an instance, ordered by sequence
 	PollPendingEvents(ctx context.Context, instanceID uuid.UUID, limit int) ([]*OutboxEvent, error)
 
-	// UpdateEventStatus updates event status and attempts
 	UpdateEventStatus(ctx context.Context, eventID uuid.UUID, status EventStatus, attempts int, nextAttempt *time.Time, lastError *string) error
 
-	// UpdateMediaInfo updates media processing information
 	UpdateMediaInfo(ctx context.Context, eventID uuid.UUID, mediaURL, mediaError *string, processed bool) error
 
-	// MarkDelivered marks event as successfully delivered
 	MarkDelivered(ctx context.Context, eventID uuid.UUID, transportResponse json.RawMessage) error
 
-	// GetEventByID retrieves a single event by ID
 	GetEventByID(ctx context.Context, eventID uuid.UUID) (*OutboxEvent, error)
 
-	// CountPendingByInstance counts pending events for an instance
 	CountPendingByInstance(ctx context.Context, instanceID uuid.UUID) (int, error)
 
-	// DeleteDeliveredEvents removes delivered events older than retention period
 	DeleteDeliveredEvents(ctx context.Context, olderThan time.Time) (int64, error)
 
-	// GetOldestSequence gets the oldest pending sequence number for an instance
 	GetOldestSequence(ctx context.Context, instanceID uuid.UUID) (int64, error)
 }
 
-// outboxRepository implements OutboxRepository using pgx
 type outboxRepository struct {
 	pool *pgxpool.Pool
 }
 
-// NewOutboxRepository creates a new OutboxRepository
 func NewOutboxRepository(pool *pgxpool.Pool) OutboxRepository {
 	return &outboxRepository{pool: pool}
 }
 
 func (r *outboxRepository) InsertEvent(ctx context.Context, event *OutboxEvent) error {
-	// Generate sequence number atomically
 	var sequenceNumber int64
 	err := r.pool.QueryRow(ctx, "SELECT get_next_event_sequence($1)", event.InstanceID).Scan(&sequenceNumber)
 	if err != nil {

@@ -5,34 +5,31 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"strings"
 
+	eventctx "go.mau.fi/whatsmeow/api/internal/events/eventctx"
 	"go.mau.fi/whatsmeow/api/internal/events/transform"
 	"go.mau.fi/whatsmeow/api/internal/events/types"
 	"go.mau.fi/whatsmeow/api/internal/logging"
 	"go.mau.fi/whatsmeow/proto/waE2E"
+	watypes "go.mau.fi/whatsmeow/types"
 	"go.mau.fi/whatsmeow/types/events"
 )
 
-// Transformer converts InternalEvent to Z-API webhook format.
-// This is the target transformer that produces webhook payloads ready for delivery.
 type Transformer struct {
-	connectedPhone string // The WhatsApp number connected to this instance
+	connectedPhone string
 }
 
-// NewTransformer creates a new Z-API transformer.
-// connectedPhone is the WhatsApp number (e.g., "5544999999999").
 func NewTransformer(connectedPhone string) *Transformer {
 	return &Transformer{
 		connectedPhone: connectedPhone,
 	}
 }
 
-// TargetSchema returns the target schema identifier.
 func (t *Transformer) TargetSchema() string {
 	return "zapi"
 }
 
-// SupportsEventType returns true if this transformer can handle the given event type.
 func (t *Transformer) SupportsEventType(eventType string) bool {
 	switch eventType {
 	case "message", "receipt", "chat_presence", "presence", "connected", "disconnected":
@@ -42,7 +39,6 @@ func (t *Transformer) SupportsEventType(eventType string) bool {
 	}
 }
 
-// Transform converts an InternalEvent to Z-API webhook format.
 func (t *Transformer) Transform(ctx context.Context, event *types.InternalEvent) (json.RawMessage, error) {
 	logger := logging.ContextLogger(ctx, nil).With(
 		slog.String("component", "zapi_transformer"),
@@ -50,7 +46,6 @@ func (t *Transformer) Transform(ctx context.Context, event *types.InternalEvent)
 		slog.String("event_type", event.EventType),
 	)
 
-	// Route to specific transformation based on event type
 	var result interface{}
 	var err error
 
@@ -76,7 +71,6 @@ func (t *Transformer) Transform(ctx context.Context, event *types.InternalEvent)
 		return nil, err
 	}
 
-	// Serialize to JSON
 	payload, err := json.Marshal(result)
 	if err != nil {
 		return nil, fmt.Errorf("failed to serialize webhook: %w", err)
@@ -89,52 +83,75 @@ func (t *Transformer) Transform(ctx context.Context, event *types.InternalEvent)
 	return payload, nil
 }
 
-// transformMessage converts a message event to ReceivedCallback.
 func (t *Transformer) transformMessage(ctx context.Context, logger *slog.Logger, event *types.InternalEvent) (*ReceivedCallback, error) {
-	// Extract whatsmeow Message from RawPayload
 	msgEvent, ok := event.RawPayload.(*events.Message)
 	if !ok {
 		return nil, fmt.Errorf("invalid message payload type")
 	}
 
-	// Build base ReceivedCallback
+	chatJID, chatParseErr := parseJID(event.Metadata["chat"])
+	senderJID, senderParseErr := parseJID(event.Metadata["from"])
+	provider := eventctx.ContactProvider(ctx)
+
+	chatPhone := normalizeConversationPhone(event.Metadata, chatJID, chatParseErr)
 	callback := &ReceivedCallback{
 		Type:           "ReceivedCallback",
 		InstanceID:     event.InstanceID.String(),
 		MessageID:      event.Metadata["message_id"],
-		Phone:          extractPhoneFromMetadata(event.Metadata["from"], event.Metadata),
+		Phone:          chatPhone,
 		FromMe:         event.Metadata["from_me"] == "true",
 		IsGroup:        event.Metadata["is_group"] == "true",
 		Momment:        event.CapturedAt.UnixMilli(),
 		Status:         "RECEIVED",
 		ConnectedPhone: t.connectedPhone,
-		ChatName:       event.Metadata["chat"],
 		IsEdit:         event.Metadata["is_edit"] == "true",
 	}
+	callback.ChatLid = deriveChatLID(event.Metadata, chatJID, chatParseErr)
 
-	// Add push name if available
+	if provider != nil && chatParseErr == nil {
+		if name := provider.ContactName(ctx, chatJID); name != "" {
+			callback.ChatName = name
+		}
+		if photo := provider.ContactPhoto(ctx, chatJID); photo != "" {
+			callback.Photo = photo
+		}
+	}
+
+	if callback.ChatName == "" {
+		callback.ChatName = event.Metadata["chat"]
+	}
+
 	if pushName, ok := event.Metadata["push_name"]; ok && pushName != "" {
 		callback.SenderName = pushName
 	}
 
-	// Add verified name if available (business accounts)
-	if verifiedName, ok := event.Metadata["verified_name"]; ok && verifiedName != "" {
-		callback.ProfileName = verifiedName
+	if verifiedNameRaw, ok := event.Metadata["verified_name"]; ok && verifiedNameRaw != "" {
+		if verifiedName := extractVerifiedBusinessName(verifiedNameRaw); verifiedName != "" {
+			callback.ProfileName = verifiedName
+		}
 	}
 
-	// Add broadcast flag
 	if broadcastOwner, ok := event.Metadata["broadcast_list_owner"]; ok && broadcastOwner != "" {
 		callback.Broadcast = true
 	}
 
-	// Add LID if using LID addressing
 	if addressingMode, ok := event.Metadata["addressing_mode"]; ok && addressingMode == "lid" {
 		if senderAlt, ok := event.Metadata["sender_alt"]; ok {
-			callback.SenderLid = extractPhoneNumber(senderAlt)
+			callback.SenderLid = normalizeLID(senderAlt)
 		}
 	}
 
-	// Add ContextInfo fields (quotes, mentions, forwards)
+	if provider != nil && senderParseErr == nil {
+		if callback.SenderName == "" {
+			if name := provider.ContactName(ctx, senderJID); name != "" {
+				callback.SenderName = name
+			}
+		}
+		if photo := provider.ContactPhoto(ctx, senderJID); photo != "" {
+			callback.SenderPhoto = photo
+		}
+	}
+
 	if event.QuotedMessageID != "" {
 		callback.ReferenceMessageID = event.QuotedMessageID
 	}
@@ -142,7 +159,6 @@ func (t *Transformer) transformMessage(ctx context.Context, logger *slog.Logger,
 		callback.Forwarded = true
 	}
 	if len(event.MentionedJIDs) > 0 {
-		// Extract phone numbers from mentioned JIDs
 		mentioned := make([]string, 0, len(event.MentionedJIDs))
 		for _, jid := range event.MentionedJIDs {
 			phone := extractPhoneNumber(jid)
@@ -155,22 +171,27 @@ func (t *Transformer) transformMessage(ctx context.Context, logger *slog.Logger,
 		}
 	}
 
-	// Handle message revocation
 	if revokedID, ok := event.Metadata["revoked_message_id"]; ok && revokedID != "" {
 		callback.RevokedMessageID = revokedID
 	}
 
-	// Handle ephemeral messages
 	if event.Metadata["is_ephemeral"] == "true" {
-		callback.MessageExpirationSeconds = 604800 // 7 days default
+		callback.MessageExpirationSeconds = 604800
 	}
 
-	// Handle view once
 	if event.Metadata["is_view_once"] == "true" {
 		callback.ViewOnce = true
 	}
 
-	// Extract message content based on type
+	if callback.IsGroup {
+		if participant := deriveParticipantPhone(event.Metadata, senderJID, senderParseErr); participant != "" {
+			callback.ParticipantPhone = participant
+		}
+		if participantLID := normalizeLID(event.Metadata["sender_alt"]); participantLID != "" {
+			callback.ParticipantLid = participantLID
+		}
+	}
+
 	if err := t.extractMessageContent(msgEvent.Message, callback, event); err != nil {
 		return nil, fmt.Errorf("failed to extract message content: %w", err)
 	}
@@ -178,9 +199,7 @@ func (t *Transformer) transformMessage(ctx context.Context, logger *slog.Logger,
 	return callback, nil
 }
 
-// extractMessageContent extracts the actual message content into the callback.
 func (t *Transformer) extractMessageContent(msg *waE2E.Message, callback *ReceivedCallback, event *types.InternalEvent) error {
-	// Text message
 	if text := msg.GetConversation(); text != "" {
 		callback.Text = &TextContent{
 			Message: text,
@@ -188,7 +207,6 @@ func (t *Transformer) extractMessageContent(msg *waE2E.Message, callback *Receiv
 		return nil
 	}
 
-	// Extended text message
 	if extText := msg.GetExtendedTextMessage(); extText != nil {
 		callback.Text = &TextContent{
 			Message: extText.GetText(),
@@ -196,11 +214,10 @@ func (t *Transformer) extractMessageContent(msg *waE2E.Message, callback *Receiv
 		return nil
 	}
 
-	// Image message
 	if img := msg.GetImageMessage(); img != nil {
 		callback.Image = &ImageContent{
-			ImageURL:     event.Metadata["media_url"],     // Injected after S3 upload
-			ThumbnailURL: event.Metadata["thumbnail_url"], // Injected after S3 upload
+			ImageURL:     event.Metadata["media_url"],
+			ThumbnailURL: event.Metadata["thumbnail_url"],
 			Caption:      img.GetCaption(),
 			MimeType:     img.GetMimetype(),
 			Width:        event.MediaWidth,
@@ -212,7 +229,6 @@ func (t *Transformer) extractMessageContent(msg *waE2E.Message, callback *Receiv
 		return nil
 	}
 
-	// Video message
 	if video := msg.GetVideoMessage(); video != nil {
 		callback.Video = &VideoContent{
 			VideoURL: event.Metadata["media_url"],
@@ -221,13 +237,12 @@ func (t *Transformer) extractMessageContent(msg *waE2E.Message, callback *Receiv
 			Seconds:  int(video.GetSeconds()),
 			Width:    event.MediaWidth,
 			Height:   event.MediaHeight,
-			IsGif:    event.MediaIsGIF, // GIF playback mode
+			IsGif:    event.MediaIsGIF,
 			ViewOnce: video.GetViewOnce(),
 		}
 		return nil
 	}
 
-	// Audio message
 	if audio := msg.GetAudioMessage(); audio != nil {
 		callback.Audio = &AudioContent{
 			AudioURL: event.Metadata["media_url"],
@@ -239,7 +254,6 @@ func (t *Transformer) extractMessageContent(msg *waE2E.Message, callback *Receiv
 		return nil
 	}
 
-	// Document message
 	if doc := msg.GetDocumentMessage(); doc != nil {
 		callback.Document = &DocumentContent{
 			DocumentURL:  event.Metadata["media_url"],
@@ -253,7 +267,6 @@ func (t *Transformer) extractMessageContent(msg *waE2E.Message, callback *Receiv
 		return nil
 	}
 
-	// Sticker message
 	if sticker := msg.GetStickerMessage(); sticker != nil {
 		callback.Sticker = &StickerContent{
 			StickerURL: event.Metadata["media_url"],
@@ -265,7 +278,6 @@ func (t *Transformer) extractMessageContent(msg *waE2E.Message, callback *Receiv
 		return nil
 	}
 
-	// Location message
 	if loc := msg.GetLocationMessage(); loc != nil {
 		callback.Location = &LocationContent{
 			Latitude:  loc.GetDegreesLatitude(),
@@ -277,7 +289,6 @@ func (t *Transformer) extractMessageContent(msg *waE2E.Message, callback *Receiv
 		return nil
 	}
 
-	// Contact message
 	if contact := msg.GetContactMessage(); contact != nil {
 		callback.Contact = &ContactContent{
 			DisplayName: contact.GetDisplayName(),
@@ -286,7 +297,6 @@ func (t *Transformer) extractMessageContent(msg *waE2E.Message, callback *Receiv
 		return nil
 	}
 
-	// Reaction message
 	if reaction := msg.GetReactionMessage(); reaction != nil {
 		callback.Reaction = &ReactionContent{
 			Value:      reaction.GetText(),
@@ -300,7 +310,6 @@ func (t *Transformer) extractMessageContent(msg *waE2E.Message, callback *Receiv
 		return nil
 	}
 
-	// Poll message
 	if poll := msg.GetPollCreationMessage(); poll != nil {
 		options := make([]PollOption, 0, len(poll.GetOptions()))
 		for _, opt := range poll.GetOptions() {
@@ -316,18 +325,14 @@ func (t *Transformer) extractMessageContent(msg *waE2E.Message, callback *Receiv
 		return nil
 	}
 
-	// Poll vote message
 	if pollVote := msg.GetPollUpdateMessage(); pollVote != nil {
-		// TODO: Extract selected options from encrypted poll vote
-		// The vote is encrypted and needs to be decrypted first
 		callback.PollVote = &PollVoteContent{
 			PollMessageID: pollVote.GetPollCreationMessageKey().GetID(),
-			Options:       []PollOption{}, // Will be populated after decryption
+			Options:       []PollOption{},
 		}
 		return nil
 	}
 
-	// Buttons response message
 	if btnResp := msg.GetButtonsResponseMessage(); btnResp != nil {
 		callback.ButtonsResponseMessage = &ButtonsResponseContent{
 			ButtonID: btnResp.GetSelectedButtonID(),
@@ -336,7 +341,6 @@ func (t *Transformer) extractMessageContent(msg *waE2E.Message, callback *Receiv
 		return nil
 	}
 
-	// List response message
 	if listResp := msg.GetListResponseMessage(); listResp != nil {
 		callback.ListResponseMessage = &ListResponseContent{
 			Title:         listResp.GetTitle(),
@@ -345,7 +349,6 @@ func (t *Transformer) extractMessageContent(msg *waE2E.Message, callback *Receiv
 		return nil
 	}
 
-	// Template button reply message
 	if templateResp := msg.GetTemplateButtonReplyMessage(); templateResp != nil {
 		callback.ButtonsResponseMessage = &ButtonsResponseContent{
 			ButtonID: templateResp.GetSelectedID(),
@@ -354,19 +357,15 @@ func (t *Transformer) extractMessageContent(msg *waE2E.Message, callback *Receiv
 		return nil
 	}
 
-	// If no specific message type matched, return error
 	return fmt.Errorf("unsupported message type")
 }
 
-// transformReceipt converts a receipt event to MessageStatusCallback.
 func (t *Transformer) transformReceipt(ctx context.Context, logger *slog.Logger, event *types.InternalEvent) (*MessageStatusCallback, error) {
-	// Extract whatsmeow Receipt from RawPayload
 	receiptEvent, ok := event.RawPayload.(*events.Receipt)
 	if !ok {
 		return nil, fmt.Errorf("invalid receipt payload type")
 	}
 
-	// Map receipt type to Z-API status
 	var status string
 	switch receiptEvent.Type {
 	case "delivered":
@@ -381,22 +380,21 @@ func (t *Transformer) transformReceipt(ctx context.Context, logger *slog.Logger,
 		status = "SENT"
 	}
 
+	chatJID, chatErr := parseJID(event.Metadata["chat"])
 	callback := &MessageStatusCallback{
 		Type:       "MessageStatusCallback",
 		InstanceID: event.InstanceID.String(),
 		Status:     status,
 		IDs:        receiptEvent.MessageIDs,
 		Momment:    receiptEvent.Timestamp.UnixMilli(),
-		Phone:      extractPhoneNumber(event.Metadata["chat"]),
+		Phone:      normalizeConversationPhone(event.Metadata, chatJID, chatErr),
 		IsGroup:    event.Metadata["is_group"] == "true",
 	}
 
 	return callback, nil
 }
 
-// transformChatPresence converts a chat presence event to PresenceChatCallback.
 func (t *Transformer) transformChatPresence(ctx context.Context, logger *slog.Logger, event *types.InternalEvent) (*PresenceChatCallback, error) {
-	// Map whatsmeow presence state to Z-API status
 	var status string
 	switch event.Metadata["state"] {
 	case "composing":
@@ -409,9 +407,10 @@ func (t *Transformer) transformChatPresence(ctx context.Context, logger *slog.Lo
 		status = "AVAILABLE"
 	}
 
+	chatJID, chatErr := parseJID(event.Metadata["chat"])
 	callback := &PresenceChatCallback{
 		Type:       "PresenceChatCallback",
-		Phone:      extractPhoneNumber(event.Metadata["chat"]),
+		Phone:      normalizeConversationPhone(event.Metadata, chatJID, chatErr),
 		Status:     status,
 		InstanceID: event.InstanceID.String(),
 	}
@@ -419,7 +418,6 @@ func (t *Transformer) transformChatPresence(ctx context.Context, logger *slog.Lo
 	return callback, nil
 }
 
-// transformPresence converts a presence event to PresenceChatCallback.
 func (t *Transformer) transformPresence(ctx context.Context, logger *slog.Logger, event *types.InternalEvent) (*PresenceChatCallback, error) {
 	var status string
 	if event.Metadata["unavailable"] == "true" {
@@ -435,7 +433,6 @@ func (t *Transformer) transformPresence(ctx context.Context, logger *slog.Logger
 		InstanceID: event.InstanceID.String(),
 	}
 
-	// Add last seen if available
 	if lastSeenStr, ok := event.Metadata["last_seen"]; ok && lastSeenStr != "" {
 		var lastSeen int64
 		fmt.Sscanf(lastSeenStr, "%d", &lastSeen)
@@ -445,7 +442,6 @@ func (t *Transformer) transformPresence(ctx context.Context, logger *slog.Logger
 	return callback, nil
 }
 
-// transformConnected converts a connected event to ConnectedCallback.
 func (t *Transformer) transformConnected(ctx context.Context, logger *slog.Logger, event *types.InternalEvent) (*ConnectedCallback, error) {
 	callback := &ConnectedCallback{
 		Type:       "ConnectedCallback",
@@ -458,7 +454,6 @@ func (t *Transformer) transformConnected(ctx context.Context, logger *slog.Logge
 	return callback, nil
 }
 
-// transformDisconnected converts a disconnected event to DisconnectedCallback.
 func (t *Transformer) transformDisconnected(ctx context.Context, logger *slog.Logger, event *types.InternalEvent) (*DisconnectedCallback, error) {
 	callback := &DisconnectedCallback{
 		Type:         "DisconnectedCallback",
@@ -471,49 +466,218 @@ func (t *Transformer) transformDisconnected(ctx context.Context, logger *slog.Lo
 	return callback, nil
 }
 
-// extractPhoneNumber extracts just the phone number from a JID string.
-// Handles LID addressing mode and alternate JIDs.
-// Example: "5544999999999@s.whatsapp.net" → "5544999999999"
 func extractPhoneNumber(jid string) string {
-	// Find the @ symbol
-	for i, c := range jid {
-		if c == '@' {
-			user := jid[:i]
-			server := jid[i+1:]
-
-			// Handle special servers
-			switch server {
-			case "s.whatsapp.net":
-				return user // Regular phone number
-			case "lid":
-				return user // LID identifier (should use alternate JID if available)
-			case "g.us":
-				return user // Group ID
-			case "broadcast":
-				if user == "status" {
-					return "status_broadcast"
-				}
-				return user
-			case "newsletter":
-				return user // Newsletter ID
-			default:
-				return user
-			}
-		}
+	parsed, err := parseJID(jid)
+	if err != nil {
+		return sanitizeConversationFallback(jid)
 	}
-	return jid
+	return userPhoneFromJID(parsed)
 }
 
-// extractPhoneFromMetadata extracts phone number considering addressing mode and alternate JIDs.
-// This is used to handle LID addressing properly.
-func extractPhoneFromMetadata(jid string, metadata map[string]string) string {
-	// Check if LID addressing mode - use alternate JID
-	if addressingMode, ok := metadata["addressing_mode"]; ok && addressingMode == "lid" {
-		if senderAlt, ok := metadata["sender_alt"]; ok && senderAlt != "" {
-			return extractPhoneNumber(senderAlt)
+func parseJID(value string) (watypes.JID, error) {
+	if value == "" {
+		return watypes.JID{}, fmt.Errorf("empty jid")
+	}
+	return watypes.ParseJID(value)
+}
+
+func normalizeConversationPhone(metadata map[string]string, chat watypes.JID, parseErr error) string {
+	if parseErr == nil {
+		if chat.Server == watypes.HiddenUserServer {
+			if alt := metadata["recipient_alt"]; alt != "" {
+				if altJID, err := watypes.ParseJID(alt); err == nil {
+					chat = altJID
+				} else {
+					return sanitizeConversationFallback(alt)
+				}
+			}
+		}
+		return conversationIdentifierFromJID(chat)
+	}
+
+	return sanitizeConversationFallback(metadata["chat"])
+}
+
+func deriveChatLID(metadata map[string]string, chat watypes.JID, parseErr error) *string {
+	if parseErr == nil && chat.Server == watypes.HiddenUserServer {
+		if normalized := normalizeLID(chat.String()); normalized != "" {
+			return stringPtr(normalized)
+		}
+		return stringPtr(chat.String())
+	}
+
+	if raw := metadata["chat"]; raw != "" {
+		if strings.HasSuffix(raw, "@"+watypes.HiddenUserServer) {
+			if normalized := normalizeLID(raw); normalized != "" {
+				return stringPtr(normalized)
+			}
+			return stringPtr(raw)
 		}
 	}
 
-	// Default to regular JID extraction
-	return extractPhoneNumber(jid)
+	if raw := metadata["chat_lid"]; raw != "" {
+		if normalized := normalizeLID(raw); normalized != "" {
+			return stringPtr(normalized)
+		}
+		return stringPtr(raw)
+	}
+
+	return nil
+}
+
+func extractVerifiedBusinessName(raw string) string {
+	trimmed := strings.TrimSpace(raw)
+	if trimmed == "" {
+		return ""
+	}
+
+	var envelope struct {
+		Details *struct {
+			VerifiedName string `json:"verifiedName"`
+		} `json:"Details"`
+		VerifiedName string `json:"verified_name"`
+	}
+
+	if err := json.Unmarshal([]byte(trimmed), &envelope); err == nil {
+		if envelope.Details != nil && envelope.Details.VerifiedName != "" {
+			return envelope.Details.VerifiedName
+		}
+		if envelope.VerifiedName != "" {
+			return envelope.VerifiedName
+		}
+	} else if trimmed != "" && trimmed[0] != '{' {
+		return trimmed
+	}
+
+	if trimmed != "" && trimmed[0] != '{' {
+		return trimmed
+	}
+
+	return ""
+}
+
+func stringPtr(value string) *string {
+	if value == "" {
+		return nil
+	}
+	v := value
+	return &v
+}
+
+func deriveParticipantPhone(metadata map[string]string, sender watypes.JID, parseErr error) string {
+	if parseErr == nil {
+		if metadata["addressing_mode"] == "lid" {
+			if alt := metadata["sender_alt"]; alt != "" {
+				if altJID, err := watypes.ParseJID(alt); err == nil {
+					sender = altJID
+				} else {
+					return sanitizeConversationFallback(alt)
+				}
+			}
+		}
+		return userPhoneFromJID(sender)
+	}
+
+	return sanitizeConversationFallback(metadata["from"])
+}
+
+func conversationIdentifierFromJID(jid watypes.JID) string {
+	user := sanitizeUserComponent(jid.User)
+	switch jid.Server {
+	case watypes.GroupServer:
+		if user == "" {
+			user = jid.User
+		}
+		return user + "-group"
+	case watypes.BroadcastServer:
+		if jid.User == watypes.StatusBroadcastJID.User {
+			return "status"
+		}
+		if user == "" {
+			user = jid.User
+		}
+		return user + "-broadcast"
+	case watypes.NewsletterServer:
+		if user == "" {
+			user = jid.User
+		}
+		return user + "-channel"
+	default:
+		if user == "" {
+			return jid.User
+		}
+		return user
+	}
+}
+
+func userPhoneFromJID(jid watypes.JID) string {
+	user := sanitizeUserComponent(jid.User)
+	if user == "" {
+		return jid.User
+	}
+	return user
+}
+
+func normalizeLID(value string) string {
+	if value == "" {
+		return ""
+	}
+	jid, err := watypes.ParseJID(value)
+	if err != nil {
+		return manualNormalizedLID(value)
+	}
+	if jid.Server != watypes.HiddenUserServer {
+		return ""
+	}
+	user := sanitizeUserComponent(jid.User)
+	if user == "" {
+		return ""
+	}
+	return user + "@" + watypes.HiddenUserServer
+}
+
+func manualNormalizedLID(value string) string {
+	if value == "" {
+		return ""
+	}
+	jidPart := value
+	if idx := strings.IndexRune(value, '@'); idx >= 0 {
+		jidPart = value[:idx]
+	}
+	user := sanitizeUserComponent(jidPart)
+	if user == "" {
+		user = jidPart
+	}
+	if user == "" {
+		return ""
+	}
+	return user + "@" + watypes.HiddenUserServer
+}
+
+func sanitizeConversationFallback(value string) string {
+	if value == "" {
+		return ""
+	}
+	if idx := strings.IndexRune(value, '@'); idx >= 0 {
+		user := value[:idx]
+		server := value[idx+1:]
+		sanitized := sanitizeUserComponent(user)
+		tempJID := watypes.JID{User: sanitized, Server: server}
+		return conversationIdentifierFromJID(tempJID)
+	}
+	sanitized := sanitizeUserComponent(value)
+	if sanitized == "" {
+		return value
+	}
+	return sanitized
+}
+
+func sanitizeUserComponent(user string) string {
+	if idx := strings.IndexRune(user, ':'); idx >= 0 {
+		user = user[:idx]
+	}
+	if idx := strings.IndexRune(user, '.'); idx >= 0 {
+		user = user[:idx]
+	}
+	return user
 }

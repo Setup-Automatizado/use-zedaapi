@@ -1,0 +1,61 @@
+{
+  "headers": {
+    "host": "185.245.182.69:3000",
+    "user-agent": "ZuckZapGo-Webhook/1.0",
+    "content-length": "1045",
+    "accept": "application/json",
+    "content-type": "application/json",
+    "accept-encoding": "gzip"
+  },
+  "body": {
+    "baseURL": "https://api.zuckzapgo.com",
+    "data": {
+      "event": {
+        "JID": "5519997291930@s.whatsapp.net",
+        "Message": {
+          "Chat": "120363038403737119@g.us",
+          "Sender": "5519997291930:12@s.whatsapp.net",
+          "IsFromMe": false,
+          "IsGroup": true,
+          "AddressingMode": "pn",
+          "SenderAlt": "55250627068030:12@lid",
+          "RecipientAlt": "",
+          "BroadcastListOwner": "",
+          "ID": "3EB0A5D4309A30FDDA378C",
+          "ServerID": 0,
+          "Type": "reaction",
+          "PushName": "Jonas Cerantola",
+          "Timestamp": "2025-09-15T14:32:07-03:00",
+          "Category": "",
+          "Multicast": false,
+          "MediaType": "",
+          "Edit": "",
+          "MsgBotInfo": {
+            "EditType": "",
+            "EditTargetID": "",
+            "EditSenderTimestampMS": "0001-01-01T00:00:00Z"
+          },
+          "MsgMetaInfo": {
+            "TargetID": "",
+            "TargetSender": "",
+            "TargetChat": "",
+            "DeprecatedLIDSession": null,
+            "ThreadMessageID": "",
+            "ThreadMessageSenderJID": ""
+          },
+          "VerifiedName": null,
+          "DeviceSentMeta": null
+        },
+        "OldPushName": "",
+        "NewPushName": "Jonas Cerantola"
+      },
+      "type": "PushName"
+    },
+    "eventType": "PushName",
+    "timestamp": 1757957528,
+    "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+    "userID": "9e832a8666e02c047a5167194c703eaf",
+    "userJID": "5521971532700:4@s.whatsapp.net",
+    "userName": "setupautomatizado"
+  }
+}

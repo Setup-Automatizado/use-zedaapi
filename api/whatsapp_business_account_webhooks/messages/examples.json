@@ -1,0 +1,38 @@
+{
+  "truncated": [
+    {
+      "object": "whatsapp_business_account",
+      "entry": [
+        {
+          "id": "481774168341746",
+          "changes": [
+            {
+              "value": {
+                "messaging_product": "whatsapp",
+                "metadata": {
+                  "display_phone_number": "5521979232690",
+                  "phone_number_id": "470938299430867"
+                },
+                "statuses": [
+                  {
+                    "id": "wamid.HBgNNTUyMTk3MTUzMjcwMBUCABEYIEE1OUZFODM3MzdDRUU3NkU1REYyOTQ0NTA2OEQwRTkxAA==",
+                    "status": "delivered",
+                    "timestamp": "1757137768",
+                    "recipient_id": "5521971532700"
+                  }
+                ]
+              },
+              "field": "messages"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "totalExamples": 1,
+    "examplesShown": 1,
+    "firstSeen": "2025-09-06T05:49:30.558Z",
+    "lastSeen": "2025-09-06T05:49:30.558Z"
+  }
+}

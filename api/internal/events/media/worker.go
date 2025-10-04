@@ -11,21 +11,21 @@ import (
 	"google.golang.org/protobuf/proto"
 
 	"go.mau.fi/whatsmeow"
-	"go.mau.fi/whatsmeow/proto/waE2E"
 
 	"go.mau.fi/whatsmeow/api/internal/config"
+	"go.mau.fi/whatsmeow/api/internal/events/encoding"
 	"go.mau.fi/whatsmeow/api/internal/events/persistence"
 	"go.mau.fi/whatsmeow/api/internal/logging"
 	"go.mau.fi/whatsmeow/api/internal/observability"
+	whatsmeowevents "go.mau.fi/whatsmeow/types/events"
 )
 
-// MediaWorker processes media for a specific WhatsApp instance
 type MediaWorker struct {
 	instanceID   uuid.UUID
 	client       *whatsmeow.Client
 	processor    *MediaProcessor
 	mediaRepo    persistence.MediaRepository
-	outboxRepo   persistence.OutboxRepository // Added to fetch original proto messages
+	outboxRepo   persistence.OutboxRepository
 	pollInterval time.Duration
 	batchSize    int
 	workerID     string
@@ -35,7 +35,6 @@ type MediaWorker struct {
 	doneCh       chan struct{}
 }
 
-// NewMediaWorker creates a new media worker for an instance
 func NewMediaWorker(
 	ctx context.Context,
 	instanceID uuid.UUID,
@@ -49,7 +48,6 @@ func NewMediaWorker(
 		slog.String("component", "media_worker"),
 		slog.String("instance_id", instanceID.String()))
 
-	// Create processor
 	processor, err := NewMediaProcessor(ctx, cfg, mediaRepo, outboxRepo, metrics)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create media processor: %w", err)
@@ -78,20 +76,17 @@ func NewMediaWorker(
 	}, nil
 }
 
-// Start begins processing media for this instance
 func (w *MediaWorker) Start(ctx context.Context) {
 	w.logger.Info("media worker starting")
 
 	go w.run(ctx)
 }
 
-// Stop gracefully stops the worker
 func (w *MediaWorker) Stop(ctx context.Context) error {
 	w.logger.Info("media worker stopping")
 
 	close(w.stopCh)
 
-	// Wait for worker to finish with timeout
 	select {
 	case <-w.doneCh:
 		w.logger.Info("media worker stopped gracefully")
@@ -102,7 +97,6 @@ func (w *MediaWorker) Stop(ctx context.Context) error {
 	}
 }
 
-// run is the main worker loop
 func (w *MediaWorker) run(ctx context.Context) {
 	defer close(w.doneCh)
 
@@ -120,7 +114,6 @@ func (w *MediaWorker) run(ctx context.Context) {
 			w.logger.Info("media worker stop signal received")
 			return
 		case <-ticker.C:
-			// Poll and process media
 			if err := w.processBatch(ctx); err != nil {
 				w.logger.Error("batch processing failed",
 					slog.String("error", err.Error()))
@@ -129,9 +122,7 @@ func (w *MediaWorker) run(ctx context.Context) {
 	}
 }
 
-// processBatch polls for pending media and processes them
 func (w *MediaWorker) processBatch(ctx context.Context) error {
-	// Poll for pending media downloads
 	mediaItems, err := w.mediaRepo.PollPendingDownloads(ctx, w.batchSize)
 	if err != nil {
 		w.metrics.MediaFailures.WithLabelValues(w.instanceID.String(), "unknown", "poll").Inc()
@@ -139,23 +130,19 @@ func (w *MediaWorker) processBatch(ctx context.Context) error {
 	}
 
 	if len(mediaItems) == 0 {
-		// No pending media
 		return nil
 	}
 
 	w.logger.Debug("processing media batch",
 		slog.Int("count", len(mediaItems)))
 
-	// Update backlog metric
 	w.metrics.MediaBacklog.Set(float64(len(mediaItems)))
 
-	// Process each media item
 	for _, media := range mediaItems {
 		if err := w.processMedia(ctx, media); err != nil {
 			w.logger.Error("media processing failed",
 				slog.String("event_id", media.EventID.String()),
 				slog.String("error", err.Error()))
-			// Continue processing other items
 			continue
 		}
 	}
@@ -163,13 +150,11 @@ func (w *MediaWorker) processBatch(ctx context.Context) error {
 	return nil
 }
 
-// processMedia processes a single media item
 func (w *MediaWorker) processMedia(ctx context.Context, media *persistence.MediaMetadata) error {
 	logger := w.logger.With(
 		slog.String("event_id", media.EventID.String()),
 		slog.String("media_type", string(media.MediaType)))
 
-	// Try to acquire lock for processing
 	acquired, err := w.mediaRepo.AcquireForProcessing(ctx, media.EventID, w.workerID)
 	if err != nil {
 		logger.Error("failed to acquire processing lock",
@@ -182,7 +167,6 @@ func (w *MediaWorker) processMedia(ctx context.Context, media *persistence.Media
 		return nil
 	}
 
-	// Ensure we release the lock on error
 	defer func() {
 		if err != nil {
 			_ = w.mediaRepo.ReleaseFromProcessing(ctx, media.EventID, w.workerID)
@@ -191,7 +175,6 @@ func (w *MediaWorker) processMedia(ctx context.Context, media *persistence.Media
 
 	logger.Info("processing media")
 
-	// Reconstruct proto message from event_outbox payload
 	msg, err := w.reconstructMessage(ctx, media)
 	if err != nil {
 		logger.Error("failed to reconstruct message",
@@ -200,7 +183,6 @@ func (w *MediaWorker) processMedia(ctx context.Context, media *persistence.Media
 		return fmt.Errorf("failed to reconstruct message: %w", err)
 	}
 
-	// Process with retry
 	result, err := w.processor.ProcessWithRetry(ctx, w.client, w.instanceID, media.EventID, msg, media.MediaKey)
 	if err != nil {
 		logger.Error("media processing failed after retries",
@@ -213,7 +195,6 @@ func (w *MediaWorker) processMedia(ctx context.Context, media *persistence.Media
 		slog.String("s3_key", result.S3Key),
 		slog.Int64("file_size", result.FileSize))
 
-	// Mark as complete
 	if err := w.mediaRepo.MarkComplete(ctx, media.EventID); err != nil {
 		logger.Error("failed to mark media as complete",
 			slog.String("error", err.Error()))
@@ -223,77 +204,55 @@ func (w *MediaWorker) processMedia(ctx context.Context, media *persistence.Media
 	return nil
 }
 
-// reconstructMessage reconstructs a proto message from event_outbox payload
-// Strategy: Fetch event from outbox → deserialize JSON payload → extract media message
 func (w *MediaWorker) reconstructMessage(ctx context.Context, media *persistence.MediaMetadata) (proto.Message, error) {
-	// 1. Fetch original event from outbox
 	outboxEvent, err := w.outboxRepo.GetEventByID(ctx, media.EventID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch event from outbox: %w", err)
 	}
 
-	// 2. Deserialize payload to map to identify message structure
-	var payload map[string]interface{}
-	if err := json.Unmarshal(outboxEvent.Payload, &payload); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal event payload: %w", err)
+	var encoded string
+	if err := json.Unmarshal(outboxEvent.Payload, &encoded); err != nil {
+		return nil, fmt.Errorf("decode payload string: %w", err)
 	}
 
-	// 3. Re-marshal specific message field and unmarshal to appropriate proto type
-	// The payload structure depends on event type (e.g., events.Message contains Message field)
-	var messageData interface{}
-	var ok bool
-
-	// Check for common message field names
-	if messageData, ok = payload["Message"]; !ok {
-		if messageData, ok = payload["message"]; !ok {
-			return nil, fmt.Errorf("no message field found in payload for event type: %s", outboxEvent.EventType)
-		}
-	}
-
-	// Re-serialize message data
-	messageJSON, err := json.Marshal(messageData)
+	internalEvent, err := encoding.DecodeInternalEvent(encoded)
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal message data: %w", err)
+		return nil, fmt.Errorf("decode internal event: %w", err)
 	}
 
-	// 4. Determine message type from media_type and unmarshal to appropriate proto message
+	msgEvent, ok := internalEvent.RawPayload.(*whatsmeowevents.Message)
+	if !ok {
+		return nil, fmt.Errorf("event raw payload is not a message: %T", internalEvent.RawPayload)
+	}
+
+	if msgEvent.Message == nil {
+		return nil, fmt.Errorf("message event missing proto payload")
+	}
+
 	switch media.MediaType {
 	case persistence.MediaTypeImage:
-		var msg waE2E.ImageMessage
-		if err := json.Unmarshal(messageJSON, &msg); err != nil {
-			return nil, fmt.Errorf("failed to unmarshal ImageMessage: %w", err)
+		if img := msgEvent.Message.GetImageMessage(); img != nil {
+			return img, nil
 		}
-		return &msg, nil
-
 	case persistence.MediaTypeVideo:
-		var msg waE2E.VideoMessage
-		if err := json.Unmarshal(messageJSON, &msg); err != nil {
-			return nil, fmt.Errorf("failed to unmarshal VideoMessage: %w", err)
+		if video := msgEvent.Message.GetVideoMessage(); video != nil {
+			return video, nil
 		}
-		return &msg, nil
-
 	case persistence.MediaTypeAudio, persistence.MediaTypeVoice:
-		var msg waE2E.AudioMessage
-		if err := json.Unmarshal(messageJSON, &msg); err != nil {
-			return nil, fmt.Errorf("failed to unmarshal AudioMessage: %w", err)
+		if audio := msgEvent.Message.GetAudioMessage(); audio != nil {
+			return audio, nil
 		}
-		return &msg, nil
-
 	case persistence.MediaTypeDocument:
-		var msg waE2E.DocumentMessage
-		if err := json.Unmarshal(messageJSON, &msg); err != nil {
-			return nil, fmt.Errorf("failed to unmarshal DocumentMessage: %w", err)
+		if doc := msgEvent.Message.GetDocumentMessage(); doc != nil {
+			return doc, nil
 		}
-		return &msg, nil
-
 	case persistence.MediaTypeSticker:
-		var msg waE2E.StickerMessage
-		if err := json.Unmarshal(messageJSON, &msg); err != nil {
-			return nil, fmt.Errorf("failed to unmarshal StickerMessage: %w", err)
+		if sticker := msgEvent.Message.GetStickerMessage(); sticker != nil {
+			return sticker, nil
 		}
-		return &msg, nil
-
 	default:
 		return nil, fmt.Errorf("unsupported media type for reconstruction: %s", media.MediaType)
 	}
+
+	return nil, fmt.Errorf("message payload missing %s content", media.MediaType)
 }

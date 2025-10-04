@@ -1,0 +1,75 @@
+{
+  "truncated": [
+    {
+      "headers": {
+        "host": "185.245.182.69:3000",
+        "user-agent": "ZuckZapGo-Webhook/1.0",
+        "content-length": "540",
+        "accept": "application/json",
+        "content-type": "application/json",
+        "accept-encoding": "gzip"
+      },
+      "body": {
+        "baseURL": "https://api.zuckzapgo.com",
+        "data": {
+          "event": {
+            "JID": "5521969535158@s.whatsapp.net",
+            "Timestamp": "2025-09-14T15:48:27.17-03:00",
+            "Action": {
+              "fullName": "Matheus Araujo Dev Frontend",
+              "firstName": "Matheus Araujo Dev Frontend",
+              "lidJID": "8014610342136@lid",
+              "saveOnPrimaryAddressbook": true
+            },
+            "FromFullSync": false
+          },
+          "type": "Contact"
+        },
+        "eventType": "Contact",
+        "timestamp": 1757875708,
+        "token": "!!!qYWdJ61zk3i1AvTfXhzE!!!",
+        "userID": "80402f2ab5855b2132cf45d6b365a62c",
+        "userJID": "5521979232690:36@s.whatsapp.net",
+        "userName": "setupautomatizado-hibrido"
+      }
+    },
+    {
+      "headers": {
+        "host": "185.245.182.69:3000",
+        "user-agent": "ZuckZapGo-Webhook/1.0",
+        "content-length": "479",
+        "accept": "application/json",
+        "content-type": "application/json",
+        "accept-encoding": "gzip"
+      },
+      "body": {
+        "baseURL": "https://api.zuckzapgo.com",
+        "data": {
+          "event": {
+            "JID": "558587941413@s.whatsapp.net",
+            "Timestamp": "2025-04-22T16:28:19.79-03:00",
+            "Action": {
+              "fullName": "LEAD 239",
+              "lidJID": "41193316573311@lid",
+              "saveOnPrimaryAddressbook": true
+            },
+            "FromFullSync": false
+          },
+          "type": "Contact"
+        },
+        "eventType": "Contact",
+        "timestamp": 1757875708,
+        "token": "!!!qYWdJ61zk3i1AvTfXhzE!!!",
+        "userID": "80402f2ab5855b2132cf45d6b365a62c",
+        "userJID": "5521979232690:36@s.whatsapp.net",
+        "userName": "setupautomatizado-hibrido"
+      }
+    }
+  ],
+  "metadata": {
+    "totalExamples": 2,
+    "examplesShown": 2,
+    "firstSeen": "2025-09-14T18:48:32.262Z",
+    "lastSeen": "2025-09-14T18:48:32.262Z"
+  }
+}

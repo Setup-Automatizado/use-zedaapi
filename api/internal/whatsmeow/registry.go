@@ -30,6 +30,7 @@ import (
 
 	internalevents "go.mau.fi/whatsmeow/api/internal/events"
 	"go.mau.fi/whatsmeow/api/internal/events/dispatch"
+	eventctx "go.mau.fi/whatsmeow/api/internal/events/eventctx"
 	"go.mau.fi/whatsmeow/api/internal/events/media"
 	"go.mau.fi/whatsmeow/api/internal/locks"
 	"go.mau.fi/whatsmeow/api/internal/observability"
@@ -62,27 +63,23 @@ type StatusSnapshot struct {
 }
 
 type ClientRegistry struct {
-	log           *slog.Logger
-	workerID      string
-	container     *sqlstore.Container
-	lockManager   locks.Manager
-	repo          InstanceRepository
-	pairCallback  func(context.Context, uuid.UUID, string) error
-	resetCallback func(context.Context, uuid.UUID, string) error
-	logLevel      string
-
-	mu            sync.RWMutex
-	clients       map[uuid.UUID]*clientState
-	creationLocks sync.Map
-
-	activeLocks   map[uuid.UUID]locks.Lock
-	activeLocksMu sync.RWMutex
-
-	splitBrainTicker  *time.Ticker
-	splitBrainStop    chan struct{}
-	splitBrainRunning bool
-	splitBrainMu      sync.Mutex
-
+	log                 *slog.Logger
+	workerID            string
+	container           *sqlstore.Container
+	lockManager         locks.Manager
+	repo                InstanceRepository
+	pairCallback        func(context.Context, uuid.UUID, string) error
+	resetCallback       func(context.Context, uuid.UUID, string) error
+	logLevel            string
+	mu                  sync.RWMutex
+	clients             map[uuid.UUID]*clientState
+	creationLocks       sync.Map
+	activeLocks         map[uuid.UUID]locks.Lock
+	activeLocksMu       sync.RWMutex
+	splitBrainTicker    *time.Ticker
+	splitBrainStop      chan struct{}
+	splitBrainRunning   bool
+	splitBrainMu        sync.Mutex
 	metrics             ClientRegistryMetrics
 	eventIntegration    *internalevents.IntegrationHelper
 	dispatchCoordinator *dispatch.Coordinator
@@ -101,6 +98,7 @@ type clientState struct {
 	lock              locks.Lock
 	lockRefreshCancel context.CancelFunc
 	lockMode          string
+	contactCache      *contactMetadataCache
 }
 
 type ClientRegistryMetrics struct {
@@ -295,6 +293,21 @@ func (r *ClientRegistry) EnsureClientWithLock(ctx context.Context, info Instance
 		go r.notifyReset(info.ID, "store_missing")
 	}
 
+	if r.eventIntegration != nil {
+		registerCtx := ctx
+		if registerCtx == nil {
+			registerCtx = context.Background()
+		}
+		registerCtx, cancel := context.WithTimeout(registerCtx, 5*time.Second)
+		err := r.eventIntegration.EnsureRegistered(registerCtx, info.ID)
+		cancel()
+		if err != nil {
+			r.log.Error("failed to pre-register instance with event system",
+				slog.String("instanceId", info.ID.String()),
+				slog.String("error", err.Error()))
+		}
+	}
+
 	return client, true, nil
 }
 
@@ -401,6 +414,21 @@ func (r *ClientRegistry) EnsureClient(ctx context.Context, info InstanceInfo) (*
 
 	if storeReset && !needsReset {
 		go r.notifyReset(info.ID, "store_missing")
+	}
+
+	if r.eventIntegration != nil {
+		registerCtx := ctx
+		if registerCtx == nil {
+			registerCtx = context.Background()
+		}
+		registerCtx, cancel := context.WithTimeout(registerCtx, 5*time.Second)
+		err := r.eventIntegration.EnsureRegistered(registerCtx, info.ID)
+		cancel()
+		if err != nil {
+			r.log.Error("failed to pre-register instance with event system",
+				slog.String("instanceId", info.ID.String()),
+				slog.String("error", err.Error()))
+		}
 	}
 
 	return client, true, nil
@@ -1100,7 +1128,27 @@ func (r *ClientRegistry) ensurePrimarySignalSession(instanceID uuid.UUID, client
 
 func (r *ClientRegistry) wrapEventHandler(instanceID uuid.UUID) func(evt interface{}) {
 	return func(evt interface{}) {
+		var provider eventctx.ContactMetadataProvider
+
+		r.mu.Lock()
+		if state, ok := r.clients[instanceID]; ok && state != nil && state.client != nil {
+			if state.contactCache == nil {
+				state.contactCache = newContactMetadataCache(
+					state.client,
+					r.log.With(
+						slog.String("component", "contact_metadata_cache"),
+						slog.String("instanceId", instanceID.String()),
+					),
+				)
+			}
+			provider = state.contactCache
+		}
+		r.mu.Unlock()
+
 		ctx := context.Background()
+		if provider != nil {
+			ctx = eventctx.WithContactProvider(ctx, provider)
+		}
 
 		// CRITICAL: Forward ALL events to event system FIRST
 		// This ensures no events are lost regardless of lifecycle processing

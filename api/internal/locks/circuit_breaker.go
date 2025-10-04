@@ -46,21 +46,17 @@ func DefaultCircuitBreakerConfig() CircuitBreakerConfig {
 }
 
 type CircuitBreakerManager struct {
-	underlying Manager
-	config     CircuitBreakerConfig
-
-	state               atomic.Int32
-	consecutiveFailures atomic.Int32
-	halfOpenAttempts    atomic.Int32
-	lastFailureTime     atomic.Int64
-
-	mu                sync.RWMutex
-	healthCheckTicker *time.Ticker
-	stopHealthCheck   chan struct{}
-	isHealthChecking  bool
-
-	onStateChange func(old, new CircuitState)
-
+	underlying            Manager
+	config                CircuitBreakerConfig
+	state                 atomic.Int32
+	consecutiveFailures   atomic.Int32
+	halfOpenAttempts      atomic.Int32
+	lastFailureTime       atomic.Int64
+	mu                    sync.RWMutex
+	healthCheckTicker     *time.Ticker
+	stopHealthCheck       chan struct{}
+	isHealthChecking      bool
+	onStateChange         func(old, new CircuitState)
 	lockSuccessCounter    func()
 	lockFailureCounter    func()
 	circuitStateGauge     func(float64)
@@ -196,7 +192,7 @@ func (cbm *CircuitBreakerManager) CheckLockOwnership(ctx context.Context, key st
 		return false, nil
 	}
 
-	err := expectedLock.Refresh(ctx, 30) // Refresh for 30 seconds
+	err := expectedLock.Refresh(ctx, 30)
 
 	if err != nil {
 		return false, err

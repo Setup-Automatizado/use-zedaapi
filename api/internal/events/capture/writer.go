@@ -18,7 +18,6 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/observability"
 )
 
-// TransactionalWriter writes events to persistence with batching semantics.
 type TransactionalWriter struct {
 	log              *slog.Logger
 	metrics          *observability.Metrics
@@ -30,15 +29,12 @@ type TransactionalWriter struct {
 	metadataEnricher MetadataEnricher
 }
 
-// WebhookResolver resolves transport configuration for an instance.
 type WebhookResolver interface {
 	Resolve(ctx context.Context, instanceID uuid.UUID) (*ResolvedWebhookConfig, error)
 }
 
-// MetadataEnricher allows caller-specific metadata augmentation before persistence.
 type MetadataEnricher func(cfg *ResolvedWebhookConfig, event *types.InternalEvent)
 
-// ResolvedWebhookConfig contains the subset of webhook configuration required by the writer.
 type ResolvedWebhookConfig struct {
 	DeliveryURL         string
 	ReceivedURL         string
@@ -49,9 +45,9 @@ type ResolvedWebhookConfig struct {
 	ConnectedURL        string
 	NotifySentByMe      bool
 	StoreJID            *string
+	ClientToken         string
 }
 
-// NewTransactionalWriter constructs a TransactionalWriter.
 func NewTransactionalWriter(
 	ctx context.Context,
 	pool *pgxpool.Pool,
@@ -78,8 +74,6 @@ func NewTransactionalWriter(
 	}
 }
 
-// WriteEvents persists the provided internal events. Events that do not have a
-// destination webhook configured are skipped gracefully.
 func (w *TransactionalWriter) WriteEvents(ctx context.Context, events []*types.InternalEvent) error {
 	if len(events) == 0 {
 		return nil
@@ -93,7 +87,6 @@ func (w *TransactionalWriter) WriteEvents(ctx context.Context, events []*types.I
 		return fmt.Errorf("resolve webhook config %s: %w", instanceID, err)
 	}
 
-	// Begin transaction scope to keep behaviour similar to previous implementation.
 	tx, err := w.pool.Begin(ctx)
 	if err != nil {
 		return fmt.Errorf("begin transaction: %w", err)
@@ -114,10 +107,13 @@ func (w *TransactionalWriter) WriteEvents(ctx context.Context, events []*types.I
 			w.metadataEnricher(resolvedConfig, internalEvent)
 		}
 
-		// Determine webhook destination.
 		transportConfig, shouldDeliver := w.buildTransportConfig(internalEvent, resolvedConfig)
 		if !shouldDeliver {
 			skippedCount++
+			w.log.WarnContext(ctx, "skipping event without webhook destination",
+				slog.String("instance_id", instanceID.String()),
+				slog.String("event_id", internalEvent.EventID.String()),
+				slog.String("event_type", internalEvent.EventType))
 			w.metrics.EventsInserted.WithLabelValues(
 				instanceID.String(),
 				internalEvent.EventType,
@@ -257,7 +253,6 @@ func (w *TransactionalWriter) WriteEvents(ctx context.Context, events []*types.I
 	return nil
 }
 
-// buildTransportConfig returns a JSON encoded transport configuration for the event.
 func (w *TransactionalWriter) buildTransportConfig(event *types.InternalEvent, cfg *ResolvedWebhookConfig) (json.RawMessage, bool) {
 	if cfg == nil {
 		return nil, false
@@ -275,6 +270,12 @@ func (w *TransactionalWriter) buildTransportConfig(event *types.InternalEvent, c
 	}{
 		URL:  url,
 		Type: category,
+	}
+
+	if cfg.ClientToken != "" {
+		config.Headers = map[string]string{
+			"Client-Token": cfg.ClientToken,
+		}
 	}
 
 	raw, err := json.Marshal(config)

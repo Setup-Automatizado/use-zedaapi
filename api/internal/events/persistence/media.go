@@ -14,7 +14,6 @@ var (
 	ErrMediaNotFound = errors.New("media metadata not found")
 )
 
-// MediaDownloadStatus represents the status of media download
 type MediaDownloadStatus string
 
 const (
@@ -25,7 +24,6 @@ const (
 	MediaStatusCompleted   MediaDownloadStatus = "completed"
 )
 
-// MediaType represents the type of media
 type MediaType string
 
 const (
@@ -37,7 +35,6 @@ const (
 	MediaTypeVoice    MediaType = "voice"
 )
 
-// S3URLType represents the type of S3 URL
 type S3URLType string
 
 const (
@@ -46,7 +43,6 @@ const (
 	S3URLCDN       S3URLType = "cdn"
 )
 
-// StorageType represents where media is stored
 type StorageType string
 
 const (
@@ -55,103 +51,83 @@ const (
 	StorageTypeNull  StorageType = "null"
 )
 
-// MediaMetadata represents a media metadata record
 type MediaMetadata struct {
-	ID                   int64
-	EventID              uuid.UUID
-	InstanceID           uuid.UUID
-	MediaKey             string
-	FileSHA256           *string
-	FileEncSHA256        *string
-	DirectPath           string
-	MediaType            MediaType
-	MimeType             *string
-	FileLength           *int64
-	DownloadStatus       MediaDownloadStatus
-	DownloadAttempts     int
-	DownloadStartedAt    *time.Time
-	DownloadedAt         *time.Time
-	DownloadDurationMS   *int
-	DownloadedSizeBytes  *int64
-	DownloadError        *string
-	S3Bucket             *string
-	S3Key                *string
-	S3URL                *string
-	S3URLType            S3URLType
-	URLExpiresAt         *time.Time
-	UploadStartedAt      *time.Time
-	UploadedAt           *time.Time
-	UploadDurationMS     *int
-	UploadError          *string
-	ProcessingWorkerID   *string
-	ProcessingStartedAt  *time.Time
-	CompletedAt          *time.Time
-	NextRetryAt          *time.Time
-	MaxRetries           int
-	StorageType          StorageType
-	FallbackAttempted    bool
-	FallbackError        *string
-	CreatedAt            time.Time
-	UpdatedAt            time.Time
+	ID                  int64
+	EventID             uuid.UUID
+	InstanceID          uuid.UUID
+	MediaKey            string
+	FileSHA256          *string
+	FileEncSHA256       *string
+	DirectPath          string
+	MediaType           MediaType
+	MimeType            *string
+	FileLength          *int64
+	DownloadStatus      MediaDownloadStatus
+	DownloadAttempts    int
+	DownloadStartedAt   *time.Time
+	DownloadedAt        *time.Time
+	DownloadDurationMS  *int
+	DownloadedSizeBytes *int64
+	DownloadError       *string
+	S3Bucket            *string
+	S3Key               *string
+	S3URL               *string
+	S3URLType           S3URLType
+	URLExpiresAt        *time.Time
+	UploadStartedAt     *time.Time
+	UploadedAt          *time.Time
+	UploadDurationMS    *int
+	UploadError         *string
+	ProcessingWorkerID  *string
+	ProcessingStartedAt *time.Time
+	CompletedAt         *time.Time
+	NextRetryAt         *time.Time
+	MaxRetries          int
+	StorageType         StorageType
+	FallbackAttempted   bool
+	FallbackError       *string
+	CreatedAt           time.Time
+	UpdatedAt           time.Time
 }
 
-// MediaRepository defines operations for media_metadata table
 type MediaRepository interface {
-	// InsertMedia creates a new media metadata record
 	InsertMedia(ctx context.Context, media *MediaMetadata) error
 
-	// PollPendingDownloads retrieves media pending download
 	PollPendingDownloads(ctx context.Context, limit int) ([]*MediaMetadata, error)
 
-	// UpdateDownloadStatus updates download status and related fields
 	UpdateDownloadStatus(ctx context.Context, eventID uuid.UUID, status MediaDownloadStatus, attempts int, nextRetry *time.Time, downloadError *string) error
 
-	// UpdateDownloadComplete marks download as complete with metrics
 	UpdateDownloadComplete(ctx context.Context, eventID uuid.UUID, durationMS int, sizeBytes int64) error
 
-	// UpdateUploadInfo updates S3 upload information
 	UpdateUploadInfo(ctx context.Context, eventID uuid.UUID, bucket, key, url string, urlType S3URLType, expiresAt *time.Time) error
 
-	// UpdateUploadInfoWithStorage updates upload information with storage type
 	UpdateUploadInfoWithStorage(ctx context.Context, eventID uuid.UUID, bucket, key, url string, urlType S3URLType, storageType StorageType, expiresAt *time.Time) error
 
-	// UpdateFallbackStatus updates fallback attempt status
 	UpdateFallbackStatus(ctx context.Context, eventID uuid.UUID, attempted bool, fallbackError *string) error
 
-	// UpdateUploadComplete marks upload as complete with metrics
 	UpdateUploadComplete(ctx context.Context, eventID uuid.UUID, durationMS int) error
 
-	// MarkComplete marks entire media processing as complete
 	MarkComplete(ctx context.Context, eventID uuid.UUID) error
 
-	// GetByEventID retrieves media metadata by event ID
 	GetByEventID(ctx context.Context, eventID uuid.UUID) (*MediaMetadata, error)
 
-	// GetByInstanceID retrieves all media for an instance
 	GetByInstanceID(ctx context.Context, instanceID uuid.UUID, limit, offset int) ([]*MediaMetadata, error)
 
-	// CountPendingByInstance counts pending media downloads for an instance
 	CountPendingByInstance(ctx context.Context, instanceID uuid.UUID) (int, error)
 
-	// CountFailedByInstance counts permanently failed media for an instance
 	CountFailedByInstance(ctx context.Context, instanceID uuid.UUID) (int, error)
 
-	// GetMediaTypeStats returns statistics by media type
 	GetMediaTypeStats(ctx context.Context, since time.Time) (map[MediaType]int, error)
 
-	// AcquireForProcessing attempts to acquire media for processing by a worker
 	AcquireForProcessing(ctx context.Context, eventID uuid.UUID, workerID string) (bool, error)
 
-	// ReleaseFromProcessing releases media from processing (on worker failure)
 	ReleaseFromProcessing(ctx context.Context, eventID uuid.UUID, workerID string) error
 }
 
-// mediaRepository implements MediaRepository using pgx
 type mediaRepository struct {
 	pool *pgxpool.Pool
 }
 
-// NewMediaRepository creates a new MediaRepository
 func NewMediaRepository(pool *pgxpool.Pool) MediaRepository {
 	return &mediaRepository{pool: pool}
 }

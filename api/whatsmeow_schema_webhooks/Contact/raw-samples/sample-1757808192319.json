@@ -1,0 +1,32 @@
+{
+  "headers": {
+    "host": "185.245.182.69:3000",
+    "user-agent": "ZuckZapGo-Webhook/1.0",
+    "content-length": "479",
+    "accept": "application/json",
+    "content-type": "application/json",
+    "accept-encoding": "gzip"
+  },
+  "body": {
+    "baseURL": "https://api.zuckzapgo.com",
+    "data": {
+      "event": {
+        "JID": "5511933434718@s.whatsapp.net",
+        "Timestamp": "2025-09-13T21:03:01.251-03:00",
+        "Action": {
+          "fullName": "Nearx",
+          "lidJID": "236103445520498@lid",
+          "saveOnPrimaryAddressbook": true
+        },
+        "FromFullSync": false
+      },
+      "type": "Contact"
+    },
+    "eventType": "Contact",
+    "timestamp": 1757808182,
+    "token": "!!!qYWdJ61zk3i1AvTfXhzE!!!",
+    "userID": "80402f2ab5855b2132cf45d6b365a62c",
+    "userJID": "5521979232690:36@s.whatsapp.net",
+    "userName": "setupautomatizado-hibrido"
+  }
+}

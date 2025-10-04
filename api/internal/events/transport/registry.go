@@ -8,8 +8,6 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/events/transport/http"
 )
 
-// httpTransportWrapper wraps http.HTTPTransport to implement Transport interface
-// This avoids import cycle
 type httpTransportWrapper struct {
 	impl *http.HTTPTransport
 }
@@ -53,14 +51,12 @@ func (w *httpTransportWrapper) Close() error {
 	return w.impl.Close()
 }
 
-// Registry manages transport instances and provides factory methods
 type Registry struct {
 	mu         sync.RWMutex
 	transports map[TransportType]Transport
 	httpConfig *http.Config
 }
 
-// NewRegistry creates a new transport registry
 func NewRegistry(httpConfig *http.Config) *Registry {
 	return &Registry{
 		transports: make(map[TransportType]Transport),
@@ -68,8 +64,6 @@ func NewRegistry(httpConfig *http.Config) *Registry {
 	}
 }
 
-// GetTransport returns a transport instance for the given type
-// Creates the transport if it doesn't exist (singleton pattern)
 func (r *Registry) GetTransport(transportType TransportType) (Transport, error) {
 	r.mu.RLock()
 	if transport, exists := r.transports[transportType]; exists {
@@ -78,11 +72,9 @@ func (r *Registry) GetTransport(transportType TransportType) (Transport, error) 
 	}
 	r.mu.RUnlock()
 
-	// Create transport if it doesn't exist
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	// Double-check after acquiring write lock
 	if transport, exists := r.transports[transportType]; exists {
 		return transport, nil
 	}
@@ -96,7 +88,6 @@ func (r *Registry) GetTransport(transportType TransportType) (Transport, error) 
 	return transport, nil
 }
 
-// createTransport creates a new transport instance based on type
 func (r *Registry) createTransport(transportType TransportType) (Transport, error) {
 	switch transportType {
 	case TransportTypeHTTP:
@@ -124,7 +115,6 @@ func (r *Registry) createTransport(transportType TransportType) (Transport, erro
 	}
 }
 
-// Close closes all registered transports
 func (r *Registry) Close() error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -137,7 +127,6 @@ func (r *Registry) Close() error {
 		}
 	}
 
-	// Clear the map
 	r.transports = make(map[TransportType]Transport)
 
 	if len(closeErrors) > 0 {
@@ -147,8 +136,6 @@ func (r *Registry) Close() error {
 	return nil
 }
 
-// RegisterTransport allows manual registration of a transport instance
-// Useful for testing or custom transport implementations
 func (r *Registry) RegisterTransport(transportType TransportType, transport Transport) {
 	r.mu.Lock()
 	defer r.mu.Unlock()

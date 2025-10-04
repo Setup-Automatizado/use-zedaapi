@@ -15,7 +15,6 @@ var (
 	ErrDLQEventNotFound = errors.New("dlq event not found")
 )
 
-// DLQReprocessStatus represents the reprocessing status of a DLQ event
 type DLQReprocessStatus string
 
 const (
@@ -26,70 +25,57 @@ const (
 	DLQReprocessDiscarded  DLQReprocessStatus = "discarded"
 )
 
-// DLQEvent represents an event in the event_dlq table
 type DLQEvent struct {
-	ID                    int64
-	InstanceID            uuid.UUID
-	EventID               uuid.UUID
-	EventType             string
-	SourceLib             string
-	OriginalPayload       json.RawMessage
-	OriginalMetadata      json.RawMessage
+	ID                     int64
+	InstanceID             uuid.UUID
+	EventID                uuid.UUID
+	EventType              string
+	SourceLib              string
+	OriginalPayload        json.RawMessage
+	OriginalMetadata       json.RawMessage
 	OriginalSequenceNumber int64
-	FailureReason         string
-	LastError             string
-	TotalAttempts         int
-	AttemptHistory        json.RawMessage
-	TransportType         TransportType
-	TransportConfig       json.RawMessage
-	LastTransportResponse json.RawMessage
-	FirstAttemptAt        time.Time
-	LastAttemptAt         time.Time
-	MovedToDLQAt          time.Time
-	ReprocessStatus       DLQReprocessStatus
-	ReprocessedAt         *time.Time
-	ReprocessResult       *string
-	ReprocessAttempts     int
-	CreatedAt             time.Time
-	UpdatedAt             time.Time
+	FailureReason          string
+	LastError              string
+	TotalAttempts          int
+	AttemptHistory         json.RawMessage
+	TransportType          TransportType
+	TransportConfig        json.RawMessage
+	LastTransportResponse  json.RawMessage
+	FirstAttemptAt         time.Time
+	LastAttemptAt          time.Time
+	MovedToDLQAt           time.Time
+	ReprocessStatus        DLQReprocessStatus
+	ReprocessedAt          *time.Time
+	ReprocessResult        *string
+	ReprocessAttempts      int
+	CreatedAt              time.Time
+	UpdatedAt              time.Time
 }
 
-// DLQRepository defines operations for event_dlq table
 type DLQRepository interface {
-	// InsertFromOutbox moves a failed event from outbox to DLQ
 	InsertFromOutbox(ctx context.Context, event *OutboxEvent, failureReason string, attemptHistory json.RawMessage) error
 
-	// GetPendingReprocessEvents retrieves events pending reprocessing
 	GetPendingReprocessEvents(ctx context.Context, limit int) ([]*DLQEvent, error)
 
-	// UpdateReprocessStatus updates the reprocessing status
 	UpdateReprocessStatus(ctx context.Context, eventID uuid.UUID, status DLQReprocessStatus, result *string) error
 
-	// GetEventByID retrieves a single DLQ event by ID
 	GetEventByID(ctx context.Context, eventID uuid.UUID) (*DLQEvent, error)
 
-	// GetByInstanceID retrieves all DLQ events for an instance
 	GetByInstanceID(ctx context.Context, instanceID uuid.UUID, limit, offset int) ([]*DLQEvent, error)
 
-	// CountByInstanceID counts DLQ events for an instance
 	CountByInstanceID(ctx context.Context, instanceID uuid.UUID) (int, error)
 
-	// GetFailureStats returns failure statistics by event type
 	GetFailureStats(ctx context.Context, since time.Time) (map[string]int, error)
 
-	// MarkDiscarded marks an event as discarded (no reprocessing)
 	MarkDiscarded(ctx context.Context, eventID uuid.UUID) error
 
-	// DeleteOldEvents removes DLQ events older than retention period
 	DeleteOldEvents(ctx context.Context, olderThan time.Time) (int64, error)
 }
 
-// dlqRepository implements DLQRepository using pgx
 type dlqRepository struct {
 	pool *pgxpool.Pool
 }
 
-// NewDLQRepository creates a new DLQRepository
 func NewDLQRepository(pool *pgxpool.Pool) DLQRepository {
 	return &dlqRepository{pool: pool}
 }

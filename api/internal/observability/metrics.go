@@ -11,77 +11,61 @@ const (
 )
 
 type Metrics struct {
-	HTTPRequests *prometheus.CounterVec
-	HTTPDuration *prometheus.HistogramVec
-	WebhookQueue prometheus.Gauge
-
-	LockAcquisitions           *prometheus.CounterVec
-	LockReacquisitionAttempts  *prometheus.CounterVec
-	LockReacquisitionFallbacks *prometheus.CounterVec
-	CircuitBreakerState        prometheus.Gauge
-	SplitBrainDetected         prometheus.Counter
-	SplitBrainInvalidLocks     *prometheus.CounterVec
-
-	HealthChecks *prometheus.CounterVec
-
-	// Event system metrics
-	EventsCaptured           *prometheus.CounterVec
-	EventsBuffered           prometheus.Gauge
-	EventsInserted           *prometheus.CounterVec
-	EventsProcessed          *prometheus.CounterVec
-	EventProcessingDuration  *prometheus.HistogramVec
-	EventRetries             *prometheus.CounterVec
-	EventsFailed             *prometheus.CounterVec
-	EventsDelivered          *prometheus.CounterVec
-	EventDeliveryDuration    *prometheus.HistogramVec
-	EventSequenceGaps        *prometheus.GaugeVec
-	EventOutboxBacklog       *prometheus.GaugeVec
-
-	// DLQ metrics
-	DLQEventsTotal           *prometheus.CounterVec
-	DLQReprocessAttempts     *prometheus.CounterVec
-	DLQReprocessSuccess      *prometheus.CounterVec
-	DLQBacklog               prometheus.Gauge
-
-	// Media processing metrics
-	MediaDownloadsTotal          *prometheus.CounterVec
-	MediaDownloadDuration        *prometheus.HistogramVec
-	MediaDownloadSize            *prometheus.HistogramVec
-	MediaDownloadErrors          *prometheus.CounterVec
-	MediaUploadsTotal            *prometheus.CounterVec
-	MediaUploadDuration          *prometheus.HistogramVec
-	MediaUploadAttempts          *prometheus.CounterVec
-	MediaUploadErrors            *prometheus.CounterVec
-	MediaUploadSizeBytes         *prometheus.CounterVec
-	MediaPresignedURLGenerated   prometheus.Counter
-	MediaDeleteAttempts          *prometheus.CounterVec
-	MediaFailures                *prometheus.CounterVec
-	MediaBacklog                 prometheus.Gauge
-
-	// Media fallback & local storage metrics
-	MediaFallbackAttempts        *prometheus.CounterVec
-	MediaFallbackSuccess         *prometheus.CounterVec
-	MediaFallbackFailure         *prometheus.CounterVec
-	MediaLocalStorageSize        prometheus.Gauge
-	MediaLocalStorageFiles       prometheus.Gauge
-	MediaCleanupTotal            *prometheus.CounterVec
-	MediaServeRequests           *prometheus.CounterVec
-	MediaServeBytes              *prometheus.CounterVec
-
-	// Transport metrics
-	TransportDeliveries      *prometheus.CounterVec
-	TransportDuration        *prometheus.HistogramVec
-	TransportErrors          *prometheus.CounterVec
-	TransportRetries         *prometheus.CounterVec
-
-	// Circuit breaker per instance
+	HTTPRequests                   *prometheus.CounterVec
+	HTTPDuration                   *prometheus.HistogramVec
+	WebhookQueue                   prometheus.Gauge
+	LockAcquisitions               *prometheus.CounterVec
+	LockReacquisitionAttempts      *prometheus.CounterVec
+	LockReacquisitionFallbacks     *prometheus.CounterVec
+	CircuitBreakerState            prometheus.Gauge
+	SplitBrainDetected             prometheus.Counter
+	SplitBrainInvalidLocks         *prometheus.CounterVec
+	HealthChecks                   *prometheus.CounterVec
+	EventsCaptured                 *prometheus.CounterVec
+	EventsBuffered                 prometheus.Gauge
+	EventsInserted                 *prometheus.CounterVec
+	EventsProcessed                *prometheus.CounterVec
+	EventProcessingDuration        *prometheus.HistogramVec
+	EventRetries                   *prometheus.CounterVec
+	EventsFailed                   *prometheus.CounterVec
+	EventsDelivered                *prometheus.CounterVec
+	EventDeliveryDuration          *prometheus.HistogramVec
+	EventSequenceGaps              *prometheus.GaugeVec
+	EventOutboxBacklog             *prometheus.GaugeVec
+	DLQEventsTotal                 *prometheus.CounterVec
+	DLQReprocessAttempts           *prometheus.CounterVec
+	DLQReprocessSuccess            *prometheus.CounterVec
+	DLQBacklog                     prometheus.Gauge
+	MediaDownloadsTotal            *prometheus.CounterVec
+	MediaDownloadDuration          *prometheus.HistogramVec
+	MediaDownloadSize              *prometheus.HistogramVec
+	MediaDownloadErrors            *prometheus.CounterVec
+	MediaUploadsTotal              *prometheus.CounterVec
+	MediaUploadDuration            *prometheus.HistogramVec
+	MediaUploadAttempts            *prometheus.CounterVec
+	MediaUploadErrors              *prometheus.CounterVec
+	MediaUploadSizeBytes           *prometheus.CounterVec
+	MediaPresignedURLGenerated     prometheus.Counter
+	MediaDeleteAttempts            *prometheus.CounterVec
+	MediaFailures                  *prometheus.CounterVec
+	MediaBacklog                   prometheus.Gauge
+	MediaFallbackAttempts          *prometheus.CounterVec
+	MediaFallbackSuccess           *prometheus.CounterVec
+	MediaFallbackFailure           *prometheus.CounterVec
+	MediaLocalStorageSize          prometheus.Gauge
+	MediaLocalStorageFiles         prometheus.Gauge
+	MediaCleanupTotal              *prometheus.CounterVec
+	MediaServeRequests             *prometheus.CounterVec
+	MediaServeBytes                *prometheus.CounterVec
+	TransportDeliveries            *prometheus.CounterVec
+	TransportDuration              *prometheus.HistogramVec
+	TransportErrors                *prometheus.CounterVec
+	TransportRetries               *prometheus.CounterVec
 	CircuitBreakerStatePerInstance *prometheus.GaugeVec
 	CircuitBreakerTransitions      *prometheus.CounterVec
-
-	// Worker pool metrics
-	WorkersActive            *prometheus.GaugeVec
-	WorkerTaskDuration       *prometheus.HistogramVec
-	WorkerErrors             *prometheus.CounterVec
+	WorkersActive                  *prometheus.GaugeVec
+	WorkerTaskDuration             *prometheus.HistogramVec
+	WorkerErrors                   *prometheus.CounterVec
 }
 
 func NewMetrics(namespace string, reg prometheus.Registerer) *Metrics {
@@ -145,7 +129,6 @@ func NewMetrics(namespace string, reg prometheus.Registerer) *Metrics {
 		Help:      "Total health check attempts, labeled by component and status.",
 	}, []string{"component", "status"})
 
-	// Event system metrics
 	eventsCaptured := prometheus.NewCounterVec(prometheus.CounterOpts{
 		Namespace: namespace,
 		Name:      "events_captured_total",
@@ -214,7 +197,6 @@ func NewMetrics(namespace string, reg prometheus.Registerer) *Metrics {
 		Help:      "Number of pending events in outbox per instance.",
 	}, []string{"instance_id"})
 
-	// DLQ metrics
 	dlqEventsTotal := prometheus.NewCounterVec(prometheus.CounterOpts{
 		Namespace: namespace,
 		Name:      "dlq_events_total",
@@ -239,7 +221,6 @@ func NewMetrics(namespace string, reg prometheus.Registerer) *Metrics {
 		Help:      "Number of events currently in DLQ.",
 	})
 
-	// Media processing metrics
 	mediaDownloadsTotal := prometheus.NewCounterVec(prometheus.CounterOpts{
 		Namespace: namespace,
 		Name:      "media_downloads_total",
@@ -291,7 +272,6 @@ func NewMetrics(namespace string, reg prometheus.Registerer) *Metrics {
 		Help:      "Number of media items pending download.",
 	})
 
-	// Media fallback & local storage metrics
 	mediaFallbackAttempts := prometheus.NewCounterVec(prometheus.CounterOpts{
 		Namespace: namespace,
 		Name:      "media_fallback_attempts_total",
@@ -370,7 +350,6 @@ func NewMetrics(namespace string, reg prometheus.Registerer) *Metrics {
 		Help:      "Total S3 deletion attempts, labeled by status (success/failure).",
 	}, []string{"status"})
 
-	// Transport metrics
 	transportDeliveries := prometheus.NewCounterVec(prometheus.CounterOpts{
 		Namespace: namespace,
 		Name:      "transport_deliveries_total",
@@ -396,7 +375,6 @@ func NewMetrics(namespace string, reg prometheus.Registerer) *Metrics {
 		Help:      "Total transport retry attempts, labeled by instance_id, transport_type, and attempt.",
 	}, []string{"instance_id", "transport_type", "attempt"})
 
-	// Circuit breaker per instance
 	circuitBreakerStatePerInstance := prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: namespace,
 		Name:      "circuit_breaker_state_per_instance",
@@ -409,7 +387,6 @@ func NewMetrics(namespace string, reg prometheus.Registerer) *Metrics {
 		Help:      "Total circuit breaker state transitions, labeled by instance_id, from_state, and to_state.",
 	}, []string{"instance_id", "from_state", "to_state"})
 
-	// Worker pool metrics
 	workersActive := prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Namespace: namespace,
 		Name:      "workers_active",
@@ -434,100 +411,77 @@ func NewMetrics(namespace string, reg prometheus.Registerer) *Metrics {
 		lockAcquisitions, lockReacquisitionAttempts, lockReacquisitionFallbacks,
 		circuitBreakerState, splitBrainDetected, splitBrainInvalidLocks,
 		healthChecks,
-		// Event system metrics
 		eventsCaptured, eventsBuffered, eventsInserted, eventsProcessed,
 		eventProcessingDuration, eventRetries, eventsFailed, eventsDelivered,
 		eventDeliveryDuration, eventSequenceGaps, eventOutboxBacklog,
-		// DLQ metrics
 		dlqEventsTotal, dlqReprocessAttempts, dlqReprocessSuccess, dlqBacklog,
-		// Media metrics
 		mediaDownloadsTotal, mediaDownloadDuration, mediaDownloadSize, mediaDownloadErrors,
 		mediaUploadsTotal, mediaUploadDuration, mediaUploadAttempts,
 		mediaUploadErrors, mediaUploadSizeBytes, mediaPresignedURLGenerated,
 		mediaDeleteAttempts, mediaFailures, mediaBacklog,
-		// Media fallback & local storage metrics
 		mediaFallbackAttempts, mediaFallbackSuccess, mediaFallbackFailure,
 		mediaLocalStorageSize, mediaLocalStorageFiles, mediaCleanupTotal,
 		mediaServeRequests, mediaServeBytes,
-		// Transport metrics
 		transportDeliveries, transportDuration, transportErrors, transportRetries,
-		// Circuit breaker per instance
 		circuitBreakerStatePerInstance, circuitBreakerTransitions,
-		// Worker pool metrics
 		workersActive, workerTaskDuration, workerErrors,
 	)
 
 	return &Metrics{
-		HTTPRequests: requests,
-		HTTPDuration: duration,
-		WebhookQueue: queue,
-
-		LockAcquisitions:           lockAcquisitions,
-		LockReacquisitionAttempts:  lockReacquisitionAttempts,
-		LockReacquisitionFallbacks: lockReacquisitionFallbacks,
-		CircuitBreakerState:        circuitBreakerState,
-		SplitBrainDetected:         splitBrainDetected,
-		SplitBrainInvalidLocks:     splitBrainInvalidLocks,
-
-		HealthChecks: healthChecks,
-
-		// Event system metrics
-		EventsCaptured:          eventsCaptured,
-		EventsBuffered:          eventsBuffered,
-		EventsInserted:          eventsInserted,
-		EventsProcessed:         eventsProcessed,
-		EventProcessingDuration: eventProcessingDuration,
-		EventRetries:            eventRetries,
-		EventsFailed:            eventsFailed,
-		EventsDelivered:         eventsDelivered,
-		EventDeliveryDuration:   eventDeliveryDuration,
-		EventSequenceGaps:       eventSequenceGaps,
-		EventOutboxBacklog:      eventOutboxBacklog,
-
-		// DLQ metrics
-		DLQEventsTotal:       dlqEventsTotal,
-		DLQReprocessAttempts: dlqReprocessAttempts,
-		DLQReprocessSuccess:  dlqReprocessSuccess,
-		DLQBacklog:           dlqBacklog,
-
-		// Media processing metrics
-		MediaDownloadsTotal:        mediaDownloadsTotal,
-		MediaDownloadDuration:      mediaDownloadDuration,
-		MediaDownloadSize:          mediaDownloadSize,
-		MediaDownloadErrors:        mediaDownloadErrors,
-		MediaUploadsTotal:          mediaUploadsTotal,
-		MediaUploadDuration:        mediaUploadDuration,
-		MediaUploadAttempts:        mediaUploadAttempts,
-		MediaUploadErrors:          mediaUploadErrors,
-		MediaUploadSizeBytes:       mediaUploadSizeBytes,
-		MediaPresignedURLGenerated: mediaPresignedURLGenerated,
-		MediaDeleteAttempts:        mediaDeleteAttempts,
-		MediaFailures:              mediaFailures,
-		MediaBacklog:               mediaBacklog,
-
-		// Media fallback & local storage metrics
-		MediaFallbackAttempts:  mediaFallbackAttempts,
-		MediaFallbackSuccess:   mediaFallbackSuccess,
-		MediaFallbackFailure:   mediaFallbackFailure,
-		MediaLocalStorageSize:  mediaLocalStorageSize,
-		MediaLocalStorageFiles: mediaLocalStorageFiles,
-		MediaCleanupTotal:      mediaCleanupTotal,
-		MediaServeRequests:     mediaServeRequests,
-		MediaServeBytes:        mediaServeBytes,
-
-		// Transport metrics
-		TransportDeliveries: transportDeliveries,
-		TransportDuration:   transportDuration,
-		TransportErrors:     transportErrors,
-		TransportRetries:    transportRetries,
-
-		// Circuit breaker per instance
+		HTTPRequests:                   requests,
+		HTTPDuration:                   duration,
+		WebhookQueue:                   queue,
+		LockAcquisitions:               lockAcquisitions,
+		LockReacquisitionAttempts:      lockReacquisitionAttempts,
+		LockReacquisitionFallbacks:     lockReacquisitionFallbacks,
+		CircuitBreakerState:            circuitBreakerState,
+		SplitBrainDetected:             splitBrainDetected,
+		SplitBrainInvalidLocks:         splitBrainInvalidLocks,
+		HealthChecks:                   healthChecks,
+		EventsCaptured:                 eventsCaptured,
+		EventsBuffered:                 eventsBuffered,
+		EventsInserted:                 eventsInserted,
+		EventsProcessed:                eventsProcessed,
+		EventProcessingDuration:        eventProcessingDuration,
+		EventRetries:                   eventRetries,
+		EventsFailed:                   eventsFailed,
+		EventsDelivered:                eventsDelivered,
+		EventDeliveryDuration:          eventDeliveryDuration,
+		EventSequenceGaps:              eventSequenceGaps,
+		EventOutboxBacklog:             eventOutboxBacklog,
+		DLQEventsTotal:                 dlqEventsTotal,
+		DLQReprocessAttempts:           dlqReprocessAttempts,
+		DLQReprocessSuccess:            dlqReprocessSuccess,
+		DLQBacklog:                     dlqBacklog,
+		MediaDownloadsTotal:            mediaDownloadsTotal,
+		MediaDownloadDuration:          mediaDownloadDuration,
+		MediaDownloadSize:              mediaDownloadSize,
+		MediaDownloadErrors:            mediaDownloadErrors,
+		MediaUploadsTotal:              mediaUploadsTotal,
+		MediaUploadDuration:            mediaUploadDuration,
+		MediaUploadAttempts:            mediaUploadAttempts,
+		MediaUploadErrors:              mediaUploadErrors,
+		MediaUploadSizeBytes:           mediaUploadSizeBytes,
+		MediaPresignedURLGenerated:     mediaPresignedURLGenerated,
+		MediaDeleteAttempts:            mediaDeleteAttempts,
+		MediaFailures:                  mediaFailures,
+		MediaBacklog:                   mediaBacklog,
+		MediaFallbackAttempts:          mediaFallbackAttempts,
+		MediaFallbackSuccess:           mediaFallbackSuccess,
+		MediaFallbackFailure:           mediaFallbackFailure,
+		MediaLocalStorageSize:          mediaLocalStorageSize,
+		MediaLocalStorageFiles:         mediaLocalStorageFiles,
+		MediaCleanupTotal:              mediaCleanupTotal,
+		MediaServeRequests:             mediaServeRequests,
+		MediaServeBytes:                mediaServeBytes,
+		TransportDeliveries:            transportDeliveries,
+		TransportDuration:              transportDuration,
+		TransportErrors:                transportErrors,
+		TransportRetries:               transportRetries,
 		CircuitBreakerStatePerInstance: circuitBreakerStatePerInstance,
 		CircuitBreakerTransitions:      circuitBreakerTransitions,
-
-		// Worker pool metrics
-		WorkersActive:      workersActive,
-		WorkerTaskDuration: workerTaskDuration,
-		WorkerErrors:       workerErrors,
+		WorkersActive:                  workersActive,
+		WorkerTaskDuration:             workerTaskDuration,
+		WorkerErrors:                   workerErrors,
 	}
 }
