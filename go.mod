@@ -19,12 +19,12 @@ require (
 	github.com/rs/zerolog v1.34.0
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/stretchr/testify v1.11.1
-	go.mau.fi/libsignal v0.2.0
+	go.mau.fi/libsignal v0.2.1-0.20251004173110-6e0a3f2435ed
 	go.mau.fi/util v0.9.1
 	golang.org/x/crypto v0.42.0
 	golang.org/x/net v0.44.0
-	google.golang.org/protobuf v1.36.9
 	sigs.k8s.io/yaml v1.6.0
+	google.golang.org/protobuf v1.36.10
 )
 
 require (

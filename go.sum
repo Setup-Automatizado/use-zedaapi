@@ -131,8 +131,8 @@ github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
 github.com/vektah/gqlparser/v2 v2.5.27 h1:RHPD3JOplpk5mP5JGX8RKZkt2/Vwj/PZv0HxTdwFp0s=
 github.com/vektah/gqlparser/v2 v2.5.27/go.mod h1:D1/VCZtV3LPnQrcPBeR/q5jkSQIPti0uYCP/RI0gIeo=
-go.mau.fi/libsignal v0.2.0 h1:oRXj3OHhEJq51BFEM8/50UZblmWiTYH93hsNTPcbk90=
-go.mau.fi/libsignal v0.2.0/go.mod h1:tvjoDsMejgT38CXTXwqaYu8itBiY8O2Mb6biWvZBb9k=
+go.mau.fi/libsignal v0.2.1-0.20251004173110-6e0a3f2435ed h1:f44xyYgZBCEic3OiKY4eYfDA2b3kBB/LlgVha4NpjRs=
+go.mau.fi/libsignal v0.2.1-0.20251004173110-6e0a3f2435ed/go.mod h1:iVvjrHyfQqWajOUaMEsIfo3IqgVMrhWcPiiEzk7NgoU=
 go.mau.fi/util v0.9.1 h1:A+XKHRsjKkFi2qOm4RriR1HqY2hoOXNS3WFHaC89r2Y=
 go.mau.fi/util v0.9.1/go.mod h1:M0bM9SyaOWJniaHs9hxEzz91r5ql6gYq6o1q5O1SsjQ=
 go.uber.org/goleak v1.3.0 h1:2K3zAYmnTNqV73imy9J1T3WC+gmCePx2hEGkimedGto=
