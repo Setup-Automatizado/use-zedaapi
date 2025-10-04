@@ -1150,18 +1150,14 @@ func (r *ClientRegistry) wrapEventHandler(instanceID uuid.UUID) func(evt interfa
 			ctx = eventctx.WithContactProvider(ctx, provider)
 		}
 
-		// CRITICAL: Forward ALL events to event system FIRST
-		// This ensures no events are lost regardless of lifecycle processing
 		if r.eventIntegration != nil {
 			eventCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 			r.eventIntegration.WrapEventHandler(eventCtx, instanceID, evt)
 			cancel()
 		}
 
-		// Then handle specific lifecycle events
 		switch e := evt.(type) {
 		case *events.Connected:
-			// Register instance with event system
 			if r.eventIntegration != nil {
 				if err := r.eventIntegration.OnInstanceConnect(ctx, instanceID); err != nil {
 					r.log.Error("failed to register instance with event system",
@@ -1170,7 +1166,6 @@ func (r *ClientRegistry) wrapEventHandler(instanceID uuid.UUID) func(evt interfa
 				}
 			}
 
-			// Register instance with dispatch coordinator
 			if r.dispatchCoordinator != nil {
 				if err := r.dispatchCoordinator.RegisterInstance(ctx, instanceID); err != nil {
 					r.log.Error("failed to register instance with dispatch coordinator",
@@ -1179,7 +1174,6 @@ func (r *ClientRegistry) wrapEventHandler(instanceID uuid.UUID) func(evt interfa
 				}
 			}
 
-			// Register instance with media coordinator
 			if r.mediaCoordinator != nil {
 				r.mu.RLock()
 				state, ok := r.clients[instanceID]
@@ -1198,7 +1192,6 @@ func (r *ClientRegistry) wrapEventHandler(instanceID uuid.UUID) func(evt interfa
 				}
 			}
 
-			// Existing connected logic
 			r.mu.Lock()
 			var (
 				client       *whatsmeow.Client
@@ -1241,7 +1234,6 @@ func (r *ClientRegistry) wrapEventHandler(instanceID uuid.UUID) func(evt interfa
 			}
 
 		case *events.Disconnected:
-			// Flush buffer before disconnect
 			if r.eventIntegration != nil {
 				if err := r.eventIntegration.OnInstanceDisconnect(ctx, instanceID); err != nil {
 					r.log.Warn("failed to flush instance buffer",
@@ -1253,7 +1245,6 @@ func (r *ClientRegistry) wrapEventHandler(instanceID uuid.UUID) func(evt interfa
 			r.log.Warn("instance disconnected", slog.String("instanceId", instanceID.String()))
 
 		case *events.LoggedOut:
-			// Unregister from dispatch coordinator
 			if r.dispatchCoordinator != nil {
 				if err := r.dispatchCoordinator.UnregisterInstance(ctx, instanceID); err != nil {
 					r.log.Error("failed to unregister instance from dispatch coordinator",
@@ -1262,7 +1253,6 @@ func (r *ClientRegistry) wrapEventHandler(instanceID uuid.UUID) func(evt interfa
 				}
 			}
 
-			// Unregister from media coordinator
 			if r.mediaCoordinator != nil {
 				if err := r.mediaCoordinator.UnregisterInstance(instanceID); err != nil {
 					r.log.Error("failed to unregister instance from media coordinator",
@@ -1271,7 +1261,6 @@ func (r *ClientRegistry) wrapEventHandler(instanceID uuid.UUID) func(evt interfa
 				}
 			}
 
-			// Unregister from event system
 			if r.eventIntegration != nil {
 				if err := r.eventIntegration.OnInstanceRemove(ctx, instanceID); err != nil {
 					r.log.Error("failed to unregister instance from event system",
