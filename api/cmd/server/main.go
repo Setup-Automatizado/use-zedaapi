@@ -89,6 +89,7 @@ func (a *webhookResolverAdapter) Resolve(ctx context.Context, id uuid.UUID) (*ca
 		}
 		return *ptr
 	}
+
 	return &capture.ResolvedWebhookConfig{
 		DeliveryURL:         deref(webhook.DeliveryURL),
 		ReceivedURL:         deref(webhook.ReceivedURL),
@@ -99,6 +100,7 @@ func (a *webhookResolverAdapter) Resolve(ctx context.Context, id uuid.UUID) (*ca
 		ConnectedURL:        deref(webhook.ConnectedURL),
 		NotifySentByMe:      webhook.NotifySentByMe,
 		StoreJID:            inst.StoreJID,
+		ClientToken:         inst.ClientToken,
 	}, nil
 }
 
@@ -158,14 +160,12 @@ func main() {
 	resolver := &webhookResolverAdapter{repo: repo}
 	metadataEnricher := storeJIDEnricher()
 
-	// Initialize event orchestrator
 	eventOrchestrator, err := events.NewOrchestrator(ctx, cfg, pgPool, resolver, metadataEnricher, metrics)
 	if err != nil {
 		logger.Error("failed to create event orchestrator", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
 
-	// Create integration helper for ClientRegistry
 	eventIntegration := events.NewIntegrationHelper(ctx, eventOrchestrator)
 
 	logger.Info("event system initialized",
@@ -173,19 +173,15 @@ func main() {
 		slog.Int("batch_size", cfg.Events.BatchSize),
 	)
 
-	// Initialize dispatch system
 	outboxRepo := persistence.NewOutboxRepository(pgPool)
 	dlqRepo := persistence.NewDLQRepository(pgPool)
 
-	// Create transport registry with HTTP config
 	httpTransportConfig := transporthttp.DefaultConfig()
 	httpTransportConfig.Timeout = cfg.Events.WebhookTimeout
 	httpTransportConfig.MaxRetries = cfg.Events.WebhookMaxRetries
 	transportRegistry := transport.NewRegistry(httpTransportConfig)
 	defer transportRegistry.Close()
 
-	// Create dispatch coordinator
-	// Note: Transform pipeline is passed as nil since it's not used in processor yet (see TODO in processor.go)
 	dispatchCoordinator := dispatch.NewCoordinator(
 		&cfg,
 		pgPool,
@@ -196,7 +192,6 @@ func main() {
 		metrics,
 	)
 
-	// Start dispatch coordinator
 	if err := dispatchCoordinator.Start(ctx); err != nil {
 		logger.Error("failed to start dispatch coordinator", slog.String("error", err.Error()))
 		os.Exit(1)
@@ -212,7 +207,6 @@ func main() {
 	logger.Info("dispatch system initialized",
 		slog.Int("workers", dispatchCoordinator.GetWorkerCount()))
 
-	// Initialize media processing system
 	mediaRepo := persistence.NewMediaRepository(pgPool)
 	mediaCoordinator := media.NewMediaCoordinator(
 		&cfg,
@@ -367,27 +361,27 @@ func main() {
 
 	logger.Info("starting graceful shutdown sequence")
 
-	logger.Info("phase 0: releasing redis locks")
+	logger.Info("releasing redis locks")
 	released := registry.ReleaseAllLocks()
-	logger.Info("phase 0 complete: redis locks released", slog.Int("count", released))
+	logger.Info("redis locks released", slog.Int("count", released))
 
-	logger.Info("phase 1: disconnecting all whatsapp clients")
+	logger.Info("disconnecting all whatsapp clients")
 	disconnectCtx, disconnectCancel := context.WithTimeout(context.Background(), 10*time.Second)
 	disconnected := registry.DisconnectAll(disconnectCtx)
 	disconnectCancel()
 	if disconnected > 0 {
-		logger.Info("phase 1: disconnected all clients", slog.Int("count", disconnected))
+		logger.Info("disconnected all clients", slog.Int("count", disconnected))
 	} else {
-		logger.Info("phase 1: no active clients to disconnect")
+		logger.Info("no active clients to disconnect")
 	}
 
-	logger.Info("phase 2.5: stopping event orchestrator")
+	logger.Info("stopping event orchestrator")
 	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*time.Second)
 	eventOrchestrator.Stop(shutdownCtx)
 	shutdownCancel()
 
 	if cfg.Sentry.DSN != "" {
-		logger.Info("phase 3: flushing sentry events")
+		logger.Info("flushing sentry events")
 		sentry.Flush(5 * time.Second)
 	}
 

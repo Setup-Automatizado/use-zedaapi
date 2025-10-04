@@ -308,7 +308,7 @@ func (h *InstanceHandler) handleServiceError(ctx context.Context, w http.Respons
 		respondError(w, http.StatusConflict, "instance already paired")
 		return
 	}
-	internallogger := logging.ContextLogger(ctx, h.log)
-	internallogger.Error("service error", slog.String("error", err.Error()))
+	logger := logging.ContextLogger(ctx, h.log)
+	logger.Error("service error", slog.String("error", err.Error()))
 	respondError(w, http.StatusInternalServerError, "internal error")
 }

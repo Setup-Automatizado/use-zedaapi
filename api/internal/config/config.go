@@ -80,45 +80,38 @@ type Config struct {
 	}
 
 	Events struct {
-		// Event processing configuration
-		BufferSize            int
-		BatchSize             int
-		PollInterval          time.Duration
-		ProcessingTimeout     time.Duration
-		ShutdownGracePeriod   time.Duration
+		BufferSize          int
+		BatchSize           int
+		PollInterval        time.Duration
+		ProcessingTimeout   time.Duration
+		ShutdownGracePeriod time.Duration
 
-		// Retry configuration
-		MaxRetryAttempts      int
-		RetryDelays           []time.Duration
+		MaxRetryAttempts int
+		RetryDelays      []time.Duration
 
-		// Circuit breaker configuration
 		CircuitBreakerEnabled bool
 		CBMaxFailures         int
 		CBTimeout             time.Duration
 		CBCooldown            time.Duration
 
-		// DLQ configuration
-		DLQRetentionPeriod    time.Duration
-		DLQReprocessEnabled   bool
+		DLQRetentionPeriod  time.Duration
+		DLQReprocessEnabled bool
 
-		// Media processing configuration
-		MediaBufferSize       int
-		MediaBatchSize        int
-		MediaMaxRetries       int
-		MediaPollInterval     time.Duration
-		MediaDownloadTimeout  time.Duration
-		MediaUploadTimeout    time.Duration
-		MediaMaxFileSize      int64
-		MediaChunkSize        int64
+		MediaBufferSize      int
+		MediaBatchSize       int
+		MediaMaxRetries      int
+		MediaPollInterval    time.Duration
+		MediaDownloadTimeout time.Duration
+		MediaUploadTimeout   time.Duration
+		MediaMaxFileSize     int64
+		MediaChunkSize       int64
 
-		// Transport configuration
-		WebhookTimeout        time.Duration
-		WebhookMaxRetries     int
-		TransportBufferSize   int
+		WebhookTimeout      time.Duration
+		WebhookMaxRetries   int
+		TransportBufferSize int
 
-		// Cleanup configuration
-		DeliveredRetention    time.Duration
-		CleanupInterval       time.Duration
+		DeliveredRetention time.Duration
+		CleanupInterval    time.Duration
 	}
 }
 
@@ -220,7 +213,7 @@ func Load() (Config, error) {
 		AccessKey: os.Getenv("S3_ACCESS_KEY"),
 		SecretKey: os.Getenv("S3_SECRET_KEY"),
 		UseSSL:    parseBool(getEnv("S3_USE_SSL", "false")),
-		ACL:       getEnv("S3_ACL", ""), // Empty = use bucket policy (modern pattern)
+		ACL:       getEnv("S3_ACL", ""),
 	}
 	expiry, err := parseDuration(getEnv("S3_URL_EXPIRATION", "30d"))
 	if err != nil {
@@ -228,7 +221,6 @@ func Load() (Config, error) {
 	}
 	cfg.S3.URLExpiry = expiry
 
-	// Media configuration
 	cfg.Media = struct {
 		LocalStoragePath   string
 		LocalURLExpiry     time.Duration
@@ -267,7 +259,6 @@ func Load() (Config, error) {
 
 	cfg.Partner.AuthToken = os.Getenv("PARTNER_AUTH_TOKEN")
 
-	// Event system configuration
 	eventBufferSize := mustParsePositiveInt(getEnv("EVENT_BUFFER_SIZE", "1000"))
 	eventBatchSize := mustParsePositiveInt(getEnv("EVENT_BATCH_SIZE", "10"))
 	eventPollInterval, err := parseDuration(getEnv("EVENT_POLL_INTERVAL", "100ms"))
@@ -283,7 +274,6 @@ func Load() (Config, error) {
 		return cfg, fmt.Errorf("invalid EVENT_SHUTDOWN_GRACE_PERIOD: %w", err)
 	}
 
-	// Retry configuration
 	maxRetryAttempts := mustParsePositiveInt(getEnv("EVENT_MAX_RETRY_ATTEMPTS", "6"))
 	retryDelaysStr := getEnv("EVENT_RETRY_DELAYS", "0s,10s,30s,2m,5m,15m")
 	retryDelays, err := parseRetryDelays(retryDelaysStr)
@@ -291,7 +281,6 @@ func Load() (Config, error) {
 		return cfg, fmt.Errorf("invalid EVENT_RETRY_DELAYS: %w", err)
 	}
 
-	// Circuit breaker configuration
 	cbMaxFailures := mustParsePositiveInt(getEnv("CB_MAX_FAILURES", "5"))
 	cbTimeout, err := parseDuration(getEnv("CB_TIMEOUT", "60s"))
 	if err != nil {
@@ -302,13 +291,11 @@ func Load() (Config, error) {
 		return cfg, fmt.Errorf("invalid CB_COOLDOWN: %w", err)
 	}
 
-	// DLQ configuration
 	dlqRetention, err := parseDuration(getEnv("DLQ_RETENTION_PERIOD", "7d"))
 	if err != nil {
 		return cfg, fmt.Errorf("invalid DLQ_RETENTION_PERIOD: %w", err)
 	}
 
-	// Media processing configuration
 	mediaBufferSize := mustParsePositiveInt(getEnv("MEDIA_BUFFER_SIZE", "500"))
 	mediaBatchSize := mustParsePositiveInt(getEnv("MEDIA_BATCH_SIZE", "5"))
 	mediaMaxRetries := mustParsePositiveInt(getEnv("MEDIA_MAX_RETRIES", "3"))
@@ -333,7 +320,6 @@ func Load() (Config, error) {
 		return cfg, fmt.Errorf("invalid MEDIA_CHUNK_SIZE: %w", err)
 	}
 
-	// Transport configuration
 	webhookTimeout, err := parseDuration(getEnv("WEBHOOK_TIMEOUT", "30s"))
 	if err != nil {
 		return cfg, fmt.Errorf("invalid WEBHOOK_TIMEOUT: %w", err)
@@ -341,7 +327,6 @@ func Load() (Config, error) {
 	webhookMaxRetries := mustParsePositiveInt(getEnv("WEBHOOK_MAX_RETRIES", "3"))
 	transportBufferSize := mustParsePositiveInt(getEnv("TRANSPORT_BUFFER_SIZE", "100"))
 
-	// Cleanup configuration
 	deliveredRetention, err := parseDuration(getEnv("DELIVERED_RETENTION_PERIOD", "1d"))
 	if err != nil {
 		return cfg, fmt.Errorf("invalid DELIVERED_RETENTION_PERIOD: %w", err)
@@ -352,45 +337,38 @@ func Load() (Config, error) {
 	}
 
 	cfg.Events = struct {
-		// Event processing configuration
-		BufferSize            int
-		BatchSize             int
-		PollInterval          time.Duration
-		ProcessingTimeout     time.Duration
-		ShutdownGracePeriod   time.Duration
+		BufferSize          int
+		BatchSize           int
+		PollInterval        time.Duration
+		ProcessingTimeout   time.Duration
+		ShutdownGracePeriod time.Duration
 
-		// Retry configuration
-		MaxRetryAttempts      int
-		RetryDelays           []time.Duration
+		MaxRetryAttempts int
+		RetryDelays      []time.Duration
 
-		// Circuit breaker configuration
 		CircuitBreakerEnabled bool
 		CBMaxFailures         int
 		CBTimeout             time.Duration
 		CBCooldown            time.Duration
 
-		// DLQ configuration
-		DLQRetentionPeriod    time.Duration
-		DLQReprocessEnabled   bool
+		DLQRetentionPeriod  time.Duration
+		DLQReprocessEnabled bool
 
-		// Media processing configuration
-		MediaBufferSize       int
-		MediaBatchSize        int
-		MediaMaxRetries       int
-		MediaPollInterval     time.Duration
-		MediaDownloadTimeout  time.Duration
-		MediaUploadTimeout    time.Duration
-		MediaMaxFileSize      int64
-		MediaChunkSize        int64
+		MediaBufferSize      int
+		MediaBatchSize       int
+		MediaMaxRetries      int
+		MediaPollInterval    time.Duration
+		MediaDownloadTimeout time.Duration
+		MediaUploadTimeout   time.Duration
+		MediaMaxFileSize     int64
+		MediaChunkSize       int64
 
-		// Transport configuration
-		WebhookTimeout        time.Duration
-		WebhookMaxRetries     int
-		TransportBufferSize   int
+		WebhookTimeout      time.Duration
+		WebhookMaxRetries   int
+		TransportBufferSize int
 
-		// Cleanup configuration
-		DeliveredRetention    time.Duration
-		CleanupInterval       time.Duration
+		DeliveredRetention time.Duration
+		CleanupInterval    time.Duration
 	}{
 		BufferSize:            eventBufferSize,
 		BatchSize:             eventBatchSize,

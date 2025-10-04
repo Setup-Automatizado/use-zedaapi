@@ -77,7 +77,6 @@ func Apply(ctx context.Context, pool *pgxpool.Pool, logger *slog.Logger) error {
 			slog.Int("total", applied+skipped))
 	}
 
-	// Validate critical tables exist after migrations
 	if err := validateSchema(ctx, conn, logger); err != nil {
 		return fmt.Errorf("schema validation failed: %w", err)
 	}
@@ -85,41 +84,31 @@ func Apply(ctx context.Context, pool *pgxpool.Pool, logger *slog.Logger) error {
 	return nil
 }
 
-// parseGooseMigration extracts the Up section from a goose-formatted migration file.
-// If no goose directives are found, returns the entire content for backward compatibility.
 func parseGooseMigration(content []byte) (string, error) {
 	text := string(content)
 
 	upMarker := "-- +goose Up"
 	downMarker := "-- +goose Down"
 
-	// Find Up marker
 	upIdx := strings.Index(text, upMarker)
 	if upIdx == -1 {
-		// No goose directives, return entire content (backward compatibility)
 		return text, nil
 	}
 
-	// Skip to content after the Up marker line
 	startIdx := upIdx + len(upMarker)
 	if newlineIdx := strings.Index(text[startIdx:], "\n"); newlineIdx != -1 {
 		startIdx += newlineIdx + 1
 	}
 
-	// Find Down marker to determine end of Up section
 	downIdx := strings.Index(text[startIdx:], downMarker)
 	if downIdx == -1 {
-		// No Down section, use rest of file
 		return text[startIdx:], nil
 	}
 
-	// Extract only the Up section (content between Up and Down markers)
 	return text[startIdx : startIdx+downIdx], nil
 }
 
-// validateSchema checks that critical tables exist after migrations
 func validateSchema(ctx context.Context, conn *pgxpool.Conn, logger *slog.Logger) error {
-	// All tables created by 000001_init.sql migration
 	criticalTables := []string{
 		"instances",
 		"webhook_configs",
