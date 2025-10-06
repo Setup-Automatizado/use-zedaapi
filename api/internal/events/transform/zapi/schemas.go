@@ -8,10 +8,12 @@ type ReceivedCallback struct {
 	IsEdit           bool    `json:"isEdit"`
 	IsGroup          bool    `json:"isGroup"`
 	IsNewsletter     bool    `json:"isNewsletter"`
+	IsBroadcast      bool    `json:"isBroadcast,omitempty"`
 	InstanceID       string  `json:"instanceId"`
 	MessageID        string  `json:"messageId"`
 	Phone            string  `json:"phone"`
 	FromMe           bool    `json:"fromMe"`
+	FromAPI          bool    `json:"fromApi"`
 	Momment          int64   `json:"momment"`
 	Status           string  `json:"status"`
 	ChatLid          *string `json:"chatLid"`
@@ -87,7 +89,7 @@ type ImageContent struct {
 	Height       int    `json:"height,omitempty"`
 	IsGif        bool   `json:"isGif,omitempty"`
 	IsAnimated   bool   `json:"isAnimated,omitempty"`
-	ViewOnce     bool   `json:"viewOnce,omitempty"`
+	ViewOnce     bool   `json:"viewOnce"`
 }
 
 type AudioContent struct {
@@ -96,7 +98,7 @@ type AudioContent struct {
 	PTT      bool   `json:"ptt,omitempty"`
 	Seconds  int    `json:"seconds,omitempty"`
 	Waveform []byte `json:"waveform,omitempty"`
-	ViewOnce bool   `json:"viewOnce,omitempty"`
+	ViewOnce bool   `json:"viewOnce"`
 }
 
 type VideoContent struct {
@@ -107,7 +109,7 @@ type VideoContent struct {
 	Width    int    `json:"width,omitempty"`
 	Height   int    `json:"height,omitempty"`
 	IsGif    bool   `json:"isGif,omitempty"`
-	ViewOnce bool   `json:"viewOnce,omitempty"`
+	ViewOnce bool   `json:"viewOnce"`
 }
 
 type DocumentContent struct {
@@ -382,22 +384,32 @@ type ExternalAdReplyContent struct {
 }
 
 type MessageStatusCallback struct {
-	InstanceID  string   `json:"instanceId"`
-	Status      string   `json:"status"`
-	IDs         []string `json:"ids"`
-	Momment     int64    `json:"momment"`
-	PhoneDevice int      `json:"phoneDevice,omitempty"`
-	Phone       string   `json:"phone"`
-	Type        string   `json:"type"`
-	IsGroup     bool     `json:"isGroup"`
+	InstanceID        string   `json:"instanceId"`
+	Status            string   `json:"status"`
+	IDs               []string `json:"ids"`
+	Momment           int64    `json:"momment"`
+	PhoneDevice       int      `json:"phoneDevice,omitempty"`
+	Phone             string   `json:"phone"`
+	Participant       string   `json:"participant,omitempty"`
+	ParticipantDevice int      `json:"participantDevice,omitempty"`
+	Type              string   `json:"type"`
+	IsGroup           bool     `json:"isGroup"`
 }
 
 type PresenceChatCallback struct {
-	Type       string `json:"type"`
-	Phone      string `json:"phone"`
-	Status     string `json:"status"`
-	LastSeen   *int64 `json:"lastSeen"`
-	InstanceID string `json:"instanceId"`
+	Type             string `json:"type"`
+	Phone            string `json:"phone"`
+	Status           string `json:"status"`
+	LastSeen         *int64 `json:"lastSeen"`
+	InstanceID       string `json:"instanceId"`
+	Participant      string `json:"participant,omitempty"`
+	ParticipantLid   string `json:"participantLid,omitempty"`
+	ParticipantPhone string `json:"participantPhone,omitempty"`
+	ChatName         string `json:"chatName,omitempty"`
+	Photo            string `json:"photo,omitempty"`
+	SenderName       string `json:"senderName,omitempty"`
+	SenderPhoto      string `json:"senderPhoto,omitempty"`
+	IsGroup          bool   `json:"isGroup,omitempty"`
 }
 
 type ConnectedCallback struct {
