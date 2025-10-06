@@ -1,0 +1,71 @@
+{
+  "headers": {
+    "host": "185.245.182.69:3000",
+    "user-agent": "ZuckZapGo-Webhook/1.0",
+    "content-length": "1329",
+    "accept": "application/json",
+    "content-type": "application/json",
+    "accept-encoding": "gzip"
+  },
+  "body": {
+    "baseURL": "https://api.zuckzapgo.com",
+    "data": {
+      "event": {
+        "JID": "5521936189925:12@s.whatsapp.net",
+        "Message": {
+          "Chat": "120363419210737395@g.us",
+          "Sender": "5521936189925:12@s.whatsapp.net",
+          "IsFromMe": false,
+          "IsGroup": true,
+          "AddressingMode": "pn",
+          "SenderAlt": "65511706611749:12@lid",
+          "RecipientAlt": "",
+          "BroadcastListOwner": "",
+          "ID": "3EB0B44762EB3D06742B46",
+          "ServerID": 0,
+          "Type": "text",
+          "PushName": "Bianca Alcantara",
+          "Timestamp": "2025-09-15T12:43:04-03:00",
+          "Category": "",
+          "Multicast": false,
+          "MediaType": "",
+          "Edit": "",
+          "MsgBotInfo": {
+            "EditType": "",
+            "EditTargetID": "",
+            "EditSenderTimestampMS": "0001-01-01T00:00:00Z"
+          },
+          "MsgMetaInfo": {
+            "TargetID": "",
+            "TargetSender": "",
+            "TargetChat": "",
+            "DeprecatedLIDSession": null,
+            "ThreadMessageID": "",
+            "ThreadMessageSenderJID": ""
+          },
+          "VerifiedName": {
+            "Certificate": {
+              "details": "CMH7n/iw76gOEgZzbWI6d2EiEEJpYW5jYSBBbGNhbnRhcmE=",
+              "signature": "EN1vdOm+fyPJhGbCghzLI2sAPoDSOORxzVxkjBqx1n0gN9g31LHfeAh4pO8EkSyBwUuS+mRQpOWOX5VMsvpLjw=="
+            },
+            "Details": {
+              "serial": 8061048276385217,
+              "issuer": "smb:wa",
+              "verifiedName": "Bianca Alcantara"
+            }
+          },
+          "DeviceSentMeta": null
+        },
+        "OldBusinessName": "",
+        "NewBusinessName": "Bianca Alcantara"
+      },
+      "type": "BusinessName"
+    },
+    "eventType": "BusinessName",
+    "timestamp": 1757950985,
+    "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+    "userID": "9e832a8666e02c047a5167194c703eaf",
+    "userJID": "5521971532700:4@s.whatsapp.net",
+    "userName": "setupautomatizado"
+  }
+}

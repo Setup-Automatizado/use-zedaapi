@@ -1,0 +1,929 @@
+{
+  "eventType": "Callterminate",
+  "firstSeen": "2025-09-06T15:57:53.558Z",
+  "lastSeen": "2025-09-13T11:43:46.504Z",
+  "totalReceived": 7,
+  "schemaVersion": 7,
+  "lastModified": "2025-09-13T11:43:46.073Z",
+  "fields": {
+    "required": [
+      "headers",
+      "headers.host",
+      "headers.user-agent",
+      "headers.content-length",
+      "headers.accept",
+      "headers.content-type",
+      "headers.accept-encoding",
+      "body",
+      "body.data",
+      "body.data.event",
+      "body.data.event.From",
+      "body.data.event.Timestamp",
+      "body.data.event.CallCreator",
+      "body.data.event.CallID",
+      "body.data.event.GroupJID",
+      "body.data.event.Reason",
+      "body.data.event.Data",
+      "body.data.event.Data.Tag",
+      "body.data.event.Data.Attrs",
+      "body.data.event.Data.Attrs.call-creator",
+      "body.data.event.Data.Attrs.call-id",
+      "body.data.event.Data.Content",
+      "body.data.type",
+      "body.eventType",
+      "body.timestamp",
+      "body.token",
+      "body.userID",
+      "body.userJID",
+      "body.userName"
+    ],
+    "optional": [
+      "body.baseURL"
+    ],
+    "truncated": []
+  },
+  "variations": [],
+  "savedStructure": {
+    "path": "",
+    "type": "object",
+    "optional": false,
+    "examples": [
+      {
+        "headers": {
+          "host": "185.245.182.69:3000",
+          "user-agent": "ZuckZapGo-Webhook/1.0",
+          "content-length": "618",
+          "accept": "application/json",
+          "content-type": "application/json",
+          "accept-encoding": "gzip"
+        },
+        "body": {
+          "baseURL": "https://api.zuckzapgo.com",
+          "data": {
+            "event": {
+              "From": "558586856817@s.whatsapp.net",
+              "Timestamp": "2025-09-08T13:19:53-03:00",
+              "CallCreator": "558586856817@s.whatsapp.net",
+              "CallID": "ACFB7B01F0E9772AAC98AAAE29A43D67",
+              "GroupJID": "",
+              "Reason": "",
+              "Data": {
+                "Tag": "terminate",
+                "Attrs": {
+                  "call-creator": "558586856817@s.whatsapp.net",
+                  "call-id": "ACFB7B01F0E9772AAC98AAAE29A43D67"
+                },
+                "Content": null
+              }
+            },
+            "type": "CallTerminate"
+          },
+          "eventType": "CallTerminate",
+          "timestamp": 1757348394,
+          "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+          "userID": "9e832a8666e02c047a5167194c703eaf",
+          "userJID": "5521971532700:4@s.whatsapp.net",
+          "userName": "setupautomatizado"
+        }
+      },
+      {
+        "headers": {
+          "host": "185.245.182.69:3000",
+          "user-agent": "ZuckZapGo-Webhook/1.0",
+          "content-length": "618",
+          "accept": "application/json",
+          "content-type": "application/json",
+          "accept-encoding": "gzip"
+        },
+        "body": {
+          "baseURL": "https://api.zuckzapgo.com",
+          "data": {
+            "event": {
+              "From": "559584028327@s.whatsapp.net",
+              "Timestamp": "2025-09-08T15:36:07-03:00",
+              "CallCreator": "559584028327@s.whatsapp.net",
+              "CallID": "ACAC5D658A11E7B0FA33E09212C81842",
+              "GroupJID": "",
+              "Reason": "",
+              "Data": {
+                "Tag": "terminate",
+                "Attrs": {
+                  "call-creator": "559584028327@s.whatsapp.net",
+                  "call-id": "ACAC5D658A11E7B0FA33E09212C81842"
+                },
+                "Content": null
+              }
+            },
+            "type": "CallTerminate"
+          },
+          "eventType": "CallTerminate",
+          "timestamp": 1757356567,
+          "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+          "userID": "9e832a8666e02c047a5167194c703eaf",
+          "userJID": "5521971532700:4@s.whatsapp.net",
+          "userName": "setupautomatizado"
+        }
+      },
+      {
+        "headers": {
+          "host": "185.245.182.69:3000",
+          "user-agent": "ZuckZapGo-Webhook/1.0",
+          "content-length": "621",
+          "accept": "application/json",
+          "content-type": "application/json",
+          "accept-encoding": "gzip"
+        },
+        "body": {
+          "baseURL": "https://api.zuckzapgo.com",
+          "data": {
+            "event": {
+              "From": "5521970579060@s.whatsapp.net",
+              "Timestamp": "2025-09-09T17:20:58-03:00",
+              "CallCreator": "5521970579060@s.whatsapp.net",
+              "CallID": "AC1400581A667F75F6E6A6177E622538",
+              "GroupJID": "",
+              "Reason": "",
+              "Data": {
+                "Tag": "terminate",
+                "Attrs": {
+                  "call-creator": "5521970579060@s.whatsapp.net",
+                  "call-id": "AC1400581A667F75F6E6A6177E622538"
+                },
+                "Content": null
+              }
+            },
+            "type": "CallTerminate"
+          },
+          "eventType": "CallTerminate",
+          "timestamp": 1757449259,
+          "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+          "userID": "9e832a8666e02c047a5167194c703eaf",
+          "userJID": "5521971532700:4@s.whatsapp.net",
+          "userName": "setupautomatizado"
+        }
+      },
+      {
+        "headers": {
+          "host": "185.245.182.69:3000",
+          "user-agent": "ZuckZapGo-Webhook/1.0",
+          "content-length": "624",
+          "accept": "application/json",
+          "content-type": "application/json",
+          "accept-encoding": "gzip"
+        },
+        "body": {
+          "baseURL": "https://api.zuckzapgo.com",
+          "data": {
+            "event": {
+              "From": "556596027946:4@s.whatsapp.net",
+              "Timestamp": "2025-09-12T16:01:30-03:00",
+              "CallCreator": "556596027946:4@s.whatsapp.net",
+              "CallID": "B6F463AD1B8044D780F41C4233DEE17E",
+              "GroupJID": "",
+              "Reason": "",
+              "Data": {
+                "Tag": "terminate",
+                "Attrs": {
+                  "call-creator": "556596027946:4@s.whatsapp.net",
+                  "call-id": "B6F463AD1B8044D780F41C4233DEE17E"
+                },
+                "Content": null
+              }
+            },
+            "type": "CallTerminate"
+          },
+          "eventType": "CallTerminate",
+          "timestamp": 1757703690,
+          "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+          "userID": "9e832a8666e02c047a5167194c703eaf",
+          "userJID": "5521971532700:4@s.whatsapp.net",
+          "userName": "setupautomatizado"
+        }
+      },
+      {
+        "headers": {
+          "host": "185.245.182.69:3000",
+          "user-agent": "ZuckZapGo-Webhook/1.0",
+          "content-length": "618",
+          "accept": "application/json",
+          "content-type": "application/json",
+          "accept-encoding": "gzip"
+        },
+        "body": {
+          "baseURL": "https://api.zuckzapgo.com",
+          "data": {
+            "event": {
+              "From": "559584028327@s.whatsapp.net",
+              "Timestamp": "2025-09-13T08:43:35-03:00",
+              "CallCreator": "559584028327@s.whatsapp.net",
+              "CallID": "AC580BA4B5A238DFCFE40BE8D8BEF5F9",
+              "GroupJID": "",
+              "Reason": "",
+              "Data": {
+                "Tag": "terminate",
+                "Attrs": {
+                  "call-creator": "559584028327@s.whatsapp.net",
+                  "call-id": "AC580BA4B5A238DFCFE40BE8D8BEF5F9"
+                },
+                "Content": null
+              }
+            },
+            "type": "CallTerminate"
+          },
+          "eventType": "CallTerminate",
+          "timestamp": 1757763815,
+          "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+          "userID": "9e832a8666e02c047a5167194c703eaf",
+          "userJID": "5521971532700:4@s.whatsapp.net",
+          "userName": "setupautomatizado"
+        }
+      }
+    ],
+    "children": {
+      "headers": {
+        "path": "headers",
+        "type": "object",
+        "optional": false,
+        "examples": [
+          {
+            "host": "185.245.182.69:3000",
+            "user-agent": "ZuckZapGo-Webhook/1.0",
+            "content-length": "568",
+            "accept": "application/json",
+            "content-type": "application/json",
+            "accept-encoding": "gzip"
+          },
+          {
+            "host": "185.245.182.69:3000",
+            "user-agent": "ZuckZapGo-Webhook/1.0",
+            "content-length": "621",
+            "accept": "application/json",
+            "content-type": "application/json",
+            "accept-encoding": "gzip"
+          },
+          {
+            "host": "185.245.182.69:3000",
+            "user-agent": "ZuckZapGo-Webhook/1.0",
+            "content-length": "618",
+            "accept": "application/json",
+            "content-type": "application/json",
+            "accept-encoding": "gzip"
+          },
+          {
+            "host": "185.245.182.69:3000",
+            "user-agent": "ZuckZapGo-Webhook/1.0",
+            "content-length": "624",
+            "accept": "application/json",
+            "content-type": "application/json",
+            "accept-encoding": "gzip"
+          }
+        ],
+        "children": {
+          "host": {
+            "path": "headers.host",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "185.245.182.69:3000"
+            ]
+          },
+          "user-agent": {
+            "path": "headers.user-agent",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "ZuckZapGo-Webhook/1.0"
+            ]
+          },
+          "content-length": {
+            "path": "headers.content-length",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "568",
+              "621",
+              "618",
+              "624"
+            ]
+          },
+          "accept": {
+            "path": "headers.accept",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "application/json"
+            ]
+          },
+          "content-type": {
+            "path": "headers.content-type",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "application/json"
+            ]
+          },
+          "accept-encoding": {
+            "path": "headers.accept-encoding",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "gzip"
+            ]
+          }
+        }
+      },
+      "body": {
+        "path": "body",
+        "type": "object",
+        "optional": false,
+        "examples": [
+          {
+            "baseURL": "https://api.zuckzapgo.com",
+            "data": {
+              "event": {
+                "From": "558586856817@s.whatsapp.net",
+                "Timestamp": "2025-09-08T13:19:53-03:00",
+                "CallCreator": "558586856817@s.whatsapp.net",
+                "CallID": "ACFB7B01F0E9772AAC98AAAE29A43D67",
+                "GroupJID": "",
+                "Reason": "",
+                "Data": {
+                  "Tag": "terminate",
+                  "Attrs": {
+                    "call-creator": "558586856817@s.whatsapp.net",
+                    "call-id": "ACFB7B01F0E9772AAC98AAAE29A43D67"
+                  },
+                  "Content": null
+                }
+              },
+              "type": "CallTerminate"
+            },
+            "eventType": "CallTerminate",
+            "timestamp": 1757348394,
+            "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+            "userID": "9e832a8666e02c047a5167194c703eaf",
+            "userJID": "5521971532700:4@s.whatsapp.net",
+            "userName": "setupautomatizado"
+          },
+          {
+            "baseURL": "https://api.zuckzapgo.com",
+            "data": {
+              "event": {
+                "From": "559584028327@s.whatsapp.net",
+                "Timestamp": "2025-09-08T15:36:07-03:00",
+                "CallCreator": "559584028327@s.whatsapp.net",
+                "CallID": "ACAC5D658A11E7B0FA33E09212C81842",
+                "GroupJID": "",
+                "Reason": "",
+                "Data": {
+                  "Tag": "terminate",
+                  "Attrs": {
+                    "call-creator": "559584028327@s.whatsapp.net",
+                    "call-id": "ACAC5D658A11E7B0FA33E09212C81842"
+                  },
+                  "Content": null
+                }
+              },
+              "type": "CallTerminate"
+            },
+            "eventType": "CallTerminate",
+            "timestamp": 1757356567,
+            "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+            "userID": "9e832a8666e02c047a5167194c703eaf",
+            "userJID": "5521971532700:4@s.whatsapp.net",
+            "userName": "setupautomatizado"
+          },
+          {
+            "baseURL": "https://api.zuckzapgo.com",
+            "data": {
+              "event": {
+                "From": "5521970579060@s.whatsapp.net",
+                "Timestamp": "2025-09-09T17:20:58-03:00",
+                "CallCreator": "5521970579060@s.whatsapp.net",
+                "CallID": "AC1400581A667F75F6E6A6177E622538",
+                "GroupJID": "",
+                "Reason": "",
+                "Data": {
+                  "Tag": "terminate",
+                  "Attrs": {
+                    "call-creator": "5521970579060@s.whatsapp.net",
+                    "call-id": "AC1400581A667F75F6E6A6177E622538"
+                  },
+                  "Content": null
+                }
+              },
+              "type": "CallTerminate"
+            },
+            "eventType": "CallTerminate",
+            "timestamp": 1757449259,
+            "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+            "userID": "9e832a8666e02c047a5167194c703eaf",
+            "userJID": "5521971532700:4@s.whatsapp.net",
+            "userName": "setupautomatizado"
+          },
+          {
+            "baseURL": "https://api.zuckzapgo.com",
+            "data": {
+              "event": {
+                "From": "556596027946:4@s.whatsapp.net",
+                "Timestamp": "2025-09-12T16:01:30-03:00",
+                "CallCreator": "556596027946:4@s.whatsapp.net",
+                "CallID": "B6F463AD1B8044D780F41C4233DEE17E",
+                "GroupJID": "",
+                "Reason": "",
+                "Data": {
+                  "Tag": "terminate",
+                  "Attrs": {
+                    "call-creator": "556596027946:4@s.whatsapp.net",
+                    "call-id": "B6F463AD1B8044D780F41C4233DEE17E"
+                  },
+                  "Content": null
+                }
+              },
+              "type": "CallTerminate"
+            },
+            "eventType": "CallTerminate",
+            "timestamp": 1757703690,
+            "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+            "userID": "9e832a8666e02c047a5167194c703eaf",
+            "userJID": "5521971532700:4@s.whatsapp.net",
+            "userName": "setupautomatizado"
+          },
+          {
+            "baseURL": "https://api.zuckzapgo.com",
+            "data": {
+              "event": {
+                "From": "559584028327@s.whatsapp.net",
+                "Timestamp": "2025-09-13T08:43:35-03:00",
+                "CallCreator": "559584028327@s.whatsapp.net",
+                "CallID": "AC580BA4B5A238DFCFE40BE8D8BEF5F9",
+                "GroupJID": "",
+                "Reason": "",
+                "Data": {
+                  "Tag": "terminate",
+                  "Attrs": {
+                    "call-creator": "559584028327@s.whatsapp.net",
+                    "call-id": "AC580BA4B5A238DFCFE40BE8D8BEF5F9"
+                  },
+                  "Content": null
+                }
+              },
+              "type": "CallTerminate"
+            },
+            "eventType": "CallTerminate",
+            "timestamp": 1757763815,
+            "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+            "userID": "9e832a8666e02c047a5167194c703eaf",
+            "userJID": "5521971532700:4@s.whatsapp.net",
+            "userName": "setupautomatizado"
+          }
+        ],
+        "children": {
+          "data": {
+            "path": "body.data",
+            "type": "object",
+            "optional": false,
+            "examples": [
+              {
+                "event": {
+                  "From": "558586856817@s.whatsapp.net",
+                  "Timestamp": "2025-09-08T13:19:53-03:00",
+                  "CallCreator": "558586856817@s.whatsapp.net",
+                  "CallID": "ACFB7B01F0E9772AAC98AAAE29A43D67",
+                  "GroupJID": "",
+                  "Reason": "",
+                  "Data": {
+                    "Tag": "terminate",
+                    "Attrs": {
+                      "call-creator": "558586856817@s.whatsapp.net",
+                      "call-id": "ACFB7B01F0E9772AAC98AAAE29A43D67"
+                    },
+                    "Content": null
+                  }
+                },
+                "type": "CallTerminate"
+              },
+              {
+                "event": {
+                  "From": "559584028327@s.whatsapp.net",
+                  "Timestamp": "2025-09-08T15:36:07-03:00",
+                  "CallCreator": "559584028327@s.whatsapp.net",
+                  "CallID": "ACAC5D658A11E7B0FA33E09212C81842",
+                  "GroupJID": "",
+                  "Reason": "",
+                  "Data": {
+                    "Tag": "terminate",
+                    "Attrs": {
+                      "call-creator": "559584028327@s.whatsapp.net",
+                      "call-id": "ACAC5D658A11E7B0FA33E09212C81842"
+                    },
+                    "Content": null
+                  }
+                },
+                "type": "CallTerminate"
+              },
+              {
+                "event": {
+                  "From": "5521970579060@s.whatsapp.net",
+                  "Timestamp": "2025-09-09T17:20:58-03:00",
+                  "CallCreator": "5521970579060@s.whatsapp.net",
+                  "CallID": "AC1400581A667F75F6E6A6177E622538",
+                  "GroupJID": "",
+                  "Reason": "",
+                  "Data": {
+                    "Tag": "terminate",
+                    "Attrs": {
+                      "call-creator": "5521970579060@s.whatsapp.net",
+                      "call-id": "AC1400581A667F75F6E6A6177E622538"
+                    },
+                    "Content": null
+                  }
+                },
+                "type": "CallTerminate"
+              },
+              {
+                "event": {
+                  "From": "556596027946:4@s.whatsapp.net",
+                  "Timestamp": "2025-09-12T16:01:30-03:00",
+                  "CallCreator": "556596027946:4@s.whatsapp.net",
+                  "CallID": "B6F463AD1B8044D780F41C4233DEE17E",
+                  "GroupJID": "",
+                  "Reason": "",
+                  "Data": {
+                    "Tag": "terminate",
+                    "Attrs": {
+                      "call-creator": "556596027946:4@s.whatsapp.net",
+                      "call-id": "B6F463AD1B8044D780F41C4233DEE17E"
+                    },
+                    "Content": null
+                  }
+                },
+                "type": "CallTerminate"
+              },
+              {
+                "event": {
+                  "From": "559584028327@s.whatsapp.net",
+                  "Timestamp": "2025-09-13T08:43:35-03:00",
+                  "CallCreator": "559584028327@s.whatsapp.net",
+                  "CallID": "AC580BA4B5A238DFCFE40BE8D8BEF5F9",
+                  "GroupJID": "",
+                  "Reason": "",
+                  "Data": {
+                    "Tag": "terminate",
+                    "Attrs": {
+                      "call-creator": "559584028327@s.whatsapp.net",
+                      "call-id": "AC580BA4B5A238DFCFE40BE8D8BEF5F9"
+                    },
+                    "Content": null
+                  }
+                },
+                "type": "CallTerminate"
+              }
+            ],
+            "children": {
+              "event": {
+                "path": "body.data.event",
+                "type": "object",
+                "optional": false,
+                "examples": [
+                  {
+                    "From": "558586856817@s.whatsapp.net",
+                    "Timestamp": "2025-09-08T13:19:53-03:00",
+                    "CallCreator": "558586856817@s.whatsapp.net",
+                    "CallID": "ACFB7B01F0E9772AAC98AAAE29A43D67",
+                    "GroupJID": "",
+                    "Reason": "",
+                    "Data": {
+                      "Tag": "terminate",
+                      "Attrs": {
+                        "call-creator": "558586856817@s.whatsapp.net",
+                        "call-id": "ACFB7B01F0E9772AAC98AAAE29A43D67"
+                      },
+                      "Content": null
+                    }
+                  },
+                  {
+                    "From": "559584028327@s.whatsapp.net",
+                    "Timestamp": "2025-09-08T15:36:07-03:00",
+                    "CallCreator": "559584028327@s.whatsapp.net",
+                    "CallID": "ACAC5D658A11E7B0FA33E09212C81842",
+                    "GroupJID": "",
+                    "Reason": "",
+                    "Data": {
+                      "Tag": "terminate",
+                      "Attrs": {
+                        "call-creator": "559584028327@s.whatsapp.net",
+                        "call-id": "ACAC5D658A11E7B0FA33E09212C81842"
+                      },
+                      "Content": null
+                    }
+                  },
+                  {
+                    "From": "5521970579060@s.whatsapp.net",
+                    "Timestamp": "2025-09-09T17:20:58-03:00",
+                    "CallCreator": "5521970579060@s.whatsapp.net",
+                    "CallID": "AC1400581A667F75F6E6A6177E622538",
+                    "GroupJID": "",
+                    "Reason": "",
+                    "Data": {
+                      "Tag": "terminate",
+                      "Attrs": {
+                        "call-creator": "5521970579060@s.whatsapp.net",
+                        "call-id": "AC1400581A667F75F6E6A6177E622538"
+                      },
+                      "Content": null
+                    }
+                  },
+                  {
+                    "From": "556596027946:4@s.whatsapp.net",
+                    "Timestamp": "2025-09-12T16:01:30-03:00",
+                    "CallCreator": "556596027946:4@s.whatsapp.net",
+                    "CallID": "B6F463AD1B8044D780F41C4233DEE17E",
+                    "GroupJID": "",
+                    "Reason": "",
+                    "Data": {
+                      "Tag": "terminate",
+                      "Attrs": {
+                        "call-creator": "556596027946:4@s.whatsapp.net",
+                        "call-id": "B6F463AD1B8044D780F41C4233DEE17E"
+                      },
+                      "Content": null
+                    }
+                  },
+                  {
+                    "From": "559584028327@s.whatsapp.net",
+                    "Timestamp": "2025-09-13T08:43:35-03:00",
+                    "CallCreator": "559584028327@s.whatsapp.net",
+                    "CallID": "AC580BA4B5A238DFCFE40BE8D8BEF5F9",
+                    "GroupJID": "",
+                    "Reason": "",
+                    "Data": {
+                      "Tag": "terminate",
+                      "Attrs": {
+                        "call-creator": "559584028327@s.whatsapp.net",
+                        "call-id": "AC580BA4B5A238DFCFE40BE8D8BEF5F9"
+                      },
+                      "Content": null
+                    }
+                  }
+                ],
+                "children": {
+                  "From": {
+                    "path": "body.data.event.From",
+                    "type": "string",
+                    "optional": false,
+                    "examples": [
+                      "5521981796084@s.whatsapp.net",
+                      "558586856817@s.whatsapp.net",
+                      "559584028327@s.whatsapp.net",
+                      "5521970579060@s.whatsapp.net",
+                      "556596027946:4@s.whatsapp.net"
+                    ]
+                  },
+                  "Timestamp": {
+                    "path": "body.data.event.Timestamp",
+                    "type": "string",
+                    "optional": false,
+                    "examples": [
+                      "2025-09-08T13:19:53-03:00",
+                      "2025-09-08T15:36:07-03:00",
+                      "2025-09-09T17:20:58-03:00",
+                      "2025-09-12T16:01:30-03:00",
+                      "2025-09-13T08:43:35-03:00"
+                    ]
+                  },
+                  "CallCreator": {
+                    "path": "body.data.event.CallCreator",
+                    "type": "string",
+                    "optional": false,
+                    "examples": [
+                      "5521981796084@s.whatsapp.net",
+                      "558586856817@s.whatsapp.net",
+                      "559584028327@s.whatsapp.net",
+                      "5521970579060@s.whatsapp.net",
+                      "556596027946:4@s.whatsapp.net"
+                    ]
+                  },
+                  "CallID": {
+                    "path": "body.data.event.CallID",
+                    "type": "string",
+                    "optional": false,
+                    "examples": [
+                      "ACFB7B01F0E9772AAC98AAAE29A43D67",
+                      "ACAC5D658A11E7B0FA33E09212C81842",
+                      "AC1400581A667F75F6E6A6177E622538",
+                      "B6F463AD1B8044D780F41C4233DEE17E",
+                      "AC580BA4B5A238DFCFE40BE8D8BEF5F9"
+                    ]
+                  },
+                  "GroupJID": {
+                    "path": "body.data.event.GroupJID",
+                    "type": "string",
+                    "optional": false,
+                    "examples": [
+                      ""
+                    ]
+                  },
+                  "Reason": {
+                    "path": "body.data.event.Reason",
+                    "type": "string",
+                    "optional": false,
+                    "examples": [
+                      ""
+                    ]
+                  },
+                  "Data": {
+                    "path": "body.data.event.Data",
+                    "type": "object",
+                    "optional": false,
+                    "examples": [
+                      {
+                        "Tag": "terminate",
+                        "Attrs": {
+                          "call-creator": "558586856817@s.whatsapp.net",
+                          "call-id": "ACFB7B01F0E9772AAC98AAAE29A43D67"
+                        },
+                        "Content": null
+                      },
+                      {
+                        "Tag": "terminate",
+                        "Attrs": {
+                          "call-creator": "559584028327@s.whatsapp.net",
+                          "call-id": "ACAC5D658A11E7B0FA33E09212C81842"
+                        },
+                        "Content": null
+                      },
+                      {
+                        "Tag": "terminate",
+                        "Attrs": {
+                          "call-creator": "5521970579060@s.whatsapp.net",
+                          "call-id": "AC1400581A667F75F6E6A6177E622538"
+                        },
+                        "Content": null
+                      },
+                      {
+                        "Tag": "terminate",
+                        "Attrs": {
+                          "call-creator": "556596027946:4@s.whatsapp.net",
+                          "call-id": "B6F463AD1B8044D780F41C4233DEE17E"
+                        },
+                        "Content": null
+                      },
+                      {
+                        "Tag": "terminate",
+                        "Attrs": {
+                          "call-creator": "559584028327@s.whatsapp.net",
+                          "call-id": "AC580BA4B5A238DFCFE40BE8D8BEF5F9"
+                        },
+                        "Content": null
+                      }
+                    ],
+                    "children": {
+                      "Tag": {
+                        "path": "body.data.event.Data.Tag",
+                        "type": "string",
+                        "optional": false,
+                        "examples": [
+                          "terminate"
+                        ]
+                      },
+                      "Attrs": {
+                        "path": "body.data.event.Data.Attrs",
+                        "type": "object",
+                        "optional": false,
+                        "examples": [
+                          {
+                            "call-creator": "558586856817@s.whatsapp.net",
+                            "call-id": "ACFB7B01F0E9772AAC98AAAE29A43D67"
+                          },
+                          {
+                            "call-creator": "559584028327@s.whatsapp.net",
+                            "call-id": "ACAC5D658A11E7B0FA33E09212C81842"
+                          },
+                          {
+                            "call-creator": "5521970579060@s.whatsapp.net",
+                            "call-id": "AC1400581A667F75F6E6A6177E622538"
+                          },
+                          {
+                            "call-creator": "556596027946:4@s.whatsapp.net",
+                            "call-id": "B6F463AD1B8044D780F41C4233DEE17E"
+                          },
+                          {
+                            "call-creator": "559584028327@s.whatsapp.net",
+                            "call-id": "AC580BA4B5A238DFCFE40BE8D8BEF5F9"
+                          }
+                        ],
+                        "children": {
+                          "call-creator": {
+                            "path": "body.data.event.Data.Attrs.call-creator",
+                            "type": "string",
+                            "optional": false,
+                            "examples": [
+                              "5521981796084@s.whatsapp.net",
+                              "558586856817@s.whatsapp.net",
+                              "559584028327@s.whatsapp.net",
+                              "5521970579060@s.whatsapp.net",
+                              "556596027946:4@s.whatsapp.net"
+                            ]
+                          },
+                          "call-id": {
+                            "path": "body.data.event.Data.Attrs.call-id",
+                            "type": "string",
+                            "optional": false,
+                            "examples": [
+                              "ACFB7B01F0E9772AAC98AAAE29A43D67",
+                              "ACAC5D658A11E7B0FA33E09212C81842",
+                              "AC1400581A667F75F6E6A6177E622538",
+                              "B6F463AD1B8044D780F41C4233DEE17E",
+                              "AC580BA4B5A238DFCFE40BE8D8BEF5F9"
+                            ]
+                          }
+                        }
+                      },
+                      "Content": {
+                        "path": "body.data.event.Data.Content",
+                        "type": "null",
+                        "optional": false,
+                        "examples": [
+                          null
+                        ]
+                      }
+                    }
+                  }
+                }
+              },
+              "type": {
+                "path": "body.data.type",
+                "type": "string",
+                "optional": false,
+                "examples": [
+                  "CallTerminate"
+                ]
+              }
+            }
+          },
+          "eventType": {
+            "path": "body.eventType",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "CallTerminate"
+            ]
+          },
+          "timestamp": {
+            "path": "body.timestamp",
+            "type": "number",
+            "optional": false,
+            "examples": [
+              1757348394,
+              1757356567,
+              1757449259,
+              1757703690,
+              1757763815
+            ]
+          },
+          "token": {
+            "path": "body.token",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "!!qYWdJ61zk3i1AvTfXhzE!!"
+            ]
+          },
+          "userID": {
+            "path": "body.userID",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "9e832a8666e02c047a5167194c703eaf"
+            ]
+          },
+          "userJID": {
+            "path": "body.userJID",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "5521971532700:4@s.whatsapp.net"
+            ]
+          },
+          "userName": {
+            "path": "body.userName",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "setupautomatizado"
+            ]
+          },
+          "baseURL": {
+            "path": "body.baseURL",
+            "type": "string",
+            "optional": true,
+            "examples": [
+              "https://api.zuckzapgo.com"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

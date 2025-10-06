@@ -1,0 +1,44 @@
+{
+  "headers": {
+    "host": "185.245.182.69:3000",
+    "user-agent": "ZuckZapGo-Webhook/1.0",
+    "content-length": "652",
+    "accept": "application/json",
+    "content-type": "application/json",
+    "accept-encoding": "gzip"
+  },
+  "body": {
+    "baseURL": "https://api.zuckzapgo.com",
+    "data": {
+      "event": {
+        "JID": "120363422025707173@g.us",
+        "Timestamp": "2025-09-10T23:47:08.769-03:00",
+        "Action": {
+          "messageRange": {
+            "lastMessageTimestamp": 1757535115,
+            "lastSystemMessageTimestamp": 1757537834,
+            "messages": [
+              {
+                "key": {
+                  "remoteJID": "120363422025707173@g.us",
+                  "fromMe": false,
+                  "ID": "3EB05E8B46A21C63CCEFB6",
+                  "participant": "5521967704448@s.whatsapp.net"
+                },
+                "timestamp": 1757535115
+              }
+            ]
+          }
+        },
+        "FromFullSync": false
+      },
+      "type": "DeleteChat"
+    },
+    "eventType": "DeleteChat",
+    "timestamp": 1757558829,
+    "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+    "userID": "9e832a8666e02c047a5167194c703eaf",
+    "userJID": "5521971532700:4@s.whatsapp.net",
+    "userName": "setupautomatizado"
+  }
+}

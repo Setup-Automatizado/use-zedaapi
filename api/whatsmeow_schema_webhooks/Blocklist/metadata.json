@@ -1,0 +1,352 @@
+{
+  "eventType": "Blocklist",
+  "firstSeen": "2025-09-08T22:50:05.573Z",
+  "lastSeen": "2025-09-08T22:50:05.589Z",
+  "totalReceived": 1,
+  "schemaVersion": 1,
+  "lastModified": "2025-09-08T22:50:05.573Z",
+  "fields": {
+    "required": [
+      "headers",
+      "headers.host",
+      "headers.user-agent",
+      "headers.content-length",
+      "headers.accept",
+      "headers.content-type",
+      "headers.accept-encoding",
+      "body",
+      "body.baseURL",
+      "body.data",
+      "body.data.event",
+      "body.data.event.Action",
+      "body.data.event.DHash",
+      "body.data.event.PrevDHash",
+      "body.data.event.Changes",
+      "body.data.event.Changes[]",
+      "body.data.event.Changes[].JID",
+      "body.data.event.Changes[].Action",
+      "body.data.type",
+      "body.eventType",
+      "body.timestamp",
+      "body.token",
+      "body.userID",
+      "body.userJID",
+      "body.userName"
+    ],
+    "optional": [],
+    "truncated": []
+  },
+  "variations": [],
+  "savedStructure": {
+    "path": "",
+    "type": "object",
+    "optional": false,
+    "examples": [
+      {
+        "headers": {
+          "host": "185.245.182.69:3000",
+          "user-agent": "ZuckZapGo-Webhook/1.0",
+          "content-length": "415",
+          "accept": "application/json",
+          "content-type": "application/json",
+          "accept-encoding": "gzip"
+        },
+        "body": {
+          "baseURL": "https://api.zuckzapgo.com",
+          "data": {
+            "event": {
+              "Action": "",
+              "DHash": "1757371804209607",
+              "PrevDHash": "1755889067963418",
+              "Changes": [
+                {
+                  "JID": "5513991577987@s.whatsapp.net",
+                  "Action": "block"
+                }
+              ]
+            },
+            "type": "Blocklist"
+          },
+          "eventType": "Blocklist",
+          "timestamp": 1757371804,
+          "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+          "userID": "9e832a8666e02c047a5167194c703eaf",
+          "userJID": "5521971532700:4@s.whatsapp.net",
+          "userName": "setupautomatizado"
+        }
+      }
+    ],
+    "children": {
+      "headers": {
+        "path": "headers",
+        "type": "object",
+        "optional": false,
+        "examples": [
+          {
+            "host": "185.245.182.69:3000",
+            "user-agent": "ZuckZapGo-Webhook/1.0",
+            "content-length": "415",
+            "accept": "application/json",
+            "content-type": "application/json",
+            "accept-encoding": "gzip"
+          }
+        ],
+        "children": {
+          "host": {
+            "path": "headers.host",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "185.245.182.69:3000"
+            ]
+          },
+          "user-agent": {
+            "path": "headers.user-agent",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "ZuckZapGo-Webhook/1.0"
+            ]
+          },
+          "content-length": {
+            "path": "headers.content-length",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "415"
+            ]
+          },
+          "accept": {
+            "path": "headers.accept",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "application/json"
+            ]
+          },
+          "content-type": {
+            "path": "headers.content-type",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "application/json"
+            ]
+          },
+          "accept-encoding": {
+            "path": "headers.accept-encoding",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "gzip"
+            ]
+          }
+        }
+      },
+      "body": {
+        "path": "body",
+        "type": "object",
+        "optional": false,
+        "examples": [
+          {
+            "baseURL": "https://api.zuckzapgo.com",
+            "data": {
+              "event": {
+                "Action": "",
+                "DHash": "1757371804209607",
+                "PrevDHash": "1755889067963418",
+                "Changes": [
+                  {
+                    "JID": "5513991577987@s.whatsapp.net",
+                    "Action": "block"
+                  }
+                ]
+              },
+              "type": "Blocklist"
+            },
+            "eventType": "Blocklist",
+            "timestamp": 1757371804,
+            "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+            "userID": "9e832a8666e02c047a5167194c703eaf",
+            "userJID": "5521971532700:4@s.whatsapp.net",
+            "userName": "setupautomatizado"
+          }
+        ],
+        "children": {
+          "baseURL": {
+            "path": "body.baseURL",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "https://api.zuckzapgo.com"
+            ]
+          },
+          "data": {
+            "path": "body.data",
+            "type": "object",
+            "optional": false,
+            "examples": [
+              {
+                "event": {
+                  "Action": "",
+                  "DHash": "1757371804209607",
+                  "PrevDHash": "1755889067963418",
+                  "Changes": [
+                    {
+                      "JID": "5513991577987@s.whatsapp.net",
+                      "Action": "block"
+                    }
+                  ]
+                },
+                "type": "Blocklist"
+              }
+            ],
+            "children": {
+              "event": {
+                "path": "body.data.event",
+                "type": "object",
+                "optional": false,
+                "examples": [
+                  {
+                    "Action": "",
+                    "DHash": "1757371804209607",
+                    "PrevDHash": "1755889067963418",
+                    "Changes": [
+                      {
+                        "JID": "5513991577987@s.whatsapp.net",
+                        "Action": "block"
+                      }
+                    ]
+                  }
+                ],
+                "children": {
+                  "Action": {
+                    "path": "body.data.event.Action",
+                    "type": "string",
+                    "optional": false,
+                    "examples": [
+                      ""
+                    ]
+                  },
+                  "DHash": {
+                    "path": "body.data.event.DHash",
+                    "type": "string",
+                    "optional": false,
+                    "examples": [
+                      "1757371804209607"
+                    ]
+                  },
+                  "PrevDHash": {
+                    "path": "body.data.event.PrevDHash",
+                    "type": "string",
+                    "optional": false,
+                    "examples": [
+                      "1755889067963418"
+                    ]
+                  },
+                  "Changes": {
+                    "path": "body.data.event.Changes",
+                    "type": "array",
+                    "optional": false,
+                    "examples": [
+                      [
+                        {
+                          "JID": "5513991577987@s.whatsapp.net",
+                          "Action": "block"
+                        }
+                      ]
+                    ],
+                    "arrayItemType": {
+                      "path": "body.data.event.Changes[0]",
+                      "type": "object",
+                      "optional": false,
+                      "examples": [
+                        {
+                          "JID": "5513991577987@s.whatsapp.net",
+                          "Action": "block"
+                        }
+                      ],
+                      "children": {
+                        "JID": {
+                          "path": "body.data.event.Changes[0].JID",
+                          "type": "string",
+                          "optional": false,
+                          "examples": [
+                            "5513991577987@s.whatsapp.net"
+                          ]
+                        },
+                        "Action": {
+                          "path": "body.data.event.Changes[0].Action",
+                          "type": "string",
+                          "optional": false,
+                          "examples": [
+                            "block"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "type": {
+                "path": "body.data.type",
+                "type": "string",
+                "optional": false,
+                "examples": [
+                  "Blocklist"
+                ]
+              }
+            }
+          },
+          "eventType": {
+            "path": "body.eventType",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "Blocklist"
+            ]
+          },
+          "timestamp": {
+            "path": "body.timestamp",
+            "type": "number",
+            "optional": false,
+            "examples": [
+              1757371804
+            ]
+          },
+          "token": {
+            "path": "body.token",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "!!qYWdJ61zk3i1AvTfXhzE!!"
+            ]
+          },
+          "userID": {
+            "path": "body.userID",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "9e832a8666e02c047a5167194c703eaf"
+            ]
+          },
+          "userJID": {
+            "path": "body.userJID",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "5521971532700:4@s.whatsapp.net"
+            ]
+          },
+          "userName": {
+            "path": "body.userName",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "setupautomatizado"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,125 @@
+{
+  "truncated": [
+    {
+      "headers": {
+        "host": "185.245.182.69:3000",
+        "user-agent": "ZuckZapGo-Webhook/1.0",
+        "content-length": "278",
+        "accept": "application/json",
+        "content-type": "application/json",
+        "accept-encoding": "gzip"
+      },
+      "body": {
+        "baseURL": "https://api.zuckzapgo.com",
+        "data": {
+          "event": {},
+          "type": "Connected"
+        },
+        "eventType": "Connected",
+        "timestamp": 1757904388,
+        "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+        "userID": "9e832a8666e02c047a5167194c703eaf",
+        "userJID": "5521971532700:4@s.whatsapp.net",
+        "userName": "setupautomatizado"
+      }
+    },
+    {
+      "headers": {
+        "host": "185.245.182.69:3000",
+        "user-agent": "ZuckZapGo-Webhook/1.0",
+        "content-length": "278",
+        "accept": "application/json",
+        "content-type": "application/json",
+        "accept-encoding": "gzip"
+      },
+      "body": {
+        "baseURL": "https://api.zuckzapgo.com",
+        "data": {
+          "event": {},
+          "type": "Connected"
+        },
+        "eventType": "Connected",
+        "timestamp": 1757904434,
+        "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+        "userID": "9e832a8666e02c047a5167194c703eaf",
+        "userJID": "5521971532700:4@s.whatsapp.net",
+        "userName": "setupautomatizado"
+      }
+    },
+    {
+      "headers": {
+        "host": "185.245.182.69:3000",
+        "user-agent": "ZuckZapGo-Webhook/1.0",
+        "content-length": "289",
+        "accept": "application/json",
+        "content-type": "application/json",
+        "accept-encoding": "gzip"
+      },
+      "body": {
+        "baseURL": "https://api.zuckzapgo.com",
+        "data": {
+          "event": {},
+          "type": "Connected"
+        },
+        "eventType": "Connected",
+        "timestamp": 1757904435,
+        "token": "!!!qYWdJ61zk3i1AvTfXhzE!!!",
+        "userID": "80402f2ab5855b2132cf45d6b365a62c",
+        "userJID": "5521979232690:36@s.whatsapp.net",
+        "userName": "setupautomatizado-hibrido"
+      }
+    },
+    {
+      "headers": {
+        "host": "185.245.182.69:3000",
+        "user-agent": "ZuckZapGo-Webhook/1.0",
+        "content-length": "278",
+        "accept": "application/json",
+        "content-type": "application/json",
+        "accept-encoding": "gzip"
+      },
+      "body": {
+        "baseURL": "https://api.zuckzapgo.com",
+        "data": {
+          "event": {},
+          "type": "Connected"
+        },
+        "eventType": "Connected",
+        "timestamp": 1757904475,
+        "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+        "userID": "9e832a8666e02c047a5167194c703eaf",
+        "userJID": "5521971532700:4@s.whatsapp.net",
+        "userName": "setupautomatizado"
+      }
+    },
+    {
+      "headers": {
+        "host": "185.245.182.69:3000",
+        "user-agent": "ZuckZapGo-Webhook/1.0",
+        "content-length": "289",
+        "accept": "application/json",
+        "content-type": "application/json",
+        "accept-encoding": "gzip"
+      },
+      "body": {
+        "baseURL": "https://api.zuckzapgo.com",
+        "data": {
+          "event": {},
+          "type": "Connected"
+        },
+        "eventType": "Connected",
+        "timestamp": 1757904475,
+        "token": "!!!qYWdJ61zk3i1AvTfXhzE!!!",
+        "userID": "80402f2ab5855b2132cf45d6b365a62c",
+        "userJID": "5521979232690:36@s.whatsapp.net",
+        "userName": "setupautomatizado-hibrido"
+      }
+    }
+  ],
+  "metadata": {
+    "totalExamples": 6,
+    "examplesShown": 5,
+    "firstSeen": "2025-09-15T02:48:04.714Z",
+    "lastSeen": "2025-09-15T02:48:04.714Z"
+  }
+}

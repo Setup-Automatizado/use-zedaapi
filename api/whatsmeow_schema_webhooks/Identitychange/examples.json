@@ -1,0 +1,37 @@
+{
+  "truncated": [
+    {
+      "headers": {
+        "host": "185.245.182.69:3000",
+        "user-agent": "ZuckZapGo-Webhook/1.0",
+        "content-length": "380",
+        "accept": "application/json",
+        "content-type": "application/json",
+        "accept-encoding": "gzip"
+      },
+      "body": {
+        "baseURL": "https://api.zuckzapgo.com",
+        "data": {
+          "event": {
+            "JID": "553196979392@s.whatsapp.net",
+            "Timestamp": "2025-09-08T19:28:48-03:00",
+            "Implicit": false
+          },
+          "type": "IdentityChange"
+        },
+        "eventType": "IdentityChange",
+        "timestamp": 1757370530,
+        "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+        "userID": "9e832a8666e02c047a5167194c703eaf",
+        "userJID": "5521971532700:4@s.whatsapp.net",
+        "userName": "setupautomatizado"
+      }
+    }
+  ],
+  "metadata": {
+    "totalExamples": 1,
+    "examplesShown": 1,
+    "firstSeen": "2025-09-08T22:28:52.512Z",
+    "lastSeen": "2025-09-08T22:28:52.512Z"
+  }
+}

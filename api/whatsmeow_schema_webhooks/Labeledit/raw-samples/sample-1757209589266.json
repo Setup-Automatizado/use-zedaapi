@@ -1,0 +1,36 @@
+{
+  "headers": {
+    "host": "185.245.182.69:3000",
+    "user-agent": "ZuckZapGo-Webhook/1.0",
+    "content-length": "420",
+    "accept": "application/json",
+    "content-type": "application/json",
+    "accept-encoding": "gzip"
+  },
+  "body": {
+    "data": {
+      "event": {
+        "Timestamp": "2025-04-22T16:28:24.121-03:00",
+        "LabelID": "4",
+        "Action": {
+          "name": "Pago",
+          "color": 3,
+          "predefinedID": 4,
+          "deleted": false,
+          "orderIndex": 4,
+          "isActive": true,
+          "type": 5,
+          "isImmutable": false
+        },
+        "FromFullSync": false
+      },
+      "type": "LabelEdit"
+    },
+    "eventType": "LabelEdit",
+    "timestamp": 1757209577,
+    "token": "hibrido",
+    "userID": "baf81c72f383e3c7814c18aab2d72360",
+    "userJID": "5521979232690:28@s.whatsapp.net",
+    "userName": "hibrido"
+  }
+}

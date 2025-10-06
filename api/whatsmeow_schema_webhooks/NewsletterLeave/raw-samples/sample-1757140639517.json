@@ -1,0 +1,29 @@
+{
+  "chatLid": null,
+  "isGroup": true,
+  "isNewsletter": false,
+  "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+  "messageId": "1047801728",
+  "phone": "120363041529191426-group",
+  "connectedPhone": "5521971532700",
+  "fromMe": false,
+  "momment": 1757140638000,
+  "expiresAt": null,
+  "status": "RECEIVED",
+  "chatName": "[04/07] LIVE#136-20H #23",
+  "senderPhoto": null,
+  "senderName": "phsantos282",
+  "photo": null,
+  "broadcast": false,
+  "participantPhone": "553798435923",
+  "referenceMessageId": null,
+  "externalAdReply": null,
+  "forwarded": false,
+  "type": "ReceivedCallback",
+  "notification": "GROUP_PARTICIPANT_LEAVE",
+  "notificationParameters": [
+    "553798435923"
+  ],
+  "callId": null,
+  "code": null
+}

@@ -1,0 +1,38 @@
+{
+  "headers": {
+    "host": "185.245.182.69:3000",
+    "user-agent": "ZuckZapGo-Webhook/1.0",
+    "content-length": "618",
+    "accept": "application/json",
+    "content-type": "application/json",
+    "accept-encoding": "gzip"
+  },
+  "body": {
+    "baseURL": "https://api.zuckzapgo.com",
+    "data": {
+      "event": {
+        "From": "559584028327@s.whatsapp.net",
+        "Timestamp": "2025-09-13T08:43:35-03:00",
+        "CallCreator": "559584028327@s.whatsapp.net",
+        "CallID": "AC580BA4B5A238DFCFE40BE8D8BEF5F9",
+        "GroupJID": "",
+        "Reason": "",
+        "Data": {
+          "Tag": "terminate",
+          "Attrs": {
+            "call-creator": "559584028327@s.whatsapp.net",
+            "call-id": "AC580BA4B5A238DFCFE40BE8D8BEF5F9"
+          },
+          "Content": null
+        }
+      },
+      "type": "CallTerminate"
+    },
+    "eventType": "CallTerminate",
+    "timestamp": 1757763815,
+    "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+    "userID": "9e832a8666e02c047a5167194c703eaf",
+    "userJID": "5521971532700:4@s.whatsapp.net",
+    "userName": "setupautomatizado"
+  }
+}

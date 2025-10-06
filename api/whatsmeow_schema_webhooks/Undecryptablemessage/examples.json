@@ -10,6 +10,7 @@
         "accept-encoding": "gzip"
       },
       "body": {
+        "baseURL": "https://api.zuckzapgo.com",
         "data": {
           "event": {
             "Info": {
@@ -51,7 +52,13 @@
             "DecryptFailMode": ""
           },
           "type": "UndecryptableMessage"
-        }
+        },
+        "eventType": "UndecryptableMessage",
+        "timestamp": 1757953560,
+        "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+        "userID": "9e832a8666e02c047a5167194c703eaf",
+        "userJID": "5521971532700:4@s.whatsapp.net",
+        "userName": "setupautomatizado"
       }
     },
     {
@@ -64,6 +71,7 @@
         "accept-encoding": "gzip"
       },
       "body": {
+        "baseURL": "https://api.zuckzapgo.com",
         "data": {
           "event": {
             "Info": {
@@ -105,7 +113,13 @@
             "DecryptFailMode": "hide"
           },
           "type": "UndecryptableMessage"
-        }
+        },
+        "eventType": "UndecryptableMessage",
+        "timestamp": 1757953738,
+        "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+        "userID": "9e832a8666e02c047a5167194c703eaf",
+        "userJID": "5521971532700:4@s.whatsapp.net",
+        "userName": "setupautomatizado"
       }
     },
     {
@@ -118,6 +132,7 @@
         "accept-encoding": "gzip"
       },
       "body": {
+        "baseURL": "https://api.zuckzapgo.com",
         "data": {
           "event": {
             "Info": {
@@ -159,7 +174,13 @@
             "DecryptFailMode": "hide"
           },
           "type": "UndecryptableMessage"
-        }
+        },
+        "eventType": "UndecryptableMessage",
+        "timestamp": 1757953739,
+        "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+        "userID": "9e832a8666e02c047a5167194c703eaf",
+        "userJID": "5521971532700:4@s.whatsapp.net",
+        "userName": "setupautomatizado"
       }
     },
     {
@@ -172,6 +193,7 @@
         "accept-encoding": "gzip"
       },
       "body": {
+        "baseURL": "https://api.zuckzapgo.com",
         "data": {
           "event": {
             "Info": {
@@ -223,7 +245,13 @@
             "DecryptFailMode": ""
           },
           "type": "UndecryptableMessage"
-        }
+        },
+        "eventType": "UndecryptableMessage",
+        "timestamp": 1757957257,
+        "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+        "userID": "9e832a8666e02c047a5167194c703eaf",
+        "userJID": "5521971532700:4@s.whatsapp.net",
+        "userName": "setupautomatizado"
       }
     },
     {
@@ -236,6 +264,7 @@
         "accept-encoding": "gzip"
       },
       "body": {
+        "baseURL": "https://api.zuckzapgo.com",
         "data": {
           "event": {
             "Info": {
@@ -287,8 +316,14 @@
             "DecryptFailMode": ""
           },
           "type": "UndecryptableMessage"
-        }
-	  }
+        },
+        "eventType": "UndecryptableMessage",
+        "timestamp": 1757958260,
+        "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+        "userID": "9e832a8666e02c047a5167194c703eaf",
+        "userJID": "5521971532700:4@s.whatsapp.net",
+        "userName": "setupautomatizado"
+      }
     }
   ],
   "metadata": {

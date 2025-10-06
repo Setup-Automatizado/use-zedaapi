@@ -1,0 +1,22 @@
+{
+  "truncated": [
+    {
+      "type": "ReceivedCallback",
+      "instanceId": "TEST_INSTANCE",
+      "messageId": "MSG003",
+      "phone": "5521999999999",
+      "sticker": {
+        "stickerUrl": "https://example.com/sticker.webp",
+        "mimeType": "image/webp"
+      },
+      "isGroup": true,
+      "participantPhone": "5521888888888"
+    }
+  ],
+  "metadata": {
+    "totalExamples": 1,
+    "examplesShown": 1,
+    "firstSeen": "2025-09-06T07:31:24.666Z",
+    "lastSeen": "2025-09-06T07:31:24.666Z"
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "headers": {
+    "accept": "application/json, text/plain, */*",
+    "content-type": "application/json",
+    "x-hub-signature": "sha1=16a70da9e71050c5f7c97af22e46f3e1f7313678",
+    "x-hub-signature-256": "sha256=308eed1aa358b814f4471a8ea044ac2329227b613173322ea7905ca72edb94ef",
+    "user-agent": "facebookexternalua",
+    "authorization": "K4D3OHUZTIYcPDsDTt1XMEU22DQh5uXeA",
+    "content-length": "624",
+    "accept-encoding": "gzip, compress, deflate, br",
+    "host": "185.245.182.69:3000",
+    "connection": "keep-alive"
+  },
+  "body": {
+    "object": "whatsapp_business_account",
+    "entry": [
+      {
+        "id": "481774168341746",
+        "changes": [
+          {
+            "value": {
+              "messaging_product": "whatsapp",
+              "metadata": {
+                "display_phone_number": "5521979232690",
+                "phone_number_id": "470938299430867"
+              },
+              "contacts": [
+                {
+                  "profile": {
+                    "name": "Guilherme Jansen - Setup Automatizado"
+                  },
+                  "wa_id": "5521971532700"
+                }
+              ],
+              "messages": [
+                {
+                  "from": "5521971532700",
+                  "id": "wamid.HBgNNTUyMTk3MTUzMjcwMBUCABIYFDNCNjlENUUyRTIxNjRBNEQzODRFAA==",
+                  "timestamp": "1759613273",
+                  "type": "audio",
+                  "audio": {
+                    "mime_type": "audio/ogg; codecs=opus",
+                    "sha256": "CYyEzCTOJIf+BbJarXKh2Hc9TO77WPRueFrcPALjUl8=",
+                    "id": "741353925654719",
+                    "voice": true
+                  }
+                }
+              ]
+            },
+            "field": "messages"
+          }
+        ]
+      }
+    ]
+  }
+}

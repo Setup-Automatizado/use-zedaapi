@@ -1,0 +1,30 @@
+{
+  "headers": {
+    "host": "185.245.182.69:3000",
+    "user-agent": "ZuckZapGo-Webhook/1.0",
+    "content-length": "372",
+    "accept": "application/json",
+    "content-type": "application/json",
+    "accept-encoding": "gzip"
+  },
+  "body": {
+    "data": {
+      "event": {
+        "JID": "120363181560269546@g.us",
+        "Timestamp": "2025-08-09T18:28:19.125-03:00",
+        "Action": {
+          "muted": true,
+          "muteEndTimestamp": -1
+        },
+        "FromFullSync": false
+      },
+      "type": "Mute"
+    },
+    "eventType": "Mute",
+    "timestamp": 1757251369,
+    "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+    "userID": "9e832a8666e02c047a5167194c703eaf",
+    "userJID": "5521971532700:4@s.whatsapp.net",
+    "userName": "setupautomatizado"
+  }
+}

@@ -1,0 +1,1585 @@
+{
+  "eventType": "Groupinfo",
+  "firstSeen": "2025-09-14T19:27:15.394Z",
+  "lastSeen": "2025-09-15T17:56:51.887Z",
+  "totalReceived": 18,
+  "schemaVersion": 169,
+  "lastModified": "2025-09-15T17:56:51.846Z",
+  "fields": {
+    "required": [
+      "headers",
+      "headers.host",
+      "headers.user-agent",
+      "headers.content-length",
+      "headers.accept",
+      "headers.content-type",
+      "headers.accept-encoding",
+      "body",
+      "body.baseURL",
+      "body.data",
+      "body.data.event",
+      "body.data.event.JID",
+      "body.data.event.Notify",
+      "body.data.event.Sender",
+      "body.data.event.SenderPN",
+      "body.data.event.Timestamp",
+      "body.data.event.Name",
+      "body.data.event.Topic",
+      "body.data.event.Locked",
+      "body.data.event.Announce",
+      "body.data.event.Ephemeral",
+      "body.data.event.MembershipApprovalMode",
+      "body.data.event.Delete",
+      "body.data.event.Link",
+      "body.data.event.Unlink",
+      "body.data.event.Unlink.Group.JID",
+      "body.data.event.Unlink.Group.Name",
+      "body.data.event.Unlink.Group.NameSetAt",
+      "body.data.event.Unlink.Group.NameSetBy",
+      "body.data.event.Unlink.Group.NameSetByPN",
+      "body.data.event.Unlink.Group.IsDefaultSubGroup",
+      "body.data.event.NewInviteLink",
+      "body.data.event.PrevParticipantVersionID",
+      "body.data.event.ParticipantVersionID",
+      "body.data.event.JoinReason",
+      "body.data.event.Join",
+      "body.data.event.Join[]",
+      "body.data.event.Leave",
+      "body.data.event.Leave[]",
+      "body.data.event.Promote",
+      "body.data.event.Promote[]",
+      "body.data.event.Demote",
+      "body.data.event.UnknownChanges",
+      "body.data.type",
+      "body.eventType",
+      "body.timestamp",
+      "body.token",
+      "body.userID",
+      "body.userJID",
+      "body.userName"
+    ],
+    "optional": [
+      "body.data.event.Topic.Topic",
+      "body.data.event.Topic.TopicID",
+      "body.data.event.Topic.TopicSetAt",
+      "body.data.event.Topic.TopicSetBy",
+      "body.data.event.Topic.TopicSetByPN",
+      "body.data.event.Topic.TopicDeleted",
+      "body.data.event.Announce.IsAnnounce",
+      "body.data.event.Announce.AnnounceVersionID",
+      "body.data.event.Unlink.Type",
+      "body.data.event.Unlink.UnlinkReason",
+      "body.data.event.Unlink.Group"
+    ],
+    "truncated": []
+  },
+  "variations": [],
+  "savedStructure": {
+    "path": "",
+    "type": "object",
+    "optional": false,
+    "examples": [
+      {
+        "headers": {
+          "host": "185.245.182.69:3000",
+          "user-agent": "ZuckZapGo-Webhook/1.0",
+          "content-length": "764",
+          "accept": "application/json",
+          "content-type": "application/json",
+          "accept-encoding": "gzip"
+        },
+        "body": {
+          "baseURL": "https://api.zuckzapgo.com",
+          "data": {
+            "event": {
+              "JID": "120363198956240527@g.us",
+              "Notify": "invite",
+              "Sender": null,
+              "SenderPN": null,
+              "Timestamp": "2025-09-15T14:33:28-03:00",
+              "Name": null,
+              "Topic": null,
+              "Locked": null,
+              "Announce": null,
+              "Ephemeral": null,
+              "MembershipApprovalMode": null,
+              "Delete": null,
+              "Link": null,
+              "Unlink": null,
+              "NewInviteLink": null,
+              "PrevParticipantVersionID": "1757945759520220",
+              "ParticipantVersionID": "1757957608129976",
+              "JoinReason": "invite",
+              "Join": [
+                "69381002424393@lid"
+              ],
+              "Leave": null,
+              "Promote": null,
+              "Demote": null,
+              "UnknownChanges": null
+            },
+            "type": "GroupInfo"
+          },
+          "eventType": "GroupInfo",
+          "timestamp": 1757957608,
+          "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+          "userID": "9e832a8666e02c047a5167194c703eaf",
+          "userJID": "5521971532700:4@s.whatsapp.net",
+          "userName": "setupautomatizado"
+        }
+      },
+      {
+        "headers": {
+          "host": "185.245.182.69:3000",
+          "user-agent": "ZuckZapGo-Webhook/1.0",
+          "content-length": "795",
+          "accept": "application/json",
+          "content-type": "application/json",
+          "accept-encoding": "gzip"
+        },
+        "body": {
+          "baseURL": "https://api.zuckzapgo.com",
+          "data": {
+            "event": {
+              "JID": "120363339104325305@g.us",
+              "Notify": "FinZap360",
+              "Sender": "557199619351@s.whatsapp.net",
+              "SenderPN": null,
+              "Timestamp": "2025-09-15T14:36:27-03:00",
+              "Name": null,
+              "Topic": null,
+              "Locked": null,
+              "Announce": null,
+              "Ephemeral": null,
+              "MembershipApprovalMode": null,
+              "Delete": null,
+              "Link": null,
+              "Unlink": null,
+              "NewInviteLink": null,
+              "PrevParticipantVersionID": "1757350484734684",
+              "ParticipantVersionID": "1757957787212049",
+              "JoinReason": "",
+              "Join": null,
+              "Leave": [
+                "557199619351@s.whatsapp.net"
+              ],
+              "Promote": null,
+              "Demote": null,
+              "UnknownChanges": null
+            },
+            "type": "GroupInfo"
+          },
+          "eventType": "GroupInfo",
+          "timestamp": 1757957787,
+          "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+          "userID": "9e832a8666e02c047a5167194c703eaf",
+          "userJID": "5521971532700:4@s.whatsapp.net",
+          "userName": "setupautomatizado"
+        }
+      },
+      {
+        "headers": {
+          "host": "185.245.182.69:3000",
+          "user-agent": "ZuckZapGo-Webhook/1.0",
+          "content-length": "792",
+          "accept": "application/json",
+          "content-type": "application/json",
+          "accept-encoding": "gzip"
+        },
+        "body": {
+          "baseURL": "https://api.zuckzapgo.com",
+          "data": {
+            "event": {
+              "JID": "120363294537607353@g.us",
+              "Notify": "Regina",
+              "Sender": "554192470609@s.whatsapp.net",
+              "SenderPN": null,
+              "Timestamp": "2025-09-15T14:39:25-03:00",
+              "Name": null,
+              "Topic": null,
+              "Locked": null,
+              "Announce": null,
+              "Ephemeral": null,
+              "MembershipApprovalMode": null,
+              "Delete": null,
+              "Link": null,
+              "Unlink": null,
+              "NewInviteLink": null,
+              "PrevParticipantVersionID": "1757956074814524",
+              "ParticipantVersionID": "1757957965139017",
+              "JoinReason": "",
+              "Join": null,
+              "Leave": [
+                "554192470609@s.whatsapp.net"
+              ],
+              "Promote": null,
+              "Demote": null,
+              "UnknownChanges": null
+            },
+            "type": "GroupInfo"
+          },
+          "eventType": "GroupInfo",
+          "timestamp": 1757957965,
+          "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+          "userID": "9e832a8666e02c047a5167194c703eaf",
+          "userJID": "5521971532700:4@s.whatsapp.net",
+          "userName": "setupautomatizado"
+        }
+      },
+      {
+        "headers": {
+          "host": "185.245.182.69:3000",
+          "user-agent": "ZuckZapGo-Webhook/1.0",
+          "content-length": "802",
+          "accept": "application/json",
+          "content-type": "application/json",
+          "accept-encoding": "gzip"
+        },
+        "body": {
+          "baseURL": "https://api.zuckzapgo.com",
+          "data": {
+            "event": {
+              "JID": "120363419210737395@g.us",
+              "Notify": "gabriela silva",
+              "Sender": "5511941336961@s.whatsapp.net",
+              "SenderPN": null,
+              "Timestamp": "2025-09-15T14:46:41-03:00",
+              "Name": null,
+              "Topic": null,
+              "Locked": null,
+              "Announce": null,
+              "Ephemeral": null,
+              "MembershipApprovalMode": null,
+              "Delete": null,
+              "Link": null,
+              "Unlink": null,
+              "NewInviteLink": null,
+              "PrevParticipantVersionID": "1757951371950524",
+              "ParticipantVersionID": "1757958401627612",
+              "JoinReason": "",
+              "Join": null,
+              "Leave": [
+                "5511941336961@s.whatsapp.net"
+              ],
+              "Promote": null,
+              "Demote": null,
+              "UnknownChanges": null
+            },
+            "type": "GroupInfo"
+          },
+          "eventType": "GroupInfo",
+          "timestamp": 1757958401,
+          "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+          "userID": "9e832a8666e02c047a5167194c703eaf",
+          "userJID": "5521971532700:4@s.whatsapp.net",
+          "userName": "setupautomatizado"
+        }
+      },
+      {
+        "headers": {
+          "host": "185.245.182.69:3000",
+          "user-agent": "ZuckZapGo-Webhook/1.0",
+          "content-length": "805",
+          "accept": "application/json",
+          "content-type": "application/json",
+          "accept-encoding": "gzip"
+        },
+        "body": {
+          "baseURL": "https://api.zuckzapgo.com",
+          "data": {
+            "event": {
+              "JID": "120363234767978628@g.us",
+              "Notify": "Rodrigo Ciescielski",
+              "Sender": "554199477942@s.whatsapp.net",
+              "SenderPN": null,
+              "Timestamp": "2025-09-15T14:56:50-03:00",
+              "Name": null,
+              "Topic": null,
+              "Locked": null,
+              "Announce": null,
+              "Ephemeral": null,
+              "MembershipApprovalMode": null,
+              "Delete": null,
+              "Link": null,
+              "Unlink": null,
+              "NewInviteLink": null,
+              "PrevParticipantVersionID": "1757940369434737",
+              "ParticipantVersionID": "1757959010112286",
+              "JoinReason": "",
+              "Join": null,
+              "Leave": [
+                "554199477942@s.whatsapp.net"
+              ],
+              "Promote": null,
+              "Demote": null,
+              "UnknownChanges": null
+            },
+            "type": "GroupInfo"
+          },
+          "eventType": "GroupInfo",
+          "timestamp": 1757959010,
+          "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+          "userID": "9e832a8666e02c047a5167194c703eaf",
+          "userJID": "5521971532700:4@s.whatsapp.net",
+          "userName": "setupautomatizado"
+        }
+      }
+    ],
+    "children": {
+      "headers": {
+        "path": "headers",
+        "type": "object",
+        "optional": false,
+        "examples": [
+          {
+            "host": "185.245.182.69:3000",
+            "user-agent": "ZuckZapGo-Webhook/1.0",
+            "content-length": "795",
+            "accept": "application/json",
+            "content-type": "application/json",
+            "accept-encoding": "gzip"
+          },
+          {
+            "host": "185.245.182.69:3000",
+            "user-agent": "ZuckZapGo-Webhook/1.0",
+            "content-length": "764",
+            "accept": "application/json",
+            "content-type": "application/json",
+            "accept-encoding": "gzip"
+          },
+          {
+            "host": "185.245.182.69:3000",
+            "user-agent": "ZuckZapGo-Webhook/1.0",
+            "content-length": "792",
+            "accept": "application/json",
+            "content-type": "application/json",
+            "accept-encoding": "gzip"
+          },
+          {
+            "host": "185.245.182.69:3000",
+            "user-agent": "ZuckZapGo-Webhook/1.0",
+            "content-length": "802",
+            "accept": "application/json",
+            "content-type": "application/json",
+            "accept-encoding": "gzip"
+          },
+          {
+            "host": "185.245.182.69:3000",
+            "user-agent": "ZuckZapGo-Webhook/1.0",
+            "content-length": "805",
+            "accept": "application/json",
+            "content-type": "application/json",
+            "accept-encoding": "gzip"
+          }
+        ],
+        "children": {
+          "host": {
+            "path": "headers.host",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "185.245.182.69:3000"
+            ]
+          },
+          "user-agent": {
+            "path": "headers.user-agent",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "ZuckZapGo-Webhook/1.0"
+            ]
+          },
+          "content-length": {
+            "path": "headers.content-length",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "795",
+              "764",
+              "792",
+              "802",
+              "805"
+            ]
+          },
+          "accept": {
+            "path": "headers.accept",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "application/json"
+            ]
+          },
+          "content-type": {
+            "path": "headers.content-type",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "application/json"
+            ]
+          },
+          "accept-encoding": {
+            "path": "headers.accept-encoding",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "gzip"
+            ]
+          }
+        }
+      },
+      "body": {
+        "path": "body",
+        "type": "object",
+        "optional": false,
+        "examples": [
+          {
+            "baseURL": "https://api.zuckzapgo.com",
+            "data": {
+              "event": {
+                "JID": "120363198956240527@g.us",
+                "Notify": "invite",
+                "Sender": null,
+                "SenderPN": null,
+                "Timestamp": "2025-09-15T14:33:28-03:00",
+                "Name": null,
+                "Topic": null,
+                "Locked": null,
+                "Announce": null,
+                "Ephemeral": null,
+                "MembershipApprovalMode": null,
+                "Delete": null,
+                "Link": null,
+                "Unlink": null,
+                "NewInviteLink": null,
+                "PrevParticipantVersionID": "1757945759520220",
+                "ParticipantVersionID": "1757957608129976",
+                "JoinReason": "invite",
+                "Join": [
+                  "69381002424393@lid"
+                ],
+                "Leave": null,
+                "Promote": null,
+                "Demote": null,
+                "UnknownChanges": null
+              },
+              "type": "GroupInfo"
+            },
+            "eventType": "GroupInfo",
+            "timestamp": 1757957608,
+            "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+            "userID": "9e832a8666e02c047a5167194c703eaf",
+            "userJID": "5521971532700:4@s.whatsapp.net",
+            "userName": "setupautomatizado"
+          },
+          {
+            "baseURL": "https://api.zuckzapgo.com",
+            "data": {
+              "event": {
+                "JID": "120363339104325305@g.us",
+                "Notify": "FinZap360",
+                "Sender": "557199619351@s.whatsapp.net",
+                "SenderPN": null,
+                "Timestamp": "2025-09-15T14:36:27-03:00",
+                "Name": null,
+                "Topic": null,
+                "Locked": null,
+                "Announce": null,
+                "Ephemeral": null,
+                "MembershipApprovalMode": null,
+                "Delete": null,
+                "Link": null,
+                "Unlink": null,
+                "NewInviteLink": null,
+                "PrevParticipantVersionID": "1757350484734684",
+                "ParticipantVersionID": "1757957787212049",
+                "JoinReason": "",
+                "Join": null,
+                "Leave": [
+                  "557199619351@s.whatsapp.net"
+                ],
+                "Promote": null,
+                "Demote": null,
+                "UnknownChanges": null
+              },
+              "type": "GroupInfo"
+            },
+            "eventType": "GroupInfo",
+            "timestamp": 1757957787,
+            "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+            "userID": "9e832a8666e02c047a5167194c703eaf",
+            "userJID": "5521971532700:4@s.whatsapp.net",
+            "userName": "setupautomatizado"
+          },
+          {
+            "baseURL": "https://api.zuckzapgo.com",
+            "data": {
+              "event": {
+                "JID": "120363294537607353@g.us",
+                "Notify": "Regina",
+                "Sender": "554192470609@s.whatsapp.net",
+                "SenderPN": null,
+                "Timestamp": "2025-09-15T14:39:25-03:00",
+                "Name": null,
+                "Topic": null,
+                "Locked": null,
+                "Announce": null,
+                "Ephemeral": null,
+                "MembershipApprovalMode": null,
+                "Delete": null,
+                "Link": null,
+                "Unlink": null,
+                "NewInviteLink": null,
+                "PrevParticipantVersionID": "1757956074814524",
+                "ParticipantVersionID": "1757957965139017",
+                "JoinReason": "",
+                "Join": null,
+                "Leave": [
+                  "554192470609@s.whatsapp.net"
+                ],
+                "Promote": null,
+                "Demote": null,
+                "UnknownChanges": null
+              },
+              "type": "GroupInfo"
+            },
+            "eventType": "GroupInfo",
+            "timestamp": 1757957965,
+            "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+            "userID": "9e832a8666e02c047a5167194c703eaf",
+            "userJID": "5521971532700:4@s.whatsapp.net",
+            "userName": "setupautomatizado"
+          },
+          {
+            "baseURL": "https://api.zuckzapgo.com",
+            "data": {
+              "event": {
+                "JID": "120363419210737395@g.us",
+                "Notify": "gabriela silva",
+                "Sender": "5511941336961@s.whatsapp.net",
+                "SenderPN": null,
+                "Timestamp": "2025-09-15T14:46:41-03:00",
+                "Name": null,
+                "Topic": null,
+                "Locked": null,
+                "Announce": null,
+                "Ephemeral": null,
+                "MembershipApprovalMode": null,
+                "Delete": null,
+                "Link": null,
+                "Unlink": null,
+                "NewInviteLink": null,
+                "PrevParticipantVersionID": "1757951371950524",
+                "ParticipantVersionID": "1757958401627612",
+                "JoinReason": "",
+                "Join": null,
+                "Leave": [
+                  "5511941336961@s.whatsapp.net"
+                ],
+                "Promote": null,
+                "Demote": null,
+                "UnknownChanges": null
+              },
+              "type": "GroupInfo"
+            },
+            "eventType": "GroupInfo",
+            "timestamp": 1757958401,
+            "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+            "userID": "9e832a8666e02c047a5167194c703eaf",
+            "userJID": "5521971532700:4@s.whatsapp.net",
+            "userName": "setupautomatizado"
+          },
+          {
+            "baseURL": "https://api.zuckzapgo.com",
+            "data": {
+              "event": {
+                "JID": "120363234767978628@g.us",
+                "Notify": "Rodrigo Ciescielski",
+                "Sender": "554199477942@s.whatsapp.net",
+                "SenderPN": null,
+                "Timestamp": "2025-09-15T14:56:50-03:00",
+                "Name": null,
+                "Topic": null,
+                "Locked": null,
+                "Announce": null,
+                "Ephemeral": null,
+                "MembershipApprovalMode": null,
+                "Delete": null,
+                "Link": null,
+                "Unlink": null,
+                "NewInviteLink": null,
+                "PrevParticipantVersionID": "1757940369434737",
+                "ParticipantVersionID": "1757959010112286",
+                "JoinReason": "",
+                "Join": null,
+                "Leave": [
+                  "554199477942@s.whatsapp.net"
+                ],
+                "Promote": null,
+                "Demote": null,
+                "UnknownChanges": null
+              },
+              "type": "GroupInfo"
+            },
+            "eventType": "GroupInfo",
+            "timestamp": 1757959010,
+            "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+            "userID": "9e832a8666e02c047a5167194c703eaf",
+            "userJID": "5521971532700:4@s.whatsapp.net",
+            "userName": "setupautomatizado"
+          }
+        ],
+        "children": {
+          "baseURL": {
+            "path": "body.baseURL",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "https://api.zuckzapgo.com"
+            ]
+          },
+          "data": {
+            "path": "body.data",
+            "type": "object",
+            "optional": false,
+            "examples": [
+              {
+                "event": {
+                  "JID": "120363198956240527@g.us",
+                  "Notify": "invite",
+                  "Sender": null,
+                  "SenderPN": null,
+                  "Timestamp": "2025-09-15T14:33:28-03:00",
+                  "Name": null,
+                  "Topic": null,
+                  "Locked": null,
+                  "Announce": null,
+                  "Ephemeral": null,
+                  "MembershipApprovalMode": null,
+                  "Delete": null,
+                  "Link": null,
+                  "Unlink": null,
+                  "NewInviteLink": null,
+                  "PrevParticipantVersionID": "1757945759520220",
+                  "ParticipantVersionID": "1757957608129976",
+                  "JoinReason": "invite",
+                  "Join": [
+                    "69381002424393@lid"
+                  ],
+                  "Leave": null,
+                  "Promote": null,
+                  "Demote": null,
+                  "UnknownChanges": null
+                },
+                "type": "GroupInfo"
+              },
+              {
+                "event": {
+                  "JID": "120363339104325305@g.us",
+                  "Notify": "FinZap360",
+                  "Sender": "557199619351@s.whatsapp.net",
+                  "SenderPN": null,
+                  "Timestamp": "2025-09-15T14:36:27-03:00",
+                  "Name": null,
+                  "Topic": null,
+                  "Locked": null,
+                  "Announce": null,
+                  "Ephemeral": null,
+                  "MembershipApprovalMode": null,
+                  "Delete": null,
+                  "Link": null,
+                  "Unlink": null,
+                  "NewInviteLink": null,
+                  "PrevParticipantVersionID": "1757350484734684",
+                  "ParticipantVersionID": "1757957787212049",
+                  "JoinReason": "",
+                  "Join": null,
+                  "Leave": [
+                    "557199619351@s.whatsapp.net"
+                  ],
+                  "Promote": null,
+                  "Demote": null,
+                  "UnknownChanges": null
+                },
+                "type": "GroupInfo"
+              },
+              {
+                "event": {
+                  "JID": "120363294537607353@g.us",
+                  "Notify": "Regina",
+                  "Sender": "554192470609@s.whatsapp.net",
+                  "SenderPN": null,
+                  "Timestamp": "2025-09-15T14:39:25-03:00",
+                  "Name": null,
+                  "Topic": null,
+                  "Locked": null,
+                  "Announce": null,
+                  "Ephemeral": null,
+                  "MembershipApprovalMode": null,
+                  "Delete": null,
+                  "Link": null,
+                  "Unlink": null,
+                  "NewInviteLink": null,
+                  "PrevParticipantVersionID": "1757956074814524",
+                  "ParticipantVersionID": "1757957965139017",
+                  "JoinReason": "",
+                  "Join": null,
+                  "Leave": [
+                    "554192470609@s.whatsapp.net"
+                  ],
+                  "Promote": null,
+                  "Demote": null,
+                  "UnknownChanges": null
+                },
+                "type": "GroupInfo"
+              },
+              {
+                "event": {
+                  "JID": "120363419210737395@g.us",
+                  "Notify": "gabriela silva",
+                  "Sender": "5511941336961@s.whatsapp.net",
+                  "SenderPN": null,
+                  "Timestamp": "2025-09-15T14:46:41-03:00",
+                  "Name": null,
+                  "Topic": null,
+                  "Locked": null,
+                  "Announce": null,
+                  "Ephemeral": null,
+                  "MembershipApprovalMode": null,
+                  "Delete": null,
+                  "Link": null,
+                  "Unlink": null,
+                  "NewInviteLink": null,
+                  "PrevParticipantVersionID": "1757951371950524",
+                  "ParticipantVersionID": "1757958401627612",
+                  "JoinReason": "",
+                  "Join": null,
+                  "Leave": [
+                    "5511941336961@s.whatsapp.net"
+                  ],
+                  "Promote": null,
+                  "Demote": null,
+                  "UnknownChanges": null
+                },
+                "type": "GroupInfo"
+              },
+              {
+                "event": {
+                  "JID": "120363234767978628@g.us",
+                  "Notify": "Rodrigo Ciescielski",
+                  "Sender": "554199477942@s.whatsapp.net",
+                  "SenderPN": null,
+                  "Timestamp": "2025-09-15T14:56:50-03:00",
+                  "Name": null,
+                  "Topic": null,
+                  "Locked": null,
+                  "Announce": null,
+                  "Ephemeral": null,
+                  "MembershipApprovalMode": null,
+                  "Delete": null,
+                  "Link": null,
+                  "Unlink": null,
+                  "NewInviteLink": null,
+                  "PrevParticipantVersionID": "1757940369434737",
+                  "ParticipantVersionID": "1757959010112286",
+                  "JoinReason": "",
+                  "Join": null,
+                  "Leave": [
+                    "554199477942@s.whatsapp.net"
+                  ],
+                  "Promote": null,
+                  "Demote": null,
+                  "UnknownChanges": null
+                },
+                "type": "GroupInfo"
+              }
+            ],
+            "children": {
+              "event": {
+                "path": "body.data.event",
+                "type": "object",
+                "optional": false,
+                "examples": [
+                  {
+                    "JID": "120363198956240527@g.us",
+                    "Notify": "invite",
+                    "Sender": null,
+                    "SenderPN": null,
+                    "Timestamp": "2025-09-15T14:33:28-03:00",
+                    "Name": null,
+                    "Topic": null,
+                    "Locked": null,
+                    "Announce": null,
+                    "Ephemeral": null,
+                    "MembershipApprovalMode": null,
+                    "Delete": null,
+                    "Link": null,
+                    "Unlink": null,
+                    "NewInviteLink": null,
+                    "PrevParticipantVersionID": "1757945759520220",
+                    "ParticipantVersionID": "1757957608129976",
+                    "JoinReason": "invite",
+                    "Join": [
+                      "69381002424393@lid"
+                    ],
+                    "Leave": null,
+                    "Promote": null,
+                    "Demote": null,
+                    "UnknownChanges": null
+                  },
+                  {
+                    "JID": "120363339104325305@g.us",
+                    "Notify": "FinZap360",
+                    "Sender": "557199619351@s.whatsapp.net",
+                    "SenderPN": null,
+                    "Timestamp": "2025-09-15T14:36:27-03:00",
+                    "Name": null,
+                    "Topic": null,
+                    "Locked": null,
+                    "Announce": null,
+                    "Ephemeral": null,
+                    "MembershipApprovalMode": null,
+                    "Delete": null,
+                    "Link": null,
+                    "Unlink": null,
+                    "NewInviteLink": null,
+                    "PrevParticipantVersionID": "1757350484734684",
+                    "ParticipantVersionID": "1757957787212049",
+                    "JoinReason": "",
+                    "Join": null,
+                    "Leave": [
+                      "557199619351@s.whatsapp.net"
+                    ],
+                    "Promote": null,
+                    "Demote": null,
+                    "UnknownChanges": null
+                  },
+                  {
+                    "JID": "120363294537607353@g.us",
+                    "Notify": "Regina",
+                    "Sender": "554192470609@s.whatsapp.net",
+                    "SenderPN": null,
+                    "Timestamp": "2025-09-15T14:39:25-03:00",
+                    "Name": null,
+                    "Topic": null,
+                    "Locked": null,
+                    "Announce": null,
+                    "Ephemeral": null,
+                    "MembershipApprovalMode": null,
+                    "Delete": null,
+                    "Link": null,
+                    "Unlink": null,
+                    "NewInviteLink": null,
+                    "PrevParticipantVersionID": "1757956074814524",
+                    "ParticipantVersionID": "1757957965139017",
+                    "JoinReason": "",
+                    "Join": null,
+                    "Leave": [
+                      "554192470609@s.whatsapp.net"
+                    ],
+                    "Promote": null,
+                    "Demote": null,
+                    "UnknownChanges": null
+                  },
+                  {
+                    "JID": "120363419210737395@g.us",
+                    "Notify": "gabriela silva",
+                    "Sender": "5511941336961@s.whatsapp.net",
+                    "SenderPN": null,
+                    "Timestamp": "2025-09-15T14:46:41-03:00",
+                    "Name": null,
+                    "Topic": null,
+                    "Locked": null,
+                    "Announce": null,
+                    "Ephemeral": null,
+                    "MembershipApprovalMode": null,
+                    "Delete": null,
+                    "Link": null,
+                    "Unlink": null,
+                    "NewInviteLink": null,
+                    "PrevParticipantVersionID": "1757951371950524",
+                    "ParticipantVersionID": "1757958401627612",
+                    "JoinReason": "",
+                    "Join": null,
+                    "Leave": [
+                      "5511941336961@s.whatsapp.net"
+                    ],
+                    "Promote": null,
+                    "Demote": null,
+                    "UnknownChanges": null
+                  },
+                  {
+                    "JID": "120363234767978628@g.us",
+                    "Notify": "Rodrigo Ciescielski",
+                    "Sender": "554199477942@s.whatsapp.net",
+                    "SenderPN": null,
+                    "Timestamp": "2025-09-15T14:56:50-03:00",
+                    "Name": null,
+                    "Topic": null,
+                    "Locked": null,
+                    "Announce": null,
+                    "Ephemeral": null,
+                    "MembershipApprovalMode": null,
+                    "Delete": null,
+                    "Link": null,
+                    "Unlink": null,
+                    "NewInviteLink": null,
+                    "PrevParticipantVersionID": "1757940369434737",
+                    "ParticipantVersionID": "1757959010112286",
+                    "JoinReason": "",
+                    "Join": null,
+                    "Leave": [
+                      "554199477942@s.whatsapp.net"
+                    ],
+                    "Promote": null,
+                    "Demote": null,
+                    "UnknownChanges": null
+                  }
+                ],
+                "children": {
+                  "JID": {
+                    "path": "body.data.event.JID",
+                    "type": "string",
+                    "optional": false,
+                    "examples": [
+                      "120363198956240527@g.us",
+                      "120363339104325305@g.us",
+                      "120363294537607353@g.us",
+                      "120363419210737395@g.us",
+                      "120363234767978628@g.us"
+                    ]
+                  },
+                  "Notify": {
+                    "path": "body.data.event.Notify",
+                    "type": "string",
+                    "optional": false,
+                    "examples": [
+                      "Trestin",
+                      "FinZap360",
+                      "Regina",
+                      "gabriela silva",
+                      "Rodrigo Ciescielski"
+                    ]
+                  },
+                  "Sender": {
+                    "path": "body.data.event.Sender",
+                    "type": "union",
+                    "optional": false,
+                    "examples": [
+                      "5511942201314@s.whatsapp.net",
+                      "557199619351@s.whatsapp.net",
+                      "554192470609@s.whatsapp.net",
+                      "5511941336961@s.whatsapp.net",
+                      "554199477942@s.whatsapp.net"
+                    ]
+                  },
+                  "SenderPN": {
+                    "path": "body.data.event.SenderPN",
+                    "type": "union",
+                    "optional": false,
+                    "examples": [
+                      null,
+                      "5512982592513@s.whatsapp.net"
+                    ]
+                  },
+                  "Timestamp": {
+                    "path": "body.data.event.Timestamp",
+                    "type": "string",
+                    "optional": false,
+                    "examples": [
+                      "2025-09-15T14:33:28-03:00",
+                      "2025-09-15T14:36:27-03:00",
+                      "2025-09-15T14:39:25-03:00",
+                      "2025-09-15T14:46:41-03:00",
+                      "2025-09-15T14:56:50-03:00"
+                    ]
+                  },
+                  "Name": {
+                    "path": "body.data.event.Name",
+                    "type": "null",
+                    "optional": false,
+                    "examples": [
+                      null
+                    ]
+                  },
+                  "Topic": {
+                    "path": "body.data.event.Topic",
+                    "type": "union",
+                    "optional": false,
+                    "examples": [
+                      {
+                        "Topic": "🚀 *Sejam bem vindos ao grupo Automatik - Parceiros!* 🚀\n\nEste grupo é uma comunidade voltada para usuários e entusiastas desta super ferramenta. O objetivo aqui é compartilhar conhecimento, trocar experiências, tirar dúvidas com outros usuários e divulgar atualizações e explorar juntos todo o potencial que ela oferece.\n\n── ✦ ─ △ ─ ✦ ──\n\n*[ REGRAS DO GRUPO ]*\n\n*⚠️ Proibidos:*\n🚫 *Bots:* Proibido uso de bots por membros – banimento imediato.\n\n*🔗 Links externos:* Não compartilhe links de outras comunidades sem permissão.\n\n*📢 Spam e autopromoção:* Evite spam, links de afiliados e mensagens repetitivas.\n\n*🗣️ Respeito sempre:* Linguagem ofensiva, brigas e preconceito não serão tolerados.\n\n*⚠️ Conteúdo ilegal:* Proibido conteúdo pirata, falso, ilegal ou fora do tema.\n\n*🚷 Abordagem no privado:* Sem spam ou ofertas no privado. Denuncie abusos.\n\n*🗯️ Discussões e brigas:* Problemas pessoais devem ser resolvidos no privado.\n\n*🚫 Exposição ou ofensas:* Qualquer forma de difamação resultará em banimento imediato.\n\n\n*✅ Permitidos:*\n🎉 *Compartilhar conhecimento:* Poste ideias e experiências que ajudem a comunidade.\n\n📚 *Aprendizado contínuo:* Busque aprender e ensinar sempre que possível.\n\n🎨 *Respeito mútuo:* Opiniões e colaborações devem ser valorizadas.\n\n🤖 *Foco no tema:* Assuntos sobre automações, IA, bots, marketing e CRM são bem-vindos.\n\n*Obs:* Caso desrespeite as regras listadas poderá ser banido sem aviso prévio!\n\n── ✦ ─ △ ─ ✦ ──\n\n*Link do grupo:* https://chat.whatsapp.com/CHZpsF6OwnkIRzog3wVAOJ\n\n📱 *Link de todos os Grupos Automatik:* https://links.mundoautomatik.com\n",
+                        "TopicID": "3EB0FFFA949C4489F31CC3",
+                        "TopicSetAt": "2025-09-15T03:11:46-03:00",
+                        "TopicSetBy": "5511953892653@s.whatsapp.net",
+                        "TopicSetByPN": "",
+                        "TopicDeleted": false
+                      },
+                      {
+                        "Topic": "🚀 *Sejam bem vindos ao grupo ⏸️ META/FB APPROVALS - Automatik!* 🚀\n\nEste grupo é uma comunidade voltada para usuários e entusiastas desta super ferramenta. O objetivo aqui é compartilhar conhecimento, trocar experiências, tirar dúvidas com outros usuários e divulgar atualizações e explorar juntos todo o potencial que ela oferece.\n\n── ✦ ─ △ ─ ✦ ──\n\n*[ REGRAS DO GRUPO ]*\n\n*⚠️ Proibidos:*\n🚫 *Bots:* Proibido uso de bots por membros – banimento imediato.\n\n*🔗 Links externos:* Não compartilhe links de outras comunidades sem permissão.\n\n*📢 Spam e autopromoção:* Evite spam, links de afiliados e mensagens repetitivas.\n\n*🗣️ Respeito sempre:* Linguagem ofensiva, brigas e preconceito não serão tolerados.\n\n*⚠️ Conteúdo ilegal:* Proibido conteúdo pirata, falso, ilegal ou fora do tema.\n\n*🚷 Abordagem no privado:* Sem spam ou ofertas no privado. Denuncie abusos.\n\n*🗯️ Discussões e brigas:* Problemas pessoais devem ser resolvidos no privado.\n\n*🚫 Exposição ou ofensas:* Qualquer forma de difamação resultará em banimento imediato.\n\n\n*✅ Permitidos:*\n🎉 *Compartilhar conhecimento:* Poste ideias e experiências que ajudem a comunidade.\n\n📚 *Aprendizado contínuo:* Busque aprender e ensinar sempre que possível.\n\n🎨 *Respeito mútuo:* Opiniões e colaborações devem ser valorizadas.\n\n🤖 *Foco no tema:* Assuntos sobre automações, IA, bots, marketing e CRM são bem-vindos.\n\n*Obs:* Caso desrespeite as regras listadas poderá ser banido sem aviso prévio!\n\n── ✦ ─ △ ─ ✦ ──\n\n*Link do grupo:* https://chat.whatsapp.com/Gjg8lDsPtm721KqEz3Zf0V\n\n📱 *Link de todos os Grupos Automatik:* https://links.mundoautomatik.com\n",
+                        "TopicID": "3EB0B5571B55501888239E",
+                        "TopicSetAt": "2025-09-15T03:14:08-03:00",
+                        "TopicSetBy": "5511953892653@s.whatsapp.net",
+                        "TopicSetByPN": "",
+                        "TopicDeleted": false
+                      },
+                      {
+                        "Topic": "🚀 *Sejam bem vindos ao grupo Colabs | Automatik®!* 🚀\n\nEste grupo é uma comunidade voltada para usuários e entusiastas desta super ferramenta. O objetivo aqui é compartilhar conhecimento, trocar experiências, tirar dúvidas com outros usuários e divulgar atualizações e explorar juntos todo o potencial que ela oferece.\n\n── ✦ ─ △ ─ ✦ ──\n\n*[ REGRAS DO GRUPO ]*\n\n*⚠️ Proibidos:*\n🚫 *Bots:* Proibido uso de bots por membros – banimento imediato.\n\n*🔗 Links externos:* Não compartilhe links de outras comunidades sem permissão.\n\n*📢 Spam e autopromoção:* Evite spam, links de afiliados e mensagens repetitivas.\n\n*🗣️ Respeito sempre:* Linguagem ofensiva, brigas e preconceito não serão tolerados.\n\n*⚠️ Conteúdo ilegal:* Proibido conteúdo pirata, falso, ilegal ou fora do tema.\n\n*🚷 Abordagem no privado:* Sem spam ou ofertas no privado. Denuncie abusos.\n\n*🗯️ Discussões e brigas:* Problemas pessoais devem ser resolvidos no privado.\n\n*🚫 Exposição ou ofensas:* Qualquer forma de difamação resultará em banimento imediato.\n\n\n*✅ Permitidos:*\n🎉 *Compartilhar conhecimento:* Poste ideias e experiências que ajudem a comunidade.\n\n📚 *Aprendizado contínuo:* Busque aprender e ensinar sempre que possível.\n\n🎨 *Respeito mútuo:* Opiniões e colaborações devem ser valorizadas.\n\n🤖 *Foco no tema:* Assuntos sobre automações, IA, bots, marketing e CRM são bem-vindos.\n\n*Obs:* Caso desrespeite as regras listadas poderá ser banido sem aviso prévio!\n\n── ✦ ─ △ ─ ✦ ──\n\n*Link do grupo:* https://chat.whatsapp.com/DYjxEyV7YiLC0f6wqqjh1s\n\n📱 *Link de todos os Grupos Automatik:* https://links.mundoautomatik.com\n",
+                        "TopicID": "3EB0ACA62E4FC5B8B0E61C",
+                        "TopicSetAt": "2025-09-15T03:16:37-03:00",
+                        "TopicSetBy": "5511953892653@s.whatsapp.net",
+                        "TopicSetByPN": "",
+                        "TopicDeleted": false
+                      },
+                      {
+                        "Topic": "🚀 *Sejam bem vindos ao grupo MagnusBilling | Automatik®!* 🚀\n\nEste grupo é uma comunidade voltada para usuários e entusiastas desta super ferramenta. O objetivo aqui é compartilhar conhecimento, trocar experiências, tirar dúvidas com outros usuários e divulgar atualizações e explorar juntos todo o potencial que ela oferece.\n\n── ✦ ─ △ ─ ✦ ──\n\n*[ REGRAS DO GRUPO ]*\n\n*⚠️ Proibidos:*\n🚫 *Bots:* Proibido uso de bots por membros – banimento imediato.\n\n*🔗 Links externos:* Não compartilhe links de outras comunidades sem permissão.\n\n*📢 Spam e autopromoção:* Evite spam, links de afiliados e mensagens repetitivas.\n\n*🗣️ Respeito sempre:* Linguagem ofensiva, brigas e preconceito não serão tolerados.\n\n*⚠️ Conteúdo ilegal:* Proibido conteúdo pirata, falso, ilegal ou fora do tema.\n\n*🚷 Abordagem no privado:* Sem spam ou ofertas no privado. Denuncie abusos.\n\n*🗯️ Discussões e brigas:* Problemas pessoais devem ser resolvidos no privado.\n\n*🚫 Exposição ou ofensas:* Qualquer forma de difamação resultará em banimento imediato.\n\n\n*✅ Permitidos:*\n🎉 *Compartilhar conhecimento:* Poste ideias e experiências que ajudem a comunidade.\n\n📚 *Aprendizado contínuo:* Busque aprender e ensinar sempre que possível.\n\n🎨 *Respeito mútuo:* Opiniões e colaborações devem ser valorizadas.\n\n🤖 *Foco no tema:* Assuntos sobre automações, IA, bots, marketing e CRM são bem-vindos.\n\n*Obs:* Caso desrespeite as regras listadas poderá ser banido sem aviso prévio!\n\n── ✦ ─ △ ─ ✦ ──\n\n*Link do grupo:* https://chat.whatsapp.com/BkLTWHmIHSa02QYrNyFpz0\n\n📱 *Link de todos os Grupos Automatik:* https://links.mundoautomatik.com\n",
+                        "TopicID": "3EB03BC6442BA1336C1C69",
+                        "TopicSetAt": "2025-09-15T03:17:03-03:00",
+                        "TopicSetBy": "5511953892653@s.whatsapp.net",
+                        "TopicSetByPN": "",
+                        "TopicDeleted": false
+                      },
+                      null
+                    ],
+                    "children": {
+                      "Topic": {
+                        "path": "body.data.event.Topic.Topic",
+                        "type": "string",
+                        "optional": true,
+                        "examples": [
+                          "🚀 *Sejam bem vindos ao grupo MEGA #01 | Automatik®!* 🚀\n\nEste grupo é uma comunidade voltada para usuários e entusiastas desta super ferramenta. O objetivo aqui é compartilhar conhecimento, trocar experiências, tirar dúvidas com outros usuários e divulgar atualizações e explorar juntos todo o potencial que ela oferece.\n\n── ✦ ─ △ ─ ✦ ──\n\n*[ REGRAS DO GRUPO ]*\n\n*⚠️ Proibidos:*\n🚫 *Bots:* Proibido uso de bots por membros – banimento imediato.\n\n*🔗 Links externos:* Não compartilhe links de outras comunidades sem permissão.\n\n*📢 Spam e autopromoção:* Evite spam, links de afiliados e mensagens repetitivas.\n\n*🗣️ Respeito sempre:* Linguagem ofensiva, brigas e preconceito não serão tolerados.\n\n*⚠️ Conteúdo ilegal:* Proibido conteúdo pirata, falso, ilegal ou fora do tema.\n\n*🚷 Abordagem no privado:* Sem spam ou ofertas no privado. Denuncie abusos.\n\n*🗯️ Discussões e brigas:* Problemas pessoais devem ser resolvidos no privado.\n\n*🚫 Exposição ou ofensas:* Qualquer forma de difamação resultará em banimento imediato.\n\n\n*✅ Permitidos:*\n🎉 *Compartilhar conhecimento:* Poste ideias e experiências que ajudem a comunidade.\n\n📚 *Aprendizado contínuo:* Busque aprender e ensinar sempre que possível.\n\n🎨 *Respeito mútuo:* Opiniões e colaborações devem ser valorizadas.\n\n🤖 *Foco no tema:* Assuntos sobre automações, IA, bots, marketing e CRM são bem-vindos.\n\n*Obs:* Caso desrespeite as regras listadas poderá ser banido sem aviso prévio!\n\n── ✦ ─ △ ─ ✦ ──\n\n*Link do grupo:* https://chat.whatsapp.com/BhlrvqKuBLQ62AwqHDAEyf\n\n📱 *Link de todos os Grupos Automatik:* https://links.mundoautomatik.com\n",
+                          "🚀 *Sejam bem vindos ao grupo Automatik - Parceiros!* 🚀\n\nEste grupo é uma comunidade voltada para usuários e entusiastas desta super ferramenta. O objetivo aqui é compartilhar conhecimento, trocar experiências, tirar dúvidas com outros usuários e divulgar atualizações e explorar juntos todo o potencial que ela oferece.\n\n── ✦ ─ △ ─ ✦ ──\n\n*[ REGRAS DO GRUPO ]*\n\n*⚠️ Proibidos:*\n🚫 *Bots:* Proibido uso de bots por membros – banimento imediato.\n\n*🔗 Links externos:* Não compartilhe links de outras comunidades sem permissão.\n\n*📢 Spam e autopromoção:* Evite spam, links de afiliados e mensagens repetitivas.\n\n*🗣️ Respeito sempre:* Linguagem ofensiva, brigas e preconceito não serão tolerados.\n\n*⚠️ Conteúdo ilegal:* Proibido conteúdo pirata, falso, ilegal ou fora do tema.\n\n*🚷 Abordagem no privado:* Sem spam ou ofertas no privado. Denuncie abusos.\n\n*🗯️ Discussões e brigas:* Problemas pessoais devem ser resolvidos no privado.\n\n*🚫 Exposição ou ofensas:* Qualquer forma de difamação resultará em banimento imediato.\n\n\n*✅ Permitidos:*\n🎉 *Compartilhar conhecimento:* Poste ideias e experiências que ajudem a comunidade.\n\n📚 *Aprendizado contínuo:* Busque aprender e ensinar sempre que possível.\n\n🎨 *Respeito mútuo:* Opiniões e colaborações devem ser valorizadas.\n\n🤖 *Foco no tema:* Assuntos sobre automações, IA, bots, marketing e CRM são bem-vindos.\n\n*Obs:* Caso desrespeite as regras listadas poderá ser banido sem aviso prévio!\n\n── ✦ ─ △ ─ ✦ ──\n\n*Link do grupo:* https://chat.whatsapp.com/CHZpsF6OwnkIRzog3wVAOJ\n\n📱 *Link de todos os Grupos Automatik:* https://links.mundoautomatik.com\n",
+                          "🚀 *Sejam bem vindos ao grupo ⏸️ META/FB APPROVALS - Automatik!* 🚀\n\nEste grupo é uma comunidade voltada para usuários e entusiastas desta super ferramenta. O objetivo aqui é compartilhar conhecimento, trocar experiências, tirar dúvidas com outros usuários e divulgar atualizações e explorar juntos todo o potencial que ela oferece.\n\n── ✦ ─ △ ─ ✦ ──\n\n*[ REGRAS DO GRUPO ]*\n\n*⚠️ Proibidos:*\n🚫 *Bots:* Proibido uso de bots por membros – banimento imediato.\n\n*🔗 Links externos:* Não compartilhe links de outras comunidades sem permissão.\n\n*📢 Spam e autopromoção:* Evite spam, links de afiliados e mensagens repetitivas.\n\n*🗣️ Respeito sempre:* Linguagem ofensiva, brigas e preconceito não serão tolerados.\n\n*⚠️ Conteúdo ilegal:* Proibido conteúdo pirata, falso, ilegal ou fora do tema.\n\n*🚷 Abordagem no privado:* Sem spam ou ofertas no privado. Denuncie abusos.\n\n*🗯️ Discussões e brigas:* Problemas pessoais devem ser resolvidos no privado.\n\n*🚫 Exposição ou ofensas:* Qualquer forma de difamação resultará em banimento imediato.\n\n\n*✅ Permitidos:*\n🎉 *Compartilhar conhecimento:* Poste ideias e experiências que ajudem a comunidade.\n\n📚 *Aprendizado contínuo:* Busque aprender e ensinar sempre que possível.\n\n🎨 *Respeito mútuo:* Opiniões e colaborações devem ser valorizadas.\n\n🤖 *Foco no tema:* Assuntos sobre automações, IA, bots, marketing e CRM são bem-vindos.\n\n*Obs:* Caso desrespeite as regras listadas poderá ser banido sem aviso prévio!\n\n── ✦ ─ △ ─ ✦ ──\n\n*Link do grupo:* https://chat.whatsapp.com/Gjg8lDsPtm721KqEz3Zf0V\n\n📱 *Link de todos os Grupos Automatik:* https://links.mundoautomatik.com\n",
+                          "🚀 *Sejam bem vindos ao grupo Colabs | Automatik®!* 🚀\n\nEste grupo é uma comunidade voltada para usuários e entusiastas desta super ferramenta. O objetivo aqui é compartilhar conhecimento, trocar experiências, tirar dúvidas com outros usuários e divulgar atualizações e explorar juntos todo o potencial que ela oferece.\n\n── ✦ ─ △ ─ ✦ ──\n\n*[ REGRAS DO GRUPO ]*\n\n*⚠️ Proibidos:*\n🚫 *Bots:* Proibido uso de bots por membros – banimento imediato.\n\n*🔗 Links externos:* Não compartilhe links de outras comunidades sem permissão.\n\n*📢 Spam e autopromoção:* Evite spam, links de afiliados e mensagens repetitivas.\n\n*🗣️ Respeito sempre:* Linguagem ofensiva, brigas e preconceito não serão tolerados.\n\n*⚠️ Conteúdo ilegal:* Proibido conteúdo pirata, falso, ilegal ou fora do tema.\n\n*🚷 Abordagem no privado:* Sem spam ou ofertas no privado. Denuncie abusos.\n\n*🗯️ Discussões e brigas:* Problemas pessoais devem ser resolvidos no privado.\n\n*🚫 Exposição ou ofensas:* Qualquer forma de difamação resultará em banimento imediato.\n\n\n*✅ Permitidos:*\n🎉 *Compartilhar conhecimento:* Poste ideias e experiências que ajudem a comunidade.\n\n📚 *Aprendizado contínuo:* Busque aprender e ensinar sempre que possível.\n\n🎨 *Respeito mútuo:* Opiniões e colaborações devem ser valorizadas.\n\n🤖 *Foco no tema:* Assuntos sobre automações, IA, bots, marketing e CRM são bem-vindos.\n\n*Obs:* Caso desrespeite as regras listadas poderá ser banido sem aviso prévio!\n\n── ✦ ─ △ ─ ✦ ──\n\n*Link do grupo:* https://chat.whatsapp.com/DYjxEyV7YiLC0f6wqqjh1s\n\n📱 *Link de todos os Grupos Automatik:* https://links.mundoautomatik.com\n",
+                          "🚀 *Sejam bem vindos ao grupo MagnusBilling | Automatik®!* 🚀\n\nEste grupo é uma comunidade voltada para usuários e entusiastas desta super ferramenta. O objetivo aqui é compartilhar conhecimento, trocar experiências, tirar dúvidas com outros usuários e divulgar atualizações e explorar juntos todo o potencial que ela oferece.\n\n── ✦ ─ △ ─ ✦ ──\n\n*[ REGRAS DO GRUPO ]*\n\n*⚠️ Proibidos:*\n🚫 *Bots:* Proibido uso de bots por membros – banimento imediato.\n\n*🔗 Links externos:* Não compartilhe links de outras comunidades sem permissão.\n\n*📢 Spam e autopromoção:* Evite spam, links de afiliados e mensagens repetitivas.\n\n*🗣️ Respeito sempre:* Linguagem ofensiva, brigas e preconceito não serão tolerados.\n\n*⚠️ Conteúdo ilegal:* Proibido conteúdo pirata, falso, ilegal ou fora do tema.\n\n*🚷 Abordagem no privado:* Sem spam ou ofertas no privado. Denuncie abusos.\n\n*🗯️ Discussões e brigas:* Problemas pessoais devem ser resolvidos no privado.\n\n*🚫 Exposição ou ofensas:* Qualquer forma de difamação resultará em banimento imediato.\n\n\n*✅ Permitidos:*\n🎉 *Compartilhar conhecimento:* Poste ideias e experiências que ajudem a comunidade.\n\n📚 *Aprendizado contínuo:* Busque aprender e ensinar sempre que possível.\n\n🎨 *Respeito mútuo:* Opiniões e colaborações devem ser valorizadas.\n\n🤖 *Foco no tema:* Assuntos sobre automações, IA, bots, marketing e CRM são bem-vindos.\n\n*Obs:* Caso desrespeite as regras listadas poderá ser banido sem aviso prévio!\n\n── ✦ ─ △ ─ ✦ ──\n\n*Link do grupo:* https://chat.whatsapp.com/BkLTWHmIHSa02QYrNyFpz0\n\n📱 *Link de todos os Grupos Automatik:* https://links.mundoautomatik.com\n"
+                        ]
+                      },
+                      "TopicID": {
+                        "path": "body.data.event.Topic.TopicID",
+                        "type": "string",
+                        "optional": true,
+                        "examples": [
+                          "3EB0E85DFF3B7C2E93CFE4",
+                          "3EB0FFFA949C4489F31CC3",
+                          "3EB0B5571B55501888239E",
+                          "3EB0ACA62E4FC5B8B0E61C",
+                          "3EB03BC6442BA1336C1C69"
+                        ]
+                      },
+                      "TopicSetAt": {
+                        "path": "body.data.event.Topic.TopicSetAt",
+                        "type": "string",
+                        "optional": true,
+                        "examples": [
+                          "2025-09-15T03:10:37-03:00",
+                          "2025-09-15T03:11:46-03:00",
+                          "2025-09-15T03:14:08-03:00",
+                          "2025-09-15T03:16:37-03:00",
+                          "2025-09-15T03:17:03-03:00"
+                        ]
+                      },
+                      "TopicSetBy": {
+                        "path": "body.data.event.Topic.TopicSetBy",
+                        "type": "string",
+                        "optional": true,
+                        "examples": [
+                          "5511953892653@s.whatsapp.net"
+                        ]
+                      },
+                      "TopicSetByPN": {
+                        "path": "body.data.event.Topic.TopicSetByPN",
+                        "type": "string",
+                        "optional": true,
+                        "examples": [
+                          ""
+                        ]
+                      },
+                      "TopicDeleted": {
+                        "path": "body.data.event.Topic.TopicDeleted",
+                        "type": "boolean",
+                        "optional": true,
+                        "examples": [
+                          false
+                        ]
+                      }
+                    }
+                  },
+                  "Locked": {
+                    "path": "body.data.event.Locked",
+                    "type": "null",
+                    "optional": false,
+                    "examples": [
+                      null
+                    ]
+                  },
+                  "Announce": {
+                    "path": "body.data.event.Announce",
+                    "type": "union",
+                    "optional": false,
+                    "examples": [
+                      null,
+                      {
+                        "IsAnnounce": true,
+                        "AnnounceVersionID": "1757943987284817"
+                      },
+                      {
+                        "IsAnnounce": false,
+                        "AnnounceVersionID": "1757950127926246"
+                      },
+                      {
+                        "IsAnnounce": false,
+                        "AnnounceVersionID": "1757950755018736"
+                      }
+                    ],
+                    "children": {
+                      "IsAnnounce": {
+                        "path": "body.data.event.Announce.IsAnnounce",
+                        "type": "boolean",
+                        "optional": true,
+                        "examples": [
+                          true,
+                          false
+                        ]
+                      },
+                      "AnnounceVersionID": {
+                        "path": "body.data.event.Announce.AnnounceVersionID",
+                        "type": "string",
+                        "optional": true,
+                        "examples": [
+                          "1757943987284817",
+                          "1757950127926246",
+                          "1757950755018736"
+                        ]
+                      }
+                    }
+                  },
+                  "Ephemeral": {
+                    "path": "body.data.event.Ephemeral",
+                    "type": "null",
+                    "optional": false,
+                    "examples": [
+                      null
+                    ]
+                  },
+                  "MembershipApprovalMode": {
+                    "path": "body.data.event.MembershipApprovalMode",
+                    "type": "null",
+                    "optional": false,
+                    "examples": [
+                      null
+                    ]
+                  },
+                  "Delete": {
+                    "path": "body.data.event.Delete",
+                    "type": "null",
+                    "optional": false,
+                    "examples": [
+                      null
+                    ]
+                  },
+                  "Link": {
+                    "path": "body.data.event.Link",
+                    "type": "null",
+                    "optional": false,
+                    "examples": [
+                      null
+                    ]
+                  },
+                  "Unlink": {
+                    "path": "body.data.event.Unlink",
+                    "type": "union",
+                    "optional": false,
+                    "examples": [
+                      null,
+                      {
+                        "Type": "sibling_group",
+                        "UnlinkReason": "unlink_group",
+                        "Group": {
+                          "JID": "120363403765907903@g.us",
+                          "Name": "Kanban GO 💬 StackLab",
+                          "NameSetAt": "2025-08-12T11:06:49-03:00",
+                          "NameSetBy": "",
+                          "NameSetByPN": "",
+                          "IsDefaultSubGroup": false
+                        }
+                      },
+                      {
+                        "Type": "sibling_group",
+                        "UnlinkReason": "unlink_group",
+                        "Group": {
+                          "JID": "120363418751640561@g.us",
+                          "Name": "MultiAPI.com.br",
+                          "NameSetAt": "2025-09-08T12:16:20-03:00",
+                          "NameSetBy": "",
+                          "NameSetByPN": "",
+                          "IsDefaultSubGroup": false
+                        }
+                      },
+                      {
+                        "Type": "parent_group",
+                        "UnlinkReason": "unlink_group",
+                        "Group": {
+                          "JID": "120363338994977146@g.us",
+                          "Name": "StackLab - Soluções Digitais",
+                          "NameSetAt": "2024-12-05T18:39:30-03:00",
+                          "NameSetBy": "",
+                          "NameSetByPN": "",
+                          "IsDefaultSubGroup": false
+                        }
+                      },
+                      {
+                        "Type": "sibling_group",
+                        "UnlinkReason": "unlink_group",
+                        "Group": {
+                          "JID": "120363377613832231@g.us",
+                          "Name": "OrbitChat.io - Develop",
+                          "NameSetAt": "2025-03-10T09:11:27-03:00",
+                          "NameSetBy": "",
+                          "NameSetByPN": "",
+                          "IsDefaultSubGroup": false
+                        }
+                      }
+                    ],
+                    "children": {
+                      "Type": {
+                        "path": "body.data.event.Unlink.Type",
+                        "type": "string",
+                        "optional": true,
+                        "examples": [
+                          "sibling_group",
+                          "parent_group"
+                        ]
+                      },
+                      "UnlinkReason": {
+                        "path": "body.data.event.Unlink.UnlinkReason",
+                        "type": "string",
+                        "optional": true,
+                        "examples": [
+                          "unlink_group"
+                        ]
+                      },
+                      "Group": {
+                        "path": "body.data.event.Unlink.Group",
+                        "type": "object",
+                        "optional": true,
+                        "examples": [
+                          {
+                            "JID": "120363403765907903@g.us",
+                            "Name": "Kanban GO 💬 StackLab",
+                            "NameSetAt": "2025-08-12T11:06:49-03:00",
+                            "NameSetBy": "",
+                            "NameSetByPN": "",
+                            "IsDefaultSubGroup": false
+                          },
+                          {
+                            "JID": "120363418751640561@g.us",
+                            "Name": "MultiAPI.com.br",
+                            "NameSetAt": "2025-09-08T12:16:20-03:00",
+                            "NameSetBy": "",
+                            "NameSetByPN": "",
+                            "IsDefaultSubGroup": false
+                          },
+                          {
+                            "JID": "120363338994977146@g.us",
+                            "Name": "StackLab - Soluções Digitais",
+                            "NameSetAt": "2024-12-05T18:39:30-03:00",
+                            "NameSetBy": "",
+                            "NameSetByPN": "",
+                            "IsDefaultSubGroup": false
+                          },
+                          {
+                            "JID": "120363377613832231@g.us",
+                            "Name": "OrbitChat.io - Develop",
+                            "NameSetAt": "2025-03-10T09:11:27-03:00",
+                            "NameSetBy": "",
+                            "NameSetByPN": "",
+                            "IsDefaultSubGroup": false
+                          }
+                        ],
+                        "children": {
+                          "JID": {
+                            "path": "body.data.event.Unlink.Group.JID",
+                            "type": "string",
+                            "optional": false,
+                            "examples": [
+                              "120363403765907903@g.us",
+                              "120363418751640561@g.us",
+                              "120363338994977146@g.us",
+                              "120363377613832231@g.us"
+                            ]
+                          },
+                          "Name": {
+                            "path": "body.data.event.Unlink.Group.Name",
+                            "type": "string",
+                            "optional": false,
+                            "examples": [
+                              "Kanban GO 💬 StackLab",
+                              "MultiAPI.com.br",
+                              "StackLab - Soluções Digitais",
+                              "OrbitChat.io - Develop"
+                            ]
+                          },
+                          "NameSetAt": {
+                            "path": "body.data.event.Unlink.Group.NameSetAt",
+                            "type": "string",
+                            "optional": false,
+                            "examples": [
+                              "2025-08-12T11:06:49-03:00",
+                              "2025-09-08T12:16:20-03:00",
+                              "2024-12-05T18:39:30-03:00",
+                              "2025-03-10T09:11:27-03:00"
+                            ]
+                          },
+                          "NameSetBy": {
+                            "path": "body.data.event.Unlink.Group.NameSetBy",
+                            "type": "string",
+                            "optional": false,
+                            "examples": [
+                              ""
+                            ]
+                          },
+                          "NameSetByPN": {
+                            "path": "body.data.event.Unlink.Group.NameSetByPN",
+                            "type": "string",
+                            "optional": false,
+                            "examples": [
+                              ""
+                            ]
+                          },
+                          "IsDefaultSubGroup": {
+                            "path": "body.data.event.Unlink.Group.IsDefaultSubGroup",
+                            "type": "boolean",
+                            "optional": false,
+                            "examples": [
+                              false
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "NewInviteLink": {
+                    "path": "body.data.event.NewInviteLink",
+                    "type": "union",
+                    "optional": false,
+                    "examples": [
+                      "https://chat.whatsapp.com/LVpKlErm1wrAC5B8cXAUqt",
+                      "https://chat.whatsapp.com/K0qLZTHffsyFMDD1gQVVTy",
+                      "https://chat.whatsapp.com/IloNraZaUqQGfwpzpS8Tsy",
+                      "https://chat.whatsapp.com/DYjxEyV7YiLC0f6wqqjh1s",
+                      null
+                    ]
+                  },
+                  "PrevParticipantVersionID": {
+                    "path": "body.data.event.PrevParticipantVersionID",
+                    "type": "string",
+                    "optional": false,
+                    "examples": [
+                      "1757945759520220",
+                      "1757350484734684",
+                      "1757956074814524",
+                      "1757951371950524",
+                      "1757940369434737"
+                    ]
+                  },
+                  "ParticipantVersionID": {
+                    "path": "body.data.event.ParticipantVersionID",
+                    "type": "string",
+                    "optional": false,
+                    "examples": [
+                      "1757957608129976",
+                      "1757957787212049",
+                      "1757957965139017",
+                      "1757958401627612",
+                      "1757959010112286"
+                    ]
+                  },
+                  "JoinReason": {
+                    "path": "body.data.event.JoinReason",
+                    "type": "string",
+                    "optional": false,
+                    "examples": [
+                      "",
+                      "invite_auto_add",
+                      "auto_add",
+                      "invite",
+                      "linked_group_join"
+                    ]
+                  },
+                  "Join": {
+                    "path": "body.data.event.Join",
+                    "type": "union",
+                    "optional": false,
+                    "examples": [
+                      [
+                        "83215092060272@lid"
+                      ],
+                      [
+                        "5511939608055@s.whatsapp.net"
+                      ],
+                      null,
+                      [
+                        "5522997471079@s.whatsapp.net"
+                      ],
+                      [
+                        "69381002424393@lid"
+                      ]
+                    ],
+                    "arrayItemType": {
+                      "path": "body.data.event.Join[0]",
+                      "type": "string",
+                      "optional": false,
+                      "examples": [
+                        "5512991745185@s.whatsapp.net",
+                        "83215092060272@lid",
+                        "5511939608055@s.whatsapp.net",
+                        "5522997471079@s.whatsapp.net",
+                        "69381002424393@lid"
+                      ]
+                    }
+                  },
+                  "Leave": {
+                    "path": "body.data.event.Leave",
+                    "type": "union",
+                    "optional": false,
+                    "examples": [
+                      [
+                        "5511942201314@s.whatsapp.net"
+                      ],
+                      [
+                        "557199619351@s.whatsapp.net"
+                      ],
+                      [
+                        "554192470609@s.whatsapp.net"
+                      ],
+                      [
+                        "5511941336961@s.whatsapp.net"
+                      ],
+                      [
+                        "554199477942@s.whatsapp.net"
+                      ]
+                    ],
+                    "arrayItemType": {
+                      "path": "body.data.event.Leave[0]",
+                      "type": "string",
+                      "optional": false,
+                      "examples": [
+                        "5511942201314@s.whatsapp.net",
+                        "557199619351@s.whatsapp.net",
+                        "554192470609@s.whatsapp.net",
+                        "5511941336961@s.whatsapp.net",
+                        "554199477942@s.whatsapp.net"
+                      ]
+                    }
+                  },
+                  "Promote": {
+                    "path": "body.data.event.Promote",
+                    "type": "union",
+                    "optional": false,
+                    "examples": [
+                      null,
+                      [
+                        "559492999518@s.whatsapp.net"
+                      ],
+                      [
+                        "555491055778@s.whatsapp.net"
+                      ]
+                    ],
+                    "arrayItemType": {
+                      "path": "body.data.event.Promote[0]",
+                      "type": "string",
+                      "optional": false,
+                      "examples": [
+                        "559492999518@s.whatsapp.net",
+                        "555491055778@s.whatsapp.net"
+                      ]
+                    }
+                  },
+                  "Demote": {
+                    "path": "body.data.event.Demote",
+                    "type": "null",
+                    "optional": false,
+                    "examples": [
+                      null
+                    ]
+                  },
+                  "UnknownChanges": {
+                    "path": "body.data.event.UnknownChanges",
+                    "type": "null",
+                    "optional": false,
+                    "examples": [
+                      null
+                    ]
+                  }
+                }
+              },
+              "type": {
+                "path": "body.data.type",
+                "type": "string",
+                "optional": false,
+                "examples": [
+                  "GroupInfo"
+                ]
+              }
+            }
+          },
+          "eventType": {
+            "path": "body.eventType",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "GroupInfo"
+            ]
+          },
+          "timestamp": {
+            "path": "body.timestamp",
+            "type": "number",
+            "optional": false,
+            "examples": [
+              1757957608,
+              1757957787,
+              1757957965,
+              1757958401,
+              1757959010
+            ]
+          },
+          "token": {
+            "path": "body.token",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "!!qYWdJ61zk3i1AvTfXhzE!!",
+              "!!!qYWdJ61zk3i1AvTfXhzE!!!"
+            ]
+          },
+          "userID": {
+            "path": "body.userID",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "9e832a8666e02c047a5167194c703eaf",
+              "80402f2ab5855b2132cf45d6b365a62c"
+            ]
+          },
+          "userJID": {
+            "path": "body.userJID",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "5521971532700:4@s.whatsapp.net",
+              "5521979232690:36@s.whatsapp.net"
+            ]
+          },
+          "userName": {
+            "path": "body.userName",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "setupautomatizado",
+              "setupautomatizado-hibrido"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

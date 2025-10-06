@@ -1,0 +1,604 @@
+{
+  "eventType": "Appstate",
+  "firstSeen": "2025-09-14T10:59:19.734Z",
+  "lastSeen": "2025-09-15T01:27:42.905Z",
+  "totalReceived": 12,
+  "schemaVersion": 1,
+  "lastModified": "2025-09-15T01:27:42.877Z",
+  "fields": {
+    "required": [
+      "headers",
+      "headers.host",
+      "headers.user-agent",
+      "headers.content-length",
+      "headers.accept",
+      "headers.content-type",
+      "headers.accept-encoding",
+      "body",
+      "body.baseURL",
+      "body.data",
+      "body.data.event",
+      "body.data.event.Index",
+      "body.data.event.Index[]",
+      "body.data.event.timestamp",
+      "body.data.event.chatLockSettings",
+      "body.data.event.chatLockSettings.hideLockedChats",
+      "body.data.type",
+      "body.eventType",
+      "body.timestamp",
+      "body.token",
+      "body.userID",
+      "body.userJID",
+      "body.userName",
+      "body.data.event.stickerAction",
+      "body.data.event.stickerAction.URL",
+      "body.data.event.stickerAction.fileEncSHA256",
+      "body.data.event.stickerAction.mediaKey",
+      "body.data.event.stickerAction.mimetype",
+      "body.data.event.stickerAction.height",
+      "body.data.event.stickerAction.width",
+      "body.data.event.stickerAction.directPath",
+      "body.data.event.stickerAction.fileLength",
+      "body.data.event.stickerAction.isFavorite",
+      "body.data.event.stickerAction.deviceIDHint",
+      "body.data.event.stickerAction.isLottie",
+      "body.data.event.contactAction.fullName",
+      "body.data.event.contactAction.firstName",
+      "body.data.event.contactAction.lidJID",
+      "body.data.event.contactAction.saveOnPrimaryAddressbook",
+      "body.data.event.agentAction.name",
+      "body.data.event.agentAction.deviceID",
+      "body.data.event.agentAction.isDeleted",
+      "body.data.event.callLogAction.callLogRecord",
+      "body.data.event.callLogAction.callLogRecord.callResult",
+      "body.data.event.callLogAction.callLogRecord.isDndMode",
+      "body.data.event.callLogAction.callLogRecord.silenceReason",
+      "body.data.event.callLogAction.callLogRecord.duration",
+      "body.data.event.callLogAction.callLogRecord.startTime",
+      "body.data.event.callLogAction.callLogRecord.isIncoming",
+      "body.data.event.callLogAction.callLogRecord.isVideo",
+      "body.data.event.callLogAction.callLogRecord.callID",
+      "body.data.event.callLogAction.callLogRecord.callCreatorJID",
+      "body.data.event.callLogAction.callLogRecord.participants",
+      "body.data.event.callLogAction.callLogRecord.participants[]",
+      "body.data.event.callLogAction.callLogRecord.participants[].userJID",
+      "body.data.event.callLogAction.callLogRecord.participants[].callResult",
+      "body.data.event.callLogAction.callLogRecord.callType",
+      "body.data.event.callLogAction"
+    ],
+    "optional": [
+      "body.data.event.stickerAction",
+      "body.data.event.contactAction",
+      "body.data.event.contactAction.firstName",
+      "body.data.event.agentAction",
+      "body.data.event.callLogAction"
+    ],
+    "truncated": []
+  },
+  "variations": [],
+  "savedStructure": {
+    "path": "",
+    "type": "object",
+    "optional": false,
+    "examples": [
+      {
+        "headers": {
+          "host": "185.245.182.69:3000",
+          "user-agent": "ZuckZapGo-Webhook/1.0",
+          "content-length": "729",
+          "accept": "application/json",
+          "content-type": "application/json",
+          "accept-encoding": "gzip"
+        },
+        "body": {
+          "baseURL": "https://api.zuckzapgo.com",
+          "data": {
+            "event": {
+              "Index": [
+                "call_log",
+                "5521971532700@s.whatsapp.net",
+                "A583A766A084735E5EAEAB5A2ACC800E",
+                "0"
+              ],
+              "timestamp": 1757899661209,
+              "callLogAction": {
+                "callLogRecord": {
+                  "callResult": 4,
+                  "isDndMode": false,
+                  "silenceReason": 0,
+                  "duration": 0,
+                  "startTime": 1757899618,
+                  "isIncoming": false,
+                  "isVideo": true,
+                  "callID": "A583A766A084735E5EAEAB5A2ACC800E",
+                  "callCreatorJID": "5521971532700@s.whatsapp.net",
+                  "participants": [
+                    {
+                      "userJID": "5521971893103@s.whatsapp.net",
+                      "callResult": 4
+                    }
+                  ],
+                  "callType": 0
+                }
+              }
+            },
+            "type": "AppState"
+          },
+          "eventType": "AppState",
+          "timestamp": 1757899660,
+          "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+          "userID": "9e832a8666e02c047a5167194c703eaf",
+          "userJID": "5521971532700:4@s.whatsapp.net",
+          "userName": "setupautomatizado"
+        }
+      }
+    ],
+    "children": {
+      "headers": {
+        "path": "headers",
+        "type": "object",
+        "optional": false,
+        "examples": [
+          {
+            "host": "185.245.182.69:3000",
+            "user-agent": "ZuckZapGo-Webhook/1.0",
+            "content-length": "729",
+            "accept": "application/json",
+            "content-type": "application/json",
+            "accept-encoding": "gzip"
+          }
+        ],
+        "children": {
+          "host": {
+            "path": "headers.host",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "185.245.182.69:3000"
+            ]
+          },
+          "user-agent": {
+            "path": "headers.user-agent",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "ZuckZapGo-Webhook/1.0"
+            ]
+          },
+          "content-length": {
+            "path": "headers.content-length",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "729"
+            ]
+          },
+          "accept": {
+            "path": "headers.accept",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "application/json"
+            ]
+          },
+          "content-type": {
+            "path": "headers.content-type",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "application/json"
+            ]
+          },
+          "accept-encoding": {
+            "path": "headers.accept-encoding",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "gzip"
+            ]
+          }
+        }
+      },
+      "body": {
+        "path": "body",
+        "type": "object",
+        "optional": false,
+        "examples": [
+          {
+            "baseURL": "https://api.zuckzapgo.com",
+            "data": {
+              "event": {
+                "Index": [
+                  "call_log",
+                  "5521971532700@s.whatsapp.net",
+                  "A583A766A084735E5EAEAB5A2ACC800E",
+                  "0"
+                ],
+                "timestamp": 1757899661209,
+                "callLogAction": {
+                  "callLogRecord": {
+                    "callResult": 4,
+                    "isDndMode": false,
+                    "silenceReason": 0,
+                    "duration": 0,
+                    "startTime": 1757899618,
+                    "isIncoming": false,
+                    "isVideo": true,
+                    "callID": "A583A766A084735E5EAEAB5A2ACC800E",
+                    "callCreatorJID": "5521971532700@s.whatsapp.net",
+                    "participants": [
+                      {
+                        "userJID": "5521971893103@s.whatsapp.net",
+                        "callResult": 4
+                      }
+                    ],
+                    "callType": 0
+                  }
+                }
+              },
+              "type": "AppState"
+            },
+            "eventType": "AppState",
+            "timestamp": 1757899660,
+            "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+            "userID": "9e832a8666e02c047a5167194c703eaf",
+            "userJID": "5521971532700:4@s.whatsapp.net",
+            "userName": "setupautomatizado"
+          }
+        ],
+        "children": {
+          "baseURL": {
+            "path": "body.baseURL",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "https://api.zuckzapgo.com"
+            ]
+          },
+          "data": {
+            "path": "body.data",
+            "type": "object",
+            "optional": false,
+            "examples": [
+              {
+                "event": {
+                  "Index": [
+                    "call_log",
+                    "5521971532700@s.whatsapp.net",
+                    "A583A766A084735E5EAEAB5A2ACC800E",
+                    "0"
+                  ],
+                  "timestamp": 1757899661209,
+                  "callLogAction": {
+                    "callLogRecord": {
+                      "callResult": 4,
+                      "isDndMode": false,
+                      "silenceReason": 0,
+                      "duration": 0,
+                      "startTime": 1757899618,
+                      "isIncoming": false,
+                      "isVideo": true,
+                      "callID": "A583A766A084735E5EAEAB5A2ACC800E",
+                      "callCreatorJID": "5521971532700@s.whatsapp.net",
+                      "participants": [
+                        {
+                          "userJID": "5521971893103@s.whatsapp.net",
+                          "callResult": 4
+                        }
+                      ],
+                      "callType": 0
+                    }
+                  }
+                },
+                "type": "AppState"
+              }
+            ],
+            "children": {
+              "event": {
+                "path": "body.data.event",
+                "type": "object",
+                "optional": false,
+                "examples": [
+                  {
+                    "Index": [
+                      "call_log",
+                      "5521971532700@s.whatsapp.net",
+                      "A583A766A084735E5EAEAB5A2ACC800E",
+                      "0"
+                    ],
+                    "timestamp": 1757899661209,
+                    "callLogAction": {
+                      "callLogRecord": {
+                        "callResult": 4,
+                        "isDndMode": false,
+                        "silenceReason": 0,
+                        "duration": 0,
+                        "startTime": 1757899618,
+                        "isIncoming": false,
+                        "isVideo": true,
+                        "callID": "A583A766A084735E5EAEAB5A2ACC800E",
+                        "callCreatorJID": "5521971532700@s.whatsapp.net",
+                        "participants": [
+                          {
+                            "userJID": "5521971893103@s.whatsapp.net",
+                            "callResult": 4
+                          }
+                        ],
+                        "callType": 0
+                      }
+                    }
+                  }
+                ],
+                "children": {
+                  "Index": {
+                    "path": "body.data.event.Index",
+                    "type": "array",
+                    "optional": false,
+                    "examples": [
+                      [
+                        "call_log",
+                        "5521971532700@s.whatsapp.net",
+                        "A583A766A084735E5EAEAB5A2ACC800E",
+                        "0"
+                      ]
+                    ],
+                    "arrayItemType": {
+                      "path": "body.data.event.Index[0]",
+                      "type": "string",
+                      "optional": false,
+                      "examples": [
+                        "call_log"
+                      ]
+                    }
+                  },
+                  "timestamp": {
+                    "path": "body.data.event.timestamp",
+                    "type": "number",
+                    "optional": false,
+                    "examples": [
+                      1757899661209
+                    ]
+                  },
+                  "callLogAction": {
+                    "path": "body.data.event.callLogAction",
+                    "type": "object",
+                    "optional": false,
+                    "examples": [
+                      {
+                        "callLogRecord": {
+                          "callResult": 4,
+                          "isDndMode": false,
+                          "silenceReason": 0,
+                          "duration": 0,
+                          "startTime": 1757899618,
+                          "isIncoming": false,
+                          "isVideo": true,
+                          "callID": "A583A766A084735E5EAEAB5A2ACC800E",
+                          "callCreatorJID": "5521971532700@s.whatsapp.net",
+                          "participants": [
+                            {
+                              "userJID": "5521971893103@s.whatsapp.net",
+                              "callResult": 4
+                            }
+                          ],
+                          "callType": 0
+                        }
+                      }
+                    ],
+                    "children": {
+                      "callLogRecord": {
+                        "path": "body.data.event.callLogAction.callLogRecord",
+                        "type": "object",
+                        "optional": false,
+                        "examples": [
+                          {
+                            "callResult": 4,
+                            "isDndMode": false,
+                            "silenceReason": 0,
+                            "duration": 0,
+                            "startTime": 1757899618,
+                            "isIncoming": false,
+                            "isVideo": true,
+                            "callID": "A583A766A084735E5EAEAB5A2ACC800E",
+                            "callCreatorJID": "5521971532700@s.whatsapp.net",
+                            "participants": [
+                              {
+                                "userJID": "5521971893103@s.whatsapp.net",
+                                "callResult": 4
+                              }
+                            ],
+                            "callType": 0
+                          }
+                        ],
+                        "children": {
+                          "callResult": {
+                            "path": "body.data.event.callLogAction.callLogRecord.callResult",
+                            "type": "number",
+                            "optional": false,
+                            "examples": [
+                              4
+                            ]
+                          },
+                          "isDndMode": {
+                            "path": "body.data.event.callLogAction.callLogRecord.isDndMode",
+                            "type": "boolean",
+                            "optional": false,
+                            "examples": [
+                              false
+                            ]
+                          },
+                          "silenceReason": {
+                            "path": "body.data.event.callLogAction.callLogRecord.silenceReason",
+                            "type": "number",
+                            "optional": false,
+                            "examples": [
+                              0
+                            ]
+                          },
+                          "duration": {
+                            "path": "body.data.event.callLogAction.callLogRecord.duration",
+                            "type": "number",
+                            "optional": false,
+                            "examples": [
+                              0
+                            ]
+                          },
+                          "startTime": {
+                            "path": "body.data.event.callLogAction.callLogRecord.startTime",
+                            "type": "number",
+                            "optional": false,
+                            "examples": [
+                              1757899618
+                            ]
+                          },
+                          "isIncoming": {
+                            "path": "body.data.event.callLogAction.callLogRecord.isIncoming",
+                            "type": "boolean",
+                            "optional": false,
+                            "examples": [
+                              false
+                            ]
+                          },
+                          "isVideo": {
+                            "path": "body.data.event.callLogAction.callLogRecord.isVideo",
+                            "type": "boolean",
+                            "optional": false,
+                            "examples": [
+                              true
+                            ]
+                          },
+                          "callID": {
+                            "path": "body.data.event.callLogAction.callLogRecord.callID",
+                            "type": "string",
+                            "optional": false,
+                            "examples": [
+                              "A583A766A084735E5EAEAB5A2ACC800E"
+                            ]
+                          },
+                          "callCreatorJID": {
+                            "path": "body.data.event.callLogAction.callLogRecord.callCreatorJID",
+                            "type": "string",
+                            "optional": false,
+                            "examples": [
+                              "5521971532700@s.whatsapp.net"
+                            ]
+                          },
+                          "participants": {
+                            "path": "body.data.event.callLogAction.callLogRecord.participants",
+                            "type": "array",
+                            "optional": false,
+                            "examples": [
+                              [
+                                {
+                                  "userJID": "5521971893103@s.whatsapp.net",
+                                  "callResult": 4
+                                }
+                              ]
+                            ],
+                            "arrayItemType": {
+                              "path": "body.data.event.callLogAction.callLogRecord.participants[0]",
+                              "type": "object",
+                              "optional": false,
+                              "examples": [
+                                {
+                                  "userJID": "5521971893103@s.whatsapp.net",
+                                  "callResult": 4
+                                }
+                              ],
+                              "children": {
+                                "userJID": {
+                                  "path": "body.data.event.callLogAction.callLogRecord.participants[0].userJID",
+                                  "type": "string",
+                                  "optional": false,
+                                  "examples": [
+                                    "5521971893103@s.whatsapp.net"
+                                  ]
+                                },
+                                "callResult": {
+                                  "path": "body.data.event.callLogAction.callLogRecord.participants[0].callResult",
+                                  "type": "number",
+                                  "optional": false,
+                                  "examples": [
+                                    4
+                                  ]
+                                }
+                              }
+                            }
+                          },
+                          "callType": {
+                            "path": "body.data.event.callLogAction.callLogRecord.callType",
+                            "type": "number",
+                            "optional": false,
+                            "examples": [
+                              0
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "type": {
+                "path": "body.data.type",
+                "type": "string",
+                "optional": false,
+                "examples": [
+                  "AppState"
+                ]
+              }
+            }
+          },
+          "eventType": {
+            "path": "body.eventType",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "AppState"
+            ]
+          },
+          "timestamp": {
+            "path": "body.timestamp",
+            "type": "number",
+            "optional": false,
+            "examples": [
+              1757899660
+            ]
+          },
+          "token": {
+            "path": "body.token",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "!!qYWdJ61zk3i1AvTfXhzE!!"
+            ]
+          },
+          "userID": {
+            "path": "body.userID",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "9e832a8666e02c047a5167194c703eaf"
+            ]
+          },
+          "userJID": {
+            "path": "body.userJID",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "5521971532700:4@s.whatsapp.net"
+            ]
+          },
+          "userName": {
+            "path": "body.userName",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "setupautomatizado"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

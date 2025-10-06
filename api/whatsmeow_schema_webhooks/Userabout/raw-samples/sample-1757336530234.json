@@ -1,0 +1,27 @@
+{
+  "headers": {
+    "host": "185.245.182.69:3000",
+    "user-agent": "ZuckZapGo-Webhook/1.0",
+    "content-length": "407",
+    "accept": "application/json",
+    "content-type": "application/json",
+    "accept-encoding": "gzip"
+  },
+  "body": {
+    "baseURL": "https://api.zuckzapgo.com",
+    "data": {
+      "event": {
+        "JID": "92328911999001@lid",
+        "Status": "Deixe sua mensagem, assim que puder responderei! :)",
+        "Timestamp": "2025-09-08T10:02:08-03:00"
+      },
+      "type": "UserAbout"
+    },
+    "eventType": "UserAbout",
+    "timestamp": 1757336528,
+    "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+    "userID": "9e832a8666e02c047a5167194c703eaf",
+    "userJID": "5521971532700:4@s.whatsapp.net",
+    "userName": "setupautomatizado"
+  }
+}

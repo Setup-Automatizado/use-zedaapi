@@ -1,0 +1,56 @@
+{
+  "headers": {
+    "accept": "application/json, text/plain, */*",
+    "content-type": "application/json",
+    "x-hub-signature": "sha1=b8b490805fa8ccb52438851373baaa2d2b0d8c6e",
+    "x-hub-signature-256": "sha256=530c08e5bd384bc94c71124f1cfa0a0e2645a48c509bf50b2fcd0bce914a6457",
+    "user-agent": "facebookexternalua",
+    "authorization": "K4D3OHUZTIYcPDsDTt1XMEU22DQh5uXeA",
+    "content-length": "1663",
+    "accept-encoding": "gzip, compress, deflate, br",
+    "host": "185.245.182.69:3000",
+    "connection": "keep-alive"
+  },
+  "body": {
+    "object": "whatsapp_business_account",
+    "entry": [
+      {
+        "id": "238279312705845",
+        "changes": [
+          {
+            "value": {
+              "messaging_product": "whatsapp",
+              "metadata": {
+                "display_phone_number": "5521995721970",
+                "phone_number_id": "241485579050647"
+              },
+              "contacts": [
+                {
+                  "profile": {
+                    "name": "Bruna"
+                  },
+                  "wa_id": "5514996297586"
+                }
+              ],
+              "calls": [
+                {
+                  "id": "wacid.HBgNNTUxNDk5NjI5NzU4NhUCABIYIEFDQjhBM0UyNkMwNjU3QTQ0MkQ2MEY2QzhBRDk2QzJEHBgNNTUyMTk5NTcyMTk3MBUCABUIAA==",
+                  "from": "5514996297586",
+                  "to": "5521995721970",
+                  "event": "connect",
+                  "timestamp": "1758940699",
+                  "direction": "USER_INITIATED",
+                  "session": {
+                    "sdp": "v=0\r\no=- 1758940699256 2 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE audio\r\na=msid-semantic: WMS 60ffa41b-7148-40a5-8c07-f765fadc2260\r\na=ice-lite\r\nm=audio 3484 UDP/TLS/RTP/SAVPF 111 126\r\nc=IN IP4 31.13.85.130\r\na=rtcp:9 IN IP4 0.0.0.0\r\na=candidate:1828070986 1 udp 2122260223 31.13.85.130 3484 typ host generation 0 network-cost 50\r\na=candidate:219428224 1 udp 2122262783 2a03:2880:f205:d0:face:b00c:0:699c 3484 typ host generation 0 network-cost 50\r\na=ice-ufrag:pKQipZpYyQSmAlbW\r\na=ice-pwd:vEpD4TOSUVcjOshw5O/lkg==\r\na=fingerprint:sha-256 F3:E4:AB:E5:7A:78:37:C9:1C:32:B6:AF:40:36:15:55:7A:7A:D1:40:FA:1E:6D:20:72:79:26:21:CF:8A:5E:D8\r\na=setup:actpass\r\na=mid:audio\r\na=sendrecv\r\na=msid:60ffa41b-7148-40a5-8c07-f765fadc2260 WhatsAppTrack1\r\na=rtcp-mux\r\na=rtpmap:111 opus/48000/2\r\na=rtcp-fb:111 transport-cc\r\na=fmtp:111 maxaveragebitrate=20000;maxplaybackrate=16000;minptime=20;sprop-maxcapturerate=16000;useinbandfec=1\r\na=rtpmap:126 telephone-event/8000\r\na=maxptime:20\r\na=ptime:20\r\na=ssrc:2470070781 cname:WhatsAppAudioStream1\r\n",
+                    "sdp_type": "offer"
+                  }
+                }
+              ]
+            },
+            "field": "calls"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,539 @@
+{
+  "eventType": "Labeledit",
+  "firstSeen": "2025-09-07T01:46:28.649Z",
+  "lastSeen": "2025-09-09T02:03:26.575Z",
+  "totalReceived": 2,
+  "schemaVersion": 2,
+  "lastModified": "2025-09-09T02:03:26.495Z",
+  "fields": {
+    "required": [
+      "headers",
+      "headers.host",
+      "headers.user-agent",
+      "headers.content-length",
+      "headers.accept",
+      "headers.content-type",
+      "headers.accept-encoding",
+      "body",
+      "body.data",
+      "body.data.event",
+      "body.data.event.Timestamp",
+      "body.data.event.LabelID",
+      "body.data.event.Action",
+      "body.data.event.Action.name",
+      "body.data.event.Action.color",
+      "body.data.event.Action.predefinedID",
+      "body.data.event.Action.deleted",
+      "body.data.event.Action.orderIndex",
+      "body.data.event.Action.isActive",
+      "body.data.event.Action.type",
+      "body.data.event.Action.isImmutable",
+      "body.data.event.FromFullSync",
+      "body.data.type",
+      "body.eventType",
+      "body.timestamp",
+      "body.token",
+      "body.userID",
+      "body.userJID",
+      "body.userName"
+    ],
+    "optional": [
+      "body.baseURL"
+    ],
+    "truncated": []
+  },
+  "variations": [],
+  "savedStructure": {
+    "path": "",
+    "type": "object",
+    "optional": false,
+    "examples": [
+      {
+        "headers": {
+          "host": "185.245.182.69:3000",
+          "user-agent": "ZuckZapGo-Webhook/1.0",
+          "content-length": "420",
+          "accept": "application/json",
+          "content-type": "application/json",
+          "accept-encoding": "gzip"
+        },
+        "body": {
+          "data": {
+            "event": {
+              "Timestamp": "2025-04-22T16:28:24.121-03:00",
+              "LabelID": "4",
+              "Action": {
+                "name": "Pago",
+                "color": 3,
+                "predefinedID": 4,
+                "deleted": false,
+                "orderIndex": 4,
+                "isActive": true,
+                "type": 5,
+                "isImmutable": false
+              },
+              "FromFullSync": false
+            },
+            "type": "LabelEdit"
+          },
+          "eventType": "LabelEdit",
+          "timestamp": 1757209577,
+          "token": "hibrido",
+          "userID": "baf81c72f383e3c7814c18aab2d72360",
+          "userJID": "5521979232690:28@s.whatsapp.net",
+          "userName": "hibrido"
+        }
+      },
+      {
+        "headers": {
+          "host": "185.245.182.69:3000",
+          "user-agent": "ZuckZapGo-Webhook/1.0",
+          "content-length": "455",
+          "accept": "application/json",
+          "content-type": "application/json",
+          "accept-encoding": "gzip"
+        },
+        "body": {
+          "baseURL": "https://api.zuckzapgo.com",
+          "data": {
+            "event": {
+              "Timestamp": "2025-04-22T16:28:24.121-03:00",
+              "LabelID": "8",
+              "Action": {
+                "name": "Lead",
+                "color": 18,
+                "predefinedID": 8,
+                "deleted": false,
+                "orderIndex": 8,
+                "isActive": true,
+                "type": 5,
+                "isImmutable": false
+              },
+              "FromFullSync": false
+            },
+            "type": "LabelEdit"
+          },
+          "eventType": "LabelEdit",
+          "timestamp": 1757383401,
+          "token": "teste",
+          "userID": "2f3400f9df6ed2280373c346b8e91f1b",
+          "userJID": "5521979232690:33@s.whatsapp.net",
+          "userName": "teste"
+        }
+      }
+    ],
+    "children": {
+      "headers": {
+        "path": "headers",
+        "type": "object",
+        "optional": false,
+        "examples": [
+          {
+            "host": "185.245.182.69:3000",
+            "user-agent": "ZuckZapGo-Webhook/1.0",
+            "content-length": "420",
+            "accept": "application/json",
+            "content-type": "application/json",
+            "accept-encoding": "gzip"
+          },
+          {
+            "host": "185.245.182.69:3000",
+            "user-agent": "ZuckZapGo-Webhook/1.0",
+            "content-length": "455",
+            "accept": "application/json",
+            "content-type": "application/json",
+            "accept-encoding": "gzip"
+          }
+        ],
+        "children": {
+          "host": {
+            "path": "headers.host",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "185.245.182.69:3000"
+            ]
+          },
+          "user-agent": {
+            "path": "headers.user-agent",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "ZuckZapGo-Webhook/1.0"
+            ]
+          },
+          "content-length": {
+            "path": "headers.content-length",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "420",
+              "455"
+            ]
+          },
+          "accept": {
+            "path": "headers.accept",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "application/json"
+            ]
+          },
+          "content-type": {
+            "path": "headers.content-type",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "application/json"
+            ]
+          },
+          "accept-encoding": {
+            "path": "headers.accept-encoding",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "gzip"
+            ]
+          }
+        }
+      },
+      "body": {
+        "path": "body",
+        "type": "object",
+        "optional": false,
+        "examples": [
+          {
+            "data": {
+              "event": {
+                "Timestamp": "2025-04-22T16:28:24.121-03:00",
+                "LabelID": "4",
+                "Action": {
+                  "name": "Pago",
+                  "color": 3,
+                  "predefinedID": 4,
+                  "deleted": false,
+                  "orderIndex": 4,
+                  "isActive": true,
+                  "type": 5,
+                  "isImmutable": false
+                },
+                "FromFullSync": false
+              },
+              "type": "LabelEdit"
+            },
+            "eventType": "LabelEdit",
+            "timestamp": 1757209577,
+            "token": "hibrido",
+            "userID": "baf81c72f383e3c7814c18aab2d72360",
+            "userJID": "5521979232690:28@s.whatsapp.net",
+            "userName": "hibrido"
+          },
+          {
+            "baseURL": "https://api.zuckzapgo.com",
+            "data": {
+              "event": {
+                "Timestamp": "2025-04-22T16:28:24.121-03:00",
+                "LabelID": "8",
+                "Action": {
+                  "name": "Lead",
+                  "color": 18,
+                  "predefinedID": 8,
+                  "deleted": false,
+                  "orderIndex": 8,
+                  "isActive": true,
+                  "type": 5,
+                  "isImmutable": false
+                },
+                "FromFullSync": false
+              },
+              "type": "LabelEdit"
+            },
+            "eventType": "LabelEdit",
+            "timestamp": 1757383401,
+            "token": "teste",
+            "userID": "2f3400f9df6ed2280373c346b8e91f1b",
+            "userJID": "5521979232690:33@s.whatsapp.net",
+            "userName": "teste"
+          }
+        ],
+        "children": {
+          "data": {
+            "path": "body.data",
+            "type": "object",
+            "optional": false,
+            "examples": [
+              {
+                "event": {
+                  "Timestamp": "2025-04-22T16:28:24.121-03:00",
+                  "LabelID": "4",
+                  "Action": {
+                    "name": "Pago",
+                    "color": 3,
+                    "predefinedID": 4,
+                    "deleted": false,
+                    "orderIndex": 4,
+                    "isActive": true,
+                    "type": 5,
+                    "isImmutable": false
+                  },
+                  "FromFullSync": false
+                },
+                "type": "LabelEdit"
+              },
+              {
+                "event": {
+                  "Timestamp": "2025-04-22T16:28:24.121-03:00",
+                  "LabelID": "8",
+                  "Action": {
+                    "name": "Lead",
+                    "color": 18,
+                    "predefinedID": 8,
+                    "deleted": false,
+                    "orderIndex": 8,
+                    "isActive": true,
+                    "type": 5,
+                    "isImmutable": false
+                  },
+                  "FromFullSync": false
+                },
+                "type": "LabelEdit"
+              }
+            ],
+            "children": {
+              "event": {
+                "path": "body.data.event",
+                "type": "object",
+                "optional": false,
+                "examples": [
+                  {
+                    "Timestamp": "2025-04-22T16:28:24.121-03:00",
+                    "LabelID": "4",
+                    "Action": {
+                      "name": "Pago",
+                      "color": 3,
+                      "predefinedID": 4,
+                      "deleted": false,
+                      "orderIndex": 4,
+                      "isActive": true,
+                      "type": 5,
+                      "isImmutable": false
+                    },
+                    "FromFullSync": false
+                  },
+                  {
+                    "Timestamp": "2025-04-22T16:28:24.121-03:00",
+                    "LabelID": "8",
+                    "Action": {
+                      "name": "Lead",
+                      "color": 18,
+                      "predefinedID": 8,
+                      "deleted": false,
+                      "orderIndex": 8,
+                      "isActive": true,
+                      "type": 5,
+                      "isImmutable": false
+                    },
+                    "FromFullSync": false
+                  }
+                ],
+                "children": {
+                  "Timestamp": {
+                    "path": "body.data.event.Timestamp",
+                    "type": "string",
+                    "optional": false,
+                    "examples": [
+                      "2025-04-22T16:28:24.121-03:00"
+                    ]
+                  },
+                  "LabelID": {
+                    "path": "body.data.event.LabelID",
+                    "type": "string",
+                    "optional": false,
+                    "examples": [
+                      "4",
+                      "8"
+                    ]
+                  },
+                  "Action": {
+                    "path": "body.data.event.Action",
+                    "type": "object",
+                    "optional": false,
+                    "examples": [
+                      {
+                        "name": "Pago",
+                        "color": 3,
+                        "predefinedID": 4,
+                        "deleted": false,
+                        "orderIndex": 4,
+                        "isActive": true,
+                        "type": 5,
+                        "isImmutable": false
+                      },
+                      {
+                        "name": "Lead",
+                        "color": 18,
+                        "predefinedID": 8,
+                        "deleted": false,
+                        "orderIndex": 8,
+                        "isActive": true,
+                        "type": 5,
+                        "isImmutable": false
+                      }
+                    ],
+                    "children": {
+                      "name": {
+                        "path": "body.data.event.Action.name",
+                        "type": "string",
+                        "optional": false,
+                        "examples": [
+                          "Pago",
+                          "Lead"
+                        ]
+                      },
+                      "color": {
+                        "path": "body.data.event.Action.color",
+                        "type": "number",
+                        "optional": false,
+                        "examples": [
+                          3,
+                          18
+                        ]
+                      },
+                      "predefinedID": {
+                        "path": "body.data.event.Action.predefinedID",
+                        "type": "number",
+                        "optional": false,
+                        "examples": [
+                          4,
+                          8
+                        ]
+                      },
+                      "deleted": {
+                        "path": "body.data.event.Action.deleted",
+                        "type": "boolean",
+                        "optional": false,
+                        "examples": [
+                          false
+                        ]
+                      },
+                      "orderIndex": {
+                        "path": "body.data.event.Action.orderIndex",
+                        "type": "number",
+                        "optional": false,
+                        "examples": [
+                          4,
+                          8
+                        ]
+                      },
+                      "isActive": {
+                        "path": "body.data.event.Action.isActive",
+                        "type": "boolean",
+                        "optional": false,
+                        "examples": [
+                          true
+                        ]
+                      },
+                      "type": {
+                        "path": "body.data.event.Action.type",
+                        "type": "number",
+                        "optional": false,
+                        "examples": [
+                          5
+                        ]
+                      },
+                      "isImmutable": {
+                        "path": "body.data.event.Action.isImmutable",
+                        "type": "boolean",
+                        "optional": false,
+                        "examples": [
+                          false
+                        ]
+                      }
+                    }
+                  },
+                  "FromFullSync": {
+                    "path": "body.data.event.FromFullSync",
+                    "type": "boolean",
+                    "optional": false,
+                    "examples": [
+                      false
+                    ]
+                  }
+                }
+              },
+              "type": {
+                "path": "body.data.type",
+                "type": "string",
+                "optional": false,
+                "examples": [
+                  "LabelEdit"
+                ]
+              }
+            }
+          },
+          "eventType": {
+            "path": "body.eventType",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "LabelEdit"
+            ]
+          },
+          "timestamp": {
+            "path": "body.timestamp",
+            "type": "number",
+            "optional": false,
+            "examples": [
+              1757209577,
+              1757383401
+            ]
+          },
+          "token": {
+            "path": "body.token",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "hibrido",
+              "teste"
+            ]
+          },
+          "userID": {
+            "path": "body.userID",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "baf81c72f383e3c7814c18aab2d72360",
+              "2f3400f9df6ed2280373c346b8e91f1b"
+            ]
+          },
+          "userJID": {
+            "path": "body.userJID",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "5521979232690:28@s.whatsapp.net",
+              "5521979232690:33@s.whatsapp.net"
+            ]
+          },
+          "userName": {
+            "path": "body.userName",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "hibrido",
+              "teste"
+            ]
+          },
+          "baseURL": {
+            "path": "body.baseURL",
+            "type": "string",
+            "optional": true,
+            "examples": [
+              "https://api.zuckzapgo.com"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

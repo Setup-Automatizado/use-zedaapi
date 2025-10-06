@@ -1,0 +1,28 @@
+{
+  "chatLid": null,
+  "isGroup": true,
+  "isNewsletter": false,
+  "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+  "messageId": "2402830010",
+  "phone": "120363377613832231-group",
+  "connectedPhone": "5521971532700",
+  "fromMe": false,
+  "momment": 1757143970000,
+  "expiresAt": null,
+  "status": "RECEIVED",
+  "chatName": "OrbitChat.io - Develop",
+  "senderPhoto": null,
+  "senderName": "WhatsApp",
+  "photo": null,
+  "broadcast": false,
+  "referenceMessageId": null,
+  "externalAdReply": null,
+  "forwarded": false,
+  "type": "ReceivedCallback",
+  "notification": "GROUP_PARTICIPANT_ADD",
+  "notificationParameters": [
+    "351934676500"
+  ],
+  "callId": null,
+  "code": null
+}

@@ -1,0 +1,25 @@
+{
+  "headers": {
+    "host": "185.245.182.69:3000",
+    "user-agent": "ZuckZapGo-Webhook/1.0",
+    "content-length": "320",
+    "accept": "application/json",
+    "content-type": "application/json",
+    "accept-encoding": "gzip"
+  },
+  "body": {
+    "baseURL": "https://api.zuckzapgo.com",
+    "data": {
+      "event": {
+        "Count": 0
+      },
+      "type": "OfflineSyncCompleted"
+    },
+    "eventType": "OfflineSyncCompleted",
+    "timestamp": 1757904475,
+    "token": "!!!qYWdJ61zk3i1AvTfXhzE!!!",
+    "userID": "80402f2ab5855b2132cf45d6b365a62c",
+    "userJID": "5521979232690:36@s.whatsapp.net",
+    "userName": "setupautomatizado-hibrido"
+  }
+}

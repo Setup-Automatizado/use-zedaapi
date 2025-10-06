@@ -1,0 +1,74 @@
+{
+  "headers": {
+    "host": "185.245.182.69:3000",
+    "user-agent": "ZuckZapGo-Webhook/1.0",
+    "content-length": "1071",
+    "accept": "application/json",
+    "content-type": "application/json",
+    "accept-encoding": "gzip"
+  },
+  "body": {
+    "data": {
+      "event": {
+        "JID": "120363401120537446@g.us",
+        "Timestamp": "2025-08-23T01:01:14.973-03:00",
+        "Action": {
+          "messageRange": {
+            "lastMessageTimestamp": 1755904881,
+            "messages": [
+              {
+                "key": {
+                  "remoteJID": "120363401120537446@g.us",
+                  "fromMe": true,
+                  "ID": "1AA631C625A5B90C04AE06D680F631E7"
+                },
+                "timestamp": 1755921628
+              },
+              {
+                "key": {
+                  "remoteJID": "120363401120537446@g.us",
+                  "fromMe": true,
+                  "ID": "05837223F1F0260F95037F76E75D6BFA"
+                },
+                "timestamp": 1755921636
+              },
+              {
+                "key": {
+                  "remoteJID": "120363401120537446@g.us",
+                  "fromMe": true,
+                  "ID": "E929B99892CEECBEEDE4DBCBFC738E0F"
+                },
+                "timestamp": 1755921663
+              },
+              {
+                "key": {
+                  "remoteJID": "120363401120537446@g.us",
+                  "fromMe": false,
+                  "ID": "3A21E81929EEDC8B1085",
+                  "participant": "559291512364@s.whatsapp.net"
+                },
+                "timestamp": 1755904881
+              },
+              {
+                "key": {
+                  "remoteJID": "120363401120537446@g.us",
+                  "fromMe": true,
+                  "ID": "A2659246247F48C84BB3509991C39474"
+                },
+                "timestamp": 1755921648
+              }
+            ]
+          }
+        },
+        "FromFullSync": false
+      },
+      "type": "DeleteChat"
+    },
+    "eventType": "DeleteChat",
+    "timestamp": 1757251369,
+    "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+    "userID": "9e832a8666e02c047a5167194c703eaf",
+    "userJID": "5521971532700:4@s.whatsapp.net",
+    "userName": "setupautomatizado"
+  }
+}

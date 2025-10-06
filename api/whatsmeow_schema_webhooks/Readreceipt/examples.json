@@ -10,6 +10,7 @@
         "accept-encoding": "gzip"
       },
       "body": {
+        "baseURL": "https://api.zuckzapgo.com",
         "data": {
           "event": {
             "Chat": "558581519864@s.whatsapp.net",
@@ -29,7 +30,13 @@
           },
           "state": "Delivered",
           "type": "ReadReceipt"
-        }
+        },
+        "eventType": "ReadReceipt",
+        "timestamp": 1757957796,
+        "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+        "userID": "9e832a8666e02c047a5167194c703eaf",
+        "userJID": "5521971532700:4@s.whatsapp.net",
+        "userName": "setupautomatizado"
       }
     }
   ],

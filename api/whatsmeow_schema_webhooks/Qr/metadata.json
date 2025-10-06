@@ -1,0 +1,256 @@
+{
+  "eventType": "Qr",
+  "firstSeen": "2025-09-07T01:46:02.832Z",
+  "lastSeen": "2025-09-07T01:46:02.893Z",
+  "totalReceived": 2,
+  "schemaVersion": 1,
+  "lastModified": "2025-09-07T01:46:02.881Z",
+  "fields": {
+    "required": [
+      "headers",
+      "headers.host",
+      "headers.user-agent",
+      "headers.content-length",
+      "headers.accept",
+      "headers.content-type",
+      "headers.accept-encoding",
+      "body",
+      "body.data",
+      "body.data.event",
+      "body.data.event.Codes",
+      "body.data.event.Codes[]",
+      "body.data.type",
+      "body.eventType",
+      "body.timestamp",
+      "body.token",
+      "body.userID",
+      "body.userJID",
+      "body.userName",
+      "body.data.code",
+      "body.data.qrCodeBase64"
+    ],
+    "optional": [],
+    "truncated": [
+      "body.data.qrCodeBase64"
+    ]
+  },
+  "variations": [],
+  "savedStructure": {
+    "path": "",
+    "type": "object",
+    "optional": false,
+    "examples": [
+      {
+        "headers": {
+          "host": "185.245.182.69:3000",
+          "user-agent": "ZuckZapGo-Webhook/1.0",
+          "content-length": "2168",
+          "accept": "application/json",
+          "content-type": "application/json",
+          "accept-encoding": "gzip"
+        },
+        "body": {
+          "data": {
+            "code": "2@7KoyahSMkwWJI9BCNK3UnLvhGaVTrSt7wMmg+Nj2MOyUnBfjmJyzj+9IqQZaLQU01eZuDxCgxH7nc052kwrM14l1CJhDVObcC+o=,6vhkZDPNJPaq0btkF0WKcZD6TMXJMEWRla8XTTE77T4=,YJfXRGECguflp4NqRGge4MM8XhKQzj5pPe5LGRBqCkQ=,2Ffr3Md9ZWRlyfOAiatKR4bDtmss7yR9td2Ba9a6xeY=",
+            "event": "code",
+            "qrCodeBase64": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN+AAAEtUlEQV...[TRUNCATED]",
+            "type": "QR"
+          },
+          "eventType": "QR",
+          "timestamp": 1757209561,
+          "token": "hibrido",
+          "userID": "baf81c72f383e3c7814c18aab2d72360",
+          "userJID": "",
+          "userName": "hibrido"
+        }
+      }
+    ],
+    "children": {
+      "headers": {
+        "path": "headers",
+        "type": "object",
+        "optional": false,
+        "examples": [
+          {
+            "host": "185.245.182.69:3000",
+            "user-agent": "ZuckZapGo-Webhook/1.0",
+            "content-length": "2168",
+            "accept": "application/json",
+            "content-type": "application/json",
+            "accept-encoding": "gzip"
+          }
+        ],
+        "children": {
+          "host": {
+            "path": "headers.host",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "185.245.182.69:3000"
+            ]
+          },
+          "user-agent": {
+            "path": "headers.user-agent",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "ZuckZapGo-Webhook/1.0"
+            ]
+          },
+          "content-length": {
+            "path": "headers.content-length",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "2168"
+            ]
+          },
+          "accept": {
+            "path": "headers.accept",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "application/json"
+            ]
+          },
+          "content-type": {
+            "path": "headers.content-type",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "application/json"
+            ]
+          },
+          "accept-encoding": {
+            "path": "headers.accept-encoding",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "gzip"
+            ]
+          }
+        }
+      },
+      "body": {
+        "path": "body",
+        "type": "object",
+        "optional": false,
+        "examples": [
+          {
+            "data": {
+              "code": "2@7KoyahSMkwWJI9BCNK3UnLvhGaVTrSt7wMmg+Nj2MOyUnBfjmJyzj+9IqQZaLQU01eZuDxCgxH7nc052kwrM14l1CJhDVObcC+o=,6vhkZDPNJPaq0btkF0WKcZD6TMXJMEWRla8XTTE77T4=,YJfXRGECguflp4NqRGge4MM8XhKQzj5pPe5LGRBqCkQ=,2Ffr3Md9ZWRlyfOAiatKR4bDtmss7yR9td2Ba9a6xeY=",
+              "event": "code",
+              "qrCodeBase64": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN+AAAEtUlEQV...[TRUNCATED]",
+              "type": "QR"
+            },
+            "eventType": "QR",
+            "timestamp": 1757209561,
+            "token": "hibrido",
+            "userID": "baf81c72f383e3c7814c18aab2d72360",
+            "userJID": "",
+            "userName": "hibrido"
+          }
+        ],
+        "children": {
+          "data": {
+            "path": "body.data",
+            "type": "object",
+            "optional": false,
+            "examples": [
+              {
+                "code": "2@7KoyahSMkwWJI9BCNK3UnLvhGaVTrSt7wMmg+Nj2MOyUnBfjmJyzj+9IqQZaLQU01eZuDxCgxH7nc052kwrM14l1CJhDVObcC+o=,6vhkZDPNJPaq0btkF0WKcZD6TMXJMEWRla8XTTE77T4=,YJfXRGECguflp4NqRGge4MM8XhKQzj5pPe5LGRBqCkQ=,2Ffr3Md9ZWRlyfOAiatKR4bDtmss7yR9td2Ba9a6xeY=",
+                "event": "code",
+                "qrCodeBase64": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN+AAAEtUlEQV...[TRUNCATED]",
+                "type": "QR"
+              }
+            ],
+            "children": {
+              "code": {
+                "path": "body.data.code",
+                "type": "string",
+                "optional": false,
+                "examples": [
+                  "2@7KoyahSMkwWJI9BCNK3UnLvhGaVTrSt7wMmg+Nj2MOyUnBfjmJyzj+9IqQZaLQU01eZuDxCgxH7nc052kwrM14l1CJhDVObcC+o=,6vhkZDPNJPaq0btkF0WKcZD6TMXJMEWRla8XTTE77T4=,YJfXRGECguflp4NqRGge4MM8XhKQzj5pPe5LGRBqCkQ=,2Ffr3Md9ZWRlyfOAiatKR4bDtmss7yR9td2Ba9a6xeY="
+                ]
+              },
+              "event": {
+                "path": "body.data.event",
+                "type": "string",
+                "optional": false,
+                "examples": [
+                  "code"
+                ]
+              },
+              "qrCodeBase64": {
+                "path": "body.data.qrCodeBase64",
+                "type": "string",
+                "optional": false,
+                "examples": [
+                  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEAAQMAAABmvDolAAAABlBMVEX///8AAABVwtN+AAAEtUlEQV...[TRUNCATED]"
+                ],
+                "isTruncated": true,
+                "originalType": "text"
+              },
+              "type": {
+                "path": "body.data.type",
+                "type": "string",
+                "optional": false,
+                "examples": [
+                  "QR"
+                ]
+              }
+            }
+          },
+          "eventType": {
+            "path": "body.eventType",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "QR"
+            ]
+          },
+          "timestamp": {
+            "path": "body.timestamp",
+            "type": "number",
+            "optional": false,
+            "examples": [
+              1757209561
+            ]
+          },
+          "token": {
+            "path": "body.token",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "hibrido"
+            ]
+          },
+          "userID": {
+            "path": "body.userID",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "baf81c72f383e3c7814c18aab2d72360"
+            ]
+          },
+          "userJID": {
+            "path": "body.userJID",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              ""
+            ]
+          },
+          "userName": {
+            "path": "body.userName",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "hibrido"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

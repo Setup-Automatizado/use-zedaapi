@@ -1,0 +1,20 @@
+{
+  "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+  "status": "READ",
+  "ids": [
+    "3AAF6EA1DE6379532D1D",
+    "3A5FDFCEF5F3930D2548",
+    "3ABE60E63CF27AB80A04",
+    "3EB0040DD8C9C0C6299D9D",
+    "3A86AB8559C72D429C0D",
+    "3EB015DF99A43C7AD9D255",
+    "3AD4764B8F1843B68982",
+    "3AF26350B9AD93E6B238"
+  ],
+  "momment": 1757142734000,
+  "participant": "554891118720",
+  "participantDevice": 0,
+  "phone": "120363182823169824-group",
+  "type": "MessageStatusCallback",
+  "isGroup": true
+}

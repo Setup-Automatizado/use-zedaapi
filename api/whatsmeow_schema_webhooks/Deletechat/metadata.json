@@ -1,0 +1,1127 @@
+{
+  "eventType": "Deletechat",
+  "firstSeen": "2025-09-07T13:23:24.490Z",
+  "lastSeen": "2025-09-11T02:47:11.027Z",
+  "totalReceived": 4,
+  "schemaVersion": 4,
+  "lastModified": "2025-09-11T02:47:10.681Z",
+  "fields": {
+    "required": [
+      "headers",
+      "headers.host",
+      "headers.user-agent",
+      "headers.content-length",
+      "headers.accept",
+      "headers.content-type",
+      "headers.accept-encoding",
+      "body",
+      "body.data",
+      "body.data.event",
+      "body.data.event.JID",
+      "body.data.event.Timestamp",
+      "body.data.event.Action",
+      "body.data.event.Action.messageRange",
+      "body.data.event.Action.messageRange.lastMessageTimestamp",
+      "body.data.event.Action.messageRange.messages",
+      "body.data.event.Action.messageRange.messages[]",
+      "body.data.event.Action.messageRange.messages[].key",
+      "body.data.event.Action.messageRange.messages[].key.remoteJID",
+      "body.data.event.Action.messageRange.messages[].key.fromMe",
+      "body.data.event.Action.messageRange.messages[].key.ID",
+      "body.data.event.Action.messageRange.messages[].timestamp",
+      "body.data.event.FromFullSync",
+      "body.data.type",
+      "body.eventType",
+      "body.timestamp",
+      "body.token",
+      "body.userID",
+      "body.userJID",
+      "body.userName"
+    ],
+    "optional": [
+      "body.data.event.Action.messageRange.lastMessageTimestamp",
+      "body.data.event.Action.messageRange.messages",
+      "body.data.event.Action.messageRange.lastSystemMessageTimestamp",
+      "body.baseURL",
+      "body.data.event.Action.messageRange.messages[].key.participant"
+    ],
+    "truncated": []
+  },
+  "variations": [],
+  "savedStructure": {
+    "path": "",
+    "type": "object",
+    "optional": false,
+    "examples": [
+      {
+        "headers": {
+          "host": "185.245.182.69:3000",
+          "user-agent": "ZuckZapGo-Webhook/1.0",
+          "content-length": "1071",
+          "accept": "application/json",
+          "content-type": "application/json",
+          "accept-encoding": "gzip"
+        },
+        "body": {
+          "data": {
+            "event": {
+              "JID": "120363401120537446@g.us",
+              "Timestamp": "2025-08-23T01:01:14.973-03:00",
+              "Action": {
+                "messageRange": {
+                  "lastMessageTimestamp": 1755904881,
+                  "messages": [
+                    {
+                      "key": {
+                        "remoteJID": "120363401120537446@g.us",
+                        "fromMe": true,
+                        "ID": "1AA631C625A5B90C04AE06D680F631E7"
+                      },
+                      "timestamp": 1755921628
+                    },
+                    {
+                      "key": {
+                        "remoteJID": "120363401120537446@g.us",
+                        "fromMe": true,
+                        "ID": "05837223F1F0260F95037F76E75D6BFA"
+                      },
+                      "timestamp": 1755921636
+                    },
+                    {
+                      "key": {
+                        "remoteJID": "120363401120537446@g.us",
+                        "fromMe": true,
+                        "ID": "E929B99892CEECBEEDE4DBCBFC738E0F"
+                      },
+                      "timestamp": 1755921663
+                    },
+                    {
+                      "key": {
+                        "remoteJID": "120363401120537446@g.us",
+                        "fromMe": false,
+                        "ID": "3A21E81929EEDC8B1085",
+                        "participant": "559291512364@s.whatsapp.net"
+                      },
+                      "timestamp": 1755904881
+                    },
+                    {
+                      "key": {
+                        "remoteJID": "120363401120537446@g.us",
+                        "fromMe": true,
+                        "ID": "A2659246247F48C84BB3509991C39474"
+                      },
+                      "timestamp": 1755921648
+                    }
+                  ]
+                }
+              },
+              "FromFullSync": false
+            },
+            "type": "DeleteChat"
+          },
+          "eventType": "DeleteChat",
+          "timestamp": 1757251369,
+          "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+          "userID": "9e832a8666e02c047a5167194c703eaf",
+          "userJID": "5521971532700:4@s.whatsapp.net",
+          "userName": "setupautomatizado"
+        }
+      },
+      {
+        "headers": {
+          "host": "185.245.182.69:3000",
+          "user-agent": "ZuckZapGo-Webhook/1.0",
+          "content-length": "414",
+          "accept": "application/json",
+          "content-type": "application/json",
+          "accept-encoding": "gzip"
+        },
+        "body": {
+          "baseURL": "https://api.zuckzapgo.com",
+          "data": {
+            "event": {
+              "JID": "120363374479055751@g.us",
+              "Timestamp": "2025-05-14T07:42:17.183-03:00",
+              "Action": {
+                "messageRange": {
+                  "lastSystemMessageTimestamp": 1737715207
+                }
+              },
+              "FromFullSync": false
+            },
+            "type": "DeleteChat"
+          },
+          "eventType": "DeleteChat",
+          "timestamp": 1757383417,
+          "token": "teste",
+          "userID": "2f3400f9df6ed2280373c346b8e91f1b",
+          "userJID": "5521979232690:33@s.whatsapp.net",
+          "userName": "teste"
+        }
+      },
+      {
+        "headers": {
+          "host": "185.245.182.69:3000",
+          "user-agent": "ZuckZapGo-Webhook/1.0",
+          "content-length": "414",
+          "accept": "application/json",
+          "content-type": "application/json",
+          "accept-encoding": "gzip"
+        },
+        "body": {
+          "baseURL": "https://api.zuckzapgo.com",
+          "data": {
+            "event": {
+              "JID": "120363373470673782@g.us",
+              "Timestamp": "2025-05-14T07:42:17.203-03:00",
+              "Action": {
+                "messageRange": {
+                  "lastSystemMessageTimestamp": 1737715143
+                }
+              },
+              "FromFullSync": false
+            },
+            "type": "DeleteChat"
+          },
+          "eventType": "DeleteChat",
+          "timestamp": 1757383477,
+          "token": "teste",
+          "userID": "2f3400f9df6ed2280373c346b8e91f1b",
+          "userJID": "5521979232690:33@s.whatsapp.net",
+          "userName": "teste"
+        }
+      },
+      {
+        "headers": {
+          "host": "185.245.182.69:3000",
+          "user-agent": "ZuckZapGo-Webhook/1.0",
+          "content-length": "652",
+          "accept": "application/json",
+          "content-type": "application/json",
+          "accept-encoding": "gzip"
+        },
+        "body": {
+          "baseURL": "https://api.zuckzapgo.com",
+          "data": {
+            "event": {
+              "JID": "120363422025707173@g.us",
+              "Timestamp": "2025-09-10T23:47:08.769-03:00",
+              "Action": {
+                "messageRange": {
+                  "lastMessageTimestamp": 1757535115,
+                  "lastSystemMessageTimestamp": 1757537834,
+                  "messages": [
+                    {
+                      "key": {
+                        "remoteJID": "120363422025707173@g.us",
+                        "fromMe": false,
+                        "ID": "3EB05E8B46A21C63CCEFB6",
+                        "participant": "5521967704448@s.whatsapp.net"
+                      },
+                      "timestamp": 1757535115
+                    }
+                  ]
+                }
+              },
+              "FromFullSync": false
+            },
+            "type": "DeleteChat"
+          },
+          "eventType": "DeleteChat",
+          "timestamp": 1757558829,
+          "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+          "userID": "9e832a8666e02c047a5167194c703eaf",
+          "userJID": "5521971532700:4@s.whatsapp.net",
+          "userName": "setupautomatizado"
+        }
+      }
+    ],
+    "children": {
+      "headers": {
+        "path": "headers",
+        "type": "object",
+        "optional": false,
+        "examples": [
+          {
+            "host": "185.245.182.69:3000",
+            "user-agent": "ZuckZapGo-Webhook/1.0",
+            "content-length": "1071",
+            "accept": "application/json",
+            "content-type": "application/json",
+            "accept-encoding": "gzip"
+          },
+          {
+            "host": "185.245.182.69:3000",
+            "user-agent": "ZuckZapGo-Webhook/1.0",
+            "content-length": "414",
+            "accept": "application/json",
+            "content-type": "application/json",
+            "accept-encoding": "gzip"
+          },
+          {
+            "host": "185.245.182.69:3000",
+            "user-agent": "ZuckZapGo-Webhook/1.0",
+            "content-length": "652",
+            "accept": "application/json",
+            "content-type": "application/json",
+            "accept-encoding": "gzip"
+          }
+        ],
+        "children": {
+          "host": {
+            "path": "headers.host",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "185.245.182.69:3000"
+            ]
+          },
+          "user-agent": {
+            "path": "headers.user-agent",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "ZuckZapGo-Webhook/1.0"
+            ]
+          },
+          "content-length": {
+            "path": "headers.content-length",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "1071",
+              "414",
+              "652"
+            ]
+          },
+          "accept": {
+            "path": "headers.accept",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "application/json"
+            ]
+          },
+          "content-type": {
+            "path": "headers.content-type",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "application/json"
+            ]
+          },
+          "accept-encoding": {
+            "path": "headers.accept-encoding",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "gzip"
+            ]
+          }
+        }
+      },
+      "body": {
+        "path": "body",
+        "type": "object",
+        "optional": false,
+        "examples": [
+          {
+            "data": {
+              "event": {
+                "JID": "120363401120537446@g.us",
+                "Timestamp": "2025-08-23T01:01:14.973-03:00",
+                "Action": {
+                  "messageRange": {
+                    "lastMessageTimestamp": 1755904881,
+                    "messages": [
+                      {
+                        "key": {
+                          "remoteJID": "120363401120537446@g.us",
+                          "fromMe": true,
+                          "ID": "1AA631C625A5B90C04AE06D680F631E7"
+                        },
+                        "timestamp": 1755921628
+                      },
+                      {
+                        "key": {
+                          "remoteJID": "120363401120537446@g.us",
+                          "fromMe": true,
+                          "ID": "05837223F1F0260F95037F76E75D6BFA"
+                        },
+                        "timestamp": 1755921636
+                      },
+                      {
+                        "key": {
+                          "remoteJID": "120363401120537446@g.us",
+                          "fromMe": true,
+                          "ID": "E929B99892CEECBEEDE4DBCBFC738E0F"
+                        },
+                        "timestamp": 1755921663
+                      },
+                      {
+                        "key": {
+                          "remoteJID": "120363401120537446@g.us",
+                          "fromMe": false,
+                          "ID": "3A21E81929EEDC8B1085",
+                          "participant": "559291512364@s.whatsapp.net"
+                        },
+                        "timestamp": 1755904881
+                      },
+                      {
+                        "key": {
+                          "remoteJID": "120363401120537446@g.us",
+                          "fromMe": true,
+                          "ID": "A2659246247F48C84BB3509991C39474"
+                        },
+                        "timestamp": 1755921648
+                      }
+                    ]
+                  }
+                },
+                "FromFullSync": false
+              },
+              "type": "DeleteChat"
+            },
+            "eventType": "DeleteChat",
+            "timestamp": 1757251369,
+            "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+            "userID": "9e832a8666e02c047a5167194c703eaf",
+            "userJID": "5521971532700:4@s.whatsapp.net",
+            "userName": "setupautomatizado"
+          },
+          {
+            "baseURL": "https://api.zuckzapgo.com",
+            "data": {
+              "event": {
+                "JID": "120363374479055751@g.us",
+                "Timestamp": "2025-05-14T07:42:17.183-03:00",
+                "Action": {
+                  "messageRange": {
+                    "lastSystemMessageTimestamp": 1737715207
+                  }
+                },
+                "FromFullSync": false
+              },
+              "type": "DeleteChat"
+            },
+            "eventType": "DeleteChat",
+            "timestamp": 1757383417,
+            "token": "teste",
+            "userID": "2f3400f9df6ed2280373c346b8e91f1b",
+            "userJID": "5521979232690:33@s.whatsapp.net",
+            "userName": "teste"
+          },
+          {
+            "baseURL": "https://api.zuckzapgo.com",
+            "data": {
+              "event": {
+                "JID": "120363373470673782@g.us",
+                "Timestamp": "2025-05-14T07:42:17.203-03:00",
+                "Action": {
+                  "messageRange": {
+                    "lastSystemMessageTimestamp": 1737715143
+                  }
+                },
+                "FromFullSync": false
+              },
+              "type": "DeleteChat"
+            },
+            "eventType": "DeleteChat",
+            "timestamp": 1757383477,
+            "token": "teste",
+            "userID": "2f3400f9df6ed2280373c346b8e91f1b",
+            "userJID": "5521979232690:33@s.whatsapp.net",
+            "userName": "teste"
+          },
+          {
+            "baseURL": "https://api.zuckzapgo.com",
+            "data": {
+              "event": {
+                "JID": "120363422025707173@g.us",
+                "Timestamp": "2025-09-10T23:47:08.769-03:00",
+                "Action": {
+                  "messageRange": {
+                    "lastMessageTimestamp": 1757535115,
+                    "lastSystemMessageTimestamp": 1757537834,
+                    "messages": [
+                      {
+                        "key": {
+                          "remoteJID": "120363422025707173@g.us",
+                          "fromMe": false,
+                          "ID": "3EB05E8B46A21C63CCEFB6",
+                          "participant": "5521967704448@s.whatsapp.net"
+                        },
+                        "timestamp": 1757535115
+                      }
+                    ]
+                  }
+                },
+                "FromFullSync": false
+              },
+              "type": "DeleteChat"
+            },
+            "eventType": "DeleteChat",
+            "timestamp": 1757558829,
+            "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+            "userID": "9e832a8666e02c047a5167194c703eaf",
+            "userJID": "5521971532700:4@s.whatsapp.net",
+            "userName": "setupautomatizado"
+          }
+        ],
+        "children": {
+          "data": {
+            "path": "body.data",
+            "type": "object",
+            "optional": false,
+            "examples": [
+              {
+                "event": {
+                  "JID": "120363401120537446@g.us",
+                  "Timestamp": "2025-08-23T01:01:14.973-03:00",
+                  "Action": {
+                    "messageRange": {
+                      "lastMessageTimestamp": 1755904881,
+                      "messages": [
+                        {
+                          "key": {
+                            "remoteJID": "120363401120537446@g.us",
+                            "fromMe": true,
+                            "ID": "1AA631C625A5B90C04AE06D680F631E7"
+                          },
+                          "timestamp": 1755921628
+                        },
+                        {
+                          "key": {
+                            "remoteJID": "120363401120537446@g.us",
+                            "fromMe": true,
+                            "ID": "05837223F1F0260F95037F76E75D6BFA"
+                          },
+                          "timestamp": 1755921636
+                        },
+                        {
+                          "key": {
+                            "remoteJID": "120363401120537446@g.us",
+                            "fromMe": true,
+                            "ID": "E929B99892CEECBEEDE4DBCBFC738E0F"
+                          },
+                          "timestamp": 1755921663
+                        },
+                        {
+                          "key": {
+                            "remoteJID": "120363401120537446@g.us",
+                            "fromMe": false,
+                            "ID": "3A21E81929EEDC8B1085",
+                            "participant": "559291512364@s.whatsapp.net"
+                          },
+                          "timestamp": 1755904881
+                        },
+                        {
+                          "key": {
+                            "remoteJID": "120363401120537446@g.us",
+                            "fromMe": true,
+                            "ID": "A2659246247F48C84BB3509991C39474"
+                          },
+                          "timestamp": 1755921648
+                        }
+                      ]
+                    }
+                  },
+                  "FromFullSync": false
+                },
+                "type": "DeleteChat"
+              },
+              {
+                "event": {
+                  "JID": "120363374479055751@g.us",
+                  "Timestamp": "2025-05-14T07:42:17.183-03:00",
+                  "Action": {
+                    "messageRange": {
+                      "lastSystemMessageTimestamp": 1737715207
+                    }
+                  },
+                  "FromFullSync": false
+                },
+                "type": "DeleteChat"
+              },
+              {
+                "event": {
+                  "JID": "120363373470673782@g.us",
+                  "Timestamp": "2025-05-14T07:42:17.203-03:00",
+                  "Action": {
+                    "messageRange": {
+                      "lastSystemMessageTimestamp": 1737715143
+                    }
+                  },
+                  "FromFullSync": false
+                },
+                "type": "DeleteChat"
+              },
+              {
+                "event": {
+                  "JID": "120363422025707173@g.us",
+                  "Timestamp": "2025-09-10T23:47:08.769-03:00",
+                  "Action": {
+                    "messageRange": {
+                      "lastMessageTimestamp": 1757535115,
+                      "lastSystemMessageTimestamp": 1757537834,
+                      "messages": [
+                        {
+                          "key": {
+                            "remoteJID": "120363422025707173@g.us",
+                            "fromMe": false,
+                            "ID": "3EB05E8B46A21C63CCEFB6",
+                            "participant": "5521967704448@s.whatsapp.net"
+                          },
+                          "timestamp": 1757535115
+                        }
+                      ]
+                    }
+                  },
+                  "FromFullSync": false
+                },
+                "type": "DeleteChat"
+              }
+            ],
+            "children": {
+              "event": {
+                "path": "body.data.event",
+                "type": "object",
+                "optional": false,
+                "examples": [
+                  {
+                    "JID": "120363401120537446@g.us",
+                    "Timestamp": "2025-08-23T01:01:14.973-03:00",
+                    "Action": {
+                      "messageRange": {
+                        "lastMessageTimestamp": 1755904881,
+                        "messages": [
+                          {
+                            "key": {
+                              "remoteJID": "120363401120537446@g.us",
+                              "fromMe": true,
+                              "ID": "1AA631C625A5B90C04AE06D680F631E7"
+                            },
+                            "timestamp": 1755921628
+                          },
+                          {
+                            "key": {
+                              "remoteJID": "120363401120537446@g.us",
+                              "fromMe": true,
+                              "ID": "05837223F1F0260F95037F76E75D6BFA"
+                            },
+                            "timestamp": 1755921636
+                          },
+                          {
+                            "key": {
+                              "remoteJID": "120363401120537446@g.us",
+                              "fromMe": true,
+                              "ID": "E929B99892CEECBEEDE4DBCBFC738E0F"
+                            },
+                            "timestamp": 1755921663
+                          },
+                          {
+                            "key": {
+                              "remoteJID": "120363401120537446@g.us",
+                              "fromMe": false,
+                              "ID": "3A21E81929EEDC8B1085",
+                              "participant": "559291512364@s.whatsapp.net"
+                            },
+                            "timestamp": 1755904881
+                          },
+                          {
+                            "key": {
+                              "remoteJID": "120363401120537446@g.us",
+                              "fromMe": true,
+                              "ID": "A2659246247F48C84BB3509991C39474"
+                            },
+                            "timestamp": 1755921648
+                          }
+                        ]
+                      }
+                    },
+                    "FromFullSync": false
+                  },
+                  {
+                    "JID": "120363374479055751@g.us",
+                    "Timestamp": "2025-05-14T07:42:17.183-03:00",
+                    "Action": {
+                      "messageRange": {
+                        "lastSystemMessageTimestamp": 1737715207
+                      }
+                    },
+                    "FromFullSync": false
+                  },
+                  {
+                    "JID": "120363373470673782@g.us",
+                    "Timestamp": "2025-05-14T07:42:17.203-03:00",
+                    "Action": {
+                      "messageRange": {
+                        "lastSystemMessageTimestamp": 1737715143
+                      }
+                    },
+                    "FromFullSync": false
+                  },
+                  {
+                    "JID": "120363422025707173@g.us",
+                    "Timestamp": "2025-09-10T23:47:08.769-03:00",
+                    "Action": {
+                      "messageRange": {
+                        "lastMessageTimestamp": 1757535115,
+                        "lastSystemMessageTimestamp": 1757537834,
+                        "messages": [
+                          {
+                            "key": {
+                              "remoteJID": "120363422025707173@g.us",
+                              "fromMe": false,
+                              "ID": "3EB05E8B46A21C63CCEFB6",
+                              "participant": "5521967704448@s.whatsapp.net"
+                            },
+                            "timestamp": 1757535115
+                          }
+                        ]
+                      }
+                    },
+                    "FromFullSync": false
+                  }
+                ],
+                "children": {
+                  "JID": {
+                    "path": "body.data.event.JID",
+                    "type": "string",
+                    "optional": false,
+                    "examples": [
+                      "120363401120537446@g.us",
+                      "120363374479055751@g.us",
+                      "120363373470673782@g.us",
+                      "120363422025707173@g.us"
+                    ]
+                  },
+                  "Timestamp": {
+                    "path": "body.data.event.Timestamp",
+                    "type": "string",
+                    "optional": false,
+                    "examples": [
+                      "2025-08-23T01:01:14.973-03:00",
+                      "2025-05-14T07:42:17.183-03:00",
+                      "2025-05-14T07:42:17.203-03:00",
+                      "2025-09-10T23:47:08.769-03:00"
+                    ]
+                  },
+                  "Action": {
+                    "path": "body.data.event.Action",
+                    "type": "object",
+                    "optional": false,
+                    "examples": [
+                      {
+                        "messageRange": {
+                          "lastMessageTimestamp": 1755904881,
+                          "messages": [
+                            {
+                              "key": {
+                                "remoteJID": "120363401120537446@g.us",
+                                "fromMe": true,
+                                "ID": "1AA631C625A5B90C04AE06D680F631E7"
+                              },
+                              "timestamp": 1755921628
+                            },
+                            {
+                              "key": {
+                                "remoteJID": "120363401120537446@g.us",
+                                "fromMe": true,
+                                "ID": "05837223F1F0260F95037F76E75D6BFA"
+                              },
+                              "timestamp": 1755921636
+                            },
+                            {
+                              "key": {
+                                "remoteJID": "120363401120537446@g.us",
+                                "fromMe": true,
+                                "ID": "E929B99892CEECBEEDE4DBCBFC738E0F"
+                              },
+                              "timestamp": 1755921663
+                            },
+                            {
+                              "key": {
+                                "remoteJID": "120363401120537446@g.us",
+                                "fromMe": false,
+                                "ID": "3A21E81929EEDC8B1085",
+                                "participant": "559291512364@s.whatsapp.net"
+                              },
+                              "timestamp": 1755904881
+                            },
+                            {
+                              "key": {
+                                "remoteJID": "120363401120537446@g.us",
+                                "fromMe": true,
+                                "ID": "A2659246247F48C84BB3509991C39474"
+                              },
+                              "timestamp": 1755921648
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "messageRange": {
+                          "lastSystemMessageTimestamp": 1737715207
+                        }
+                      },
+                      {
+                        "messageRange": {
+                          "lastSystemMessageTimestamp": 1737715143
+                        }
+                      },
+                      {
+                        "messageRange": {
+                          "lastMessageTimestamp": 1757535115,
+                          "lastSystemMessageTimestamp": 1757537834,
+                          "messages": [
+                            {
+                              "key": {
+                                "remoteJID": "120363422025707173@g.us",
+                                "fromMe": false,
+                                "ID": "3EB05E8B46A21C63CCEFB6",
+                                "participant": "5521967704448@s.whatsapp.net"
+                              },
+                              "timestamp": 1757535115
+                            }
+                          ]
+                        }
+                      }
+                    ],
+                    "children": {
+                      "messageRange": {
+                        "path": "body.data.event.Action.messageRange",
+                        "type": "object",
+                        "optional": false,
+                        "examples": [
+                          {
+                            "lastMessageTimestamp": 1755904881,
+                            "messages": [
+                              {
+                                "key": {
+                                  "remoteJID": "120363401120537446@g.us",
+                                  "fromMe": true,
+                                  "ID": "1AA631C625A5B90C04AE06D680F631E7"
+                                },
+                                "timestamp": 1755921628
+                              },
+                              {
+                                "key": {
+                                  "remoteJID": "120363401120537446@g.us",
+                                  "fromMe": true,
+                                  "ID": "05837223F1F0260F95037F76E75D6BFA"
+                                },
+                                "timestamp": 1755921636
+                              },
+                              {
+                                "key": {
+                                  "remoteJID": "120363401120537446@g.us",
+                                  "fromMe": true,
+                                  "ID": "E929B99892CEECBEEDE4DBCBFC738E0F"
+                                },
+                                "timestamp": 1755921663
+                              },
+                              {
+                                "key": {
+                                  "remoteJID": "120363401120537446@g.us",
+                                  "fromMe": false,
+                                  "ID": "3A21E81929EEDC8B1085",
+                                  "participant": "559291512364@s.whatsapp.net"
+                                },
+                                "timestamp": 1755904881
+                              },
+                              {
+                                "key": {
+                                  "remoteJID": "120363401120537446@g.us",
+                                  "fromMe": true,
+                                  "ID": "A2659246247F48C84BB3509991C39474"
+                                },
+                                "timestamp": 1755921648
+                              }
+                            ]
+                          },
+                          {
+                            "lastSystemMessageTimestamp": 1737715207
+                          },
+                          {
+                            "lastSystemMessageTimestamp": 1737715143
+                          },
+                          {
+                            "lastMessageTimestamp": 1757535115,
+                            "lastSystemMessageTimestamp": 1757537834,
+                            "messages": [
+                              {
+                                "key": {
+                                  "remoteJID": "120363422025707173@g.us",
+                                  "fromMe": false,
+                                  "ID": "3EB05E8B46A21C63CCEFB6",
+                                  "participant": "5521967704448@s.whatsapp.net"
+                                },
+                                "timestamp": 1757535115
+                              }
+                            ]
+                          }
+                        ],
+                        "children": {
+                          "lastMessageTimestamp": {
+                            "path": "body.data.event.Action.messageRange.lastMessageTimestamp",
+                            "type": "number",
+                            "optional": true,
+                            "examples": [
+                              1755904881,
+                              1757535115
+                            ]
+                          },
+                          "messages": {
+                            "path": "body.data.event.Action.messageRange.messages",
+                            "type": "array",
+                            "optional": true,
+                            "examples": [
+                              [
+                                {
+                                  "key": {
+                                    "remoteJID": "120363401120537446@g.us",
+                                    "fromMe": true,
+                                    "ID": "1AA631C625A5B90C04AE06D680F631E7"
+                                  },
+                                  "timestamp": 1755921628
+                                },
+                                {
+                                  "key": {
+                                    "remoteJID": "120363401120537446@g.us",
+                                    "fromMe": true,
+                                    "ID": "05837223F1F0260F95037F76E75D6BFA"
+                                  },
+                                  "timestamp": 1755921636
+                                },
+                                {
+                                  "key": {
+                                    "remoteJID": "120363401120537446@g.us",
+                                    "fromMe": true,
+                                    "ID": "E929B99892CEECBEEDE4DBCBFC738E0F"
+                                  },
+                                  "timestamp": 1755921663
+                                },
+                                {
+                                  "key": {
+                                    "remoteJID": "120363401120537446@g.us",
+                                    "fromMe": false,
+                                    "ID": "3A21E81929EEDC8B1085",
+                                    "participant": "559291512364@s.whatsapp.net"
+                                  },
+                                  "timestamp": 1755904881
+                                },
+                                {
+                                  "key": {
+                                    "remoteJID": "120363401120537446@g.us",
+                                    "fromMe": true,
+                                    "ID": "A2659246247F48C84BB3509991C39474"
+                                  },
+                                  "timestamp": 1755921648
+                                }
+                              ],
+                              [
+                                {
+                                  "key": {
+                                    "remoteJID": "120363422025707173@g.us",
+                                    "fromMe": false,
+                                    "ID": "3EB05E8B46A21C63CCEFB6",
+                                    "participant": "5521967704448@s.whatsapp.net"
+                                  },
+                                  "timestamp": 1757535115
+                                }
+                              ]
+                            ],
+                            "arrayItemType": {
+                              "path": "body.data.event.Action.messageRange.messages[0]",
+                              "type": "object",
+                              "optional": false,
+                              "examples": [
+                                {
+                                  "key": {
+                                    "remoteJID": "120363401120537446@g.us",
+                                    "fromMe": true,
+                                    "ID": "1AA631C625A5B90C04AE06D680F631E7"
+                                  },
+                                  "timestamp": 1755921628
+                                },
+                                {
+                                  "key": {
+                                    "remoteJID": "120363422025707173@g.us",
+                                    "fromMe": false,
+                                    "ID": "3EB05E8B46A21C63CCEFB6",
+                                    "participant": "5521967704448@s.whatsapp.net"
+                                  },
+                                  "timestamp": 1757535115
+                                }
+                              ],
+                              "children": {
+                                "key": {
+                                  "path": "body.data.event.Action.messageRange.messages[0].key",
+                                  "type": "object",
+                                  "optional": false,
+                                  "examples": [
+                                    {
+                                      "remoteJID": "120363401120537446@g.us",
+                                      "fromMe": true,
+                                      "ID": "1AA631C625A5B90C04AE06D680F631E7"
+                                    },
+                                    {
+                                      "remoteJID": "120363422025707173@g.us",
+                                      "fromMe": false,
+                                      "ID": "3EB05E8B46A21C63CCEFB6",
+                                      "participant": "5521967704448@s.whatsapp.net"
+                                    }
+                                  ],
+                                  "children": {
+                                    "remoteJID": {
+                                      "path": "body.data.event.Action.messageRange.messages[0].key.remoteJID",
+                                      "type": "string",
+                                      "optional": false,
+                                      "examples": [
+                                        "120363401120537446@g.us",
+                                        "120363422025707173@g.us"
+                                      ]
+                                    },
+                                    "fromMe": {
+                                      "path": "body.data.event.Action.messageRange.messages[0].key.fromMe",
+                                      "type": "boolean",
+                                      "optional": false,
+                                      "examples": [
+                                        true,
+                                        false
+                                      ]
+                                    },
+                                    "ID": {
+                                      "path": "body.data.event.Action.messageRange.messages[0].key.ID",
+                                      "type": "string",
+                                      "optional": false,
+                                      "examples": [
+                                        "1AA631C625A5B90C04AE06D680F631E7",
+                                        "3EB05E8B46A21C63CCEFB6"
+                                      ]
+                                    },
+                                    "participant": {
+                                      "path": "body.data.event.Action.messageRange.messages[0].key.participant",
+                                      "type": "string",
+                                      "optional": true,
+                                      "examples": [
+                                        "5521967704448@s.whatsapp.net"
+                                      ]
+                                    }
+                                  }
+                                },
+                                "timestamp": {
+                                  "path": "body.data.event.Action.messageRange.messages[0].timestamp",
+                                  "type": "number",
+                                  "optional": false,
+                                  "examples": [
+                                    1755921628,
+                                    1757535115
+                                  ]
+                                }
+                              }
+                            }
+                          },
+                          "lastSystemMessageTimestamp": {
+                            "path": "body.data.event.Action.messageRange.lastSystemMessageTimestamp",
+                            "type": "number",
+                            "optional": true,
+                            "examples": [
+                              1737715207,
+                              1737715143,
+                              1757537834
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "FromFullSync": {
+                    "path": "body.data.event.FromFullSync",
+                    "type": "boolean",
+                    "optional": false,
+                    "examples": [
+                      false
+                    ]
+                  }
+                }
+              },
+              "type": {
+                "path": "body.data.type",
+                "type": "string",
+                "optional": false,
+                "examples": [
+                  "DeleteChat"
+                ]
+              }
+            }
+          },
+          "eventType": {
+            "path": "body.eventType",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "DeleteChat"
+            ]
+          },
+          "timestamp": {
+            "path": "body.timestamp",
+            "type": "number",
+            "optional": false,
+            "examples": [
+              1757251369,
+              1757383417,
+              1757383477,
+              1757558829
+            ]
+          },
+          "token": {
+            "path": "body.token",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "!!qYWdJ61zk3i1AvTfXhzE!!",
+              "teste"
+            ]
+          },
+          "userID": {
+            "path": "body.userID",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "9e832a8666e02c047a5167194c703eaf",
+              "2f3400f9df6ed2280373c346b8e91f1b"
+            ]
+          },
+          "userJID": {
+            "path": "body.userJID",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "5521971532700:4@s.whatsapp.net",
+              "5521979232690:33@s.whatsapp.net"
+            ]
+          },
+          "userName": {
+            "path": "body.userName",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "setupautomatizado",
+              "teste"
+            ]
+          },
+          "baseURL": {
+            "path": "body.baseURL",
+            "type": "string",
+            "optional": true,
+            "examples": [
+              "https://api.zuckzapgo.com"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

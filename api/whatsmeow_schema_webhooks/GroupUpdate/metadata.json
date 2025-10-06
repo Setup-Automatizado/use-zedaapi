@@ -1,0 +1,40 @@
+{
+  "eventType": "GroupUpdate",
+  "firstSeen": "2025-09-06T04:25:23.745Z",
+  "lastSeen": "2025-09-06T07:31:24.670Z",
+  "totalReceived": 78,
+  "schemaVersion": 45,
+  "lastModified": "2025-09-06T07:31:24.666Z",
+  "fields": {
+    "required": [
+      "instanceId",
+      "status",
+      "ids",
+      "ids[]",
+      "momment",
+      "phoneDevice",
+      "phone",
+      "type",
+      "isGroup",
+      "sticker.stickerUrl",
+      "sticker.mimeType"
+    ],
+    "optional": [
+      "instanceId",
+      "status",
+      "ids",
+      "momment",
+      "participant",
+      "participantDevice",
+      "phone",
+      "type",
+      "isGroup",
+      "phoneDevice",
+      "messageId",
+      "sticker",
+      "participantPhone"
+    ],
+    "truncated": []
+  },
+  "variations": []
+}

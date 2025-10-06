@@ -1,0 +1,71 @@
+{
+  "headers": {
+    "host": "185.245.182.69:3000",
+    "user-agent": "ZuckZapGo-Webhook/1.0",
+    "content-length": "1313",
+    "accept": "application/json",
+    "content-type": "application/json",
+    "accept-encoding": "gzip"
+  },
+  "body": {
+    "baseURL": "https://api.zuckzapgo.com",
+    "data": {
+      "event": {
+        "JID": "6666393276641@lid",
+        "Message": {
+          "Chat": "120363337449922588@g.us",
+          "Sender": "6666393276641@lid",
+          "IsFromMe": false,
+          "IsGroup": true,
+          "AddressingMode": "pn",
+          "SenderAlt": "",
+          "RecipientAlt": "",
+          "BroadcastListOwner": "",
+          "ID": "A55746826ED4E641CC4860F06EC30115",
+          "ServerID": 0,
+          "Type": "poll",
+          "PushName": "Feed Connect | Julio",
+          "Timestamp": "2025-09-15T13:29:05-03:00",
+          "Category": "",
+          "Multicast": false,
+          "MediaType": "",
+          "Edit": "",
+          "MsgBotInfo": {
+            "EditType": "",
+            "EditTargetID": "",
+            "EditSenderTimestampMS": "0001-01-01T00:00:00Z"
+          },
+          "MsgMetaInfo": {
+            "TargetID": "",
+            "TargetSender": "",
+            "TargetChat": "",
+            "DeprecatedLIDSession": null,
+            "ThreadMessageID": "",
+            "ThreadMessageSenderJID": ""
+          },
+          "VerifiedName": {
+            "Certificate": {
+              "details": "CMrDsrTo5qTgcxIGc21iOndhIhRGZWVkIENvbm5lY3QgfCBKdWxpbw==",
+              "signature": "GLzjqdRexPqH951tM8nd69FnHpqCKM8fOs246LUdTQMxt+nu3SE3I5mY1ioFUVYn0MJ/t+j8zw5JD2Apq+9MAw=="
+            },
+            "Details": {
+              "serial": 8340828372285039000,
+              "issuer": "smb:wa",
+              "verifiedName": "Feed Connect | Julio"
+            }
+          },
+          "DeviceSentMeta": null
+        },
+        "OldBusinessName": "",
+        "NewBusinessName": "Feed Connect | Julio"
+      },
+      "type": "BusinessName"
+    },
+    "eventType": "BusinessName",
+    "timestamp": 1757953745,
+    "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+    "userID": "9e832a8666e02c047a5167194c703eaf",
+    "userJID": "5521971532700:4@s.whatsapp.net",
+    "userName": "setupautomatizado"
+  }
+}

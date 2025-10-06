@@ -21,5 +21,13 @@ export interface ZApiPresenceChatPaused {
     status?: string;
     lastSeen?: null;
     instanceId?: string;
+    participant?: string;
+    participantLid?: string;
+    participantPhone?: string;
+    chatName?: string;
+    photo?: string;
+    senderName?: string;
+    senderPhoto?: string;
+    isGroup?: boolean;
   };
 }

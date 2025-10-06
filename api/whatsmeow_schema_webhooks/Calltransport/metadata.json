@@ -1,0 +1,602 @@
+{
+  "eventType": "Calltransport",
+  "firstSeen": "2025-09-08T15:41:33.666Z",
+  "lastSeen": "2025-09-11T23:45:03.270Z",
+  "totalReceived": 5,
+  "schemaVersion": 1,
+  "lastModified": "2025-09-11T23:45:03.270Z",
+  "fields": {
+    "required": [
+      "headers",
+      "headers.host",
+      "headers.user-agent",
+      "headers.content-length",
+      "headers.accept",
+      "headers.content-type",
+      "headers.accept-encoding",
+      "body",
+      "body.baseURL",
+      "body.data",
+      "body.data.event",
+      "body.data.event.From",
+      "body.data.event.Timestamp",
+      "body.data.event.CallCreator",
+      "body.data.event.CallID",
+      "body.data.event.GroupJID",
+      "body.data.event.RemotePlatform",
+      "body.data.event.RemoteVersion",
+      "body.data.event.Data",
+      "body.data.event.Data.Tag",
+      "body.data.event.Data.Attrs",
+      "body.data.event.Data.Attrs.call-creator",
+      "body.data.event.Data.Attrs.call-id",
+      "body.data.event.Data.Attrs.transport-message-type",
+      "body.data.event.Data.Content",
+      "body.data.event.Data.Content[]",
+      "body.data.event.Data.Content[].Tag",
+      "body.data.event.Data.Content[].Attrs",
+      "body.data.event.Data.Content[].Attrs.priority",
+      "body.data.event.Data.Content[].Content",
+      "body.data.type",
+      "body.eventType",
+      "body.timestamp",
+      "body.token",
+      "body.userID",
+      "body.userJID",
+      "body.userName"
+    ],
+    "optional": [],
+    "truncated": []
+  },
+  "variations": [],
+  "savedStructure": {
+    "path": "",
+    "type": "object",
+    "optional": false,
+    "examples": [
+      {
+        "headers": {
+          "host": "185.245.182.69:3000",
+          "user-agent": "ZuckZapGo-Webhook/1.0",
+          "content-length": "800",
+          "accept": "application/json",
+          "content-type": "application/json",
+          "accept-encoding": "gzip"
+        },
+        "body": {
+          "baseURL": "https://api.zuckzapgo.com",
+          "data": {
+            "event": {
+              "From": "5521981796084@s.whatsapp.net",
+              "Timestamp": "2025-09-08T12:41:31-03:00",
+              "CallCreator": "5521981796084@s.whatsapp.net",
+              "CallID": "4564F5B167F27EFBEC48A2C3FBC73BAA",
+              "GroupJID": "",
+              "RemotePlatform": "",
+              "RemoteVersion": "",
+              "Data": {
+                "Tag": "transport",
+                "Attrs": {
+                  "call-creator": "5521981796084@s.whatsapp.net",
+                  "call-id": "4564F5B167F27EFBEC48A2C3FBC73BAA",
+                  "transport-message-type": "1"
+                },
+                "Content": [
+                  {
+                    "Tag": "te",
+                    "Attrs": {
+                      "priority": "1"
+                    },
+                    "Content": "sRpUHaog"
+                  },
+                  {
+                    "Tag": "net",
+                    "Attrs": {
+                      "medium": "1",
+                      "protocol": "0"
+                    },
+                    "Content": null
+                  }
+                ]
+              }
+            },
+            "type": "CallTransport"
+          },
+          "eventType": "CallTransport",
+          "timestamp": 1757346091,
+          "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+          "userID": "9e832a8666e02c047a5167194c703eaf",
+          "userJID": "5521971532700:4@s.whatsapp.net",
+          "userName": "setupautomatizado"
+        }
+      }
+    ],
+    "children": {
+      "headers": {
+        "path": "headers",
+        "type": "object",
+        "optional": false,
+        "examples": [
+          {
+            "host": "185.245.182.69:3000",
+            "user-agent": "ZuckZapGo-Webhook/1.0",
+            "content-length": "800",
+            "accept": "application/json",
+            "content-type": "application/json",
+            "accept-encoding": "gzip"
+          }
+        ],
+        "children": {
+          "host": {
+            "path": "headers.host",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "185.245.182.69:3000"
+            ]
+          },
+          "user-agent": {
+            "path": "headers.user-agent",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "ZuckZapGo-Webhook/1.0"
+            ]
+          },
+          "content-length": {
+            "path": "headers.content-length",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "800"
+            ]
+          },
+          "accept": {
+            "path": "headers.accept",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "application/json"
+            ]
+          },
+          "content-type": {
+            "path": "headers.content-type",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "application/json"
+            ]
+          },
+          "accept-encoding": {
+            "path": "headers.accept-encoding",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "gzip"
+            ]
+          }
+        }
+      },
+      "body": {
+        "path": "body",
+        "type": "object",
+        "optional": false,
+        "examples": [
+          {
+            "baseURL": "https://api.zuckzapgo.com",
+            "data": {
+              "event": {
+                "From": "5521981796084@s.whatsapp.net",
+                "Timestamp": "2025-09-08T12:41:31-03:00",
+                "CallCreator": "5521981796084@s.whatsapp.net",
+                "CallID": "4564F5B167F27EFBEC48A2C3FBC73BAA",
+                "GroupJID": "",
+                "RemotePlatform": "",
+                "RemoteVersion": "",
+                "Data": {
+                  "Tag": "transport",
+                  "Attrs": {
+                    "call-creator": "5521981796084@s.whatsapp.net",
+                    "call-id": "4564F5B167F27EFBEC48A2C3FBC73BAA",
+                    "transport-message-type": "1"
+                  },
+                  "Content": [
+                    {
+                      "Tag": "te",
+                      "Attrs": {
+                        "priority": "1"
+                      },
+                      "Content": "sRpUHaog"
+                    },
+                    {
+                      "Tag": "net",
+                      "Attrs": {
+                        "medium": "1",
+                        "protocol": "0"
+                      },
+                      "Content": null
+                    }
+                  ]
+                }
+              },
+              "type": "CallTransport"
+            },
+            "eventType": "CallTransport",
+            "timestamp": 1757346091,
+            "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+            "userID": "9e832a8666e02c047a5167194c703eaf",
+            "userJID": "5521971532700:4@s.whatsapp.net",
+            "userName": "setupautomatizado"
+          }
+        ],
+        "children": {
+          "baseURL": {
+            "path": "body.baseURL",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "https://api.zuckzapgo.com"
+            ]
+          },
+          "data": {
+            "path": "body.data",
+            "type": "object",
+            "optional": false,
+            "examples": [
+              {
+                "event": {
+                  "From": "5521981796084@s.whatsapp.net",
+                  "Timestamp": "2025-09-08T12:41:31-03:00",
+                  "CallCreator": "5521981796084@s.whatsapp.net",
+                  "CallID": "4564F5B167F27EFBEC48A2C3FBC73BAA",
+                  "GroupJID": "",
+                  "RemotePlatform": "",
+                  "RemoteVersion": "",
+                  "Data": {
+                    "Tag": "transport",
+                    "Attrs": {
+                      "call-creator": "5521981796084@s.whatsapp.net",
+                      "call-id": "4564F5B167F27EFBEC48A2C3FBC73BAA",
+                      "transport-message-type": "1"
+                    },
+                    "Content": [
+                      {
+                        "Tag": "te",
+                        "Attrs": {
+                          "priority": "1"
+                        },
+                        "Content": "sRpUHaog"
+                      },
+                      {
+                        "Tag": "net",
+                        "Attrs": {
+                          "medium": "1",
+                          "protocol": "0"
+                        },
+                        "Content": null
+                      }
+                    ]
+                  }
+                },
+                "type": "CallTransport"
+              }
+            ],
+            "children": {
+              "event": {
+                "path": "body.data.event",
+                "type": "object",
+                "optional": false,
+                "examples": [
+                  {
+                    "From": "5521981796084@s.whatsapp.net",
+                    "Timestamp": "2025-09-08T12:41:31-03:00",
+                    "CallCreator": "5521981796084@s.whatsapp.net",
+                    "CallID": "4564F5B167F27EFBEC48A2C3FBC73BAA",
+                    "GroupJID": "",
+                    "RemotePlatform": "",
+                    "RemoteVersion": "",
+                    "Data": {
+                      "Tag": "transport",
+                      "Attrs": {
+                        "call-creator": "5521981796084@s.whatsapp.net",
+                        "call-id": "4564F5B167F27EFBEC48A2C3FBC73BAA",
+                        "transport-message-type": "1"
+                      },
+                      "Content": [
+                        {
+                          "Tag": "te",
+                          "Attrs": {
+                            "priority": "1"
+                          },
+                          "Content": "sRpUHaog"
+                        },
+                        {
+                          "Tag": "net",
+                          "Attrs": {
+                            "medium": "1",
+                            "protocol": "0"
+                          },
+                          "Content": null
+                        }
+                      ]
+                    }
+                  }
+                ],
+                "children": {
+                  "From": {
+                    "path": "body.data.event.From",
+                    "type": "string",
+                    "optional": false,
+                    "examples": [
+                      "5521981796084@s.whatsapp.net"
+                    ]
+                  },
+                  "Timestamp": {
+                    "path": "body.data.event.Timestamp",
+                    "type": "string",
+                    "optional": false,
+                    "examples": [
+                      "2025-09-08T12:41:31-03:00"
+                    ]
+                  },
+                  "CallCreator": {
+                    "path": "body.data.event.CallCreator",
+                    "type": "string",
+                    "optional": false,
+                    "examples": [
+                      "5521981796084@s.whatsapp.net"
+                    ]
+                  },
+                  "CallID": {
+                    "path": "body.data.event.CallID",
+                    "type": "string",
+                    "optional": false,
+                    "examples": [
+                      "4564F5B167F27EFBEC48A2C3FBC73BAA"
+                    ]
+                  },
+                  "GroupJID": {
+                    "path": "body.data.event.GroupJID",
+                    "type": "string",
+                    "optional": false,
+                    "examples": [
+                      ""
+                    ]
+                  },
+                  "RemotePlatform": {
+                    "path": "body.data.event.RemotePlatform",
+                    "type": "string",
+                    "optional": false,
+                    "examples": [
+                      ""
+                    ]
+                  },
+                  "RemoteVersion": {
+                    "path": "body.data.event.RemoteVersion",
+                    "type": "string",
+                    "optional": false,
+                    "examples": [
+                      ""
+                    ]
+                  },
+                  "Data": {
+                    "path": "body.data.event.Data",
+                    "type": "object",
+                    "optional": false,
+                    "examples": [
+                      {
+                        "Tag": "transport",
+                        "Attrs": {
+                          "call-creator": "5521981796084@s.whatsapp.net",
+                          "call-id": "4564F5B167F27EFBEC48A2C3FBC73BAA",
+                          "transport-message-type": "1"
+                        },
+                        "Content": [
+                          {
+                            "Tag": "te",
+                            "Attrs": {
+                              "priority": "1"
+                            },
+                            "Content": "sRpUHaog"
+                          },
+                          {
+                            "Tag": "net",
+                            "Attrs": {
+                              "medium": "1",
+                              "protocol": "0"
+                            },
+                            "Content": null
+                          }
+                        ]
+                      }
+                    ],
+                    "children": {
+                      "Tag": {
+                        "path": "body.data.event.Data.Tag",
+                        "type": "string",
+                        "optional": false,
+                        "examples": [
+                          "transport"
+                        ]
+                      },
+                      "Attrs": {
+                        "path": "body.data.event.Data.Attrs",
+                        "type": "object",
+                        "optional": false,
+                        "examples": [
+                          {
+                            "call-creator": "5521981796084@s.whatsapp.net",
+                            "call-id": "4564F5B167F27EFBEC48A2C3FBC73BAA",
+                            "transport-message-type": "1"
+                          }
+                        ],
+                        "children": {
+                          "call-creator": {
+                            "path": "body.data.event.Data.Attrs.call-creator",
+                            "type": "string",
+                            "optional": false,
+                            "examples": [
+                              "5521981796084@s.whatsapp.net"
+                            ]
+                          },
+                          "call-id": {
+                            "path": "body.data.event.Data.Attrs.call-id",
+                            "type": "string",
+                            "optional": false,
+                            "examples": [
+                              "4564F5B167F27EFBEC48A2C3FBC73BAA"
+                            ]
+                          },
+                          "transport-message-type": {
+                            "path": "body.data.event.Data.Attrs.transport-message-type",
+                            "type": "string",
+                            "optional": false,
+                            "examples": [
+                              "1"
+                            ]
+                          }
+                        }
+                      },
+                      "Content": {
+                        "path": "body.data.event.Data.Content",
+                        "type": "array",
+                        "optional": false,
+                        "examples": [
+                          [
+                            {
+                              "Tag": "te",
+                              "Attrs": {
+                                "priority": "1"
+                              },
+                              "Content": "sRpUHaog"
+                            },
+                            {
+                              "Tag": "net",
+                              "Attrs": {
+                                "medium": "1",
+                                "protocol": "0"
+                              },
+                              "Content": null
+                            }
+                          ]
+                        ],
+                        "arrayItemType": {
+                          "path": "body.data.event.Data.Content[0]",
+                          "type": "object",
+                          "optional": false,
+                          "examples": [
+                            {
+                              "Tag": "te",
+                              "Attrs": {
+                                "priority": "1"
+                              },
+                              "Content": "sRpUHaog"
+                            }
+                          ],
+                          "children": {
+                            "Tag": {
+                              "path": "body.data.event.Data.Content[0].Tag",
+                              "type": "string",
+                              "optional": false,
+                              "examples": [
+                                "te"
+                              ]
+                            },
+                            "Attrs": {
+                              "path": "body.data.event.Data.Content[0].Attrs",
+                              "type": "object",
+                              "optional": false,
+                              "examples": [
+                                {
+                                  "priority": "1"
+                                }
+                              ],
+                              "children": {
+                                "priority": {
+                                  "path": "body.data.event.Data.Content[0].Attrs.priority",
+                                  "type": "string",
+                                  "optional": false,
+                                  "examples": [
+                                    "1"
+                                  ]
+                                }
+                              }
+                            },
+                            "Content": {
+                              "path": "body.data.event.Data.Content[0].Content",
+                              "type": "string",
+                              "optional": false,
+                              "examples": [
+                                "sRpUHaog"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "type": {
+                "path": "body.data.type",
+                "type": "string",
+                "optional": false,
+                "examples": [
+                  "CallTransport"
+                ]
+              }
+            }
+          },
+          "eventType": {
+            "path": "body.eventType",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "CallTransport"
+            ]
+          },
+          "timestamp": {
+            "path": "body.timestamp",
+            "type": "number",
+            "optional": false,
+            "examples": [
+              1757346091
+            ]
+          },
+          "token": {
+            "path": "body.token",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "!!qYWdJ61zk3i1AvTfXhzE!!"
+            ]
+          },
+          "userID": {
+            "path": "body.userID",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "9e832a8666e02c047a5167194c703eaf"
+            ]
+          },
+          "userJID": {
+            "path": "body.userJID",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "5521971532700:4@s.whatsapp.net"
+            ]
+          },
+          "userName": {
+            "path": "body.userName",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "setupautomatizado"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

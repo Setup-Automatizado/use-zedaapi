@@ -1,0 +1,34 @@
+{
+  "headers": {
+    "host": "185.245.182.69:3000",
+    "user-agent": "ZuckZapGo-Webhook/1.0",
+    "content-length": "427",
+    "accept": "application/json",
+    "content-type": "application/json",
+    "accept-encoding": "gzip"
+  },
+  "body": {
+    "baseURL": "https://api.zuckzapgo.com",
+    "data": {
+      "event": {
+        "Index": [
+          "deviceAgent",
+          "10507b32-d8ca-4fce-8ba9-169e45258952"
+        ],
+        "timestamp": 1754774899119,
+        "agentAction": {
+          "name": "wuzapi",
+          "deviceID": -1,
+          "isDeleted": true
+        }
+      },
+      "type": "AppState"
+    },
+    "eventType": "AppState",
+    "timestamp": 1757899660,
+    "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+    "userID": "9e832a8666e02c047a5167194c703eaf",
+    "userJID": "5521971532700:4@s.whatsapp.net",
+    "userName": "setupautomatizado"
+  }
+}

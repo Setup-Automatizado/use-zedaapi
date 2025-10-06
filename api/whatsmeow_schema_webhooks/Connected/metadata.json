@@ -1,0 +1,516 @@
+{
+  "eventType": "Connected",
+  "firstSeen": "2025-09-06T09:02:02.061Z",
+  "lastSeen": "2025-09-15T02:48:04.730Z",
+  "totalReceived": 49,
+  "schemaVersion": 84,
+  "lastModified": "2025-09-15T02:48:04.716Z",
+  "fields": {
+    "required": [
+      "headers",
+      "headers.host",
+      "headers.user-agent",
+      "headers.content-length",
+      "headers.accept",
+      "headers.content-type",
+      "headers.accept-encoding",
+      "body",
+      "body.data",
+      "body.data.event",
+      "body.data.event.Action.name",
+      "body.data.type",
+      "body.eventType",
+      "body.timestamp",
+      "body.token",
+      "body.userID",
+      "body.userJID",
+      "body.userName"
+    ],
+    "optional": [
+      "body.data.event.Timestamp",
+      "body.data.event.Action",
+      "body.data.event.FromFullSync",
+      "body.baseURL"
+    ],
+    "truncated": []
+  },
+  "variations": [],
+  "savedStructure": {
+    "path": "",
+    "type": "object",
+    "optional": false,
+    "examples": [
+      {
+        "headers": {
+          "host": "185.245.182.69:3000",
+          "user-agent": "ZuckZapGo-Webhook/1.0",
+          "content-length": "278",
+          "accept": "application/json",
+          "content-type": "application/json",
+          "accept-encoding": "gzip"
+        },
+        "body": {
+          "baseURL": "https://api.zuckzapgo.com",
+          "data": {
+            "event": {},
+            "type": "Connected"
+          },
+          "eventType": "Connected",
+          "timestamp": 1757904388,
+          "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+          "userID": "9e832a8666e02c047a5167194c703eaf",
+          "userJID": "5521971532700:4@s.whatsapp.net",
+          "userName": "setupautomatizado"
+        }
+      },
+      {
+        "headers": {
+          "host": "185.245.182.69:3000",
+          "user-agent": "ZuckZapGo-Webhook/1.0",
+          "content-length": "278",
+          "accept": "application/json",
+          "content-type": "application/json",
+          "accept-encoding": "gzip"
+        },
+        "body": {
+          "baseURL": "https://api.zuckzapgo.com",
+          "data": {
+            "event": {},
+            "type": "Connected"
+          },
+          "eventType": "Connected",
+          "timestamp": 1757904434,
+          "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+          "userID": "9e832a8666e02c047a5167194c703eaf",
+          "userJID": "5521971532700:4@s.whatsapp.net",
+          "userName": "setupautomatizado"
+        }
+      },
+      {
+        "headers": {
+          "host": "185.245.182.69:3000",
+          "user-agent": "ZuckZapGo-Webhook/1.0",
+          "content-length": "289",
+          "accept": "application/json",
+          "content-type": "application/json",
+          "accept-encoding": "gzip"
+        },
+        "body": {
+          "baseURL": "https://api.zuckzapgo.com",
+          "data": {
+            "event": {},
+            "type": "Connected"
+          },
+          "eventType": "Connected",
+          "timestamp": 1757904435,
+          "token": "!!!qYWdJ61zk3i1AvTfXhzE!!!",
+          "userID": "80402f2ab5855b2132cf45d6b365a62c",
+          "userJID": "5521979232690:36@s.whatsapp.net",
+          "userName": "setupautomatizado-hibrido"
+        }
+      },
+      {
+        "headers": {
+          "host": "185.245.182.69:3000",
+          "user-agent": "ZuckZapGo-Webhook/1.0",
+          "content-length": "278",
+          "accept": "application/json",
+          "content-type": "application/json",
+          "accept-encoding": "gzip"
+        },
+        "body": {
+          "baseURL": "https://api.zuckzapgo.com",
+          "data": {
+            "event": {},
+            "type": "Connected"
+          },
+          "eventType": "Connected",
+          "timestamp": 1757904475,
+          "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+          "userID": "9e832a8666e02c047a5167194c703eaf",
+          "userJID": "5521971532700:4@s.whatsapp.net",
+          "userName": "setupautomatizado"
+        }
+      },
+      {
+        "headers": {
+          "host": "185.245.182.69:3000",
+          "user-agent": "ZuckZapGo-Webhook/1.0",
+          "content-length": "289",
+          "accept": "application/json",
+          "content-type": "application/json",
+          "accept-encoding": "gzip"
+        },
+        "body": {
+          "baseURL": "https://api.zuckzapgo.com",
+          "data": {
+            "event": {},
+            "type": "Connected"
+          },
+          "eventType": "Connected",
+          "timestamp": 1757904475,
+          "token": "!!!qYWdJ61zk3i1AvTfXhzE!!!",
+          "userID": "80402f2ab5855b2132cf45d6b365a62c",
+          "userJID": "5521979232690:36@s.whatsapp.net",
+          "userName": "setupautomatizado-hibrido"
+        }
+      }
+    ],
+    "children": {
+      "headers": {
+        "path": "headers",
+        "type": "object",
+        "optional": false,
+        "examples": [
+          {
+            "host": "185.245.182.69:3000",
+            "user-agent": "ZuckZapGo-Webhook/1.0",
+            "content-length": "227",
+            "accept": "application/json",
+            "content-type": "application/json",
+            "accept-encoding": "gzip"
+          },
+          {
+            "host": "185.245.182.69:3000",
+            "user-agent": "ZuckZapGo-Webhook/1.0",
+            "content-length": "278",
+            "accept": "application/json",
+            "content-type": "application/json",
+            "accept-encoding": "gzip"
+          },
+          {
+            "host": "185.245.182.69:3000",
+            "user-agent": "ZuckZapGo-Webhook/1.0",
+            "content-length": "248",
+            "accept": "application/json",
+            "content-type": "application/json",
+            "accept-encoding": "gzip"
+          },
+          {
+            "host": "185.245.182.69:3000",
+            "user-agent": "ZuckZapGo-Webhook/1.0",
+            "content-length": "351",
+            "accept": "application/json",
+            "content-type": "application/json",
+            "accept-encoding": "gzip"
+          },
+          {
+            "host": "185.245.182.69:3000",
+            "user-agent": "ZuckZapGo-Webhook/1.0",
+            "content-length": "289",
+            "accept": "application/json",
+            "content-type": "application/json",
+            "accept-encoding": "gzip"
+          }
+        ],
+        "children": {
+          "host": {
+            "path": "headers.host",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "185.245.182.69:3000"
+            ]
+          },
+          "user-agent": {
+            "path": "headers.user-agent",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "ZuckZapGo-Webhook/1.0"
+            ]
+          },
+          "content-length": {
+            "path": "headers.content-length",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "227",
+              "278",
+              "248",
+              "351",
+              "289"
+            ]
+          },
+          "accept": {
+            "path": "headers.accept",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "application/json"
+            ]
+          },
+          "content-type": {
+            "path": "headers.content-type",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "application/json"
+            ]
+          },
+          "accept-encoding": {
+            "path": "headers.accept-encoding",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "gzip"
+            ]
+          }
+        }
+      },
+      "body": {
+        "path": "body",
+        "type": "object",
+        "optional": false,
+        "examples": [
+          {
+            "baseURL": "https://api.zuckzapgo.com",
+            "data": {
+              "event": {},
+              "type": "Connected"
+            },
+            "eventType": "Connected",
+            "timestamp": 1757904388,
+            "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+            "userID": "9e832a8666e02c047a5167194c703eaf",
+            "userJID": "5521971532700:4@s.whatsapp.net",
+            "userName": "setupautomatizado"
+          },
+          {
+            "baseURL": "https://api.zuckzapgo.com",
+            "data": {
+              "event": {},
+              "type": "Connected"
+            },
+            "eventType": "Connected",
+            "timestamp": 1757904434,
+            "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+            "userID": "9e832a8666e02c047a5167194c703eaf",
+            "userJID": "5521971532700:4@s.whatsapp.net",
+            "userName": "setupautomatizado"
+          },
+          {
+            "baseURL": "https://api.zuckzapgo.com",
+            "data": {
+              "event": {},
+              "type": "Connected"
+            },
+            "eventType": "Connected",
+            "timestamp": 1757904435,
+            "token": "!!!qYWdJ61zk3i1AvTfXhzE!!!",
+            "userID": "80402f2ab5855b2132cf45d6b365a62c",
+            "userJID": "5521979232690:36@s.whatsapp.net",
+            "userName": "setupautomatizado-hibrido"
+          },
+          {
+            "baseURL": "https://api.zuckzapgo.com",
+            "data": {
+              "event": {},
+              "type": "Connected"
+            },
+            "eventType": "Connected",
+            "timestamp": 1757904475,
+            "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+            "userID": "9e832a8666e02c047a5167194c703eaf",
+            "userJID": "5521971532700:4@s.whatsapp.net",
+            "userName": "setupautomatizado"
+          },
+          {
+            "baseURL": "https://api.zuckzapgo.com",
+            "data": {
+              "event": {},
+              "type": "Connected"
+            },
+            "eventType": "Connected",
+            "timestamp": 1757904475,
+            "token": "!!!qYWdJ61zk3i1AvTfXhzE!!!",
+            "userID": "80402f2ab5855b2132cf45d6b365a62c",
+            "userJID": "5521979232690:36@s.whatsapp.net",
+            "userName": "setupautomatizado-hibrido"
+          }
+        ],
+        "children": {
+          "data": {
+            "path": "body.data",
+            "type": "object",
+            "optional": false,
+            "examples": [
+              {
+                "event": {},
+                "type": "Connected"
+              },
+              {
+                "event": {
+                  "Timestamp": "2025-08-09T18:28:16.337-03:00",
+                  "Action": {
+                    "name": "Guilherme Jansen - Setup Automatizado"
+                  },
+                  "FromFullSync": false
+                },
+                "type": "Connected"
+              },
+              {
+                "event": {
+                  "Timestamp": "2025-04-22T16:28:21.826-03:00",
+                  "Action": {
+                    "name": "Setup Automatizado"
+                  },
+                  "FromFullSync": false
+                },
+                "type": "Connected"
+              }
+            ],
+            "children": {
+              "event": {
+                "path": "body.data.event",
+                "type": "object",
+                "optional": false,
+                "examples": [
+                  {},
+                  {
+                    "Timestamp": "2025-08-09T18:28:16.337-03:00",
+                    "Action": {
+                      "name": "Guilherme Jansen - Setup Automatizado"
+                    },
+                    "FromFullSync": false
+                  },
+                  {
+                    "Timestamp": "2025-04-22T16:28:21.826-03:00",
+                    "Action": {
+                      "name": "Setup Automatizado"
+                    },
+                    "FromFullSync": false
+                  }
+                ],
+                "children": {
+                  "Timestamp": {
+                    "path": "body.data.event.Timestamp",
+                    "type": "string",
+                    "optional": true,
+                    "examples": [
+                      "2025-08-09T18:28:16.337-03:00",
+                      "2025-04-22T16:28:21.826-03:00"
+                    ]
+                  },
+                  "Action": {
+                    "path": "body.data.event.Action",
+                    "type": "object",
+                    "optional": true,
+                    "examples": [
+                      {
+                        "name": "Guilherme Jansen - Setup Automatizado"
+                      },
+                      {
+                        "name": "Setup Automatizado"
+                      }
+                    ],
+                    "children": {
+                      "name": {
+                        "path": "body.data.event.Action.name",
+                        "type": "string",
+                        "optional": false,
+                        "examples": [
+                          "Guilherme Jansen - Setup Automatizado",
+                          "Setup Automatizado"
+                        ]
+                      }
+                    }
+                  },
+                  "FromFullSync": {
+                    "path": "body.data.event.FromFullSync",
+                    "type": "boolean",
+                    "optional": true,
+                    "examples": [
+                      false
+                    ]
+                  }
+                }
+              },
+              "type": {
+                "path": "body.data.type",
+                "type": "string",
+                "optional": false,
+                "examples": [
+                  "Connected"
+                ]
+              }
+            }
+          },
+          "eventType": {
+            "path": "body.eventType",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "Connected"
+            ]
+          },
+          "timestamp": {
+            "path": "body.timestamp",
+            "type": "number",
+            "optional": false,
+            "examples": [
+              1757904358,
+              1757904388,
+              1757904434,
+              1757904435,
+              1757904475
+            ]
+          },
+          "token": {
+            "path": "body.token",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "!!qYWdJ61zk3i1AvTfXhzE!!",
+              "hibrido",
+              "teste",
+              "!!!qYWdJ61zk3i1AvTfXhzE!!!"
+            ]
+          },
+          "userID": {
+            "path": "body.userID",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "9e832a8666e02c047a5167194c703eaf",
+              "baf81c72f383e3c7814c18aab2d72360",
+              "2f3400f9df6ed2280373c346b8e91f1b",
+              "80402f2ab5855b2132cf45d6b365a62c"
+            ]
+          },
+          "userJID": {
+            "path": "body.userJID",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "5521971532700:4@s.whatsapp.net",
+              "5521979232690:28@s.whatsapp.net",
+              "5521979232690:33@s.whatsapp.net",
+              "5521979232690:36@s.whatsapp.net"
+            ]
+          },
+          "userName": {
+            "path": "body.userName",
+            "type": "string",
+            "optional": false,
+            "examples": [
+              "setupautomatizado",
+              "hibrido",
+              "teste",
+              "setupautomatizado-hibrido"
+            ]
+          },
+          "baseURL": {
+            "path": "body.baseURL",
+            "type": "string",
+            "optional": true,
+            "examples": [
+              "",
+              "https://api.zuckzapgo.com"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

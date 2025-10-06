@@ -1,0 +1,71 @@
+{
+  "headers": {
+    "host": "185.245.182.69:3000",
+    "user-agent": "ZuckZapGo-Webhook/1.0",
+    "content-length": "1350",
+    "accept": "application/json",
+    "content-type": "application/json",
+    "accept-encoding": "gzip"
+  },
+  "body": {
+    "baseURL": "https://api.zuckzapgo.com",
+    "data": {
+      "event": {
+        "JID": "5516992341269:12@s.whatsapp.net",
+        "Message": {
+          "Chat": "120363345548920821@g.us",
+          "Sender": "5516992341269:12@s.whatsapp.net",
+          "IsFromMe": false,
+          "IsGroup": true,
+          "AddressingMode": "pn",
+          "SenderAlt": "132362369257625:12@lid",
+          "RecipientAlt": "",
+          "BroadcastListOwner": "",
+          "ID": "3EB063ADAE46124C4FA3CC",
+          "ServerID": 0,
+          "Type": "media",
+          "PushName": "Giancarlo Molinari",
+          "Timestamp": "2025-09-15T12:54:06-03:00",
+          "Category": "",
+          "Multicast": false,
+          "MediaType": "sticker",
+          "Edit": "",
+          "MsgBotInfo": {
+            "EditType": "",
+            "EditTargetID": "",
+            "EditSenderTimestampMS": "0001-01-01T00:00:00Z"
+          },
+          "MsgMetaInfo": {
+            "TargetID": "",
+            "TargetSender": "",
+            "TargetChat": "",
+            "DeprecatedLIDSession": null,
+            "ThreadMessageID": "",
+            "ThreadMessageSenderJID": ""
+          },
+          "VerifiedName": {
+            "Certificate": {
+              "details": "CPWqyJaJ8L69ARIGc21iOndhIhJHaWFuY2FybG8gTW9saW5hcmk=",
+              "signature": "4lCCUzX3sIzDP+uFmTCy+asyWCYPjnbjhk603s+C3lrBBLHhB1oky0T54ApyfQQqlLm2PPjVBJyucC2TX+RcBg=="
+            },
+            "Details": {
+              "serial": 106674070834255220,
+              "issuer": "smb:wa",
+              "verifiedName": "Giancarlo Molinari"
+            }
+          },
+          "DeviceSentMeta": null
+        },
+        "OldBusinessName": "",
+        "NewBusinessName": "Giancarlo Molinari"
+      },
+      "type": "BusinessName"
+    },
+    "eventType": "BusinessName",
+    "timestamp": 1757951647,
+    "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+    "userID": "9e832a8666e02c047a5167194c703eaf",
+    "userJID": "5521971532700:4@s.whatsapp.net",
+    "userName": "setupautomatizado"
+  }
+}

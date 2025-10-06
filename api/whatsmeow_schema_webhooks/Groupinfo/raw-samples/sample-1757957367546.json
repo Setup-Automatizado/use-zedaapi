@@ -1,0 +1,49 @@
+{
+  "headers": {
+    "host": "185.245.182.69:3000",
+    "user-agent": "ZuckZapGo-Webhook/1.0",
+    "content-length": "774",
+    "accept": "application/json",
+    "content-type": "application/json",
+    "accept-encoding": "gzip"
+  },
+  "body": {
+    "baseURL": "https://api.zuckzapgo.com",
+    "data": {
+      "event": {
+        "JID": "120363344102839767@g.us",
+        "Notify": "invite",
+        "Sender": null,
+        "SenderPN": null,
+        "Timestamp": "2025-09-15T14:29:25-03:00",
+        "Name": null,
+        "Topic": null,
+        "Locked": null,
+        "Announce": null,
+        "Ephemeral": null,
+        "MembershipApprovalMode": null,
+        "Delete": null,
+        "Link": null,
+        "Unlink": null,
+        "NewInviteLink": null,
+        "PrevParticipantVersionID": "1757945791727645",
+        "ParticipantVersionID": "1757957365141307",
+        "JoinReason": "invite",
+        "Join": [
+          "5522997471079@s.whatsapp.net"
+        ],
+        "Leave": null,
+        "Promote": null,
+        "Demote": null,
+        "UnknownChanges": null
+      },
+      "type": "GroupInfo"
+    },
+    "eventType": "GroupInfo",
+    "timestamp": 1757957365,
+    "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+    "userID": "9e832a8666e02c047a5167194c703eaf",
+    "userJID": "5521971532700:4@s.whatsapp.net",
+    "userName": "setupautomatizado"
+  }
+}

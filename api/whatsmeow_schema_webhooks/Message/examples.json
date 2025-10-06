@@ -1,0 +1,614 @@
+{
+  "truncated": [
+    {
+      "headers": {
+        "host": "185.245.182.69:3000",
+        "user-agent": "ZuckZapGo-Webhook/1.0",
+        "content-length": "1882",
+        "accept": "application/json",
+        "content-type": "application/json",
+        "accept-encoding": "gzip"
+      },
+      "body": {
+        "baseURL": "https://api.zuckzapgo.com",
+        "data": {
+          "event": {
+            "Info": {
+              "Chat": "120363048845091565@g.us",
+              "Sender": "5521972256830:20@s.whatsapp.net",
+              "IsFromMe": false,
+              "IsGroup": true,
+              "AddressingMode": "pn",
+              "SenderAlt": "38444352954456:20@lid",
+              "RecipientAlt": "",
+              "BroadcastListOwner": "",
+              "ID": "3FF4B40A1C494660DD9D",
+              "ServerID": 0,
+              "Type": "text",
+              "PushName": "Ramon",
+              "Timestamp": "2025-09-15T14:56:41-03:00",
+              "Category": "",
+              "Multicast": false,
+              "MediaType": "",
+              "Edit": "7",
+              "MsgBotInfo": {
+                "EditType": "",
+                "EditTargetID": "",
+                "EditSenderTimestampMS": "0001-01-01T00:00:00Z"
+              },
+              "MsgMetaInfo": {
+                "TargetID": "",
+                "TargetSender": "",
+                "TargetChat": "",
+                "DeprecatedLIDSession": null,
+                "ThreadMessageID": "",
+                "ThreadMessageSenderJID": ""
+              },
+              "VerifiedName": null,
+              "DeviceSentMeta": null
+            },
+            "Message": {
+              "protocolMessage": {
+                "key": {
+                  "remoteJID": "120363048845091565@g.us",
+                  "fromMe": true,
+                  "ID": "3F6C0CABB7ADFEE6C893"
+                },
+                "type": 0
+              },
+              "messageContextInfo": {
+                "deviceListMetadata": {
+                  "senderKeyHash": "3c/MKjfJrvDiVw==",
+                  "senderTimestamp": 1757108570,
+                  "recipientKeyHash": "pe8woOURGcy7CQ==",
+                  "recipientTimestamp": 1757249841
+                },
+                "deviceListMetadataVersion": 2
+              }
+            },
+            "IsEphemeral": false,
+            "IsViewOnce": false,
+            "IsViewOnceV2": false,
+            "IsViewOnceV2Extension": false,
+            "IsDocumentWithCaption": false,
+            "IsLottieSticker": false,
+            "IsBotInvoke": false,
+            "IsEdit": false,
+            "SourceWebMsg": null,
+            "UnavailableRequestID": "",
+            "RetryCount": 0,
+            "NewsletterMeta": null,
+            "RawMessage": {
+              "protocolMessage": {
+                "key": {
+                  "remoteJID": "120363048845091565@g.us",
+                  "fromMe": true,
+                  "ID": "3F6C0CABB7ADFEE6C893"
+                },
+                "type": 0
+              },
+              "messageContextInfo": {
+                "deviceListMetadata": {
+                  "senderKeyHash": "3c/MKjfJrvDiVw==",
+                  "senderTimestamp": 1757108570,
+                  "recipientKeyHash": "pe8woOURGcy7CQ==",
+                  "recipientTimestamp": 1757249841
+                },
+                "deviceListMetadataVersion": 2
+              }
+            }
+          },
+          "type": "Message"
+        },
+        "eventType": "Message",
+        "timestamp": 1757959002,
+        "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+        "userID": "9e832a8666e02c047a5167194c703eaf",
+        "userJID": "5521971532700:4@s.whatsapp.net",
+        "userName": "setupautomatizado"
+      }
+    },
+    {
+      "headers": {
+        "host": "185.245.182.69:3000",
+        "user-agent": "ZuckZapGo-Webhook/1.0",
+        "content-length": "1882",
+        "accept": "application/json",
+        "content-type": "application/json",
+        "accept-encoding": "gzip"
+      },
+      "body": {
+        "baseURL": "https://api.zuckzapgo.com",
+        "data": {
+          "event": {
+            "Info": {
+              "Chat": "120363048845091565@g.us",
+              "Sender": "5521972256830:20@s.whatsapp.net",
+              "IsFromMe": false,
+              "IsGroup": true,
+              "AddressingMode": "pn",
+              "SenderAlt": "38444352954456:20@lid",
+              "RecipientAlt": "",
+              "BroadcastListOwner": "",
+              "ID": "3F9B82752D33A00D3708",
+              "ServerID": 0,
+              "Type": "text",
+              "PushName": "Ramon",
+              "Timestamp": "2025-09-15T14:56:45-03:00",
+              "Category": "",
+              "Multicast": false,
+              "MediaType": "",
+              "Edit": "7",
+              "MsgBotInfo": {
+                "EditType": "",
+                "EditTargetID": "",
+                "EditSenderTimestampMS": "0001-01-01T00:00:00Z"
+              },
+              "MsgMetaInfo": {
+                "TargetID": "",
+                "TargetSender": "",
+                "TargetChat": "",
+                "DeprecatedLIDSession": null,
+                "ThreadMessageID": "",
+                "ThreadMessageSenderJID": ""
+              },
+              "VerifiedName": null,
+              "DeviceSentMeta": null
+            },
+            "Message": {
+              "protocolMessage": {
+                "key": {
+                  "remoteJID": "120363048845091565@g.us",
+                  "fromMe": true,
+                  "ID": "3F1CBAC433CB7C02FF08"
+                },
+                "type": 0
+              },
+              "messageContextInfo": {
+                "deviceListMetadata": {
+                  "senderKeyHash": "3c/MKjfJrvDiVw==",
+                  "senderTimestamp": 1757108570,
+                  "recipientKeyHash": "pe8woOURGcy7CQ==",
+                  "recipientTimestamp": 1757249841
+                },
+                "deviceListMetadataVersion": 2
+              }
+            },
+            "IsEphemeral": false,
+            "IsViewOnce": false,
+            "IsViewOnceV2": false,
+            "IsViewOnceV2Extension": false,
+            "IsDocumentWithCaption": false,
+            "IsLottieSticker": false,
+            "IsBotInvoke": false,
+            "IsEdit": false,
+            "SourceWebMsg": null,
+            "UnavailableRequestID": "",
+            "RetryCount": 0,
+            "NewsletterMeta": null,
+            "RawMessage": {
+              "protocolMessage": {
+                "key": {
+                  "remoteJID": "120363048845091565@g.us",
+                  "fromMe": true,
+                  "ID": "3F1CBAC433CB7C02FF08"
+                },
+                "type": 0
+              },
+              "messageContextInfo": {
+                "deviceListMetadata": {
+                  "senderKeyHash": "3c/MKjfJrvDiVw==",
+                  "senderTimestamp": 1757108570,
+                  "recipientKeyHash": "pe8woOURGcy7CQ==",
+                  "recipientTimestamp": 1757249841
+                },
+                "deviceListMetadataVersion": 2
+              }
+            }
+          },
+          "type": "Message"
+        },
+        "eventType": "Message",
+        "timestamp": 1757959006,
+        "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+        "userID": "9e832a8666e02c047a5167194c703eaf",
+        "userJID": "5521971532700:4@s.whatsapp.net",
+        "userName": "setupautomatizado"
+      }
+    },
+    {
+      "headers": {
+        "host": "185.245.182.69:3000",
+        "user-agent": "ZuckZapGo-Webhook/1.0",
+        "content-length": "1617239",
+        "accept": "application/json",
+        "content-type": "application/json",
+        "accept-encoding": "gzip"
+      },
+      "body": {
+        "baseURL": "https://api.zuckzapgo.com",
+        "data": {
+          "base64": "AAAAGGZ0eXBtcDQyAAAAAG1wNDJpc29tAAAAGGJlYW0BAAAAAQAAAAAAAAACAAAAAAANb21vb3YAAABsbXZoZAAAAAAAAAAAAAAA...[TRUNCATED]",
+          "event": {
+            "Info": {
+              "Chat": "5521979232690@s.whatsapp.net",
+              "Sender": "5521971532700@s.whatsapp.net",
+              "IsFromMe": true,
+              "IsGroup": false,
+              "AddressingMode": "",
+              "SenderAlt": "227294266302623@lid",
+              "RecipientAlt": "140712372899859@lid",
+              "BroadcastListOwner": "",
+              "ID": "A538F5529C9BE6D48E00674BF55675BF",
+              "ServerID": 0,
+              "Type": "media",
+              "PushName": "Guilherme Jansen - Setup Automatizado",
+              "Timestamp": "2025-09-15T14:57:33-03:00",
+              "Category": "",
+              "Multicast": false,
+              "MediaType": "video",
+              "Edit": "",
+              "MsgBotInfo": {
+                "EditType": "",
+                "EditTargetID": "",
+                "EditSenderTimestampMS": "0001-01-01T00:00:00Z"
+              },
+              "MsgMetaInfo": {
+                "TargetID": "",
+                "TargetSender": "",
+                "TargetChat": "",
+                "DeprecatedLIDSession": null,
+                "ThreadMessageID": "",
+                "ThreadMessageSenderJID": ""
+              },
+              "VerifiedName": {
+                "Certificate": {
+                  "details": "CLP785WYuZHbJhIGc21iOndhIiVHdWlsaGVybWUgSmFuc2VuIC0gU2V0dXAgQXV0b21hdGl6YWRv",
+                  "signature": "PAWkg19wmecwhAxkgkzfYAoFrY9Kcq2QtLT/RW6dISArLkahXlc7g/6nX8lSCg8KVHyhuxi4ex0rZ1o4mmZ3DA=="
+                },
+                "Details": {
+                  "serial": 2789493750986768000,
+                  "issuer": "smb:wa",
+                  "verifiedName": "Guilherme Jansen - Setup Automatizado"
+                }
+              },
+              "DeviceSentMeta": {
+                "DestinationJID": "5521979232690@s.whatsapp.net",
+                "Phash": ""
+              }
+            },
+            "Message": {
+              "videoMessage": {
+                "URL": "https://mmg.whatsapp.net/v/t62.7161-24/530129610_815357780966721_8739248628895887_n.enc?ccb=11-4&oh=01_Q5Aa2gFKpXyGgzE4IqOqRkxLG9Ln9z-nPoJ8c0WugqEwbGEF2w&oe=68EFBECF&_nc_sid=5e03e0&mms3=true",
+                "mimetype": "video/mp4",
+                "fileSHA256": "wGfn/NjHn0b6179Fzvv3wiCvMoxTPs2QbQ9XhkpsmUc=",
+                "fileLength": 1207533,
+                "seconds": 5,
+                "mediaKey": "63tuFeAeb0zvi0e7ZQ/mLmgEJe96sGuHQHHPPnVe2Yw=",
+                "height": 864,
+                "width": 480,
+                "fileEncSHA256": "SwKYEf0HaLVh/3Fq7yg72dLxu8gL18rgiyvBpZmMBQU=",
+                "directPath": "/v/t62.7161-24/530129610_815357780966721_8739248628895887_n.enc?ccb=11-4&oh=01_Q5Aa2gFKpXyGgzE4IqOqRkxLG9Ln9z-nPoJ8c0WugqEwbGEF2w&oe=68EFBECF&_nc_sid=5e03e0",
+                "mediaKeyTimestamp": 1757959051,
+                "JPEGThumbnail": "/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEABsbGxscGx4hIR4qLSgtKj04MzM4PV1CR0JHQl2NWGdYWGdYjX2Xe3N7l33gsJycsOD/...[TRUNCATED]",
+                "contextInfo": {
+                  "pairedMediaType": 0
+                },
+                "streamingSidecar": "EvPJt9WpHTPQsQbCxzny1grDU40R2JnpbVpCNLPXq0YU+cfBhL4lcYRQGt8jHpuS8EXTbxVxcnBvuX3Z6ukTWIYVQXeYUt2WKRaXQiQHFwyLuUkCFijhI4z2AIpgzjuIj3poo7UUMmxT2eXl42JXLSAgSi4mjCunJLFxm/BWpWi5OBlRus8100G6CqjWGrEux+VSmwp2tfOAkOrVNbbJ0NCohS8a12rKL3PmNoQqvNyyg1h+fH0kDJ5xA06JVw==",
+                "externalShareFullVideoDurationInSeconds": 0
+              },
+              "messageContextInfo": {
+                "deviceListMetadata": {
+                  "senderKeyHash": "pe8woOURGcy7CQ==",
+                  "senderTimestamp": 1757249841,
+                  "receiverAccountType": 1,
+                  "recipientKeyHash": "HGlz1Gd1GxEmFw==",
+                  "recipientTimestamp": 1757710721
+                },
+                "deviceListMetadataVersion": 2,
+                "messageSecret": "OCHKZWiDO42fISJ8vX4ewH2qukEDJwGmsF95rSdUQ30="
+              }
+            },
+            "IsEphemeral": false,
+            "IsViewOnce": false,
+            "IsViewOnceV2": false,
+            "IsViewOnceV2Extension": false,
+            "IsDocumentWithCaption": false,
+            "IsLottieSticker": false,
+            "IsBotInvoke": false,
+            "IsEdit": false,
+            "SourceWebMsg": null,
+            "UnavailableRequestID": "",
+            "RetryCount": 0,
+            "NewsletterMeta": null,
+            "RawMessage": {
+              "deviceSentMessage": {
+                "destinationJID": "5521979232690@s.whatsapp.net",
+                "message": {
+                  "videoMessage": {
+                    "URL": "https://mmg.whatsapp.net/v/t62.7161-24/530129610_815357780966721_8739248628895887_n.enc?ccb=11-4&oh=01_Q5Aa2gFKpXyGgzE4IqOqRkxLG9Ln9z-nPoJ8c0WugqEwbGEF2w&oe=68EFBECF&_nc_sid=5e03e0&mms3=true",
+                    "mimetype": "video/mp4",
+                    "fileSHA256": "wGfn/NjHn0b6179Fzvv3wiCvMoxTPs2QbQ9XhkpsmUc=",
+                    "fileLength": 1207533,
+                    "seconds": 5,
+                    "mediaKey": "63tuFeAeb0zvi0e7ZQ/mLmgEJe96sGuHQHHPPnVe2Yw=",
+                    "height": 864,
+                    "width": 480,
+                    "fileEncSHA256": "SwKYEf0HaLVh/3Fq7yg72dLxu8gL18rgiyvBpZmMBQU=",
+                    "directPath": "/v/t62.7161-24/530129610_815357780966721_8739248628895887_n.enc?ccb=11-4&oh=01_Q5Aa2gFKpXyGgzE4IqOqRkxLG9Ln9z-nPoJ8c0WugqEwbGEF2w&oe=68EFBECF&_nc_sid=5e03e0",
+                    "mediaKeyTimestamp": 1757959051,
+                    "JPEGThumbnail": "/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEABsbGxscGx4hIR4qLSgtKj04MzM4PV1CR0JHQl2NWGdYWGdYjX2Xe3N7l33gsJycsOD/...[TRUNCATED]",
+                    "contextInfo": {
+                      "pairedMediaType": 0
+                    },
+                    "streamingSidecar": "EvPJt9WpHTPQsQbCxzny1grDU40R2JnpbVpCNLPXq0YU+cfBhL4lcYRQGt8jHpuS8EXTbxVxcnBvuX3Z6ukTWIYVQXeYUt2WKRaXQiQHFwyLuUkCFijhI4z2AIpgzjuIj3poo7UUMmxT2eXl42JXLSAgSi4mjCunJLFxm/BWpWi5OBlRus8100G6CqjWGrEux+VSmwp2tfOAkOrVNbbJ0NCohS8a12rKL3PmNoQqvNyyg1h+fH0kDJ5xA06JVw==",
+                    "externalShareFullVideoDurationInSeconds": 0
+                  },
+                  "messageContextInfo": {
+                    "deviceListMetadata": {
+                      "senderKeyHash": "pe8woOURGcy7CQ==",
+                      "senderTimestamp": 1757249841,
+                      "receiverAccountType": 1,
+                      "recipientKeyHash": "HGlz1Gd1GxEmFw==",
+                      "recipientTimestamp": 1757710721
+                    },
+                    "deviceListMetadataVersion": 2,
+                    "messageSecret": "OCHKZWiDO42fISJ8vX4ewH2qukEDJwGmsF95rSdUQ30="
+                  }
+                }
+              },
+              "messageContextInfo": {
+                "deviceListMetadata": {
+                  "senderKeyHash": "pe8woOURGcy7CQ==",
+                  "senderTimestamp": 1757249841,
+                  "receiverAccountType": 1,
+                  "recipientKeyHash": "HGlz1Gd1GxEmFw==",
+                  "recipientTimestamp": 1757710721
+                },
+                "deviceListMetadataVersion": 2,
+                "messageSecret": "OCHKZWiDO42fISJ8vX4ewH2qukEDJwGmsF95rSdUQ30="
+              }
+            }
+          },
+          "fileName": "A538F5529C9BE6D48E00674BF55675BF_1757959054424933312.mp4",
+          "mimeType": "video/mp4",
+          "s3": {
+            "bucket": "zuckzapgo",
+            "fileName": "A538F5529C9BE6D48E00674BF55675BF_1757959054424933312.mp4",
+            "key": "users/9e832a8666e02c047a5167194c703eaf/outbox/contacts/5521971532700/2025/09/15/videos/A538F5529C9BE6D48E00674BF55675BF_1757959054424933312.mp4",
+            "mimeType": "video/mp4",
+            "size": 1207533,
+            "url": "https://s3.setupautomatizado.com.br/zuckzapgo/users/9e832a8666e02c047a5167194c703eaf/outbox/contacts/5521971532700/2025/09/15/videos/A538F5529C9BE6D48E00674BF55675BF_1757959054424933312.mp4"
+          },
+          "type": "Message"
+        },
+        "eventType": "Message",
+        "timestamp": 1757959054,
+        "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+        "userID": "9e832a8666e02c047a5167194c703eaf",
+        "userJID": "5521971532700:4@s.whatsapp.net",
+        "userName": "setupautomatizado"
+      }
+    },
+    {
+      "headers": {
+        "host": "185.245.182.69:3000",
+        "user-agent": "ZuckZapGo-Webhook/1.0",
+        "content-length": "1511",
+        "accept": "application/json",
+        "content-type": "application/json",
+        "accept-encoding": "gzip"
+      },
+      "body": {
+        "baseURL": "https://api.zuckzapgo.com",
+        "data": {
+          "event": {
+            "Info": {
+              "Chat": "120363420363903724@g.us",
+              "Sender": "558197721355:1@s.whatsapp.net",
+              "IsFromMe": false,
+              "IsGroup": true,
+              "AddressingMode": "pn",
+              "SenderAlt": "249628297580724:1@lid",
+              "RecipientAlt": "",
+              "BroadcastListOwner": "",
+              "ID": "3F15662A398E77E7CC22",
+              "ServerID": 0,
+              "Type": "text",
+              "PushName": "Marcus Vinicius",
+              "Timestamp": "2025-09-15T14:57:37-03:00",
+              "Category": "",
+              "Multicast": false,
+              "MediaType": "",
+              "Edit": "",
+              "MsgBotInfo": {
+                "EditType": "",
+                "EditTargetID": "",
+                "EditSenderTimestampMS": "0001-01-01T00:00:00Z"
+              },
+              "MsgMetaInfo": {
+                "TargetID": "",
+                "TargetSender": "",
+                "TargetChat": "",
+                "DeprecatedLIDSession": null,
+                "ThreadMessageID": "",
+                "ThreadMessageSenderJID": ""
+              },
+              "VerifiedName": null,
+              "DeviceSentMeta": null
+            },
+            "Message": {
+              "extendedTextMessage": {
+                "text": "acah que consegue entender o problema se olhar a configuração da stack?",
+                "contextInfo": {
+                  "expiration": 0
+                }
+              }
+            },
+            "IsEphemeral": false,
+            "IsViewOnce": false,
+            "IsViewOnceV2": false,
+            "IsViewOnceV2Extension": false,
+            "IsDocumentWithCaption": false,
+            "IsLottieSticker": false,
+            "IsBotInvoke": false,
+            "IsEdit": false,
+            "SourceWebMsg": null,
+            "UnavailableRequestID": "",
+            "RetryCount": 0,
+            "NewsletterMeta": null,
+            "RawMessage": {
+              "extendedTextMessage": {
+                "text": "acah que consegue entender o problema se olhar a configuração da stack?",
+                "contextInfo": {
+                  "expiration": 0
+                }
+              }
+            }
+          },
+          "type": "Message"
+        },
+        "eventType": "Message",
+        "timestamp": 1757959057,
+        "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+        "userID": "9e832a8666e02c047a5167194c703eaf",
+        "userJID": "5521971532700:4@s.whatsapp.net",
+        "userName": "setupautomatizado"
+      }
+    },
+    {
+      "headers": {
+        "host": "185.245.182.69:3000",
+        "user-agent": "ZuckZapGo-Webhook/1.0",
+        "content-length": "4022",
+        "accept": "application/json",
+        "content-type": "application/json",
+        "accept-encoding": "gzip"
+      },
+      "body": {
+        "baseURL": "https://api.zuckzapgo.com",
+        "data": {
+          "event": {
+            "Info": {
+              "Chat": "120363375520943587@g.us",
+              "Sender": "24112063873228:32@lid",
+              "IsFromMe": false,
+              "IsGroup": true,
+              "AddressingMode": "lid",
+              "SenderAlt": "5518998009148:32@s.whatsapp.net",
+              "RecipientAlt": "",
+              "BroadcastListOwner": "",
+              "ID": "3EB011A315C0BD95F28979",
+              "ServerID": 0,
+              "Type": "text",
+              "PushName": "Thalison Vieira",
+              "Timestamp": "2025-09-15T14:57:56-03:00",
+              "Category": "",
+              "Multicast": false,
+              "MediaType": "",
+              "Edit": "",
+              "MsgBotInfo": {
+                "EditType": "",
+                "EditTargetID": "",
+                "EditSenderTimestampMS": "0001-01-01T00:00:00Z"
+              },
+              "MsgMetaInfo": {
+                "TargetID": "",
+                "TargetSender": "",
+                "TargetChat": "",
+                "DeprecatedLIDSession": null,
+                "ThreadMessageID": "",
+                "ThreadMessageSenderJID": ""
+              },
+              "VerifiedName": null,
+              "DeviceSentMeta": null
+            },
+            "Message": {
+              "extendedTextMessage": {
+                "text": "Sobre custos vai depender muito da quantidade de follow-up, lembretes... Qual templete vai usar se em utility ou marketing. na internet ta cheio de conteúdo sobre, ou voce pode ir no gpt e perguntar, fui aprendendo api oficial com ele kkkk",
+                "contextInfo": {
+                  "stanzaID": "3EB025703D69EE0ED6235F",
+                  "participant": "192388815433914@lid",
+                  "quotedMessage": {
+                    "conversation": "Pessoal tenho algumas clínicas aqui rodando já com a DinastiAPI, nunca trabalhei com API oficial. Essas especificamente nao tem crm, chatwoot, nada.\n\nAgentes básicos, com followup, lembretes de consulta, agendamento, etc.\n\nQuero apresentar a esses clientes que existe a possibilidade de migração para a API Oficial, para diminuir as chances de perda do número, mas para isso, teremos que: X\n\nEsse X seria o quanto vai custar a mais pra ele e os impactos que teremos na operação. Existe algum conteúdo na Dinastia onde eu consiga aprender esse básico? Sobre custos, como migrar, se vale ou nao a pena migrar, etc",
+                    "messageContextInfo": {
+                      "messageSecret": "2SG4a1UsFCC645Os39IyHea60HrPH3t3wTxAF0Ki+bg="
+                    }
+                  },
+                  "disappearingMode": {
+                    "initiator": 0,
+                    "trigger": 1
+                  }
+                },
+                "inviteLinkGroupTypeV2": 0
+              },
+              "messageContextInfo": {
+                "messageSecret": "zJAgSbR4+YFlBQGxIDj9RTntF/s4BntFoYh8+1e6GRA=",
+                "limitSharingV2": {
+                  "sharingLimited": false,
+                  "trigger": 0,
+                  "limitSharingSettingTimestamp": 1755795797661,
+                  "initiatedByMe": false
+                }
+              }
+            },
+            "IsEphemeral": false,
+            "IsViewOnce": false,
+            "IsViewOnceV2": false,
+            "IsViewOnceV2Extension": false,
+            "IsDocumentWithCaption": false,
+            "IsLottieSticker": false,
+            "IsBotInvoke": false,
+            "IsEdit": false,
+            "SourceWebMsg": null,
+            "UnavailableRequestID": "",
+            "RetryCount": 0,
+            "NewsletterMeta": null,
+            "RawMessage": {
+              "extendedTextMessage": {
+                "text": "Sobre custos vai depender muito da quantidade de follow-up, lembretes... Qual templete vai usar se em utility ou marketing. na internet ta cheio de conteúdo sobre, ou voce pode ir no gpt e perguntar, fui aprendendo api oficial com ele kkkk",
+                "contextInfo": {
+                  "stanzaID": "3EB025703D69EE0ED6235F",
+                  "participant": "192388815433914@lid",
+                  "quotedMessage": {
+                    "conversation": "Pessoal tenho algumas clínicas aqui rodando já com a DinastiAPI, nunca trabalhei com API oficial. Essas especificamente nao tem crm, chatwoot, nada.\n\nAgentes básicos, com followup, lembretes de consulta, agendamento, etc.\n\nQuero apresentar a esses clientes que existe a possibilidade de migração para a API Oficial, para diminuir as chances de perda do número, mas para isso, teremos que: X\n\nEsse X seria o quanto vai custar a mais pra ele e os impactos que teremos na operação. Existe algum conteúdo na Dinastia onde eu consiga aprender esse básico? Sobre custos, como migrar, se vale ou nao a pena migrar, etc",
+                    "messageContextInfo": {
+                      "messageSecret": "2SG4a1UsFCC645Os39IyHea60HrPH3t3wTxAF0Ki+bg="
+                    }
+                  },
+                  "disappearingMode": {
+                    "initiator": 0,
+                    "trigger": 1
+                  }
+                },
+                "inviteLinkGroupTypeV2": 0
+              },
+              "messageContextInfo": {
+                "messageSecret": "zJAgSbR4+YFlBQGxIDj9RTntF/s4BntFoYh8+1e6GRA=",
+                "limitSharingV2": {
+                  "sharingLimited": false,
+                  "trigger": 0,
+                  "limitSharingSettingTimestamp": 1755795797661,
+                  "initiatedByMe": false
+                }
+              }
+            }
+          },
+          "type": "Message"
+        },
+        "eventType": "Message",
+        "timestamp": 1757959076,
+        "token": "!!qYWdJ61zk3i1AvTfXhzE!!",
+        "userID": "9e832a8666e02c047a5167194c703eaf",
+        "userJID": "5521971532700:4@s.whatsapp.net",
+        "userName": "setupautomatizado"
+      }
+    }
+  ],
+  "metadata": {
+    "totalExamples": 6,
+    "examplesShown": 5,
+    "firstSeen": "2025-09-15T17:58:03.775Z",
+    "lastSeen": "2025-09-15T17:58:03.775Z"
+  }
+}

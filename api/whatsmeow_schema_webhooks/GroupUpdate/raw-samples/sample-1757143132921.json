@@ -1,0 +1,16 @@
+{
+  "instanceId": "3E6D06A438D501A5CD70265FDA264287",
+  "status": "READ",
+  "ids": [
+    "3AFB52B7A4B687C4C732",
+    "A5BAD94FD29F89357C89F4E2080984C0",
+    "A5D09BF0AFCF757AFD85CDA0C049764D",
+    "A558D428DC5CE3593F427BD75CBDC688"
+  ],
+  "momment": 1757143132000,
+  "participant": "60808281243793",
+  "participantDevice": 0,
+  "phone": "120363419921172685-group",
+  "type": "MessageStatusCallback",
+  "isGroup": true
+}
