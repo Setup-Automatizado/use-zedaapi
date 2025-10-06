@@ -43,14 +43,16 @@ type Config struct {
 	}
 
 	S3 struct {
-		Endpoint  string
-		Region    string
-		Bucket    string
-		AccessKey string
-		SecretKey string
-		UseSSL    bool
-		URLExpiry time.Duration
-		ACL       string // Optional: S3 object ACL (e.g., "public-read", "private"). Empty = use bucket policy (modern AWS pattern)
+		Endpoint         string
+		Region           string
+		Bucket           string
+		AccessKey        string
+		SecretKey        string
+		UseSSL           bool
+		UsePresignedURLs bool
+		PublicBaseURL    string
+		URLExpiry        time.Duration
+		ACL              string // Optional: S3 object ACL (e.g., "public-read", "private"). Empty = use bucket policy (modern AWS pattern)
 	}
 
 	Media struct {
@@ -58,6 +60,10 @@ type Config struct {
 		LocalURLExpiry     time.Duration
 		LocalSecretKey     string
 		LocalPublicBaseURL string
+		CleanupInterval    time.Duration
+		CleanupBatchSize   int
+		S3Retention        time.Duration
+		LocalRetention     time.Duration
 	}
 
 	Sentry struct {
@@ -112,6 +118,9 @@ type Config struct {
 
 		DeliveredRetention time.Duration
 		CleanupInterval    time.Duration
+
+		DebugRawPayload bool
+		DebugDumpDir    string
 	}
 }
 
@@ -198,22 +207,26 @@ func Load() (Config, error) {
 	}
 
 	cfg.S3 = struct {
-		Endpoint  string
-		Region    string
-		Bucket    string
-		AccessKey string
-		SecretKey string
-		UseSSL    bool
-		URLExpiry time.Duration
-		ACL       string
+		Endpoint         string
+		Region           string
+		Bucket           string
+		AccessKey        string
+		SecretKey        string
+		UseSSL           bool
+		UsePresignedURLs bool
+		PublicBaseURL    string
+		URLExpiry        time.Duration
+		ACL              string
 	}{
-		Endpoint:  getEnv("S3_ENDPOINT", "http://localhost:9000"),
-		Region:    getEnv("S3_REGION", "us-east-1"),
-		Bucket:    getEnv("S3_BUCKET", "funnelchat-media"),
-		AccessKey: os.Getenv("S3_ACCESS_KEY"),
-		SecretKey: os.Getenv("S3_SECRET_KEY"),
-		UseSSL:    parseBool(getEnv("S3_USE_SSL", "false")),
-		ACL:       getEnv("S3_ACL", ""),
+		Endpoint:         getEnv("S3_ENDPOINT", "http://localhost:9000"),
+		Region:           getEnv("S3_REGION", "us-east-1"),
+		Bucket:           getEnv("S3_BUCKET", "funnelchat-media"),
+		AccessKey:        os.Getenv("S3_ACCESS_KEY"),
+		SecretKey:        os.Getenv("S3_SECRET_KEY"),
+		UseSSL:           parseBool(getEnv("S3_USE_SSL", "false")),
+		UsePresignedURLs: parseBool(getEnv("S3_USE_PRESIGNED_URLS", "true")),
+		PublicBaseURL:    os.Getenv("S3_PUBLIC_BASE_URL"),
+		ACL:              getEnv("S3_ACL", ""),
 	}
 	expiry, err := parseDuration(getEnv("S3_URL_EXPIRATION", "30d"))
 	if err != nil {
@@ -221,21 +234,37 @@ func Load() (Config, error) {
 	}
 	cfg.S3.URLExpiry = expiry
 
-	cfg.Media = struct {
-		LocalStoragePath   string
-		LocalURLExpiry     time.Duration
-		LocalSecretKey     string
-		LocalPublicBaseURL string
-	}{
-		LocalStoragePath:   getEnv("MEDIA_LOCAL_STORAGE_PATH", "/var/whatsmeow/media"),
-		LocalSecretKey:     os.Getenv("MEDIA_LOCAL_SECRET_KEY"),
-		LocalPublicBaseURL: os.Getenv("MEDIA_LOCAL_PUBLIC_BASE_URL"),
-	}
+	cfg.Media.LocalStoragePath = getEnv("MEDIA_LOCAL_STORAGE_PATH", "/var/whatsmeow/media")
+	cfg.Media.LocalSecretKey = os.Getenv("MEDIA_LOCAL_SECRET_KEY")
+	cfg.Media.LocalPublicBaseURL = os.Getenv("MEDIA_LOCAL_PUBLIC_BASE_URL")
 	mediaExpiry, err := parseDuration(getEnv("MEDIA_LOCAL_URL_EXPIRY", "720h"))
 	if err != nil {
 		return cfg, fmt.Errorf("invalid MEDIA_LOCAL_URL_EXPIRY: %w", err)
 	}
 	cfg.Media.LocalURLExpiry = mediaExpiry
+	mediaCleanupInterval, err := parseDuration(getEnv("MEDIA_CLEANUP_INTERVAL", "168h"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid MEDIA_CLEANUP_INTERVAL: %w", err)
+	}
+	cfg.Media.CleanupInterval = mediaCleanupInterval
+	cleanupBatchSize, err := parseInt(getEnv("MEDIA_CLEANUP_BATCH_SIZE", "200"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid MEDIA_CLEANUP_BATCH_SIZE: %w", err)
+	}
+	cfg.Media.CleanupBatchSize = cleanupBatchSize
+	if cfg.Media.CleanupBatchSize <= 0 {
+		cfg.Media.CleanupBatchSize = 200
+	}
+	s3Retention, err := parseDuration(getEnv("S3_MEDIA_RETENTION", "720h"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid S3_MEDIA_RETENTION: %w", err)
+	}
+	cfg.Media.S3Retention = s3Retention
+	localRetention, err := parseDuration(getEnv("LOCAL_MEDIA_RETENTION", "720h"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid LOCAL_MEDIA_RETENTION: %w", err)
+	}
+	cfg.Media.LocalRetention = localRetention
 
 	cfg.Sentry = struct {
 		DSN         string
@@ -331,9 +360,15 @@ func Load() (Config, error) {
 	if err != nil {
 		return cfg, fmt.Errorf("invalid DELIVERED_RETENTION_PERIOD: %w", err)
 	}
-	cleanupInterval, err := parseDuration(getEnv("CLEANUP_INTERVAL", "1h"))
+	eventCleanupInterval, err := parseDuration(getEnv("CLEANUP_INTERVAL", "1h"))
 	if err != nil {
 		return cfg, fmt.Errorf("invalid CLEANUP_INTERVAL: %w", err)
+	}
+
+	debugRawPayload := parseBool(getEnv("EVENTS_DEBUG_RAW_PAYLOAD", "false"))
+	debugDumpDir := strings.TrimSpace(getEnv("EVENTS_DEBUG_DUMP_DIR", "./tmp/debug-events"))
+	if debugDumpDir == "" {
+		debugDumpDir = "./tmp/debug-events"
 	}
 
 	cfg.Events = struct {
@@ -369,6 +404,9 @@ func Load() (Config, error) {
 
 		DeliveredRetention time.Duration
 		CleanupInterval    time.Duration
+
+		DebugRawPayload bool
+		DebugDumpDir    string
 	}{
 		BufferSize:            eventBufferSize,
 		BatchSize:             eventBatchSize,
@@ -395,7 +433,9 @@ func Load() (Config, error) {
 		WebhookMaxRetries:     webhookMaxRetries,
 		TransportBufferSize:   transportBufferSize,
 		DeliveredRetention:    deliveredRetention,
-		CleanupInterval:       cleanupInterval,
+		CleanupInterval:       eventCleanupInterval,
+		DebugRawPayload:       debugRawPayload,
+		DebugDumpDir:          debugDumpDir,
 	}
 
 	return cfg, nil
