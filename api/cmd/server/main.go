@@ -218,11 +218,15 @@ func main() {
 	logger.Info("media processing system initialized",
 		slog.Int("max_workers", cfg.Workers.Media))
 
-	var mediaHTTPHandler *handlers.MediaHandler
-	if localStorage, err := media.NewLocalMediaStorage(ctx, &cfg, metrics); err != nil {
+	var (
+		mediaHTTPHandler *handlers.MediaHandler
+		localStorage     *media.LocalMediaStorage
+	)
+	if ls, err := media.NewLocalMediaStorage(ctx, &cfg, metrics); err != nil {
 		logger.Warn("local media storage disabled",
 			slog.String("error", err.Error()))
 	} else {
+		localStorage = ls
 		mediaHTTPHandler = handlers.NewMediaHandler(localStorage, metrics, logger)
 	}
 
@@ -236,6 +240,37 @@ func main() {
 	defer redisClient.Close()
 
 	redisLockManager := locks.NewRedisManager(redisClient)
+
+	var mediaReaper *media.MediaReaper
+	if cfg.Media.CleanupInterval > 0 {
+		s3CleanupUploader, err := media.NewS3Uploader(ctx, &cfg, metrics)
+		if err != nil {
+			logger.Warn("media cleanup disabled: s3 uploader init failed",
+				slog.String("error", err.Error()))
+		} else {
+			reaperCfg := media.MediaReaperConfig{
+				Interval:       cfg.Media.CleanupInterval,
+				BatchSize:      cfg.Media.CleanupBatchSize,
+				S3Retention:    cfg.Media.S3Retention,
+				LocalRetention: cfg.Media.LocalRetention,
+			}
+			mediaReaper, err = media.NewMediaReaper(mediaRepo, s3CleanupUploader, localStorage, metrics, logger, redisLockManager, reaperCfg)
+			if err != nil {
+				logger.Warn("media cleanup disabled",
+					slog.String("error", err.Error()))
+			} else {
+				mediaReaper.Start(ctx)
+				defer func() {
+					stopCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+					defer cancel()
+					if err := mediaReaper.Stop(stopCtx); err != nil {
+						logger.Warn("media reaper stop error",
+							slog.String("error", err.Error()))
+					}
+				}()
+			}
+		}
+	}
 
 	cbConfig := locks.DefaultCircuitBreakerConfig()
 	lockManager := locks.NewCircuitBreakerManager(redisLockManager, cbConfig)

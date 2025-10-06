@@ -90,6 +90,18 @@ type MediaMetadata struct {
 	UpdatedAt           time.Time
 }
 
+type ExpiredMediaRecord struct {
+	ID          int64
+	InstanceID  uuid.UUID
+	StorageType StorageType
+	S3Bucket    *string
+	S3Key       *string
+	S3URLType   S3URLType
+	SizeBytes   int64
+	CreatedAt   time.Time
+	ReferenceAt time.Time
+}
+
 type MediaRepository interface {
 	InsertMedia(ctx context.Context, media *MediaMetadata) error
 
@@ -122,6 +134,9 @@ type MediaRepository interface {
 	AcquireForProcessing(ctx context.Context, eventID uuid.UUID, workerID string) (bool, error)
 
 	ReleaseFromProcessing(ctx context.Context, eventID uuid.UUID, workerID string) error
+
+	ListExpiredMedia(ctx context.Context, s3Threshold time.Time, localThreshold time.Time, limit int) ([]*ExpiredMediaRecord, error)
+	DeleteMediaByIDs(ctx context.Context, ids []int64) error
 }
 
 type mediaRepository struct {
@@ -526,5 +541,79 @@ func (r *mediaRepository) ReleaseFromProcessing(ctx context.Context, eventID uui
 		  AND processing_worker_id = $2`
 
 	_, err := r.pool.Exec(ctx, query, eventID, workerID)
+	return err
+}
+
+func (r *mediaRepository) ListExpiredMedia(ctx context.Context, s3Threshold time.Time, localThreshold time.Time, limit int) ([]*ExpiredMediaRecord, error) {
+	if limit <= 0 {
+		limit = 200
+	}
+
+	query := `
+		SELECT
+			id,
+			instance_id,
+			storage_type,
+			s3_bucket,
+			s3_key,
+			s3_url_type,
+			COALESCE(downloaded_size_bytes, file_length, 0) AS size_bytes,
+			created_at,
+			CASE
+				WHEN storage_type = 's3' THEN COALESCE(uploaded_at, completed_at, created_at)
+				ELSE COALESCE(completed_at, created_at)
+			END AS reference_at
+		FROM media_metadata
+		WHERE completed_at IS NOT NULL
+		  AND storage_type IN ('s3', 'local')
+		  AND (
+		        (storage_type = 's3'
+		         AND COALESCE(uploaded_at, completed_at, created_at) <= $1
+		         AND s3_key IS NOT NULL)
+		     OR (storage_type = 'local'
+		         AND COALESCE(completed_at, created_at) <= $2
+		         AND s3_key IS NOT NULL)
+		      )
+		ORDER BY reference_at ASC
+		LIMIT $3`
+
+	rows, err := r.pool.Query(ctx, query, s3Threshold, localThreshold, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var records []*ExpiredMediaRecord
+	for rows.Next() {
+		record := &ExpiredMediaRecord{}
+		if err := rows.Scan(
+			&record.ID,
+			&record.InstanceID,
+			&record.StorageType,
+			&record.S3Bucket,
+			&record.S3Key,
+			&record.S3URLType,
+			&record.SizeBytes,
+			&record.CreatedAt,
+			&record.ReferenceAt,
+		); err != nil {
+			return nil, err
+		}
+		records = append(records, record)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return records, nil
+}
+
+func (r *mediaRepository) DeleteMediaByIDs(ctx context.Context, ids []int64) error {
+	if len(ids) == 0 {
+		return nil
+	}
+	query := `DELETE FROM media_metadata WHERE id = ANY($1)`
+	_, err := r.pool.Exec(ctx, query, ids)
 	return err
 }

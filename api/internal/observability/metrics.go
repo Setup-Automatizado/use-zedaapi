@@ -55,6 +55,10 @@ type Metrics struct {
 	MediaLocalStorageSize          prometheus.Gauge
 	MediaLocalStorageFiles         prometheus.Gauge
 	MediaCleanupTotal              *prometheus.CounterVec
+	MediaCleanupRuns               *prometheus.CounterVec
+	MediaCleanupDeletedBytes       *prometheus.CounterVec
+	MediaCleanupErrors             *prometheus.CounterVec
+	MediaCleanupDuration           prometheus.Histogram
 	MediaServeRequests             *prometheus.CounterVec
 	MediaServeBytes                *prometheus.CounterVec
 	TransportDeliveries            *prometheus.CounterVec
@@ -308,6 +312,31 @@ func NewMetrics(namespace string, reg prometheus.Registerer) *Metrics {
 		Help:      "Total media cleanup operations, labeled by cleanup_type (expired_files/stale_locks/etc).",
 	}, []string{"cleanup_type"})
 
+	mediaCleanupRuns := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: namespace,
+		Name:      "media_cleanup_runs_total",
+		Help:      "Number of media cleanup cycles executed, labeled by result (success/partial/error/empty).",
+	}, []string{"result"})
+
+	mediaCleanupDeletedBytes := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: namespace,
+		Name:      "media_cleanup_deleted_bytes_total",
+		Help:      "Total bytes removed during media cleanup, labeled by storage_type (s3/local).",
+	}, []string{"storage_type"})
+
+	mediaCleanupErrors := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: namespace,
+		Name:      "media_cleanup_errors_total",
+		Help:      "Total media cleanup errors, labeled by storage_type and error_type.",
+	}, []string{"storage_type", "error_type"})
+
+	mediaCleanupDuration := prometheus.NewHistogram(prometheus.HistogramOpts{
+		Namespace: namespace,
+		Name:      "media_cleanup_duration_seconds",
+		Help:      "Duration of media cleanup cycles in seconds.",
+		Buckets:   []float64{1, 5, 15, 30, 60, 120, 300, 600},
+	})
+
 	mediaServeRequests := prometheus.NewCounterVec(prometheus.CounterOpts{
 		Namespace: namespace,
 		Name:      "media_serve_requests_total",
@@ -420,7 +449,9 @@ func NewMetrics(namespace string, reg prometheus.Registerer) *Metrics {
 		mediaUploadErrors, mediaUploadSizeBytes, mediaPresignedURLGenerated,
 		mediaDeleteAttempts, mediaFailures, mediaBacklog,
 		mediaFallbackAttempts, mediaFallbackSuccess, mediaFallbackFailure,
-		mediaLocalStorageSize, mediaLocalStorageFiles, mediaCleanupTotal,
+		mediaLocalStorageSize, mediaLocalStorageFiles,
+		mediaCleanupTotal, mediaCleanupRuns, mediaCleanupDeletedBytes,
+		mediaCleanupErrors, mediaCleanupDuration,
 		mediaServeRequests, mediaServeBytes,
 		transportDeliveries, transportDuration, transportErrors, transportRetries,
 		circuitBreakerStatePerInstance, circuitBreakerTransitions,
@@ -472,6 +503,10 @@ func NewMetrics(namespace string, reg prometheus.Registerer) *Metrics {
 		MediaLocalStorageSize:          mediaLocalStorageSize,
 		MediaLocalStorageFiles:         mediaLocalStorageFiles,
 		MediaCleanupTotal:              mediaCleanupTotal,
+		MediaCleanupRuns:               mediaCleanupRuns,
+		MediaCleanupDeletedBytes:       mediaCleanupDeletedBytes,
+		MediaCleanupErrors:             mediaCleanupErrors,
+		MediaCleanupDuration:           mediaCleanupDuration,
 		MediaServeRequests:             mediaServeRequests,
 		MediaServeBytes:                mediaServeBytes,
 		TransportDeliveries:            transportDeliveries,
