@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0-develop.3](https://github.com/Funnelchat20/whatsapp-api-golang/compare/v1.2.0-develop.2...v1.2.0-develop.3) (2025-10-06)
+
+### ✨ Features
+
+* **config:** add media cleanup and S3 URL configuration options ([858e789](https://github.com/Funnelchat20/whatsapp-api-golang/commit/858e78955e1484f94d195f66368966767e6e3cad))
+* **media:** add presigned URL toggle and public URL support for S3 ([e9900ee](https://github.com/Funnelchat20/whatsapp-api-golang/commit/e9900eeecffa399cf26bd8d84527e805051ef902))
+* **events:** add undecryptable message support and contact metadata enrichment ([dce506d](https://github.com/Funnelchat20/whatsapp-api-golang/commit/dce506d2a18832f175a77f702f201188f9a2888a))
+* **whatsmeow:** enhance contact metadata with photo details and presence system ([602f920](https://github.com/Funnelchat20/whatsapp-api-golang/commit/602f920507cd0783de6e95f91619e41366472148))
+* **events:** enhance ZAPI transformer with complete webhook payload support ([c495b3e](https://github.com/Funnelchat20/whatsapp-api-golang/commit/c495b3e89b7f81fdd31f4337e0472cb7dbb8b2e7))
+* **media:** implement automated media cleanup system with distributed locking ([8a88244](https://github.com/Funnelchat20/whatsapp-api-golang/commit/8a88244431a792ccfa2a182a2be65a9fc0500a73))
+* **whatsmeow:** implement LID to phone number resolution system ([ca50b99](https://github.com/Funnelchat20/whatsapp-api-golang/commit/ca50b99679091e541fcbc9f745ca9667ed8cca02))
+
 ## [1.2.0-develop.2](https://github.com/Funnelchat20/whatsapp-api-golang/compare/v1.2.0-develop.1...v1.2.0-develop.2) (2025-10-04)
 
 ### ✨ Features
