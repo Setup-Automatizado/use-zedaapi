@@ -7,24 +7,33 @@ import (
 	"fmt"
 	"log/slog"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/google/uuid"
+	"google.golang.org/protobuf/encoding/protojson"
+
+	eventctx "go.mau.fi/whatsmeow/api/internal/events/eventctx"
 	"go.mau.fi/whatsmeow/api/internal/events/transform"
 	"go.mau.fi/whatsmeow/api/internal/events/types"
 	"go.mau.fi/whatsmeow/api/internal/logging"
 	"go.mau.fi/whatsmeow/proto/waE2E"
+	watypes "go.mau.fi/whatsmeow/types"
 	"go.mau.fi/whatsmeow/types/events"
 )
 
+var debugProtoMarshalOpts = protojson.MarshalOptions{EmitUnpopulated: true}
+
 type Transformer struct {
 	instanceID uuid.UUID
+	debug      bool
 }
 
-func NewTransformer(instanceID uuid.UUID) *Transformer {
+func NewTransformer(instanceID uuid.UUID, debug bool) *Transformer {
 	return &Transformer{
 		instanceID: instanceID,
+		debug:      debug,
 	}
 }
 
@@ -32,6 +41,7 @@ func (t *Transformer) SourceLib() types.SourceLib {
 	return types.SourceLibWhatsmeow
 }
 
+// TODO: Adicionar novos eventos
 func (t *Transformer) SupportsEvent(eventType reflect.Type) bool {
 	switch eventType {
 	case reflect.TypeOf(&events.Message{}),
@@ -42,13 +52,16 @@ func (t *Transformer) SupportsEvent(eventType reflect.Type) bool {
 		reflect.TypeOf(&events.Disconnected{}),
 		reflect.TypeOf(&events.JoinedGroup{}),
 		reflect.TypeOf(&events.GroupInfo{}),
-		reflect.TypeOf(&events.Picture{}):
+		reflect.TypeOf(&events.Picture{}),
+		reflect.TypeOf(&events.HistorySync{}),
+		reflect.TypeOf(&events.UndecryptableMessage{}):
 		return true
 	default:
 		return false
 	}
 }
 
+// TODO: Adicionar novos eventos
 func (t *Transformer) Transform(ctx context.Context, rawEvent interface{}) (*types.InternalEvent, error) {
 	logger := logging.ContextLogger(ctx, nil).With(
 		slog.String("component", "whatsmeow_transformer"),
@@ -74,6 +87,10 @@ func (t *Transformer) Transform(ctx context.Context, rawEvent interface{}) (*typ
 		return t.transformGroupInfo(ctx, logger, evt)
 	case *events.Picture:
 		return t.transformPicture(ctx, logger, evt)
+	case *events.HistorySync:
+		return t.transformHistorySync(ctx, logger, evt)
+	case *events.UndecryptableMessage:
+		return t.transformUndecryptable(ctx, logger, evt)
 	default:
 		logger.Debug("unsupported event type",
 			slog.String("event_type", fmt.Sprintf("%T", rawEvent)),
@@ -87,6 +104,8 @@ func (t *Transformer) transformMessage(ctx context.Context, logger *slog.Logger,
 
 	msg.UnwrapRaw()
 
+	lidResolver := eventctx.LIDResolverFromContext(ctx)
+
 	event := &types.InternalEvent{
 		InstanceID: t.instanceID,
 		EventID:    eventID,
@@ -99,6 +118,7 @@ func (t *Transformer) transformMessage(ctx context.Context, logger *slog.Logger,
 
 	event.Metadata["message_id"] = msg.Info.ID
 	event.Metadata["from"] = msg.Info.Sender.String()
+	event.Metadata["sender"] = msg.Info.Sender.String()
 	event.Metadata["chat"] = msg.Info.Chat.String()
 	event.Metadata["from_me"] = fmt.Sprintf("%t", msg.Info.IsFromMe)
 	event.Metadata["is_group"] = fmt.Sprintf("%t", msg.Info.IsGroup)
@@ -120,6 +140,73 @@ func (t *Transformer) transformMessage(ctx context.Context, logger *slog.Logger,
 	event.Metadata["multicast"] = fmt.Sprintf("%t", msg.Info.Multicast)
 	if msg.Info.MediaType != "" {
 		event.Metadata["media_type_info"] = msg.Info.MediaType
+	}
+
+	if _, exists := event.Metadata["sender_pn"]; !exists {
+		sender := msg.Info.Sender.ToNonAD()
+		switch sender.Server {
+		case watypes.DefaultUserServer:
+			event.Metadata["sender_pn"] = sender.String()
+		case watypes.HiddenUserServer:
+			if lidResolver != nil {
+				if pn, ok := lidResolver.PNForLID(ctx, sender); ok {
+					event.Metadata["sender_pn"] = pn.String()
+				}
+			}
+		}
+		if _, hasPN := event.Metadata["sender_pn"]; !hasPN {
+			alt := msg.Info.MessageSource.SenderAlt.ToNonAD()
+			if alt.Server == watypes.DefaultUserServer && !alt.IsEmpty() {
+				event.Metadata["sender_pn"] = alt.String()
+			}
+		}
+	}
+
+	isGroupChat := msg.Info.IsGroup
+
+	if provider := eventctx.ContactProvider(ctx); provider != nil {
+		senderLookup := msg.Info.Sender.ToNonAD()
+		senderIsHidden := senderLookup.Server == watypes.HiddenUserServer
+		if senderIsHidden {
+			if alt := msg.Info.MessageSource.SenderAlt.ToNonAD(); !alt.IsEmpty() && alt.Server != watypes.HiddenUserServer {
+				senderLookup = alt
+				senderIsHidden = false
+			} else if pn := strings.TrimSpace(event.Metadata["sender_pn"]); pn != "" {
+				if pnJID, err := watypes.ParseJID(pn); err == nil {
+					senderLookup = pnJID.ToNonAD()
+					senderIsHidden = senderLookup.Server == watypes.HiddenUserServer
+				}
+			}
+		}
+
+		chatLookup := msg.Info.Chat.ToNonAD()
+		if chatLookup.Server == watypes.HiddenUserServer {
+			if alt := msg.Info.MessageSource.RecipientAlt.ToNonAD(); !alt.IsEmpty() {
+				chatLookup = alt
+			}
+		}
+
+		if !isGroupChat {
+			if _, ok := event.Metadata["chat_name"]; !ok {
+				if name := provider.ContactName(ctx, chatLookup); name != "" {
+					event.Metadata["chat_name"] = name
+				}
+			}
+		}
+		if isGroupChat || chatLookup.Server != watypes.HiddenUserServer {
+			t.populatePhotoMetadata(ctx, provider, event.Metadata, "chat", chatLookup)
+		}
+		if !senderIsHidden {
+			if _, ok := event.Metadata["sender_name"]; !ok {
+				if name := provider.ContactName(ctx, senderLookup); name != "" {
+					event.Metadata["sender_name"] = name
+				}
+			}
+			t.populatePhotoMetadata(ctx, provider, event.Metadata, "sender", senderLookup)
+		}
+	}
+	if _, ok := event.Metadata["sender_name"]; !ok && msg.Info.PushName != "" {
+		event.Metadata["sender_name"] = msg.Info.PushName
 	}
 
 	if msg.Info.Edit != "" {
@@ -168,7 +255,11 @@ func (t *Transformer) transformMessage(ctx context.Context, logger *slog.Logger,
 		event.Metadata["sender_alt"] = msg.Info.MessageSource.SenderAlt.String()
 	}
 	if !msg.Info.MessageSource.RecipientAlt.IsEmpty() {
-		event.Metadata["recipient_alt"] = msg.Info.MessageSource.RecipientAlt.String()
+		recipientAlt := msg.Info.MessageSource.RecipientAlt.String()
+		event.Metadata["recipient_alt"] = recipientAlt
+		if msg.Info.MessageSource.RecipientAlt.Server == watypes.GroupServer {
+			event.Metadata["chat_alt"] = recipientAlt
+		}
 	}
 	if !msg.Info.MessageSource.BroadcastListOwner.IsEmpty() {
 		event.Metadata["broadcast_list_owner"] = msg.Info.MessageSource.BroadcastListOwner.String()
@@ -241,11 +332,241 @@ func (t *Transformer) transformMessage(ctx context.Context, logger *slog.Logger,
 		slog.String("media_type", event.MediaType),
 	)
 
+	t.logMessageDebug(ctx, logger, msg)
+
 	return event, nil
+}
+
+func (t *Transformer) transformUndecryptable(ctx context.Context, logger *slog.Logger, msg *events.UndecryptableMessage) (*types.InternalEvent, error) {
+	eventID := uuid.New()
+
+	lidResolver := eventctx.LIDResolverFromContext(ctx)
+
+	event := &types.InternalEvent{
+		InstanceID: t.instanceID,
+		EventID:    eventID,
+		EventType:  "undecryptable",
+		SourceLib:  types.SourceLibWhatsmeow,
+		RawPayload: msg,
+		Metadata:   make(map[string]string),
+		CapturedAt: time.Now(),
+	}
+
+	info := msg.Info
+
+	event.Metadata["message_id"] = info.ID
+	event.Metadata["from"] = info.Sender.String()
+	event.Metadata["sender"] = info.Sender.String()
+	event.Metadata["chat"] = info.Chat.String()
+	event.Metadata["from_me"] = fmt.Sprintf("%t", info.IsFromMe)
+	event.Metadata["is_group"] = fmt.Sprintf("%t", info.IsGroup)
+	event.Metadata["timestamp"] = fmt.Sprintf("%d", info.Timestamp.Unix())
+	if info.PushName != "" {
+		event.Metadata["push_name"] = info.PushName
+	}
+	if info.VerifiedName != nil {
+		verifiedNameJSON, _ := json.Marshal(info.VerifiedName)
+		event.Metadata["verified_name"] = string(verifiedNameJSON)
+	}
+	if info.Category != "" {
+		event.Metadata["category"] = info.Category
+	}
+	if info.ServerID != 0 {
+		event.Metadata["server_id"] = fmt.Sprintf("%d", info.ServerID)
+	}
+	event.Metadata["multicast"] = fmt.Sprintf("%t", info.Multicast)
+	if info.MediaType != "" {
+		event.Metadata["media_type_info"] = info.MediaType
+	}
+
+	if _, exists := event.Metadata["sender_pn"]; !exists {
+		sender := info.Sender.ToNonAD()
+		switch sender.Server {
+		case watypes.DefaultUserServer:
+			event.Metadata["sender_pn"] = sender.String()
+		case watypes.HiddenUserServer:
+			if lidResolver != nil {
+				if pn, ok := lidResolver.PNForLID(ctx, sender); ok {
+					event.Metadata["sender_pn"] = pn.String()
+				}
+			}
+		}
+		if _, hasPN := event.Metadata["sender_pn"]; !hasPN {
+			alt := info.MessageSource.SenderAlt.ToNonAD()
+			if alt.Server == watypes.DefaultUserServer && !alt.IsEmpty() {
+				event.Metadata["sender_pn"] = alt.String()
+			}
+		}
+	}
+
+	if provider := eventctx.ContactProvider(ctx); provider != nil {
+		senderJID := info.Sender.ToNonAD()
+		chatJID := info.Chat.ToNonAD()
+		if _, ok := event.Metadata["chat_name"]; !ok {
+			if name := provider.ContactName(ctx, chatJID); name != "" {
+				event.Metadata["chat_name"] = name
+			}
+		}
+		t.populatePhotoMetadata(ctx, provider, event.Metadata, "chat", chatJID)
+		if _, ok := event.Metadata["sender_name"]; !ok {
+			if name := provider.ContactName(ctx, senderJID); name != "" {
+				event.Metadata["sender_name"] = name
+			}
+		}
+		t.populatePhotoMetadata(ctx, provider, event.Metadata, "sender", senderJID)
+	}
+	if _, ok := event.Metadata["sender_name"]; !ok && info.PushName != "" {
+		event.Metadata["sender_name"] = info.PushName
+	}
+
+	if info.MsgMetaInfo.TargetID != "" {
+		event.Metadata["reply_to_message_id"] = info.MsgMetaInfo.TargetID
+	}
+	if !info.MsgMetaInfo.TargetSender.IsEmpty() {
+		event.Metadata["reply_to_sender"] = info.MsgMetaInfo.TargetSender.String()
+	}
+	if !info.MsgMetaInfo.TargetChat.IsEmpty() {
+		event.Metadata["reply_to_chat"] = info.MsgMetaInfo.TargetChat.String()
+	}
+	if info.MsgMetaInfo.ThreadMessageID != "" {
+		event.Metadata["thread_message_id"] = info.MsgMetaInfo.ThreadMessageID
+	}
+	if !info.MsgMetaInfo.ThreadMessageSenderJID.IsEmpty() {
+		event.Metadata["thread_message_sender"] = info.MsgMetaInfo.ThreadMessageSenderJID.String()
+	}
+
+	if info.DeviceSentMeta != nil && info.DeviceSentMeta.Phash != "" {
+		event.Metadata["device_sent_phash"] = info.DeviceSentMeta.Phash
+	}
+
+	if info.MessageSource.AddressingMode != "" {
+		event.Metadata["addressing_mode"] = string(info.MessageSource.AddressingMode)
+	}
+	if !info.MessageSource.SenderAlt.IsEmpty() {
+		event.Metadata["sender_alt"] = info.MessageSource.SenderAlt.String()
+	}
+	if !info.MessageSource.RecipientAlt.IsEmpty() {
+		recipientAlt := info.MessageSource.RecipientAlt.String()
+		event.Metadata["recipient_alt"] = recipientAlt
+		if info.MessageSource.RecipientAlt.Server == watypes.GroupServer {
+			event.Metadata["chat_alt"] = recipientAlt
+		}
+	}
+	if !info.MessageSource.BroadcastListOwner.IsEmpty() {
+		event.Metadata["broadcast_list_owner"] = info.MessageSource.BroadcastListOwner.String()
+	}
+
+	event.Metadata["waiting_message"] = "true"
+	event.Metadata["is_unavailable"] = fmt.Sprintf("%t", msg.IsUnavailable)
+	if msg.UnavailableType != "" {
+		event.Metadata["unavailable_type"] = string(msg.UnavailableType)
+		if msg.UnavailableType == events.UnavailableTypeViewOnce {
+			event.Metadata["is_view_once"] = "true"
+		}
+	}
+	if msg.DecryptFailMode != "" {
+		event.Metadata["decrypt_fail_mode"] = string(msg.DecryptFailMode)
+	}
+
+	logger.WarnContext(ctx, "captured undecryptable message",
+		slog.String("event_id", eventID.String()),
+		slog.String("message_id", info.ID),
+		slog.Bool("is_unavailable", msg.IsUnavailable),
+		slog.String("unavailable_type", string(msg.UnavailableType)),
+	)
+
+	t.logUndecryptableDebug(ctx, logger, msg)
+
+	return event, nil
+}
+
+func (t *Transformer) logMessageDebug(ctx context.Context, logger *slog.Logger, msg *events.Message) {
+	if !t.debug || msg == nil {
+		return
+	}
+
+	details := map[string]interface{}{
+		"message_id":   msg.Info.ID,
+		"from":         msg.Info.Sender.String(),
+		"chat":         msg.Info.Chat.String(),
+		"timestamp":    msg.Info.Timestamp.Unix(),
+		"is_view_once": msg.IsViewOnce,
+		"is_ephemeral": msg.IsEphemeral,
+	}
+
+	if msg.Message != nil {
+		if data, err := debugProtoMarshalOpts.Marshal(msg.Message); err == nil {
+			details["proto"] = json.RawMessage(data)
+		}
+	}
+
+	if msg.RawMessage != nil {
+		if data, err := debugProtoMarshalOpts.Marshal(msg.RawMessage); err == nil {
+			details["raw_proto"] = json.RawMessage(data)
+		}
+	}
+
+	if data, err := json.Marshal(details); err == nil {
+		logger.DebugContext(ctx, "whatsmeow raw message", slog.String("payload", string(data)))
+	}
+}
+
+func (t *Transformer) logUndecryptableDebug(ctx context.Context, logger *slog.Logger, msg *events.UndecryptableMessage) {
+	if !t.debug || msg == nil {
+		return
+	}
+
+	details := map[string]interface{}{
+		"message_id":        msg.Info.ID,
+		"from":              msg.Info.Sender.String(),
+		"chat":              msg.Info.Chat.String(),
+		"timestamp":         msg.Info.Timestamp.Unix(),
+		"is_unavailable":    msg.IsUnavailable,
+		"unavailable_type":  string(msg.UnavailableType),
+		"decrypt_fail_mode": string(msg.DecryptFailMode),
+	}
+
+	if data, err := json.Marshal(details); err == nil {
+		logger.DebugContext(ctx, "whatsmeow undecryptable message", slog.String("payload", string(data)))
+	}
+}
+
+func (t *Transformer) populatePhotoMetadata(ctx context.Context, provider eventctx.ContactMetadataProvider, metadata map[string]string, prefix string, jid watypes.JID) {
+	if jid.IsEmpty() {
+		return
+	}
+
+	if detailProvider, ok := provider.(eventctx.ContactPhotoDetailProvider); ok {
+		details := detailProvider.ContactPhotoDetails(ctx, jid)
+		full := strings.TrimSpace(details.FullURL)
+		preview := strings.TrimSpace(details.PreviewURL)
+		if full != "" {
+			if current, ok := metadata[prefix+"_photo"]; !ok || strings.TrimSpace(current) == "" {
+				metadata[prefix+"_photo"] = full
+			}
+			return
+		}
+		if preview != "" {
+			if current, ok := metadata[prefix+"_photo"]; !ok || strings.TrimSpace(current) == "" {
+				metadata[prefix+"_photo"] = preview
+			}
+			return
+		}
+	}
+
+	if _, ok := metadata[prefix+"_photo"]; ok {
+		return
+	}
+
+	if photo := strings.TrimSpace(provider.ContactPhoto(ctx, jid)); photo != "" {
+		metadata[prefix+"_photo"] = photo
+	}
 }
 
 func (t *Transformer) transformReceipt(ctx context.Context, logger *slog.Logger, receipt *events.Receipt) (*types.InternalEvent, error) {
 	eventID := uuid.New()
+
+	lidResolver := eventctx.LIDResolverFromContext(ctx)
 
 	event := &types.InternalEvent{
 		InstanceID: t.instanceID,
@@ -261,6 +582,27 @@ func (t *Transformer) transformReceipt(ctx context.Context, logger *slog.Logger,
 	event.Metadata["sender"] = receipt.Sender.String()
 	event.Metadata["receipt_type"] = string(receipt.Type)
 	event.Metadata["timestamp"] = fmt.Sprintf("%d", receipt.Timestamp.Unix())
+	event.Metadata["from_me"] = fmt.Sprintf("%t", receipt.IsFromMe)
+
+	if receipt.Chat.Device > 0 {
+		event.Metadata["chat_device"] = fmt.Sprintf("%d", receipt.Chat.Device)
+	}
+	if receipt.Sender.Device > 0 {
+		event.Metadata["sender_device"] = fmt.Sprintf("%d", receipt.Sender.Device)
+	}
+
+	event.Metadata["sender_jid"] = receipt.Sender.String()
+
+	if !receipt.MessageSender.IsEmpty() {
+		event.Metadata["message_sender"] = receipt.MessageSender.String()
+	}
+
+	isGroup := receipt.Chat.Server == watypes.GroupServer
+	if !isGroup && !receipt.MessageSource.RecipientAlt.IsEmpty() && receipt.MessageSource.RecipientAlt.Server == watypes.GroupServer {
+		isGroup = true
+		event.Metadata["chat_alt"] = receipt.MessageSource.RecipientAlt.String()
+	}
+	event.Metadata["is_group"] = fmt.Sprintf("%t", isGroup)
 
 	if receipt.MessageSource.AddressingMode != "" {
 		event.Metadata["addressing_mode"] = string(receipt.MessageSource.AddressingMode)
@@ -277,6 +619,52 @@ func (t *Transformer) transformReceipt(ctx context.Context, logger *slog.Logger,
 		event.Metadata["message_ids"] = string(messageIDsJSON)
 	}
 
+	if _, exists := event.Metadata["sender_pn"]; !exists {
+		sender := receipt.Sender.ToNonAD()
+		switch sender.Server {
+		case watypes.DefaultUserServer:
+			event.Metadata["sender_pn"] = sender.String()
+		case watypes.HiddenUserServer:
+			if lidResolver != nil {
+				if pn, ok := lidResolver.PNForLID(ctx, sender); ok {
+					event.Metadata["sender_pn"] = pn.String()
+				}
+			}
+		}
+		if _, hasPN := event.Metadata["sender_pn"]; !hasPN {
+			alt := receipt.MessageSource.SenderAlt.ToNonAD()
+			if alt.Server == watypes.DefaultUserServer && !alt.IsEmpty() {
+				event.Metadata["sender_pn"] = alt.String()
+			}
+		}
+	}
+
+	if !receipt.MessageSender.IsEmpty() {
+		if _, exists := event.Metadata["message_sender_pn"]; !exists {
+			originalSender := receipt.MessageSender.ToNonAD()
+			switch originalSender.Server {
+			case watypes.DefaultUserServer:
+				event.Metadata["message_sender_pn"] = originalSender.String()
+			case watypes.HiddenUserServer:
+				if lidResolver != nil {
+					if pn, ok := lidResolver.PNForLID(ctx, originalSender); ok {
+						event.Metadata["message_sender_pn"] = pn.String()
+					}
+				}
+			}
+		}
+	}
+
+	if provider := eventctx.ContactProvider(ctx); provider != nil {
+		senderJID := receipt.Sender.ToNonAD()
+		if _, ok := event.Metadata["sender_name"]; !ok {
+			if name := provider.ContactName(ctx, senderJID); name != "" {
+				event.Metadata["sender_name"] = name
+			}
+		}
+		t.populatePhotoMetadata(ctx, provider, event.Metadata, "sender", senderJID)
+	}
+
 	logger.InfoContext(ctx, "transformed receipt event",
 		slog.String("event_id", eventID.String()),
 		slog.String("receipt_type", string(receipt.Type)),
@@ -288,6 +676,8 @@ func (t *Transformer) transformReceipt(ctx context.Context, logger *slog.Logger,
 
 func (t *Transformer) transformChatPresence(ctx context.Context, logger *slog.Logger, presence *events.ChatPresence) (*types.InternalEvent, error) {
 	eventID := uuid.New()
+
+	lidResolver := eventctx.LIDResolverFromContext(ctx)
 
 	event := &types.InternalEvent{
 		InstanceID: t.instanceID,
@@ -303,6 +693,7 @@ func (t *Transformer) transformChatPresence(ctx context.Context, logger *slog.Lo
 	event.Metadata["sender"] = presence.Sender.String()
 	event.Metadata["state"] = string(presence.State)
 	event.Metadata["media"] = string(presence.Media)
+	event.Metadata["is_group"] = fmt.Sprintf("%t", presence.IsGroup)
 
 	if presence.MessageSource.AddressingMode != "" {
 		event.Metadata["addressing_mode"] = string(presence.MessageSource.AddressingMode)
@@ -313,6 +704,24 @@ func (t *Transformer) transformChatPresence(ctx context.Context, logger *slog.Lo
 	if !presence.MessageSource.RecipientAlt.IsEmpty() {
 		event.Metadata["recipient_alt"] = presence.MessageSource.RecipientAlt.String()
 	}
+
+	senderJID := presence.Sender.ToNonAD()
+	if _, exists := event.Metadata["sender_pn"]; !exists {
+		switch senderJID.Server {
+		case watypes.DefaultUserServer, watypes.LegacyUserServer:
+			event.Metadata["sender_pn"] = senderJID.String()
+		case watypes.HiddenUserServer:
+			if !presence.MessageSource.SenderAlt.IsEmpty() && presence.MessageSource.SenderAlt.Server != watypes.HiddenUserServer {
+				event.Metadata["sender_pn"] = presence.MessageSource.SenderAlt.ToNonAD().String()
+			} else if lidResolver != nil {
+				if pn, ok := lidResolver.PNForLID(ctx, senderJID); ok && !pn.IsEmpty() {
+					event.Metadata["sender_pn"] = pn.ToNonAD().String()
+				}
+			}
+		}
+	}
+
+	// Presence events depend exclusively on WhatsApp metadata; avoid extra lookups
 
 	logger.InfoContext(ctx, "transformed chat presence event",
 		slog.String("event_id", eventID.String()),
@@ -578,6 +987,23 @@ func (t *Transformer) extractContextInfo(ctxInfo *waE2E.ContextInfo, event *type
 		event.EphemeralExpiry = ephemeralExpiry
 		event.Metadata["ephemeral_expiry"] = fmt.Sprintf("%d", ephemeralExpiry)
 	}
+	if external := ctxInfo.GetExternalAdReply(); external != nil {
+		externalPayload := map[string]interface{}{
+			"title":                 external.GetTitle(),
+			"body":                  external.GetBody(),
+			"mediaType":             int(external.GetMediaType()),
+			"thumbnailUrl":          external.GetThumbnailURL(),
+			"sourceType":            external.GetSourceType(),
+			"sourceId":              external.GetSourceID(),
+			"sourceUrl":             external.GetSourceURL(),
+			"containsAutoReply":     external.GetContainsAutoReply(),
+			"renderLargerThumbnail": external.GetRenderLargerThumbnail(),
+			"showAdAttribution":     external.GetShowAdAttribution(),
+		}
+		if raw, err := json.Marshal(externalPayload); err == nil {
+			event.Metadata["external_ad_reply"] = string(raw)
+		}
+	}
 }
 
 func (t *Transformer) transformJoinedGroup(ctx context.Context, logger *slog.Logger, joined *events.JoinedGroup) (*types.InternalEvent, error) {
@@ -701,6 +1127,51 @@ func (t *Transformer) transformPicture(ctx context.Context, logger *slog.Logger,
 		slog.String("event_id", eventID.String()),
 		slog.String("jid", picture.JID.String()),
 		slog.Bool("remove", picture.Remove),
+	)
+
+	return event, nil
+}
+
+func (t *Transformer) transformHistorySync(ctx context.Context, logger *slog.Logger, history *events.HistorySync) (*types.InternalEvent, error) {
+	if history.Data == nil {
+		return nil, fmt.Errorf("history sync event missing Data field")
+	}
+
+	eventID := uuid.New()
+
+	event := &types.InternalEvent{
+		InstanceID: t.instanceID,
+		EventID:    eventID,
+		EventType:  "history_sync",
+		SourceLib:  types.SourceLibWhatsmeow,
+		RawPayload: history,
+		Metadata:   make(map[string]string),
+		CapturedAt: time.Now(),
+	}
+
+	syncTypeStr := strings.TrimPrefix(history.Data.SyncType.String(), "HistorySync_")
+	syncTypeStr = strings.ToLower(syncTypeStr)
+	event.Metadata["history_sync_type"] = syncTypeStr
+	event.Metadata["chunk_order"] = strconv.FormatUint(uint64(history.Data.GetChunkOrder()), 10)
+	event.Metadata["progress"] = strconv.FormatUint(uint64(history.Data.GetProgress()), 10)
+
+	conversationCount := len(history.Data.GetConversations())
+	event.Metadata["conversation_count"] = strconv.Itoa(conversationCount)
+
+	statusMessageCount := len(history.Data.GetStatusV3Messages())
+	event.Metadata["status_message_count"] = strconv.Itoa(statusMessageCount)
+
+	pushnameCount := len(history.Data.GetPushnames())
+	event.Metadata["pushname_count"] = strconv.Itoa(pushnameCount)
+
+	logger.InfoContext(ctx, "transformed history sync event",
+		slog.String("event_id", eventID.String()),
+		slog.String("sync_type", syncTypeStr),
+		slog.Uint64("chunk_order", uint64(history.Data.GetChunkOrder())),
+		slog.Uint64("progress", uint64(history.Data.GetProgress())),
+		slog.Int("conversation_count", conversationCount),
+		slog.Int("status_message_count", statusMessageCount),
+		slog.Int("pushname_count", pushnameCount),
 	)
 
 	return event, nil

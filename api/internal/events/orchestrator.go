@@ -118,6 +118,8 @@ func (o *Orchestrator) RegisterInstance(ctx context.Context, instanceID uuid.UUI
 		instanceID,
 		o.router,
 		o.metrics,
+		o.config.Events.DebugRawPayload,
+		o.config.Events.DebugDumpDir,
 	)
 	o.handlers[instanceID] = handler
 

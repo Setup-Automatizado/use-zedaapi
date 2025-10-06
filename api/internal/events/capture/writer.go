@@ -2,9 +2,13 @@ package capture
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log/slog"
+	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -27,6 +31,7 @@ type TransactionalWriter struct {
 	cfg              *config.Config
 	resolver         WebhookResolver
 	metadataEnricher MetadataEnricher
+	debugDumpDir     string
 }
 
 type WebhookResolver interface {
@@ -62,6 +67,11 @@ func NewTransactionalWriter(
 		slog.String("component", "transactional_writer"),
 	)
 
+	dumpDir := "./tmp/debug-events"
+	if cfg != nil && strings.TrimSpace(cfg.Events.DebugDumpDir) != "" {
+		dumpDir = strings.TrimSpace(cfg.Events.DebugDumpDir)
+	}
+
 	return &TransactionalWriter{
 		log:              log,
 		metrics:          metrics,
@@ -71,6 +81,7 @@ func NewTransactionalWriter(
 		cfg:              cfg,
 		resolver:         resolver,
 		metadataEnricher: metadataEnricher,
+		debugDumpDir:     dumpDir,
 	}
 }
 
@@ -107,21 +118,6 @@ func (w *TransactionalWriter) WriteEvents(ctx context.Context, events []*types.I
 			w.metadataEnricher(resolvedConfig, internalEvent)
 		}
 
-		transportConfig, shouldDeliver := w.buildTransportConfig(internalEvent, resolvedConfig)
-		if !shouldDeliver {
-			skippedCount++
-			w.log.WarnContext(ctx, "skipping event without webhook destination",
-				slog.String("instance_id", instanceID.String()),
-				slog.String("event_id", internalEvent.EventID.String()),
-				slog.String("event_type", internalEvent.EventType))
-			w.metrics.EventsInserted.WithLabelValues(
-				instanceID.String(),
-				internalEvent.EventType,
-				"skipped",
-			).Inc()
-			continue
-		}
-
 		encodedPayload, err := encoding.EncodeInternalEvent(internalEvent)
 		if err != nil {
 			failureCount++
@@ -129,12 +125,20 @@ func (w *TransactionalWriter) WriteEvents(ctx context.Context, events []*types.I
 				slog.String("event_id", internalEvent.EventID.String()),
 				slog.String("event_type", internalEvent.EventType),
 				slog.String("error", err.Error()))
+			w.dumpEventDebug(internalEvent, "encode_internal_event", nil, map[string]string{"error": err.Error()})
 			w.metrics.EventsInserted.WithLabelValues(
 				instanceID.String(),
 				internalEvent.EventType,
 				"encode_failed",
 			).Inc()
 			continue
+		}
+
+		decodedPayload, _ := base64.StdEncoding.DecodeString(encodedPayload)
+		w.debugLogInternalEvent(ctx, internalEvent, encodedPayload, decodedPayload)
+		if w.cfg != nil && w.cfg.Events.DebugRawPayload {
+			extra := map[string]string{"encoded_payload": encodedPayload}
+			w.dumpEventDebug(internalEvent, "internal_event_captured", decodedPayload, extra)
 		}
 
 		payloadJSON, err := json.Marshal(encodedPayload)
@@ -166,6 +170,22 @@ func (w *TransactionalWriter) WriteEvents(ctx context.Context, events []*types.I
 				instanceID.String(),
 				internalEvent.EventType,
 				"metadata_failed",
+			).Inc()
+			continue
+		}
+
+		transportConfig, shouldDeliver := w.buildTransportConfig(internalEvent, resolvedConfig)
+		if !shouldDeliver {
+			skippedCount++
+			w.log.WarnContext(ctx, "skipping event without webhook destination",
+				slog.String("instance_id", instanceID.String()),
+				slog.String("event_id", internalEvent.EventID.String()),
+				slog.String("event_type", internalEvent.EventType))
+			w.dumpEventDebug(internalEvent, "no_webhook_destination", decodedPayload, nil)
+			w.metrics.EventsInserted.WithLabelValues(
+				instanceID.String(),
+				internalEvent.EventType,
+				"skipped",
 			).Inc()
 			continue
 		}
@@ -303,6 +323,8 @@ func resolveWebhookURL(event *types.InternalEvent, cfg *ResolvedWebhookConfig) (
 		return cfg.ReceivedURL, "received"
 	case "receipt":
 		return cfg.ReceivedDeliveryURL, "receipt"
+	case "undecryptable":
+		return cfg.ReceivedURL, "received"
 	case "chat_presence":
 		return cfg.ChatPresenceURL, "chat_presence"
 	case "presence":
@@ -313,6 +335,76 @@ func resolveWebhookURL(event *types.InternalEvent, cfg *ResolvedWebhookConfig) (
 		return cfg.DisconnectedURL, "disconnected"
 	default:
 		return "", ""
+	}
+}
+
+func (w *TransactionalWriter) debugLogInternalEvent(ctx context.Context, event *types.InternalEvent, encoded string, decoded []byte) {
+	if w.cfg == nil || !w.cfg.Events.DebugRawPayload {
+		return
+	}
+
+	attrs := []any{
+		slog.String("instance_id", event.InstanceID.String()),
+		slog.String("event_id", event.EventID.String()),
+		slog.String("event_type", event.EventType),
+		slog.String("payload_base64", encoded),
+	}
+
+	if len(decoded) > 0 {
+		attrs = append(attrs, slog.String("payload_json", string(decoded)))
+	}
+
+	w.log.DebugContext(ctx, "internal event payload", attrs...)
+}
+
+func (w *TransactionalWriter) dumpEventDebug(event *types.InternalEvent, reason string, payloadJSON []byte, extra map[string]string) {
+	if w.debugDumpDir == "" {
+		return
+	}
+
+	if err := os.MkdirAll(w.debugDumpDir, 0o755); err != nil {
+		w.log.Warn("failed to create debug dump directory",
+			slog.String("dir", w.debugDumpDir),
+			slog.String("error", err.Error()))
+		return
+	}
+
+	dump := map[string]interface{}{
+		"timestamp":   time.Now().Format(time.RFC3339Nano),
+		"reason":      reason,
+		"event_id":    event.EventID.String(),
+		"event_type":  event.EventType,
+		"instance_id": event.InstanceID.String(),
+		"metadata":    cloneStringMap(event.Metadata),
+	}
+
+	if payloadJSON != nil {
+		dump["payload_json"] = json.RawMessage(payloadJSON)
+	}
+
+	if event.RawPayload != nil {
+		dump["raw_payload_type"] = fmt.Sprintf("%T", event.RawPayload)
+		dump["raw_payload_repr"] = fmt.Sprintf("%+v", event.RawPayload)
+	}
+
+	if extra != nil {
+		for k, v := range extra {
+			dump[k] = v
+		}
+	}
+
+	data, err := json.MarshalIndent(dump, "", "  ")
+	if err != nil {
+		data = []byte(fmt.Sprintf("%+v", dump))
+	}
+
+	fileName := fmt.Sprintf("%s_%s_%d.json", event.EventType, event.EventID.String(), time.Now().UnixNano())
+	filePath := filepath.Join(w.debugDumpDir, fileName)
+
+	if writeErr := os.WriteFile(filePath, data, 0o644); writeErr != nil {
+		w.log.Warn("failed to write debug dump",
+			slog.String("path", filePath),
+			slog.String("error", writeErr.Error()))
 	}
 }
 

@@ -165,7 +165,7 @@ func (s *LocalMediaStorage) GenerateSignedURL(relativePath string, expiresAt tim
 	message := fmt.Sprintf("%s:%d", relativePath, expiresTimestamp)
 	signature := s.generateHMAC(message)
 
-	url := fmt.Sprintf("%s/v1/media/%s?expires=%d&signature=%s",
+	url := fmt.Sprintf("%s/%s?expires=%d&signature=%s",
 		s.publicBaseURL,
 		relativePath,
 		expiresTimestamp,
@@ -390,6 +390,63 @@ func (s *LocalMediaStorage) removeEmptyDirs(root string) error {
 
 		return nil
 	})
+}
+
+func (s *LocalMediaStorage) cleanupEmptyParents(path string) {
+	for path != s.basePath {
+		if path == "" || path == "." {
+			return
+		}
+		if err := os.Remove(path); err != nil {
+			return
+		}
+		path = filepath.Dir(path)
+	}
+}
+
+func (s *LocalMediaStorage) DeleteMedia(ctx context.Context, relativePath string) (int64, error) {
+	logger := logging.ContextLogger(ctx, s.logger).With(
+		slog.String("path", relativePath))
+
+	cleanPath := filepath.Clean(relativePath)
+	if strings.Contains(cleanPath, "..") {
+		return 0, fmt.Errorf("invalid path: path traversal detected")
+	}
+
+	fullPath := filepath.Join(s.basePath, cleanPath)
+
+	info, err := os.Stat(fullPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			logger.Warn("local media already removed",
+				slog.String("full_path", fullPath))
+			return 0, nil
+		}
+		return 0, fmt.Errorf("failed to stat file: %w", err)
+	}
+
+	if info.IsDir() {
+		return 0, fmt.Errorf("expected file but found directory: %s", cleanPath)
+	}
+
+	size := info.Size()
+
+	if err := os.Remove(fullPath); err != nil {
+		return 0, fmt.Errorf("failed to remove file: %w", err)
+	}
+
+	s.metrics.MediaLocalStorageSize.Add(-float64(size))
+	s.metrics.MediaLocalStorageFiles.Dec()
+
+	parent := filepath.Dir(fullPath)
+	if parent != s.basePath {
+		s.cleanupEmptyParents(parent)
+	}
+
+	logger.Info("local media deleted",
+		slog.Int64("size", size))
+
+	return size, nil
 }
 
 func (s *LocalMediaStorage) CopyToWriter(

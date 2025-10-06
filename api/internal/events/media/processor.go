@@ -340,7 +340,7 @@ func (p *MediaProcessor) uploadToS3WithRetry(
 			}
 		}
 
-		s3Key, presignedURL, err := p.uploader.Upload(
+		s3Key, mediaURL, err := p.uploader.Upload(
 			ctx,
 			instanceID,
 			eventID,
@@ -351,13 +351,20 @@ func (p *MediaProcessor) uploadToS3WithRetry(
 		)
 
 		if err == nil {
-			expiresAt := time.Now().Add(p.urlExpiry)
+			urlType := persistence.S3URLPresigned
+			var expiresAt *time.Time
+			if p.uploader.UsesPresignedURLs() {
+				expiry := time.Now().Add(p.urlExpiry)
+				expiresAt = &expiry
+			} else {
+				urlType = persistence.S3URLPublic
+			}
 			_ = p.mediaRepo.UpdateUploadInfoWithStorage(
 				ctx, eventID,
-				p.bucket, s3Key, presignedURL,
-				persistence.S3URLPresigned,
+				p.bucket, s3Key, mediaURL,
+				urlType,
 				persistence.StorageTypeS3,
-				&expiresAt,
+				expiresAt,
 			)
 
 			if attempt > 0 {
@@ -365,9 +372,9 @@ func (p *MediaProcessor) uploadToS3WithRetry(
 			}
 
 			return &ProcessResult{
-				S3Bucket:    "funnelchat-media",
+				S3Bucket:    p.bucket,
 				S3Key:       s3Key,
-				S3URL:       presignedURL,
+				S3URL:       mediaURL,
 				ContentType: downloadResult.ContentType,
 				FileName:    downloadResult.FileName,
 				FileSize:    downloadResult.FileSize,

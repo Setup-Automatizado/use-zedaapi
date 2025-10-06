@@ -20,15 +20,16 @@ import (
 )
 
 const (
-	payloadTypeMessage      = "message"
-	payloadTypeReceipt      = "receipt"
-	payloadTypeChatPresence = "chat_presence"
-	payloadTypePresence     = "presence"
-	payloadTypeConnected    = "connected"
-	payloadTypeDisconnected = "disconnected"
-	payloadTypeJoinedGroup  = "joined_group"
-	payloadTypeGroupInfo    = "group_info"
-	payloadTypePicture      = "picture"
+	payloadTypeMessage       = "message"
+	payloadTypeReceipt       = "receipt"
+	payloadTypeChatPresence  = "chat_presence"
+	payloadTypePresence      = "presence"
+	payloadTypeConnected     = "connected"
+	payloadTypeDisconnected  = "disconnected"
+	payloadTypeJoinedGroup   = "joined_group"
+	payloadTypeGroupInfo     = "group_info"
+	payloadTypePicture       = "picture"
+	payloadTypeUndecryptable = "undecryptable"
 )
 
 var (
@@ -46,6 +47,7 @@ func init() {
 	gob.Register(&whatsmeowevents.JoinedGroup{})
 	gob.Register(&whatsmeowevents.GroupInfo{})
 	gob.Register(&whatsmeowevents.Picture{})
+	gob.Register(&whatsmeowevents.UndecryptableMessage{})
 	gob.Register(uuid.UUID{})
 }
 
@@ -287,6 +289,12 @@ func encodeRawPayload(payload interface{}) (*persistedPayload, error) {
 			return nil, fmt.Errorf("marshal picture payload: %w", err)
 		}
 		return &persistedPayload{Type: payloadTypePicture, Data: data}, nil
+	case *whatsmeowevents.UndecryptableMessage:
+		data, err := json.Marshal(evt)
+		if err != nil {
+			return nil, fmt.Errorf("marshal undecryptable payload: %w", err)
+		}
+		return &persistedPayload{Type: payloadTypeUndecryptable, Data: data}, nil
 	default:
 		return nil, fmt.Errorf("unsupported raw payload type %T", payload)
 	}
@@ -342,6 +350,12 @@ func decodeRawPayload(payload *persistedPayload) (interface{}, error) {
 		var evt whatsmeowevents.Picture
 		if err := json.Unmarshal(payload.Data, &evt); err != nil {
 			return nil, fmt.Errorf("unmarshal picture payload: %w", err)
+		}
+		return &evt, nil
+	case payloadTypeUndecryptable:
+		var evt whatsmeowevents.UndecryptableMessage
+		if err := json.Unmarshal(payload.Data, &evt); err != nil {
+			return nil, fmt.Errorf("unmarshal undecryptable payload: %w", err)
 		}
 		return &evt, nil
 	default:

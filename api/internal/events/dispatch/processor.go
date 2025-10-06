@@ -3,6 +3,7 @@ package dispatch
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"strings"
@@ -19,6 +20,19 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/logging"
 	"go.mau.fi/whatsmeow/api/internal/observability"
 )
+
+const (
+	historySyncEventType  = "history_sync"
+	skipReasonHistorySync = "history_sync_temporarily_ignored"
+)
+
+type skippedEventError struct {
+	Reason string
+}
+
+func (e *skippedEventError) Error() string {
+	return fmt.Sprintf("event skipped: %s", e.Reason)
+}
 
 type EventProcessor struct {
 	instanceID        uuid.UUID
@@ -82,6 +96,10 @@ func (p *EventProcessor) Process(ctx context.Context, event *persistence.OutboxE
 
 	webhookPayload, err = p.transformEvent(ctx, event)
 	if err != nil {
+		var skippedErr *skippedEventError
+		if errors.As(err, &skippedErr) {
+			return p.handleSkippedEvent(ctx, event, skippedErr.Reason)
+		}
 		return p.handleTransformError(ctx, event, err)
 	}
 
@@ -114,6 +132,18 @@ func (p *EventProcessor) transformEvent(ctx context.Context, event *persistence.
 		return nil, fmt.Errorf("decode internal event: %w", err)
 	}
 
+	// TODO: Temporary debug logging for schema verification - remove after validation
+	if debugPayload, _ := json.Marshal(internalEvent); len(debugPayload) > 0 {
+		logger.Debug("debug internal event payload (temporary)", slog.String("payload", string(debugPayload)))
+	}
+
+	if internalEvent.EventType == historySyncEventType {
+		logger.Warn("skipping history sync event",
+			slog.String("event_id", event.EventID.String()),
+			slog.String("reason", skipReasonHistorySync))
+		return nil, &skippedEventError{Reason: skipReasonHistorySync}
+	}
+
 	if event.MediaURL != nil && *event.MediaURL != "" {
 		if internalEvent.Metadata == nil {
 			internalEvent.Metadata = make(map[string]string)
@@ -122,12 +152,21 @@ func (p *EventProcessor) transformEvent(ctx context.Context, event *persistence.
 	}
 
 	connectedPhone := p.connectedPhone(ctx)
-	zapiTransformer := transformzapi.NewTransformer(connectedPhone)
+	debugRaw := false
+	dumpDir := ""
+	if p.cfg != nil {
+		debugRaw = p.cfg.Events.DebugRawPayload
+		dumpDir = p.cfg.Events.DebugDumpDir
+	}
+	zapiTransformer := transformzapi.NewTransformer(connectedPhone, debugRaw, dumpDir)
 
 	payload, err := zapiTransformer.Transform(ctx, internalEvent)
 	if err != nil {
 		return nil, err
 	}
+
+	// TODO: Temporary debug logging for schema verification - remove after validation
+	logger.Debug("debug zapi payload (temporary)", slog.String("payload", string(payload)))
 
 	logger.Debug("event transformed successfully",
 		slog.Int("payload_size", len(payload)))
@@ -219,7 +258,7 @@ func (p *EventProcessor) handleRetryableError(ctx context.Context, event *persis
 			slog.Int("attempts", newAttemptCount),
 			slog.Int("max_attempts", event.MaxAttempts))
 
-		return p.moveToDLQ(ctx, event, fmt.Sprintf("max retries exceeded: %s", result.ErrorMessage))
+		return p.moveToDLQ(ctx, event, fmt.Sprintf("max retries exceeded: %s", result.ErrorMessage), "max_retries_exceeded")
 	}
 
 	nextAttempt := CalculateNextAttempt(newAttemptCount, p.cfg.Events.RetryDelays)
@@ -249,7 +288,7 @@ func (p *EventProcessor) handlePermanentError(ctx context.Context, event *persis
 		slog.String("error", result.ErrorMessage),
 		slog.Int("status_code", result.StatusCode))
 
-	if err := p.moveToDLQ(ctx, event, fmt.Sprintf("permanent error: %s (status %d)", result.ErrorMessage, result.StatusCode)); err != nil {
+	if err := p.moveToDLQ(ctx, event, fmt.Sprintf("permanent error: %s (status %d)", result.ErrorMessage, result.StatusCode), "permanent_error"); err != nil {
 		return err
 	}
 
@@ -296,7 +335,7 @@ func (p *EventProcessor) handleTransformError(ctx context.Context, event *persis
 	logger.Error("transformation failed",
 		slog.String("error", err.Error()))
 
-	if dlqErr := p.moveToDLQ(ctx, event, fmt.Sprintf("transform error: %v", err)); dlqErr != nil {
+	if dlqErr := p.moveToDLQ(ctx, event, fmt.Sprintf("transform error: %v", err), "transform_error"); dlqErr != nil {
 		return dlqErr
 	}
 
@@ -324,7 +363,7 @@ func (p *EventProcessor) handleDeliveryError(ctx context.Context, event *persist
 	newAttemptCount := event.Attempts + 1
 
 	if newAttemptCount >= event.MaxAttempts {
-		return p.moveToDLQ(ctx, event, fmt.Sprintf("max retries exceeded: %v", err))
+		return p.moveToDLQ(ctx, event, fmt.Sprintf("max retries exceeded: %v", err), "max_retries_exceeded")
 	}
 
 	nextAttempt := CalculateNextAttempt(newAttemptCount, p.cfg.Events.RetryDelays)
@@ -341,8 +380,29 @@ func (p *EventProcessor) handleDeliveryError(ctx context.Context, event *persist
 	return fmt.Errorf("delivery error (will retry): %w", err)
 }
 
-func (p *EventProcessor) moveToDLQ(ctx context.Context, event *persistence.OutboxEvent, reason string) error {
+func dlqReasonLabel(reason string) string {
+	lowerReason := strings.ToLower(reason)
+	if strings.HasPrefix(lowerReason, "transform error") {
+		return "transform_error"
+	}
+	if strings.HasPrefix(lowerReason, "permanent error") {
+		return "permanent_error"
+	}
+	if strings.HasPrefix(lowerReason, "max retries exceeded") {
+		return "max_retries_exceeded"
+	}
+	if strings.HasPrefix(lowerReason, "delivery error") {
+		return "delivery_error"
+	}
+	return "unknown"
+}
+
+func (p *EventProcessor) moveToDLQ(ctx context.Context, event *persistence.OutboxEvent, reason string, reasonLabel string) error {
 	logger := logging.ContextLogger(ctx, nil)
+
+	if reasonLabel == "" {
+		reasonLabel = dlqReasonLabel(reason)
+	}
 
 	attemptHistory, _ := json.Marshal(map[string]interface{}{
 		"total_attempts": event.Attempts,
@@ -365,8 +425,33 @@ func (p *EventProcessor) moveToDLQ(ctx context.Context, event *persistence.Outbo
 	logger.Info("event moved to DLQ",
 		slog.String("reason", reason))
 
-	p.metrics.DLQEventsTotal.WithLabelValues(p.instanceID.String(), event.EventType).Inc()
+	p.metrics.DLQEventsTotal.WithLabelValues(p.instanceID.String(), event.EventType, reasonLabel).Inc()
 	p.metrics.DLQBacklog.Inc()
+
+	return nil
+}
+
+func (p *EventProcessor) handleSkippedEvent(ctx context.Context, event *persistence.OutboxEvent, reason string) error {
+	logger := logging.ContextLogger(ctx, nil)
+
+	logger.Info("event skipped",
+		slog.String("event_id", event.EventID.String()),
+		slog.String("event_type", event.EventType),
+		slog.String("reason", reason))
+
+	responseJSON, _ := json.Marshal(map[string]interface{}{
+		"status":    "skipped",
+		"reason":    reason,
+		"timestamp": time.Now(),
+	})
+
+	if err := p.outboxRepo.MarkDelivered(ctx, event.EventID, responseJSON); err != nil {
+		logger.Error("failed to mark skipped event as delivered",
+			slog.String("error", err.Error()))
+		return fmt.Errorf("mark skipped event as delivered: %w", err)
+	}
+
+	p.metrics.EventsProcessed.WithLabelValues(p.instanceID.String(), event.EventType, "skipped").Inc()
 
 	return nil
 }
