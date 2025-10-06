@@ -17,7 +17,6 @@ services:
     volumes:
       - ../../:/app
       - go-cache:/go/pkg
-    command: ["air", "-c", "api/.air.toml"]
 
   postgres:
     ports:

@@ -119,9 +119,6 @@ RUN apk add --no-cache \
     gcc \
     musl-dev
 
-# Install air for hot reload (lightweight, fast install)
-RUN go install github.com/air-verse/air@latest
-
 # Install goimports for code formatting
 RUN go install golang.org/x/tools/cmd/goimports@latest
 
@@ -142,8 +139,8 @@ COPY . .
 
 EXPOSE 8080
 
-# Run with air (hot reload)
-CMD ["air", "-c", "api/.air.toml"]
+# Run the API server directly
+CMD ["go", "run", "./api/cmd/server"]
 
 # ==========================================
 # Stage 5: Testing
