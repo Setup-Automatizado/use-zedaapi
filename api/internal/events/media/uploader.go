@@ -22,13 +22,15 @@ import (
 )
 
 type S3Uploader struct {
-	client    *s3.Client
-	uploader  *manager.Uploader
-	bucket    string
-	urlExpiry time.Duration
-	acl       string
-	metrics   *observability.Metrics
-	logger    *slog.Logger
+	client        *s3.Client
+	uploader      *manager.Uploader
+	bucket        string
+	urlExpiry     time.Duration
+	acl           string
+	usePresigned  bool
+	publicBaseURL string
+	metrics       *observability.Metrics
+	logger        *slog.Logger
 }
 
 func NewS3Uploader(ctx context.Context, cfg *config.Config, metrics *observability.Metrics) (*S3Uploader, error) {
@@ -58,6 +60,8 @@ func NewS3Uploader(ctx context.Context, cfg *config.Config, metrics *observabili
 		slog.String("bucket", cfg.S3.Bucket),
 		slog.String("region", cfg.S3.Region),
 		slog.Duration("url_expiry", cfg.S3.URLExpiry),
+		slog.Bool("use_presigned_urls", cfg.S3.UsePresignedURLs),
+		slog.String("public_base_url", cfg.S3.PublicBaseURL),
 		slog.String("acl", cfg.S3.ACL))
 
 	if cfg.S3.ACL != "" {
@@ -66,17 +70,19 @@ func NewS3Uploader(ctx context.Context, cfg *config.Config, metrics *observabili
 	}
 
 	return &S3Uploader{
-		client:    s3Client,
-		uploader:  uploader,
-		bucket:    cfg.S3.Bucket,
-		urlExpiry: cfg.S3.URLExpiry,
-		acl:       cfg.S3.ACL,
-		metrics:   metrics,
-		logger:    logger,
+		client:        s3Client,
+		uploader:      uploader,
+		bucket:        cfg.S3.Bucket,
+		urlExpiry:     cfg.S3.URLExpiry,
+		acl:           cfg.S3.ACL,
+		usePresigned:  cfg.S3.UsePresignedURLs,
+		publicBaseURL: strings.TrimSuffix(cfg.S3.PublicBaseURL, "/"),
+		metrics:       metrics,
+		logger:        logger,
 	}, nil
 }
 
-func (u *S3Uploader) Upload(ctx context.Context, instanceID uuid.UUID, eventID uuid.UUID, mediaType string, reader io.Reader, contentType string, fileSize int64) (key string, presignedURL string, err error) {
+func (u *S3Uploader) Upload(ctx context.Context, instanceID uuid.UUID, eventID uuid.UUID, mediaType string, reader io.Reader, contentType string, fileSize int64) (key string, mediaURL string, err error) {
 	logger := logging.ContextLogger(ctx, u.logger).With(
 		slog.String("instance_id", instanceID.String()),
 		slog.String("event_id", eventID.String()),
@@ -114,6 +120,7 @@ func (u *S3Uploader) Upload(ctx context.Context, instanceID uuid.UUID, eventID u
 			slog.String("error", err.Error()),
 			slog.Duration("duration", duration))
 
+		u.metrics.MediaUploadsTotal.WithLabelValues(instanceID.String(), mediaType, "failure").Inc()
 		u.metrics.MediaUploadAttempts.WithLabelValues("failure").Inc()
 		u.metrics.MediaUploadErrors.WithLabelValues(classifyS3Error(err)).Inc()
 
@@ -124,19 +131,28 @@ func (u *S3Uploader) Upload(ctx context.Context, instanceID uuid.UUID, eventID u
 		slog.String("location", uploadResult.Location),
 		slog.Duration("duration", duration))
 
+	u.metrics.MediaUploadsTotal.WithLabelValues(instanceID.String(), mediaType, "success").Inc()
 	u.metrics.MediaUploadAttempts.WithLabelValues("success").Inc()
-	u.metrics.MediaUploadDuration.WithLabelValues(mediaType).Observe(duration.Seconds())
+	u.metrics.MediaUploadDuration.WithLabelValues(instanceID.String(), mediaType).Observe(duration.Seconds())
 	u.metrics.MediaUploadSizeBytes.WithLabelValues(mediaType).Add(float64(fileSize))
 
-	presignedURL, err = u.GeneratePresignedURL(ctx, key)
-	if err != nil {
-		return key, "", fmt.Errorf("failed to generate presigned URL: %w", err)
+	if u.usePresigned {
+		mediaURL, err = u.GeneratePresignedURL(ctx, key)
+		if err != nil {
+			return key, "", fmt.Errorf("failed to generate presigned URL: %w", err)
+		}
+	} else {
+		mediaURL = u.buildPublicURL(key, uploadResult.Location)
 	}
 
-	return key, presignedURL, nil
+	return key, mediaURL, nil
 }
 
 func (u *S3Uploader) GeneratePresignedURL(ctx context.Context, key string) (string, error) {
+	if !u.usePresigned {
+		return "", fmt.Errorf("presigned URLs are disabled")
+	}
+
 	logger := logging.ContextLogger(ctx, u.logger).With(
 		slog.String("s3_key", key))
 
@@ -164,14 +180,37 @@ func (u *S3Uploader) GeneratePresignedURL(ctx context.Context, key string) (stri
 	return req.URL, nil
 }
 
+func (u *S3Uploader) buildPublicURL(key string, uploadLocation string) string {
+	if u.publicBaseURL != "" {
+		return fmt.Sprintf("%s/%s", u.publicBaseURL, key)
+	}
+	return uploadLocation
+}
+
+func (u *S3Uploader) UsesPresignedURLs() bool {
+	return u.usePresigned
+}
+
 func (u *S3Uploader) Delete(ctx context.Context, key string) error {
+	return u.DeleteObject(ctx, u.bucket, key)
+}
+
+func (u *S3Uploader) DeleteObject(ctx context.Context, bucket, key string) error {
+	if key == "" {
+		return fmt.Errorf("s3 delete failed: empty key")
+	}
+	if bucket == "" {
+		bucket = u.bucket
+	}
+
 	logger := logging.ContextLogger(ctx, u.logger).With(
+		slog.String("s3_bucket", bucket),
 		slog.String("s3_key", key))
 
 	logger.Debug("deleting media from s3")
 
 	_, err := u.client.DeleteObject(ctx, &s3.DeleteObjectInput{
-		Bucket: aws.String(u.bucket),
+		Bucket: aws.String(bucket),
 		Key:    aws.String(key),
 	})
 
