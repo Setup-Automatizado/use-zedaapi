@@ -1,0 +1,280 @@
+{
+  "truncated": [
+    {
+      "headers": {
+        "accept": "application/json, text/plain, */*",
+        "content-type": "application/json",
+        "x-hub-signature": "sha1=e3d8a79077c8bbdc593e94eb06c38fb6e64bd0b4",
+        "x-hub-signature-256": "sha256=2eb79a02adef423ba1af93531fef88f2e596b606590848535578dd7d49b3a0fa",
+        "user-agent": "facebookexternalua",
+        "authorization": "K4D3OHUZTIYcPDsDTt1XMEU22DQh5uXeA",
+        "content-length": "573",
+        "accept-encoding": "gzip, compress, deflate, br",
+        "host": "185.245.182.69:3000",
+        "connection": "keep-alive"
+      },
+      "body": {
+        "object": "whatsapp_business_account",
+        "entry": [
+          {
+            "id": "1609684059751598",
+            "changes": [
+              {
+                "value": {
+                  "messaging_product": "whatsapp",
+                  "metadata": {
+                    "display_phone_number": "551638772120",
+                    "phone_number_id": "551885248018731"
+                  },
+                  "statuses": [
+                    {
+                      "id": "wamid.HBgMNTU2NDk2NDI4Mjg0FQIAERgSNzNBRDY4RDUxNUJDQTU1Q0MwAA==",
+                      "status": "delivered",
+                      "timestamp": "1759672842",
+                      "recipient_id": "556496428284",
+                      "conversation": {
+                        "id": "b56e94985fcb9fae48205f74509dc7fc",
+                        "origin": {
+                          "type": "marketing"
+                        }
+                      },
+                      "pricing": {
+                        "billable": true,
+                        "pricing_model": "PMP",
+                        "category": "marketing",
+                        "type": "regular"
+                      }
+                    }
+                  ]
+                },
+                "field": "messages"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "headers": {
+        "accept": "application/json, text/plain, */*",
+        "content-type": "application/json",
+        "x-hub-signature": "sha1=b71448ad0d688bb247f25bc32abc073b58d25414",
+        "x-hub-signature-256": "sha256=def0c332e1a5427e6c462257a894d8e97c0f0ccba4eea48b24c4f9df1bd62e80",
+        "user-agent": "facebookexternalua",
+        "authorization": "K4D3OHUZTIYcPDsDTt1XMEU22DQh5uXeA",
+        "content-length": "569",
+        "accept-encoding": "gzip, compress, deflate, br",
+        "host": "185.245.182.69:3000",
+        "connection": "keep-alive"
+      },
+      "body": {
+        "object": "whatsapp_business_account",
+        "entry": [
+          {
+            "id": "1609684059751598",
+            "changes": [
+              {
+                "value": {
+                  "messaging_product": "whatsapp",
+                  "metadata": {
+                    "display_phone_number": "551638772120",
+                    "phone_number_id": "551885248018731"
+                  },
+                  "statuses": [
+                    {
+                      "id": "wamid.HBgNNTUxNjk4MTAyMzQ1MRUCABEYEjA2MDM2Qzk2ODNFOTY3M0Y2NAA=",
+                      "status": "read",
+                      "timestamp": "1759673170",
+                      "recipient_id": "5516981023451",
+                      "conversation": {
+                        "id": "244f50155e048f6d89fa4a4e34622df8",
+                        "origin": {
+                          "type": "marketing"
+                        }
+                      },
+                      "pricing": {
+                        "billable": true,
+                        "pricing_model": "PMP",
+                        "category": "marketing",
+                        "type": "regular"
+                      }
+                    }
+                  ]
+                },
+                "field": "messages"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "headers": {
+        "accept": "application/json, text/plain, */*",
+        "content-type": "application/json",
+        "x-hub-signature": "sha1=a4f6532ad898602857132f159fd9742341e4dfa1",
+        "x-hub-signature-256": "sha256=5da14eec8521121ae13d130465220d8b6cd0c60157cd94a4eaffa87461f7a2ca",
+        "user-agent": "facebookexternalua",
+        "authorization": "K4D3OHUZTIYcPDsDTt1XMEU22DQh5uXeA",
+        "content-length": "564",
+        "accept-encoding": "gzip, compress, deflate, br",
+        "host": "185.245.182.69:3000",
+        "connection": "keep-alive"
+      },
+      "body": {
+        "object": "whatsapp_business_account",
+        "entry": [
+          {
+            "id": "1609684059751598",
+            "changes": [
+              {
+                "value": {
+                  "messaging_product": "whatsapp",
+                  "metadata": {
+                    "display_phone_number": "551638772120",
+                    "phone_number_id": "551885248018731"
+                  },
+                  "statuses": [
+                    {
+                      "id": "wamid.HBgMNTU2NDk5ODg3MzgyFQIAERgSQkUxNDVDRjNFOTlGRjAzMjJDAA==",
+                      "status": "read",
+                      "timestamp": "1759673242",
+                      "recipient_id": "556499887382",
+                      "conversation": {
+                        "id": "aebd22815b648a2a4fd834ff2cfe4575",
+                        "origin": {
+                          "type": "utility"
+                        }
+                      },
+                      "pricing": {
+                        "billable": true,
+                        "pricing_model": "PMP",
+                        "category": "utility",
+                        "type": "regular"
+                      }
+                    }
+                  ]
+                },
+                "field": "messages"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "headers": {
+        "accept": "application/json, text/plain, */*",
+        "content-type": "application/json",
+        "x-hub-signature": "sha1=6998613013dba12646d4ed5bdfa21ff38e15c26f",
+        "x-hub-signature-256": "sha256=d3a4469708c560a71bd8f4269adebf2486e35e0cb2f68084980dabfb5b44cc64",
+        "user-agent": "facebookexternalua",
+        "authorization": "K4D3OHUZTIYcPDsDTt1XMEU22DQh5uXeA",
+        "content-length": "568",
+        "accept-encoding": "gzip, compress, deflate, br",
+        "host": "185.245.182.69:3000",
+        "connection": "keep-alive"
+      },
+      "body": {
+        "object": "whatsapp_business_account",
+        "entry": [
+          {
+            "id": "1609684059751598",
+            "changes": [
+              {
+                "value": {
+                  "messaging_product": "whatsapp",
+                  "metadata": {
+                    "display_phone_number": "551638772120",
+                    "phone_number_id": "551885248018731"
+                  },
+                  "statuses": [
+                    {
+                      "id": "wamid.HBgMNTU2NDk2NDI4Mjg0FQIAERgSNzNBRDY4RDUxNUJDQTU1Q0MwAA==",
+                      "status": "read",
+                      "timestamp": "1759673895",
+                      "recipient_id": "556496428284",
+                      "conversation": {
+                        "id": "b56e94985fcb9fae48205f74509dc7fc",
+                        "origin": {
+                          "type": "marketing"
+                        }
+                      },
+                      "pricing": {
+                        "billable": true,
+                        "pricing_model": "PMP",
+                        "category": "marketing",
+                        "type": "regular"
+                      }
+                    }
+                  ]
+                },
+                "field": "messages"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "headers": {
+        "accept": "application/json, text/plain, */*",
+        "content-type": "application/json",
+        "x-hub-signature": "sha1=aabb26c77f30b85012759a3077665f5e793ea49d",
+        "x-hub-signature-256": "sha256=d7fc775e78656959a78686afe11e72af21513f756dba1044f94378fbb68cee24",
+        "user-agent": "facebookexternalua",
+        "authorization": "K4D3OHUZTIYcPDsDTt1XMEU22DQh5uXeA",
+        "content-length": "564",
+        "accept-encoding": "gzip, compress, deflate, br",
+        "host": "185.245.182.69:3000",
+        "connection": "keep-alive"
+      },
+      "body": {
+        "object": "whatsapp_business_account",
+        "entry": [
+          {
+            "id": "1609684059751598",
+            "changes": [
+              {
+                "value": {
+                  "messaging_product": "whatsapp",
+                  "metadata": {
+                    "display_phone_number": "551638772120",
+                    "phone_number_id": "551885248018731"
+                  },
+                  "statuses": [
+                    {
+                      "id": "wamid.HBgMNTU2NDkyMDgyMjc2FQIAERgSQzEyOTJBNTI1MEI1NDdBODJGAA==",
+                      "status": "read",
+                      "timestamp": "1759674680",
+                      "recipient_id": "556492082276",
+                      "conversation": {
+                        "id": "fa68ad56d88f81e76fa01db08c5c4adf",
+                        "origin": {
+                          "type": "utility"
+                        }
+                      },
+                      "pricing": {
+                        "billable": true,
+                        "pricing_model": "PMP",
+                        "category": "utility",
+                        "type": "regular"
+                      }
+                    }
+                  ]
+                },
+                "field": "messages"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "metadata": {
+    "totalExamples": 6,
+    "examplesShown": 5,
+    "firstSeen": "2025-10-05T14:31:22.994Z",
+    "lastSeen": "2025-10-05T14:31:22.994Z"
+  }
+}

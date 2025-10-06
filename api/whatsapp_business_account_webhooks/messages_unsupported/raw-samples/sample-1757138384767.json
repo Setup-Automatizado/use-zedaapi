@@ -1,0 +1,46 @@
+{
+  "object": "whatsapp_business_account",
+  "entry": [
+    {
+      "id": "481774168341746",
+      "changes": [
+        {
+          "value": {
+            "messaging_product": "whatsapp",
+            "metadata": {
+              "display_phone_number": "5521979232690",
+              "phone_number_id": "470938299430867"
+            },
+            "contacts": [
+              {
+                "profile": {
+                  "name": "Guilherme Jansen - Setup Automatizado"
+                },
+                "wa_id": "5521971532700"
+              }
+            ],
+            "messages": [
+              {
+                "from": "5521971532700",
+                "id": "wamid.HBgNNTUyMTk3MTUzMjcwMBUCABIYFjNFQjBBNURBOUVDMUZFMkY0RkFCMzEA",
+                "timestamp": "1757138382",
+                "errors": [
+                  {
+                    "code": 131060,
+                    "title": "This message is unavailable.",
+                    "message": "This message is unavailable.",
+                    "error_data": {
+                      "details": "This message is currently unavailable."
+                    }
+                  }
+                ],
+                "type": "unsupported"
+              }
+            ]
+          },
+          "field": "messages"
+        }
+      ]
+    }
+  ]
+}
