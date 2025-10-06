@@ -21,6 +21,9 @@ const (
 	defaultNameTTL       = 12 * time.Hour
 	defaultPhotoTTL      = 12 * time.Hour
 	defaultErrorTTL      = 5 * time.Minute
+
+	photoTypePreview = "preview"
+	photoTypeImage   = "image"
 )
 
 type nameCacheEntry struct {
@@ -31,6 +34,7 @@ type nameCacheEntry struct {
 type photoCacheEntry struct {
 	url     string
 	id      string
+	typ     string
 	expires time.Time
 }
 
@@ -55,7 +59,17 @@ type contactMetadataCache struct {
 	group singleflight.Group
 }
 
-var _ eventctx.ContactMetadataProvider = (*contactMetadataCache)(nil)
+func photoCacheKey(jidKey, photoType string) string {
+	if photoType == "" {
+		photoType = photoTypePreview
+	}
+	return jidKey + "|" + photoType
+}
+
+var (
+	_ eventctx.ContactMetadataProvider    = (*contactMetadataCache)(nil)
+	_ eventctx.ContactPhotoDetailProvider = (*contactMetadataCache)(nil)
+)
 
 func newContactMetadataCache(client *whatsmeow.Client, log *slog.Logger) *contactMetadataCache {
 	return &contactMetadataCache{
@@ -106,19 +120,49 @@ func (c *contactMetadataCache) ContactPhoto(ctx context.Context, jid types.JID) 
 		return ""
 	}
 
+	return c.fetchContactPhoto(ctx, jid, photoTypePreview)
+}
+
+func (c *contactMetadataCache) ContactPhotoDetails(ctx context.Context, jid types.JID) eventctx.ContactPhotoDetails {
+	var details eventctx.ContactPhotoDetails
+	if c == nil {
+		return details
+	}
+
 	key := jid.String()
+
+	if preview := c.fetchContactPhoto(ctx, jid, photoTypePreview); preview != "" {
+		details.PreviewURL = preview
+		if entry := c.photoEntrySnapshot(photoCacheKey(key, photoTypePreview)); entry != nil {
+			details.PreviewID = entry.id
+		}
+	}
+
+	if full := c.fetchContactPhoto(ctx, jid, photoTypeImage); full != "" {
+		details.FullURL = full
+		if entry := c.photoEntrySnapshot(photoCacheKey(key, photoTypeImage)); entry != nil {
+			details.FullID = entry.id
+		}
+	}
+
+	return details
+}
+
+func (c *contactMetadataCache) fetchContactPhoto(ctx context.Context, jid types.JID, photoType string) string {
+	key := jid.String()
+	cacheKey := photoCacheKey(key, photoType)
 	now := time.Now()
-	if url, ok := c.getPhotoFromCache(key, now); ok {
+	if url, ok := c.getPhotoFromCache(cacheKey, now); ok {
 		return url
 	}
 
-	result, _, _ := c.group.Do("photo:"+key, func() (interface{}, error) {
-		if url, ok := c.getPhotoFromCache(key, time.Now()); ok {
+	result, _, _ := c.group.Do("photo:"+cacheKey, func() (interface{}, error) {
+		if url, ok := c.getPhotoFromCache(cacheKey, time.Now()); ok {
 			return url, nil
 		}
 
-		existing := c.photoEntrySnapshot(key)
-		url, id, ttl, reuse := c.resolveContactPhoto(ctx, jid, existing)
+		existing := c.photoEntrySnapshot(cacheKey)
+		url, id, ttl, reuse := c.resolveContactPhoto(ctx, jid, existing, photoType)
 		if reuse && existing != nil {
 			if url == "" {
 				url = existing.url
@@ -130,7 +174,7 @@ func (c *contactMetadataCache) ContactPhoto(ctx context.Context, jid types.JID) 
 		if ttl <= 0 {
 			ttl = c.photoTTL
 		}
-		c.storePhoto(key, url, id, time.Now().Add(ttl))
+		c.storePhoto(cacheKey, url, id, photoType, time.Now().Add(ttl))
 		return url, nil
 	})
 
@@ -193,13 +237,14 @@ func (c *contactMetadataCache) getPhotoFromCache(key string, now time.Time) (str
 	return entry.url, true
 }
 
-func (c *contactMetadataCache) storePhoto(key, url, id string, expires time.Time) {
+func (c *contactMetadataCache) storePhoto(key, url, id, photoType string, expires time.Time) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
 	if entry, ok := c.photoEntries[key]; ok {
 		entry.url = url
 		entry.id = id
+		entry.typ = photoType
 		entry.expires = expires
 		c.touchPhotoLocked(key)
 		return
@@ -209,7 +254,7 @@ func (c *contactMetadataCache) storePhoto(key, url, id string, expires time.Time
 		c.evictOldestPhotoLocked()
 	}
 
-	c.photoEntries[key] = &photoCacheEntry{url: url, id: id, expires: expires}
+	c.photoEntries[key] = &photoCacheEntry{url: url, id: id, typ: photoType, expires: expires}
 	elem := c.photoOrder.PushFront(key)
 	c.photoNodes[key] = elem
 }
@@ -312,15 +357,20 @@ func (c *contactMetadataCache) resolveContactName(ctx context.Context, jid types
 	return sanitized
 }
 
-func (c *contactMetadataCache) resolveContactPhoto(ctx context.Context, jid types.JID, existing *photoCacheEntry) (url, id string, ttl time.Duration, reuse bool) {
+func (c *contactMetadataCache) resolveContactPhoto(ctx context.Context, jid types.JID, existing *photoCacheEntry, photoType string) (url, id string, ttl time.Duration, reuse bool) {
 	existingID := ""
 	existingURL := ""
+	requestedType := photoType
+	if requestedType == "" {
+		requestedType = photoTypePreview
+	}
 	if existing != nil {
 		existingID = existing.id
 		existingURL = existing.url
 	}
 
 	params := &whatsmeow.GetProfilePictureParams{
+		Preview:    requestedType == photoTypePreview,
 		ExistingID: existingID,
 	}
 	if isCommunityJID(jid) {

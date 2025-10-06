@@ -99,6 +99,7 @@ type clientState struct {
 	lockRefreshCancel context.CancelFunc
 	lockMode          string
 	contactCache      *contactMetadataCache
+	lidResolver       eventctx.LIDResolver
 }
 
 type ClientRegistryMetrics struct {
@@ -1128,7 +1129,10 @@ func (r *ClientRegistry) ensurePrimarySignalSession(instanceID uuid.UUID, client
 
 func (r *ClientRegistry) wrapEventHandler(instanceID uuid.UUID) func(evt interface{}) {
 	return func(evt interface{}) {
-		var provider eventctx.ContactMetadataProvider
+		var (
+			provider eventctx.ContactMetadataProvider
+			resolver eventctx.LIDResolver
+		)
 
 		r.mu.Lock()
 		if state, ok := r.clients[instanceID]; ok && state != nil && state.client != nil {
@@ -1142,12 +1146,25 @@ func (r *ClientRegistry) wrapEventHandler(instanceID uuid.UUID) func(evt interfa
 				)
 			}
 			provider = state.contactCache
+			if state.lidResolver == nil {
+				state.lidResolver = newStoreLIDResolver(
+					state.client,
+					r.log.With(
+						slog.String("component", "lid_resolver"),
+						slog.String("instanceId", instanceID.String()),
+					),
+				)
+			}
+			resolver = state.lidResolver
 		}
 		r.mu.Unlock()
 
 		ctx := context.Background()
 		if provider != nil {
 			ctx = eventctx.WithContactProvider(ctx, provider)
+		}
+		if resolver != nil {
+			ctx = eventctx.WithLIDResolver(ctx, resolver)
 		}
 
 		if r.eventIntegration != nil {
@@ -1210,6 +1227,19 @@ func (r *ClientRegistry) wrapEventHandler(instanceID uuid.UUID) func(evt interfa
 			if client != nil && !sessionReady {
 				r.ensurePrimarySignalSession(instanceID, client)
 			}
+			r.announcePresenceAvailable(instanceID, "connected")
+
+		case *events.PushNameSetting:
+			r.announcePresenceAvailable(instanceID, "push_name_setting")
+
+		case *events.AppStateSyncComplete:
+			r.announcePresenceAvailable(instanceID, "app_state_sync_complete")
+
+		case *events.KeepAliveRestored:
+			r.announcePresenceAvailable(instanceID, "keep_alive_restored")
+
+		case *events.StreamReplaced:
+			r.announcePresenceAvailable(instanceID, "stream_replaced")
 
 		case *events.PairSuccess:
 			jid := e.ID.String()
@@ -1234,6 +1264,7 @@ func (r *ClientRegistry) wrapEventHandler(instanceID uuid.UUID) func(evt interfa
 			}
 
 		case *events.Disconnected:
+			r.announcePresenceUnavailable(instanceID, "disconnected")
 			if r.eventIntegration != nil {
 				if err := r.eventIntegration.OnInstanceDisconnect(ctx, instanceID); err != nil {
 					r.log.Warn("failed to flush instance buffer",
@@ -1245,6 +1276,7 @@ func (r *ClientRegistry) wrapEventHandler(instanceID uuid.UUID) func(evt interfa
 			r.log.Warn("instance disconnected", slog.String("instanceId", instanceID.String()))
 
 		case *events.LoggedOut:
+			r.announcePresenceUnavailable(instanceID, "logged_out")
 			if r.dispatchCoordinator != nil {
 				if err := r.dispatchCoordinator.UnregisterInstance(ctx, instanceID); err != nil {
 					r.log.Error("failed to unregister instance from dispatch coordinator",
@@ -1290,6 +1322,46 @@ func (r *ClientRegistry) wrapEventHandler(instanceID uuid.UUID) func(evt interfa
 			}
 		}
 	}
+}
+
+func (r *ClientRegistry) announcePresenceAvailable(instanceID uuid.UUID, reason string) {
+	r.announcePresence(instanceID, types.PresenceAvailable, reason)
+}
+
+func (r *ClientRegistry) announcePresenceUnavailable(instanceID uuid.UUID, reason string) {
+	r.announcePresence(instanceID, types.PresenceUnavailable, reason)
+}
+
+func (r *ClientRegistry) announcePresence(instanceID uuid.UUID, presence types.Presence, reason string) {
+	client := r.getClient(instanceID)
+	if client == nil {
+		return
+	}
+
+	go func() {
+		if err := client.SendPresence(presence); err != nil {
+			r.log.Warn("failed to send presence update",
+				slog.String("instanceId", instanceID.String()),
+				slog.String("reason", reason),
+				slog.String("presence", string(presence)),
+				slog.String("error", err.Error()))
+			return
+		}
+		r.log.Debug("presence state updated",
+			slog.String("instanceId", instanceID.String()),
+			slog.String("reason", reason),
+			slog.String("presence", string(presence)))
+	}()
+}
+
+func (r *ClientRegistry) getClient(instanceID uuid.UUID) *whatsmeow.Client {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	if state, ok := r.clients[instanceID]; ok && state != nil {
+		return state.client
+	}
+	return nil
 }
 
 func (r *ClientRegistry) Status(info InstanceInfo) StatusSnapshot {
