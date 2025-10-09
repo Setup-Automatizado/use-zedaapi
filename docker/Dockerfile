@@ -31,7 +31,7 @@ COPY . .
 ARG VERSION=dev
 ARG COMMIT=unknown
 ARG BUILD_TIME
-ARG TARGETARCH=arm64
+ARG TARGETARCH=amd64
 
 # Build with optimizations
 # CGO_ENABLED=0 for static binary
