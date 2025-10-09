@@ -37,34 +37,98 @@ variable "api_target_group_arn" {
   type        = string
 }
 
-variable "efs_file_system_id" {
-  description = "EFS file system ID"
-  type        = string
-}
-
-variable "efs_file_system_arn" {
-  description = "EFS file system ARN"
-  type        = string
-}
-
-variable "postgres_access_point_id" {
-  description = "EFS Access Point ID for Postgres"
-  type        = string
-}
-
-variable "redis_access_point_id" {
-  description = "EFS Access Point ID for Redis"
-  type        = string
-}
-
-variable "minio_access_point_id" {
-  description = "EFS Access Point ID for MinIO"
-  type        = string
-}
-
 variable "secrets_arn" {
   description = "Secrets Manager ARN containing credentials"
   type        = string
+}
+
+variable "aws_region" {
+  description = "AWS region for runtime configuration"
+  type        = string
+}
+
+variable "db_host" {
+  description = "Database endpoint hostname"
+  type        = string
+}
+
+variable "db_port" {
+  description = "Database port"
+  type        = number
+  default     = 5432
+}
+
+variable "db_name_app" {
+  description = "Primary application database name"
+  type        = string
+}
+
+variable "db_name_store" {
+  description = "Whatsmeow store database name"
+  type        = string
+}
+
+variable "redis_host" {
+  description = "Redis endpoint hostname"
+  type        = string
+}
+
+variable "redis_port" {
+  description = "Redis port"
+  type        = number
+  default     = 6379
+}
+
+variable "redis_tls_enabled" {
+  description = "Enable TLS connection to Redis"
+  type        = bool
+  default     = true
+}
+
+variable "s3_bucket_name" {
+  description = "S3 bucket for media storage"
+  type        = string
+}
+
+variable "s3_bucket_arn" {
+  description = "S3 bucket ARN for IAM policies"
+  type        = string
+}
+
+variable "s3_endpoint" {
+  description = "Custom S3 endpoint (leave empty for AWS S3)"
+  type        = string
+  default     = ""
+}
+
+variable "s3_use_presigned_urls" {
+  description = "Enable presigned URLs"
+  type        = bool
+  default     = true
+}
+
+variable "app_environment" {
+  description = "Application environment value"
+  type        = string
+  default     = "production"
+}
+
+variable "log_level" {
+  description = "Log level"
+  type        = string
+  default     = "info"
+}
+
+variable "extra_environment" {
+  description = "Additional environment variables for API container"
+  type        = map(string)
+  default     = {}
+}
+
+variable "secret_key_mapping" {
+  description = "Mapping of environment variable names to secret JSON keys"
+  type        = map(string)
+  default     = {}
 }
 
 variable "api_image" {

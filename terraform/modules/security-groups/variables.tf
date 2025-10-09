@@ -17,10 +17,16 @@ variable "vpc_id" {
   type        = string
 }
 
-variable "expose_minio_console" {
-  description = "Expose MinIO console through ALB (development/debugging only)"
-  type        = bool
-  default     = false
+variable "rds_port" {
+  description = "PostgreSQL port"
+  type        = number
+  default     = 5432
+}
+
+variable "redis_port" {
+  description = "Redis port"
+  type        = number
+  default     = 6379
 }
 
 variable "tags" {

@@ -1,11 +1,5 @@
 # ==================================================
-# ECS Service Module - Task Definition + Service
-# ==================================================
-# Creates:
-# - IAM roles for task execution and task
-# - Task definition with 4 containers (API, Postgres, Redis, MinIO)
-# - ECS service with ALB integration
-# - Auto-scaling policies
+# ECS Service Module - API Task & Service
 # ==================================================
 
 terraform {
@@ -16,6 +10,56 @@ terraform {
       version = "~> 5.0"
     }
   }
+}
+
+locals {
+  s3_endpoint = length(var.s3_endpoint) > 0 ? var.s3_endpoint : "https://s3.${var.aws_region}.amazonaws.com"
+  gin_mode    = lower(var.app_environment) == "production" ? "release" : "debug"
+
+  base_environment = merge({
+    APP_ENV               = var.app_environment
+    ENVIRONMENT           = var.app_environment
+    LOG_LEVEL             = var.log_level
+    GIN_MODE              = local.gin_mode
+    AWS_REGION            = var.aws_region
+    DB_HOST               = var.db_host
+    DB_PORT               = tostring(var.db_port)
+    DB_NAME               = var.db_name_app
+    WA_DB_HOST            = var.db_host
+    WA_DB_PORT            = tostring(var.db_port)
+    WA_DB_NAME            = var.db_name_store
+    REDIS_ADDR            = "${var.redis_host}:${var.redis_port}"
+    REDIS_TLS_ENABLED     = var.redis_tls_enabled ? "true" : "false"
+    S3_BUCKET             = var.s3_bucket_name
+    S3_REGION             = var.aws_region
+    S3_ENDPOINT           = local.s3_endpoint
+    S3_USE_SSL            = "true"
+    S3_USE_PRESIGNED_URLS = var.s3_use_presigned_urls ? "true" : "false"
+  }, var.extra_environment)
+
+  environment_definitions = [
+    for entry in sort(keys(local.base_environment)) : {
+      name  = entry
+      value = local.base_environment[entry]
+    }
+  ]
+
+  default_secret_mapping = {
+    POSTGRES_DSN          = "postgres_dsn"
+    WAMEOW_POSTGRES_DSN   = "wameow_postgres_dsn"
+    DB_USER               = "db_user"
+    DB_PASSWORD           = "db_password"
+    REDIS_PASSWORD        = "redis_password"
+  }
+
+  secret_mapping = merge(local.default_secret_mapping, var.secret_key_mapping)
+
+  secret_definitions = [
+    for env_name, secret_key in local.secret_mapping : {
+      name      = env_name
+      valueFrom = "${var.secrets_arn}:${secret_key}::"
+    }
+  ]
 }
 
 # ==================================================
@@ -45,7 +89,6 @@ resource "aws_iam_role_policy_attachment" "task_execution_policy" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
-# Allow pulling from ECR and accessing secrets
 resource "aws_iam_role_policy" "task_execution_secrets" {
   name = "${var.environment}-whatsmeow-task-execution-secrets"
   role = aws_iam_role.task_execution.id
@@ -79,7 +122,7 @@ resource "aws_iam_role_policy" "task_execution_secrets" {
 }
 
 # ==================================================
-# IAM Role: ECS Task
+# IAM Role: ECS Task Runtime
 # ==================================================
 resource "aws_iam_role" "task" {
   name = "${var.environment}-whatsmeow-task-role"
@@ -100,9 +143,8 @@ resource "aws_iam_role" "task" {
   tags = var.tags
 }
 
-# Allow task to access EFS
-resource "aws_iam_role_policy" "task_efs" {
-  name = "${var.environment}-whatsmeow-task-efs"
+resource "aws_iam_role_policy" "task_s3" {
+  name = "${var.environment}-whatsmeow-task-s3"
   role = aws_iam_role.task.id
 
   policy = jsonencode({
@@ -111,42 +153,27 @@ resource "aws_iam_role_policy" "task_efs" {
       {
         Effect = "Allow"
         Action = [
-          "elasticfilesystem:ClientMount",
-          "elasticfilesystem:ClientWrite"
+          "s3:AbortMultipartUpload",
+          "s3:DeleteObject",
+          "s3:GetObject",
+          "s3:ListBucket",
+          "s3:PutObject"
         ]
-        Resource = var.efs_file_system_arn
+        Resource = [
+          var.s3_bucket_arn,
+          "${var.s3_bucket_arn}/*"
+        ]
       }
     ]
   })
 }
 
 # ==================================================
-# CloudWatch Log Groups
+# CloudWatch Log Group
 # ==================================================
 resource "aws_cloudwatch_log_group" "api" {
   name              = "/ecs/${var.environment}/whatsmeow/api"
-  retention_in_days = 7
-
-  tags = var.tags
-}
-
-resource "aws_cloudwatch_log_group" "postgres" {
-  name              = "/ecs/${var.environment}/whatsmeow/postgres"
-  retention_in_days = 7
-
-  tags = var.tags
-}
-
-resource "aws_cloudwatch_log_group" "redis" {
-  name              = "/ecs/${var.environment}/whatsmeow/redis"
-  retention_in_days = 7
-
-  tags = var.tags
-}
-
-resource "aws_cloudwatch_log_group" "minio" {
-  name              = "/ecs/${var.environment}/whatsmeow/minio"
-  retention_in_days = 7
+  retention_in_days = 14
 
   tags = var.tags
 }
@@ -163,56 +190,13 @@ resource "aws_ecs_task_definition" "main" {
   execution_role_arn       = aws_iam_role.task_execution.arn
   task_role_arn            = aws_iam_role.task.arn
 
-  # ==================================================
-  # EFS Volume Configuration
-  # ==================================================
-  volume {
-    name = "postgres-data"
-    efs_volume_configuration {
-      file_system_id     = var.efs_file_system_id
-      transit_encryption = "ENABLED"
-      authorization_config {
-        access_point_id = var.postgres_access_point_id
-        iam             = "ENABLED"
-      }
-    }
-  }
-
-  volume {
-    name = "redis-data"
-    efs_volume_configuration {
-      file_system_id     = var.efs_file_system_id
-      transit_encryption = "ENABLED"
-      authorization_config {
-        access_point_id = var.redis_access_point_id
-        iam             = "ENABLED"
-      }
-    }
-  }
-
-  volume {
-    name = "minio-data"
-    efs_volume_configuration {
-      file_system_id     = var.efs_file_system_id
-      transit_encryption = "ENABLED"
-      authorization_config {
-        access_point_id = var.minio_access_point_id
-        iam             = "ENABLED"
-      }
-    }
-  }
-
-  # ==================================================
-  # Container Definitions
-  # ==================================================
   container_definitions = jsonencode([
-    # API Container
     {
       name      = "api"
       image     = var.api_image
       essential = true
-      cpu       = 512
-      memory    = 1024
+      cpu       = 1024
+      memory    = 2048
 
       portMappings = [
         {
@@ -222,21 +206,8 @@ resource "aws_ecs_task_definition" "main" {
         }
       ]
 
-      environment = [
-        { name = "DB_HOST", value = "localhost" },
-        { name = "DB_PORT", value = "5432" },
-        { name = "REDIS_HOST", value = "localhost" },
-        { name = "REDIS_PORT", value = "6379" },
-        { name = "MINIO_ENDPOINT", value = "localhost:9000" },
-        { name = "ENVIRONMENT", value = var.environment }
-      ]
-
-      secrets = [
-        { name = "DB_USER", valueFrom = "${var.secrets_arn}:db_user::" },
-        { name = "DB_PASSWORD", valueFrom = "${var.secrets_arn}:db_password::" },
-        { name = "MINIO_ACCESS_KEY", valueFrom = "${var.secrets_arn}:minio_access_key::" },
-        { name = "MINIO_SECRET_KEY", valueFrom = "${var.secrets_arn}:minio_secret_key::" }
-      ]
+      environment = local.environment_definitions
+      secrets     = local.secret_definitions
 
       healthCheck = {
         command     = ["CMD-SHELL", "curl -f http://localhost:8080/healthz || exit 1"]
@@ -252,162 +223,6 @@ resource "aws_ecs_task_definition" "main" {
           "awslogs-group"         = aws_cloudwatch_log_group.api.name
           "awslogs-region"        = data.aws_region.current.name
           "awslogs-stream-prefix" = "api"
-        }
-      }
-
-      dependsOn = [
-        { containerName = "postgres", condition = "HEALTHY" },
-        { containerName = "redis", condition = "HEALTHY" },
-        { containerName = "minio", condition = "HEALTHY" }
-      ]
-    },
-
-    # Postgres Container
-    {
-      name      = "postgres"
-      image     = "postgres:16-alpine"
-      essential = true
-      cpu       = 256
-      memory    = 512
-
-      portMappings = [
-        {
-          containerPort = 5432
-          protocol      = "tcp"
-          name          = "postgres"
-        }
-      ]
-
-      environment = [
-        { name = "POSTGRES_DB", value = "api_core" },
-        { name = "PGDATA", value = "/var/lib/postgresql/data/pgdata" }
-      ]
-
-      secrets = [
-        { name = "POSTGRES_USER", valueFrom = "${var.secrets_arn}:db_user::" },
-        { name = "POSTGRES_PASSWORD", valueFrom = "${var.secrets_arn}:db_password::" }
-      ]
-
-      mountPoints = [
-        {
-          sourceVolume  = "postgres-data"
-          containerPath = "/var/lib/postgresql/data"
-          readOnly      = false
-        }
-      ]
-
-      healthCheck = {
-        command     = ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
-        interval    = 30
-        timeout     = 10
-        retries     = 3
-        startPeriod = 30
-      }
-
-      logConfiguration = {
-        logDriver = "awslogs"
-        options = {
-          "awslogs-group"         = aws_cloudwatch_log_group.postgres.name
-          "awslogs-region"        = data.aws_region.current.name
-          "awslogs-stream-prefix" = "postgres"
-        }
-      }
-    },
-
-    # Redis Container
-    {
-      name      = "redis"
-      image     = "redis:7-alpine"
-      essential = true
-      cpu       = 256
-      memory    = 256
-
-      command = ["redis-server", "--appendonly", "yes"]
-
-      portMappings = [
-        {
-          containerPort = 6379
-          protocol      = "tcp"
-          name          = "redis"
-        }
-      ]
-
-      mountPoints = [
-        {
-          sourceVolume  = "redis-data"
-          containerPath = "/data"
-          readOnly      = false
-        }
-      ]
-
-      healthCheck = {
-        command     = ["CMD-SHELL", "redis-cli ping || exit 1"]
-        interval    = 30
-        timeout     = 10
-        retries     = 3
-        startPeriod = 15
-      }
-
-      logConfiguration = {
-        logDriver = "awslogs"
-        options = {
-          "awslogs-group"         = aws_cloudwatch_log_group.redis.name
-          "awslogs-region"        = data.aws_region.current.name
-          "awslogs-stream-prefix" = "redis"
-        }
-      }
-    },
-
-    # MinIO Container
-    {
-      name      = "minio"
-      image     = "minio/minio:latest"
-      essential = true
-      cpu       = 512
-      memory    = 1024
-
-      command = ["server", "/data", "--console-address", ":9001"]
-
-      portMappings = [
-        {
-          containerPort = 9000
-          protocol      = "tcp"
-          name          = "minio-api"
-        },
-        {
-          containerPort = 9001
-          protocol      = "tcp"
-          name          = "minio-console"
-        }
-      ]
-
-      secrets = [
-        { name = "MINIO_ROOT_USER", valueFrom = "${var.secrets_arn}:minio_access_key::" },
-        { name = "MINIO_ROOT_PASSWORD", valueFrom = "${var.secrets_arn}:minio_secret_key::" }
-      ]
-
-      mountPoints = [
-        {
-          sourceVolume  = "minio-data"
-          containerPath = "/data"
-          readOnly      = false
-        }
-      ]
-
-      healthCheck = {
-        command     = ["CMD-SHELL", "curl -f http://localhost:9000/minio/health/live || exit 1"]
-        interval    = 30
-        timeout     = 10
-        retries     = 3
-        startPeriod = 30
-      }
-
-      logConfiguration = {
-        logDriver = "awslogs"
-        options = {
-          "awslogs-group"         = aws_cloudwatch_log_group.minio.name
-          "awslogs-region"        = data.aws_region.current.name
-          "awslogs-stream-prefix" = "minio"
         }
       }
     }
@@ -467,7 +282,7 @@ resource "aws_ecs_service" "main" {
 }
 
 # ==================================================
-# Auto Scaling Target
+# Auto Scaling Target & Policies
 # ==================================================
 resource "aws_appautoscaling_target" "ecs" {
   count = var.enable_autoscaling ? 1 : 0
@@ -479,9 +294,6 @@ resource "aws_appautoscaling_target" "ecs" {
   service_namespace  = "ecs"
 }
 
-# ==================================================
-# Auto Scaling Policy: CPU
-# ==================================================
 resource "aws_appautoscaling_policy" "cpu" {
   count = var.enable_autoscaling ? 1 : 0
 
@@ -501,9 +313,6 @@ resource "aws_appautoscaling_policy" "cpu" {
   }
 }
 
-# ==================================================
-# Auto Scaling Policy: Memory
-# ==================================================
 resource "aws_appautoscaling_policy" "memory" {
   count = var.enable_autoscaling ? 1 : 0
 
@@ -527,3 +336,4 @@ resource "aws_appautoscaling_policy" "memory" {
 # Data Sources
 # ==================================================
 data "aws_region" "current" {}
+

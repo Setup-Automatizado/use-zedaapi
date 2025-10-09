@@ -1,10 +1,9 @@
 # ==================================================
 # Secrets Manager Module
 # ==================================================
-# Creates AWS Secrets Manager secret with:
-# - Database credentials
-# - MinIO credentials
-# - Auto-rotation disabled (manual rotation recommended)
+# Creates AWS Secrets Manager secret with caller-provided payload
+# Auto-rotation is disabled by default (use Secrets Manager rotation
+# or external workflows for rotation policies)
 # ==================================================
 
 terraform {
@@ -39,12 +38,6 @@ resource "aws_secretsmanager_secret" "main" {
 # Secret Version (Initial Values)
 # ==================================================
 resource "aws_secretsmanager_secret_version" "main" {
-  secret_id = aws_secretsmanager_secret.main.id
-
-  secret_string = jsonencode({
-    db_user          = var.db_user
-    db_password      = var.db_password
-    minio_access_key = var.minio_access_key
-    minio_secret_key = var.minio_secret_key
-  })
+  secret_id     = aws_secretsmanager_secret.main.id
+  secret_string = jsonencode(var.secret_payload)
 }

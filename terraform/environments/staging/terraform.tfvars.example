@@ -1,30 +1,56 @@
 # ==================================================
 # Staging Environment - Example Variables
 # ==================================================
-# Copy this file to terraform.tfvars and fill in your values
-# NEVER commit terraform.tfvars to version control!
+# Copy to terraform.tfvars and adjust values before running `terraform apply`
 
 aws_region = "us-east-1"
 
 vpc_cidr           = "10.1.0.0/16"
 availability_zones = ["us-east-1a", "us-east-1b"]
+enable_nat_gateway = true
 
-# NAT Gateway (adds ~$32/month per AZ)
-# Set to true if ECS tasks need internet access (e.g., for pulling public images)
-enable_nat_gateway = false
-
-# HTTPS Certificate (optional)
-# Create ACM certificate first: aws acm request-certificate --domain-name staging-api.example.com
 # certificate_arn = "arn:aws:acm:us-east-1:123456789012:certificate/abcd1234-5678-90ab-cdef-EXAMPLE11111"
 
-# Docker Image
-# Updated automatically by CD workflow
-api_image = "your-dockerhub-username/whatsmeow-api:develop"
+api_image       = "123456789012.dkr.ecr.us-east-1.amazonaws.com/whatsapp-api:staging"
+app_environment = "staging"
+log_level       = "info"
 
-# Database Credentials (minimum 16 characters)
 db_user     = "whatsmeow"
-db_password = "CHANGE_THIS_TO_SECURE_PASSWORD_MIN_16_CHARS"
+db_password = "change-me-strong-password"
+db_instance_class        = "db.t4g.medium"
+db_allocated_storage     = 20
+db_max_allocated_storage = 100
 
-# MinIO Credentials (minimum 16 characters)
-minio_access_key = "minio"
-minio_secret_key = "CHANGE_THIS_TO_SECURE_PASSWORD_MIN_16_CHARS"
+redis_auth_token = ""
+
+s3_bucket_name        = "whatsapp-api-staging-media"
+s3_force_destroy      = false
+s3_use_presigned_urls = true
+
+# Example lifecycle rule: archive media after 90 days
+# s3_lifecycle_rules = [
+#   {
+#     id      = "archive-old-media"
+#     enabled = true
+#     transitions = [
+#       {
+#         days          = 90
+#         storage_class = "STANDARD_IA"
+#       }
+#     ]
+#     expiration_days = 365
+#   }
+# ]
+
+# Additional secrets (optional)
+# additional_secret_values = {
+#   partner_auth_token = "super-secret"
+#   sentry_dsn         = "https://key.ingest.sentry.io/123"
+# }
+
+# Map env var names to secret keys defined above
+# secret_env_mapping = {
+#   PARTNER_AUTH_TOKEN = "partner_auth_token"
+#   SENTRY_DSN         = "sentry_dsn"
+# }
+

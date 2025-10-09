@@ -12,40 +12,10 @@ variable "environment" {
   }
 }
 
-variable "db_user" {
-  description = "Database username"
-  type        = string
-  default     = "whatsmeow"
+variable "secret_payload" {
+  description = "Key/value pairs stored in the secret"
+  type        = map(string)
   sensitive   = true
-}
-
-variable "db_password" {
-  description = "Database password"
-  type        = string
-  sensitive   = true
-
-  validation {
-    condition     = length(var.db_password) >= 16
-    error_message = "Database password must be at least 16 characters long."
-  }
-}
-
-variable "minio_access_key" {
-  description = "MinIO access key (username)"
-  type        = string
-  default     = "minio"
-  sensitive   = true
-}
-
-variable "minio_secret_key" {
-  description = "MinIO secret key (password)"
-  type        = string
-  sensitive   = true
-
-  validation {
-    condition     = length(var.minio_secret_key) >= 16
-    error_message = "MinIO secret key must be at least 16 characters long."
-  }
 }
 
 variable "recovery_window_in_days" {

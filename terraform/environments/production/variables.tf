@@ -2,6 +2,7 @@
 # Production Environment - Variables
 # ==================================================
 
+# Global
 variable "aws_region" {
   description = "AWS region"
   type        = string
@@ -17,49 +18,275 @@ variable "vpc_cidr" {
 variable "availability_zones" {
   description = "Availability zones"
   type        = list(string)
-  default     = ["us-east-1a", "us-east-1b"]
+  default     = ["us-east-1a", "us-east-1b", "us-east-1c"]
 }
 
 variable "enable_nat_gateway" {
-  description = "Enable NAT Gateway (adds ~$32/month per AZ)"
+  description = "Enable NAT Gateway"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "certificate_arn" {
-  description = "ACM certificate ARN for HTTPS (optional)"
+  description = "ACM certificate ARN"
   type        = string
   default     = null
 }
 
+# Application runtime
 variable "api_image" {
-  description = "Docker image for API container"
+  description = "Docker image URI"
   type        = string
-  default     = "whatsmeow-api:latest"
+  default     = "123456789012.dkr.ecr.us-east-1.amazonaws.com/whatsapp-api:prod"
 }
 
+variable "app_environment" {
+  description = "Application environment string"
+  type        = string
+  default     = "production"
+}
+
+variable "log_level" {
+  description = "Structured log level"
+  type        = string
+  default     = "info"
+}
+
+variable "extra_environment" {
+  description = "Additional environment variables"
+  type        = map(string)
+  default     = {}
+}
+
+variable "secret_env_mapping" {
+  description = "Additional secret env mappings"
+  type        = map(string)
+  default     = {}
+}
+
+# Database
 variable "db_user" {
-  description = "Database username"
+  description = "Database master username"
   type        = string
   default     = "whatsmeow"
   sensitive   = true
 }
 
 variable "db_password" {
-  description = "Database password"
+  description = "Database master password"
   type        = string
   sensitive   = true
 }
 
-variable "minio_access_key" {
-  description = "MinIO access key"
+variable "db_name_app" {
+  description = "Primary database name"
   type        = string
-  default     = "minio"
+  default     = "api_core"
+}
+
+variable "db_name_store" {
+  description = "Whatsmeow store database name"
+  type        = string
+  default     = "whatsmeow_store"
+}
+
+variable "db_instance_class" {
+  description = "RDS instance class"
+  type        = string
+  default     = "db.r6g.large"
+}
+
+variable "db_allocated_storage" {
+  description = "Initial allocated storage"
+  type        = number
+  default     = 100
+}
+
+variable "db_max_allocated_storage" {
+  description = "Max storage for autoscaling"
+  type        = number
+  default     = 1000
+}
+
+variable "db_engine_version" {
+  description = "PostgreSQL engine version"
+  type        = string
+  default     = "16.3"
+}
+
+variable "db_multi_az" {
+  description = "Enable Multi-AZ"
+  type        = bool
+  default     = true
+}
+
+variable "db_backup_retention" {
+  description = "Backup retention (days)"
+  type        = number
+  default     = 14
+}
+
+variable "db_deletion_protection" {
+  description = "Enable deletion protection"
+  type        = bool
+  default     = true
+}
+
+variable "db_skip_final_snapshot" {
+  description = "Skip final snapshot on destroy"
+  type        = bool
+  default     = false
+}
+
+variable "db_apply_immediately" {
+  description = "Apply changes immediately"
+  type        = bool
+  default     = false
+}
+
+variable "db_performance_insights" {
+  description = "Enable Performance Insights"
+  type        = bool
+  default     = true
+}
+
+variable "db_performance_insights_retention" {
+  description = "Performance Insights retention"
+  type        = number
+  default     = 7
+}
+
+# Redis
+variable "redis_engine_version" {
+  description = "Redis engine version"
+  type        = string
+  default     = "7.1"
+}
+
+variable "redis_node_type" {
+  description = "ElastiCache node type"
+  type        = string
+  default     = "cache.r6g.large"
+}
+
+variable "redis_replicas_per_node_group" {
+  description = "Replicas per shard"
+  type        = number
+  default     = 2
+}
+
+variable "redis_auth_token" {
+  description = "Redis AUTH token"
+  type        = string
+  default     = ""
   sensitive   = true
 }
 
-variable "minio_secret_key" {
-  description = "MinIO secret key"
+# S3
+variable "s3_bucket_name" {
+  description = "S3 bucket name"
   type        = string
+  default     = "whatsapp-api-production-media"
+}
+
+variable "s3_force_destroy" {
+  description = "Force bucket destroy"
+  type        = bool
+  default     = false
+}
+
+variable "s3_endpoint" {
+  description = "Custom S3 endpoint"
+  type        = string
+  default     = ""
+}
+
+variable "s3_use_presigned_urls" {
+  description = "Enable presigned URLs"
+  type        = bool
+  default     = true
+}
+
+variable "s3_lifecycle_rules" {
+  description = "Lifecycle rules"
+  type = list(object({
+    id      = string
+    enabled = bool
+    transitions = optional(list(object({
+      days          = number
+      storage_class = string
+    })), [])
+    expiration_days = optional(number)
+  }))
+  default = []
+}
+
+# Secrets
+variable "additional_secret_values" {
+  description = "Additional secret key/value pairs"
+  type        = map(string)
+  default     = {}
   sensitive   = true
 }
+
+variable "secret_recovery_window" {
+  description = "Secrets Manager recovery window"
+  type        = number
+  default     = 14
+}
+
+# ECS sizing
+variable "task_cpu" {
+  description = "Fargate task CPU"
+  type        = number
+  default     = 2048
+}
+
+variable "task_memory" {
+  description = "Fargate task memory"
+  type        = number
+  default     = 4096
+}
+
+variable "desired_count" {
+  description = "Desired tasks"
+  type        = number
+  default     = 2
+}
+
+variable "enable_execute_command" {
+  description = "Enable ECS Exec"
+  type        = bool
+  default     = false
+}
+
+variable "enable_autoscaling" {
+  description = "Enable autoscaling"
+  type        = bool
+  default     = true
+}
+
+variable "autoscaling_min_capacity" {
+  description = "Min tasks"
+  type        = number
+  default     = 2
+}
+
+variable "autoscaling_max_capacity" {
+  description = "Max tasks"
+  type        = number
+  default     = 6
+}
+
+variable "autoscaling_cpu_target" {
+  description = "CPU target"
+  type        = number
+  default     = 60
+}
+
+variable "autoscaling_memory_target" {
+  description = "Memory target"
+  type        = number
+  default     = 70
+}
+

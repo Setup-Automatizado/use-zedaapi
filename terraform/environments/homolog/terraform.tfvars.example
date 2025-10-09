@@ -1,30 +1,31 @@
 # ==================================================
 # Homolog Environment - Example Variables
 # ==================================================
-# Copy this file to terraform.tfvars and fill in your values
-# NEVER commit terraform.tfvars to version control!
 
 aws_region = "us-east-1"
 
 vpc_cidr           = "10.2.0.0/16"
 availability_zones = ["us-east-1a", "us-east-1b"]
-
-# NAT Gateway (adds ~$32/month per AZ)
-# Set to true if ECS tasks need internet access (e.g., for pulling public images)
 enable_nat_gateway = false
 
-# HTTPS Certificate (optional)
-# Create ACM certificate first: aws acm request-certificate --domain-name homolog-api.example.com
-# certificate_arn = "arn:aws:acm:us-east-1:123456789012:certificate/abcd1234-5678-90ab-cdef-EXAMPLE11111"
+api_image       = "whatsapp-api:homolog"
+app_environment = "homolog"
+log_level       = "debug"
 
-# Docker Image
-# Updated automatically by CD workflow
-api_image = "your-dockerhub-username/whatsmeow-api:homolog"
-
-# Database Credentials (minimum 16 characters)
 db_user     = "whatsmeow"
-db_password = "CHANGE_THIS_TO_SECURE_PASSWORD_MIN_16_CHARS"
+db_password = "change-me"
 
-# MinIO Credentials (minimum 16 characters)
-minio_access_key = "minio"
-minio_secret_key = "CHANGE_THIS_TO_SECURE_PASSWORD_MIN_16_CHARS"
+redis_auth_token = ""
+
+s3_bucket_name        = "whatsapp-api-homolog-media"
+s3_force_destroy      = true
+s3_use_presigned_urls = true
+
+# additional_secret_values = {
+#   partner_auth_token = "example-token"
+# }
+
+# secret_env_mapping = {
+#   PARTNER_AUTH_TOKEN = "partner_auth_token"
+# }
+

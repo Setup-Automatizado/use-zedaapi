@@ -4,7 +4,8 @@
 # Creates security groups for:
 # - ALB (public internet access)
 # - ECS Tasks (internal communication)
-# - EFS (file system access)
+# - RDS PostgreSQL
+# - ElastiCache Redis
 # ==================================================
 
 terraform {
@@ -115,23 +116,6 @@ resource "aws_vpc_security_group_ingress_rule" "ecs_api_from_alb" {
   }
 }
 
-# Inbound: MinIO console from ALB (optional, for debugging)
-resource "aws_vpc_security_group_ingress_rule" "ecs_minio_from_alb" {
-  count = var.expose_minio_console ? 1 : 0
-
-  security_group_id = aws_security_group.ecs_tasks.id
-  description       = "Allow MinIO console from ALB"
-
-  referenced_security_group_id = aws_security_group.alb.id
-  from_port                    = 9001
-  to_port                      = 9001
-  ip_protocol                  = "tcp"
-
-  tags = {
-    Name = "minio-console-from-alb"
-  }
-}
-
 # Inbound: Self (for internal container communication)
 resource "aws_vpc_security_group_ingress_rule" "ecs_self" {
   security_group_id = aws_security_group.ecs_tasks.id
@@ -159,17 +143,17 @@ resource "aws_vpc_security_group_egress_rule" "ecs_all" {
 }
 
 # ==================================================
-# Security Group: EFS
+# Security Group: RDS PostgreSQL
 # ==================================================
-resource "aws_security_group" "efs" {
-  name_prefix = "${var.environment}-whatsmeow-efs-"
-  description = "Security group for EFS mount targets"
+resource "aws_security_group" "rds" {
+  name_prefix = "${var.environment}-whatsmeow-rds-"
+  description = "Security group for PostgreSQL RDS instance"
   vpc_id      = var.vpc_id
 
   tags = merge(
     var.tags,
     {
-      Name = "${var.environment}-whatsmeow-efs-sg"
+      Name = "${var.environment}-whatsmeow-rds-sg"
     }
   )
 
@@ -178,18 +162,75 @@ resource "aws_security_group" "efs" {
   }
 }
 
-# Inbound: NFS from ECS tasks
-resource "aws_vpc_security_group_ingress_rule" "efs_from_ecs" {
-  security_group_id = aws_security_group.efs.id
-  description       = "Allow NFS from ECS tasks"
+resource "aws_vpc_security_group_ingress_rule" "rds_from_ecs" {
+  security_group_id = aws_security_group.rds.id
+  description       = "Allow PostgreSQL from ECS tasks"
 
   referenced_security_group_id = aws_security_group.ecs_tasks.id
-  from_port                    = 2049
-  to_port                      = 2049
+  from_port                    = var.rds_port
+  to_port                      = var.rds_port
   ip_protocol                  = "tcp"
 
   tags = {
-    Name = "nfs-from-ecs"
+    Name = "postgres-from-ecs"
+  }
+}
+
+resource "aws_vpc_security_group_egress_rule" "rds_all" {
+  security_group_id = aws_security_group.rds.id
+  description       = "Allow outbound traffic"
+
+  cidr_ipv4   = "0.0.0.0/0"
+  ip_protocol = "-1"
+
+  tags = {
+    Name = "rds-egress"
+  }
+}
+
+# ==================================================
+# Security Group: ElastiCache Redis
+# ==================================================
+resource "aws_security_group" "redis" {
+  name_prefix = "${var.environment}-whatsmeow-redis-"
+  description = "Security group for ElastiCache Redis"
+  vpc_id      = var.vpc_id
+
+  tags = merge(
+    var.tags,
+    {
+      Name = "${var.environment}-whatsmeow-redis-sg"
+    }
+  )
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "redis_from_ecs" {
+  security_group_id = aws_security_group.redis.id
+  description       = "Allow Redis from ECS tasks"
+
+  referenced_security_group_id = aws_security_group.ecs_tasks.id
+  from_port                    = var.redis_port
+  to_port                      = var.redis_port
+  ip_protocol                  = "tcp"
+
+  tags = {
+    Name = "redis-from-ecs"
+  }
+}
+
+resource "aws_vpc_security_group_egress_rule" "redis_all" {
+  security_group_id = aws_security_group.redis.id
+  description       = "Allow outbound traffic"
+
+  cidr_ipv4   = "0.0.0.0/0"
+  ip_protocol = "-1"
+
+  tags = {
+    Name = "redis-egress"
   }
 }
 

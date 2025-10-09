@@ -28,7 +28,7 @@ output "ecs_service_name" {
 }
 
 output "task_definition_arn" {
-  description = "ECS Task Definition ARN (for CD workflow)"
+  description = "ECS Task Definition ARN"
   value       = module.ecs_service.task_definition_arn
 }
 
@@ -37,7 +37,17 @@ output "secrets_arn" {
   value       = module.secrets.secret_arn
 }
 
-output "efs_file_system_id" {
-  description = "EFS File System ID"
-  value       = module.efs.efs_file_system_id
+output "rds_endpoint" {
+  description = "PostgreSQL endpoint"
+  value       = module.rds.db_endpoint
+}
+
+output "redis_endpoint" {
+  description = "Redis primary endpoint"
+  value       = module.elasticache.primary_endpoint
+}
+
+output "s3_bucket_name" {
+  description = "S3 bucket for media"
+  value       = module.s3.bucket_name
 }

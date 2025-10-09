@@ -23,7 +23,7 @@
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                     AWS Cloud                           │
+│                      AWS Cloud                          │
 │                                                         │
 │  ┌───────────────────────────────────────────────────┐ │
 │  │ VPC (10.x.0.0/16)                                 │ │
@@ -40,29 +40,24 @@
 │  │  │ Private AZ-a │         │ Private AZ-b │      │ │
 │  │  │              │         │              │      │ │
 │  │  │  ┌────────┐  │         │  ┌────────┐  │      │ │
-│  │  │  │ECS Task│  │         │  │ECS Task│  │      │ │
-│  │  │  │(Fargate│  │         │  │(Fargate│  │      │ │
-│  │  │  │   )    │  │         │  │   )    │  │      │ │
-│  │  │  │        │  │         │  │        │  │      │ │
-│  │  │  │ ┌────┐ │  │         │  │ ┌────┐ │  │      │ │
-│  │  │  │ │API │ │  │         │  │ │API │ │  │      │ │
-│  │  │  │ │PG  │ │  │         │  │ │PG  │ │  │      │ │
-│  │  │  │ │RDS │ │  │         │  │ │RDS │ │  │      │ │
-│  │  │  │ │MinIO   │         │  │ │MinIO   │      │ │
-│  │  │  │ └────┘ │  │         │  │ └────┘ │  │      │ │
-│  │  │  │   │    │  │         │  │   │    │  │      │ │
-│  │  │  │   ▼    │  │         │  │   ▼    │  │      │ │
-│  │  │  │ ┌────┐ │  │         │  │ ┌────┐ │  │      │ │
-│  │  │  │ │EFS │ │  │         │  │ │EFS │ │  │      │ │
-│  │  │  │ └────┘ │  │         │  │ └────┘ │  │      │ │
-│  │  │  └────────┘  │         │  └────────┘  │      │ │
+│  │  │  │ECS     │  │         │  │ECS     │  │      │ │
+│  │  │  │Task    │  │         │  │Task    │  │      │ │
+│  │  │  │(API)   │  │         │  │(API)   │  │      │ │
+│  │  │  └──┬─────┘  │         │  └──┬─────┘  │      │ │
+│  │  │     │        │         │     │        │      │ │
+│  │  │     │        │         │     │        │      │ │
+│  │  │     │        │         │     │        │      │ │
+│  │  │  ┌──▼────┐   │         │  ┌──▼────┐   │      │ │
+│  │  │  │ RDS   │   │         │  │Redis  │   │      │ │
+│  │  │  │Postgre│   │         │  │Elasti │   │      │ │
+│  │  │  └───────┘   │         │  │Cache  │   │      │ │
 │  │  └──────────────┘         └──────────────┘      │ │
 │  └───────────────────────────────────────────────────┘ │
 │                                                         │
-│  ┌────────────┐  ┌────────────┐  ┌────────────┐       │
-│  │  Secrets   │  │    EFS     │  │   ECR      │       │
-│  │  Manager   │  │  Storage   │  │  Registry  │       │
-│  └────────────┘  └────────────┘  └────────────┘       │
+│  ┌────────────┐   ┌────────────┐   ┌────────────┐      │
+│  │ Secrets    │   │    S3      │   │    ECR     │      │
+│  │ Manager    │   │ Media      │   │  Registry  │      │
+│  └────────────┘   └────────────┘   └────────────┘      │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -71,14 +66,17 @@
 | Resource | Production | Staging | Homolog |
 |----------|-----------|---------|---------|
 | VPC CIDR | 10.0.0.0/16 | 10.1.0.0/16 | 10.2.0.0/16 |
+| NAT Gateway | ✅ Enabled | ✅ Enabled | ❌ Disabled |
 | Desired Tasks | 2 | 1 | 1 |
-| Max Tasks (Auto-scaling) | 10 | 5 | 3 |
+| Max Tasks (Auto-scaling) | 6 | 5 | 2 |
 | Container Insights | ✅ Enabled | ❌ Disabled | ❌ Disabled |
-| EFS Backups | ✅ Enabled | ❌ Disabled | ❌ Disabled |
-| Deletion Protection | ✅ Enabled | ❌ Disabled | ❌ Disabled |
 | FARGATE_SPOT | ❌ Disabled | ✅ Enabled | ✅ Enabled |
 | ECS Exec | ❌ Disabled | ✅ Enabled | ✅ Enabled |
-| MinIO Console | ❌ Disabled | ✅ Enabled | ✅ Enabled |
+| RDS Multi-AZ | ✅ Enabled | ⚙️ Optional | ❌ Disabled |
+| Redis Replicas | 2 | 1 | 0 |
+| S3 Force Destroy | ❌ Disabled | ❌ Disabled | ✅ Enabled |
+
+> ⚙️ Optional = configurable via `terraform.tfvars` for that environment.
 
 ---
 
@@ -354,17 +352,8 @@ aws ecs execute-command \
 ### View Logs
 
 ```bash
-# API logs
+# API logs (replace environment name accordingly)
 aws logs tail /ecs/production/whatsmeow/api --follow
-
-# Postgres logs
-aws logs tail /ecs/production/whatsmeow/postgres --follow
-
-# Redis logs
-aws logs tail /ecs/production/whatsmeow/redis --follow
-
-# MinIO logs
-aws logs tail /ecs/production/whatsmeow/minio --follow
 ```
 
 ### Update Secrets
@@ -379,8 +368,9 @@ aws secretsmanager update-secret \
   --secret-string '{
     "db_user": "whatsmeow",
     "db_password": "new-password-here",
-    "minio_access_key": "minio",
-    "minio_secret_key": "new-key-here"
+    "postgres_dsn": "postgres://whatsmeow:new-password-here@prod-db.xxxxxx.us-east-1.rds.amazonaws.com:5432/api_core?sslmode=require",
+    "wameow_postgres_dsn": "postgres://whatsmeow:new-password-here@prod-db.xxxxxx.us-east-1.rds.amazonaws.com:5432/whatsmeow_store?sslmode=require",
+    "redis_password": "optional-auth-token"
   }'
 
 # Force service restart to pick up new secrets
@@ -469,18 +459,19 @@ aws elbv2 describe-target-health \
 - Health check path `/healthz` not responding
 - Container taking too long to start (increase `startPeriod`)
 
-#### 5. **EFS Mount Failed**
+#### 5. **RDS Connection Failed**
 
 ```bash
-# Check mount targets
-aws efs describe-mount-targets \
-  --file-system-id $(terraform output -raw efs_file_system_id)
+# Check RDS status
+aws rds describe-db-instances \
+  --db-instance-identifier $(terraform output -raw rds_endpoint | cut -d'.' -f1)
 ```
 
 **Common causes**:
-- Security group not allowing NFS (port 2049)
-- Mount target not in same AZ as task
-- IAM permissions missing for EFS
+- RDS not in `available` status (wait for maintenance window to finish)
+- Security group rules missing (ensure ingress from ECS security group)
+- Password rotated without updating secret (see [Update Secrets](#update-secrets))
+- `sslmode` misconfigured (`require` is enforced in Terraform templates)
 
 ---
 
@@ -488,19 +479,31 @@ aws efs describe-mount-targets \
 
 ### Monthly Cost Breakdown
 
-#### Production (2 tasks)
-- **ECS Fargate** (1.5 vCPU, 3 GB): ~$70/month
-- **ALB**: ~$20/month
-- **EFS** (10 GB): ~$5/month
-- **Secrets Manager**: ~$1/month
-- **CloudWatch Logs** (7 days): ~$2/month
-- **Total**: **~$98/month**
+#### Production (reference sizing)
+- **ECS Fargate** (2 tasks, 2 vCPU/4 GB): ~US$110/month
+- **Application Load Balancer**: ~US$25/month
+- **RDS PostgreSQL** (db.r6g.large Multi-AZ, 100 GB gp3): ~US$280/month
+- **ElastiCache Redis** (cache.r6g.large + replica): ~US$150/month
+- **S3 Storage** (100 GB with versioning): ~US$3/month
+- **Secrets Manager & KMS**: ~US$2/month
+- **CloudWatch Logs & Metrics**: ~US$5/month
+- **Estimated total**: **~US$575/month**
 
-#### Staging/Homolog (1 task each)
-- **ECS Fargate** (70% SPOT discount): ~$11/month each
-- **ALB**: ~$20/month each
-- **EFS** (5 GB): ~$2/month each
-- **Total per environment**: **~$33/month**
+#### Staging (single task, SPOT)
+- **ECS Fargate** (1 task, SPOT 1 vCPU/2 GB): ~US$15/month
+- **ALB**: ~US$20/month
+- **RDS PostgreSQL** (db.t4g.medium single AZ, 20 GB): ~US$55/month
+- **ElastiCache Redis** (cache.t4g.small + replica): ~US$35/month
+- **S3 Storage** (25 GB): ~US$1/month
+- **Estimated total**: **~US$126/month**
+
+#### Homolog (single task, SPOT)
+- **ECS Fargate** (1 task, SPOT 0.5 vCPU/1 GB): ~US$8/month
+- **ALB**: ~US$20/month
+- **RDS PostgreSQL** (db.t4g.small, 10 GB): ~US$35/month
+- **ElastiCache Redis** (cache.t4g.small, no replica): ~US$20/month
+- **S3 Storage** (10 GB): ~US$0.5/month
+- **Estimated total**: **~US$84/month**
 
 ### Cost Savings Tips
 
@@ -525,23 +528,21 @@ autoscaling_max_capacity = 3
 enable_container_insights = false
 ```
 
-5. **Disable EFS Backups** (non-production):
-```hcl
-enable_backup = false
-```
+5. **Right-size Database & Cache**:
+   - Use `db_instance_class = "db.t4g.small"` and `redis_node_type = "cache.t4g.small"` for homolog
+   - Reduce `db_backup_retention` for non-production (e.g., `3`)
 
-6. **Transition to EFS IA** (infrequently accessed data):
-```hcl
-transition_to_ia = "AFTER_7_DAYS"  # instead of AFTER_30_DAYS
-```
+6. **Lifecycle Media Objects**:
+   - Configure `s3_lifecycle_rules` to transition older objects to `STANDARD_IA`
+   - Enable expiration for presigned artifacts that can be regenerated
 
 ### Total Cost Scenarios
 
 | Configuration | Production | Staging | Homolog | Total |
 |---------------|-----------|---------|---------|-------|
-| **Full** (all features) | $98/mo | $53/mo | $53/mo | **$204/mo** |
-| **Optimized** (SPOT, no insights) | $98/mo | $33/mo | $33/mo | **$164/mo** |
-| **Minimal** (SPOT, 1 env) | $98/mo | - | - | **$98/mo** |
+| **Reference** (current defaults) | $575/mo | $126/mo | $84/mo | **$785/mo** |
+| **Optimized** (smaller DB/cache, shorter retention) | $410/mo | $92/mo | $58/mo | **$560/mo** |
+| **Minimal** (single staging env, SPOT everywhere) | - | $92/mo | - | **$92/mo** |
 
 ---
 
@@ -554,4 +555,4 @@ transition_to_ia = "AFTER_7_DAYS"  # instead of AFTER_30_DAYS
 
 ---
 
-**Last Updated**: 2025-09-30
+**Last Updated**: 2025-10-09
