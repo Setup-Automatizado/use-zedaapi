@@ -68,7 +68,6 @@ ENV TZ=UTC
 
 # Copy certificates and timezone data
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
 
 # Copy compiled binaries
 COPY --from=builder /app/api /usr/local/bin/api
