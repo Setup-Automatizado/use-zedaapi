@@ -56,6 +56,60 @@ Benefits:
 
 * **terraform:** migrate to AWS managed services architecture ([768916d](https://github.com/Funnelchat20/whatsapp-api-golang/commit/768916d2b924e40644676bda2f5e4e686f42d2db))
 
+## [2.0.0-develop.1](https://github.com/Funnelchat20/whatsapp-api-golang/compare/v1.2.0-develop.3...v2.0.0-develop.1) (2025-10-09)
+
+### ⚠ BREAKING CHANGES
+
+* **terraform:** Replace containerized data stores with AWS managed
+services (RDS PostgreSQL, ElastiCache Redis, S3) for improved
+reliability, scalability, and operational efficiency.
+
+New Terraform Modules:
+- RDS PostgreSQL with Multi-AZ, automated backups, encryption
+- ElastiCache Redis with replication and automatic failover
+- S3 buckets with versioning, encryption, lifecycle policies
+
+Module Refactoring:
+- ECS Service: Simplified to API-only container, removed Postgres/Redis/MinIO
+- Security Groups: Added RDS and ElastiCache SGs, removed EFS
+- Secrets Manager: Flexible payload structure per environment
+
+Environment Migration:
+Production:
+- RDS db.r6g.large Multi-AZ, 100GB gp3, 7-day backups
+- ElastiCache cache.r6g.large with 2 replicas
+- S3 whatsmeow-production-media
+- Cost: ~$575/month
+
+Staging:
+- RDS db.t4g.medium single-AZ, 20GB, 3-day backups
+- ElastiCache cache.t4g.small with 1 replica
+- FARGATE_SPOT enabled
+- Cost: ~$126/month
+
+Homolog:
+- RDS db.t4g.small single-AZ, 10GB, 1-day backups
+- ElastiCache cache.t4g.small no replicas
+- FARGATE_SPOT, NAT Gateway disabled
+- Cost: ~$84/month
+
+Documentation:
+- Updated architecture diagram with managed services
+- New cost breakdown per environment
+- Updated troubleshooting for RDS/ElastiCache/S3
+- Removed EFS and container-based service documentation
+
+Benefits:
+- Automated backups and point-in-time recovery
+- Managed patching and maintenance
+- Better scalability with auto-scaling support
+- Enhanced security with encryption at rest/transit
+- Reduced operational complexity
+
+### ✨ Features
+
+* **terraform:** migrate to AWS managed services architecture ([768916d](https://github.com/Funnelchat20/whatsapp-api-golang/commit/768916d2b924e40644676bda2f5e4e686f42d2db))
+
 ## [1.2.0-develop.3](https://github.com/Funnelchat20/whatsapp-api-golang/compare/v1.2.0-develop.2...v1.2.0-develop.3) (2025-10-06)
 
 ### ✨ Features
