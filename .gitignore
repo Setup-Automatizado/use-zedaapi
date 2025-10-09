@@ -56,3 +56,4 @@ logs/
 docker-compose.override.yml
 tmp/
 .tmp/
+.terraform/
