@@ -442,7 +442,7 @@ aws ecs describe-tasks \
 **Common causes**:
 - Secrets not found (check ARN)
 - Image pull failed (check ECR permissions)
-- Health check failing (check /healthz endpoint)
+- Health check failing (check /health endpoint)
 - Insufficient resources (check task CPU/memory)
 
 #### 4. **ALB Health Check Failing**
@@ -456,7 +456,7 @@ aws elbv2 describe-target-health \
 **Common causes**:
 - Container not exposing port 8080
 - Security group blocking traffic
-- Health check path `/healthz` not responding
+- Health check path `/health` not responding
 - Container taking too long to start (increase `startPeriod`)
 
 #### 5. **RDS Connection Failed**

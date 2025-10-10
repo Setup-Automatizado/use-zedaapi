@@ -195,8 +195,8 @@ resource "aws_ecs_task_definition" "main" {
       name      = "api"
       image     = var.api_image
       essential = true
-      cpu       = 1024
-      memory    = 2048
+      cpu       = var.task_cpu
+      memory    = var.task_memory
 
       portMappings = [
         {
@@ -210,7 +210,7 @@ resource "aws_ecs_task_definition" "main" {
       secrets     = local.secret_definitions
 
       healthCheck = {
-        command     = ["CMD-SHELL", "curl -f http://localhost:8080/healthz || exit 1"]
+        command     = ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
         interval    = 30
         timeout     = 10
         retries     = 3
@@ -249,7 +249,7 @@ resource "aws_ecs_service" "main" {
   network_configuration {
     subnets          = var.private_subnet_ids
     security_groups  = [var.ecs_security_group_id]
-    assign_public_ip = false
+    assign_public_ip = var.assign_public_ip
   }
 
   load_balancer {
@@ -258,13 +258,12 @@ resource "aws_ecs_service" "main" {
     container_port   = 8080
   }
 
-  deployment_configuration {
-    maximum_percent         = 200
-    minimum_healthy_percent = 100
-    deployment_circuit_breaker {
-      enable   = true
-      rollback = true
-    }
+  deployment_maximum_percent         = 200
+  deployment_minimum_healthy_percent = 100
+
+  deployment_circuit_breaker {
+    enable   = true
+    rollback = true
   }
 
   enable_execute_command = var.enable_execute_command
@@ -336,4 +335,3 @@ resource "aws_appautoscaling_policy" "memory" {
 # Data Sources
 # ==================================================
 data "aws_region" "current" {}
-

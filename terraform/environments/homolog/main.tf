@@ -173,7 +173,7 @@ module "ecs_service" {
   environment            = local.environment
   cluster_id             = module.ecs_cluster.cluster_id
   cluster_name           = module.ecs_cluster.cluster_name
-  private_subnet_ids     = module.vpc.private_subnet_ids
+  private_subnet_ids     = module.vpc.public_subnet_ids
   ecs_security_group_id  = module.security_groups.ecs_tasks_security_group_id
   api_target_group_arn   = module.alb.api_target_group_arn
   secrets_arn            = module.secrets.secret_arn
@@ -203,6 +203,7 @@ module "ecs_service" {
   log_level                = var.log_level
   extra_environment        = var.extra_environment
   secret_key_mapping       = var.secret_env_mapping
+  assign_public_ip         = true
 
   tags = local.common_tags
 
@@ -210,4 +211,3 @@ module "ecs_service" {
     module.alb
   ]
 }
-

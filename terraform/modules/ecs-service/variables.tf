@@ -131,6 +131,12 @@ variable "secret_key_mapping" {
   default     = {}
 }
 
+variable "assign_public_ip" {
+  description = "Assign public IP to ECS tasks"
+  type        = bool
+  default     = false
+}
+
 variable "api_image" {
   description = "Docker image for API container"
   type        = string

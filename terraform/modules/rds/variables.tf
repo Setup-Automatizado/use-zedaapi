@@ -94,6 +94,23 @@ variable "performance_insights_retention" {
   default     = 7
 }
 
+variable "monitoring_interval" {
+  description = "Enhanced monitoring interval in seconds (0 disables)"
+  type        = number
+  default     = 0
+
+  validation {
+    condition     = var.monitoring_interval == 0 || contains([1, 5, 10, 15, 30, 60], var.monitoring_interval)
+    error_message = "Monitoring interval must be 0 or one of 1,5,10,15,30,60 seconds."
+  }
+}
+
+variable "monitoring_role_arn" {
+  description = "IAM role ARN for enhanced monitoring"
+  type        = string
+  default     = null
+}
+
 variable "subnet_ids" {
   description = "Private subnet IDs"
   type        = list(string)
@@ -109,4 +126,3 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
-

@@ -62,8 +62,8 @@ resource "aws_db_instance" "this" {
   performance_insights_enabled = var.performance_insights_enabled
   performance_insights_retention_period = var.performance_insights_enabled ? var.performance_insights_retention : null
   copy_tags_to_snapshot       = true
-  monitoring_interval         = 60
-  monitoring_role_arn         = null
+  monitoring_interval         = var.monitoring_interval
+  monitoring_role_arn         = var.monitoring_interval > 0 ? var.monitoring_role_arn : null
 
   tags = merge(
     var.tags,
