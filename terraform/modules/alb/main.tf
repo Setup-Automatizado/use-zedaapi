@@ -42,7 +42,7 @@ resource "aws_lb" "main" {
 # Target Group: API
 # ==================================================
 resource "aws_lb_target_group" "api" {
-  name_prefix = "${substr(var.environment, 0, 3)}-api-"
+  name_prefix = substr("${var.environment}api", 0, 6)
   port        = 8080
   protocol    = "HTTP"
   vpc_id      = var.vpc_id
@@ -50,7 +50,7 @@ resource "aws_lb_target_group" "api" {
 
   health_check {
     enabled             = true
-    path                = "/healthz"
+    path                = "/health"
     protocol            = "HTTP"
     matcher             = "200"
     interval            = 30
@@ -79,7 +79,7 @@ resource "aws_lb_target_group" "api" {
 resource "aws_lb_target_group" "minio" {
   count = var.expose_minio_console ? 1 : 0
 
-  name_prefix = "${substr(var.environment, 0, 3)}-mio-"
+  name_prefix = substr("${var.environment}mio", 0, 6)
   port        = 9001
   protocol    = "HTTP"
   vpc_id      = var.vpc_id

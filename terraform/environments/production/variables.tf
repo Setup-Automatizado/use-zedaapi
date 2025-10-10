@@ -52,6 +52,18 @@ variable "log_level" {
   default     = "info"
 }
 
+variable "prometheus_namespace" {
+  description = "Prometheus metrics namespace"
+  type        = string
+  default     = "whatsmeow_api"
+}
+
+variable "sentry_release" {
+  description = "Sentry release identifier"
+  type        = string
+  default     = "production"
+}
+
 variable "extra_environment" {
   description = "Additional environment variables"
   type        = map(string)
@@ -62,6 +74,51 @@ variable "secret_env_mapping" {
   description = "Additional secret env mappings"
   type        = map(string)
   default     = {}
+}
+
+variable "s3_access_key" {
+  description = "S3 access key for production media operations"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "s3_secret_key" {
+  description = "S3 secret key for production media operations"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "s3_public_base_url" {
+  description = "Public base URL for production media hosted in S3"
+  type        = string
+  default     = ""
+}
+
+variable "media_local_secret_key" {
+  description = "Secret key used to sign locally served media URLs"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "media_local_public_base_url" {
+  description = "Public base URL for locally served media assets"
+  type        = string
+  default     = ""
+}
+
+variable "redis_username" {
+  description = "Redis username if ACLs are enabled"
+  type        = string
+  default     = ""
+}
+
+variable "media_local_storage_path" {
+  description = "Path used by ECS task for local media fallback"
+  type        = string
+  default     = "/tmp/whatsmeow/media"
 }
 
 # Database
@@ -289,4 +346,3 @@ variable "autoscaling_memory_target" {
   type        = number
   default     = 70
 }
-

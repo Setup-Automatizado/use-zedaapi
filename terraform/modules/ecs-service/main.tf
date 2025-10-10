@@ -17,24 +17,77 @@ locals {
   gin_mode    = lower(var.app_environment) == "production" ? "release" : "debug"
 
   base_environment = merge({
-    APP_ENV               = var.app_environment
-    ENVIRONMENT           = var.app_environment
-    LOG_LEVEL             = var.log_level
-    GIN_MODE              = local.gin_mode
-    AWS_REGION            = var.aws_region
-    DB_HOST               = var.db_host
-    DB_PORT               = tostring(var.db_port)
-    DB_NAME               = var.db_name_app
-    WA_DB_HOST            = var.db_host
-    WA_DB_PORT            = tostring(var.db_port)
-    WA_DB_NAME            = var.db_name_store
-    REDIS_ADDR            = "${var.redis_host}:${var.redis_port}"
-    REDIS_TLS_ENABLED     = var.redis_tls_enabled ? "true" : "false"
-    S3_BUCKET             = var.s3_bucket_name
-    S3_REGION             = var.aws_region
-    S3_ENDPOINT           = local.s3_endpoint
-    S3_USE_SSL            = "true"
-    S3_USE_PRESIGNED_URLS = var.s3_use_presigned_urls ? "true" : "false"
+    APP_ENV                        = var.app_environment
+    ENVIRONMENT                    = var.app_environment
+    LOG_LEVEL                      = var.log_level
+    GIN_MODE                       = local.gin_mode
+    AWS_REGION                     = var.aws_region
+    HTTP_ADDR                      = "0.0.0.0:8080"
+    HTTP_READ_HEADER_TIMEOUT       = "5s"
+    HTTP_READ_TIMEOUT              = "15s"
+    HTTP_WRITE_TIMEOUT             = "30s"
+    HTTP_IDLE_TIMEOUT              = "120s"
+    HTTP_MAX_HEADER_BYTES          = tostring(1048576)
+    POSTGRES_MAX_CONNS             = tostring(32)
+    DB_HOST                        = var.db_host
+    DB_PORT                        = tostring(var.db_port)
+    DB_NAME                        = var.db_name_app
+    WA_DB_HOST                     = var.db_host
+    WA_DB_PORT                     = tostring(var.db_port)
+    WA_DB_NAME                     = var.db_name_store
+    WAMEOW_LOG_LEVEL               = upper(var.log_level)
+    REDIS_ADDR                     = "${var.redis_host}:${var.redis_port}"
+    REDIS_USERNAME                 = ""
+    REDIS_DB                       = tostring(0)
+    REDIS_TLS_ENABLED              = var.redis_tls_enabled ? "true" : "false"
+    S3_BUCKET                      = var.s3_bucket_name
+    S3_REGION                      = var.aws_region
+    S3_ENDPOINT                    = local.s3_endpoint
+    S3_USE_SSL                     = "true"
+    S3_USE_PRESIGNED_URLS          = var.s3_use_presigned_urls ? "true" : "false"
+    S3_PUBLIC_BASE_URL             = ""
+    S3_URL_EXPIRATION              = "6d"
+    S3_MEDIA_RETENTION             = "720h"
+    S3_ACL                         = ""
+    MEDIA_LOCAL_STORAGE_PATH       = var.media_local_storage_path
+    MEDIA_LOCAL_URL_EXPIRY         = "720h"
+    MEDIA_LOCAL_PUBLIC_BASE_URL    = ""
+    MEDIA_CLEANUP_INTERVAL         = "168h"
+    MEDIA_CLEANUP_BATCH_SIZE       = tostring(200)
+    LOCAL_MEDIA_RETENTION          = "720h"
+    MEDIA_BUFFER_SIZE              = tostring(500)
+    MEDIA_BATCH_SIZE               = tostring(5)
+    MEDIA_MAX_RETRIES              = tostring(3)
+    MEDIA_POLL_INTERVAL            = "1s"
+    MEDIA_DOWNLOAD_TIMEOUT         = "5m"
+    MEDIA_UPLOAD_TIMEOUT           = "10m"
+    MEDIA_MAX_FILE_SIZE            = tostring(104857600)
+    MEDIA_CHUNK_SIZE               = tostring(5242880)
+    WEBHOOK_TIMEOUT                = "30s"
+    WEBHOOK_MAX_RETRIES            = tostring(3)
+    WEBHOOK_DISPATCHER_CONCURRENCY = tostring(8)
+    MEDIA_WORKER_CONCURRENCY       = tostring(4)
+    PROMETHEUS_NAMESPACE           = var.prometheus_namespace
+    EVENT_BUFFER_SIZE              = tostring(1000)
+    EVENT_BATCH_SIZE               = tostring(10)
+    EVENT_POLL_INTERVAL            = "100ms"
+    EVENT_PROCESSING_TIMEOUT       = "30s"
+    EVENT_SHUTDOWN_GRACE_PERIOD    = "30s"
+    EVENT_MAX_RETRY_ATTEMPTS       = tostring(6)
+    EVENT_RETRY_DELAYS             = "0s,10s,30s,2m,5m,15m"
+    CB_ENABLED                     = "true"
+    CB_MAX_FAILURES                = tostring(5)
+    CB_TIMEOUT                     = "60s"
+    CB_COOLDOWN                    = "30s"
+    DLQ_RETENTION_PERIOD           = "7d"
+    DLQ_REPROCESS_ENABLED          = "true"
+    TRANSPORT_BUFFER_SIZE          = tostring(100)
+    DELIVERED_RETENTION_PERIOD     = "1d"
+    CLEANUP_INTERVAL               = "1h"
+    EVENTS_DEBUG_RAW_PAYLOAD       = "false"
+    EVENTS_DEBUG_DUMP_DIR          = "./tmp/debug-events"
+    SENTRY_ENVIRONMENT             = var.app_environment
+    SENTRY_RELEASE                 = var.sentry_release
   }, var.extra_environment)
 
   environment_definitions = [
@@ -45,11 +98,11 @@ locals {
   ]
 
   default_secret_mapping = {
-    POSTGRES_DSN          = "postgres_dsn"
-    WAMEOW_POSTGRES_DSN   = "wameow_postgres_dsn"
-    DB_USER               = "db_user"
-    DB_PASSWORD           = "db_password"
-    REDIS_PASSWORD        = "redis_password"
+    POSTGRES_DSN        = "postgres_dsn"
+    WAMEOW_POSTGRES_DSN = "wameow_postgres_dsn"
+    DB_USER             = "db_user"
+    DB_PASSWORD         = "db_password"
+    REDIS_PASSWORD      = "redis_password"
   }
 
   secret_mapping = merge(local.default_secret_mapping, var.secret_key_mapping)
@@ -195,8 +248,8 @@ resource "aws_ecs_task_definition" "main" {
       name      = "api"
       image     = var.api_image
       essential = true
-      cpu       = 1024
-      memory    = 2048
+      cpu       = var.task_cpu
+      memory    = var.task_memory
 
       portMappings = [
         {
@@ -210,7 +263,7 @@ resource "aws_ecs_task_definition" "main" {
       secrets     = local.secret_definitions
 
       healthCheck = {
-        command     = ["CMD-SHELL", "curl -f http://localhost:8080/healthz || exit 1"]
+        command     = ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
         interval    = 30
         timeout     = 10
         retries     = 3
@@ -249,7 +302,7 @@ resource "aws_ecs_service" "main" {
   network_configuration {
     subnets          = var.private_subnet_ids
     security_groups  = [var.ecs_security_group_id]
-    assign_public_ip = false
+    assign_public_ip = var.assign_public_ip
   }
 
   load_balancer {
@@ -258,13 +311,12 @@ resource "aws_ecs_service" "main" {
     container_port   = 8080
   }
 
-  deployment_configuration {
-    maximum_percent         = 200
-    minimum_healthy_percent = 100
-    deployment_circuit_breaker {
-      enable   = true
-      rollback = true
-    }
+  deployment_maximum_percent         = 200
+  deployment_minimum_healthy_percent = 100
+
+  deployment_circuit_breaker {
+    enable   = true
+    rollback = true
   }
 
   enable_execute_command = var.enable_execute_command
@@ -336,4 +388,3 @@ resource "aws_appautoscaling_policy" "memory" {
 # Data Sources
 # ==================================================
 data "aws_region" "current" {}
-

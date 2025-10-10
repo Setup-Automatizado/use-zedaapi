@@ -6,14 +6,14 @@ vpc_cidr           = "10.0.0.0/16"
 availability_zones = ["us-east-1a", "us-east-1b", "us-east-1c"]
 enable_nat_gateway = true
 
-certificate_arn = "arn:aws:acm:us-east-1:ACCOUNT_ID:certificate/CERTIFICATE_ID"
+certificate_arn = "arn:aws:acm:us-east-1:AKIA4W5HKAR23AI5S6VZ:certificate/CERTIFICATE_ID"
 
-api_image       = "ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/whatsapp-api:prod"
+api_image       = "873839854709.dkr.ecr.us-east-1.amazonaws.com/whatsapp-api:prod"
 app_environment = "production"
 log_level       = "info"
 
 db_user     = "whatsmeow"
-db_password = "CHANGE_ME_PRODUCTION_DB_PASSWORD"
+db_password = "80c1f79d907334e75a0403fd79431006bfafdad0634594e13f8194bdb7711a3b"
 
 db_instance_class        = "db.r6g.large"
 db_allocated_storage     = 100
@@ -26,11 +26,14 @@ db_skip_final_snapshot   = false
 redis_engine_version          = "7.1"
 redis_node_type               = "cache.r6g.large"
 redis_replicas_per_node_group = 2
-redis_auth_token              = "CHANGE_ME_PRODUCTION_REDIS_TOKEN"
+redis_auth_token              = "80c1f79d907334e75a0403fd79431006bfafdad0634594e13f8194bdb7711a3b"
 
 s3_bucket_name        = "production-whatsapp-api-media"
 s3_force_destroy      = false
 s3_use_presigned_urls = true
+s3_access_key         = "AKIA4W5HKAR2XE36XHBI"
+s3_secret_key         = "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"
+s3_public_base_url    = "https://production-whatsapp-api-media.s3.us-east-1.amazonaws.com"
 
 s3_lifecycle_rules = [
   {
@@ -51,13 +54,16 @@ s3_lifecycle_rules = [
 ]
 
 additional_secret_values = {
-  partner_auth_token = "CHANGE_ME_PRODUCTION_PARTNER_TOKEN"
+  partner_auth_token = "80c1f79d907334e75a0403fd79431006bfafdad0634594e13f8194bdb7711a3b"
   sentry_dsn         = "https://CHANGE_ME_PRODUCTION_SENTRY_DSN"
 }
 
 secret_env_mapping = {
-  PARTNER_AUTH_TOKEN = "partner_auth_token"
-  SENTRY_DSN         = "sentry_dsn"
+  PARTNER_AUTH_TOKEN     = "partner_auth_token"
+  SENTRY_DSN             = "sentry_dsn"
+  S3_ACCESS_KEY          = "s3_access_key"
+  S3_SECRET_KEY          = "s3_secret_key"
+  MEDIA_LOCAL_SECRET_KEY = "media_local_secret_key"
 }
 
 secret_recovery_window = 14
@@ -67,13 +73,17 @@ task_memory            = 4096
 desired_count          = 2
 enable_execute_command = false
 
-enable_autoscaling         = true
-autoscaling_min_capacity   = 2
-autoscaling_max_capacity   = 6
-autoscaling_cpu_target     = 60
-autoscaling_memory_target  = 70
+enable_autoscaling        = true
+autoscaling_min_capacity  = 2
+autoscaling_max_capacity  = 6
+autoscaling_cpu_target    = 60
+autoscaling_memory_target = 70
 
 extra_environment = {
   PROMETHEUS_ENABLED = "true"
   GIN_MODE           = "release"
 }
+
+media_local_secret_key      = "80c1f79d907334e75a0403fd79431006bfafdad0634594e13f8194bdb7711a3b"
+media_local_public_base_url = "http://production-whatsmeow-alb-1412624585.us-east-1.elb.amazonaws.com"
+redis_username              = "default"

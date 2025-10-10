@@ -119,6 +119,24 @@ variable "log_level" {
   default     = "info"
 }
 
+variable "prometheus_namespace" {
+  description = "Prometheus metrics namespace exposed by the service"
+  type        = string
+  default     = "whatsmeow_api"
+}
+
+variable "media_local_storage_path" {
+  description = "Filesystem path used for local media fallback storage"
+  type        = string
+  default     = "/tmp/whatsmeow/media"
+}
+
+variable "sentry_release" {
+  description = "Release identifier reported to Sentry"
+  type        = string
+  default     = "unknown"
+}
+
 variable "extra_environment" {
   description = "Additional environment variables for API container"
   type        = map(string)
@@ -129,6 +147,12 @@ variable "secret_key_mapping" {
   description = "Mapping of environment variable names to secret JSON keys"
   type        = map(string)
   default     = {}
+}
+
+variable "assign_public_ip" {
+  description = "Assign public IP to ECS tasks"
+  type        = bool
+  default     = false
 }
 
 variable "api_image" {

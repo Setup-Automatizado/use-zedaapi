@@ -292,9 +292,9 @@ jobs:
         id: health
         continue-on-error: true
         run: |
-          URL="${{ needs.deploy.outputs.service_url }}/healthz"
+          URL="${{ needs.deploy.outputs.service_url }}/health"
 
-          if [ "$URL" = "N/A/healthz" ]; then
+          if [ "$URL" = "N/A/health" ]; then
             echo "⚠️ Service URL not available, skipping health check"
             exit 0
           fi
