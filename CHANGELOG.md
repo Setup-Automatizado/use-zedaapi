@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.0.0-homolog.3](https://github.com/Funnelchat20/whatsapp-api-golang/compare/v2.0.0-homolog.2...v2.0.0-homolog.3) (2025-10-10)
+
+### ✨ Features
+
+* **terraform:** update S3 URL expiration and enhance media storage configuration ([4f7b2d3](https://github.com/Funnelchat20/whatsapp-api-golang/commit/4f7b2d33368a80c57c1812711efec302eb254f3d))
+
 ## [2.0.0-homolog.2](https://github.com/Funnelchat20/whatsapp-api-golang/compare/v2.0.0-homolog.1...v2.0.0-homolog.2) (2025-10-10)
 
 ### ✨ Features
