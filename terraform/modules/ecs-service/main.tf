@@ -45,15 +45,12 @@ locals {
     S3_ENDPOINT                    = local.s3_endpoint
     S3_USE_SSL                     = "true"
     S3_USE_PRESIGNED_URLS          = var.s3_use_presigned_urls ? "true" : "false"
-    S3_ACCESS_KEY                  = ""
-    S3_SECRET_KEY                  = ""
     S3_PUBLIC_BASE_URL             = ""
-    S3_URL_EXPIRATION              = "30d"
+    S3_URL_EXPIRATION              = "6d"
     S3_MEDIA_RETENTION             = "720h"
     S3_ACL                         = ""
-    MEDIA_LOCAL_STORAGE_PATH       = "/var/whatsmeow/media"
+    MEDIA_LOCAL_STORAGE_PATH       = var.media_local_storage_path
     MEDIA_LOCAL_URL_EXPIRY         = "720h"
-    MEDIA_LOCAL_SECRET_KEY         = ""
     MEDIA_LOCAL_PUBLIC_BASE_URL    = ""
     MEDIA_CLEANUP_INTERVAL         = "168h"
     MEDIA_CLEANUP_BATCH_SIZE       = tostring(200)

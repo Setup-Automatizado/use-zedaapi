@@ -19,6 +19,7 @@ db_instance_class        = "db.t4g.small"
 db_allocated_storage     = 10
 db_max_allocated_storage = 50
 db_multi_az              = false
+db_engine_version        = "16.8"
 db_backup_retention      = 3
 
 redis_engine_version          = "7.1"
@@ -29,13 +30,13 @@ redis_auth_token              = ""
 s3_bucket_name        = "homolog-whatsapp-api-media"
 s3_force_destroy      = true
 s3_use_presigned_urls = true
-s3_access_key         = ""
-s3_secret_key         = ""
-s3_public_base_url    = ""
+s3_access_key         = "AKIA4W5HKAR2XE36XHBI"
+s3_secret_key         = "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"
+s3_public_base_url    = "https://homolog-whatsapp-api-media.s3.us-east-1.amazonaws.com"
 
-media_local_secret_key      = ""
-media_local_public_base_url = ""
-redis_username              = ""
+media_local_secret_key      = "80c1f79d907334e75a0403fd79431006bfafdad0634594e13f8194bdb7711a3b"
+media_local_public_base_url = "http://homolog-whatsmeow-alb-1412624585.us-east-1.elb.amazonaws.com/media"
+redis_username              = "default"
 
 s3_lifecycle_rules = []
 

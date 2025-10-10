@@ -119,6 +119,12 @@ variable "redis_username" {
   default     = ""
 }
 
+variable "media_local_storage_path" {
+  description = "Path used by ECS task for local media fallback"
+  type        = string
+  default     = "/tmp/whatsmeow/media"
+}
+
 # --------------------------------------------------
 # Database (Amazon RDS for PostgreSQL)
 # --------------------------------------------------

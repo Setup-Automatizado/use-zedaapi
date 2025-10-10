@@ -7,14 +7,14 @@ availability_zones = ["us-east-1a", "us-east-1b"]
 enable_nat_gateway = true
 
 # Optional: uncomment when ACM certificate is issued in us-east-1
-# certificate_arn = "arn:aws:acm:us-east-1:ACCOUNT_ID:certificate/CERTIFICATE_ID"
+# certificate_arn = "arn:aws:acm:us-east-1:AKIA4W5HKAR23AI5S6VZ:certificate/CERTIFICATE_ID"
 
-api_image       = "ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/whatsapp-api:staging"
+api_image       = "873839854709.dkr.ecr.us-east-1.amazonaws.com/whatsapp-api:staging"
 app_environment = "staging"
 log_level       = "info"
 
 db_user     = "whatsmeow"
-db_password = "CHANGE_ME_STAGING_DB_PASSWORD"
+db_password = "joXuRHCec93TsM1X"
 
 db_instance_class        = "db.t4g.medium"
 db_allocated_storage     = 20
@@ -24,14 +24,14 @@ db_multi_az              = false
 redis_engine_version          = "7.1"
 redis_node_type               = "cache.t4g.small"
 redis_replicas_per_node_group = 1
-redis_auth_token              = "CHANGE_ME_STAGING_REDIS_TOKEN"
+redis_auth_token              = "joXuRHCec93TsM1X"
 
 s3_bucket_name        = "staging-whatsapp-api-media"
 s3_force_destroy      = false
 s3_use_presigned_urls = true
-s3_access_key         = ""
-s3_secret_key         = ""
-s3_public_base_url    = ""
+s3_access_key         = "AKIA4W5HKAR2XE36XHBI"
+s3_secret_key         = "c1Mj/fsvMHKhF07y4cQ/aWJqJKOgtHAceK9pY9eh"
+s3_public_base_url    = "https://staging-whatsapp-api-media.s3.us-east-1.amazonaws.com"
 
 # Example lifecycle rule; adjust or remove as needed
 s3_lifecycle_rules = [
@@ -49,7 +49,7 @@ s3_lifecycle_rules = [
 ]
 
 additional_secret_values = {
-  partner_auth_token = "CHANGE_ME_STAGING_PARTNER_TOKEN"
+  partner_auth_token = "80c1f79d907334e75a0403fd79431006bfafdad0634594e13f8194bdb7711a3b"
   sentry_dsn         = "https://CHANGE_ME_STAGING_SENTRY_DSN"
 }
 
@@ -78,6 +78,6 @@ extra_environment = {
   PROMETHEUS_ENABLED = "true"
 }
 
-media_local_secret_key      = ""
-media_local_public_base_url = ""
-redis_username              = ""
+media_local_secret_key      = "80c1f79d907334e75a0403fd79431006bfafdad0634594e13f8194bdb7711a3b"
+media_local_public_base_url = "http://staging-whatsmeow-alb-1412624585.us-east-1.elb.amazonaws.com"
+redis_username              = "default"

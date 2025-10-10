@@ -125,6 +125,12 @@ variable "prometheus_namespace" {
   default     = "whatsmeow_api"
 }
 
+variable "media_local_storage_path" {
+  description = "Filesystem path used for local media fallback storage"
+  type        = string
+  default     = "/tmp/whatsmeow/media"
+}
+
 variable "sentry_release" {
   description = "Release identifier reported to Sentry"
   type        = string

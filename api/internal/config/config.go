@@ -228,7 +228,7 @@ func Load() (Config, error) {
 		PublicBaseURL:    os.Getenv("S3_PUBLIC_BASE_URL"),
 		ACL:              getEnv("S3_ACL", ""),
 	}
-	expiry, err := parseDuration(getEnv("S3_URL_EXPIRATION", "30d"))
+	expiry, err := parseDuration(getEnv("S3_URL_EXPIRATION", "6d"))
 	if err != nil {
 		return cfg, fmt.Errorf("invalid S3_URL_EXPIRATION: %w", err)
 	}

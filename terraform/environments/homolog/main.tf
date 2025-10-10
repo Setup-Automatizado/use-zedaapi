@@ -206,6 +206,7 @@ module "ecs_service" {
   log_level                 = var.log_level
   prometheus_namespace      = var.prometheus_namespace
   sentry_release            = var.sentry_release
+  media_local_storage_path  = var.media_local_storage_path
   extra_environment = merge(
     var.extra_environment,
     {
