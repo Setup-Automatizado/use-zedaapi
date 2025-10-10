@@ -2,7 +2,10 @@ package docs
 
 import (
 	_ "embed"
+	"encoding/json"
+	"fmt"
 	"net/http"
+	"strings"
 	"sync"
 
 	"sigs.k8s.io/yaml"
@@ -19,6 +22,62 @@ var (
 	specJSON []byte
 	jsonErr  error
 )
+
+type OpenAPISpec struct {
+	OpenAPI    string                 `json:"openapi" yaml:"openapi"`
+	Info       map[string]interface{} `json:"info" yaml:"info"`
+	Servers    []Server               `json:"servers" yaml:"servers"`
+	Paths      map[string]interface{} `json:"paths" yaml:"paths"`
+	Components map[string]interface{} `json:"components" yaml:"components"`
+}
+
+type Server struct {
+	URL         string `json:"url" yaml:"url"`
+	Description string `json:"description" yaml:"description"`
+}
+
+type Config struct {
+	BaseURL string
+}
+
+func generateServers(baseURL string) []Server {
+	servers := []Server{}
+
+	servers = append(servers, Server{
+		URL:         baseURL,
+		Description: "API Server",
+	})
+
+	if !strings.Contains(baseURL, "localhost") && !strings.Contains(baseURL, "127.0.0.1") {
+		servers = append(servers, Server{
+			URL:         "http://localhost:8080",
+			Description: "Local development",
+		})
+	}
+
+	return servers
+}
+
+func generateDynamicSpec(baseURL string) ([]byte, []byte, error) {
+	var spec OpenAPISpec
+	if err := yaml.Unmarshal(specYAML, &spec); err != nil {
+		return nil, nil, fmt.Errorf("failed to parse base spec: %w", err)
+	}
+
+	spec.Servers = generateServers(baseURL)
+
+	yamlBytes, err := yaml.Marshal(spec)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to marshal YAML: %w", err)
+	}
+
+	jsonBytes, err := json.Marshal(spec)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to marshal JSON: %w", err)
+	}
+
+	return yamlBytes, jsonBytes, nil
+}
 
 const swaggerUIHTML = `<!DOCTYPE html>
 <html lang="en">
@@ -46,7 +105,63 @@ const swaggerUIHTML = `<!DOCTYPE html>
   </body>
 </html>`
 
-func YAMLHandler() http.Handler {
+func YAMLHandler(cfg Config) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		baseURL := cfg.BaseURL
+		if baseURL == "" {
+			scheme := "http"
+			if r.TLS != nil || r.Header.Get("X-Forwarded-Proto") == "https" {
+				scheme = "https"
+			}
+			host := r.Host
+			baseURL = fmt.Sprintf("%s://%s", scheme, host)
+		}
+
+		yamlBytes, _, err := generateDynamicSpec(baseURL)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("failed to generate spec: %v", err), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/yaml")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write(yamlBytes)
+	})
+}
+
+func JSONHandler(cfg Config) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		baseURL := cfg.BaseURL
+		if baseURL == "" {
+			scheme := "http"
+			if r.TLS != nil || r.Header.Get("X-Forwarded-Proto") == "https" {
+				scheme = "https"
+			}
+			host := r.Host
+			baseURL = fmt.Sprintf("%s://%s", scheme, host)
+		}
+
+		_, jsonBytes, err := generateDynamicSpec(baseURL)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("failed to generate spec: %v", err), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write(jsonBytes)
+	})
+}
+
+func UIHandler() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(swaggerUIHTML))
+	})
+}
+
+func LegacyYAMLHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/yaml")
 		w.WriteHeader(http.StatusOK)
@@ -54,7 +169,7 @@ func YAMLHandler() http.Handler {
 	})
 }
 
-func JSONHandler() http.Handler {
+func LegacyJSONHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		jsonOnce.Do(func() {
 			if len(specJSONRaw) > 0 {
@@ -70,13 +185,5 @@ func JSONHandler() http.Handler {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write(specJSON)
-	})
-}
-
-func UIHandler() http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte(swaggerUIHTML))
 	})
 }

@@ -113,6 +113,12 @@ variable "media_local_public_base_url" {
   default     = ""
 }
 
+variable "api_base_url" {
+  description = "Base URL for the API (used for OpenAPI documentation servers)"
+  type        = string
+  default     = ""
+}
+
 variable "redis_username" {
   description = "Redis username when ACLs are enabled"
   type        = string

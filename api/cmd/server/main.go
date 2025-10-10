@@ -14,6 +14,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/prometheus/client_golang/prometheus"
 
+	"go.mau.fi/whatsmeow/api/docs"
 	"go.mau.fi/whatsmeow/api/internal/config"
 	"go.mau.fi/whatsmeow/api/internal/database"
 	"go.mau.fi/whatsmeow/api/internal/events"
@@ -371,6 +372,7 @@ func main() {
 		HealthHandler:   healthHandler,
 		MediaHandler:    mediaHTTPHandler,
 		PartnerToken:    cfg.Partner.AuthToken,
+		DocsConfig:      docs.Config{BaseURL: cfg.HTTP.BaseURL},
 	})
 
 	server := apihandler.NewServer(

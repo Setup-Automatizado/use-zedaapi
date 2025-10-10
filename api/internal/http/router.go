@@ -26,6 +26,7 @@ type RouterDeps struct {
 	HealthHandler   *handlers.HealthHandler
 	MediaHandler    *handlers.MediaHandler
 	PartnerToken    string
+	DocsConfig      docs.Config
 }
 
 func NewRouter(deps RouterDeps) http.Handler {
@@ -59,10 +60,10 @@ func NewRouter(deps RouterDeps) http.Handler {
 			docs.UIHandler().ServeHTTP(w, req)
 		})
 		dr.Get("/openapi.yaml", func(w http.ResponseWriter, req *http.Request) {
-			docs.YAMLHandler().ServeHTTP(w, req)
+			docs.YAMLHandler(deps.DocsConfig).ServeHTTP(w, req)
 		})
 		dr.Get("/openapi.json", func(w http.ResponseWriter, req *http.Request) {
-			docs.JSONHandler().ServeHTTP(w, req)
+			docs.JSONHandler(deps.DocsConfig).ServeHTTP(w, req)
 		})
 	})
 

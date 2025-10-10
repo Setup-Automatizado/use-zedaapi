@@ -27,6 +27,7 @@ redis_auth_token              = ""
 s3_bucket_name        = "whatsapp-api-production-media"
 s3_force_destroy      = false
 s3_use_presigned_urls = true
+api_base_url          = "http://your-alb-endpoint.us-east-1.elb.amazonaws.com"
 
 # additional_secret_values = {
 #   partner_auth_token = "super-secret"

@@ -32,6 +32,7 @@ s3_use_presigned_urls = true
 s3_access_key         = "AKIA4W5HKAR2XE36XHBI"
 s3_secret_key         = "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"
 s3_public_base_url    = "https://staging-whatsapp-api-media.s3.us-east-1.amazonaws.com"
+api_base_url          = "http://staging-whatsmeow-alb-1412624585.us-east-1.elb.amazonaws.com"
 
 # Example lifecycle rule; adjust or remove as needed
 s3_lifecycle_rules = [

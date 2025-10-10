@@ -233,6 +233,7 @@ module "ecs_service" {
       REDIS_USERNAME              = var.redis_username
     }
   )
+  api_base_url       = var.api_base_url
   secret_key_mapping = var.secret_env_mapping
 
   tags = local.common_tags

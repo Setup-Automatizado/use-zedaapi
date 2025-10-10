@@ -107,6 +107,12 @@ variable "s3_use_presigned_urls" {
   default     = true
 }
 
+variable "api_base_url" {
+  description = "Base URL for the API (used for OpenAPI documentation servers)"
+  type        = string
+  default     = ""
+}
+
 variable "app_environment" {
   description = "Application environment value"
   type        = string

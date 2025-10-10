@@ -13,6 +13,7 @@ type Config struct {
 
 	HTTP struct {
 		Addr              string
+		BaseURL           string
 		ReadHeaderTimeout time.Duration
 		ReadTimeout       time.Duration
 		WriteTimeout      time.Duration
@@ -152,6 +153,7 @@ func Load() (Config, error) {
 
 	cfg.HTTP = struct {
 		Addr              string
+		BaseURL           string
 		ReadHeaderTimeout time.Duration
 		ReadTimeout       time.Duration
 		WriteTimeout      time.Duration
@@ -159,6 +161,7 @@ func Load() (Config, error) {
 		MaxHeaderBytes    int
 	}{
 		Addr:              getEnv("HTTP_ADDR", "0.0.0.0:8080"),
+		BaseURL:           getEnv("API_BASE_URL", "http://localhost:8080"),
 		ReadHeaderTimeout: httpReadHeaderTimeout,
 		ReadTimeout:       httpReadTimeout,
 		WriteTimeout:      httpWriteTimeout,

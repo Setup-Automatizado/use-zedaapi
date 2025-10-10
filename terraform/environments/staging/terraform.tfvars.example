@@ -26,6 +26,7 @@ redis_auth_token = ""
 s3_bucket_name        = "whatsapp-api-staging-media"
 s3_force_destroy      = false
 s3_use_presigned_urls = true
+api_base_url          = "http://your-alb-endpoint.us-east-1.elb.amazonaws.com"
 
 # Example lifecycle rule: archive media after 90 days
 # s3_lifecycle_rules = [

@@ -23,6 +23,7 @@ locals {
     GIN_MODE                       = local.gin_mode
     AWS_REGION                     = var.aws_region
     HTTP_ADDR                      = "0.0.0.0:8080"
+    API_BASE_URL                   = var.api_base_url
     HTTP_READ_HEADER_TIMEOUT       = "5s"
     HTTP_READ_TIMEOUT              = "15s"
     HTTP_WRITE_TIMEOUT             = "30s"

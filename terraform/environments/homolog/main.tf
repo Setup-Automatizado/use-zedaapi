@@ -215,6 +215,7 @@ module "ecs_service" {
       REDIS_USERNAME              = var.redis_username
     }
   )
+  api_base_url       = var.api_base_url
   secret_key_mapping = var.secret_env_mapping
   assign_public_ip   = true
 
