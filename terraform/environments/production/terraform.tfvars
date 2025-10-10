@@ -31,6 +31,9 @@ redis_auth_token              = "CHANGE_ME_PRODUCTION_REDIS_TOKEN"
 s3_bucket_name        = "production-whatsapp-api-media"
 s3_force_destroy      = false
 s3_use_presigned_urls = true
+s3_access_key         = ""
+s3_secret_key         = ""
+s3_public_base_url    = ""
 
 s3_lifecycle_rules = [
   {
@@ -56,8 +59,11 @@ additional_secret_values = {
 }
 
 secret_env_mapping = {
-  PARTNER_AUTH_TOKEN = "partner_auth_token"
-  SENTRY_DSN         = "sentry_dsn"
+  PARTNER_AUTH_TOKEN     = "partner_auth_token"
+  SENTRY_DSN             = "sentry_dsn"
+  S3_ACCESS_KEY          = "s3_access_key"
+  S3_SECRET_KEY          = "s3_secret_key"
+  MEDIA_LOCAL_SECRET_KEY = "media_local_secret_key"
 }
 
 secret_recovery_window = 14
@@ -67,13 +73,17 @@ task_memory            = 4096
 desired_count          = 2
 enable_execute_command = false
 
-enable_autoscaling         = true
-autoscaling_min_capacity   = 2
-autoscaling_max_capacity   = 6
-autoscaling_cpu_target     = 60
-autoscaling_memory_target  = 70
+enable_autoscaling        = true
+autoscaling_min_capacity  = 2
+autoscaling_max_capacity  = 6
+autoscaling_cpu_target    = 60
+autoscaling_memory_target = 70
 
 extra_environment = {
   PROMETHEUS_ENABLED = "true"
   GIN_MODE           = "release"
 }
+
+media_local_secret_key      = ""
+media_local_public_base_url = ""
+redis_username              = ""

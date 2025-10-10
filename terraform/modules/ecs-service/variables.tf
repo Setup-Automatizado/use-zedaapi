@@ -119,6 +119,18 @@ variable "log_level" {
   default     = "info"
 }
 
+variable "prometheus_namespace" {
+  description = "Prometheus metrics namespace exposed by the service"
+  type        = string
+  default     = "whatsmeow_api"
+}
+
+variable "sentry_release" {
+  description = "Release identifier reported to Sentry"
+  type        = string
+  default     = "unknown"
+}
+
 variable "extra_environment" {
   description = "Additional environment variables for API container"
   type        = map(string)

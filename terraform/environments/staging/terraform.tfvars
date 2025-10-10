@@ -29,6 +29,9 @@ redis_auth_token              = "CHANGE_ME_STAGING_REDIS_TOKEN"
 s3_bucket_name        = "staging-whatsapp-api-media"
 s3_force_destroy      = false
 s3_use_presigned_urls = true
+s3_access_key         = ""
+s3_secret_key         = ""
+s3_public_base_url    = ""
 
 # Example lifecycle rule; adjust or remove as needed
 s3_lifecycle_rules = [
@@ -51,8 +54,11 @@ additional_secret_values = {
 }
 
 secret_env_mapping = {
-  PARTNER_AUTH_TOKEN = "partner_auth_token"
-  SENTRY_DSN         = "sentry_dsn"
+  PARTNER_AUTH_TOKEN     = "partner_auth_token"
+  SENTRY_DSN             = "sentry_dsn"
+  S3_ACCESS_KEY          = "s3_access_key"
+  S3_SECRET_KEY          = "s3_secret_key"
+  MEDIA_LOCAL_SECRET_KEY = "media_local_secret_key"
 }
 
 secret_recovery_window = 7
@@ -62,12 +68,16 @@ task_memory            = 2048
 desired_count          = 1
 enable_execute_command = true
 
-enable_autoscaling         = true
-autoscaling_min_capacity   = 1
-autoscaling_max_capacity   = 5
-autoscaling_cpu_target     = 70
-autoscaling_memory_target  = 80
+enable_autoscaling        = true
+autoscaling_min_capacity  = 1
+autoscaling_max_capacity  = 5
+autoscaling_cpu_target    = 70
+autoscaling_memory_target = 80
 
 extra_environment = {
   PROMETHEUS_ENABLED = "true"
 }
+
+media_local_secret_key      = ""
+media_local_public_base_url = ""
+redis_username              = ""

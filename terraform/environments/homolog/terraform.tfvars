@@ -29,6 +29,13 @@ redis_auth_token              = ""
 s3_bucket_name        = "homolog-whatsapp-api-media"
 s3_force_destroy      = true
 s3_use_presigned_urls = true
+s3_access_key         = ""
+s3_secret_key         = ""
+s3_public_base_url    = ""
+
+media_local_secret_key      = ""
+media_local_public_base_url = ""
+redis_username              = ""
 
 s3_lifecycle_rules = []
 
@@ -37,7 +44,10 @@ additional_secret_values = {
 }
 
 secret_env_mapping = {
-  PARTNER_AUTH_TOKEN = "partner_auth_token"
+  PARTNER_AUTH_TOKEN     = "partner_auth_token"
+  S3_ACCESS_KEY          = "s3_access_key"
+  S3_SECRET_KEY          = "s3_secret_key"
+  MEDIA_LOCAL_SECRET_KEY = "media_local_secret_key"
 }
 
 secret_recovery_window = 7
@@ -47,11 +57,11 @@ task_memory            = 1024
 desired_count          = 1
 enable_execute_command = true
 
-enable_autoscaling         = false
-autoscaling_min_capacity   = 1
-autoscaling_max_capacity   = 2
-autoscaling_cpu_target     = 75
-autoscaling_memory_target  = 85
+enable_autoscaling        = false
+autoscaling_min_capacity  = 1
+autoscaling_max_capacity  = 2
+autoscaling_cpu_target    = 75
+autoscaling_memory_target = 85
 
 extra_environment = {
   LOG_LEVEL = "debug"
