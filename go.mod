@@ -2,7 +2,7 @@ module go.mau.fi/whatsmeow
 
 go 1.24.0
 
-toolchain go1.25.1
+toolchain go1.25.3
 
 require (
 	github.com/PuerkitoBio/goquery v1.10.3
@@ -12,11 +12,11 @@ require (
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.19.11
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.88.3
 	github.com/beeper/argo-go v1.1.2
+	github.com/coder/websocket v1.8.14
 	github.com/gen2brain/go-fitz v1.24.15
 	github.com/getsentry/sentry-go v0.35.3
 	github.com/go-chi/chi/v5 v5.2.3
 	github.com/google/uuid v1.6.0
-	github.com/gorilla/websocket v1.5.0
 	github.com/jackc/pgx/v5 v5.7.6
 	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9
@@ -25,11 +25,11 @@ require (
 	github.com/redis/go-redis/v9 v9.14.0
 	github.com/rs/zerolog v1.34.0
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
-	go.mau.fi/libsignal v0.2.1-0.20251004173110-6e0a3f2435ed
-	go.mau.fi/util v0.9.2-0.20251005111801-c13b66219cee
-	golang.org/x/crypto v0.42.0
+	go.mau.fi/libsignal v0.2.1
+	go.mau.fi/util v0.9.2
+	golang.org/x/crypto v0.43.0
 	golang.org/x/image v0.32.0
-	golang.org/x/net v0.44.0
+	golang.org/x/net v0.46.0
 	google.golang.org/protobuf v1.36.10
 	sigs.k8s.io/yaml v1.6.0
 )
@@ -67,8 +67,8 @@ require (
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	github.com/vektah/gqlparser/v2 v2.5.27 // indirect
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
-	golang.org/x/exp v0.0.0-20250911091902-df9299821621 // indirect
+	golang.org/x/exp v0.0.0-20251009144603-d2f985daa21b // indirect
 	golang.org/x/sync v0.17.0 // indirect
-	golang.org/x/sys v0.36.0 // indirect
+	golang.org/x/sys v0.37.0 // indirect
 	golang.org/x/text v0.30.0 // indirect
 )
