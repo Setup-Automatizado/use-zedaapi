@@ -3,6 +3,8 @@
 
 Esses retornos devem ser modularizados porque o que vem da Whatsmeow vem totalmente diferentes e vamos precisar transformar nesses abaixo:
 
+> **Normalização de JIDs:** Todos os campos `phone`, `participantPhone`, `participant` (em presenças) e metadados correlatos agora tentam resolver o número real (MSISDN) antes de cair para o `@lid`. Quando o número não puder ser resolvido, o comportamento anterior é preservado e o LID continua disponível via `chatLid`/`participantLid`.
+
 Nossos webhooks#
 Delivery#
 Responsavel por avisar você que sua mensagem foi entregue ao WhatsApp, mas isso não significa necessáriamente que seu contato a recebeu, para informações de recebimento e leitura você vai precisar observar o webhook de status.
@@ -1272,6 +1274,127 @@ Exemplo de solicitação de entrada em grupo adicionado por um participante#
   "callId": null,
   "code": null,
   "requestMethod": "non_admin_add"
+}
+Exemplo de participante promovido a admin em um grupo#
+{
+  "isGroup": true,
+  "isNewsletter": false,
+  "instanceId": "A20DA9C0183A2D35A260F53F5D2B9244",
+  "messageId": "A20DA9C0183A2D35A260F53F5D2B9244",
+  "phone": "5544999999999-group",
+  "connectedPhone": "5544999999999",
+  "fromMe": false,
+  "momment": 1682017970000,
+  "expiresAt": null,
+  "status": "RECEIVED",
+  "chatName": "name",
+  "senderPhoto": "https://",
+  "senderName": "name",
+  "photo": null,
+  "broadcast": false,
+  "participantPhone": "5544999999999",
+  "participantLid": null,
+  "referenceMessageId": null,
+  "externalAdReply": null,
+  "forwarded": false,
+  "type": "ReceivedCallback",
+  "notification": "GROUP_PARTICIPANT_PROMOTE",
+  "notificationParameters": [
+      "5544999999999"
+  ],
+  "callId": null,
+  "code": null
+}
+Exemplo de participante rebaixado de admin em um grupo#
+{
+  "isGroup": true,
+  "isNewsletter": false,
+  "instanceId": "A20DA9C0183A2D35A260F53F5D2B9244",
+  "messageId": "A20DA9C0183A2D35A260F53F5D2B9244",
+  "phone": "5544999999999-group",
+  "connectedPhone": "5544999999999",
+  "fromMe": false,
+  "momment": 1682017970000,
+  "expiresAt": null,
+  "status": "RECEIVED",
+  "chatName": "name",
+  "senderPhoto": "https://",
+  "senderName": "name",
+  "photo": null,
+  "broadcast": false,
+  "participantPhone": "5544777777777",
+  "participantLid": null,
+  "referenceMessageId": null,
+  "externalAdReply": null,
+  "forwarded": false,
+  "type": "ReceivedCallback",
+  "notification": "GROUP_PARTICIPANT_DEMOTE",
+  "notificationParameters": [
+      "5544777777777"
+  ],
+  "callId": null,
+  "code": null
+}
+Exemplo de entrada do dispositivo em um grupo (group_joined)#
+{
+  "isGroup": true,
+  "isNewsletter": false,
+  "instanceId": "A20DA9C0183A2D35A260F53F5D2B9244",
+  "messageId": "A20DA9C0183A2D35A260F53F5D2B9244",
+  "phone": "5544999999999-group",
+  "connectedPhone": "5544999999999",
+  "fromMe": false,
+  "momment": 1682017970000,
+  "expiresAt": null,
+  "status": "RECEIVED",
+  "chatName": "name",
+  "senderPhoto": "https://",
+  "senderName": "name",
+  "photo": null,
+  "broadcast": false,
+  "participantPhone": "5544888888888",
+  "participantLid": null,
+  "referenceMessageId": null,
+  "externalAdReply": null,
+  "forwarded": false,
+  "type": "ReceivedCallback",
+  "notification": "GROUP_PARTICIPANT_ADD",
+  "notificationParameters": [
+      "5544888888888"
+  ],
+  "callId": null,
+  "code": null,
+  "requestMethod": "invite_link"
+}
+Exemplo de grupo excluído#
+{
+  "isGroup": true,
+  "isNewsletter": false,
+  "instanceId": "A20DA9C0183A2D35A260F53F5D2B9244",
+  "messageId": "A20DA9C0183A2D35A260F53F5D2B9244",
+  "phone": "5544999999999-group",
+  "connectedPhone": "5544999999999",
+  "fromMe": false,
+  "momment": 1682017970000,
+  "expiresAt": null,
+  "status": "RECEIVED",
+  "chatName": "name",
+  "senderPhoto": "https://",
+  "senderName": "name",
+  "photo": null,
+  "broadcast": false,
+  "participantPhone": null,
+  "participantLid": null,
+  "referenceMessageId": null,
+  "externalAdReply": null,
+  "forwarded": false,
+  "type": "ReceivedCallback",
+  "notification": "GROUP_DELETE",
+  "notificationParameters": [
+      "deleted_by_admin"
+  ],
+  "callId": null,
+  "code": null
 }
 Exemplo de admin promovido a um canal#
 {
