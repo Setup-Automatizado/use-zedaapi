@@ -14,6 +14,7 @@ import (
 	"time"
 
 	eventctx "go.mau.fi/whatsmeow/api/internal/events/eventctx"
+	"go.mau.fi/whatsmeow/api/internal/events/pollstore"
 	"go.mau.fi/whatsmeow/api/internal/events/transform"
 	"go.mau.fi/whatsmeow/api/internal/events/types"
 	"go.mau.fi/whatsmeow/api/internal/logging"
@@ -27,13 +28,15 @@ type Transformer struct {
 	connectedPhone string
 	debugRaw       bool
 	dumpDir        string
+	pollStore      pollstore.Store
 }
 
-func NewTransformer(connectedPhone string, debug bool, dumpDir string) *Transformer {
+func NewTransformer(connectedPhone string, debug bool, dumpDir string, store pollstore.Store) *Transformer {
 	return &Transformer{
 		connectedPhone: connectedPhone,
 		debugRaw:       debug,
 		dumpDir:        strings.TrimSpace(dumpDir),
+		pollStore:      store,
 	}
 }
 
@@ -41,10 +44,13 @@ func (t *Transformer) TargetSchema() string {
 	return "zapi"
 }
 
-// TODO: Adicionar novos eventos
 func (t *Transformer) SupportsEventType(eventType string) bool {
 	switch eventType {
-	case "message", "receipt", "chat_presence", "presence", "connected", "disconnected", "undecryptable":
+	case "message", "receipt", "chat_presence", "presence", "connected", "disconnected", "undecryptable", "group_info", "picture",
+		"call_offer", "call_offer_notice", "call_transport", "call_relay_latency", "call_terminate", "call_reject",
+		"group_joined",
+		"newsletter_join", "newsletter_leave", "newsletter_mute_change", "newsletter_live_update",
+		"push_name", "business_name", "user_about":
 		return true
 	default:
 		return false
@@ -76,6 +82,20 @@ func (t *Transformer) Transform(ctx context.Context, event *types.InternalEvent)
 		result, err = t.transformDisconnected(ctx, logger, event)
 	case "undecryptable":
 		result, err = t.transformUndecryptable(ctx, logger, event)
+	case "group_info":
+		result, err = t.transformGroupInfoEvent(ctx, logger, event)
+	case "group_joined":
+		result, err = t.transformGroupJoinedEvent(ctx, logger, event)
+	case "picture":
+		result, err = t.transformPictureEvent(ctx, logger, event)
+	case "call_offer", "call_offer_notice", "call_transport", "call_relay_latency", "call_terminate", "call_reject":
+		result, err = t.transformCallEvent(ctx, logger, event)
+	case "newsletter_join", "newsletter_leave", "newsletter_mute_change":
+		result, err = t.transformNewsletterAdminEvent(ctx, logger, event)
+	case "newsletter_live_update":
+		result, err = t.transformNewsletterLiveUpdateEvent(ctx, logger, event)
+	case "push_name", "business_name", "user_about":
+		result, err = t.transformProfileEvent(ctx, logger, event)
 	default:
 		logger.Debug("unsupported event type for Z-API transformation")
 		return nil, transform.ErrUnsupportedEvent
@@ -372,10 +392,16 @@ func (t *Transformer) transformMessage(ctx context.Context, logger *slog.Logger,
 
 	if msgEvent.SourceWebMsg != nil {
 		if stub := msgEvent.SourceWebMsg.GetMessageStubType(); stub != waWeb.WebMessageInfo_UNKNOWN {
-			callback.Notification = stub.String()
-		}
-		if params := msgEvent.SourceWebMsg.GetMessageStubParameters(); len(params) > 0 {
-			callback.NotificationParameters = append([]string(nil), params...)
+			rawParams := msgEvent.SourceWebMsg.GetMessageStubParameters()
+			name, params, reqMethod := mapMessageStubToZAPINotification(stub, rawParams)
+			callback.Notification = name
+			handled := applyGroupUpdateStub(callback, stub, rawParams)
+			if !handled && len(params) > 0 {
+				callback.NotificationParameters = params
+			}
+			if reqMethod != "" && callback.RequestMethod == "" {
+				callback.RequestMethod = reqMethod
+			}
 		}
 	}
 
@@ -412,7 +438,7 @@ func (t *Transformer) transformMessage(ctx context.Context, logger *slog.Logger,
 		callback.IsGroup = false
 	}
 
-	if err := t.extractMessageContent(msgEvent.Message, callback, event); err != nil {
+	if err := t.extractMessageContent(ctx, logger, msgEvent.Message, callback, event); err != nil {
 		kinds := messagePayloadKinds(msgEvent.Message)
 		logger.WarnContext(ctx, "unsupported message content type",
 			slog.String("message_id", callback.MessageID),
@@ -427,6 +453,631 @@ func (t *Transformer) transformMessage(ctx context.Context, logger *slog.Logger,
 	}
 
 	return callback, nil
+}
+
+func (t *Transformer) transformGroupInfoEvent(ctx context.Context, logger *slog.Logger, event *types.InternalEvent) (*ReceivedCallback, error) {
+	info, ok := event.RawPayload.(*events.GroupInfo)
+	if !ok {
+		return nil, fmt.Errorf("invalid group info payload type")
+	}
+
+	notification, participants := deriveGroupInfoNotification(info)
+
+	groupPhone := conversationIdentifierFromJID(info.JID)
+	if groupPhone == "" {
+		if fallback := sanitizeConversationFallback(event.Metadata["group_id"]); fallback != "" {
+			groupPhone = fallback
+		} else {
+			groupPhone = info.JID.String()
+		}
+	}
+
+	callback := &ReceivedCallback{
+		Type:           "ReceivedCallback",
+		InstanceID:     event.InstanceID.String(),
+		MessageID:      event.EventID.String(),
+		Phone:          groupPhone,
+		FromMe:         false,
+		IsGroup:        true,
+		ConnectedPhone: t.connectedPhone,
+		Momment:        eventTimestampMillis(event),
+		Status:         "RECEIVED",
+	}
+
+	provider := eventctx.ContactProvider(ctx)
+	if provider != nil {
+		if name := provider.ContactName(ctx, info.JID); name != "" {
+			callback.ChatName = name
+		}
+		if photo := provider.ContactPhoto(ctx, info.JID); photo != "" {
+			callback.Photo = photo
+		}
+		if info.Sender != nil {
+			if senderName := provider.ContactName(ctx, *info.Sender); senderName != "" {
+				callback.SenderName = senderName
+			}
+			if senderPhoto := provider.ContactPhoto(ctx, *info.Sender); senderPhoto != "" {
+				callback.SenderPhoto = senderPhoto
+			}
+		}
+	}
+
+	if callback.ChatName == "" && info.Name != nil {
+		if trimmed := strings.TrimSpace(info.Name.Name); trimmed != "" {
+			callback.ChatName = trimmed
+		}
+	}
+	if callback.SenderName == "" && info.Notify != "" {
+		callback.SenderName = info.Notify
+	}
+	if info.Sender != nil && info.Sender.Server == watypes.HiddenUserServer {
+		if normalized := normalizeLID(info.Sender.String()); normalized != "" {
+			callback.SenderLid = normalized
+		} else {
+			callback.SenderLid = info.Sender.String()
+		}
+	}
+
+	if notification != "" {
+		callback.Notification = notification
+		callback.NotificationParameters = buildGroupNotificationParameters(participants)
+		if len(callback.NotificationParameters) == 0 {
+			logger.DebugContext(ctx, "group info event missing participant identifiers",
+				slog.String("event_id", event.EventID.String()),
+				slog.String("group_id", info.JID.String()),
+			)
+			return nil, transform.ErrUnsupportedEvent
+		}
+
+		first := participants[0]
+		if phone := participantPhoneFromJID(first); phone != "" {
+			callback.ParticipantPhone = phone
+		}
+		if lid := participantLIDFromJID(first); lid != "" {
+			callback.ParticipantLid = lid
+		}
+		if callback.ParticipantPhone == "" {
+			if phone := firstParticipantPhoneFromMetadata(event.Metadata, participantPNMetadataKey(callback.Notification)); phone != "" {
+				callback.ParticipantPhone = phone
+			}
+		}
+		if reqMethod := resolveGroupRequestMethod(callback.Notification, info); reqMethod != "" {
+			callback.RequestMethod = reqMethod
+		}
+
+		logger.InfoContext(ctx, "transformed group info notification",
+			slog.String("event_id", event.EventID.String()),
+			slog.String("group_id", info.JID.String()),
+			slog.String("notification", callback.Notification),
+			slog.Int("participant_count", len(callback.NotificationParameters)),
+		)
+
+		return callback, nil
+	}
+
+	if meta := deriveGroupMetadataNotification(info); meta != nil {
+		callback.Notification = meta.Name
+		callback.NotificationParameters = meta.Params
+		if meta.Code != "" {
+			callback.Code = meta.Code
+		}
+		if meta.ChatName != "" && callback.ChatName == "" {
+			callback.ChatName = meta.ChatName
+		}
+		logger.InfoContext(ctx, "transformed group metadata notification",
+			slog.String("event_id", event.EventID.String()),
+			slog.String("group_id", info.JID.String()),
+			slog.String("notification", callback.Notification),
+		)
+		return callback, nil
+	}
+
+	logger.DebugContext(ctx, "group info event ignored",
+		slog.String("event_id", event.EventID.String()),
+		slog.String("group_id", info.JID.String()),
+	)
+	return nil, transform.ErrUnsupportedEvent
+}
+
+func deriveGroupInfoNotification(info *events.GroupInfo) (string, []watypes.JID) {
+	if info == nil {
+		return "", nil
+	}
+	if len(info.MembershipRequestsCreated) > 0 {
+		return "MEMBERSHIP_APPROVAL_REQUEST", info.MembershipRequestsCreated
+	}
+	if len(info.MembershipRequestsRevoked) > 0 {
+		return "REVOKED_MEMBERSHIP_REQUESTS", info.MembershipRequestsRevoked
+	}
+	if len(info.Join) > 0 {
+		notification := "GROUP_PARTICIPANT_ADD"
+		if strings.EqualFold(strings.TrimSpace(info.Notify), "invite") || strings.EqualFold(strings.TrimSpace(info.JoinReason), "invite") {
+			notification = "GROUP_PARTICIPANT_INVITE"
+		}
+		return notification, info.Join
+	}
+	if len(info.Leave) > 0 {
+		return "GROUP_PARTICIPANT_LEAVE", info.Leave
+	}
+	if len(info.Promote) > 0 {
+		return "GROUP_PARTICIPANT_PROMOTE", info.Promote
+	}
+	if len(info.Demote) > 0 {
+		return "GROUP_PARTICIPANT_DEMOTE", info.Demote
+	}
+	return "", nil
+}
+
+func buildGroupNotificationParameters(participants []watypes.JID) []string {
+	if len(participants) == 0 {
+		return nil
+	}
+	params := make([]string, 0, len(participants))
+	for _, jid := range participants {
+		if jid.IsEmpty() {
+			continue
+		}
+		if value := conversationIdentifierFromJID(jid); value != "" {
+			params = append(params, value)
+		}
+	}
+	return params
+}
+
+type groupMetadataNotification struct {
+	Name     string
+	Params   []string
+	Code     string
+	ChatName string
+}
+
+func deriveGroupMetadataNotification(info *events.GroupInfo) *groupMetadataNotification {
+	if info == nil {
+		return nil
+	}
+
+	if info.Delete != nil {
+		params := []string{}
+		if reason := strings.TrimSpace(info.Delete.DeleteReason); reason != "" {
+			params = append(params, reason)
+		}
+		if info.Delete.Deleted {
+			return &groupMetadataNotification{
+				Name:   "GROUP_DELETE",
+				Params: params,
+			}
+		}
+	}
+
+	if info.NewInviteLink != nil {
+		if link := strings.TrimSpace(*info.NewInviteLink); link != "" {
+			return &groupMetadataNotification{
+				Name:   "GROUP_CHANGE_INVITE_LINK",
+				Params: []string{link},
+				Code:   link,
+			}
+		}
+	}
+
+	if info.Name != nil {
+		name := strings.TrimSpace(info.Name.Name)
+		if name != "" {
+			return &groupMetadataNotification{
+				Name:     "GROUP_CHANGE_SUBJECT",
+				Params:   []string{name},
+				ChatName: name,
+			}
+		}
+	}
+
+	if info.Topic != nil {
+		topic := strings.TrimSpace(info.Topic.Topic)
+		if info.Topic.TopicDeleted {
+			topic = ""
+		}
+		return &groupMetadataNotification{
+			Name:   "GROUP_CHANGE_DESCRIPTION",
+			Params: []string{topic},
+		}
+	}
+
+	if info.Locked != nil {
+		value := fmt.Sprintf("%t", info.Locked.IsLocked)
+		return &groupMetadataNotification{
+			Name:   "GROUP_CHANGE_RESTRICT",
+			Params: []string{value},
+		}
+	}
+
+	if info.Announce != nil {
+		value := fmt.Sprintf("%t", info.Announce.IsAnnounce)
+		return &groupMetadataNotification{
+			Name:   "GROUP_CHANGE_ANNOUNCE",
+			Params: []string{value},
+		}
+	}
+
+	if info.Ephemeral != nil {
+		params := []string{fmt.Sprintf("%t", info.Ephemeral.IsEphemeral)}
+		if timer := info.Ephemeral.DisappearingTimer; timer > 0 {
+			params = append(params, strconv.FormatUint(uint64(timer), 10))
+		}
+		return &groupMetadataNotification{
+			Name:   "CHANGE_EPHEMERAL_SETTING",
+			Params: params,
+		}
+	}
+
+	if info.MembershipApprovalMode != nil {
+		value := fmt.Sprintf("%t", info.MembershipApprovalMode.IsJoinApprovalRequired)
+		return &groupMetadataNotification{
+			Name:   "GROUP_MEMBERSHIP_JOIN_APPROVAL_MODE",
+			Params: []string{value},
+		}
+	}
+
+	if info.Link != nil {
+		if notif := buildCommunityLinkNotification("COMMUNITY_LINK", info.Link); notif != nil {
+			return notif
+		}
+	}
+	if info.Unlink != nil {
+		if notif := buildCommunityLinkNotification("COMMUNITY_UNLINK", info.Unlink); notif != nil {
+			return notif
+		}
+	}
+
+	return nil
+}
+
+func buildCommunityLinkNotification(prefix string, change *watypes.GroupLinkChange) *groupMetadataNotification {
+	if change == nil {
+		return nil
+	}
+
+	var suffix string
+	switch change.Type {
+	case watypes.GroupLinkChangeTypeParent:
+		suffix = "_PARENT_GROUP"
+	case watypes.GroupLinkChangeTypeSub:
+		suffix = "_SUB_GROUP"
+	case watypes.GroupLinkChangeTypeSibling:
+		suffix = "_SIBLING_GROUP"
+	default:
+		suffix = ""
+	}
+
+	params := make([]string, 0, 2)
+	if !change.Group.JID.IsEmpty() {
+		params = append(params, change.Group.JID.String())
+	}
+	if name := strings.TrimSpace(change.Group.Name); name != "" {
+		params = append(params, name)
+	}
+
+	return &groupMetadataNotification{
+		Name:   prefix + suffix,
+		Params: params,
+	}
+}
+
+func eventTimestampMillis(event *types.InternalEvent) int64 {
+	if event == nil {
+		return time.Now().UnixMilli()
+	}
+	if tsStr := strings.TrimSpace(event.Metadata["timestamp"]); tsStr != "" {
+		if ts, err := strconv.ParseInt(tsStr, 10, 64); err == nil {
+			if ts > 1_000_000_000_000 {
+				return ts
+			}
+			if ts > 0 {
+				return ts * 1000
+			}
+		}
+	}
+	return event.CapturedAt.UnixMilli()
+}
+
+func participantPhoneFromJID(jid watypes.JID) string {
+	switch jid.Server {
+	case watypes.HiddenUserServer:
+		return ""
+	default:
+		return userPhoneFromJID(jid)
+	}
+}
+
+func participantLIDFromJID(jid watypes.JID) string {
+	if jid.Server != watypes.HiddenUserServer {
+		return ""
+	}
+	if normalized := normalizeLID(jid.String()); normalized != "" {
+		return normalized
+	}
+	return jid.String()
+}
+
+func deriveGroupRequestMethod(reason string) string {
+	trimmed := strings.TrimSpace(strings.ToLower(reason))
+	switch trimmed {
+	case "", "unknown":
+		return ""
+	case "invite", "invite_link":
+		return "invite_link"
+	case "non_admin_add":
+		return "non_admin_add"
+	default:
+		return trimmed
+	}
+}
+
+func resolveGroupRequestMethod(notification string, info *events.GroupInfo) string {
+	if info == nil {
+		return ""
+	}
+	if notification == "MEMBERSHIP_APPROVAL_REQUEST" {
+		if method := deriveGroupRequestMethod(info.MembershipRequestMethod); method != "" {
+			return method
+		}
+	}
+	return deriveGroupRequestMethod(info.JoinReason)
+}
+
+func deriveJoinedGroupParticipants(joined *events.JoinedGroup) []watypes.JID {
+	if joined == nil {
+		return nil
+	}
+	participants := make([]watypes.JID, 0, len(joined.Participants))
+	for _, member := range joined.Participants {
+		if member.JID.IsEmpty() {
+			continue
+		}
+		participants = append(participants, member.JID)
+	}
+	return participants
+}
+
+func (t *Transformer) transformGroupJoinedEvent(ctx context.Context, logger *slog.Logger, event *types.InternalEvent) (*ReceivedCallback, error) {
+	joined, ok := event.RawPayload.(*events.JoinedGroup)
+	if !ok {
+		return nil, fmt.Errorf("invalid group joined payload type")
+	}
+
+	groupJID := joined.GroupInfo.JID
+	groupPhone := conversationIdentifierFromJID(groupJID)
+	if groupPhone == "" {
+		groupPhone = sanitizeConversationFallback(groupJID.String())
+	}
+
+	participants := deriveJoinedGroupParticipants(joined)
+	if len(participants) == 0 {
+		if joined.Sender != nil && !joined.Sender.IsEmpty() {
+			participants = append(participants, *joined.Sender)
+		} else {
+			logger.DebugContext(ctx, "joined group event without participants",
+				slog.String("event_id", event.EventID.String()),
+				slog.String("group_id", groupJID.String()),
+			)
+			return nil, transform.ErrUnsupportedEvent
+		}
+	}
+
+	callback := &ReceivedCallback{
+		Type:                   "ReceivedCallback",
+		InstanceID:             event.InstanceID.String(),
+		MessageID:              event.EventID.String(),
+		Phone:                  groupPhone,
+		FromMe:                 false,
+		IsGroup:                true,
+		ConnectedPhone:         t.connectedPhone,
+		Momment:                eventTimestampMillis(event),
+		Status:                 "RECEIVED",
+		Notification:           "GROUP_PARTICIPANT_ADD",
+		NotificationParameters: buildGroupNotificationParameters(participants),
+	}
+
+	if len(callback.NotificationParameters) == 0 {
+		logger.DebugContext(ctx, "joined group event missing notification parameters",
+			slog.String("event_id", event.EventID.String()),
+			slog.String("group_id", groupJID.String()),
+		)
+		return nil, transform.ErrUnsupportedEvent
+	}
+
+	if reqMethod := deriveGroupRequestMethod(joined.Reason); reqMethod != "" {
+		callback.RequestMethod = reqMethod
+	}
+
+	first := participants[0]
+	if phone := participantPhoneFromJID(first); phone != "" {
+		callback.ParticipantPhone = phone
+	}
+	if lid := participantLIDFromJID(first); lid != "" {
+		callback.ParticipantLid = lid
+	}
+	if callback.ParticipantPhone == "" {
+		if phone := firstParticipantPhoneFromMetadata(event.Metadata, "join_participants_pn"); phone != "" {
+			callback.ParticipantPhone = phone
+		}
+	}
+
+	provider := eventctx.ContactProvider(ctx)
+	if provider != nil {
+		if callback.ChatName == "" {
+			if name := provider.ContactName(ctx, groupJID); name != "" {
+				callback.ChatName = name
+			}
+		}
+		if callback.Photo == "" {
+			if photo := provider.ContactPhoto(ctx, groupJID); photo != "" {
+				callback.Photo = photo
+			}
+		}
+		if joined.Sender != nil && !joined.Sender.IsEmpty() {
+			if callback.SenderName == "" {
+				if name := provider.ContactName(ctx, *joined.Sender); name != "" {
+					callback.SenderName = name
+				}
+			}
+			if callback.SenderPhoto == "" {
+				if photo := provider.ContactPhoto(ctx, *joined.Sender); photo != "" {
+					callback.SenderPhoto = photo
+				}
+			}
+		}
+	}
+
+	if callback.ChatName == "" {
+		if name := strings.TrimSpace(joined.GroupInfo.GroupName.Name); name != "" {
+			callback.ChatName = name
+		}
+	}
+
+	if callback.SenderName == "" && strings.TrimSpace(joined.Notify) != "" {
+		callback.SenderName = strings.TrimSpace(joined.Notify)
+	}
+
+	if joined.Sender != nil && joined.Sender.Server == watypes.HiddenUserServer {
+		if normalized := normalizeLID(joined.Sender.String()); normalized != "" {
+			callback.SenderLid = normalized
+		} else {
+			callback.SenderLid = joined.Sender.String()
+		}
+	}
+
+	logger.InfoContext(ctx, "transformed joined group event",
+		slog.String("event_id", event.EventID.String()),
+		slog.String("group_id", groupJID.String()),
+		slog.Int("participant_count", len(callback.NotificationParameters)),
+	)
+
+	return callback, nil
+}
+
+func (t *Transformer) transformPictureEvent(ctx context.Context, logger *slog.Logger, event *types.InternalEvent) (*ReceivedCallback, error) {
+	picture, ok := event.RawPayload.(*events.Picture)
+	if !ok {
+		return nil, fmt.Errorf("invalid picture payload type")
+	}
+
+	phone := conversationIdentifierFromJID(picture.JID)
+	if phone == "" {
+		phone = sanitizeConversationFallback(picture.JID.String())
+	}
+
+	isGroup := picture.JID.Server == watypes.GroupServer
+	fromMe := userPhoneFromJID(picture.Author) == sanitizeUserComponent(t.connectedPhone)
+
+	callback := &ReceivedCallback{
+		Type:           "ReceivedCallback",
+		InstanceID:     event.InstanceID.String(),
+		MessageID:      event.EventID.String(),
+		Phone:          phone,
+		FromMe:         fromMe,
+		IsGroup:        isGroup,
+		ConnectedPhone: t.connectedPhone,
+		Momment:        eventTimestampMillis(event),
+		Status:         "RECEIVED",
+	}
+
+	provider := eventctx.ContactProvider(ctx)
+	if provider != nil {
+		if callback.ChatName == "" {
+			if name := provider.ContactName(ctx, picture.JID); name != "" {
+				callback.ChatName = name
+			}
+		}
+		if callback.Photo == "" {
+			if photo := provider.ContactPhoto(ctx, picture.JID); photo != "" {
+				callback.Photo = photo
+			}
+		}
+		if callback.SenderName == "" {
+			if name := provider.ContactName(ctx, picture.Author); name != "" {
+				callback.SenderName = name
+			}
+		}
+		if callback.SenderPhoto == "" {
+			if photo := provider.ContactPhoto(ctx, picture.Author); photo != "" {
+				callback.SenderPhoto = photo
+			}
+		}
+	}
+
+	callback.Notification, callback.NotificationParameters = mapPictureNotification(picture, isGroup, t.connectedPhone)
+	if !picture.Remove {
+		if updated := resolveContactPhotoURL(ctx, provider, picture.JID); updated != "" {
+			callback.UpdatedPhoto = updated
+		}
+	} else {
+		callback.UpdatedPhoto = ""
+	}
+
+	if isGroup && !picture.Author.IsEmpty() {
+		if phone := participantPhoneFromJID(picture.Author); phone != "" {
+			callback.ParticipantPhone = phone
+		}
+		if lid := participantLIDFromJID(picture.Author); lid != "" {
+			callback.ParticipantLid = lid
+		}
+	}
+
+	logger.InfoContext(ctx, "transformed picture event",
+		slog.String("event_id", event.EventID.String()),
+		slog.String("jid", picture.JID.String()),
+		slog.Bool("remove", picture.Remove),
+	)
+
+	return callback, nil
+}
+
+func mapPictureNotification(picture *events.Picture, isGroup bool, connectedPhone string) (string, []string) {
+	if picture == nil {
+		return "", nil
+	}
+	code := strings.TrimSpace(picture.PictureID)
+	if isGroup {
+		if picture.Remove {
+			return "GROUP_PICTURE_UPDATED", nil
+		}
+		if code != "" {
+			return "GROUP_PICTURE_UPDATED", []string{code}
+		}
+		return "GROUP_PICTURE_UPDATED", nil
+	}
+	connected := sanitizeUserComponent(connectedPhone)
+	if connected != "" && connected == userPhoneFromJID(picture.JID) {
+		if picture.Remove {
+			return "PROFILE_PICTURE_UPDATED", nil
+		}
+		if code != "" {
+			return "PROFILE_PICTURE_UPDATED", []string{code}
+		}
+		return "PROFILE_PICTURE_UPDATED", nil
+	}
+	if picture.Remove {
+		return "CONTACT_PICTURE_UPDATED", nil
+	}
+	if code != "" {
+		return "CONTACT_PICTURE_UPDATED", []string{code}
+	}
+	return "CONTACT_PICTURE_UPDATED", nil
+}
+
+func resolveContactPhotoURL(ctx context.Context, provider eventctx.ContactMetadataProvider, jid watypes.JID) string {
+	if provider == nil {
+		return ""
+	}
+	if detailProvider, ok := provider.(eventctx.ContactPhotoDetailProvider); ok {
+		details := detailProvider.ContactPhotoDetails(ctx, jid)
+		if url := strings.TrimSpace(details.FullURL); url != "" {
+			return url
+		}
+		if url := strings.TrimSpace(details.PreviewURL); url != "" {
+			return url
+		}
+	}
+	return strings.TrimSpace(provider.ContactPhoto(ctx, jid))
 }
 
 func (t *Transformer) transformUndecryptable(ctx context.Context, logger *slog.Logger, event *types.InternalEvent) (*ReceivedCallback, error) {
@@ -632,7 +1283,30 @@ func (t *Transformer) transformUndecryptable(ctx context.Context, logger *slog.L
 	return callback, nil
 }
 
-func (t *Transformer) extractMessageContent(msg *waE2E.Message, callback *ReceivedCallback, event *types.InternalEvent) error {
+func (t *Transformer) extractMessageContent(ctx context.Context, logger *slog.Logger, msg *waE2E.Message, callback *ReceivedCallback, event *types.InternalEvent) error {
+	if invite := msg.GetNewsletterAdminInviteMessage(); invite != nil {
+		callback.NewsletterAdminInvite = &NewsletterAdminInviteContent{
+			NewsletterID:     strings.TrimSpace(invite.GetNewsletterJID()),
+			NewsletterName:   invite.GetNewsletterName(),
+			Text:             invite.GetCaption(),
+			InviteExpiration: invite.GetInviteExpiration(),
+		}
+		return nil
+	}
+
+	if eventMsg := msg.GetEventMessage(); eventMsg != nil {
+		eventContent := &EventContent{
+			Name:         eventMsg.GetName(),
+			Description:  eventMsg.GetDescription(),
+			Canceled:     eventMsg.GetIsCanceled(),
+			JoinLink:     eventMsg.GetJoinLink(),
+			ScheduleTime: eventMsg.GetStartTime(),
+			Location:     extractEventLocation(eventMsg.GetLocation()),
+		}
+		callback.Event = eventContent
+		return nil
+	}
+
 	if text := msg.GetConversation(); text != "" {
 		callback.Text = &TextContent{
 			Message: text,
@@ -785,9 +1459,10 @@ func (t *Transformer) extractMessageContent(msg *waE2E.Message, callback *Receiv
 	}
 
 	if pollVote := msg.GetPollUpdateMessage(); pollVote != nil {
+		options := t.resolvePollVoteOptions(ctx, logger, event, pollVote)
 		callback.PollVote = &PollVoteContent{
 			PollMessageID: pollVote.GetPollCreationMessageKey().GetID(),
-			Options:       []PollOption{},
+			Options:       options,
 		}
 		return nil
 	}
@@ -1217,10 +1892,17 @@ func (t *Transformer) transformPresence(ctx context.Context, logger *slog.Logger
 
 	callback := &PresenceChatCallback{
 		Type:       "PresenceChatCallback",
-		Phone:      extractPhoneNumber(event.Metadata["from"]),
 		Status:     status,
 		InstanceID: event.InstanceID.String(),
 	}
+
+	phone := extractPhoneNumber(event.Metadata["from"])
+	if pn := strings.TrimSpace(event.Metadata["from_pn"]); pn != "" {
+		if normalized := extractPhoneNumber(pn); normalized != "" {
+			phone = normalized
+		}
+	}
+	callback.Phone = phone
 
 	if lastSeenStr, ok := event.Metadata["last_seen"]; ok && lastSeenStr != "" {
 		var lastSeen int64
@@ -1271,6 +1953,18 @@ func parseJID(value string) (watypes.JID, error) {
 }
 
 func normalizeConversationPhone(metadata map[string]string, chat watypes.JID, parseErr error) string {
+	if pn := strings.TrimSpace(metadata["chat_pn"]); pn != "" {
+		if parsed, err := watypes.ParseJID(pn); err == nil {
+			return conversationIdentifierFromJID(parsed)
+		}
+		if normalized := normalizeLID(pn); normalized != "" {
+			return normalized
+		}
+		if fallback := sanitizeConversationFallback(pn); fallback != "" {
+			return fallback
+		}
+	}
+
 	if alt := metadata["chat_alt"]; alt != "" {
 		if parsed, err := watypes.ParseJID(alt); err == nil {
 			return conversationIdentifierFromJID(parsed)
@@ -1502,6 +2196,32 @@ func isStatusBroadcastReference(value string) bool {
 	return false
 }
 
+func extractEventLocation(loc *waE2E.LocationMessage) map[string]string {
+	if loc == nil {
+		return nil
+	}
+	result := make(map[string]string)
+	if loc.GetDegreesLatitude() != 0 {
+		result["latitude"] = fmt.Sprintf("%f", loc.GetDegreesLatitude())
+	}
+	if loc.GetDegreesLongitude() != 0 {
+		result["longitude"] = fmt.Sprintf("%f", loc.GetDegreesLongitude())
+	}
+	if name := strings.TrimSpace(loc.GetName()); name != "" {
+		result["name"] = name
+	}
+	if addr := strings.TrimSpace(loc.GetAddress()); addr != "" {
+		result["address"] = addr
+	}
+	if url := strings.TrimSpace(loc.GetURL()); url != "" {
+		result["url"] = url
+	}
+	if len(result) == 0 {
+		return nil
+	}
+	return result
+}
+
 func hasMessageContent(callback *ReceivedCallback) bool {
 	if callback == nil {
 		return false
@@ -1534,6 +2254,295 @@ func hasMessageContent(callback *ReceivedCallback) bool {
 		return true
 	}
 	return false
+}
+
+func (t *Transformer) resolvePollVoteOptions(ctx context.Context, logger *slog.Logger, event *types.InternalEvent, pollVote *waE2E.PollUpdateMessage) []PollOption {
+	hashPayload := strings.TrimSpace(event.Metadata["poll_vote_hashes"])
+	if hashPayload == "" {
+		return nil
+	}
+	var hashStrings []string
+	if err := json.Unmarshal([]byte(hashPayload), &hashStrings); err != nil {
+		logger.DebugContext(ctx, "failed to decode poll vote hashes",
+			slog.String("event_id", event.EventID.String()),
+			slog.String("error", err.Error()))
+		return nil
+	}
+	rawHashes := make([][]byte, 0, len(hashStrings))
+	for _, hexString := range hashStrings {
+		decoded, err := hex.DecodeString(hexString)
+		if err != nil {
+			continue
+		}
+		rawHashes = append(rawHashes, decoded)
+	}
+	if len(rawHashes) == 0 {
+		return nil
+	}
+	options := make([]PollOption, 0, len(rawHashes))
+	if t.pollStore != nil {
+		pollID := ""
+		if key := pollVote.GetPollCreationMessageKey(); key != nil {
+			pollID = key.GetID()
+		}
+		names, err := t.pollStore.ResolveOptions(ctx, event.InstanceID, pollID, rawHashes)
+		if err != nil {
+			logger.DebugContext(ctx, "poll option lookup failed",
+				slog.String("event_id", event.EventID.String()),
+				slog.String("error", err.Error()))
+		} else {
+			for _, name := range names {
+				if strings.TrimSpace(name) == "" {
+					continue
+				}
+				options = append(options, PollOption{Name: name})
+			}
+		}
+	}
+	if len(options) == 0 {
+		for _, hexString := range hashStrings {
+			if hexString == "" {
+				continue
+			}
+			options = append(options, PollOption{Name: hexString})
+		}
+	}
+	return options
+}
+
+func mapMessageStubToZAPINotification(stub waWeb.WebMessageInfo_StubType, params []string) (string, []string, string) {
+	if len(params) > 0 {
+		params = append([]string(nil), params...)
+	}
+	switch stub {
+	case waWeb.WebMessageInfo_GROUP_MEMBERSHIP_JOIN_APPROVAL_REQUEST,
+		waWeb.WebMessageInfo_GROUP_MEMBERSHIP_JOIN_APPROVAL_MODE,
+		waWeb.WebMessageInfo_COMMUNITY_LINK_PARENT_GROUP_MEMBERSHIP_APPROVAL,
+		waWeb.WebMessageInfo_GROUP_PARTICIPANT_ADD_REQUEST_JOIN,
+		waWeb.WebMessageInfo_GROUP_PARTICIPANT_ACCEPT:
+		formatted, revoked := normalizeMembershipStubParams(params)
+		if revoked {
+			return "REVOKED_MEMBERSHIP_REQUESTS", formatted, ""
+		}
+		return "MEMBERSHIP_APPROVAL_REQUEST", formatted, "invite_link"
+	case waWeb.WebMessageInfo_GROUP_MEMBERSHIP_JOIN_APPROVAL_REQUEST_NON_ADMIN_ADD:
+		formatted, revoked := normalizeMembershipStubParams(params)
+		if revoked {
+			return "REVOKED_MEMBERSHIP_REQUESTS", formatted, ""
+		}
+		return "MEMBERSHIP_APPROVAL_REQUEST", formatted, "non_admin_add"
+	case waWeb.WebMessageInfo_GROUP_PARTICIPANT_LINKED_GROUP_JOIN:
+		formatted, revoked := normalizeMembershipStubParams(params)
+		if revoked {
+			return "REVOKED_MEMBERSHIP_REQUESTS", formatted, ""
+		}
+		return "MEMBERSHIP_APPROVAL_REQUEST", formatted, "invite_link"
+	default:
+		return stub.String(), params, ""
+	}
+}
+
+const inviteLinkPrefix = "https://chat.whatsapp.com/"
+
+func applyGroupUpdateStub(callback *ReceivedCallback, stub waWeb.WebMessageInfo_StubType, rawParams []string) bool {
+	if callback == nil {
+		return false
+	}
+	switch stub {
+	case waWeb.WebMessageInfo_GROUP_CHANGE_SUBJECT:
+		if subject := firstNonEmptyStubParam(rawParams); subject != "" {
+			callback.Notification = "GROUP_CHANGE_SUBJECT"
+			callback.NotificationParameters = []string{subject}
+			if callback.ChatName == "" {
+				callback.ChatName = subject
+			}
+			return true
+		}
+	case waWeb.WebMessageInfo_GROUP_CHANGE_DESCRIPTION:
+		if description := joinStubParams(rawParams); description != "" {
+			callback.Notification = "GROUP_CHANGE_DESCRIPTION"
+			callback.NotificationParameters = []string{description}
+			return true
+		}
+	case waWeb.WebMessageInfo_GROUP_CHANGE_INVITE_LINK:
+		if link := extractInviteLinkFromParams(rawParams); link != "" {
+			callback.Notification = "GROUP_CHANGE_INVITE_LINK"
+			callback.NotificationParameters = []string{link}
+			callback.Code = link
+			return true
+		}
+	case waWeb.WebMessageInfo_GROUP_CHANGE_RESTRICT:
+		if value, ok := deriveStubBooleanValue(rawParams); ok {
+			callback.Notification = "GROUP_CHANGE_RESTRICT"
+			callback.NotificationParameters = []string{value}
+			return true
+		}
+	case waWeb.WebMessageInfo_GROUP_CHANGE_ANNOUNCE:
+		if value, ok := deriveStubBooleanValue(rawParams); ok {
+			callback.Notification = "GROUP_CHANGE_ANNOUNCE"
+			callback.NotificationParameters = []string{value}
+			return true
+		}
+	case waWeb.WebMessageInfo_CHANGE_EPHEMERAL_SETTING:
+		if params := deriveEphemeralStubParameters(rawParams); len(params) > 0 {
+			callback.Notification = "CHANGE_EPHEMERAL_SETTING"
+			callback.NotificationParameters = params
+			return true
+		}
+	}
+	return false
+}
+
+func firstNonEmptyStubParam(params []string) string {
+	for _, raw := range params {
+		trimmed := strings.TrimSpace(raw)
+		if trimmed != "" {
+			return trimmed
+		}
+	}
+	return ""
+}
+
+func joinStubParams(params []string) string {
+	var builder []string
+	for _, raw := range params {
+		trimmed := strings.TrimSpace(raw)
+		if trimmed != "" {
+			builder = append(builder, trimmed)
+		}
+	}
+	return strings.Join(builder, "\n")
+}
+
+func deriveStubBooleanValue(params []string) (string, bool) {
+	for _, raw := range params {
+		trimmed := strings.TrimSpace(raw)
+		if trimmed == "" {
+			continue
+		}
+		lower := strings.ToLower(trimmed)
+		switch lower {
+		case "true", "1", "on", "enabled", "enable", "sim", "yes":
+			return "true", true
+		case "false", "0", "off", "disabled", "disable", "nao", "nao.", "no":
+			return "false", true
+		}
+		if value, err := strconv.ParseInt(trimmed, 10, 64); err == nil {
+			if value == 0 {
+				return "false", true
+			}
+			return "true", true
+		}
+	}
+	return "", false
+}
+
+func deriveEphemeralStubParameters(params []string) []string {
+	for _, raw := range params {
+		trimmed := strings.TrimSpace(raw)
+		if trimmed == "" {
+			continue
+		}
+		if seconds, err := strconv.ParseInt(trimmed, 10, 64); err == nil {
+			if seconds <= 0 {
+				return []string{"false"}
+			}
+			return []string{"true", strconv.FormatInt(seconds, 10)}
+		}
+		lower := strings.ToLower(trimmed)
+		switch lower {
+		case "false", "off", "disabled", "0":
+			return []string{"false"}
+		case "true", "on", "enabled", "1":
+			return []string{"true"}
+		}
+	}
+	return nil
+}
+
+func extractInviteLinkFromParams(params []string) string {
+	for _, raw := range params {
+		if link := sanitizeInviteLinkCandidate(raw); link != "" {
+			return link
+		}
+	}
+	return ""
+}
+
+func sanitizeInviteLinkCandidate(raw string) string {
+	trimmed := strings.TrimSpace(raw)
+	if trimmed == "" {
+		return ""
+	}
+	lower := strings.ToLower(trimmed)
+	if idx := strings.Index(lower, "chat.whatsapp.com/"); idx >= 0 {
+		candidate := trimmed[idx:]
+		candidate = stripAfterDelimiter(candidate)
+		code := strings.TrimPrefix(candidate, inviteLinkPrefix)
+		if isValidInviteCode(code) {
+			return inviteLinkPrefix + code
+		}
+	}
+	code := strings.TrimPrefix(trimmed, inviteLinkPrefix)
+	code = stripNonAlnum(code)
+	if isValidInviteCode(code) {
+		return inviteLinkPrefix + code
+	}
+	return ""
+}
+
+func stripAfterDelimiter(value string) string {
+	for i, r := range value {
+		switch r {
+		case ' ', '\t', '\n', '\r', '"', '\'', '<', '>', ',':
+			return value[:i]
+		}
+	}
+	return value
+}
+
+func stripNonAlnum(value string) string {
+	var builder strings.Builder
+	for _, r := range value {
+		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') {
+			builder.WriteRune(r)
+		}
+	}
+	return builder.String()
+}
+
+func isValidInviteCode(code string) bool {
+	if len(code) < 20 || len(code) > 30 {
+		return false
+	}
+	for _, r := range code {
+		if !((r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9')) {
+			return false
+		}
+	}
+	return true
+}
+
+func normalizeMembershipStubParams(params []string) ([]string, bool) {
+	sanitized := make([]string, 0, len(params))
+	revoked := false
+	for _, raw := range params {
+		trimmed := strings.TrimSpace(raw)
+		if trimmed == "" {
+			continue
+		}
+		lower := strings.ToLower(trimmed)
+		if strings.Contains(lower, "revog") || strings.Contains(lower, "revoke") {
+			revoked = true
+			continue
+		}
+		if jid, err := parseJID(trimmed); err == nil {
+			sanitized = append(sanitized, conversationIdentifierFromJID(jid))
+			continue
+		}
+		sanitized = append(sanitized, trimmed)
+	}
+	return sanitized, revoked
 }
 
 func conversationIdentifierFromJID(jid watypes.JID) string {
@@ -1659,4 +2668,52 @@ func sanitizeUserComponent(user string) string {
 		user = user[:idx]
 	}
 	return user
+}
+
+func participantPNMetadataKey(notification string) string {
+	switch notification {
+	case "GROUP_PARTICIPANT_ADD", "GROUP_PARTICIPANT_INVITE":
+		return "join_participants_pn"
+	case "GROUP_PARTICIPANT_LEAVE":
+		return "leave_participants_pn"
+	case "GROUP_PARTICIPANT_PROMOTE":
+		return "promote_participants_pn"
+	case "GROUP_PARTICIPANT_DEMOTE":
+		return "demote_participants_pn"
+	case "MEMBERSHIP_APPROVAL_REQUEST":
+		return "membership_request_created_pn"
+	case "REVOKED_MEMBERSHIP_REQUESTS":
+		return "membership_request_revoked_pn"
+	default:
+		return ""
+	}
+}
+
+func participantPNListFromMetadata(metadata map[string]string, key string) []string {
+	raw := strings.TrimSpace(metadata[key])
+	if raw == "" {
+		return nil
+	}
+	var values []string
+	if err := json.Unmarshal([]byte(raw), &values); err != nil {
+		return nil
+	}
+	return values
+}
+
+func firstParticipantPhoneFromMetadata(metadata map[string]string, key string) string {
+	if key == "" {
+		return ""
+	}
+	entries := participantPNListFromMetadata(metadata, key)
+	for _, candidate := range entries {
+		candidate = strings.TrimSpace(candidate)
+		if candidate == "" {
+			continue
+		}
+		if phone := extractPhoneNumber(candidate); phone != "" {
+			return phone
+		}
+	}
+	return ""
 }

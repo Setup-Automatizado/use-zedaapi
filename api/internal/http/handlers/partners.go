@@ -53,10 +53,15 @@ type partnerCreateRequest struct {
 }
 
 type partnerCreateResponse struct {
+	// Z-API Standard Fields
+	ID    string `json:"id"`    // Instance ID (Z-API compatible)
+	Token string `json:"token"` // Instance Token (Z-API compatible)
+	Due   int64  `json:"due"`   // Timestamp in milliseconds (Z-API compatible)
+
+	// Extended Fields (our API)
 	InstanceID         uuid.UUID                  `json:"instanceId"`
 	Name               string                     `json:"name"`
 	SessionName        string                     `json:"sessionName"`
-	ClientToken        string                     `json:"clientToken"`
 	InstanceToken      string                     `json:"instanceToken"`
 	SubscriptionActive bool                       `json:"subscriptionActive"`
 	CallRejectAuto     bool                       `json:"callRejectAuto"`
@@ -65,6 +70,49 @@ type partnerCreateResponse struct {
 	Middleware         string                     `json:"middleware"`
 	Webhooks           *instances.WebhookSettings `json:"webhooks,omitempty"`
 	CreatedAt          string                     `json:"createdAt"`
+}
+
+// listInstancesResponse represents the Z-API compatible list response
+type listInstancesResponse struct {
+	Total     int                `json:"total"`
+	TotalPage int                `json:"totalPage"`
+	PageSize  int                `json:"pageSize"`
+	Page      int                `json:"page"`
+	Content   []instanceListItem `json:"content"`
+}
+
+// instanceListItem represents a single instance in the list (Z-API compatible)
+type instanceListItem struct {
+	// Z-API Standard Fields
+	ID    string `json:"id"`
+	Token string `json:"token"`
+	Due   int64  `json:"due"`
+
+	// Z-API Extended Fields
+	Name              string `json:"name"`
+	Created           string `json:"created"`
+	PhoneConnected    bool   `json:"phoneConnected"`
+	WhatsappConnected bool   `json:"whatsappConnected"`
+	Middleware        string `json:"middleware"`
+
+	// Webhook URLs (flattened from WebhookSettings)
+	DeliveryCallbackUrl            *string `json:"deliveryCallbackUrl,omitempty"`
+	ReceivedCallbackUrl            *string `json:"receivedCallbackUrl,omitempty"`
+	ReceivedAndDeliveryCallbackUrl *string `json:"receivedAndDeliveryCallbackUrl,omitempty"`
+	DisconnectedCallbackUrl        *string `json:"disconnectedCallbackUrl,omitempty"`
+	ConnectedCallbackUrl           *string `json:"connectedCallbackUrl,omitempty"`
+	MessageStatusCallbackUrl       *string `json:"messageStatusCallbackUrl,omitempty"`
+	PresenceChatCallbackUrl        *string `json:"presenceChatCallbackUrl,omitempty"`
+
+	// Additional Fields (our API)
+	SessionName        string  `json:"sessionName,omitempty"`
+	CallRejectAuto     bool    `json:"callRejectAuto"`
+	CallRejectMessage  *string `json:"callRejectMessage,omitempty"`
+	AutoReadMessage    bool    `json:"autoReadMessage"`
+	SubscriptionActive bool    `json:"subscriptionActive"`
+	NotifySentByMe     bool    `json:"notifySentByMe"`
+	InstanceID         string  `json:"instanceId"`
+	InstanceToken      string  `json:"instanceToken"`
 }
 
 func (h *PartnerHandler) createInstance(w http.ResponseWriter, r *http.Request) {
@@ -100,10 +148,15 @@ func (h *PartnerHandler) createInstance(w http.ResponseWriter, r *http.Request) 
 	}
 
 	respondJSON(w, http.StatusCreated, partnerCreateResponse{
+		// Z-API Standard Fields
+		ID:    inst.ID.String(),
+		Token: inst.InstanceToken,
+		Due:   time.Now().UnixMilli(),
+
+		// Extended Fields
 		InstanceID:         inst.ID,
 		Name:               inst.Name,
 		SessionName:        inst.SessionName,
-		ClientToken:        inst.ClientToken,
 		InstanceToken:      inst.InstanceToken,
 		SubscriptionActive: inst.SubscriptionActive,
 		CallRejectAuto:     inst.CallRejectAuto,
@@ -175,7 +228,58 @@ func (h *PartnerHandler) listInstances(w http.ResponseWriter, r *http.Request) {
 		respondError(w, http.StatusInternalServerError, "failed to list instances")
 		return
 	}
-	respondJSON(w, http.StatusOK, result)
+
+	// Convert to Z-API format
+	totalPage := int(result.Total) / result.PageSize
+	if int(result.Total)%result.PageSize > 0 {
+		totalPage++
+	}
+
+	content := make([]instanceListItem, len(result.Data))
+	for i, inst := range result.Data {
+		item := instanceListItem{
+			// Z-API Standard Fields
+			ID:                 inst.ID.String(),
+			Token:              inst.InstanceToken,
+			Due:                time.Now().UnixMilli(), // Current timestamp as default
+			Name:               inst.Name,
+			Created:            inst.CreatedAt.Format(time.RFC3339),
+			PhoneConnected:     inst.PhoneConnected,
+			WhatsappConnected:  inst.WhatsappConnected,
+			Middleware:         inst.Middleware,
+			SessionName:        inst.SessionName,
+			CallRejectAuto:     inst.CallRejectAuto,
+			CallRejectMessage:  inst.CallRejectMessage,
+			AutoReadMessage:    inst.AutoReadMessage,
+			SubscriptionActive: inst.SubscriptionActive,
+			InstanceID:         inst.ID.String(),
+			InstanceToken:      inst.InstanceToken,
+		}
+
+		// Flatten webhook settings
+		if inst.Webhooks != nil {
+			item.DeliveryCallbackUrl = inst.Webhooks.DeliveryURL
+			item.ReceivedCallbackUrl = inst.Webhooks.ReceivedURL
+			item.ReceivedAndDeliveryCallbackUrl = inst.Webhooks.ReceivedDeliveryURL
+			item.DisconnectedCallbackUrl = inst.Webhooks.DisconnectedURL
+			item.ConnectedCallbackUrl = inst.Webhooks.ConnectedURL
+			item.MessageStatusCallbackUrl = inst.Webhooks.MessageStatusURL
+			item.PresenceChatCallbackUrl = inst.Webhooks.ChatPresenceURL
+			item.NotifySentByMe = inst.Webhooks.NotifySentByMe
+		}
+
+		content[i] = item
+	}
+
+	response := listInstancesResponse{
+		Total:     int(result.Total),
+		TotalPage: totalPage,
+		PageSize:  result.PageSize,
+		Page:      result.Page,
+		Content:   content,
+	}
+
+	respondJSON(w, http.StatusOK, response)
 }
 
 func (h *PartnerHandler) parseInstancePath(w http.ResponseWriter, r *http.Request) (uuid.UUID, string, bool) {

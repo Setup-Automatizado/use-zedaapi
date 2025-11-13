@@ -18,15 +18,19 @@ import (
 )
 
 type RouterDeps struct {
-	Logger          *slog.Logger
-	Metrics         *observability.Metrics
-	SentryHandler   *sentryhttp.Handler
-	InstanceHandler *handlers.InstanceHandler
-	PartnerHandler  *handlers.PartnerHandler
-	HealthHandler   *handlers.HealthHandler
-	MediaHandler    *handlers.MediaHandler
-	PartnerToken    string
-	DocsConfig      docs.Config
+	Logger             *slog.Logger
+	Metrics            *observability.Metrics
+	SentryHandler      *sentryhttp.Handler
+	InstanceHandler    *handlers.InstanceHandler
+	PartnerHandler     *handlers.PartnerHandler
+	HealthHandler      *handlers.HealthHandler
+	MediaHandler       *handlers.MediaHandler
+	MessageHandler     *handlers.MessageHandler
+	GroupsHandler      *handlers.GroupsHandler
+	CommunitiesHandler *handlers.CommunitiesHandler
+	NewslettersHandler *handlers.NewslettersHandler
+	PartnerToken       string
+	DocsConfig         docs.Config
 }
 
 func NewRouter(deps RouterDeps) http.Handler {
@@ -67,6 +71,23 @@ func NewRouter(deps RouterDeps) http.Handler {
 		})
 	})
 
+	// Inject MessageHandler into InstanceHandler to avoid route conflicts
+	// Both handlers need to register routes under /instances/{instanceId}/token/{token}
+	if deps.InstanceHandler != nil {
+		if deps.MessageHandler != nil {
+			deps.InstanceHandler.SetMessageHandler(deps.MessageHandler)
+		}
+		if deps.GroupsHandler != nil {
+			deps.InstanceHandler.SetGroupsHandler(deps.GroupsHandler)
+		}
+		if deps.CommunitiesHandler != nil {
+			deps.InstanceHandler.SetCommunitiesHandler(deps.CommunitiesHandler)
+		}
+		if deps.NewslettersHandler != nil {
+			deps.InstanceHandler.SetNewslettersHandler(deps.NewslettersHandler)
+		}
+	}
+
 	if deps.InstanceHandler != nil {
 		deps.InstanceHandler.Register(r)
 	}
@@ -84,6 +105,9 @@ func NewRouter(deps RouterDeps) http.Handler {
 			mr.Get("/stats", deps.MediaHandler.GetStats)
 		})
 	}
+
+	// MessageHandler routes are now registered via InstanceHandler
+	// No need to call Register() here to avoid duplicate route panic
 
 	return r
 }

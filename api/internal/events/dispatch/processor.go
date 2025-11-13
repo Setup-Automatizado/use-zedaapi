@@ -15,6 +15,7 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/config"
 	"go.mau.fi/whatsmeow/api/internal/events/encoding"
 	"go.mau.fi/whatsmeow/api/internal/events/persistence"
+	"go.mau.fi/whatsmeow/api/internal/events/pollstore"
 	transformzapi "go.mau.fi/whatsmeow/api/internal/events/transform/zapi"
 	"go.mau.fi/whatsmeow/api/internal/events/transport"
 	"go.mau.fi/whatsmeow/api/internal/logging"
@@ -42,6 +43,7 @@ type EventProcessor struct {
 	transportRegistry *transport.Registry
 	lookup            InstanceLookup
 	metrics           *observability.Metrics
+	pollStore         pollstore.Store
 }
 
 type transportConfig struct {
@@ -61,6 +63,7 @@ func NewEventProcessor(
 	dlqRepo persistence.DLQRepository,
 	transportRegistry *transport.Registry,
 	lookup InstanceLookup,
+	pollStore pollstore.Store,
 	metrics *observability.Metrics,
 ) *EventProcessor {
 	return &EventProcessor{
@@ -71,6 +74,7 @@ func NewEventProcessor(
 		transportRegistry: transportRegistry,
 		lookup:            lookup,
 		metrics:           metrics,
+		pollStore:         pollStore,
 	}
 }
 
@@ -158,7 +162,7 @@ func (p *EventProcessor) transformEvent(ctx context.Context, event *persistence.
 		debugRaw = p.cfg.Events.DebugRawPayload
 		dumpDir = p.cfg.Events.DebugDumpDir
 	}
-	zapiTransformer := transformzapi.NewTransformer(connectedPhone, debugRaw, dumpDir)
+	zapiTransformer := transformzapi.NewTransformer(connectedPhone, debugRaw, dumpDir, p.pollStore)
 
 	payload, err := zapiTransformer.Transform(ctx, internalEvent)
 	if err != nil {

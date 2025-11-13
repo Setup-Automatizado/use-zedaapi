@@ -10,7 +10,6 @@ type Instance struct {
 	ID                 uuid.UUID        `json:"instanceId"`
 	Name               string           `json:"name"`
 	SessionName        string           `json:"sessionName"`
-	ClientToken        string           `json:"clientToken"`
 	InstanceToken      string           `json:"instanceToken"`
 	StoreJID           *string          `json:"storeJid,omitempty"`
 	IsDevice           bool             `json:"isDevice"`
@@ -27,6 +26,10 @@ type Instance struct {
 	PhoneConnected     bool             `json:"phoneConnected"`
 	WhatsappConnected  bool             `json:"whatsappConnected"`
 	Due                *time.Time       `json:"due,omitempty"`
+	ConnectionStatus   string           `json:"connectionStatus,omitempty"`
+	LastConnectedAt    *time.Time       `json:"lastConnectedAt,omitempty"`
+	WorkerID           *string          `json:"workerId,omitempty"`
+	DesiredWorkerID    *string          `json:"desiredWorkerId,omitempty"`
 }
 
 type WebhookSettings struct {
@@ -40,14 +43,44 @@ type WebhookSettings struct {
 	NotifySentByMe      bool    `json:"notifySentByMe"`
 }
 
+// Status represents the instance connection status response.
+// Z-API compatible fields: connected, error, smartphoneConnected
+// Additional fields are hidden from JSON response but preserved for internal use.
 type Status struct {
-	Connected          bool      `json:"connected"`
-	StoreJID           *string   `json:"storeJid,omitempty"`
-	LastConnected      time.Time `json:"lastConnected,omitempty"`
-	InstanceID         uuid.UUID `json:"instanceId"`
-	AutoReconnect      bool      `json:"autoReconnect"`
-	WorkerAssigned     string    `json:"workerAssigned"`
-	SubscriptionActive bool      `json:"subscriptionActive"`
+	Connected           bool       `json:"connected"`           // Z-API: Indica se seu número está conectado ao Z-API
+	ConnectionStatus    string     `json:"-"`                   // Hidden: internal connection state tracking
+	StoreJID            *string    `json:"-"`                   // Hidden: WhatsApp JID for internal use
+	LastConnected       *time.Time `json:"-"`                   // Hidden: last connection timestamp for internal tracking
+	InstanceID          uuid.UUID  `json:"-"`                   // Hidden: internal instance identifier
+	AutoReconnect       bool       `json:"-"`                   // Hidden: internal reconnection flag
+	WorkerAssigned      string     `json:"-"`                   // Hidden: internal worker assignment tracking
+	SubscriptionActive  bool       `json:"-"`                   // Hidden: internal subscription state
+	Error               string     `json:"error"`               // Z-API: Informa detalhes caso algum dos atributos não esteja true
+	SmartphoneConnected bool       `json:"smartphoneConnected"` // Z-API: Indica se o celular está conectado à internet
+}
+
+// DeviceMetadata espelha o objeto "device" retornado pela Z-API.
+type DeviceMetadata struct {
+	SessionName        string `json:"sessionName,omitempty"`
+	DeviceModel        string `json:"device_model,omitempty"`
+	WAVersion          string `json:"wa_version,omitempty"`
+	MCC                string `json:"mcc,omitempty"`
+	MNC                string `json:"mnc,omitempty"`
+	OSVersion          string `json:"os_version,omitempty"`
+	DeviceManufacturer string `json:"device_manufacturer,omitempty"`
+	OSBuildNumber      string `json:"osbuildnumber,omitempty"`
+	Platform           string `json:"platform,omitempty"`
+}
+
+// DeviceResponse replica o payload do GET /device da Z-API.
+type DeviceResponse struct {
+	Phone          string         `json:"phone"`
+	ImgURL         *string        `json:"imgUrl"`
+	Name           string         `json:"name"`
+	Device         DeviceMetadata `json:"device"`
+	OriginalDevice string         `json:"originalDevice,omitempty"`
+	SessionID      int            `json:"sessionId"`
+	IsBusiness     bool           `json:"isBusiness"`
 }
 
 type ListFilter struct {

@@ -13,6 +13,7 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/config"
 	"go.mau.fi/whatsmeow/api/internal/events/capture"
 	"go.mau.fi/whatsmeow/api/internal/events/persistence"
+	"go.mau.fi/whatsmeow/api/internal/events/pollstore"
 	"go.mau.fi/whatsmeow/api/internal/events/types"
 	"go.mau.fi/whatsmeow/api/internal/logging"
 	"go.mau.fi/whatsmeow/api/internal/observability"
@@ -28,6 +29,7 @@ type Orchestrator struct {
 	mediaRepo  persistence.MediaRepository
 	router     *capture.EventRouter
 	writer     *capture.TransactionalWriter
+	pollStore  pollstore.Store
 	mu         sync.RWMutex
 	handlers   map[uuid.UUID]*capture.EventHandler
 	buffers    map[uuid.UUID]*capture.EventBuffer
@@ -42,6 +44,7 @@ func NewOrchestrator(
 	pool *pgxpool.Pool,
 	resolver capture.WebhookResolver,
 	metadataEnricher capture.MetadataEnricher,
+	pollStore pollstore.Store,
 	metrics *observability.Metrics,
 ) (*Orchestrator, error) {
 	log := logging.ContextLogger(ctx, nil).With(
@@ -75,6 +78,7 @@ func NewOrchestrator(
 		mediaRepo:  mediaRepo,
 		router:     router,
 		writer:     writer,
+		pollStore:  pollStore,
 		handlers:   make(map[uuid.UUID]*capture.EventHandler),
 		buffers:    make(map[uuid.UUID]*capture.EventBuffer),
 		stopCh:     make(chan struct{}),
@@ -120,6 +124,7 @@ func (o *Orchestrator) RegisterInstance(ctx context.Context, instanceID uuid.UUI
 		o.metrics,
 		o.config.Events.DebugRawPayload,
 		o.config.Events.DebugDumpDir,
+		o.pollStore,
 	)
 	o.handlers[instanceID] = handler
 

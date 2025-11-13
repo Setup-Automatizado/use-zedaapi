@@ -9,28 +9,39 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gen2brain/go-fitz"
 	"github.com/getsentry/sentry-go"
 	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	"github.com/prometheus/client_golang/prometheus"
 
+	wameow "go.mau.fi/whatsmeow"
+
 	"go.mau.fi/whatsmeow/api/docs"
+	"go.mau.fi/whatsmeow/api/internal/chats"
+	"go.mau.fi/whatsmeow/api/internal/communities"
 	"go.mau.fi/whatsmeow/api/internal/config"
+	"go.mau.fi/whatsmeow/api/internal/contacts"
 	"go.mau.fi/whatsmeow/api/internal/database"
 	"go.mau.fi/whatsmeow/api/internal/events"
 	"go.mau.fi/whatsmeow/api/internal/events/capture"
 	"go.mau.fi/whatsmeow/api/internal/events/dispatch"
 	"go.mau.fi/whatsmeow/api/internal/events/media"
 	"go.mau.fi/whatsmeow/api/internal/events/persistence"
+	"go.mau.fi/whatsmeow/api/internal/events/pollstore"
 	"go.mau.fi/whatsmeow/api/internal/events/transport"
 	transporthttp "go.mau.fi/whatsmeow/api/internal/events/transport/http"
 	"go.mau.fi/whatsmeow/api/internal/events/types"
+	"go.mau.fi/whatsmeow/api/internal/groups"
 	apihandler "go.mau.fi/whatsmeow/api/internal/http"
 	"go.mau.fi/whatsmeow/api/internal/http/handlers"
 	"go.mau.fi/whatsmeow/api/internal/instances"
 	"go.mau.fi/whatsmeow/api/internal/locks"
 	"go.mau.fi/whatsmeow/api/internal/logging"
+	"go.mau.fi/whatsmeow/api/internal/messages/queue"
+	"go.mau.fi/whatsmeow/api/internal/newsletters"
 	"go.mau.fi/whatsmeow/api/internal/observability"
+	"go.mau.fi/whatsmeow/api/internal/workers"
 	redisinit "go.mau.fi/whatsmeow/api/internal/redis"
 	sentryinit "go.mau.fi/whatsmeow/api/internal/sentry"
 	"go.mau.fi/whatsmeow/api/internal/whatsmeow"
@@ -54,6 +65,28 @@ func (a *repositoryAdapter) ListInstancesWithStoreJID(ctx context.Context) ([]wh
 		}
 	}
 	return result, nil
+}
+
+func (a *repositoryAdapter) UpdateConnectionStatus(ctx context.Context, id uuid.UUID, connected bool, status string, workerID *string, desiredWorkerID *string) error {
+	return a.repo.UpdateConnectionStatus(ctx, id, connected, status, workerID, desiredWorkerID)
+}
+
+func (a *repositoryAdapter) GetConnectionState(ctx context.Context, id uuid.UUID) (*whatsmeow.ConnectionState, error) {
+	state, err := a.repo.GetConnectionState(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	if state == nil {
+		return nil, nil
+	}
+
+	return &whatsmeow.ConnectionState{
+		Connected:       state.Connected,
+		Status:          state.Status,
+		LastConnectedAt: state.LastConnectedAt,
+		WorkerID:        state.WorkerID,
+		DesiredWorkerID: state.DesiredWorkerID,
+	}, nil
 }
 
 type instanceLookupAdapter struct {
@@ -101,8 +134,19 @@ func (a *webhookResolverAdapter) Resolve(ctx context.Context, id uuid.UUID) (*ca
 		ConnectedURL:        deref(webhook.ConnectedURL),
 		NotifySentByMe:      webhook.NotifySentByMe,
 		StoreJID:            inst.StoreJID,
-		ClientToken:         inst.ClientToken,
 	}, nil
+}
+
+type queueClientRegistryAdapter struct {
+	registry *whatsmeow.ClientRegistry
+}
+
+func (a *queueClientRegistryAdapter) GetClient(instanceID string) (*wameow.Client, bool) {
+	id, err := uuid.Parse(instanceID)
+	if err != nil {
+		return nil, false
+	}
+	return a.registry.GetClient(id)
 }
 
 func storeJIDEnricher() capture.MetadataEnricher {
@@ -134,8 +178,16 @@ func main() {
 		log.Fatalf("config load: %v", err)
 	}
 
+	if cfg.Document.MuPDFVersion != "" {
+		fitz.FzVersion = cfg.Document.MuPDFVersion
+	}
+
 	logger := logging.New(cfg.Log.Level)
 	logger.Info("starting FunnelChat API", slog.String("env", cfg.AppEnv))
+	if cfg.Document.MuPDFVersion != "" {
+		logger.Debug("configured MuPDF runtime",
+			slog.String("version", cfg.Document.MuPDFVersion))
+	}
 
 	sentryHandler, err := sentryinit.Init(cfg.Sentry.DSN, cfg.Sentry.Environment, cfg.Sentry.Release)
 	if err != nil {
@@ -143,6 +195,17 @@ func main() {
 	}
 
 	metrics := observability.NewMetrics(cfg.Prometheus.Namespace, prometheus.DefaultRegisterer)
+
+	// Ensure all required databases exist before connecting
+	// This allows automatic database creation in fresh environments (dev, CI/CD, deploy)
+	databases := map[string]string{
+		"application": cfg.Postgres.DSN,
+		"whatsmeow":   cfg.WhatsmeowStore.DSN,
+	}
+	if err := database.EnsureMultipleDatabases(ctx, databases, logger); err != nil {
+		logger.Error("ensure databases exist", slog.String("error", err.Error()))
+		os.Exit(1)
+	}
 
 	pgPool, err := database.NewPool(ctx, cfg.Postgres.DSN, cfg.Postgres.MaxConns)
 	if err != nil {
@@ -156,12 +219,24 @@ func main() {
 		os.Exit(1)
 	}
 
+	redisClient := redisinit.NewClient(redisinit.Config{
+		Addr:       cfg.Redis.Addr,
+		Username:   cfg.Redis.Username,
+		Password:   cfg.Redis.Password,
+		DB:         cfg.Redis.DB,
+		TLSEnabled: cfg.Redis.TLSEnabled,
+	})
+	defer redisClient.Close()
+
+	pollStore := pollstore.NewRedisStore(redisClient, 365*24*time.Hour)
+	redisLockManager := locks.NewRedisManager(redisClient)
+
 	repo := instances.NewRepository(pgPool)
 
 	resolver := &webhookResolverAdapter{repo: repo}
 	metadataEnricher := storeJIDEnricher()
 
-	eventOrchestrator, err := events.NewOrchestrator(ctx, cfg, pgPool, resolver, metadataEnricher, metrics)
+	eventOrchestrator, err := events.NewOrchestrator(ctx, cfg, pgPool, resolver, metadataEnricher, pollStore, metrics)
 	if err != nil {
 		logger.Error("failed to create event orchestrator", slog.String("error", err.Error()))
 		os.Exit(1)
@@ -190,6 +265,7 @@ func main() {
 		dlqRepo,
 		transportRegistry,
 		&instanceLookupAdapter{repo: repo},
+		pollStore,
 		metrics,
 	)
 
@@ -230,17 +306,6 @@ func main() {
 		localStorage = ls
 		mediaHTTPHandler = handlers.NewMediaHandler(localStorage, metrics, logger)
 	}
-
-	redisClient := redisinit.NewClient(redisinit.Config{
-		Addr:       cfg.Redis.Addr,
-		Username:   cfg.Redis.Username,
-		Password:   cfg.Redis.Password,
-		DB:         cfg.Redis.DB,
-		TLSEnabled: cfg.Redis.TLSEnabled,
-	})
-	defer redisClient.Close()
-
-	redisLockManager := locks.NewRedisManager(redisClient)
 
 	var mediaReaper *media.MediaReaper
 	if cfg.Media.CleanupInterval > 0 {
@@ -304,7 +369,43 @@ func main() {
 	}
 
 	repoAdapter := &repositoryAdapter{repo: repo}
-	registry, err := whatsmeow.NewClientRegistry(ctx, cfg.WhatsmeowStore.DSN, cfg.WhatsmeowStore.LogLevel, lockManager, repoAdapter, logger, pairCallback, resetCallback, eventIntegration, dispatchCoordinator, mediaCoordinator)
+	contactMetadataCfg := whatsmeow.ContactMetadataConfig{
+		CacheCapacity:   cfg.ContactMetadata.CacheCapacity,
+		NameTTL:         cfg.ContactMetadata.NameTTL,
+		PhotoTTL:        cfg.ContactMetadata.PhotoTTL,
+		ErrorTTL:        cfg.ContactMetadata.ErrorTTL,
+		PrefetchWorkers: cfg.ContactMetadata.PrefetchWorkers,
+		FetchQueueSize:  cfg.ContactMetadata.FetchQueueSize,
+	}
+	autoConnectCfg := whatsmeow.AutoConnectConfig{
+		Enabled:        cfg.Connection.AutoConnectPaired,
+		MaxAttempts:    cfg.Connection.MaxAttempts,
+		InitialBackoff: cfg.Connection.InitialBackoff,
+		MaxBackoff:     cfg.Connection.MaxBackoff,
+	}
+	registry, err := whatsmeow.NewClientRegistry(
+		ctx,
+		cfg.WhatsmeowStore.DSN,
+		cfg.WhatsmeowStore.LogLevel,
+		lockManager,
+		repoAdapter,
+		logger,
+		pairCallback,
+		resetCallback,
+		eventIntegration,
+		dispatchCoordinator,
+		mediaCoordinator,
+		cfg.Events.HandlerTimeout,
+		contactMetadataCfg,
+		redisClient,
+		autoConnectCfg,
+		whatsmeow.LockConfig{
+			KeyPrefix:       cfg.RedisLock.KeyPrefix,
+			TTL:             cfg.RedisLock.TTL,
+			RefreshInterval: cfg.RedisLock.RefreshInterval,
+		},
+		metrics,
+	)
 	if err != nil {
 		logger.Error("whatsmeow registry", slog.String("error", err.Error()))
 		os.Exit(1)
@@ -328,7 +429,30 @@ func main() {
 		}
 	}()
 
-	instanceService := instances.NewService(repo, registry, logger)
+	workerDirectory := workers.NewRegistry(
+		pgPool,
+		registry.WorkerID(),
+		registry.WorkerHostname(),
+		cfg.AppEnv,
+		workers.Config{
+			HeartbeatInterval: cfg.WorkerRegistry.HeartbeatInterval,
+			Expiry:            cfg.WorkerRegistry.Expiry,
+		},
+		logger,
+	)
+
+	if err := workerDirectory.Start(ctx); err != nil {
+		logger.Error("worker directory start", slog.String("error", err.Error()))
+		os.Exit(1)
+	}
+	registry.AttachWorkerDirectory(workerDirectory, cfg.WorkerRegistry.RebalanceInterval)
+	defer func() {
+		stopCtx, stopCancel := context.WithTimeout(context.Background(), 5*time.Second)
+		workerDirectory.Stop(stopCtx)
+		stopCancel()
+	}()
+
+	instanceService := instances.NewService(repo, registry, cfg.Client.AuthToken, logger)
 	reconcileCtx, reconcileCancel := context.WithTimeout(ctx, 30*time.Second)
 	cleaned, reconcileErr := instanceService.ReconcileDetachedStores(reconcileCtx)
 	reconcileCancel()
@@ -347,6 +471,12 @@ func main() {
 		logger.Info("connected existing clients", slog.Int("connected", connected), slog.Int("skipped", skipped))
 	}
 
+	if cfg.Reconciliation.Enabled {
+		logger.Info("starting reconciliation worker",
+			slog.Duration("interval", cfg.Reconciliation.Interval))
+		registry.StartReconciliationWorker(ctx, cfg.Reconciliation.Interval)
+	}
+
 	registry.SetMetrics(whatsmeow.ClientRegistryMetrics{
 		SplitBrainDetected: func() { metrics.SplitBrainDetected.Inc() },
 		SplitBrainInvalidLock: func(instanceID string) {
@@ -355,24 +485,106 @@ func main() {
 	})
 	registry.StartSplitBrainDetection()
 
+	contactsProvider := contacts.NewRegistryClientProvider(registry, repo, logger)
+	contactsService := contacts.NewService(contactsProvider, logger)
+
+	chatsProvider := chats.NewRegistryClientProvider(registry, repo, logger)
+	chatsService := chats.NewService(chatsProvider, logger)
+
+	// Initialize message queue coordinator
+	var messageCoordinator *queue.Coordinator
+	var messageHandler *handlers.MessageHandler
+	if cfg.MessageQueue.Enabled {
+		queueConfig := &queue.Config{
+			PollInterval:         cfg.MessageQueue.PollInterval,
+			BatchSize:            1, // CRITICAL: Must be 1 for FIFO ordering
+			MaxAttempts:          cfg.MessageQueue.MaxAttempts,
+			InitialBackoff:       cfg.MessageQueue.InitialBackoff,
+			MaxBackoff:           cfg.MessageQueue.MaxBackoff,
+			BackoffMultiplier:    cfg.MessageQueue.BackoffMultiplier,
+			DisconnectRetryDelay: cfg.MessageQueue.DisconnectRetryDelay,
+			CompletedRetention:   cfg.MessageQueue.CompletedRetention,
+			FailedRetention:      cfg.MessageQueue.FailedRetention,
+			WorkersPerInstance:   1, // CRITICAL: Must be 1 for FIFO ordering
+		}
+
+		coordinatorConfig := &queue.CoordinatorConfig{
+			Pool:            pgPool,
+			ClientRegistry:  &queueClientRegistryAdapter{registry: registry},
+			Processor:       queue.NewWhatsAppMessageProcessor(logger),
+			Config:          queueConfig,
+			Logger:          logger,
+			CleanupInterval: cfg.MessageQueue.CleanupInterval,
+			CleanupTimeout:  cfg.MessageQueue.CleanupTimeout,
+			Metrics:         metrics,
+		}
+
+		messageCoordinator, err = queue.NewCoordinator(ctx, coordinatorConfig)
+		if err != nil {
+			logger.Error("failed to initialize message queue coordinator", slog.String("error", err.Error()))
+			os.Exit(1)
+		}
+
+		logger.Info("message queue coordinator initialized",
+			slog.Duration("poll_interval", cfg.MessageQueue.PollInterval),
+			slog.Int("max_attempts", cfg.MessageQueue.MaxAttempts))
+
+		// Create message handler for HTTP endpoints
+		messageHandler = handlers.NewMessageHandler(
+			messageCoordinator,
+			instanceService,
+			contactsService,
+			chatsService,
+			logger,
+			cfg.Shutdown.QueueDrainTimeout,
+		)
+
+		// Cleanup on shutdown
+		defer func() {
+			logger.Info("stopping message queue coordinator")
+			shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 30*time.Second)
+			if err := messageCoordinator.Stop(shutdownCtx); err != nil {
+				logger.Error("message queue coordinator stop error", slog.String("error", err.Error()))
+			}
+			shutdownCancel()
+			logger.Info("message queue coordinator stopped")
+		}()
+	}
+
+	groupsProvider := groups.NewRegistryClientProvider(registry, repo, logger)
+	groupsService := groups.NewService(groupsProvider, logger)
+
+	communitiesProvider := communities.NewRegistryClientProvider(registry, repo, logger)
+	communitiesService := communities.NewService(communitiesProvider, groupsService, logger)
+
+	newslettersProvider := newsletters.NewRegistryClientProvider(registry, repo, logger)
+	newslettersService := newsletters.NewService(newslettersProvider, logger)
+
 	instanceHandler := handlers.NewInstanceHandler(instanceService, logger)
 	partnerHandler := handlers.NewPartnerHandler(instanceService, logger)
 	healthHandler := handlers.NewHealthHandler(pgPool, lockManager)
+	groupsHandler := handlers.NewGroupsHandler(instanceService, groupsService, communitiesService, metrics, logger)
+	communitiesHandler := handlers.NewCommunitiesHandler(instanceService, communitiesService, metrics, logger)
+	newslettersHandler := handlers.NewNewslettersHandler(instanceService, newslettersService, metrics, logger)
 
 	healthHandler.SetMetrics(func(component, status string) {
 		metrics.HealthChecks.WithLabelValues(component, status).Inc()
 	})
 
 	router := apihandler.NewRouter(apihandler.RouterDeps{
-		Logger:          logger,
-		Metrics:         metrics,
-		SentryHandler:   sentryHandler,
-		InstanceHandler: instanceHandler,
-		PartnerHandler:  partnerHandler,
-		HealthHandler:   healthHandler,
-		MediaHandler:    mediaHTTPHandler,
-		PartnerToken:    cfg.Partner.AuthToken,
-		DocsConfig:      docs.Config{BaseURL: cfg.HTTP.BaseURL},
+		Logger:             logger,
+		Metrics:            metrics,
+		SentryHandler:      sentryHandler,
+		InstanceHandler:    instanceHandler,
+		PartnerHandler:     partnerHandler,
+		HealthHandler:      healthHandler,
+		MediaHandler:       mediaHTTPHandler,
+		MessageHandler:     messageHandler,
+		GroupsHandler:      groupsHandler,
+		CommunitiesHandler: communitiesHandler,
+		NewslettersHandler: newslettersHandler,
+		PartnerToken:       cfg.Partner.AuthToken,
+		DocsConfig:         docs.Config{BaseURL: cfg.HTTP.BaseURL},
 	})
 
 	server := apihandler.NewServer(
@@ -397,6 +609,15 @@ func main() {
 	defer emergencyTimeout.Stop()
 
 	logger.Info("starting graceful shutdown sequence")
+
+	if messageCoordinator != nil {
+		logger.Info("draining message queue before shutdown")
+		drainCtx, drainCancel := context.WithTimeout(context.Background(), cfg.Shutdown.QueueDrainTimeout)
+		if err := messageCoordinator.DrainQueue(drainCtx); err != nil {
+			logger.Error("queue drain error", slog.String("error", err.Error()))
+		}
+		drainCancel()
+	}
 
 	logger.Info("releasing redis locks")
 	released := registry.ReleaseAllLocks()

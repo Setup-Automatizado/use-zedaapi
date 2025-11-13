@@ -18,8 +18,10 @@ import (
 	"github.com/google/uuid"
 	_ "github.com/lib/pq"
 	pq "github.com/lib/pq"
+	"github.com/redis/go-redis/v9"
 
 	"go.mau.fi/libsignal/keys/prekey"
+
 	"go.mau.fi/whatsmeow"
 	"go.mau.fi/whatsmeow/proto/waCompanionReg"
 	"go.mau.fi/whatsmeow/store"
@@ -33,6 +35,7 @@ import (
 	eventctx "go.mau.fi/whatsmeow/api/internal/events/eventctx"
 	"go.mau.fi/whatsmeow/api/internal/events/media"
 	"go.mau.fi/whatsmeow/api/internal/locks"
+	"go.mau.fi/whatsmeow/api/internal/logging"
 	"go.mau.fi/whatsmeow/api/internal/observability"
 )
 
@@ -41,65 +44,179 @@ type StoreLink struct {
 	StoreJID string
 }
 
+type ConnectionState struct {
+	Connected       bool
+	Status          string
+	LastConnectedAt *time.Time
+	WorkerID        *string
+	DesiredWorkerID *string
+}
+
 type InstanceRepository interface {
 	ListInstancesWithStoreJID(ctx context.Context) ([]StoreLink, error)
+	UpdateConnectionStatus(ctx context.Context, id uuid.UUID, connected bool, status string, workerID *string, desiredWorkerID *string) error
+	GetConnectionState(ctx context.Context, id uuid.UUID) (*ConnectionState, error)
 }
 
 type InstanceInfo struct {
 	ID            uuid.UUID
 	Name          string
 	SessionName   string
-	ClientToken   string
 	InstanceToken string
 	StoreJID      *string
 }
 
 type StatusSnapshot struct {
-	Connected     bool
-	StoreJID      *string
-	LastConnected time.Time
-	AutoReconnect bool
-	WorkerID      string
+	Connected        bool
+	ConnectionStatus string
+	StoreJID         *string
+	LastConnected    *time.Time
+	AutoReconnect    bool
+	WorkerID         string
 }
 
+type ContactMetadataConfig struct {
+	CacheCapacity   int
+	NameTTL         time.Duration
+	PhotoTTL        time.Duration
+	ErrorTTL        time.Duration
+	PrefetchWorkers int
+	FetchQueueSize  int
+}
+
+func (c ContactMetadataConfig) withDefaults() ContactMetadataConfig {
+	if c.CacheCapacity <= 0 {
+		c.CacheCapacity = defaultCacheCapacity
+	}
+	if c.NameTTL <= 0 {
+		c.NameTTL = defaultNameTTL
+	}
+	if c.PhotoTTL <= 0 {
+		c.PhotoTTL = defaultPhotoTTL
+	}
+	if c.ErrorTTL <= 0 {
+		c.ErrorTTL = defaultErrorTTL
+	}
+	if c.PrefetchWorkers <= 0 {
+		c.PrefetchWorkers = 4
+	}
+	if c.FetchQueueSize <= 0 {
+		c.FetchQueueSize = 1024
+	}
+	return c
+}
+
+type AutoConnectConfig struct {
+	Enabled        bool
+	MaxAttempts    int
+	InitialBackoff time.Duration
+	MaxBackoff     time.Duration
+}
+
+func (c AutoConnectConfig) withDefaults() AutoConnectConfig {
+	if c.MaxAttempts <= 0 {
+		c.MaxAttempts = 3
+	}
+	if c.InitialBackoff <= 0 {
+		c.InitialBackoff = time.Second
+	}
+	if c.MaxBackoff <= 0 {
+		c.MaxBackoff = 10 * time.Second
+	}
+	if c.MaxBackoff < c.InitialBackoff {
+		c.MaxBackoff = c.InitialBackoff
+	}
+	return c
+}
+
+type LockConfig struct {
+	KeyPrefix       string
+	TTL             time.Duration
+	RefreshInterval time.Duration
+}
+
+func (c LockConfig) withDefaults() LockConfig {
+	if c.KeyPrefix == "" {
+		c.KeyPrefix = "funnelchat"
+	}
+	if c.TTL <= 0 {
+		c.TTL = 30 * time.Second
+	}
+	if c.RefreshInterval <= 0 || c.RefreshInterval >= c.TTL {
+		c.RefreshInterval = c.TTL / 2
+	}
+	return c
+}
+
+type WorkerDirectory interface {
+	AssignedOwner(id uuid.UUID) string
+}
+
+var ErrNotAssignedOwner = errors.New("instance not assigned to this worker")
+
 type ClientRegistry struct {
-	log                 *slog.Logger
-	workerID            string
-	container           *sqlstore.Container
-	lockManager         locks.Manager
-	repo                InstanceRepository
-	pairCallback        func(context.Context, uuid.UUID, string) error
-	resetCallback       func(context.Context, uuid.UUID, string) error
-	logLevel            string
-	mu                  sync.RWMutex
-	clients             map[uuid.UUID]*clientState
-	creationLocks       sync.Map
-	activeLocks         map[uuid.UUID]locks.Lock
-	activeLocksMu       sync.RWMutex
-	splitBrainTicker    *time.Ticker
-	splitBrainStop      chan struct{}
-	splitBrainRunning   bool
-	splitBrainMu        sync.Mutex
-	metrics             ClientRegistryMetrics
-	eventIntegration    *internalevents.IntegrationHelper
-	dispatchCoordinator *dispatch.Coordinator
-	mediaCoordinator    *media.MediaCoordinator
+	log                  *slog.Logger
+	workerID             string
+	hostname             string
+	container            *sqlstore.Container
+	lockManager          locks.Manager
+	repo                 InstanceRepository
+	pairCallback         func(context.Context, uuid.UUID, string) error
+	resetCallback        func(context.Context, uuid.UUID, string) error
+	logLevel             string
+	mu                   sync.RWMutex
+	clients              map[uuid.UUID]*clientState
+	creationLocks        sync.Map
+	activeLocks          map[uuid.UUID]locks.Lock
+	activeLocksMu        sync.RWMutex
+	splitBrainTicker     *time.Ticker
+	splitBrainStop       chan struct{}
+	splitBrainRunning    bool
+	splitBrainMu         sync.Mutex
+	metrics              ClientRegistryMetrics
+	obsMetrics           *observability.Metrics
+	eventIntegration     *internalevents.IntegrationHelper
+	dispatchCoordinator  *dispatch.Coordinator
+	mediaCoordinator     *media.MediaCoordinator
+	contactMetadataCfg   ContactMetadataConfig
+	contactMetadataRedis *redis.Client
+	eventHandlerTimeout  time.Duration
+	autoConnectCfg       AutoConnectConfig
+	lockTTL              time.Duration
+	lockRefreshInterval  time.Duration
+	lockKeyPrefix        string
+	workerDirectory      WorkerDirectory
+	rebalanceTicker      *time.Ticker
+	rebalanceStop        chan struct{}
+
+	reconcileMu       sync.Mutex
+	reconcileTicker   *time.Ticker
+	reconcileCancel   context.CancelFunc
+	reconcileDone     chan struct{}
+	reconcileRunning  bool
+	reconcileInterval time.Duration
+
+	connectOverride        func(*whatsmeow.Client) error
+	isConnectedOverride    func(*whatsmeow.Client) bool
+	ensureWithLockOverride func(context.Context, InstanceInfo, locks.Lock) (*whatsmeow.Client, bool, error)
 }
 
 type clientState struct {
-	client         *whatsmeow.Client
-	lastConnected  time.Time
-	storeJID       *string
-	pairing        *pairingSession
-	wasNewInstance bool
-	createdAt      time.Time
-	primarySession bool
-
-	lock              locks.Lock
-	lockRefreshCancel context.CancelFunc
-	lockMode          string
-	contactCache      *contactMetadataCache
-	lidResolver       eventctx.LIDResolver
+	client             *whatsmeow.Client
+	lastConnected      time.Time
+	connectionStatus   string
+	storeJID           *string
+	pairing            *pairingSession
+	wasNewInstance     bool
+	createdAt          time.Time
+	primarySession     bool
+	lock               locks.Lock
+	lockRefreshCancel  context.CancelFunc
+	lockMode           string
+	contactCache       *contactMetadataCache
+	lidResolver        eventctx.LIDResolver
+	pollDecrypter      eventctx.PollDecrypter
+	autoConnectStarted bool
 }
 
 type ClientRegistryMetrics struct {
@@ -154,6 +271,12 @@ func NewClientRegistry(
 	eventIntegration *internalevents.IntegrationHelper,
 	dispatchCoordinator *dispatch.Coordinator,
 	mediaCoordinator *media.MediaCoordinator,
+	eventHandlerTimeout time.Duration,
+	contactMetadataCfg ContactMetadataConfig,
+	contactMetadataRedis *redis.Client,
+	autoConnectCfg AutoConnectConfig,
+	lockCfg LockConfig,
+	obsMetrics *observability.Metrics,
 ) (*ClientRegistry, error) {
 	if logger == nil {
 		logger = slog.New(slog.NewJSONHandler(os.Stdout, nil))
@@ -177,21 +300,42 @@ func NewClientRegistry(
 	}
 
 	hostname, _ := os.Hostname()
+	contactCfg := contactMetadataCfg.withDefaults()
+	autoCfg := autoConnectCfg.withDefaults()
+	lockConfiguration := lockCfg.withDefaults()
+	workerIdentifier := fmt.Sprintf("%s-%s", hostname, uuid.NewString())
 	return &ClientRegistry{
-		log:                 logger,
-		workerID:            hostname,
-		container:           container,
-		lockManager:         lockManager,
-		repo:                repo,
-		pairCallback:        pairCallback,
-		resetCallback:       resetCallback,
-		logLevel:            logLevel,
-		clients:             make(map[uuid.UUID]*clientState),
-		activeLocks:         make(map[uuid.UUID]locks.Lock),
-		eventIntegration:    eventIntegration,
-		dispatchCoordinator: dispatchCoordinator,
-		mediaCoordinator:    mediaCoordinator,
+		log:                  logger,
+		workerID:             workerIdentifier,
+		hostname:             hostname,
+		container:            container,
+		lockManager:          lockManager,
+		repo:                 repo,
+		pairCallback:         pairCallback,
+		resetCallback:        resetCallback,
+		logLevel:             logLevel,
+		clients:              make(map[uuid.UUID]*clientState),
+		activeLocks:          make(map[uuid.UUID]locks.Lock),
+		eventIntegration:     eventIntegration,
+		dispatchCoordinator:  dispatchCoordinator,
+		mediaCoordinator:     mediaCoordinator,
+		contactMetadataCfg:   contactCfg,
+		contactMetadataRedis: contactMetadataRedis,
+		eventHandlerTimeout:  eventHandlerTimeout,
+		autoConnectCfg:       autoCfg,
+		lockTTL:              lockConfiguration.TTL,
+		lockRefreshInterval:  lockConfiguration.RefreshInterval,
+		lockKeyPrefix:        lockConfiguration.KeyPrefix,
+		obsMetrics:           obsMetrics,
 	}, nil
+}
+
+func (r *ClientRegistry) WorkerID() string {
+	return r.workerID
+}
+
+func (r *ClientRegistry) WorkerHostname() string {
+	return r.hostname
 }
 
 func (r *ClientRegistry) EnsureClientWithLock(ctx context.Context, info InstanceInfo, externalLock locks.Lock) (*whatsmeow.Client, bool, error) {
@@ -238,6 +382,14 @@ func (r *ClientRegistry) EnsureClientWithLock(ctx context.Context, info Instance
 		r.ResetClient(info.ID, "store_missing")
 	}
 
+	if !ok && !r.canHandleInstance(info.ID) {
+		return nil, false, ErrNotAssignedOwner
+	}
+
+	if !ok && !r.canHandleInstance(info.ID) {
+		return nil, false, ErrNotAssignedOwner
+	}
+
 	client, storeReset, lock, err := r.instantiateClientWithLock(ctx, info, externalLock)
 	if err != nil {
 		return nil, false, err
@@ -278,6 +430,15 @@ func (r *ClientRegistry) EnsureClientWithLock(ctx context.Context, info Instance
 	r.mu.Unlock()
 
 	if lock != nil {
+		if lockMode != "redis" && !r.canHandleInstance(info.ID) {
+			if releaseErr := lock.Release(context.Background()); releaseErr != nil {
+				r.log.Warn("failed to release lock for non-owner",
+					slog.String("instanceId", info.ID.String()),
+					slog.String("error", releaseErr.Error()))
+			}
+			return nil, false, ErrNotAssignedOwner
+		}
+
 		cancelFunc := r.startLockRefresh(info.ID, lock, lockMode)
 		r.mu.Lock()
 		if state, exists := r.clients[info.ID]; exists {
@@ -308,6 +469,8 @@ func (r *ClientRegistry) EnsureClientWithLock(ctx context.Context, info Instance
 				slog.String("error", err.Error()))
 		}
 	}
+
+	r.maybeStartAutoConnect(info.ID)
 
 	return client, true, nil
 }
@@ -398,6 +561,15 @@ func (r *ClientRegistry) EnsureClient(ctx context.Context, info InstanceInfo) (*
 	r.mu.Unlock()
 
 	if lock != nil {
+		if lockMode != "redis" && !r.canHandleInstance(info.ID) {
+			if releaseErr := lock.Release(context.Background()); releaseErr != nil {
+				r.log.Warn("failed to release lock for non-owner",
+					slog.String("instanceId", info.ID.String()),
+					slog.String("error", releaseErr.Error()))
+			}
+			return nil, false, ErrNotAssignedOwner
+		}
+
 		cancelFunc := r.startLockRefresh(info.ID, lock, lockMode)
 		r.log.Debug("started lock refresh goroutine",
 			slog.String("instanceId", info.ID.String()),
@@ -432,7 +604,133 @@ func (r *ClientRegistry) EnsureClient(ctx context.Context, info InstanceInfo) (*
 		}
 	}
 
+	r.maybeStartAutoConnect(info.ID)
+
 	return client, true, nil
+}
+
+func (r *ClientRegistry) maybeStartAutoConnect(instanceID uuid.UUID) {
+	if !r.autoConnectCfg.Enabled {
+		return
+	}
+
+	r.mu.Lock()
+	state, ok := r.clients[instanceID]
+	if !ok || state == nil || state.client == nil {
+		r.mu.Unlock()
+		return
+	}
+	if state.autoConnectStarted {
+		r.mu.Unlock()
+		return
+	}
+
+	paired := state.storeJID != nil && *state.storeJID != ""
+	if !state.wasNewInstance && !paired {
+		r.mu.Unlock()
+		return
+	}
+
+	state.autoConnectStarted = true
+	client := state.client
+	wasNew := state.wasNewInstance
+	r.mu.Unlock()
+
+	go r.autoConnectInstance(instanceID, client, wasNew)
+}
+
+func (r *ClientRegistry) isClientConnected(client *whatsmeow.Client) bool {
+	if r.isConnectedOverride != nil {
+		return r.isConnectedOverride(client)
+	}
+	return client.IsConnected()
+}
+
+func (r *ClientRegistry) connectClient(client *whatsmeow.Client) error {
+	if r.connectOverride != nil {
+		return r.connectOverride(client)
+	}
+	return client.Connect()
+}
+
+func (r *ClientRegistry) autoConnectInstance(instanceID uuid.UUID, client *whatsmeow.Client, wasNew bool) {
+	if client == nil {
+		return
+	}
+
+	r.mu.RLock()
+	state, ok := r.clients[instanceID]
+	if !ok || state == nil || state.client != client {
+		r.mu.RUnlock()
+		return
+	}
+	r.mu.RUnlock()
+
+	cfg := r.autoConnectCfg.withDefaults()
+	logger := r.log.With(
+		slog.String("component", "client_registry"),
+		slog.String("worker", "auto_connect"),
+		slog.String("instanceId", instanceID.String()),
+		slog.Bool("new_instance", wasNew),
+	)
+
+	time.Sleep(100 * time.Millisecond)
+
+	backoff := cfg.InitialBackoff
+	maxBackoff := cfg.MaxBackoff
+	if maxBackoff < backoff {
+		maxBackoff = backoff
+	}
+
+	maxAttempts := cfg.MaxAttempts
+	if maxAttempts <= 0 {
+		maxAttempts = 3
+	}
+
+	for attempt := 1; attempt <= maxAttempts; attempt++ {
+		r.mu.RLock()
+		currentState, ok := r.clients[instanceID]
+		r.mu.RUnlock()
+		if !ok || currentState == nil || currentState.client != client {
+			logger.Debug("auto-connect aborted - client state removed",
+				slog.Int("attempt", attempt))
+			return
+		}
+
+		if r.isClientConnected(client) {
+			logger.Debug("auto-connect skipped, already connected",
+				slog.Int("attempt", attempt))
+			r.persistConnectionStatus(instanceID, true, "connected", nil)
+			return
+		}
+
+		r.persistConnectionStatus(instanceID, false, "connecting", nil)
+
+		if err := r.connectClient(client); err != nil {
+			logger.Warn("auto-connect attempt failed",
+				slog.Int("attempt", attempt),
+				slog.String("error", err.Error()))
+			r.persistConnectionStatus(instanceID, false, "connect_failed", nil)
+
+			if attempt == maxAttempts {
+				break
+			}
+
+			time.Sleep(backoff)
+			backoff = time.Duration(float64(backoff) * 2)
+			if backoff > maxBackoff {
+				backoff = maxBackoff
+			}
+			continue
+		}
+
+		logger.Info("auto-connect successful", slog.Int("attempt", attempt))
+		r.persistConnectionStatus(instanceID, true, "connected", nil)
+		return
+	}
+
+	logger.Error("auto-connect exhausted attempts",
+		slog.Int("attempts", maxAttempts))
 }
 
 func (r *ClientRegistry) startLockRefresh(instanceID uuid.UUID, lock locks.Lock, lockMode string) context.CancelFunc {
@@ -465,7 +763,7 @@ func (r *ClientRegistry) startLockRefresh(instanceID uuid.UUID, lock locks.Lock,
 	ctx, cancel := context.WithCancel(workerCtx)
 
 	go func() {
-		ticker := time.NewTicker(10 * time.Second)
+		ticker := time.NewTicker(r.lockRefreshIntervalDuration())
 		defer ticker.Stop()
 
 		baseLogger.Debug("started lock refresh goroutine")
@@ -498,10 +796,10 @@ func (r *ClientRegistry) startLockRefresh(instanceID uuid.UUID, lock locks.Lock,
 						iterationLogger.Debug("checking circuit breaker state for lock reacquisition",
 							slog.Int("circuit_state", int(circuitState)))
 
-						if circuitState == locks.StateClosed {
-							iterationLogger.Info("Redis recovered - attempting to reacquire real lock")
+							if circuitState == locks.StateClosed {
+								iterationLogger.Info("Redis recovered - attempting to reacquire real lock")
 
-							lockKey := fmt.Sprintf("funnelchat:instance:%s", instanceID.String())
+								lockKey := r.lockKey(instanceID)
 
 							var newLock locks.Lock
 							var acquired bool
@@ -510,7 +808,7 @@ func (r *ClientRegistry) startLockRefresh(instanceID uuid.UUID, lock locks.Lock,
 							for attempt := 1; attempt <= 3; attempt++ {
 								attemptLogger := iterationLogger.With(slog.Int("attempt", attempt))
 								acquireCtx, acquireCancel := context.WithTimeout(workerCtx, 3*time.Second)
-								newLock, acquired, acquireErr = r.lockManager.Acquire(acquireCtx, lockKey, 30)
+									newLock, acquired, acquireErr = r.lockManager.Acquire(acquireCtx, lockKey, r.lockTTLSeconds())
 								acquireCancel()
 
 								if acquireErr == nil && acquired && newLock != nil {
@@ -609,7 +907,7 @@ func (r *ClientRegistry) startLockRefresh(instanceID uuid.UUID, lock locks.Lock,
 				}
 
 				refreshCtx, refreshCancel := context.WithTimeout(workerCtx, 2*time.Second)
-				err := lock.Refresh(refreshCtx, 30)
+				err := lock.Refresh(refreshCtx, r.lockTTLSeconds())
 				refreshCancel()
 
 				if err != nil {
@@ -761,9 +1059,9 @@ func (r *ClientRegistry) instantiateClientWithLock(ctx context.Context, info Ins
 		r.log.Warn("lock manager not configured - multi-replica coordination disabled",
 			slog.String("instanceId", info.ID.String()))
 	} else if !lockAlreadyHeld {
-		key := fmt.Sprintf("funnelchat:instance:%s", info.ID.String())
+		key := r.lockKey(info.ID)
 		var acquired bool
-		lock, acquired, err = r.lockManager.Acquire(ctx, key, 30)
+		lock, acquired, err = r.lockManager.Acquire(ctx, key, r.lockTTLSeconds())
 		if err != nil {
 			return nil, false, nil, fmt.Errorf("failed to acquire redis lock (redis unavailable): %w", err)
 		}
@@ -986,6 +1284,8 @@ func (r *ClientRegistry) resetClient(instanceID uuid.UUID, reason string, delete
 		go r.notifyReset(instanceID, reason)
 	}
 
+	r.persistConnectionStatus(instanceID, false, reason, nil)
+
 	return true
 }
 
@@ -1130,8 +1430,9 @@ func (r *ClientRegistry) ensurePrimarySignalSession(instanceID uuid.UUID, client
 func (r *ClientRegistry) wrapEventHandler(instanceID uuid.UUID) func(evt interface{}) {
 	return func(evt interface{}) {
 		var (
-			provider eventctx.ContactMetadataProvider
-			resolver eventctx.LIDResolver
+			provider  eventctx.ContactMetadataProvider
+			resolver  eventctx.LIDResolver
+			decrypter eventctx.PollDecrypter
 		)
 
 		r.mu.Lock()
@@ -1143,6 +1444,9 @@ func (r *ClientRegistry) wrapEventHandler(instanceID uuid.UUID) func(evt interfa
 						slog.String("component", "contact_metadata_cache"),
 						slog.String("instanceId", instanceID.String()),
 					),
+					instanceID,
+					r.contactMetadataCfg,
+					r.contactMetadataRedis,
 				)
 			}
 			provider = state.contactCache
@@ -1156,6 +1460,16 @@ func (r *ClientRegistry) wrapEventHandler(instanceID uuid.UUID) func(evt interfa
 				)
 			}
 			resolver = state.lidResolver
+			if state.pollDecrypter == nil {
+				state.pollDecrypter = newPollDecrypter(
+					state.client,
+					r.log.With(
+						slog.String("component", "poll_decrypter"),
+						slog.String("instanceId", instanceID.String()),
+					),
+				)
+			}
+			decrypter = state.pollDecrypter
 		}
 		r.mu.Unlock()
 
@@ -1166,9 +1480,16 @@ func (r *ClientRegistry) wrapEventHandler(instanceID uuid.UUID) func(evt interfa
 		if resolver != nil {
 			ctx = eventctx.WithLIDResolver(ctx, resolver)
 		}
+		if decrypter != nil {
+			ctx = eventctx.WithPollDecrypter(ctx, decrypter)
+		}
 
 		if r.eventIntegration != nil {
-			eventCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
+			timeout := r.eventHandlerTimeout
+			if timeout <= 0 {
+				timeout = 60 * time.Second
+			}
+			eventCtx, cancel := context.WithTimeout(ctx, timeout)
 			r.eventIntegration.WrapEventHandler(eventCtx, instanceID, evt)
 			cancel()
 		}
@@ -1215,6 +1536,7 @@ func (r *ClientRegistry) wrapEventHandler(instanceID uuid.UUID) func(evt interfa
 				sessionReady bool
 			)
 			if state, ok := r.clients[instanceID]; ok {
+				state.connectionStatus = "connected"
 				state.lastConnected = time.Now().UTC()
 				if state.client != nil && state.client.Store != nil && state.client.Store.ID != nil {
 					jid := state.client.Store.ID.String()
@@ -1228,6 +1550,7 @@ func (r *ClientRegistry) wrapEventHandler(instanceID uuid.UUID) func(evt interfa
 				r.ensurePrimarySignalSession(instanceID, client)
 			}
 			r.announcePresenceAvailable(instanceID, "connected")
+			r.persistConnectionStatus(instanceID, true, "connected", nil)
 
 		case *events.PushNameSetting:
 			r.announcePresenceAvailable(instanceID, "push_name_setting")
@@ -1264,6 +1587,11 @@ func (r *ClientRegistry) wrapEventHandler(instanceID uuid.UUID) func(evt interfa
 			}
 
 		case *events.Disconnected:
+			r.mu.Lock()
+			if state, ok := r.clients[instanceID]; ok {
+				state.connectionStatus = "disconnected"
+			}
+			r.mu.Unlock()
 			r.announcePresenceUnavailable(instanceID, "disconnected")
 			if r.eventIntegration != nil {
 				if err := r.eventIntegration.OnInstanceDisconnect(ctx, instanceID); err != nil {
@@ -1274,8 +1602,14 @@ func (r *ClientRegistry) wrapEventHandler(instanceID uuid.UUID) func(evt interfa
 			}
 
 			r.log.Warn("instance disconnected", slog.String("instanceId", instanceID.String()))
+			r.persistConnectionStatus(instanceID, false, "disconnected", nil)
 
 		case *events.LoggedOut:
+			r.mu.Lock()
+			if state, ok := r.clients[instanceID]; ok {
+				state.connectionStatus = "logged_out"
+			}
+			r.mu.Unlock()
 			r.announcePresenceUnavailable(instanceID, "logged_out")
 			if r.dispatchCoordinator != nil {
 				if err := r.dispatchCoordinator.UnregisterInstance(ctx, instanceID); err != nil {
@@ -1308,6 +1642,8 @@ func (r *ClientRegistry) wrapEventHandler(instanceID uuid.UUID) func(evt interfa
 			r.log.Warn("instance logged out",
 				slog.String("instanceId", instanceID.String()),
 				slog.String("reason", reason))
+			emptyWorker := ""
+			r.persistConnectionStatus(instanceID, false, reason, &emptyWorker)
 			r.ResetClient(instanceID, reason)
 
 		case *events.PairError:
@@ -1339,7 +1675,7 @@ func (r *ClientRegistry) announcePresence(instanceID uuid.UUID, presence types.P
 	}
 
 	go func() {
-		if err := client.SendPresence(presence); err != nil {
+		if err := client.SendPresence(context.Background(), presence); err != nil {
 			r.log.Warn("failed to send presence update",
 				slog.String("instanceId", instanceID.String()),
 				slog.String("reason", reason),
@@ -1364,12 +1700,41 @@ func (r *ClientRegistry) getClient(instanceID uuid.UUID) *whatsmeow.Client {
 	return nil
 }
 
+// GetClient returns a WhatsApp client for the given instance ID.
+// This is a public wrapper around getClient for use by other packages.
+// Returns the client and a boolean indicating if it was found.
+func (r *ClientRegistry) GetClient(instanceID uuid.UUID) (*whatsmeow.Client, bool) {
+	client := r.getClient(instanceID)
+	return client, client != nil
+}
+
 func (r *ClientRegistry) Status(info InstanceInfo) StatusSnapshot {
 	r.mu.RLock()
 	state, ok := r.clients[info.ID]
 	r.mu.RUnlock()
 	if !ok {
-		return StatusSnapshot{Connected: false, StoreJID: info.StoreJID, WorkerID: r.workerID}
+		snapshot := StatusSnapshot{
+			Connected:        false,
+			ConnectionStatus: "disconnected",
+			StoreJID:         info.StoreJID,
+			AutoReconnect:    false,
+			WorkerID:         r.workerID,
+		}
+
+		if repoState := r.loadRepoConnectionState(info.ID); repoState != nil {
+			snapshot.Connected = repoState.Connected
+			if repoState.Status != "" {
+				snapshot.ConnectionStatus = repoState.Status
+			}
+			if repoState.LastConnectedAt != nil {
+				snapshot.LastConnected = repoState.LastConnectedAt
+			}
+			if repoState.WorkerID != nil && *repoState.WorkerID != "" {
+				snapshot.WorkerID = *repoState.WorkerID
+			}
+		}
+
+		return snapshot
 	}
 
 	var storeJID *string
@@ -1380,13 +1745,147 @@ func (r *ClientRegistry) Status(info InstanceInfo) StatusSnapshot {
 		storeJID = &jid
 	}
 
-	return StatusSnapshot{
-		Connected:     state.client != nil && state.client.IsLoggedIn(),
-		StoreJID:      storeJID,
-		LastConnected: state.lastConnected,
-		AutoReconnect: state.client != nil && state.client.EnableAutoReconnect,
-		WorkerID:      r.workerID,
+	connected := state.client != nil && state.client.IsLoggedIn()
+	connectionStatus := state.connectionStatus
+	if connectionStatus == "" {
+		if connected {
+			connectionStatus = "connected"
+		} else if state.wasNewInstance {
+			connectionStatus = "initializing"
+		} else {
+			connectionStatus = "disconnected"
+		}
 	}
+
+	var lastConnected *time.Time
+	if !state.lastConnected.IsZero() {
+		lc := state.lastConnected
+		lastConnected = &lc
+	} else if repoState := r.loadRepoConnectionState(info.ID); repoState != nil && repoState.LastConnectedAt != nil {
+		lastConnected = repoState.LastConnectedAt
+		if connectionStatus == "" && repoState.Status != "" {
+			connectionStatus = repoState.Status
+		}
+	}
+
+	return StatusSnapshot{
+		Connected:        connected,
+		ConnectionStatus: connectionStatus,
+		StoreJID:         storeJID,
+		LastConnected:    lastConnected,
+		AutoReconnect:    state.client != nil && state.client.EnableAutoReconnect,
+		WorkerID:         r.workerID,
+	}
+}
+
+func (r *ClientRegistry) loadRepoConnectionState(instanceID uuid.UUID) *ConnectionState {
+	if r.repo == nil {
+		return nil
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	state, err := r.repo.GetConnectionState(ctx, instanceID)
+	if err != nil {
+		r.log.Debug("failed to load connection state from repository",
+			slog.String("instanceId", instanceID.String()),
+			slog.String("error", err.Error()))
+		return nil
+	}
+
+	return state
+}
+
+func (r *ClientRegistry) persistConnectionStatus(instanceID uuid.UUID, connected bool, status string, workerIDOverride *string) {
+	if r.repo == nil {
+		return
+	}
+
+	var workerPtr *string
+	if workerIDOverride != nil {
+		if *workerIDOverride != "" {
+			worker := *workerIDOverride
+			workerPtr = &worker
+		}
+	} else if r.workerID != "" {
+		worker := r.workerID
+		workerPtr = &worker
+	}
+
+	desiredPtr := r.desiredWorkerPointer(instanceID)
+
+	go func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		if err := r.repo.UpdateConnectionStatus(ctx, instanceID, connected, status, workerPtr, desiredPtr); err != nil {
+			r.log.Warn("failed to persist connection status",
+				slog.String("instanceId", instanceID.String()),
+				slog.String("status", status),
+				slog.String("error", err.Error()))
+		} else {
+			r.log.Debug("persisted connection status",
+				slog.String("instanceId", instanceID.String()),
+				slog.String("status", status),
+				slog.Bool("connected", connected))
+		}
+	}()
+}
+
+func (r *ClientRegistry) desiredWorkerPointer(instanceID uuid.UUID) *string {
+	if r.workerDirectory == nil {
+		if r.workerID == "" {
+			return nil
+		}
+		owner := r.workerID
+		return &owner
+	}
+	owner := r.workerDirectory.AssignedOwner(instanceID)
+	if owner == "" {
+		return nil
+	}
+	ownerCopy := owner
+	return &ownerCopy
+}
+
+func (r *ClientRegistry) canHandleInstance(instanceID uuid.UUID) bool {
+	if r.workerDirectory == nil || r.workerID == "" {
+		return true
+	}
+	owner := r.workerDirectory.AssignedOwner(instanceID)
+	return owner == "" || owner == r.workerID
+}
+
+func (r *ClientRegistry) lockKey(instanceID uuid.UUID) string {
+	prefix := r.lockKeyPrefix
+	if prefix == "" {
+		prefix = "funnelchat"
+	}
+	return fmt.Sprintf("%s:instance:%s", prefix, instanceID.String())
+}
+
+func (r *ClientRegistry) lockTTLSeconds() int {
+	ttl := r.lockTTL
+	if ttl <= 0 {
+		ttl = 30 * time.Second
+	}
+	seconds := int(ttl / time.Second)
+	if seconds <= 0 {
+		seconds = 30
+	}
+	return seconds
+}
+
+func (r *ClientRegistry) lockRefreshIntervalDuration() time.Duration {
+	interval := r.lockRefreshInterval
+	if interval <= 0 || interval >= r.lockTTL {
+		interval = r.lockTTL / 2
+	}
+	if interval <= 0 {
+		interval = 10 * time.Second
+	}
+	return interval
 }
 
 func (r *ClientRegistry) Restart(ctx context.Context, info InstanceInfo) error {
@@ -1432,6 +1931,10 @@ func (r *ClientRegistry) Disconnect(ctx context.Context, info InstanceInfo) erro
 		r.log.Debug("stopping lock refresh goroutine",
 			slog.String("instanceId", info.ID.String()))
 		state.lockRefreshCancel()
+	}
+
+	if state.contactCache != nil {
+		state.contactCache.Close()
 	}
 
 	if state.lock != nil {
@@ -1608,8 +2111,15 @@ func (r *ClientRegistry) ConnectExistingClients(ctx context.Context) (connected,
 	r.log.Info("starting reconnection of paired instances", slog.Int("total", len(links)))
 
 	for _, link := range links {
-		key := fmt.Sprintf("funnelchat:instance:%s", link.ID.String())
-		lock, acquired, err := r.lockManager.Acquire(ctx, key, 30)
+		if !r.canHandleInstance(link.ID) {
+			r.log.Debug("skipping instance (assigned to another worker)",
+				slog.String("instanceId", link.ID.String()))
+			skipped++
+			continue
+		}
+
+		key := r.lockKey(link.ID)
+		lock, acquired, err := r.lockManager.Acquire(ctx, key, r.lockTTLSeconds())
 
 		if err != nil {
 			errStr := err.Error()
@@ -1796,6 +2306,352 @@ func (r *ClientRegistry) SetSplitBrainMetrics(splitBrainCounter func()) {
 	r.SetMetrics(ClientRegistryMetrics{SplitBrainDetected: splitBrainCounter})
 }
 
+func (r *ClientRegistry) startOwnershipRebalancer(interval time.Duration) {
+	r.stopOwnershipRebalancer()
+	r.rebalanceTicker = time.NewTicker(interval)
+	r.rebalanceStop = make(chan struct{})
+	go r.runOwnershipRebalancer()
+}
+
+func (r *ClientRegistry) stopOwnershipRebalancer() {
+	if r.rebalanceStop != nil {
+		close(r.rebalanceStop)
+		r.rebalanceStop = nil
+	}
+	if r.rebalanceTicker != nil {
+		r.rebalanceTicker.Stop()
+		r.rebalanceTicker = nil
+	}
+}
+
+func (r *ClientRegistry) runOwnershipRebalancer() {
+	for {
+		select {
+		case <-r.rebalanceStop:
+			return
+		case <-r.rebalanceTicker.C:
+			r.performOwnershipRebalance()
+		}
+	}
+}
+
+func (r *ClientRegistry) performOwnershipRebalance() {
+	if r.workerDirectory == nil {
+		return
+	}
+	r.mu.RLock()
+	ids := make([]uuid.UUID, 0, len(r.clients))
+	for id := range r.clients {
+		ids = append(ids, id)
+	}
+	r.mu.RUnlock()
+
+	for _, id := range ids {
+		owner := r.workerDirectory.AssignedOwner(id)
+		if owner == "" || owner == r.workerID {
+			continue
+		}
+		r.log.Info("handing off instance to new worker",
+			slog.String("instanceId", id.String()),
+			slog.String("currentWorker", r.workerID),
+			slog.String("assignedWorker", owner))
+		r.resetClient(id, "ownership_rebalance", false)
+	}
+}
+
+func (r *ClientRegistry) AttachWorkerDirectory(dir WorkerDirectory, rebalanceInterval time.Duration) {
+	r.workerDirectory = dir
+	if dir == nil {
+		r.stopOwnershipRebalancer()
+		return
+	}
+	if rebalanceInterval <= 0 {
+		rebalanceInterval = 30 * time.Second
+	}
+	r.startOwnershipRebalancer(rebalanceInterval)
+}
+
+func (r *ClientRegistry) StartReconciliationWorker(ctx context.Context, interval time.Duration) {
+	if r.repo == nil {
+		r.log.Warn("reconciliation worker disabled - repository not configured")
+		return
+	}
+
+	if interval <= 0 {
+		interval = 10 * time.Second
+	}
+
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	r.reconcileMu.Lock()
+	if r.reconcileRunning {
+		r.reconcileMu.Unlock()
+		r.log.Warn("reconciliation worker already running")
+		return
+	}
+
+	workerLogger := r.log.With(
+		slog.String("component", "client_registry"),
+		slog.String("worker", "reconciliation"),
+	)
+	workerCtx := logging.WithLogger(ctx, workerLogger)
+	workerCtx, cancel := context.WithCancel(workerCtx)
+
+	ticker := time.NewTicker(interval)
+	done := make(chan struct{})
+
+	r.reconcileCancel = cancel
+	r.reconcileDone = done
+	r.reconcileTicker = ticker
+	r.reconcileRunning = true
+	r.reconcileInterval = interval
+	r.reconcileMu.Unlock()
+
+	workerLogger.Info("started reconciliation worker",
+		slog.Duration("interval", interval))
+
+	go r.runReconciliationWorker(workerCtx, ticker, done, workerLogger)
+}
+
+func (r *ClientRegistry) StopReconciliationWorker() {
+	r.reconcileMu.Lock()
+	if !r.reconcileRunning {
+		r.reconcileMu.Unlock()
+		return
+	}
+
+	cancel := r.reconcileCancel
+	done := r.reconcileDone
+	ticker := r.reconcileTicker
+
+	r.reconcileCancel = nil
+	r.reconcileDone = nil
+	r.reconcileTicker = nil
+	r.reconcileRunning = false
+	r.reconcileInterval = 0
+	r.reconcileMu.Unlock()
+
+	if cancel != nil {
+		cancel()
+	}
+	if ticker != nil {
+		ticker.Stop()
+	}
+
+	if done != nil {
+		select {
+		case <-done:
+			r.log.Info("reconciliation worker stopped")
+		case <-time.After(5 * time.Second):
+			r.log.Warn("reconciliation worker stop timeout")
+		}
+	}
+}
+
+func (r *ClientRegistry) runReconciliationWorker(ctx context.Context, ticker *time.Ticker, done chan struct{}, logger *slog.Logger) {
+	defer close(done)
+	defer func() {
+		if rec := recover(); rec != nil {
+			err := fmt.Errorf("reconciliation worker panic: %v", rec)
+			logger.Error("reconciliation worker panic", slog.Any("panic", rec))
+			observability.CaptureWorkerException(ctx, "client_registry", "reconciliation", "", err)
+		}
+	}()
+	defer ticker.Stop()
+
+	r.reconcileOrphanedInstances(ctx, logger)
+
+	for {
+		select {
+		case <-ctx.Done():
+			logger.Info("reconciliation worker stopped by context")
+			return
+		case <-ticker.C:
+			r.reconcileOrphanedInstances(ctx, logger)
+		}
+	}
+}
+
+func (r *ClientRegistry) reconcileOrphanedInstances(ctx context.Context, logger *slog.Logger) {
+	if r.repo == nil {
+		return
+	}
+
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	if logger == nil {
+		logger = logging.ContextLogger(ctx, r.log).With(
+			slog.String("component", "client_registry"),
+			slog.String("worker", "reconciliation"),
+		)
+	}
+
+	listCtx, cancel := context.WithTimeout(ctx, 15*time.Second)
+	links, err := r.repo.ListInstancesWithStoreJID(listCtx)
+	cancel()
+	if err != nil {
+		logger.Error("reconciliation: list instances failed",
+			slog.String("error", err.Error()))
+		r.recordReconciliationAttempt("error")
+		return
+	}
+
+	r.mu.RLock()
+	orphaned := make([]StoreLink, 0, len(links))
+	for _, link := range links {
+		if _, exists := r.clients[link.ID]; exists {
+			continue
+		}
+		orphaned = append(orphaned, link)
+	}
+	r.mu.RUnlock()
+
+	if r.obsMetrics != nil && r.obsMetrics.OrphanedInstances != nil {
+		r.obsMetrics.OrphanedInstances.Set(float64(len(orphaned)))
+	}
+
+	if len(orphaned) == 0 {
+		logger.Debug("reconciliation: no orphaned instances found",
+			slog.Int("paired_instances", len(links)))
+		return
+	}
+
+	logger.Info("reconciliation: recovering orphaned instances",
+		slog.Int("count", len(orphaned)))
+
+	for _, link := range orphaned {
+		if ctx.Err() != nil {
+			logger.Debug("reconciliation: context cancelled, stopping recovery")
+			return
+		}
+
+		start := time.Now()
+		instanceLogger := logger.With(slog.String("instanceId", link.ID.String()))
+
+		if !r.canHandleInstance(link.ID) {
+			logger.Debug("reconciliation: instance assigned to another worker",
+				slog.String("instanceId", link.ID.String()))
+			r.recordReconciliationAttempt("skipped")
+			continue
+		}
+
+		key := r.lockKey(link.ID)
+
+		var (
+			lock     locks.Lock
+			acquired bool
+			lockErr  error
+		)
+
+		if r.lockManager != nil {
+			lockCtx, lockCancel := context.WithTimeout(ctx, 5*time.Second)
+			lock, acquired, lockErr = r.lockManager.Acquire(lockCtx, key, r.lockTTLSeconds())
+			lockCancel()
+		} else {
+			lock = &noOpLock{}
+			acquired = true
+		}
+
+		if lockErr != nil {
+			if isRedisConnectivityError(lockErr) {
+				instanceLogger.Warn("reconciliation: redis unavailable, using in-memory lock")
+				lock = &noOpLock{}
+				acquired = true
+			} else {
+				instanceLogger.Debug("reconciliation: lock acquire error",
+					slog.String("error", lockErr.Error()))
+				r.recordReconciliationAttempt("error")
+				continue
+			}
+		}
+
+		if !acquired {
+			instanceLogger.Debug("reconciliation: lock held by another replica")
+			r.recordReconciliationAttempt("skipped")
+			continue
+		}
+
+		info := InstanceInfo{
+			ID:       link.ID,
+			StoreJID: &link.StoreJID,
+		}
+
+		var (
+			client    *whatsmeow.Client
+			created   bool
+			ensureErr error
+		)
+		if r.ensureWithLockOverride != nil {
+			client, created, ensureErr = r.ensureWithLockOverride(ctx, info, lock)
+		} else {
+			client, created, ensureErr = r.EnsureClientWithLock(ctx, info, lock)
+		}
+		if ensureErr != nil {
+			instanceLogger.Error("reconciliation: ensure client failed",
+				slog.String("error", ensureErr.Error()))
+			r.recordReconciliationAttempt("failure")
+			if lock != nil {
+				if releaseErr := lock.Release(context.Background()); releaseErr != nil {
+					instanceLogger.Warn("reconciliation: failed to release lock after ensure failure",
+						slog.String("error", releaseErr.Error()))
+				}
+			}
+			continue
+		}
+
+		if !r.isClientConnected(client) {
+			if connectErr := r.connectClient(client); connectErr != nil {
+				instanceLogger.Error("reconciliation: connect failed",
+					slog.String("error", connectErr.Error()))
+				r.recordReconciliationAttempt("failure")
+				continue
+			}
+		}
+
+		r.recordReconciliationAttempt("success")
+		if r.obsMetrics != nil && r.obsMetrics.ReconciliationDuration != nil {
+			r.obsMetrics.ReconciliationDuration.Observe(time.Since(start).Seconds())
+		}
+
+		instanceLogger.Info("reconciliation: instance recovered",
+			slog.Duration("duration", time.Since(start)),
+			slog.Bool("was_created", created))
+	}
+
+	if r.obsMetrics != nil && r.obsMetrics.OrphanedInstances != nil {
+		r.obsMetrics.OrphanedInstances.Set(0)
+	}
+}
+
+func (r *ClientRegistry) recordReconciliationAttempt(result string) {
+	if result == "" {
+		result = "unknown"
+	}
+	if r.obsMetrics == nil || r.obsMetrics.ReconciliationAttempts == nil {
+		return
+	}
+	r.obsMetrics.ReconciliationAttempts.WithLabelValues(result).Inc()
+}
+
+func isRedisConnectivityError(err error) bool {
+	if err == nil {
+		return false
+	}
+	errStr := err.Error()
+	return strings.Contains(errStr, "connection refused") ||
+		strings.Contains(errStr, "connection reset") ||
+		strings.Contains(errStr, "i/o timeout") ||
+		strings.Contains(errStr, "EOF") ||
+		strings.Contains(errStr, "broken pipe") ||
+		strings.Contains(errStr, "network is unreachable") ||
+		strings.Contains(errStr, "no route to host") ||
+		strings.Contains(errStr, "context deadline exceeded")
+}
+
 func (r *ClientRegistry) StartSplitBrainDetection() {
 	r.splitBrainMu.Lock()
 	defer r.splitBrainMu.Unlock()
@@ -1914,7 +2770,7 @@ func (r *ClientRegistry) detectSplitBrain() {
 			continue
 		}
 
-		lockKey := fmt.Sprintf("funnelchat:instance:%s", instanceID.String())
+		lockKey := r.lockKey(instanceID)
 		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 
 		var stillOwned bool
@@ -1927,7 +2783,7 @@ func (r *ClientRegistry) detectSplitBrain() {
 		if checker, ok := r.lockManager.(lockOwnershipChecker); ok {
 			stillOwned, err = checker.CheckLockOwnership(ctx, lockKey, expectedLock)
 		} else {
-			err = expectedLock.Refresh(ctx, 30)
+			err = expectedLock.Refresh(ctx, r.lockTTLSeconds())
 			stillOwned = (err == nil)
 		}
 		cancel()
@@ -2055,7 +2911,17 @@ func (r *ClientRegistry) Close() error {
 		return nil
 	}
 
+	r.StopReconciliationWorker()
 	r.StopSplitBrainDetection()
+	r.stopOwnershipRebalancer()
+
+	r.mu.RLock()
+	for _, state := range r.clients {
+		if state != nil && state.contactCache != nil {
+			state.contactCache.Close()
+		}
+	}
+	r.mu.RUnlock()
 
 	if r.container != nil {
 		return r.container.Close()

@@ -27,17 +27,24 @@ type StoreLink struct {
 	StoreJID string
 }
 
+type ConnectionState struct {
+	Connected       bool
+	Status          string
+	LastConnectedAt *time.Time
+	WorkerID        *string
+	DesiredWorkerID *string
+}
+
 func (r *Repository) Insert(ctx context.Context, inst *Instance) error {
 	query := `INSERT INTO instances (
-	    id, name, session_name, client_token, instance_token, store_jid,
+	    id, name, session_name, instance_token, store_jid,
 	    is_device, business_device, subscription_active, canceled_at,
 	    call_reject_auto, call_reject_message, auto_read_message
-	) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`
+	) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`
 	_, err := r.pool.Exec(ctx, query,
 		inst.ID,
 		inst.Name,
 		inst.SessionName,
-		inst.ClientToken,
 		inst.InstanceToken,
 		inst.StoreJID,
 		inst.IsDevice,
@@ -55,18 +62,22 @@ func (r *Repository) Insert(ctx context.Context, inst *Instance) error {
 }
 
 func (r *Repository) GetByID(ctx context.Context, id uuid.UUID) (*Instance, error) {
-	query := `SELECT id, name, session_name, client_token, instance_token, store_jid, is_device, business_device, subscription_active, canceled_at, call_reject_auto, call_reject_message, auto_read_message, created_at, updated_at
+	query := `SELECT id, name, session_name, instance_token, store_jid, is_device, business_device, subscription_active, canceled_at, call_reject_auto, call_reject_message, auto_read_message, created_at, updated_at, connected, connection_status, last_connected_at, worker_id, desired_worker_id
         FROM instances WHERE id=$1`
 	row := r.pool.QueryRow(ctx, query, id)
 	var inst Instance
 	var storeJID *string
 	var canceledAt *time.Time
 	var callRejectMessage *string
+	var connected bool
+	var connectionStatus string
+	var lastConnectedAt *time.Time
+	var workerID *string
+	var desiredWorkerID *string
 	if err := row.Scan(
 		&inst.ID,
 		&inst.Name,
 		&inst.SessionName,
-		&inst.ClientToken,
 		&inst.InstanceToken,
 		&storeJID,
 		&inst.IsDevice,
@@ -78,6 +89,12 @@ func (r *Repository) GetByID(ctx context.Context, id uuid.UUID) (*Instance, erro
 		&inst.AutoReadMessage,
 		&inst.CreatedAt,
 		&inst.UpdatedAt,
+		&connected,
+		&connectionStatus,
+		&lastConnectedAt,
+		&workerID,
+		&desiredWorkerID,
+		&desiredWorkerID,
 	); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, ErrInstanceNotFound
@@ -87,6 +104,11 @@ func (r *Repository) GetByID(ctx context.Context, id uuid.UUID) (*Instance, erro
 	inst.StoreJID = storeJID
 	inst.CanceledAt = canceledAt
 	inst.CallRejectMessage = callRejectMessage
+	inst.WhatsappConnected = connected
+	inst.ConnectionStatus = connectionStatus
+	inst.LastConnectedAt = lastConnectedAt
+	inst.WorkerID = workerID
+	inst.DesiredWorkerID = desiredWorkerID
 	if inst.IsDevice {
 		inst.Middleware = "mobile"
 	} else {
@@ -138,32 +160,18 @@ func (r *Repository) UpdateSubscription(ctx context.Context, id uuid.UUID, activ
 }
 
 func (r *Repository) Delete(ctx context.Context, id uuid.UUID) error {
-	tx, err := r.pool.Begin(ctx)
-	if err != nil {
-		return fmt.Errorf("begin transaction: %w", err)
-	}
-	defer tx.Rollback(ctx)
+	// Cascades automáticos cuidam da remoção de:
+	// - webhook_configs (ON DELETE CASCADE)
+	// - message_sequences (ON DELETE CASCADE)
+	query := `DELETE FROM instances WHERE id=$1`
 
-	_, err = tx.Exec(ctx, `DELETE FROM webhook_dlq WHERE instance_id=$1`, id)
-	if err != nil {
-		return fmt.Errorf("delete webhook_dlq: %w", err)
-	}
-
-	_, err = tx.Exec(ctx, `DELETE FROM instance_events_log WHERE instance_id=$1`, id)
-	if err != nil {
-		return fmt.Errorf("delete instance_events_log: %w", err)
-	}
-
-	res, err := tx.Exec(ctx, `DELETE FROM instances WHERE id=$1`, id)
+	res, err := r.pool.Exec(ctx, query, id)
 	if err != nil {
 		return fmt.Errorf("delete instance: %w", err)
 	}
+
 	if res.RowsAffected() == 0 {
 		return ErrInstanceNotFound
-	}
-
-	if err := tx.Commit(ctx); err != nil {
-		return fmt.Errorf("commit transaction: %w", err)
 	}
 
 	return nil
@@ -182,10 +190,10 @@ func (r *Repository) List(ctx context.Context, filter ListFilter) ([]Instance, i
 	middleware := strings.ToLower(strings.TrimSpace(filter.Middleware))
 	rows, err := r.pool.Query(ctx, `
         SELECT
-            i.id, i.name, i.session_name, i.client_token, i.instance_token, i.store_jid,
+            i.id, i.name, i.session_name, i.instance_token, i.store_jid,
             i.is_device, i.business_device, i.subscription_active, i.canceled_at,
             i.call_reject_auto, i.call_reject_message, i.auto_read_message,
-            i.created_at, i.updated_at,
+            i.created_at, i.updated_at, i.connected, i.connection_status, i.last_connected_at, i.worker_id, i.desired_worker_id,
             wc.delivery_url, wc.received_url, wc.received_delivery_url, wc.message_status_url,
             wc.disconnected_url, wc.chat_presence_url, wc.connected_url, COALESCE(wc.notify_sent_by_me, FALSE)
         FROM instances i
@@ -206,13 +214,17 @@ func (r *Repository) List(ctx context.Context, filter ListFilter) ([]Instance, i
 		var storeJID *string
 		var canceledAt *time.Time
 		var callRejectMessage *string
-		var delivery, received, receivedDelivery, statusURL, disconnected, chatPresence, connected *string
+		var connected bool
+		var connectionStatus string
+		var lastConnectedAt *time.Time
+		var workerID *string
+		var desiredWorkerID *string
+		var delivery, received, receivedDelivery, statusURL, disconnected, chatPresence, connectedURL *string
 		var notify bool
 		if err := rows.Scan(
 			&inst.ID,
 			&inst.Name,
 			&inst.SessionName,
-			&inst.ClientToken,
 			&inst.InstanceToken,
 			&storeJID,
 			&inst.IsDevice,
@@ -224,13 +236,18 @@ func (r *Repository) List(ctx context.Context, filter ListFilter) ([]Instance, i
 			&inst.AutoReadMessage,
 			&inst.CreatedAt,
 			&inst.UpdatedAt,
+			&connected,
+			&connectionStatus,
+			&lastConnectedAt,
+			&workerID,
+			&desiredWorkerID,
 			&delivery,
 			&received,
 			&receivedDelivery,
 			&statusURL,
 			&disconnected,
 			&chatPresence,
-			&connected,
+			&connectedURL,
 			&notify,
 		); err != nil {
 			return nil, 0, fmt.Errorf("scan instance: %w", err)
@@ -238,6 +255,11 @@ func (r *Repository) List(ctx context.Context, filter ListFilter) ([]Instance, i
 		inst.StoreJID = storeJID
 		inst.CanceledAt = canceledAt
 		inst.CallRejectMessage = callRejectMessage
+		inst.WhatsappConnected = connected
+		inst.ConnectionStatus = connectionStatus
+		inst.LastConnectedAt = lastConnectedAt
+		inst.WorkerID = workerID
+		inst.DesiredWorkerID = desiredWorkerID
 		inst.Webhooks = &WebhookSettings{
 			DeliveryURL:         delivery,
 			ReceivedURL:         received,
@@ -245,7 +267,7 @@ func (r *Repository) List(ctx context.Context, filter ListFilter) ([]Instance, i
 			MessageStatusURL:    statusURL,
 			DisconnectedURL:     disconnected,
 			ChatPresenceURL:     chatPresence,
-			ConnectedURL:        connected,
+			ConnectedURL:        connectedURL,
 			NotifySentByMe:      notify,
 		}
 		if inst.IsDevice {
@@ -269,13 +291,17 @@ func (r *Repository) List(ctx context.Context, filter ListFilter) ([]Instance, i
 }
 
 func (r *Repository) ListInstancesWithStoreJID(ctx context.Context) ([]StoreLink, error) {
-	rows, err := r.pool.Query(ctx, `SELECT id, store_jid FROM instances WHERE store_jid IS NOT NULL AND store_jid <> ''`)
+	rows, err := r.pool.Query(ctx, `
+        SELECT id, store_jid
+        FROM instances
+        WHERE store_jid IS NOT NULL AND store_jid <> ''
+    `)
 	if err != nil {
-		return nil, fmt.Errorf("list instances with store_jid: %w", err)
+		return nil, fmt.Errorf("list instances with store jid: %w", err)
 	}
 	defer rows.Close()
 
-	links := make([]StoreLink, 0)
+	var links []StoreLink
 	for rows.Next() {
 		var link StoreLink
 		if err := rows.Scan(&link.ID, &link.StoreJID); err != nil {
@@ -283,8 +309,62 @@ func (r *Repository) ListInstancesWithStoreJID(ctx context.Context) ([]StoreLink
 		}
 		links = append(links, link)
 	}
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("iterate store links: %w", err)
-	}
+
 	return links, nil
+}
+
+func (r *Repository) UpdateConnectionStatus(ctx context.Context, id uuid.UUID, connected bool, status string, workerID *string, desiredWorkerID *string) error {
+	var worker interface{}
+	if workerID != nil && *workerID != "" {
+		worker = *workerID
+	}
+	var desired interface{}
+	if desiredWorkerID != nil && *desiredWorkerID != "" {
+		desired = *desiredWorkerID
+	}
+
+	query := `
+		UPDATE instances
+		SET
+			connected = $2,
+			connection_status = $3,
+			worker_id = $4,
+			desired_worker_id = COALESCE($5, desired_worker_id),
+			last_connected_at = CASE WHEN $2 = TRUE THEN NOW() ELSE last_connected_at END,
+			updated_at = NOW()
+		WHERE id = $1
+	`
+
+	res, err := r.pool.Exec(ctx, query, id, connected, status, worker, desired)
+	if err != nil {
+		return fmt.Errorf("update connection status: %w", err)
+	}
+	if res.RowsAffected() == 0 {
+		return ErrInstanceNotFound
+	}
+	return nil
+}
+
+func (r *Repository) GetConnectionState(ctx context.Context, id uuid.UUID) (*ConnectionState, error) {
+	query := `
+		SELECT connected, connection_status, last_connected_at, worker_id, desired_worker_id
+		FROM instances
+		WHERE id = $1
+	`
+
+	var state ConnectionState
+	if err := r.pool.QueryRow(ctx, query, id).Scan(
+		&state.Connected,
+		&state.Status,
+		&state.LastConnectedAt,
+		&state.WorkerID,
+		&state.DesiredWorkerID,
+	); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, ErrInstanceNotFound
+		}
+		return nil, fmt.Errorf("get connection state: %w", err)
+	}
+
+	return &state, nil
 }

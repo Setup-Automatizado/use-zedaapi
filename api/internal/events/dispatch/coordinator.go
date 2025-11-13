@@ -12,6 +12,7 @@ import (
 
 	"go.mau.fi/whatsmeow/api/internal/config"
 	"go.mau.fi/whatsmeow/api/internal/events/persistence"
+	"go.mau.fi/whatsmeow/api/internal/events/pollstore"
 	"go.mau.fi/whatsmeow/api/internal/events/transport"
 	"go.mau.fi/whatsmeow/api/internal/logging"
 	"go.mau.fi/whatsmeow/api/internal/observability"
@@ -25,6 +26,7 @@ type Coordinator struct {
 	transportRegistry *transport.Registry
 	lookup            InstanceLookup
 	metrics           *observability.Metrics
+	pollStore         pollstore.Store
 
 	mu       sync.RWMutex
 	workers  map[uuid.UUID]*InstanceWorker
@@ -40,6 +42,7 @@ func NewCoordinator(
 	dlqRepo persistence.DLQRepository,
 	transportRegistry *transport.Registry,
 	lookup InstanceLookup,
+	pollStore pollstore.Store,
 	metrics *observability.Metrics,
 ) *Coordinator {
 	return &Coordinator{
@@ -50,6 +53,7 @@ func NewCoordinator(
 		transportRegistry: transportRegistry,
 		lookup:            lookup,
 		metrics:           metrics,
+		pollStore:         pollStore,
 		workers:           make(map[uuid.UUID]*InstanceWorker),
 		stopChan:          make(chan struct{}),
 		running:           false,
@@ -96,6 +100,7 @@ func (c *Coordinator) RegisterInstance(ctx context.Context, instanceID uuid.UUID
 		c.dlqRepo,
 		c.transportRegistry,
 		c.lookup,
+		c.pollStore,
 		c.metrics,
 	)
 

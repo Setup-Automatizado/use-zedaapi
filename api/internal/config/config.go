@@ -43,6 +43,12 @@ type Config struct {
 		TLSEnabled bool
 	}
 
+	RedisLock struct {
+		KeyPrefix       string
+		TTL             time.Duration
+		RefreshInterval time.Duration
+	}
+
 	S3 struct {
 		Endpoint         string
 		Region           string
@@ -67,6 +73,10 @@ type Config struct {
 		LocalRetention     time.Duration
 	}
 
+	Document struct {
+		MuPDFVersion string
+	}
+
 	Sentry struct {
 		DSN         string
 		Environment string
@@ -78,6 +88,12 @@ type Config struct {
 		Media             int
 	}
 
+	WorkerRegistry struct {
+		HeartbeatInterval time.Duration
+		Expiry            time.Duration
+		RebalanceInterval time.Duration
+	}
+
 	Prometheus struct {
 		Namespace string
 	}
@@ -86,11 +102,25 @@ type Config struct {
 		AuthToken string
 	}
 
+	Client struct {
+		AuthToken string
+	}
+
+	ContactMetadata struct {
+		CacheCapacity   int
+		NameTTL         time.Duration
+		PhotoTTL        time.Duration
+		ErrorTTL        time.Duration
+		PrefetchWorkers int
+		FetchQueueSize  int
+	}
+
 	Events struct {
 		BufferSize          int
 		BatchSize           int
 		PollInterval        time.Duration
 		ProcessingTimeout   time.Duration
+		HandlerTimeout      time.Duration
 		ShutdownGracePeriod time.Duration
 
 		MaxRetryAttempts int
@@ -122,6 +152,41 @@ type Config struct {
 
 		DebugRawPayload bool
 		DebugDumpDir    string
+	}
+
+	MessageQueue struct {
+		Enabled              bool
+		PollInterval         time.Duration
+		MaxAttempts          int
+		InitialBackoff       time.Duration
+		MaxBackoff           time.Duration
+		BackoffMultiplier    float64
+		DisconnectRetryDelay time.Duration
+		CompletedRetention   time.Duration
+		FailedRetention      time.Duration
+		CleanupInterval      time.Duration
+		CleanupTimeout       time.Duration
+	}
+
+	Reconciliation struct {
+		Enabled  bool
+		Interval time.Duration
+	}
+
+	Connection struct {
+		AutoConnectPaired bool
+		MaxAttempts       int
+		InitialBackoff    time.Duration
+		MaxBackoff        time.Duration
+	}
+
+	Shutdown struct {
+		OverallTimeout          time.Duration
+		HTTPTimeout             time.Duration
+		QueueDrainTimeout       time.Duration
+		EventFlushTimeout       time.Duration
+		ClientDisconnectTimeout time.Duration
+		LockReleaseTimeout      time.Duration
 	}
 }
 
@@ -209,6 +274,30 @@ func Load() (Config, error) {
 		TLSEnabled: parseBool(getEnv("REDIS_TLS_ENABLED", "false")),
 	}
 
+	lockTTL, err := parseDuration(getEnv("REDIS_LOCK_TTL", "30s"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid REDIS_LOCK_TTL: %w", err)
+	}
+	if lockTTL <= 0 {
+		lockTTL = 30 * time.Second
+	}
+	lockRefresh, err := parseDuration(getEnv("REDIS_LOCK_REFRESH_INTERVAL", "10s"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid REDIS_LOCK_REFRESH_INTERVAL: %w", err)
+	}
+	if lockRefresh <= 0 || lockRefresh >= lockTTL {
+		lockRefresh = lockTTL / 2
+	}
+	cfg.RedisLock = struct {
+		KeyPrefix       string
+		TTL             time.Duration
+		RefreshInterval time.Duration
+	}{
+		KeyPrefix:       getEnv("REDIS_LOCK_KEY_PREFIX", "funnelchat"),
+		TTL:             lockTTL,
+		RefreshInterval: lockRefresh,
+	}
+
 	cfg.S3 = struct {
 		Endpoint         string
 		Region           string
@@ -287,9 +376,77 @@ func Load() (Config, error) {
 		Media:             mustParsePositiveInt(getEnv("MEDIA_WORKER_CONCURRENCY", "4")),
 	}
 
+	heartbeatInterval, err := parseDuration(getEnv("WORKER_HEARTBEAT_INTERVAL", "5s"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid WORKER_HEARTBEAT_INTERVAL: %w", err)
+	}
+	workerExpiry, err := parseDuration(getEnv("WORKER_HEARTBEAT_EXPIRY", "20s"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid WORKER_HEARTBEAT_EXPIRY: %w", err)
+	}
+	if workerExpiry <= heartbeatInterval {
+		workerExpiry = heartbeatInterval * 2
+	}
+	rebalanceInterval, err := parseDuration(getEnv("WORKER_REBALANCE_INTERVAL", "30s"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid WORKER_REBALANCE_INTERVAL: %w", err)
+	}
+	if rebalanceInterval <= 0 {
+		rebalanceInterval = 30 * time.Second
+	}
+	cfg.WorkerRegistry = struct {
+		HeartbeatInterval time.Duration
+		Expiry            time.Duration
+		RebalanceInterval time.Duration
+	}{
+		HeartbeatInterval: heartbeatInterval,
+		Expiry:            workerExpiry,
+		RebalanceInterval: rebalanceInterval,
+	}
+
 	cfg.Prometheus.Namespace = getEnv("PROMETHEUS_NAMESPACE", "funnelchat_api")
 
-	cfg.Partner.AuthToken = os.Getenv("PARTNER_AUTH_TOKEN")
+	cfg.Partner.AuthToken = strings.TrimSpace(os.Getenv("PARTNER_AUTH_TOKEN"))
+	cfg.Client.AuthToken = strings.TrimSpace(os.Getenv("CLIENT_AUTH_TOKEN"))
+
+	if cfg.Client.AuthToken == "" {
+		return cfg, fmt.Errorf("CLIENT_AUTH_TOKEN must be configured")
+	}
+	if len(cfg.Client.AuthToken) < 16 {
+		return cfg, fmt.Errorf("CLIENT_AUTH_TOKEN must be at least 16 characters")
+	}
+
+	contactCacheCapacity := mustParsePositiveInt(getEnv("CONTACT_METADATA_CACHE_CAPACITY", "50000"))
+	contactNameTTL, err := parseDuration(getEnv("CONTACT_METADATA_NAME_TTL", "24h"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid CONTACT_METADATA_NAME_TTL: %w", err)
+	}
+	contactPhotoTTL, err := parseDuration(getEnv("CONTACT_METADATA_PHOTO_TTL", "24h"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid CONTACT_METADATA_PHOTO_TTL: %w", err)
+	}
+	contactErrorTTL, err := parseDuration(getEnv("CONTACT_METADATA_ERROR_TTL", "24h"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid CONTACT_METADATA_ERROR_TTL: %w", err)
+	}
+	contactPrefetchWorkers := mustParsePositiveInt(getEnv("CONTACT_METADATA_PREFETCH_WORKERS", "4"))
+	contactFetchQueueSize := mustParsePositiveInt(getEnv("CONTACT_METADATA_FETCH_QUEUE_SIZE", "1024"))
+
+	cfg.ContactMetadata = struct {
+		CacheCapacity   int
+		NameTTL         time.Duration
+		PhotoTTL        time.Duration
+		ErrorTTL        time.Duration
+		PrefetchWorkers int
+		FetchQueueSize  int
+	}{
+		CacheCapacity:   contactCacheCapacity,
+		NameTTL:         contactNameTTL,
+		PhotoTTL:        contactPhotoTTL,
+		ErrorTTL:        contactErrorTTL,
+		PrefetchWorkers: contactPrefetchWorkers,
+		FetchQueueSize:  contactFetchQueueSize,
+	}
 
 	eventBufferSize := mustParsePositiveInt(getEnv("EVENT_BUFFER_SIZE", "1000"))
 	eventBatchSize := mustParsePositiveInt(getEnv("EVENT_BATCH_SIZE", "10"))
@@ -300,6 +457,10 @@ func Load() (Config, error) {
 	eventProcessingTimeout, err := parseDuration(getEnv("EVENT_PROCESSING_TIMEOUT", "30s"))
 	if err != nil {
 		return cfg, fmt.Errorf("invalid EVENT_PROCESSING_TIMEOUT: %w", err)
+	}
+	eventHandlerTimeout, err := parseDuration(getEnv("EVENT_HANDLER_TIMEOUT", "60s"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid EVENT_HANDLER_TIMEOUT: %w", err)
 	}
 	eventShutdownGracePeriod, err := parseDuration(getEnv("EVENT_SHUTDOWN_GRACE_PERIOD", "30s"))
 	if err != nil {
@@ -374,11 +535,161 @@ func Load() (Config, error) {
 		debugDumpDir = "./tmp/debug-events"
 	}
 
+	// Message Queue Configuration
+	mqEnabled := parseBool(getEnv("MESSAGE_QUEUE_ENABLED", "true"))
+	mqPollInterval, err := parseDuration(getEnv("MESSAGE_QUEUE_POLL_INTERVAL", "100ms"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid MESSAGE_QUEUE_POLL_INTERVAL: %w", err)
+	}
+	mqMaxAttempts := mustParsePositiveInt(getEnv("MESSAGE_QUEUE_MAX_ATTEMPTS", "3"))
+	mqInitialBackoff, err := parseDuration(getEnv("MESSAGE_QUEUE_INITIAL_BACKOFF", "1s"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid MESSAGE_QUEUE_INITIAL_BACKOFF: %w", err)
+	}
+	mqMaxBackoff, err := parseDuration(getEnv("MESSAGE_QUEUE_MAX_BACKOFF", "5m"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid MESSAGE_QUEUE_MAX_BACKOFF: %w", err)
+	}
+	mqBackoffMultiplier := 2.0 // Fixed exponential backoff multiplier
+	if val := getEnv("MESSAGE_QUEUE_BACKOFF_MULTIPLIER", ""); val != "" {
+		if parsed, err := strconv.ParseFloat(val, 64); err == nil && parsed > 0 {
+			mqBackoffMultiplier = parsed
+		}
+	}
+	mqDisconnectRetryDelay, err := parseDuration(getEnv("MESSAGE_QUEUE_DISCONNECT_RETRY_DELAY", "30s"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid MESSAGE_QUEUE_DISCONNECT_RETRY_DELAY: %w", err)
+	}
+	mqCompletedRetention, err := parseDuration(getEnv("MESSAGE_QUEUE_COMPLETED_RETENTION", "24h"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid MESSAGE_QUEUE_COMPLETED_RETENTION: %w", err)
+	}
+	mqFailedRetention, err := parseDuration(getEnv("MESSAGE_QUEUE_FAILED_RETENTION", "7d"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid MESSAGE_QUEUE_FAILED_RETENTION: %w", err)
+	}
+	mqCleanupInterval, err := parseDuration(getEnv("MESSAGE_QUEUE_CLEANUP_INTERVAL", "1h"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid MESSAGE_QUEUE_CLEANUP_INTERVAL: %w", err)
+	}
+	mqCleanupTimeout, err := parseDuration(getEnv("MESSAGE_QUEUE_CLEANUP_TIMEOUT", "5m"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid MESSAGE_QUEUE_CLEANUP_TIMEOUT: %w", err)
+	}
+
+	cfg.MessageQueue = struct {
+		Enabled              bool
+		PollInterval         time.Duration
+		MaxAttempts          int
+		InitialBackoff       time.Duration
+		MaxBackoff           time.Duration
+		BackoffMultiplier    float64
+		DisconnectRetryDelay time.Duration
+		CompletedRetention   time.Duration
+		FailedRetention      time.Duration
+		CleanupInterval      time.Duration
+		CleanupTimeout       time.Duration
+	}{
+		Enabled:              mqEnabled,
+		PollInterval:         mqPollInterval,
+		MaxAttempts:          mqMaxAttempts,
+		InitialBackoff:       mqInitialBackoff,
+		MaxBackoff:           mqMaxBackoff,
+		BackoffMultiplier:    mqBackoffMultiplier,
+		DisconnectRetryDelay: mqDisconnectRetryDelay,
+		CompletedRetention:   mqCompletedRetention,
+		FailedRetention:      mqFailedRetention,
+		CleanupInterval:      mqCleanupInterval,
+		CleanupTimeout:       mqCleanupTimeout,
+	}
+
+	reconciliationEnabled := parseBool(getEnv("RECONCILIATION_ENABLED", "true"))
+	reconciliationInterval, err := parseDuration(getEnv("RECONCILIATION_INTERVAL", "10s"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid RECONCILIATION_INTERVAL: %w", err)
+	}
+	cfg.Reconciliation = struct {
+		Enabled  bool
+		Interval time.Duration
+	}{
+		Enabled:  reconciliationEnabled,
+		Interval: reconciliationInterval,
+	}
+
+	autoConnectPaired := parseBool(getEnv("AUTO_CONNECT_PAIRED", "true"))
+	autoConnectMaxAttempts := mustParsePositiveInt(getEnv("AUTO_CONNECT_MAX_ATTEMPTS", "3"))
+	autoConnectInitialBackoff, err := parseDuration(getEnv("AUTO_CONNECT_INITIAL_BACKOFF", "1s"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid AUTO_CONNECT_INITIAL_BACKOFF: %w", err)
+	}
+	autoConnectMaxBackoff, err := parseDuration(getEnv("AUTO_CONNECT_MAX_BACKOFF", "10s"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid AUTO_CONNECT_MAX_BACKOFF: %w", err)
+	}
+	cfg.Connection = struct {
+		AutoConnectPaired bool
+		MaxAttempts       int
+		InitialBackoff    time.Duration
+		MaxBackoff        time.Duration
+	}{
+		AutoConnectPaired: autoConnectPaired,
+		MaxAttempts:       autoConnectMaxAttempts,
+		InitialBackoff:    autoConnectInitialBackoff,
+		MaxBackoff:        autoConnectMaxBackoff,
+	}
+
+	shutdownOverallTimeout, err := parseDuration(getEnv("SHUTDOWN_TIMEOUT", "120s"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid SHUTDOWN_TIMEOUT: %w", err)
+	}
+	shutdownHTTPTimeout, err := parseDuration(getEnv("SHUTDOWN_HTTP_TIMEOUT", "30s"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid SHUTDOWN_HTTP_TIMEOUT: %w", err)
+	}
+	shutdownQueueTimeout, err := parseDuration(getEnv("SHUTDOWN_QUEUE_TIMEOUT", "60s"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid SHUTDOWN_QUEUE_TIMEOUT: %w", err)
+	}
+	shutdownEventTimeout, err := parseDuration(getEnv("SHUTDOWN_EVENT_TIMEOUT", "10s"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid SHUTDOWN_EVENT_TIMEOUT: %w", err)
+	}
+	shutdownClientTimeout, err := parseDuration(getEnv("SHUTDOWN_CLIENT_TIMEOUT", "10s"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid SHUTDOWN_CLIENT_TIMEOUT: %w", err)
+	}
+	shutdownLockTimeout, err := parseDuration(getEnv("SHUTDOWN_LOCK_TIMEOUT", "5s"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid SHUTDOWN_LOCK_TIMEOUT: %w", err)
+	}
+	cfg.Shutdown = struct {
+		OverallTimeout          time.Duration
+		HTTPTimeout             time.Duration
+		QueueDrainTimeout       time.Duration
+		EventFlushTimeout       time.Duration
+		ClientDisconnectTimeout time.Duration
+		LockReleaseTimeout      time.Duration
+	}{
+		OverallTimeout:          shutdownOverallTimeout,
+		HTTPTimeout:             shutdownHTTPTimeout,
+		QueueDrainTimeout:       shutdownQueueTimeout,
+		EventFlushTimeout:       shutdownEventTimeout,
+		ClientDisconnectTimeout: shutdownClientTimeout,
+		LockReleaseTimeout:      shutdownLockTimeout,
+	}
+
+	cfg.Document = struct {
+		MuPDFVersion string
+	}{
+		MuPDFVersion: getEnv("MUPDF_VERSION", "1.24.10"),
+	}
+
 	cfg.Events = struct {
 		BufferSize          int
 		BatchSize           int
 		PollInterval        time.Duration
 		ProcessingTimeout   time.Duration
+		HandlerTimeout      time.Duration
 		ShutdownGracePeriod time.Duration
 
 		MaxRetryAttempts int
@@ -415,6 +726,7 @@ func Load() (Config, error) {
 		BatchSize:             eventBatchSize,
 		PollInterval:          eventPollInterval,
 		ProcessingTimeout:     eventProcessingTimeout,
+		HandlerTimeout:        eventHandlerTimeout,
 		ShutdownGracePeriod:   eventShutdownGracePeriod,
 		MaxRetryAttempts:      maxRetryAttempts,
 		RetryDelays:           retryDelays,

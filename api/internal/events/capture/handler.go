@@ -13,6 +13,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"go.mau.fi/whatsmeow/api/internal/events/pollstore"
 	"go.mau.fi/whatsmeow/api/internal/events/transform"
 	whatsmeowtransform "go.mau.fi/whatsmeow/api/internal/events/transform/whatsmeow"
 	"go.mau.fi/whatsmeow/api/internal/events/types"
@@ -41,13 +42,14 @@ func NewEventHandler(
 	metrics *observability.Metrics,
 	debugRaw bool,
 	dumpDir string,
+	pollStore pollstore.Store,
 ) *EventHandler {
 	log := logging.ContextLogger(ctx, nil).With(
 		slog.String("component", "event_handler"),
 		slog.String("instance_id", instanceID.String()),
 	)
 
-	sourceTransformer := whatsmeowtransform.NewTransformer(instanceID, debugRaw)
+	sourceTransformer := whatsmeowtransform.NewTransformer(instanceID, debugRaw, pollStore)
 
 	return &EventHandler{
 		log:         log,

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -19,6 +20,8 @@ type WebhookConfig struct {
 	ChatPresenceURL     *string
 	ConnectedURL        *string
 	NotifySentByMe      bool
+	CreatedAt           time.Time
+	UpdatedAt           time.Time
 }
 
 func (r *Repository) UpsertWebhookConfig(ctx context.Context, cfg WebhookConfig) error {
@@ -63,8 +66,10 @@ func (r *Repository) UpsertWebhookConfig(ctx context.Context, cfg WebhookConfig)
 }
 
 func (r *Repository) GetWebhookConfig(ctx context.Context, id uuid.UUID) (*WebhookConfig, error) {
-	query := `SELECT instance_id, delivery_url, received_url, received_delivery_url, message_status_url, disconnected_url, chat_presence_url, connected_url, notify_sent_by_me
-        FROM webhook_configs WHERE instance_id=$1`
+	query := `SELECT instance_id, delivery_url, received_url, received_delivery_url,
+	          message_status_url, disconnected_url, chat_presence_url, connected_url,
+	          notify_sent_by_me, created_at, updated_at
+	          FROM webhook_configs WHERE instance_id=$1`
 	row := r.pool.QueryRow(ctx, query, id)
 	var cfg WebhookConfig
 	if err := row.Scan(
@@ -77,6 +82,8 @@ func (r *Repository) GetWebhookConfig(ctx context.Context, id uuid.UUID) (*Webho
 		&cfg.ChatPresenceURL,
 		&cfg.ConnectedURL,
 		&cfg.NotifySentByMe,
+		&cfg.CreatedAt,
+		&cfg.UpdatedAt,
 	); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			cfg.InstanceID = id

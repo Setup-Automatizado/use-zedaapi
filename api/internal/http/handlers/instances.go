@@ -16,20 +16,48 @@ import (
 )
 
 type InstanceHandler struct {
-	service *instances.Service
-	log     *slog.Logger
+	service            *instances.Service
+	messageHandler     *MessageHandler
+	groupsHandler      *GroupsHandler
+	communitiesHandler *CommunitiesHandler
+	newslettersHandler *NewslettersHandler
+	log                *slog.Logger
 }
 
 func NewInstanceHandler(service *instances.Service, log *slog.Logger) *InstanceHandler {
 	return &InstanceHandler{service: service, log: log}
 }
 
+// SetMessageHandler injects the MessageHandler for route registration
+func (h *InstanceHandler) SetMessageHandler(messageHandler *MessageHandler) {
+	h.messageHandler = messageHandler
+}
+
+// SetGroupsHandler injects the GroupsHandler for route registration
+func (h *InstanceHandler) SetGroupsHandler(groupsHandler *GroupsHandler) {
+	h.groupsHandler = groupsHandler
+}
+
+// SetCommunitiesHandler injects the CommunitiesHandler for route registration
+func (h *InstanceHandler) SetCommunitiesHandler(communitiesHandler *CommunitiesHandler) {
+	h.communitiesHandler = communitiesHandler
+}
+
+// SetNewslettersHandler injects the NewslettersHandler for route registration
+func (h *InstanceHandler) SetNewslettersHandler(newslettersHandler *NewslettersHandler) {
+	h.newslettersHandler = newslettersHandler
+}
+
 func (h *InstanceHandler) Register(r chi.Router) {
 	r.Route("/instances/{instanceId}/token/{token}", func(r chi.Router) {
+		// Instance management routes
 		r.Get("/status", h.getStatus)
 		r.Get("/qr-code", h.getQRCode)
 		r.Get("/qr-code/image", h.getQRCodeImage)
+		r.Get("/device", h.getDevice)
 		r.Get("/phone-code/{phone}", h.getPhoneCode)
+		r.Get("/restart", h.restart)
+		r.Get("/disconnect", h.disconnect)
 		r.Post("/restart", h.restart)
 		r.Post("/disconnect", h.disconnect)
 		r.Put("/update-webhook-delivery", h.updateWebhookDelivery)
@@ -41,6 +69,26 @@ func (h *InstanceHandler) Register(r chi.Router) {
 		r.Put("/update-webhook-chat-presence", h.updateWebhookChatPresence)
 		r.Put("/update-notify-sent-by-me", h.updateNotifySentByMe)
 		r.Put("/update-every-webhooks", h.updateEveryWebhooks)
+
+		// Message routes (delegated to MessageHandler)
+		if h.messageHandler != nil {
+			h.messageHandler.RegisterRoutes(r)
+		}
+
+		// Group/community shared routes
+		if h.groupsHandler != nil {
+			h.groupsHandler.RegisterRoutes(r)
+		}
+
+		// Community specific routes
+		if h.communitiesHandler != nil {
+			h.communitiesHandler.RegisterRoutes(r)
+		}
+
+		// Newsletter routes
+		if h.newslettersHandler != nil {
+			h.newslettersHandler.RegisterRoutes(r)
+		}
 	})
 }
 
@@ -76,11 +124,31 @@ func (h *InstanceHandler) getQRCode(w http.ResponseWriter, r *http.Request) {
 		h.handleServiceError(ctx, w, err)
 		return
 	}
-	respondJSON(w, http.StatusOK, map[string]string{"code": code})
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write([]byte(code))
 }
 
 type qrImageResponse struct {
 	Image string `json:"image"`
+}
+
+func (h *InstanceHandler) getDevice(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	instanceID, ok := h.parseInstanceID(w, r)
+	if !ok {
+		return
+	}
+	ctx = logging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
+	instanceToken := chi.URLParam(r, "token")
+	clientToken := r.Header.Get("Client-Token")
+
+	device, err := h.service.GetDevice(ctx, instanceID, clientToken, instanceToken)
+	if err != nil {
+		h.handleServiceError(ctx, w, err)
+		return
+	}
+	respondJSON(w, http.StatusOK, device)
 }
 
 func (h *InstanceHandler) getQRCodeImage(w http.ResponseWriter, r *http.Request) {
@@ -121,6 +189,10 @@ type notifySentByMeRequest struct {
 type webhookUpdateResponse struct {
 	Value    bool                       `json:"value"`
 	Webhooks *instances.WebhookSettings `json:"webhooks,omitempty"`
+}
+
+type valueResponse struct {
+	Value bool `json:"value"`
 }
 
 func (h *InstanceHandler) getPhoneCode(w http.ResponseWriter, r *http.Request) {
@@ -257,7 +329,7 @@ func (h *InstanceHandler) restart(w http.ResponseWriter, r *http.Request) {
 		h.handleServiceError(ctx, w, err)
 		return
 	}
-	respondJSON(w, http.StatusAccepted, map[string]string{"status": "restarting"})
+	respondJSON(w, http.StatusOK, valueResponse{Value: true})
 }
 
 func (h *InstanceHandler) disconnect(w http.ResponseWriter, r *http.Request) {
@@ -274,7 +346,7 @@ func (h *InstanceHandler) disconnect(w http.ResponseWriter, r *http.Request) {
 		h.handleServiceError(ctx, w, err)
 		return
 	}
-	respondJSON(w, http.StatusAccepted, map[string]string{"status": "disconnected"})
+	respondJSON(w, http.StatusOK, valueResponse{Value: true})
 }
 
 func (h *InstanceHandler) parseInstanceID(w http.ResponseWriter, r *http.Request) (uuid.UUID, bool) {

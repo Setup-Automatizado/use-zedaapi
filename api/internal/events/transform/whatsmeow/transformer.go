@@ -3,6 +3,7 @@ package whatsmeow
 import (
 	"context"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"log/slog"
@@ -14,7 +15,9 @@ import (
 	"github.com/google/uuid"
 	"google.golang.org/protobuf/encoding/protojson"
 
+	whatsmeowcore "go.mau.fi/whatsmeow"
 	eventctx "go.mau.fi/whatsmeow/api/internal/events/eventctx"
+	"go.mau.fi/whatsmeow/api/internal/events/pollstore"
 	"go.mau.fi/whatsmeow/api/internal/events/transform"
 	"go.mau.fi/whatsmeow/api/internal/events/types"
 	"go.mau.fi/whatsmeow/api/internal/logging"
@@ -28,12 +31,14 @@ var debugProtoMarshalOpts = protojson.MarshalOptions{EmitUnpopulated: true}
 type Transformer struct {
 	instanceID uuid.UUID
 	debug      bool
+	pollStore  pollstore.Store
 }
 
-func NewTransformer(instanceID uuid.UUID, debug bool) *Transformer {
+func NewTransformer(instanceID uuid.UUID, debug bool, store pollstore.Store) *Transformer {
 	return &Transformer{
 		instanceID: instanceID,
 		debug:      debug,
+		pollStore:  store,
 	}
 }
 
@@ -54,7 +59,20 @@ func (t *Transformer) SupportsEvent(eventType reflect.Type) bool {
 		reflect.TypeOf(&events.GroupInfo{}),
 		reflect.TypeOf(&events.Picture{}),
 		reflect.TypeOf(&events.HistorySync{}),
-		reflect.TypeOf(&events.UndecryptableMessage{}):
+		reflect.TypeOf(&events.UndecryptableMessage{}),
+		reflect.TypeOf(&events.CallOffer{}),
+		reflect.TypeOf(&events.CallOfferNotice{}),
+		reflect.TypeOf(&events.CallRelayLatency{}),
+		reflect.TypeOf(&events.CallTransport{}),
+		reflect.TypeOf(&events.CallTerminate{}),
+		reflect.TypeOf(&events.CallReject{}),
+		reflect.TypeOf(&events.NewsletterJoin{}),
+		reflect.TypeOf(&events.NewsletterLeave{}),
+		reflect.TypeOf(&events.NewsletterMuteChange{}),
+		reflect.TypeOf(&events.NewsletterLiveUpdate{}),
+		reflect.TypeOf(&events.PushName{}),
+		reflect.TypeOf(&events.BusinessName{}),
+		reflect.TypeOf(&events.UserAbout{}):
 		return true
 	default:
 		return false
@@ -91,6 +109,32 @@ func (t *Transformer) Transform(ctx context.Context, rawEvent interface{}) (*typ
 		return t.transformHistorySync(ctx, logger, evt)
 	case *events.UndecryptableMessage:
 		return t.transformUndecryptable(ctx, logger, evt)
+	case *events.CallOffer:
+		return t.transformCallOffer(ctx, logger, evt)
+	case *events.CallOfferNotice:
+		return t.transformCallOfferNotice(ctx, logger, evt)
+	case *events.CallRelayLatency:
+		return t.transformCallRelayLatency(ctx, logger, evt)
+	case *events.CallTransport:
+		return t.transformCallTransport(ctx, logger, evt)
+	case *events.CallTerminate:
+		return t.transformCallTerminate(ctx, logger, evt)
+	case *events.CallReject:
+		return t.transformCallReject(ctx, logger, evt)
+	case *events.NewsletterJoin:
+		return t.transformNewsletterJoin(ctx, logger, evt)
+	case *events.NewsletterLeave:
+		return t.transformNewsletterLeave(ctx, logger, evt)
+	case *events.NewsletterMuteChange:
+		return t.transformNewsletterMuteChange(ctx, logger, evt)
+	case *events.NewsletterLiveUpdate:
+		return t.transformNewsletterLiveUpdate(ctx, logger, evt)
+	case *events.PushName:
+		return t.transformPushName(ctx, logger, evt)
+	case *events.BusinessName:
+		return t.transformBusinessName(ctx, logger, evt)
+	case *events.UserAbout:
+		return t.transformUserAbout(ctx, logger, evt)
 	default:
 		logger.Debug("unsupported event type",
 			slog.String("event_type", fmt.Sprintf("%T", rawEvent)),
@@ -143,22 +187,16 @@ func (t *Transformer) transformMessage(ctx context.Context, logger *slog.Logger,
 	}
 
 	if _, exists := event.Metadata["sender_pn"]; !exists {
-		sender := msg.Info.Sender.ToNonAD()
-		switch sender.Server {
-		case watypes.DefaultUserServer:
-			event.Metadata["sender_pn"] = sender.String()
-		case watypes.HiddenUserServer:
-			if lidResolver != nil {
-				if pn, ok := lidResolver.PNForLID(ctx, sender); ok {
-					event.Metadata["sender_pn"] = pn.String()
-				}
-			}
+		if pn := resolvedPNString(ctx, lidResolver, msg.Info.Sender); pn != "" {
+			event.Metadata["sender_pn"] = pn
+		} else if pn := resolvedPNString(ctx, lidResolver, msg.Info.MessageSource.SenderAlt); pn != "" {
+			event.Metadata["sender_pn"] = pn
 		}
-		if _, hasPN := event.Metadata["sender_pn"]; !hasPN {
-			alt := msg.Info.MessageSource.SenderAlt.ToNonAD()
-			if alt.Server == watypes.DefaultUserServer && !alt.IsEmpty() {
-				event.Metadata["sender_pn"] = alt.String()
-			}
+	}
+
+	if _, exists := event.Metadata["chat_pn"]; !exists {
+		if pn := deriveChatPNString(ctx, lidResolver, msg.Info.Chat, msg.Info.MessageSource.RecipientAlt); pn != "" {
+			event.Metadata["chat_pn"] = pn
 		}
 	}
 
@@ -186,11 +224,9 @@ func (t *Transformer) transformMessage(ctx context.Context, logger *slog.Logger,
 			}
 		}
 
-		if !isGroupChat {
-			if _, ok := event.Metadata["chat_name"]; !ok {
-				if name := provider.ContactName(ctx, chatLookup); name != "" {
-					event.Metadata["chat_name"] = name
-				}
+		if _, ok := event.Metadata["chat_name"]; !ok {
+			if name := provider.ContactName(ctx, chatLookup); name != "" {
+				event.Metadata["chat_name"] = name
 			}
 		}
 		if isGroupChat || chatLookup.Server != watypes.HiddenUserServer {
@@ -333,6 +369,8 @@ func (t *Transformer) transformMessage(ctx context.Context, logger *slog.Logger,
 	)
 
 	t.logMessageDebug(ctx, logger, msg)
+
+	t.capturePollMetadata(ctx, event, msg)
 
 	return event, nil
 }
@@ -511,6 +549,106 @@ func (t *Transformer) logMessageDebug(ctx context.Context, logger *slog.Logger, 
 	}
 }
 
+func (t *Transformer) capturePollMetadata(ctx context.Context, event *types.InternalEvent, msg *events.Message) {
+	if msg == nil || msg.Message == nil {
+		return
+	}
+	if poll := msg.Message.GetPollCreationMessage(); poll != nil {
+		if messageID := msg.Info.ID; messageID != "" {
+			t.storePollOptions(ctx, poll, messageID)
+		}
+	}
+	if pollVote := msg.Message.GetPollUpdateMessage(); pollVote != nil {
+		if key := pollVote.GetPollCreationMessageKey(); key != nil {
+			event.Metadata["poll_message_id"] = key.GetID()
+		}
+		t.capturePollVoteHashes(ctx, event, msg, pollVote)
+	}
+}
+
+func (t *Transformer) storePollOptions(ctx context.Context, poll *waE2E.PollCreationMessage, messageID string) {
+	if t.pollStore == nil || poll == nil || messageID == "" {
+		return
+	}
+	options := poll.GetOptions()
+	if len(options) == 0 {
+		return
+	}
+	mapping := make(map[string]string, len(options))
+	names := make([]string, len(options))
+	missingHash := false
+	for i, opt := range options {
+		name := strings.TrimSpace(opt.GetOptionName())
+		if name == "" {
+			continue
+		}
+		names[i] = name
+		hash := strings.TrimSpace(opt.GetOptionHash())
+		if hash == "" {
+			missingHash = true
+		} else {
+			mapping[strings.ToLower(hash)] = name
+		}
+	}
+	if missingHash {
+		computed := whatsmeowcore.HashPollOptions(names)
+		for i, hashed := range computed {
+			if len(hashed) == 0 || names[i] == "" {
+				continue
+			}
+			hash := strings.ToLower(hex.EncodeToString(hashed))
+			if _, exists := mapping[hash]; !exists {
+				mapping[hash] = names[i]
+			}
+		}
+	}
+	if len(mapping) == 0 {
+		return
+	}
+	if err := t.pollStore.SaveOptions(ctx, t.instanceID, messageID, mapping); err != nil && t.debug {
+		logging.ContextLogger(ctx, nil).Debug("poll option store failed",
+			slog.String("instance_id", t.instanceID.String()),
+			slog.String("message_id", messageID),
+			slog.String("error", err.Error()))
+	}
+}
+
+func (t *Transformer) capturePollVoteHashes(ctx context.Context, event *types.InternalEvent, msg *events.Message, pollVote *waE2E.PollUpdateMessage) {
+	decrypter := eventctx.PollDecrypterFromContext(ctx)
+	if decrypter == nil {
+		return
+	}
+	voteMsg, err := decrypter.DecryptPollVote(ctx, msg)
+	if err != nil {
+		if t.debug {
+			logging.ContextLogger(ctx, nil).Debug("poll vote decrypt failed",
+				slog.String("instance_id", t.instanceID.String()),
+				slog.String("message_id", msg.Info.ID),
+				slog.String("error", err.Error()))
+		}
+		return
+	}
+	selected := voteMsg.GetSelectedOptions()
+	if len(selected) == 0 {
+		return
+	}
+	hashes := make([]string, 0, len(selected))
+	for _, entry := range selected {
+		if len(entry) == 0 {
+			continue
+		}
+		hashes = append(hashes, strings.ToLower(hex.EncodeToString(entry)))
+	}
+	if len(hashes) == 0 {
+		return
+	}
+	payload, err := json.Marshal(hashes)
+	if err != nil {
+		return
+	}
+	event.Metadata["poll_vote_hashes"] = string(payload)
+}
+
 func (t *Transformer) logUndecryptableDebug(ctx context.Context, logger *slog.Logger, msg *events.UndecryptableMessage) {
 	if !t.debug || msg == nil {
 		return
@@ -619,38 +757,24 @@ func (t *Transformer) transformReceipt(ctx context.Context, logger *slog.Logger,
 		event.Metadata["message_ids"] = string(messageIDsJSON)
 	}
 
-	if _, exists := event.Metadata["sender_pn"]; !exists {
-		sender := receipt.Sender.ToNonAD()
-		switch sender.Server {
-		case watypes.DefaultUserServer:
-			event.Metadata["sender_pn"] = sender.String()
-		case watypes.HiddenUserServer:
-			if lidResolver != nil {
-				if pn, ok := lidResolver.PNForLID(ctx, sender); ok {
-					event.Metadata["sender_pn"] = pn.String()
-				}
-			}
+	if _, exists := event.Metadata["chat_pn"]; !exists {
+		if pn := deriveChatPNString(ctx, lidResolver, receipt.Chat, receipt.MessageSource.RecipientAlt); pn != "" {
+			event.Metadata["chat_pn"] = pn
 		}
-		if _, hasPN := event.Metadata["sender_pn"]; !hasPN {
-			alt := receipt.MessageSource.SenderAlt.ToNonAD()
-			if alt.Server == watypes.DefaultUserServer && !alt.IsEmpty() {
-				event.Metadata["sender_pn"] = alt.String()
-			}
+	}
+
+	if _, exists := event.Metadata["sender_pn"]; !exists {
+		if pn := resolvedPNString(ctx, lidResolver, receipt.Sender); pn != "" {
+			event.Metadata["sender_pn"] = pn
+		} else if pn := resolvedPNString(ctx, lidResolver, receipt.MessageSource.SenderAlt); pn != "" {
+			event.Metadata["sender_pn"] = pn
 		}
 	}
 
 	if !receipt.MessageSender.IsEmpty() {
 		if _, exists := event.Metadata["message_sender_pn"]; !exists {
-			originalSender := receipt.MessageSender.ToNonAD()
-			switch originalSender.Server {
-			case watypes.DefaultUserServer:
-				event.Metadata["message_sender_pn"] = originalSender.String()
-			case watypes.HiddenUserServer:
-				if lidResolver != nil {
-					if pn, ok := lidResolver.PNForLID(ctx, originalSender); ok {
-						event.Metadata["message_sender_pn"] = pn.String()
-					}
-				}
+			if pn := resolvedPNString(ctx, lidResolver, receipt.MessageSender); pn != "" {
+				event.Metadata["message_sender_pn"] = pn
 			}
 		}
 	}
@@ -705,19 +829,17 @@ func (t *Transformer) transformChatPresence(ctx context.Context, logger *slog.Lo
 		event.Metadata["recipient_alt"] = presence.MessageSource.RecipientAlt.String()
 	}
 
-	senderJID := presence.Sender.ToNonAD()
+	if _, exists := event.Metadata["chat_pn"]; !exists {
+		if pn := deriveChatPNString(ctx, lidResolver, presence.Chat, presence.MessageSource.RecipientAlt); pn != "" {
+			event.Metadata["chat_pn"] = pn
+		}
+	}
+
 	if _, exists := event.Metadata["sender_pn"]; !exists {
-		switch senderJID.Server {
-		case watypes.DefaultUserServer, watypes.LegacyUserServer:
-			event.Metadata["sender_pn"] = senderJID.String()
-		case watypes.HiddenUserServer:
-			if !presence.MessageSource.SenderAlt.IsEmpty() && presence.MessageSource.SenderAlt.Server != watypes.HiddenUserServer {
-				event.Metadata["sender_pn"] = presence.MessageSource.SenderAlt.ToNonAD().String()
-			} else if lidResolver != nil {
-				if pn, ok := lidResolver.PNForLID(ctx, senderJID); ok && !pn.IsEmpty() {
-					event.Metadata["sender_pn"] = pn.ToNonAD().String()
-				}
-			}
+		if pn := resolvedPNString(ctx, lidResolver, presence.Sender); pn != "" {
+			event.Metadata["sender_pn"] = pn
+		} else if pn := resolvedPNString(ctx, lidResolver, presence.MessageSource.SenderAlt); pn != "" {
+			event.Metadata["sender_pn"] = pn
 		}
 	}
 
@@ -735,6 +857,8 @@ func (t *Transformer) transformChatPresence(ctx context.Context, logger *slog.Lo
 func (t *Transformer) transformPresence(ctx context.Context, logger *slog.Logger, presence *events.Presence) (*types.InternalEvent, error) {
 	eventID := uuid.New()
 
+	lidResolver := eventctx.LIDResolverFromContext(ctx)
+
 	event := &types.InternalEvent{
 		InstanceID: t.instanceID,
 		EventID:    eventID,
@@ -749,6 +873,11 @@ func (t *Transformer) transformPresence(ctx context.Context, logger *slog.Logger
 	event.Metadata["unavailable"] = fmt.Sprintf("%t", presence.Unavailable)
 	if !presence.LastSeen.IsZero() {
 		event.Metadata["last_seen"] = fmt.Sprintf("%d", presence.LastSeen.Unix())
+	}
+	if _, exists := event.Metadata["from_pn"]; !exists {
+		if pn := resolvedPNString(ctx, lidResolver, presence.From); pn != "" {
+			event.Metadata["from_pn"] = pn
+		}
 	}
 
 	logger.InfoContext(ctx, "transformed presence event",
@@ -797,6 +926,69 @@ func (t *Transformer) transformDisconnected(ctx context.Context, logger *slog.Lo
 	)
 
 	return event, nil
+}
+
+func resolvedPNString(ctx context.Context, resolver eventctx.LIDResolver, jid watypes.JID) string {
+	if jid.IsEmpty() {
+		return ""
+	}
+	normalized := jid.ToNonAD()
+	switch normalized.Server {
+	case watypes.DefaultUserServer, watypes.LegacyUserServer:
+		return normalized.String()
+	case watypes.HiddenUserServer:
+		if resolver == nil {
+			return ""
+		}
+		if pn, ok := resolver.PNForLID(ctx, normalized); ok && !pn.IsEmpty() {
+			return pn.ToNonAD().String()
+		}
+	}
+	return ""
+}
+
+func deriveChatPNString(ctx context.Context, resolver eventctx.LIDResolver, chat watypes.JID, recipientAlt watypes.JID) string {
+	if pn := resolvedPNString(ctx, resolver, chat); pn != "" {
+		return pn
+	}
+	if pn := resolvedPNString(ctx, resolver, recipientAlt); pn != "" {
+		return pn
+	}
+	return ""
+}
+
+func encodeParticipantPNList(ctx context.Context, resolver eventctx.LIDResolver, participants []watypes.JID) string {
+	if len(participants) == 0 {
+		return ""
+	}
+	values := make([]string, len(participants))
+	hasValue := false
+	for i, member := range participants {
+		if pn := resolvedPNString(ctx, resolver, member); pn != "" {
+			values[i] = pn
+			hasValue = true
+		}
+	}
+	if !hasValue {
+		return ""
+	}
+	encoded, err := json.Marshal(values)
+	if err != nil {
+		return ""
+	}
+	return string(encoded)
+}
+
+func storeParticipantPNMetadata(ctx context.Context, resolver eventctx.LIDResolver, metadata map[string]string, key string, participants []watypes.JID) {
+	if metadata == nil {
+		return
+	}
+	if _, exists := metadata[key]; exists {
+		return
+	}
+	if encoded := encodeParticipantPNList(ctx, resolver, participants); encoded != "" {
+		metadata[key] = encoded
+	}
 }
 
 type MediaInfo struct {
@@ -1009,6 +1201,8 @@ func (t *Transformer) extractContextInfo(ctxInfo *waE2E.ContextInfo, event *type
 func (t *Transformer) transformJoinedGroup(ctx context.Context, logger *slog.Logger, joined *events.JoinedGroup) (*types.InternalEvent, error) {
 	eventID := uuid.New()
 
+	lidResolver := eventctx.LIDResolverFromContext(ctx)
+
 	event := &types.InternalEvent{
 		InstanceID: t.instanceID,
 		EventID:    eventID,
@@ -1032,12 +1226,26 @@ func (t *Transformer) transformJoinedGroup(ctx context.Context, logger *slog.Log
 	if joined.SenderPN != nil {
 		event.Metadata["sender_pn"] = joined.SenderPN.String()
 	}
+	if _, ok := event.Metadata["sender_pn"]; !ok && joined.Sender != nil {
+		if pn := resolvedPNString(ctx, lidResolver, *joined.Sender); pn != "" {
+			event.Metadata["sender_pn"] = pn
+		}
+	}
 	if joined.Notify != "" {
 		event.Metadata["notify"] = joined.Notify
 	}
 	if joined.CreateKey != "" {
 		event.Metadata["create_key"] = joined.CreateKey
 	}
+
+	participantJIDs := make([]watypes.JID, 0, len(joined.Participants))
+	for _, member := range joined.Participants {
+		if member.JID.IsEmpty() {
+			continue
+		}
+		participantJIDs = append(participantJIDs, member.JID)
+	}
+	storeParticipantPNMetadata(ctx, lidResolver, event.Metadata, "join_participants_pn", participantJIDs)
 
 	logger.InfoContext(ctx, "transformed joined group event",
 		slog.String("event_id", eventID.String()),
@@ -1049,6 +1257,8 @@ func (t *Transformer) transformJoinedGroup(ctx context.Context, logger *slog.Log
 
 func (t *Transformer) transformGroupInfo(ctx context.Context, logger *slog.Logger, info *events.GroupInfo) (*types.InternalEvent, error) {
 	eventID := uuid.New()
+
+	lidResolver := eventctx.LIDResolverFromContext(ctx)
 
 	event := &types.InternalEvent{
 		InstanceID: t.instanceID,
@@ -1069,6 +1279,11 @@ func (t *Transformer) transformGroupInfo(ctx context.Context, logger *slog.Logge
 	if info.SenderPN != nil {
 		event.Metadata["sender_pn"] = info.SenderPN.String()
 	}
+	if _, ok := event.Metadata["sender_pn"]; !ok && info.Sender != nil {
+		if pn := resolvedPNString(ctx, lidResolver, *info.Sender); pn != "" {
+			event.Metadata["sender_pn"] = pn
+		}
+	}
 	if info.Notify != "" {
 		event.Metadata["notify"] = info.Notify
 	}
@@ -1086,11 +1301,21 @@ func (t *Transformer) transformGroupInfo(ctx context.Context, logger *slog.Logge
 			event.Metadata["topic_set_by"] = info.Topic.TopicSetBy.String()
 		}
 	}
+
+	storeParticipantPNMetadata(ctx, lidResolver, event.Metadata, "join_participants_pn", info.Join)
+	storeParticipantPNMetadata(ctx, lidResolver, event.Metadata, "leave_participants_pn", info.Leave)
+	storeParticipantPNMetadata(ctx, lidResolver, event.Metadata, "promote_participants_pn", info.Promote)
+	storeParticipantPNMetadata(ctx, lidResolver, event.Metadata, "demote_participants_pn", info.Demote)
+	storeParticipantPNMetadata(ctx, lidResolver, event.Metadata, "membership_request_created_pn", info.MembershipRequestsCreated)
+	storeParticipantPNMetadata(ctx, lidResolver, event.Metadata, "membership_request_revoked_pn", info.MembershipRequestsRevoked)
 	if info.Locked != nil {
 		event.Metadata["locked"] = fmt.Sprintf("%t", info.Locked.IsLocked)
 	}
 	if info.Announce != nil {
 		event.Metadata["announce"] = fmt.Sprintf("%t", info.Announce.IsAnnounce)
+	}
+	if method := strings.TrimSpace(info.MembershipRequestMethod); method != "" {
+		event.Metadata["membership_request_method"] = method
 	}
 
 	logger.InfoContext(ctx, "transformed group info event",

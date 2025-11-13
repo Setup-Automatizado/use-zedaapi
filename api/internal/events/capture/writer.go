@@ -50,7 +50,6 @@ type ResolvedWebhookConfig struct {
 	ConnectedURL        string
 	NotifySentByMe      bool
 	StoreJID            *string
-	ClientToken         string
 }
 
 func NewTransactionalWriter(
@@ -292,9 +291,9 @@ func (w *TransactionalWriter) buildTransportConfig(event *types.InternalEvent, c
 		Type: category,
 	}
 
-	if cfg.ClientToken != "" {
+	if w.cfg != nil && strings.TrimSpace(w.cfg.Client.AuthToken) != "" {
 		config.Headers = map[string]string{
-			"Client-Token": cfg.ClientToken,
+			"Client-Token": w.cfg.Client.AuthToken,
 		}
 	}
 
@@ -324,6 +323,12 @@ func resolveWebhookURL(event *types.InternalEvent, cfg *ResolvedWebhookConfig) (
 	case "receipt":
 		return cfg.ReceivedDeliveryURL, "receipt"
 	case "undecryptable":
+		return cfg.ReceivedURL, "received"
+	case "group_info":
+		return cfg.ReceivedURL, "received"
+	case "group_joined":
+		return cfg.ReceivedURL, "received"
+	case "picture":
 		return cfg.ReceivedURL, "received"
 	case "chat_presence":
 		return cfg.ChatPresenceURL, "chat_presence"

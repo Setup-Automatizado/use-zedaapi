@@ -16,6 +16,8 @@ import (
 	whatsmeowpkg "go.mau.fi/whatsmeow"
 	"go.mau.fi/whatsmeow/api/internal/logging"
 	"go.mau.fi/whatsmeow/api/internal/whatsmeow"
+	whatsstore "go.mau.fi/whatsmeow/store"
+	watypes "go.mau.fi/whatsmeow/types"
 )
 
 var (
@@ -28,13 +30,19 @@ var (
 )
 
 type Service struct {
-	repo     *Repository
-	registry *whatsmeow.ClientRegistry
-	log      *slog.Logger
+	repo            *Repository
+	registry        *whatsmeow.ClientRegistry
+	clientAuthToken string
+	log             *slog.Logger
 }
 
-func NewService(repo *Repository, registry *whatsmeow.ClientRegistry, log *slog.Logger) *Service {
-	return &Service{repo: repo, registry: registry, log: log}
+func NewService(repo *Repository, registry *whatsmeow.ClientRegistry, clientAuthToken string, log *slog.Logger) *Service {
+	return &Service{
+		repo:            repo,
+		registry:        registry,
+		clientAuthToken: clientAuthToken,
+		log:             log,
+	}
 }
 
 func (s *Service) Create(ctx context.Context, params CreateParams) (*Instance, error) {
@@ -42,7 +50,6 @@ func (s *Service) Create(ctx context.Context, params CreateParams) (*Instance, e
 		ID:              uuid.New(),
 		Name:            params.Name,
 		SessionName:     params.Name,
-		ClientToken:     uuid.NewString(),
 		InstanceToken:   uuid.NewString(),
 		IsDevice:        false,
 		BusinessDevice:  false,
@@ -83,15 +90,67 @@ func (s *Service) GetStatus(ctx context.Context, id uuid.UUID, clientToken, inst
 		return nil, ErrUnauthorized
 	}
 	snapshot := s.registry.Status(toInstanceInfo(*inst))
+	connectionStatus := inst.ConnectionStatus
+	if snapshot.ConnectionStatus != "" {
+		connectionStatus = snapshot.ConnectionStatus
+	} else if connectionStatus == "" {
+		if snapshot.Connected {
+			connectionStatus = "connected"
+		} else {
+			connectionStatus = "disconnected"
+		}
+	}
+
+	lastConnected := inst.LastConnectedAt
+	if snapshot.LastConnected != nil {
+		lastConnected = snapshot.LastConnected
+	}
+
+	storeJID := snapshot.StoreJID
+	if storeJID == nil {
+		storeJID = inst.StoreJID
+	}
+
+	worker := snapshot.WorkerID
+	if worker == "" && inst.WorkerID != nil {
+		worker = *inst.WorkerID
+	}
+
+	smartphoneConnected := false
+	if storeJID != nil && *storeJID != "" {
+		smartphoneConnected = snapshot.Connected
+	}
+
+	statusError := deriveStatusError(snapshot.Connected, connectionStatus, storeJID)
+
 	return &Status{
-		Connected:          snapshot.Connected,
-		StoreJID:           snapshot.StoreJID,
-		LastConnected:      snapshot.LastConnected,
-		InstanceID:         inst.ID,
-		AutoReconnect:      snapshot.AutoReconnect,
-		WorkerAssigned:     snapshot.WorkerID,
-		SubscriptionActive: inst.SubscriptionActive,
+		Connected:           snapshot.Connected,
+		ConnectionStatus:    connectionStatus,
+		StoreJID:            storeJID,
+		LastConnected:       lastConnected,
+		InstanceID:          inst.ID,
+		AutoReconnect:       snapshot.AutoReconnect,
+		WorkerAssigned:      worker,
+		SubscriptionActive:  inst.SubscriptionActive,
+		Error:               statusError,
+		SmartphoneConnected: smartphoneConnected,
 	}, nil
+}
+
+func deriveStatusError(connected bool, status string, storeJID *string) string {
+	if connected {
+		return ""
+	}
+
+	normalized := strings.ToLower(status)
+	switch {
+	case strings.HasPrefix(normalized, "logged_out"):
+		return "You need to restore the session."
+	case storeJID != nil && *storeJID != "":
+		return "You are already connected."
+	default:
+		return "You are not connected."
+	}
 }
 
 func (s *Service) Restart(ctx context.Context, id uuid.UUID, clientToken, instanceToken string) error {
@@ -164,6 +223,57 @@ func (s *Service) GetQRCodeImage(ctx context.Context, id uuid.UUID, clientToken,
 	return "data:image/png;base64," + base64.StdEncoding.EncodeToString(png), nil
 }
 
+func (s *Service) GetDevice(ctx context.Context, id uuid.UUID, clientToken, instanceToken string) (*DeviceResponse, error) {
+	inst, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	if !s.tokensMatch(inst, clientToken, instanceToken) {
+		return nil, ErrUnauthorized
+	}
+
+	device := &DeviceResponse{
+		Phone: "",
+		Name:  inst.Name,
+		Device: DeviceMetadata{
+			SessionName: inst.SessionName,
+			WAVersion:   whatsstore.GetWAVersion().String(),
+		},
+		SessionID:  0,
+		IsBusiness: inst.BusinessDevice,
+	}
+
+	if ua := whatsstore.BaseClientPayload.GetUserAgent(); ua != nil {
+		device.Device.MCC = ua.GetMcc()
+		device.Device.MNC = ua.GetMnc()
+		device.Device.OSVersion = ua.GetOsVersion()
+		device.Device.DeviceManufacturer = ua.GetManufacturer()
+		device.Device.DeviceModel = ua.GetDevice()
+		device.Device.OSBuildNumber = ua.GetOsBuildNumber()
+	}
+
+	if inst.StoreJID != nil {
+		if parsed, phone := parsePhoneFromJID(*inst.StoreJID); phone != "" {
+			device.Phone = phone
+			device.SessionID = int(parsed.Device)
+		}
+	}
+
+	if client, ok := s.registry.GetClient(inst.ID); ok && client != nil {
+		s.hydrateDeviceFromClient(ctx, device, client, inst)
+	}
+
+	if strings.TrimSpace(device.Device.DeviceModel) == "" {
+		device.Device.DeviceModel = inst.SessionName
+	}
+	if strings.TrimSpace(device.Device.Platform) == "" {
+		device.Device.Platform = deriveOriginalDevice(inst, "")
+	}
+	device.OriginalDevice = deriveOriginalDevice(inst, device.Device.Platform)
+
+	return device, nil
+}
+
 func (s *Service) GetPhoneCode(ctx context.Context, id uuid.UUID, clientToken, instanceToken, phone string) (string, error) {
 	inst, err := s.repo.GetByID(ctx, id)
 	if err != nil {
@@ -226,7 +336,8 @@ func (s *Service) tokensMatch(inst *Instance, clientToken, instanceToken string)
 	if inst == nil {
 		return false
 	}
-	return inst.ClientToken == clientToken && inst.InstanceToken == instanceToken
+	// Validate against global client token (from env) and per-instance token
+	return s.clientAuthToken == clientToken && inst.InstanceToken == instanceToken
 }
 
 func (s *Service) UpdateWebhookDelivery(ctx context.Context, id uuid.UUID, clientToken, instanceToken, value string) (*WebhookSettings, error) {
@@ -359,7 +470,6 @@ func (s *Service) CreatePartnerInstance(ctx context.Context, params PartnerCreat
 		ID:                 uuid.New(),
 		Name:               params.Name,
 		SessionName:        params.SessionName,
-		ClientToken:        uuid.NewString(),
 		InstanceToken:      uuid.NewString(),
 		IsDevice:           params.IsDevice,
 		BusinessDevice:     params.BusinessDevice,
@@ -500,6 +610,29 @@ func (s *Service) ListInstances(ctx context.Context, filter ListFilter) (ListRes
 		if instances[i].Webhooks == nil {
 			instances[i].Webhooks = &WebhookSettings{NotifySentByMe: false}
 		}
+		// Populate connection status merging live registry snapshot with persisted state
+		snapshot := s.registry.Status(toInstanceInfo(instances[i]))
+		if snapshot.StoreJID != nil {
+			instances[i].StoreJID = snapshot.StoreJID
+		}
+		instances[i].WhatsappConnected = snapshot.Connected
+		instances[i].PhoneConnected = snapshot.Connected && snapshot.StoreJID != nil && *snapshot.StoreJID != ""
+
+		if snapshot.ConnectionStatus != "" {
+			instances[i].ConnectionStatus = snapshot.ConnectionStatus
+		} else if instances[i].ConnectionStatus == "" {
+			instances[i].ConnectionStatus = "disconnected"
+		}
+
+		if snapshot.LastConnected != nil {
+			instances[i].LastConnectedAt = snapshot.LastConnected
+		}
+
+		if snapshot.WorkerID != "" {
+			instances[i].WorkerID = strPtr(snapshot.WorkerID)
+		} else if instances[i].WorkerID == nil {
+			instances[i].WorkerID = nil
+		}
 	}
 	if filter.Page <= 0 {
 		filter.Page = 1
@@ -595,7 +728,6 @@ func toInstanceInfo(inst Instance) whatsmeow.InstanceInfo {
 		ID:            inst.ID,
 		Name:          inst.Name,
 		SessionName:   inst.SessionName,
-		ClientToken:   inst.ClientToken,
 		InstanceToken: inst.InstanceToken,
 		StoreJID:      inst.StoreJID,
 	}
@@ -609,4 +741,88 @@ func ensureActive(inst *Instance) error {
 		return ErrInstanceInactive
 	}
 	return nil
+}
+
+func (s *Service) hydrateDeviceFromClient(ctx context.Context, device *DeviceResponse, client *whatsmeowpkg.Client, inst *Instance) {
+	if client == nil || device == nil {
+		return
+	}
+	if client.Store != nil {
+		if client.Store.ID != nil {
+			if phone := phoneFromJID(*client.Store.ID); phone != "" {
+				device.Phone = phone
+			}
+			device.SessionID = int(client.Store.ID.Device)
+		}
+		if push := strings.TrimSpace(client.Store.PushName); push != "" {
+			device.Name = push
+		}
+		if platform := strings.TrimSpace(client.Store.Platform); platform != "" {
+			device.Device.Platform = strings.ToLower(platform)
+			if strings.TrimSpace(device.Device.DeviceModel) == "" {
+				device.Device.DeviceModel = platform
+			}
+		}
+		if client.Store.BusinessName != "" {
+			device.IsBusiness = true
+		}
+	}
+	if img := s.selfProfilePictureURL(ctx, client, inst); img != "" {
+		device.ImgURL = &img
+	}
+}
+
+func (s *Service) selfProfilePictureURL(ctx context.Context, client *whatsmeowpkg.Client, inst *Instance) string {
+	if client == nil || client.Store == nil {
+		return ""
+	}
+	var jid watypes.JID
+	if client.Store.ID != nil {
+		jid = client.Store.ID.ToNonAD()
+	} else if inst != nil && inst.StoreJID != nil {
+		parsed, err := watypes.ParseJID(*inst.StoreJID)
+		if err == nil {
+			jid = parsed.ToNonAD()
+		}
+	}
+	if jid == watypes.EmptyJID {
+		return ""
+	}
+	info, err := client.GetProfilePictureInfo(ctx, jid, nil)
+	if err != nil {
+		if errors.Is(err, whatsmeowpkg.ErrProfilePictureNotSet) || errors.Is(err, whatsmeowpkg.ErrProfilePictureUnauthorized) {
+			return ""
+		}
+		logger := logging.ContextLogger(ctx, s.log)
+		logger.Debug("failed to fetch profile picture",
+			slog.String("instance_id", inst.ID.String()),
+			slog.String("error", err.Error()))
+		return ""
+	}
+	return strings.TrimSpace(info.URL)
+}
+
+func parsePhoneFromJID(raw string) (watypes.JID, string) {
+	jid, err := watypes.ParseJID(raw)
+	if err != nil {
+		return watypes.JID{}, ""
+	}
+	return jid, phoneFromJID(jid)
+}
+
+func phoneFromJID(jid watypes.JID) string {
+	return strings.TrimSpace(jid.User)
+}
+
+func deriveOriginalDevice(inst *Instance, candidate string) string {
+	if trimmed := strings.TrimSpace(candidate); trimmed != "" {
+		return strings.ToLower(trimmed)
+	}
+	if inst != nil {
+		if inst.IsDevice {
+			return "smba"
+		}
+		return "smbi"
+	}
+	return ""
 }

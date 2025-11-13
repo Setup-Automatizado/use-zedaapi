@@ -9,7 +9,6 @@ CREATE TABLE IF NOT EXISTS instances (
     id UUID PRIMARY KEY,
     name TEXT,
     session_name TEXT,
-    client_token TEXT NOT NULL,
     instance_token TEXT NOT NULL,
     store_jid TEXT,
     is_device BOOLEAN NOT NULL DEFAULT FALSE,
@@ -23,7 +22,6 @@ CREATE TABLE IF NOT EXISTS instances (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS idx_instances_client_token ON instances(client_token);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_instances_instance_token ON instances(instance_token);
 
 -- Webhook Configs: Per-instance webhook configuration
@@ -39,42 +37,6 @@ CREATE TABLE IF NOT EXISTS webhook_configs (
     notify_sent_by_me BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- Legacy Webhook Outbox (kept for backward compatibility, superseded by event_outbox)
-CREATE TABLE IF NOT EXISTS webhook_outbox (
-    id UUID PRIMARY KEY,
-    instance_id UUID NOT NULL REFERENCES instances(id) ON DELETE CASCADE,
-    event_type TEXT NOT NULL,
-    payload JSONB NOT NULL,
-    status TEXT NOT NULL DEFAULT 'pending',
-    attempts INT NOT NULL DEFAULT 0,
-    next_attempt_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    last_error TEXT,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
-CREATE INDEX IF NOT EXISTS idx_webhook_outbox_status_next_attempt ON webhook_outbox(status, next_attempt_at);
-CREATE INDEX IF NOT EXISTS idx_webhook_outbox_instance_created ON webhook_outbox(instance_id, created_at DESC);
-
--- Legacy Webhook DLQ (kept for backward compatibility, superseded by event_dlq)
-CREATE TABLE IF NOT EXISTS webhook_dlq (
-    id UUID PRIMARY KEY,
-    instance_id UUID NOT NULL,
-    event_type TEXT NOT NULL,
-    payload JSONB NOT NULL,
-    failure_reason TEXT,
-    failed_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
-
--- Instance Events Log: Audit trail
-CREATE TABLE IF NOT EXISTS instance_events_log (
-    id BIGSERIAL PRIMARY KEY,
-    instance_id UUID NOT NULL,
-    event_type TEXT NOT NULL,
-    payload JSONB,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- Event Outbox: Primary queue for all WhatsApp events
@@ -441,11 +403,6 @@ BEFORE UPDATE ON webhook_configs
 FOR EACH ROW
 EXECUTE PROCEDURE trigger_set_timestamp();
 
-CREATE TRIGGER set_timestamp_webhook_outbox
-BEFORE UPDATE ON webhook_outbox
-FOR EACH ROW
-EXECUTE PROCEDURE trigger_set_timestamp();
-
 -- Event system triggers
 CREATE TRIGGER trg_event_outbox_updated_at
     BEFORE UPDATE ON event_outbox
@@ -462,16 +419,134 @@ CREATE TRIGGER trg_media_metadata_updated_at
     FOR EACH ROW
     EXECUTE FUNCTION update_media_metadata_updated_at();
 
+-- ============================================================================
+-- NATIVE MESSAGE QUEUE SYSTEM (PostgreSQL-backed, FIFO ordering)
+-- ============================================================================
+-- Native PostgreSQL message queue for WhatsApp message delivery with:
+-- - Dynamic per-instance queues (one queue per WhatsApp instance)
+-- - FIFO ordering guarantee via BIGSERIAL id
+-- - Delayed/scheduled message support via scheduled_at
+-- - Automatic retry with exponential backoff
+-- - Dead Letter Queue (DLQ) for permanently failed messages
+-- - Multi-replica safety via FOR UPDATE SKIP LOCKED
+--
+-- Architecture:
+-- 1. message_queue: Main queue table with BIGSERIAL id for FIFO ordering
+-- 2. message_dlq: Dead Letter Queue for permanently failed messages
+-- 3. Indexes: Optimized for efficient queue polling and cleanup
+-- ============================================================================
+
+-- Main message queue table
+-- FIFO by Recipient: processing_key ensures strict ordering per phone number
+-- LISTEN/NOTIFY: trigger sends notifications to workers for <10ms latency
+CREATE TABLE IF NOT EXISTS message_queue (
+    id BIGSERIAL PRIMARY KEY,
+    instance_id UUID NOT NULL REFERENCES instances(id) ON DELETE CASCADE,
+    payload JSONB NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'pending',
+    scheduled_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    attempts INT NOT NULL DEFAULT 0,
+    max_attempts INT NOT NULL DEFAULT 3,
+    last_error TEXT,
+    last_attempt_at TIMESTAMPTZ,
+    processed_at TIMESTAMPTZ,
+    processing_key TEXT, -- Phone number for FIFO by recipient
+
+    -- Constraints
+    CONSTRAINT message_queue_status_check CHECK (status IN ('pending', 'processing', 'completed', 'failed'))
+);
+
+-- Critical index for efficient queue polling with FIFO by recipient
+-- Optimizes: WHERE instance_id = ? AND status = 'pending' AND scheduled_at <= NOW()
+--           ORDER BY processing_key, id (FIFO per phone number)
+CREATE INDEX idx_message_queue_processing_v2
+    ON message_queue(instance_id, status, scheduled_at, processing_key, id)
+    WHERE status = 'pending';
+
+-- Additional index for efficient processing_key queries
+CREATE INDEX idx_message_queue_processing_key
+    ON message_queue(instance_id, processing_key, status, scheduled_at, id);
+
+-- Index for cleanup operations (removing old completed/failed messages)
+CREATE INDEX idx_message_queue_cleanup
+    ON message_queue(status, processed_at) WHERE processed_at IS NOT NULL;
+
+-- Dead Letter Queue (DLQ) for permanently failed messages
+CREATE TABLE IF NOT EXISTS message_dlq (
+    id BIGSERIAL PRIMARY KEY,
+    original_id BIGINT NOT NULL,
+    instance_id UUID NOT NULL REFERENCES instances(id) ON DELETE CASCADE,
+    payload JSONB NOT NULL,
+    error TEXT NOT NULL,
+    attempts INT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL,
+    moved_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Index for DLQ queries by instance
+CREATE INDEX idx_message_dlq_instance
+    ON message_dlq(instance_id, moved_at DESC);
+
+-- Index for original_id lookups
+CREATE INDEX idx_message_dlq_original_id
+    ON message_dlq(original_id);
+
+-- ============================================================================
+-- MESSAGE QUEUE: LISTEN/NOTIFY SUPPORT
+-- ============================================================================
+-- Function to notify workers when new messages are enqueued
+-- Eliminates polling latency (1s → <10ms)
+CREATE OR REPLACE FUNCTION notify_message_queue()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Send notification with instance_id as payload
+    -- Workers listening on 'message_queue_channel' will be notified immediately
+    PERFORM pg_notify('message_queue_channel', NEW.instance_id::text);
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger to call notify function after INSERT
+CREATE TRIGGER trigger_notify_message_queue
+    AFTER INSERT ON message_queue
+    FOR EACH ROW
+    EXECUTE FUNCTION notify_message_queue();
+
+-- Comment on tables for documentation
+COMMENT ON TABLE message_queue IS 'Main message queue for WhatsApp message delivery with FIFO ordering guarantee via BIGSERIAL id. Includes FIFO by recipient (processing_key) and LISTEN/NOTIFY support for <10ms latency';
+COMMENT ON TABLE message_dlq IS 'Dead Letter Queue for permanently failed messages after max retry attempts';
+
+COMMENT ON COLUMN message_queue.id IS 'BIGSERIAL ensures FIFO ordering (insertion order preserved)';
+COMMENT ON COLUMN message_queue.instance_id IS 'WhatsApp instance UUID - each instance has isolated queue';
+COMMENT ON COLUMN message_queue.payload IS 'Message payload in JSONB format (flexible schema)';
+COMMENT ON COLUMN message_queue.status IS 'Current status: pending, processing, completed, failed';
+COMMENT ON COLUMN message_queue.scheduled_at IS 'When message should be processed (supports delayed messages)';
+COMMENT ON COLUMN message_queue.attempts IS 'Number of delivery attempts (for retry logic)';
+COMMENT ON COLUMN message_queue.max_attempts IS 'Maximum retry attempts before moving to DLQ';
+COMMENT ON COLUMN message_queue.processing_key IS 'Phone number extracted from payload for strict FIFO ordering per recipient (enables parallel processing of different recipients while maintaining order per recipient)';
+
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
 
+-- Drop Native Message Queue structures
+DROP TRIGGER IF EXISTS trigger_notify_message_queue ON message_queue;
+DROP FUNCTION IF EXISTS notify_message_queue();
+DROP INDEX IF EXISTS idx_message_dlq_original_id;
+DROP INDEX IF EXISTS idx_message_dlq_instance;
+DROP INDEX IF EXISTS idx_message_queue_cleanup;
+DROP INDEX IF EXISTS idx_message_queue_processing_key;
+DROP INDEX IF EXISTS idx_message_queue_processing_v2;
+DROP INDEX IF EXISTS idx_message_queue_processing;
+DROP TABLE IF EXISTS message_dlq;
+DROP TABLE IF EXISTS message_queue;
+
 -- Drop triggers
 DROP TRIGGER IF EXISTS trg_media_metadata_updated_at ON media_metadata;
 DROP TRIGGER IF EXISTS trg_event_dlq_updated_at ON event_dlq;
 DROP TRIGGER IF EXISTS trg_event_outbox_updated_at ON event_outbox;
-DROP TRIGGER IF EXISTS set_timestamp_webhook_outbox ON webhook_outbox;
 DROP TRIGGER IF EXISTS set_timestamp_webhook_configs ON webhook_configs;
 DROP TRIGGER IF EXISTS set_timestamp_instances ON instances;
 
@@ -509,22 +584,14 @@ DROP INDEX IF EXISTS idx_outbox_instance_recent;
 DROP INDEX IF EXISTS idx_outbox_media_pending;
 DROP INDEX IF EXISTS idx_outbox_instance_pending;
 
--- Drop indexes (webhook_outbox)
-DROP INDEX IF EXISTS idx_webhook_outbox_instance_created;
-DROP INDEX IF EXISTS idx_webhook_outbox_status_next_attempt;
-
 -- Drop indexes (instances)
 DROP INDEX IF EXISTS idx_instances_instance_token;
-DROP INDEX IF EXISTS idx_instances_client_token;
 
 -- Drop tables
 DROP TABLE IF EXISTS instance_event_sequence;
 DROP TABLE IF EXISTS media_metadata;
 DROP TABLE IF EXISTS event_dlq;
 DROP TABLE IF EXISTS event_outbox;
-DROP TABLE IF EXISTS instance_events_log;
-DROP TABLE IF EXISTS webhook_dlq;
-DROP TABLE IF EXISTS webhook_outbox;
 DROP TABLE IF EXISTS webhook_configs;
 DROP TABLE IF EXISTS instances;
 

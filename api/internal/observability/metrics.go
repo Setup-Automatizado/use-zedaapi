@@ -21,6 +21,12 @@ type Metrics struct {
 	SplitBrainDetected             prometheus.Counter
 	SplitBrainInvalidLocks         *prometheus.CounterVec
 	HealthChecks                   *prometheus.CounterVec
+	GroupsRequests                 *prometheus.CounterVec
+	GroupsLatency                  *prometheus.HistogramVec
+	CommunitiesRequests            *prometheus.CounterVec
+	CommunitiesLatency             *prometheus.HistogramVec
+	NewslettersRequests            *prometheus.CounterVec
+	NewslettersLatency             *prometheus.HistogramVec
 	EventsCaptured                 *prometheus.CounterVec
 	EventsBuffered                 prometheus.Gauge
 	EventsInserted                 *prometheus.CounterVec
@@ -70,6 +76,20 @@ type Metrics struct {
 	WorkersActive                  *prometheus.GaugeVec
 	WorkerTaskDuration             *prometheus.HistogramVec
 	WorkerErrors                   *prometheus.CounterVec
+	MessageQueueSize               *prometheus.GaugeVec
+	MessageQueueEnqueued           *prometheus.CounterVec
+	MessageQueueProcessed          *prometheus.CounterVec
+	MessageQueueDuration           *prometheus.HistogramVec
+	MessageQueueDLQSize            prometheus.Gauge
+	MessageQueueRetries            *prometheus.CounterVec
+	MessageQueueErrors             *prometheus.CounterVec
+	MessageQueueWorkers            *prometheus.GaugeVec
+	OrphanedInstances              prometheus.Gauge
+	ReconciliationAttempts         *prometheus.CounterVec
+	ReconciliationDuration         prometheus.Histogram
+	QueueDrainDuration             prometheus.Histogram
+	QueueDrainTimeouts             prometheus.Counter
+	QueueDrainedMessages           prometheus.Counter
 }
 
 func NewMetrics(namespace string, reg prometheus.Registerer) *Metrics {
@@ -87,8 +107,8 @@ func NewMetrics(namespace string, reg prometheus.Registerer) *Metrics {
 	}, labels)
 	queue := prometheus.NewGauge(prometheus.GaugeOpts{
 		Namespace: namespace,
-		Name:      "webhook_outbox_backlog",
-		Help:      "Number of webhook events pending delivery.",
+		Name:      "event_outbox_backlog_legacy",
+		Help:      "Number of events pending delivery (deprecated, use event_outbox_backlog gauge vec instead).",
 	})
 
 	lockAcquisitions := prometheus.NewCounterVec(prometheus.CounterOpts{
@@ -132,6 +152,42 @@ func NewMetrics(namespace string, reg prometheus.Registerer) *Metrics {
 		Name:      "health_checks_total",
 		Help:      "Total health check attempts, labeled by component and status.",
 	}, []string{"component", "status"})
+
+	groupsRequests := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: namespace,
+		Name:      "groups_requests_total",
+		Help:      "Total groups handler requests, labeled by operation and status.",
+	}, []string{"operation", "status"})
+	groupsLatency := prometheus.NewHistogramVec(prometheus.HistogramOpts{
+		Namespace: namespace,
+		Name:      "groups_latency_seconds",
+		Help:      "Latency of groups handler operations in seconds.",
+		Buckets:   []float64{0.01, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5},
+	}, []string{"operation"})
+
+	communitiesRequests := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: namespace,
+		Name:      "communities_requests_total",
+		Help:      "Total communities handler requests, labeled by operation and status.",
+	}, []string{"operation", "status"})
+	communitiesLatency := prometheus.NewHistogramVec(prometheus.HistogramOpts{
+		Namespace: namespace,
+		Name:      "communities_latency_seconds",
+		Help:      "Latency of communities handler operations in seconds.",
+		Buckets:   []float64{0.01, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5},
+	}, []string{"operation"})
+
+	newslettersRequests := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: namespace,
+		Name:      "newsletters_requests_total",
+		Help:      "Total newsletters handler requests, labeled by operation and status.",
+	}, []string{"operation", "status"})
+	newslettersLatency := prometheus.NewHistogramVec(prometheus.HistogramOpts{
+		Namespace: namespace,
+		Name:      "newsletters_latency_seconds",
+		Help:      "Latency of newsletters handler operations in seconds.",
+		Buckets:   []float64{0.01, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5},
+	}, []string{"operation"})
 
 	eventsCaptured := prometheus.NewCounterVec(prometheus.CounterOpts{
 		Namespace: namespace,
@@ -435,11 +491,101 @@ func NewMetrics(namespace string, reg prometheus.Registerer) *Metrics {
 		Help:      "Total worker errors, labeled by worker_type and error_type.",
 	}, []string{"worker_type", "error_type"})
 
+	messageQueueSize := prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Namespace: namespace,
+		Name:      "message_queue_size",
+		Help:      "Current size of message queue per instance and status.",
+	}, []string{"instance_id", "status"})
+
+	messageQueueEnqueued := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: namespace,
+		Name:      "message_queue_enqueued_total",
+		Help:      "Total messages enqueued, labeled by instance_id, message_type, and status.",
+	}, []string{"instance_id", "message_type", "status"})
+
+	messageQueueProcessed := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: namespace,
+		Name:      "message_queue_processed_total",
+		Help:      "Total messages processed, labeled by instance_id, message_type, and status.",
+	}, []string{"instance_id", "message_type", "status"})
+
+	messageQueueDuration := prometheus.NewHistogramVec(prometheus.HistogramOpts{
+		Namespace: namespace,
+		Name:      "message_queue_processing_duration_seconds",
+		Help:      "Duration of message processing in seconds.",
+		Buckets:   []float64{.01, .05, .1, .25, .5, 1, 2.5, 5, 10, 30, 60},
+	}, []string{"instance_id", "message_type"})
+
+	messageQueueDLQSize := prometheus.NewGauge(prometheus.GaugeOpts{
+		Namespace: namespace,
+		Name:      "message_queue_dlq_size",
+		Help:      "Current size of message queue Dead Letter Queue.",
+	})
+
+	messageQueueRetries := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: namespace,
+		Name:      "message_queue_retries_total",
+		Help:      "Total message retry attempts, labeled by instance_id, message_type, and attempt.",
+	}, []string{"instance_id", "message_type", "attempt"})
+
+	messageQueueErrors := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: namespace,
+		Name:      "message_queue_errors_total",
+		Help:      "Total message processing errors, labeled by instance_id, message_type, and error_type.",
+	}, []string{"instance_id", "message_type", "error_type"})
+
+	messageQueueWorkers := prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Namespace: namespace,
+		Name:      "message_queue_workers_active",
+		Help:      "Number of active message queue workers per instance.",
+	}, []string{"instance_id"})
+
+	orphanedInstances := prometheus.NewGauge(prometheus.GaugeOpts{
+		Namespace: namespace,
+		Name:      "orphaned_instances",
+		Help:      "Number of instances paired in database but not active in this replica.",
+	})
+
+	reconciliationAttempts := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: namespace,
+		Name:      "reconciliation_attempts_total",
+		Help:      "Reconciliation attempts labeled by result (success, failure, skipped, error).",
+	}, []string{"result"})
+
+	reconciliationDuration := prometheus.NewHistogram(prometheus.HistogramOpts{
+		Namespace: namespace,
+		Name:      "reconciliation_duration_seconds",
+		Help:      "Duration of reconciliation runs in seconds.",
+		Buckets:   []float64{0.05, 0.1, 0.25, 0.5, 1, 2, 5, 10, 30},
+	})
+
+	queueDrainDuration := prometheus.NewHistogram(prometheus.HistogramOpts{
+		Namespace: namespace,
+		Name:      "queue_drain_duration_seconds",
+		Help:      "Duration of queue drain phases in seconds.",
+		Buckets:   []float64{1, 2, 5, 10, 30, 60, 120},
+	})
+
+	queueDrainTimeouts := prometheus.NewCounter(prometheus.CounterOpts{
+		Namespace: namespace,
+		Name:      "queue_drain_timeouts_total",
+		Help:      "Total number of queue drain operations that timed out.",
+	})
+
+	queueDrainedMessages := prometheus.NewCounter(prometheus.CounterOpts{
+		Namespace: namespace,
+		Name:      "queue_drained_messages_total",
+		Help:      "Total messages processed during queue drain operations.",
+	})
+
 	reg.MustRegister(
 		requests, duration, queue,
 		lockAcquisitions, lockReacquisitionAttempts, lockReacquisitionFallbacks,
 		circuitBreakerState, splitBrainDetected, splitBrainInvalidLocks,
 		healthChecks,
+		groupsRequests, groupsLatency,
+		communitiesRequests, communitiesLatency,
+		newslettersRequests, newslettersLatency,
 		eventsCaptured, eventsBuffered, eventsInserted, eventsProcessed,
 		eventProcessingDuration, eventRetries, eventsFailed, eventsDelivered,
 		eventDeliveryDuration, eventSequenceGaps, eventOutboxBacklog,
@@ -456,6 +602,11 @@ func NewMetrics(namespace string, reg prometheus.Registerer) *Metrics {
 		transportDeliveries, transportDuration, transportErrors, transportRetries,
 		circuitBreakerStatePerInstance, circuitBreakerTransitions,
 		workersActive, workerTaskDuration, workerErrors,
+		messageQueueSize, messageQueueEnqueued, messageQueueProcessed,
+		messageQueueDuration, messageQueueDLQSize, messageQueueRetries,
+		messageQueueErrors, messageQueueWorkers,
+		orphanedInstances, reconciliationAttempts, reconciliationDuration,
+		queueDrainDuration, queueDrainTimeouts, queueDrainedMessages,
 	)
 
 	return &Metrics{
@@ -469,6 +620,12 @@ func NewMetrics(namespace string, reg prometheus.Registerer) *Metrics {
 		SplitBrainDetected:             splitBrainDetected,
 		SplitBrainInvalidLocks:         splitBrainInvalidLocks,
 		HealthChecks:                   healthChecks,
+		GroupsRequests:                 groupsRequests,
+		GroupsLatency:                  groupsLatency,
+		CommunitiesRequests:            communitiesRequests,
+		CommunitiesLatency:             communitiesLatency,
+		NewslettersRequests:            newslettersRequests,
+		NewslettersLatency:             newslettersLatency,
 		EventsCaptured:                 eventsCaptured,
 		EventsBuffered:                 eventsBuffered,
 		EventsInserted:                 eventsInserted,
@@ -518,5 +675,19 @@ func NewMetrics(namespace string, reg prometheus.Registerer) *Metrics {
 		WorkersActive:                  workersActive,
 		WorkerTaskDuration:             workerTaskDuration,
 		WorkerErrors:                   workerErrors,
+		MessageQueueSize:               messageQueueSize,
+		MessageQueueEnqueued:           messageQueueEnqueued,
+		MessageQueueProcessed:          messageQueueProcessed,
+		MessageQueueDuration:           messageQueueDuration,
+		MessageQueueDLQSize:            messageQueueDLQSize,
+		MessageQueueRetries:            messageQueueRetries,
+		MessageQueueErrors:             messageQueueErrors,
+		MessageQueueWorkers:            messageQueueWorkers,
+		OrphanedInstances:              orphanedInstances,
+		ReconciliationAttempts:         reconciliationAttempts,
+		ReconciliationDuration:         reconciliationDuration,
+		QueueDrainDuration:             queueDrainDuration,
+		QueueDrainTimeouts:             queueDrainTimeouts,
+		QueueDrainedMessages:           queueDrainedMessages,
 	}
 }
