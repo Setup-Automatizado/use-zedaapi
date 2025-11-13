@@ -119,10 +119,46 @@ variable "redis_username" {
   default     = ""
 }
 
+variable "redis_lock_key_prefix" {
+  description = "Prefix applied to Redis lock keys"
+  type        = string
+  default     = "funnelchat"
+}
+
+variable "redis_lock_ttl" {
+  description = "TTL applied to Redis locks"
+  type        = string
+  default     = "30s"
+}
+
+variable "redis_lock_refresh_interval" {
+  description = "Interval between lock refresh attempts"
+  type        = string
+  default     = "10s"
+}
+
 variable "media_local_storage_path" {
   description = "Path used by ECS task for local media fallback"
   type        = string
   default     = "/tmp/whatsmeow/media"
+}
+
+variable "worker_heartbeat_interval" {
+  description = "Interval between worker heartbeats"
+  type        = string
+  default     = "5s"
+}
+
+variable "worker_heartbeat_expiry" {
+  description = "Time window before a worker is considered unhealthy"
+  type        = string
+  default     = "20s"
+}
+
+variable "worker_rebalance_interval" {
+  description = "Interval for the ownership rebalance loop"
+  type        = string
+  default     = "30s"
 }
 
 variable "db_user" {
@@ -344,4 +380,10 @@ variable "autoscaling_memory_target" {
   description = "Memory target"
   type        = number
   default     = 85
+}
+
+variable "allowed_admin_ips" {
+  description = "List of IP addresses allowed to access RDS directly (for admin/database management tasks)"
+  type        = list(string)
+  default     = []
 }

@@ -85,6 +85,24 @@ variable "redis_tls_enabled" {
   default     = true
 }
 
+variable "redis_lock_key_prefix" {
+  description = "Prefix applied to Redis distributed lock keys"
+  type        = string
+  default     = "funnelchat"
+}
+
+variable "redis_lock_ttl" {
+  description = "TTL applied to Redis locks (duration string)"
+  type        = string
+  default     = "30s"
+}
+
+variable "redis_lock_refresh_interval" {
+  description = "Interval between lock refresh attempts (duration string)"
+  type        = string
+  default     = "10s"
+}
+
 variable "s3_bucket_name" {
   description = "S3 bucket for media storage"
   type        = string
@@ -135,6 +153,24 @@ variable "media_local_storage_path" {
   description = "Filesystem path used for local media fallback storage"
   type        = string
   default     = "/tmp/whatsmeow/media"
+}
+
+variable "worker_heartbeat_interval" {
+  description = "Interval used by each worker to send heartbeats (duration string)"
+  type        = string
+  default     = "5s"
+}
+
+variable "worker_heartbeat_expiry" {
+  description = "Time window after which a worker heartbeat is considered expired"
+  type        = string
+  default     = "20s"
+}
+
+variable "worker_rebalance_interval" {
+  description = "Interval for registry ownership rebalance checks"
+  type        = string
+  default     = "30s"
 }
 
 variable "sentry_release" {

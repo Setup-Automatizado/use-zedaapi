@@ -1,7 +1,7 @@
 # Base docker-compose configuration
 # Este arquivo define os serviços base que serão usados em todos os ambientes
 
-version: '3.9'
+version: "3.9"
 
 services:
   # ==================================
@@ -57,6 +57,7 @@ services:
 
       # Application
       PARTNER_AUTH_TOKEN: ${PARTNER_AUTH_TOKEN:-}
+      CLIENT_AUTH_TOKEN: ${CLIENT_AUTH_TOKEN:-}
       LOG_LEVEL: ${LOG_LEVEL:-info}
       ENVIRONMENT: ${ENVIRONMENT:-production}
 

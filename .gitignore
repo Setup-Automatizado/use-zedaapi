@@ -47,5 +47,3 @@ docker-compose.override.yml
 tmp/
 .tmp/
 .terraform/
-
-api/PLAN.md

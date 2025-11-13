@@ -34,3 +34,9 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "allowed_admin_ips" {
+  description = "List of IP addresses allowed to access RDS directly (for admin tasks)"
+  type        = list(string)
+  default     = []
+}

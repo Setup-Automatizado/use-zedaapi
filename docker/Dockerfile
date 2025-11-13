@@ -38,30 +38,40 @@ ARG TARGETARCH=amd64
 # -ldflags for version info and size reduction
 # Use TARGETARCH from buildx for multi-platform support
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} go build \
-    -ldflags="-w -s -X main.Version=${VERSION} -X main.Commit=${COMMIT} -X main.BuildTime=${BUILD_TIME}" \
-    -o /app/api \
-    ./api/cmd/server
+	-ldflags="-w -s -X main.Version=${VERSION} -X main.Commit=${COMMIT} -X main.BuildTime=${BUILD_TIME}" \
+	-o /app/api \
+	./api/cmd/server
 
 # Build migrations tool (if exists)
 RUN if [ -f "./api/cmd/migrate/main.go" ]; then \
-    CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} go build \
-    -ldflags="-w -s" \
-    -o /app/migrate \
-    ./api/cmd/migrate; \
-    fi
+	CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} go build \
+	-ldflags="-w -s" \
+	-o /app/migrate \
+	./api/cmd/migrate; \
+	fi
 
 # ==========================================
 # Stage 3: Runtime (Production)
 # ==========================================
 FROM alpine:3.21 AS production
 
-# Install runtime dependencies
+# Install runtime dependencies including ffmpeg and mupdf for media processing
+# ffmpeg: audio conversion (Opus), video analysis, thumbnail generation
+# ffprobe: video/audio metadata extraction (included with ffmpeg)
+# mupdf: PDF processing library required by github.com/gen2brain/go-fitz
 RUN apk add --no-cache \
-    ca-certificates \
-    tzdata \
-    curl \
-    && addgroup -g 1000 app \
-    && adduser -D -u 1000 -G app app
+	ca-certificates \
+	tzdata \
+	curl \
+	ffmpeg \
+	mupdf \
+	&& addgroup -g 1000 app \
+	&& adduser -D -u 1000 -G app app \
+	&& libmupdf=$(find /usr/lib -maxdepth 1 -name 'libmupdf.so.*' -print -quit) \
+	&& [ -n "${libmupdf}" ] \
+	&& ln -sf "${libmupdf}" /usr/lib/libmupdf.so \
+	&& libmupdf_third=$(find /usr/lib -maxdepth 1 -name 'libmupdf-third.so.*' -print -quit) \
+	&& if [ -n "${libmupdf_third}" ]; then ln -sf "${libmupdf_third}" /usr/lib/libmupdf-third.so; fi
 
 # Set timezone
 ENV TZ=UTC
@@ -78,10 +88,10 @@ COPY --from=builder /build/api/migrations/ /app/migrations/
 
 # Copy migrations tool if it exists (optional, handled via RUN)
 RUN --mount=type=bind,from=builder,source=/app,target=/tmp/builder \
-    if [ -f /tmp/builder/migrate ]; then \
-        cp /tmp/builder/migrate /usr/local/bin/migrate; \
-        chmod +x /usr/local/bin/migrate; \
-    fi
+	if [ -f /tmp/builder/migrate ]; then \
+	cp /tmp/builder/migrate /usr/local/bin/migrate; \
+	chmod +x /usr/local/bin/migrate; \
+	fi
 
 # Set working directory
 WORKDIR /app
@@ -97,7 +107,7 @@ EXPOSE 8080
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8080/health || exit 1
+	CMD curl -f http://localhost:8080/health || exit 1
 
 # Run application
 ENTRYPOINT ["/usr/local/bin/api"]
@@ -108,15 +118,16 @@ CMD []
 # ==========================================
 FROM golang:1.25-alpine AS development
 
-# Install development tools
+# Install development tools including ffmpeg for local testing
 RUN apk add --no-cache \
-    git \
-    ca-certificates \
-    tzdata \
-    curl \
-    make \
-    gcc \
-    musl-dev
+	git \
+	ca-certificates \
+	tzdata \
+	curl \
+	make \
+	gcc \
+	musl-dev \
+	ffmpeg
 
 # Install goimports for code formatting
 RUN go install golang.org/x/tools/cmd/goimports@latest
@@ -147,8 +158,14 @@ CMD ["go", "run", "./api/cmd/server"]
 FROM golang:1.25-alpine AS testing
 WORKDIR /build
 
-# Install build dependencies (gcc needed for -race flag)
-RUN apk add --no-cache gcc musl-dev git ca-certificates
+# Install build dependencies including ffmpeg for media processing tests
+# gcc needed for -race flag
+RUN apk add --no-cache \
+	gcc \
+	musl-dev \
+	git \
+	ca-certificates \
+	ffmpeg
 
 # Copy dependencies
 COPY --from=deps /go/pkg /go/pkg
@@ -167,6 +184,6 @@ RUN go tool cover -html=coverage.out -o coverage.html
 # Metadata
 # ==========================================
 LABEL maintainer="WhatsApp API"
-LABEL description="WhatsApp API"
+LABEL description="WhatsApp API with ffmpeg support for media processing"
 LABEL version="${VERSION}"
 LABEL org.opencontainers.image.source="https://github.com/Funnelchat20/whatsapp-api-golang"

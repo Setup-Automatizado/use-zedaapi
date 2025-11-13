@@ -176,6 +176,24 @@ resource "aws_vpc_security_group_ingress_rule" "rds_from_ecs" {
   }
 }
 
+# Allow RDS access from admin IPs (for database management)
+resource "aws_vpc_security_group_ingress_rule" "rds_from_admin" {
+  count = length(var.allowed_admin_ips)
+
+  security_group_id = aws_security_group.rds.id
+  description       = "Allow PostgreSQL from admin IP ${var.allowed_admin_ips[count.index]}"
+
+  # If IP already has CIDR notation (contains '/'), use as-is, otherwise add /32
+  cidr_ipv4   = can(regex("/", var.allowed_admin_ips[count.index])) ? var.allowed_admin_ips[count.index] : "${var.allowed_admin_ips[count.index]}/32"
+  from_port   = var.rds_port
+  to_port     = var.rds_port
+  ip_protocol = "tcp"
+
+  tags = {
+    Name = "postgres-from-admin-${count.index}"
+  }
+}
+
 resource "aws_vpc_security_group_egress_rule" "rds_all" {
   security_group_id = aws_security_group.rds.id
   description       = "Allow outbound traffic"

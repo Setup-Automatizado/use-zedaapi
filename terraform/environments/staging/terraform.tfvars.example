@@ -22,6 +22,9 @@ db_allocated_storage     = 20
 db_max_allocated_storage = 100
 
 redis_auth_token = ""
+redis_lock_key_prefix       = "funnelchat"
+redis_lock_ttl              = "30s"
+redis_lock_refresh_interval = "10s"
 
 s3_bucket_name        = "whatsapp-api-staging-media"
 s3_force_destroy      = false
@@ -46,12 +49,17 @@ api_base_url          = "http://your-alb-endpoint.us-east-1.elb.amazonaws.com"
 # Additional secrets (optional)
 # additional_secret_values = {
 #   partner_auth_token = "super-secret"
+#   client_auth_token  = "super-secret"
 #   sentry_dsn         = "https://key.ingest.sentry.io/123"
 # }
 
 # Map env var names to secret keys defined above
 # secret_env_mapping = {
 #   PARTNER_AUTH_TOKEN = "partner_auth_token"
+#   CLIENT_AUTH_TOKEN  = "client_auth_token"
 #   SENTRY_DSN         = "sentry_dsn"
 # }
 
+worker_heartbeat_interval = "5s"
+worker_heartbeat_expiry   = "20s"
+worker_rebalance_interval = "30s"

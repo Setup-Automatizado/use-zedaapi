@@ -121,10 +121,46 @@ variable "redis_username" {
   default     = ""
 }
 
+variable "redis_lock_key_prefix" {
+  description = "Prefix for Redis distributed lock keys"
+  type        = string
+  default     = "funnelchat"
+}
+
+variable "redis_lock_ttl" {
+  description = "TTL applied to Redis locks"
+  type        = string
+  default     = "30s"
+}
+
+variable "redis_lock_refresh_interval" {
+  description = "Interval for refreshing Redis locks"
+  type        = string
+  default     = "10s"
+}
+
 variable "media_local_storage_path" {
   description = "Path used by ECS task for local media fallback"
   type        = string
   default     = "/tmp/whatsmeow/media"
+}
+
+variable "worker_heartbeat_interval" {
+  description = "Worker heartbeat interval"
+  type        = string
+  default     = "5s"
+}
+
+variable "worker_heartbeat_expiry" {
+  description = "Time window before a worker is considered unhealthy"
+  type        = string
+  default     = "20s"
+}
+
+variable "worker_rebalance_interval" {
+  description = "Interval for registry ownership rebalance"
+  type        = string
+  default     = "30s"
 }
 
 # Database

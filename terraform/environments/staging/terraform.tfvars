@@ -25,6 +25,9 @@ redis_engine_version          = "7.1"
 redis_node_type               = "cache.t4g.small"
 redis_replicas_per_node_group = 1
 redis_auth_token              = "joXuRHCec93TsM1X"
+redis_lock_key_prefix         = "funnelchat"
+redis_lock_ttl                = "30s"
+redis_lock_refresh_interval   = "10s"
 
 s3_bucket_name        = "staging-whatsapp-api-media"
 s3_force_destroy      = false
@@ -51,11 +54,13 @@ s3_lifecycle_rules = [
 
 additional_secret_values = {
   partner_auth_token = "80c1f79d907334e75a0403fd79431006bfafdad0634594e13f8194bdb7711a3b"
+  client_auth_token  = "80c1f79d907334e75a0403fd79431006bfafdad0634594e13f8194bdb7711a3b"
   sentry_dsn         = "https://CHANGE_ME_STAGING_SENTRY_DSN"
 }
 
 secret_env_mapping = {
   PARTNER_AUTH_TOKEN     = "partner_auth_token"
+  CLIENT_AUTH_TOKEN      = "client_auth_token"
   SENTRY_DSN             = "sentry_dsn"
   S3_ACCESS_KEY          = "s3_access_key"
   S3_SECRET_KEY          = "s3_secret_key"
@@ -82,3 +87,6 @@ extra_environment = {
 media_local_secret_key      = "80c1f79d907334e75a0403fd79431006bfafdad0634594e13f8194bdb7711a3b"
 media_local_public_base_url = "http://staging-whatsmeow-alb-1412624585.us-east-1.elb.amazonaws.com"
 redis_username              = "default"
+worker_heartbeat_interval   = "5s"
+worker_heartbeat_expiry     = "20s"
+worker_rebalance_interval   = "30s"
