@@ -2,6 +2,96 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.0.0](https://github.com/Funnelchat20/whatsapp-api-golang/compare/v1.1.0...v2.0.0) (2025-12-18)
+
+### ⚠ BREAKING CHANGES
+
+* **terraform:** Replace containerized data stores with AWS managed
+services (RDS PostgreSQL, ElastiCache Redis, S3) for improved
+reliability, scalability, and operational efficiency.
+
+New Terraform Modules:
+- RDS PostgreSQL with Multi-AZ, automated backups, encryption
+- ElastiCache Redis with replication and automatic failover
+- S3 buckets with versioning, encryption, lifecycle policies
+
+Module Refactoring:
+- ECS Service: Simplified to API-only container, removed Postgres/Redis/MinIO
+- Security Groups: Added RDS and ElastiCache SGs, removed EFS
+- Secrets Manager: Flexible payload structure per environment
+
+Environment Migration:
+Production:
+- RDS db.r6g.large Multi-AZ, 100GB gp3, 7-day backups
+- ElastiCache cache.r6g.large with 2 replicas
+- S3 whatsmeow-production-media
+- Cost: ~$575/month
+
+Staging:
+- RDS db.t4g.medium single-AZ, 20GB, 3-day backups
+- ElastiCache cache.t4g.small with 1 replica
+- FARGATE_SPOT enabled
+- Cost: ~$126/month
+
+Homolog:
+- RDS db.t4g.small single-AZ, 10GB, 1-day backups
+- ElastiCache cache.t4g.small no replicas
+- FARGATE_SPOT, NAT Gateway disabled
+- Cost: ~$84/month
+
+Documentation:
+- Updated architecture diagram with managed services
+- New cost breakdown per environment
+- Updated troubleshooting for RDS/ElastiCache/S3
+- Removed EFS and container-based service documentation
+
+Benefits:
+- Automated backups and point-in-time recovery
+- Managed patching and maintenance
+- Better scalability with auto-scaling support
+- Enhanced security with encryption at rest/transit
+- Reduced operational complexity
+
+### ✨ Features
+
+* **observability:** add comprehensive metrics and async context helpers ([680c8a6](https://github.com/Funnelchat20/whatsapp-api-golang/commit/680c8a602a528f7f14adf069121cab354245eb1d))
+* **docs:** add dynamic OpenAPI specification generation ([d6f6b86](https://github.com/Funnelchat20/whatsapp-api-golang/commit/d6f6b866b34807402544a0df01c6f83392351a53))
+* **db:** add event outbox, DLQ, and media metadata schema ([321fa6b](https://github.com/Funnelchat20/whatsapp-api-golang/commit/321fa6baa15eabfc4bc57dbeabc95f82da7b285e))
+* **config:** add event system and media configuration ([d52469f](https://github.com/Funnelchat20/whatsapp-api-golang/commit/d52469fd2d2989847fbfd30dbf8e512fd04f81b3))
+* **config:** add media cleanup and S3 URL configuration options ([858e789](https://github.com/Funnelchat20/whatsapp-api-golang/commit/858e78955e1484f94d195f66368966767e6e3cad))
+* **handlers:** add media HTTP handler for local file serving ([42300f3](https://github.com/Funnelchat20/whatsapp-api-golang/commit/42300f3ebb30dcf382e9968e6a745b3e1558cdff))
+* add PDF processing and image manipulation dependencies ([869074e](https://github.com/Funnelchat20/whatsapp-api-golang/commit/869074e31349f7fb5e3d700db39d7a5b139f7649))
+* **media:** add presigned URL toggle and public URL support for S3 ([e9900ee](https://github.com/Funnelchat20/whatsapp-api-golang/commit/e9900eeecffa399cf26bd8d84527e805051ef902))
+* **events:** add undecryptable message support and contact metadata enrichment ([dce506d](https://github.com/Funnelchat20/whatsapp-api-golang/commit/dce506d2a18832f175a77f702f201188f9a2888a))
+* add z-api services, queues, and poll events ([cd21306](https://github.com/Funnelchat20/whatsapp-api-golang/commit/cd213062fab5ba6f64e55f86e7370d8441fd2cd8))
+* **terraform:** enhance configuration for S3 and media handling ([a9de795](https://github.com/Funnelchat20/whatsapp-api-golang/commit/a9de795bb7fda9bc4e250eb4c27f573091c8da16))
+* **whatsmeow:** enhance contact metadata with photo details and presence system ([602f920](https://github.com/Funnelchat20/whatsapp-api-golang/commit/602f920507cd0783de6e95f91619e41366472148))
+* **events:** enhance ZAPI transformer with complete webhook payload support ([c495b3e](https://github.com/Funnelchat20/whatsapp-api-golang/commit/c495b3e89b7f81fdd31f4337e0472cb7dbb8b2e7))
+* enrich group membership and interactive payloads ([f3487bc](https://github.com/Funnelchat20/whatsapp-api-golang/commit/f3487bc34331e049d0e9fc448e9a6380f768e5c6))
+* **events:** enrich webhook payloads with contact metadata ([7d043d6](https://github.com/Funnelchat20/whatsapp-api-golang/commit/7d043d68450669924ccc823af8c19829d458ef61))
+* **media:** implement automated media cleanup system with distributed locking ([8a88244](https://github.com/Funnelchat20/whatsapp-api-golang/commit/8a88244431a792ccfa2a182a2be65a9fc0500a73))
+* **events:** implement comprehensive event processing system ([c84d840](https://github.com/Funnelchat20/whatsapp-api-golang/commit/c84d8408400bcb71a510687b2d8ccd8101012470))
+* **whatsmeow:** implement LID to phone number resolution system ([ca50b99](https://github.com/Funnelchat20/whatsapp-api-golang/commit/ca50b99679091e541fcbc9f745ca9667ed8cca02))
+* **terraform:** migrate to AWS managed services architecture ([768916d](https://github.com/Funnelchat20/whatsapp-api-golang/commit/768916d2b924e40644676bda2f5e4e686f42d2db))
+* **core:** sync whatsmeow core library with upstream changes ([0512728](https://github.com/Funnelchat20/whatsapp-api-golang/commit/0512728ae7a423543b187a1225cc45430503c72e))
+* **api:** update API internals with improved configuration and error handling ([bc11341](https://github.com/Funnelchat20/whatsapp-api-golang/commit/bc1134114be8351ed8b42ab0a2697bd159667f2f))
+* **proto:** update protobuf definitions from upstream whatsmeow ([a56671f](https://github.com/Funnelchat20/whatsapp-api-golang/commit/a56671f39a46f1eb6a1996fc742500973ac3a4e0))
+* **terraform:** update S3 URL expiration and enhance media storage configuration ([4f7b2d3](https://github.com/Funnelchat20/whatsapp-api-golang/commit/4f7b2d33368a80c57c1812711efec302eb254f3d))
+* **socket:** update socket layer and store with upstream improvements ([591bd77](https://github.com/Funnelchat20/whatsapp-api-golang/commit/591bd7701278818625438c541f4721a22f94124f))
+* **integration:** wire event system into WhatsApp client lifecycle ([98f787c](https://github.com/Funnelchat20/whatsapp-api-golang/commit/98f787c038da4058bb73a42460f40ce32746b031))
+
+### ♻️ Code Refactoring
+
+* **handlers:** clean up import aliases for consistency ([e443649](https://github.com/Funnelchat20/whatsapp-api-golang/commit/e4436490fef498028846471a91c75ea581423db4))
+* **locks:** enhance circuit breaker metrics and tracking ([76a7ba6](https://github.com/Funnelchat20/whatsapp-api-golang/commit/76a7ba614799dd117f36ab2412610dd3c88572f1))
+* **integration:** finalize event system wiring and interfaces ([5831173](https://github.com/Funnelchat20/whatsapp-api-golang/commit/5831173ce3f5a705ace8bb2b0907a8e53ed35a7c))
+* **events:** persist internal events using JSON ([f9f9e6c](https://github.com/Funnelchat20/whatsapp-api-golang/commit/f9f9e6cad3e1a46b6928356feb4fe1dae3de7fea))
+
+### 📝 Documentation
+
+* add z-api playbooks and handler references ([c330d54](https://github.com/Funnelchat20/whatsapp-api-golang/commit/c330d54886a6af1c8938ca883ef6f8d253685d33))
+* update code standards and add comprehensive development plan ([e59b86b](https://github.com/Funnelchat20/whatsapp-api-golang/commit/e59b86b8c2e0120e49c31ab129e96696b233c2e7))
+
 ## [2.0.0-develop.1](https://github.com/Funnelchat20/whatsapp-api-golang/compare/v1.2.0-develop.3...v2.0.0-develop.1) (2025-11-13)
 
 ### ⚠ BREAKING CHANGES
