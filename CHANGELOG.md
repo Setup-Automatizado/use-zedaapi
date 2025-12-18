@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.0.0-homolog.4](https://github.com/Funnelchat20/whatsapp-api-golang/compare/v2.0.0-homolog.3...v2.0.0-homolog.4) (2025-12-18)
+
+### ✨ Features
+
+* **docs:** add dynamic OpenAPI specification generation ([d6f6b86](https://github.com/Funnelchat20/whatsapp-api-golang/commit/d6f6b866b34807402544a0df01c6f83392351a53))
+* add PDF processing and image manipulation dependencies ([869074e](https://github.com/Funnelchat20/whatsapp-api-golang/commit/869074e31349f7fb5e3d700db39d7a5b139f7649))
+* add z-api services, queues, and poll events ([cd21306](https://github.com/Funnelchat20/whatsapp-api-golang/commit/cd213062fab5ba6f64e55f86e7370d8441fd2cd8))
+* enrich group membership and interactive payloads ([f3487bc](https://github.com/Funnelchat20/whatsapp-api-golang/commit/f3487bc34331e049d0e9fc448e9a6380f768e5c6))
+* **core:** sync whatsmeow core library with upstream changes ([0512728](https://github.com/Funnelchat20/whatsapp-api-golang/commit/0512728ae7a423543b187a1225cc45430503c72e))
+* **api:** update API internals with improved configuration and error handling ([bc11341](https://github.com/Funnelchat20/whatsapp-api-golang/commit/bc1134114be8351ed8b42ab0a2697bd159667f2f))
+* **proto:** update protobuf definitions from upstream whatsmeow ([a56671f](https://github.com/Funnelchat20/whatsapp-api-golang/commit/a56671f39a46f1eb6a1996fc742500973ac3a4e0))
+* **socket:** update socket layer and store with upstream improvements ([591bd77](https://github.com/Funnelchat20/whatsapp-api-golang/commit/591bd7701278818625438c541f4721a22f94124f))
+
+### 📝 Documentation
+
+* add z-api playbooks and handler references ([c330d54](https://github.com/Funnelchat20/whatsapp-api-golang/commit/c330d54886a6af1c8938ca883ef6f8d253685d33))
+
 ## [2.0.0-develop.1](https://github.com/Funnelchat20/whatsapp-api-golang/compare/v1.2.0-develop.3...v2.0.0-develop.1) (2025-11-13)
 
 ### ⚠ BREAKING CHANGES
