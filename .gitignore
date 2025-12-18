@@ -46,4 +46,13 @@ logs/
 docker-compose.override.yml
 tmp/
 .tmp/
+
+# Terraform
 .terraform/
+*.tfstate
+*.tfstate.backup
+*.tfstate.*.backup
+.terraform.lock.hcl
+
+# Claude Code
+.claude/
