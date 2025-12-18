@@ -12,13 +12,13 @@ terraform {
     }
   }
 
-  backend "s3" {
-    bucket         = "whatsmeow-terraform-state"
-    key            = "homolog/terraform.tfstate"
-    region         = "us-east-1"
-    encrypt        = true
-    dynamodb_table = "whatsmeow-terraform-locks"
-  }
+#   backend "s3" {
+#     bucket         = "whatsmeow-terraform-state"
+#     key            = "homolog/terraform.tfstate"
+#     region         = "us-east-1"
+#     encrypt        = true
+#     dynamodb_table = "whatsmeow-terraform-locks"
+#   }
 }
 
 provider "aws" {
@@ -68,6 +68,10 @@ module "security_groups" {
   allowed_admin_ips = var.allowed_admin_ips
 
   tags = local.common_tags
+}
+
+locals {
+  rds_subnet_ids = var.rds_use_public_subnets ? module.vpc.public_subnet_ids : module.vpc.private_subnet_ids
 }
 
 module "alb" {
@@ -123,8 +127,10 @@ module "rds" {
   apply_immediately              = var.db_apply_immediately
   performance_insights_enabled   = var.db_performance_insights
   performance_insights_retention = var.db_performance_insights_retention
-  subnet_ids                     = module.vpc.private_subnet_ids
+  subnet_ids                     = local.rds_subnet_ids
   security_group_ids             = [module.security_groups.rds_security_group_id]
+  use_public_subnets             = var.rds_use_public_subnets
+  publicly_accessible            = var.rds_publicly_accessible
 
   tags = local.common_tags
 }

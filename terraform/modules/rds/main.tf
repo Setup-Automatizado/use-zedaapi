@@ -17,14 +17,15 @@ terraform {
 }
 
 locals {
-  identifier = "${var.environment}-whatsmeow-db"
+  identifier          = "${var.environment}-whatsmeow-db"
+  subnet_group_suffix = var.use_public_subnets ? "public" : "private"
 }
 
 # ==================================================
 # Subnet Group
 # ==================================================
 resource "aws_db_subnet_group" "this" {
-  name       = local.identifier
+  name       = "${local.identifier}-${local.subnet_group_suffix}"
   subnet_ids = var.subnet_ids
 
   tags = merge(
@@ -33,6 +34,10 @@ resource "aws_db_subnet_group" "this" {
       Name = "${local.identifier}-subnet-group"
     }
   )
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # ==================================================
@@ -58,7 +63,7 @@ resource "aws_db_instance" "this" {
   apply_immediately                     = var.apply_immediately
   db_subnet_group_name                  = aws_db_subnet_group.this.name
   vpc_security_group_ids                = var.security_group_ids
-  publicly_accessible                   = false
+  publicly_accessible                   = var.publicly_accessible
   performance_insights_enabled          = var.performance_insights_enabled
   performance_insights_retention_period = var.performance_insights_enabled ? var.performance_insights_retention : null
   copy_tags_to_snapshot                 = true

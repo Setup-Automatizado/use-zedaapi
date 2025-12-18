@@ -1,83 +1,127 @@
-# Homolog environment configuration
+# ==================================================
+# WhatsApp API - Homolog Environment Configuration
+# ==================================================
+# Este arquivo contém apenas variáveis suportadas pelo
+# módulo raiz (ver variables.tf). Ajuste os valores
+# conforme necessidade do ambiente antes de executar
+# `terraform plan`/`terraform apply`.
+# ==================================================
 
-aws_region = "us-east-1"
-
-vpc_cidr           = "10.2.0.0/16"
+# --------------------------------------------------
+# Região, rede e segurança
+# --------------------------------------------------
+aws_region         = "us-east-1"
 availability_zones = ["us-east-1a", "us-east-1b"]
+vpc_cidr           = "10.2.0.0/16"
 enable_nat_gateway = false
 
-# certificate_arn = "arn:aws:acm:us-east-1:AKIA4W5HKAR23AI5S6VZ:certificate/CERTIFICATE_ID"
+# IPs com acesso administrativo direto a RDS/Redis
+allowed_admin_ips = [
+  "177.192.10.4/32",
+  "102.216.82.164/32",
+]
 
-api_image       = "873839854709.dkr.ecr.us-east-1.amazonaws.com/whatsapp-api:homolog"
-app_environment = "homolog"
-log_level       = "debug"
+# --------------------------------------------------
+# Aplicação e observabilidade
+# --------------------------------------------------
+app_environment      = "homolog"
+log_level            = "debug"
+prometheus_namespace = "whatsmeow_api"
+sentry_release       = "homolog"
 
-db_user     = "whatsmeow"
-db_password = "joXuRHCec93TsM1X"
-
-db_instance_class        = "db.t4g.small"
-db_allocated_storage     = 10
+# --------------------------------------------------
+# Banco de dados (RDS PostgreSQL)
+# --------------------------------------------------
+db_name_app              = "whatsmeow"
+db_name_store            = "whatsmeow_store"
+db_user                  = "whatsapp_api_user"
+db_password              = "yjMZ(j(J(DPZUXZusvz6"
+db_instance_class        = "db.t3.micro"
+db_allocated_storage     = 20
 db_max_allocated_storage = 50
-db_multi_az              = false
 db_engine_version        = "16.8"
-db_backup_retention      = 3
+db_multi_az              = false
+db_backup_retention      = 1
+db_deletion_protection   = false
+db_skip_final_snapshot   = true
+db_apply_immediately     = true
+db_performance_insights  = false
 
+rds_publicly_accessible = true
+rds_use_public_subnets  = true
+
+# --------------------------------------------------
+# Redis (ElastiCache)
+# --------------------------------------------------
 redis_engine_version          = "7.1"
-redis_node_type               = "cache.t4g.small"
+redis_node_type               = "cache.t3.micro"
 redis_replicas_per_node_group = 0
-redis_auth_token              = ""
+redis_auth_token              = "y52kar3uAQuu5TDgt27stBfvPcoaSwh1"
 redis_lock_key_prefix         = "funnelchat"
-redis_lock_ttl                = "30s"
-redis_lock_refresh_interval   = "10s"
 
-s3_bucket_name        = "homolog-whatsapp-api-media"
-s3_force_destroy      = true
-s3_use_presigned_urls = true
-s3_access_key         = "AKIA4W5HKAR2XE36XHBI"
-s3_secret_key         = "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"
-s3_public_base_url    = "https://homolog-whatsapp-api-media.s3.us-east-1.amazonaws.com"
-api_base_url          = "http://homolog-whatsmeow-alb-1665982637.us-east-1.elb.amazonaws.com"
+# --------------------------------------------------
+# S3 (armazenamento de mídia)
+# --------------------------------------------------
+s3_bucket_name   = "whatsapp-api-homolog-media"
+s3_force_destroy = true
+s3_lifecycle_rules = [
+  {
+    id      = "media-retention"
+    enabled = true
+    transitions = [
+      {
+        days          = 30
+        storage_class = "STANDARD_IA"
+      }
+    ]
+    expiration_days = 90
+  }
+]
 
-media_local_secret_key      = "80c1f79d907334e75a0403fd79431006bfafdad0634594e13f8194bdb7711a3b"
-media_local_public_base_url = "http://homolog-whatsmeow-alb-1665982637.us-east-1.elb.amazonaws.com/media"
-redis_username              = "default"
-worker_heartbeat_interval   = "5s"
-worker_heartbeat_expiry     = "20s"
-worker_rebalance_interval   = "30s"
+s3_public_base_url          = "https://whatsapp-api-homolog-media.s3.us-east-1.amazonaws.com"
+media_local_public_base_url = "http://homolog-whatsmeow-alb-731186848.us-east-1.elb.amazonaws.com/media"
+s3_use_presigned_urls       = true
 
-s3_lifecycle_rules = []
-
+# --------------------------------------------------
+# Secrets Manager payload extra
+# --------------------------------------------------
+s3_access_key          = "funnelchat"
+s3_secret_key          = "funnelchatsecret"
+media_local_secret_key = "supersecret"
 additional_secret_values = {
-  partner_auth_token = "joXuRHCec93TsM1X",
-  client_auth_token  = "joXuRHCec93TsM1X",
+  partner_auth_token = "iB4uIxOYOMFSnScXWlphBg=="
+  client_auth_token  = "iB4uIxOYOMFSnScXWlphBg=="
+  sentry_dsn         = "https://2e9b95288cbd7051e60d263580ceb8e0@o4510360009441280.ingest.us.sentry.io/4510360011538432"
 }
 
-secret_env_mapping = {
-  PARTNER_AUTH_TOKEN     = "partner_auth_token"
-  CLIENT_AUTH_TOKEN      = "client_auth_token"
-  S3_ACCESS_KEY          = "s3_access_key"
-  S3_SECRET_KEY          = "s3_secret_key"
-  MEDIA_LOCAL_SECRET_KEY = "media_local_secret_key"
-}
-
-secret_recovery_window = 7
-
-task_cpu               = 512
-task_memory            = 1024
-desired_count          = 1
-enable_execute_command = true
-
-enable_autoscaling        = false
+# --------------------------------------------------
+# ECS / serviço API
+# --------------------------------------------------
+api_image                 = "873839854709.dkr.ecr.us-east-1.amazonaws.com/whatsapp-api:homolog"
+task_cpu                  = 512
+task_memory               = 1024
+desired_count             = 1
+enable_execute_command    = true
+enable_autoscaling        = true
 autoscaling_min_capacity  = 1
 autoscaling_max_capacity  = 2
-autoscaling_cpu_target    = 75
+autoscaling_cpu_target    = 70
 autoscaling_memory_target = 85
 
-extra_environment = {
-  LOG_LEVEL = "debug"
-}
+# --------------------------------------------------
+# Certificado do ALB (HTTP somente em homolog)
+# --------------------------------------------------
+certificate_arn = null
 
-# Admin IPs allowed to access RDS directly (for database management)
-# ⚠️ WARNING: Using 0.0.0.0/0 allows access from ANY IP - INSECURE!
-# Only use in homolog/development environments temporarily
-allowed_admin_ips = ["0.0.0.0/0"]
+# --------------------------------------------------
+# Outros ajustes
+# --------------------------------------------------
+media_local_storage_path  = "/tmp/whatsmeow/media"
+worker_heartbeat_interval = "5s"
+worker_heartbeat_expiry   = "20s"
+worker_rebalance_interval = "30s"
+secret_recovery_window    = 7
+s3_endpoint               = ""
+api_base_url              = "http://homolog-whatsmeow-alb-731186848.us-east-1.elb.amazonaws.com"
+extra_environment         = {}
+secret_env_mapping        = {}

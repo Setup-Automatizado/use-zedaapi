@@ -32,9 +32,10 @@ variable "enable_versioning" {
 variable "lifecycle_rules" {
   description = "Lifecycle rules configuration"
   type = list(object({
-    id      = string
-    enabled = bool
-    transitions = optional(list(object({
+    id             = string
+    enabled        = bool
+    filter_prefix  = optional(string)
+    transitions    = optional(list(object({
       days          = number
       storage_class = string
     })), [])
@@ -48,4 +49,3 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
-

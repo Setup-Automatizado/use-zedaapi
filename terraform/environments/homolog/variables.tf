@@ -252,6 +252,18 @@ variable "db_performance_insights_retention" {
   default     = 7
 }
 
+variable "rds_publicly_accessible" {
+  description = "Expose the RDS instance with a public endpoint (only for non-production environments)"
+  type        = bool
+  default     = false
+}
+
+variable "rds_use_public_subnets" {
+  description = "Place the RDS subnet group in the public subnets instead of private ones"
+  type        = bool
+  default     = false
+}
+
 variable "redis_engine_version" {
   description = "Redis engine version"
   type        = string

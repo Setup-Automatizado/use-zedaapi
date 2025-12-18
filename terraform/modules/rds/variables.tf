@@ -121,6 +121,18 @@ variable "security_group_ids" {
   type        = list(string)
 }
 
+variable "use_public_subnets" {
+  description = "Whether the DB subnet group should use public subnets"
+  type        = bool
+  default     = false
+}
+
+variable "publicly_accessible" {
+  description = "Whether the RDS instance should expose a public endpoint"
+  type        = bool
+  default     = false
+}
+
 variable "tags" {
   description = "Common tags"
   type        = map(string)

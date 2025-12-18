@@ -62,6 +62,10 @@ resource "aws_s3_bucket_lifecycle_configuration" "this" {
       id     = rule.value.id
       status = rule.value.enabled ? "Enabled" : "Disabled"
 
+      filter {
+        prefix = lookup(rule.value, "filter_prefix", "")
+      }
+
       dynamic "transition" {
         for_each = coalesce(rule.value.transitions, [])
         content {
@@ -79,4 +83,3 @@ resource "aws_s3_bucket_lifecycle_configuration" "this" {
     }
   }
 }
-

@@ -129,6 +129,24 @@ resource "aws_vpc_security_group_ingress_rule" "ecs_self" {
   }
 }
 
+# Inbound: API port from admin IPs (for direct access)
+resource "aws_vpc_security_group_ingress_rule" "ecs_api_from_admin" {
+  count = length(var.allowed_admin_ips)
+
+  security_group_id = aws_security_group.ecs_tasks.id
+  description       = "Allow API traffic from admin IP ${var.allowed_admin_ips[count.index]}"
+
+  # If IP already has CIDR notation (contains '/'), use as-is, otherwise add /32
+  cidr_ipv4   = can(regex("/", var.allowed_admin_ips[count.index])) ? var.allowed_admin_ips[count.index] : "${var.allowed_admin_ips[count.index]}/32"
+  from_port   = 8080
+  to_port     = 8080
+  ip_protocol = "tcp"
+
+  tags = {
+    Name = "api-from-admin-${count.index}"
+  }
+}
+
 # Outbound: All traffic (for pulling images, external APIs)
 resource "aws_vpc_security_group_egress_rule" "ecs_all" {
   security_group_id = aws_security_group.ecs_tasks.id
@@ -237,6 +255,22 @@ resource "aws_vpc_security_group_ingress_rule" "redis_from_ecs" {
 
   tags = {
     Name = "redis-from-ecs"
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "redis_from_admin" {
+  count = length(var.allowed_admin_ips)
+
+  security_group_id = aws_security_group.redis.id
+  description       = "Allow Redis from admin IP ${var.allowed_admin_ips[count.index]}"
+
+  cidr_ipv4   = can(regex("/", var.allowed_admin_ips[count.index])) ? var.allowed_admin_ips[count.index] : "${var.allowed_admin_ips[count.index]}/32"
+  from_port   = var.redis_port
+  to_port     = var.redis_port
+  ip_protocol = "tcp"
+
+  tags = {
+    Name = "redis-from-admin-${count.index}"
   }
 }
 
