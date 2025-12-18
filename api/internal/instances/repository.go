@@ -94,7 +94,6 @@ func (r *Repository) GetByID(ctx context.Context, id uuid.UUID) (*Instance, erro
 		&lastConnectedAt,
 		&workerID,
 		&desiredWorkerID,
-		&desiredWorkerID,
 	); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, ErrInstanceNotFound

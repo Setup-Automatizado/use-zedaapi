@@ -41,10 +41,10 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/messages/queue"
 	"go.mau.fi/whatsmeow/api/internal/newsletters"
 	"go.mau.fi/whatsmeow/api/internal/observability"
-	"go.mau.fi/whatsmeow/api/internal/workers"
 	redisinit "go.mau.fi/whatsmeow/api/internal/redis"
 	sentryinit "go.mau.fi/whatsmeow/api/internal/sentry"
 	"go.mau.fi/whatsmeow/api/internal/whatsmeow"
+	"go.mau.fi/whatsmeow/api/internal/workers"
 	"go.mau.fi/whatsmeow/api/migrations"
 )
 
@@ -192,6 +192,25 @@ func main() {
 	sentryHandler, err := sentryinit.Init(cfg.Sentry.DSN, cfg.Sentry.Environment, cfg.Sentry.Release)
 	if err != nil {
 		logger.Error("sentry init failed", slog.String("error", err.Error()))
+	}
+
+	if sentryinit.Enabled() {
+		hostname, _ := os.Hostname()
+		tags := map[string]string{
+			"environment": cfg.Sentry.Environment,
+			"app_env":     cfg.AppEnv,
+		}
+		extras := map[string]any{
+			"hostname":             hostname,
+			"http_addr":            cfg.HTTP.Addr,
+			"prometheus_namespace": cfg.Prometheus.Namespace,
+			"mu_pdf_version":       cfg.Document.MuPDFVersion,
+		}
+		sentryinit.CaptureLifecycleEvent("startup", tags, extras)
+		defer func() {
+			sentryinit.CaptureLifecycleEvent("shutdown", tags, extras)
+			sentryinit.Flush(5 * time.Second)
+		}()
 	}
 
 	metrics := observability.NewMetrics(cfg.Prometheus.Namespace, prometheus.DefaultRegisterer)
