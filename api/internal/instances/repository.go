@@ -367,3 +367,39 @@ func (r *Repository) GetConnectionState(ctx context.Context, id uuid.UUID) (*Con
 
 	return &state, nil
 }
+
+func (r *Repository) UpdateCallRejectAuto(ctx context.Context, id uuid.UUID, value bool) error {
+	query := `UPDATE instances SET call_reject_auto=$2, updated_at=NOW() WHERE id=$1`
+	res, err := r.pool.Exec(ctx, query, id, value)
+	if err != nil {
+		return fmt.Errorf("update call_reject_auto: %w", err)
+	}
+	if res.RowsAffected() == 0 {
+		return ErrInstanceNotFound
+	}
+	return nil
+}
+
+func (r *Repository) UpdateCallRejectMessage(ctx context.Context, id uuid.UUID, value *string) error {
+	query := `UPDATE instances SET call_reject_message=$2, updated_at=NOW() WHERE id=$1`
+	res, err := r.pool.Exec(ctx, query, id, value)
+	if err != nil {
+		return fmt.Errorf("update call_reject_message: %w", err)
+	}
+	if res.RowsAffected() == 0 {
+		return ErrInstanceNotFound
+	}
+	return nil
+}
+
+func (r *Repository) UpdateAutoReadMessage(ctx context.Context, id uuid.UUID, value bool) error {
+	query := `UPDATE instances SET auto_read_message=$2, updated_at=NOW() WHERE id=$1`
+	res, err := r.pool.Exec(ctx, query, id, value)
+	if err != nil {
+		return fmt.Errorf("update auto_read_message: %w", err)
+	}
+	if res.RowsAffected() == 0 {
+		return ErrInstanceNotFound
+	}
+	return nil
+}

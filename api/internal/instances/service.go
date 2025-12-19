@@ -444,6 +444,39 @@ func (s *Service) UpdateEveryWebhooks(ctx context.Context, id uuid.UUID, clientT
 	})
 }
 
+func (s *Service) UpdateCallRejectAuto(ctx context.Context, id uuid.UUID, clientToken, instanceToken string, value bool) error {
+	inst, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+	if !s.tokensMatch(inst, clientToken, instanceToken) {
+		return ErrUnauthorized
+	}
+	return s.repo.UpdateCallRejectAuto(ctx, id, value)
+}
+
+func (s *Service) UpdateCallRejectMessage(ctx context.Context, id uuid.UUID, clientToken, instanceToken string, value *string) error {
+	inst, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+	if !s.tokensMatch(inst, clientToken, instanceToken) {
+		return ErrUnauthorized
+	}
+	return s.repo.UpdateCallRejectMessage(ctx, id, value)
+}
+
+func (s *Service) UpdateAutoReadMessage(ctx context.Context, id uuid.UUID, clientToken, instanceToken string, value bool) error {
+	inst, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+	if !s.tokensMatch(inst, clientToken, instanceToken) {
+		return ErrUnauthorized
+	}
+	return s.repo.UpdateAutoReadMessage(ctx, id, value)
+}
+
 type PartnerCreateParams struct {
 	Name                        string
 	SessionName                 string

@@ -69,6 +69,9 @@ func (h *InstanceHandler) Register(r chi.Router) {
 		r.Put("/update-webhook-chat-presence", h.updateWebhookChatPresence)
 		r.Put("/update-notify-sent-by-me", h.updateNotifySentByMe)
 		r.Put("/update-every-webhooks", h.updateEveryWebhooks)
+		r.Put("/update-call-reject-auto", h.updateCallRejectAuto)
+		r.Put("/update-call-reject-message", h.updateCallRejectMessage)
+		r.Put("/update-auto-read-message", h.updateAutoReadMessage)
 
 		// Message routes (delegated to MessageHandler)
 		if h.messageHandler != nil {
@@ -184,6 +187,14 @@ type webhookEveryRequest struct {
 
 type notifySentByMeRequest struct {
 	NotifySentByMe bool `json:"notifySentByMe"`
+}
+
+type boolValueRequest struct {
+	Value bool `json:"value"`
+}
+
+type stringValueRequest struct {
+	Value string `json:"value"`
 }
 
 type webhookUpdateResponse struct {
@@ -383,4 +394,74 @@ func (h *InstanceHandler) handleServiceError(ctx context.Context, w http.Respons
 	logger := logging.ContextLogger(ctx, h.log)
 	logger.Error("service error", slog.String("error", err.Error()))
 	respondError(w, http.StatusInternalServerError, "internal error")
+}
+
+func (h *InstanceHandler) updateCallRejectAuto(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	instanceID, ok := h.parseInstanceID(w, r)
+	if !ok {
+		return
+	}
+	ctx = logging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
+	instanceToken := chi.URLParam(r, "token")
+	clientToken := r.Header.Get("Client-Token")
+
+	var req boolValueRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondError(w, http.StatusBadRequest, "invalid json payload")
+		return
+	}
+	if err := h.service.UpdateCallRejectAuto(ctx, instanceID, clientToken, instanceToken, req.Value); err != nil {
+		h.handleServiceError(ctx, w, err)
+		return
+	}
+	respondJSON(w, http.StatusOK, valueResponse{Value: true})
+}
+
+func (h *InstanceHandler) updateCallRejectMessage(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	instanceID, ok := h.parseInstanceID(w, r)
+	if !ok {
+		return
+	}
+	ctx = logging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
+	instanceToken := chi.URLParam(r, "token")
+	clientToken := r.Header.Get("Client-Token")
+
+	var req stringValueRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondError(w, http.StatusBadRequest, "invalid json payload")
+		return
+	}
+	var value *string
+	if req.Value != "" {
+		value = &req.Value
+	}
+	if err := h.service.UpdateCallRejectMessage(ctx, instanceID, clientToken, instanceToken, value); err != nil {
+		h.handleServiceError(ctx, w, err)
+		return
+	}
+	respondJSON(w, http.StatusOK, valueResponse{Value: true})
+}
+
+func (h *InstanceHandler) updateAutoReadMessage(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	instanceID, ok := h.parseInstanceID(w, r)
+	if !ok {
+		return
+	}
+	ctx = logging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
+	instanceToken := chi.URLParam(r, "token")
+	clientToken := r.Header.Get("Client-Token")
+
+	var req boolValueRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondError(w, http.StatusBadRequest, "invalid json payload")
+		return
+	}
+	if err := h.service.UpdateAutoReadMessage(ctx, instanceID, clientToken, instanceToken, req.Value); err != nil {
+		h.handleServiceError(ctx, w, err)
+		return
+	}
+	respondJSON(w, http.StatusOK, valueResponse{Value: true})
 }
