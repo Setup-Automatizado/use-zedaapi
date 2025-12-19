@@ -75,8 +75,8 @@
 | Listar contatos | GET /contacts | ✅ | messages.go | Completo com paginação e OpenAPI docs |
 | Metadata do contato | GET /contacts/{PHONE} | ❌ | - | Detalhes individuais - precisa implementar |
 | Foto do perfil | GET /profile-picture | ❌ | - | Query param: phone - precisa implementar |
-| Número tem WhatsApp? | GET /phone-exists/{PHONE} | ❌ | - | Validação individual - precisa implementar |
-| Validação em lote | POST /phone-exists-batch | ❌ | - | Validação múltipla - precisa implementar |
+| Número tem WhatsApp? | GET /phone-exists/{PHONE} | ✅ | messages.go | Validação individual - implementado com OpenAPI docs |
+| Validação em lote | POST /phone-exists-batch | ✅ | messages.go | Validação múltipla até 50.000 números - implementado com OpenAPI docs |
 
 ---
 
@@ -135,19 +135,19 @@
 
 ## 📝 Resumo Executivo
 
-### ✅ Implementados (22 endpoints)
+### ✅ Implementados (23 endpoints)
 - **Instance:** 3/4 (75%)
 - **Messages Básico:** 10/10 (100%)
-- **Contacts:** 1/5 (20%)
+- **Contacts:** 2/5 (40%)
 - **Chats:** 1/8 (12.5%)
 - **Queue:** 4/4 (100%)
 
-### ❌ Faltantes (31 endpoints)
+### ❌ Faltantes (30 endpoints)
 - **Instance:** 1 endpoint (device info)
 - **Messages Avançado:** 4 endpoints (PTV, link, poll, event)
 - **Messages Interativos:** 2 endpoints (button-actions, button-list) - **PRIORIDADE COM ATENÇÃO ESPECIAL**
 - **Messages Operações:** 3 endpoints (forward, reactions, delete)
-- **Contacts:** 4 endpoints (metadata, profile-picture, validation)
+- **Contacts:** 3 endpoints (metadata, profile-picture)
 - **Chats:** 7 endpoints (metadata, modify operations, expiration)
 - **Calls:** 1 endpoint (send-call)
 - **Status:** 3 endpoints (text, image, audio stories)
@@ -166,7 +166,7 @@
 
 **Prioridade MÉDIA (Metadata e Validação):**
 5. Metadata de contato (`GET /contacts/{PHONE}`)
-6. Validação de números (`GET /phone-exists`, `POST /phone-exists-batch`)
+6. Validação de números (`GET /phone-exists/{PHONE}` ✅, `POST /phone-exists-batch` ✅)
 7. Metadata de chat (`GET /chats/{PHONE}`)
 8. Operações básicas de chat (ler, arquivar, fixar, mutar)
 
