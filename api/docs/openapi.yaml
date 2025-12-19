@@ -260,6 +260,31 @@ components:
       required:
         - value
       additionalProperties: false
+    BoolValueRequest:
+      type: object
+      properties:
+        value:
+          type: boolean
+          description: Boolean value for the setting.
+      required:
+        - value
+      additionalProperties: false
+    StringValueRequest:
+      type: object
+      properties:
+        value:
+          type: string
+          description: String value for the setting.
+      required:
+        - value
+      additionalProperties: false
+    ValueResponse:
+      type: object
+      properties:
+        value:
+          type: boolean
+          description: Indicates whether the operation was successful.
+      additionalProperties: false
     NotifySentByMeRequest:
       type: object
       properties:
@@ -2734,6 +2759,77 @@ components:
       required:
         - value
       additionalProperties: false
+    PhoneExistsResponse:
+      type: object
+      description: |
+        Z-API compatible response for phone number validation.
+        Returns whether a phone number is registered on WhatsApp along with phone and LID.
+      properties:
+        exists:
+          type: boolean
+          description: true if the phone number has WhatsApp, false otherwise
+          example: true
+        phone:
+          type: string
+          nullable: true
+          description: Phone number if exists on WhatsApp, null otherwise
+          example: "5521979232690"
+        lid:
+          type: string
+          nullable: true
+          description: LID (Linked ID) if available, null otherwise
+          example: "140712372899859@lid"
+      required:
+        - exists
+      additionalProperties: false
+    PhoneExistsBatchRequest:
+      type: object
+      description: |
+        Z-API compatible request for batch phone number validation.
+        Allows validating up to 50,000 phone numbers in a single request.
+      properties:
+        phones:
+          type: array
+          description: |
+            Array of phone numbers to validate.
+            Each number must be in international format (DDI DDD NUMBER).
+            Numbers only - no formatting, spaces, or masks.
+          items:
+            type: string
+            pattern: "^\\d+$"
+          minItems: 1
+          maxItems: 50000
+          example:
+            - "554499999999"
+            - "554488888888"
+      required:
+        - phones
+      additionalProperties: false
+    PhoneExistsBatchResponse:
+      type: object
+      description: |
+        Z-API compatible response for batch phone number validation.
+        Contains the validation result for each phone number in the batch.
+      properties:
+        exists:
+          type: boolean
+          description: true if the phone number has WhatsApp, false otherwise
+          example: true
+        inputPhone:
+          type: string
+          description: Phone number as sent in the request (may or may not include ninth digit)
+          example: "554499999999"
+        outputPhone:
+          type: string
+          description: |
+            Formatted phone number from WhatsApp response.
+            Reflects the WhatsApp registration and includes ninth digit if applicable.
+          example: "554499999999"
+      required:
+        - exists
+        - inputPhone
+        - outputPhone
+      additionalProperties: false
 paths:
   /health:
     get:
@@ -3702,6 +3798,135 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /instances/{instanceId}/token/{instanceToken}/update-call-reject-auto:
+    put:
+      tags:
+        - Instances
+      summary: Toggle automatic call rejection
+      description: "Mirrors Z-API `/update-call-reject-auto`, enabling or disabling automatic rejection of incoming calls."
+      operationId: updateCallRejectAuto
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BoolValueRequest"
+      responses:
+        "200":
+          description: Setting updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValueResponse"
+        "400":
+          description: Invalid payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Instance not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /instances/{instanceId}/token/{instanceToken}/update-call-reject-message:
+    put:
+      tags:
+        - Instances
+      summary: Update call rejection message
+      description: "Mirrors Z-API `/update-call-reject-message`, setting the message sent when rejecting calls."
+      operationId: updateCallRejectMessage
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StringValueRequest"
+      responses:
+        "200":
+          description: Setting updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValueResponse"
+        "400":
+          description: Invalid payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Instance not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /instances/{instanceId}/token/{instanceToken}/update-auto-read-message:
+    put:
+      tags:
+        - Instances
+      summary: Toggle automatic message reading
+      description: "Mirrors Z-API `/update-auto-read-message`, enabling or disabling automatic marking of messages as read."
+      operationId: updateAutoReadMessage
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BoolValueRequest"
+      responses:
+        "200":
+          description: Setting updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValueResponse"
+        "400":
+          description: Invalid payload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Instance not found
           content:
             application/json:
               schema:
@@ -4927,6 +5152,226 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
                 error: "instance not connected"
+  /instances/{instanceId}/token/{instanceToken}/phone-exists/{phone}:
+    get:
+      tags:
+        - Contacts
+      summary: Check if phone number has WhatsApp
+      description: |
+        Verifies if a phone number is registered on WhatsApp.
+
+        **Use Cases:**
+        - Form validation (verify phone before saving)
+        - Contact verification before sending messages
+        - Lead qualification in CRM systems
+
+        **Important Notes:**
+        - Use this API for form validation purposes
+        - Do NOT use before sending messages (Z-API validates automatically)
+        - Using for message validation creates duplicate checks
+        - Not designed for spam - use responsibly
+
+        **Phone Format:**
+        - International format: DDI + DDD + NUMBER
+        - Numbers only (no formatting, spaces, or masks)
+        - Example: `551199999999` (Brazil mobile)
+
+        **Z-API Compatible:** Matches Z-API request/response format exactly.
+      operationId: phoneExists
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+        - name: phone
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^\\d+$"
+          description: |
+            Phone number in international format (DDI DDD NUMBER).
+            Numbers only - no formatting, spaces, or masks.
+          example: "551199999999"
+      responses:
+        "200":
+          description: Phone validation result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PhoneExistsResponse"
+              examples:
+                exists_with_lid:
+                  summary: Phone exists with LID
+                  description: Phone number is registered on WhatsApp and LID is available
+                  value:
+                    exists: true
+                    phone: "5521979232690"
+                    lid: "140712372899859@lid"
+                exists_without_lid:
+                  summary: Phone exists without LID
+                  description: Phone number is registered but LID is not available
+                  value:
+                    exists: true
+                    phone: "5521979232690"
+                    lid: null
+                not_exists:
+                  summary: Phone does not exist
+                  description: Phone number is not registered on WhatsApp
+                  value:
+                    exists: false
+                    phone: null
+                    lid: null
+        "400":
+          description: Invalid phone number format
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "Phone number must contain only digits"
+        "401":
+          description: Unauthorized (invalid Client-Token or instance token)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "unauthorized"
+        "404":
+          description: Instance not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "instance not found"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "Failed to check phone number"
+        "503":
+          description: Contacts service not available
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "Contacts service not available"
+  /instances/{instanceId}/token/{instanceToken}/phone-exists-batch:
+    post:
+      tags:
+        - Contacts
+      summary: Batch validate phone numbers on WhatsApp
+      description: |
+        Validates multiple phone numbers to check if they are registered on WhatsApp.
+
+        **Use Cases:**
+        - Bulk contact validation before marketing campaigns
+        - CRM data cleansing and enrichment
+        - Lead qualification at scale
+        - Form validation with multiple numbers
+
+        **Important Notes:**
+        - Maximum batch size: 50,000 numbers per request
+        - Use for validation purposes, not before sending messages
+        - Not designed for spam - use responsibly
+
+        **Phone Format:**
+        - International format: DDI + DDD + NUMBER
+        - Numbers only (no formatting, spaces, or masks)
+        - Example: `551199999999` (Brazil mobile)
+
+        **Response Fields:**
+        - `exists`: Whether the phone has WhatsApp
+        - `inputPhone`: The number as you sent it
+        - `outputPhone`: The number formatted by WhatsApp (may include 9th digit)
+
+        **Z-API Compatible:** Matches Z-API request/response format exactly.
+      operationId: phoneExistsBatch
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PhoneExistsBatchRequest"
+            example:
+              phones:
+                - "554499999999"
+                - "554488888888"
+      responses:
+        "200":
+          description: Batch validation results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PhoneExistsBatchResponse"
+              example:
+                - exists: true
+                  inputPhone: "554499999999"
+                  outputPhone: "554499999999"
+                - exists: false
+                  inputPhone: "554488888888"
+                  outputPhone: "554488888888"
+        "400":
+          description: Invalid request (empty array, invalid format, or batch size exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                empty_array:
+                  value:
+                    error: "Phones array is required and cannot be empty"
+                invalid_format:
+                  value:
+                    error: "Phone at index 0 must contain only digits"
+                batch_exceeded:
+                  value:
+                    error: "Batch size exceeds maximum limit of 50000 numbers"
+        "401":
+          description: Unauthorized (invalid Client-Token or instance token)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "unauthorized"
+        "404":
+          description: Instance not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "instance not found"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "Failed to check phone numbers"
+        "503":
+          description: Contacts service not available
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "Contacts service not available"
   /instances/{instanceId}/token/{instanceToken}/chats:
     get:
       tags:
