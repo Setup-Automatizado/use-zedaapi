@@ -85,8 +85,10 @@ s3_use_presigned_urls       = true
 # --------------------------------------------------
 # Secrets Manager payload extra
 # --------------------------------------------------
-s3_access_key          = "funnelchat"
-s3_secret_key          = "funnelchatsecret"
+# S3 credentials vazias para usar IAM Role do ECS Task
+# Em dev local com MinIO, defina credenciais no .env
+s3_access_key          = ""
+s3_secret_key          = ""
 media_local_secret_key = "supersecret"
 additional_secret_values = {
   partner_auth_token = "iB4uIxOYOMFSnScXWlphBg=="
