@@ -199,6 +199,8 @@ type ClientRegistry struct {
 	connectOverride        func(*whatsmeow.Client) error
 	isConnectedOverride    func(*whatsmeow.Client) bool
 	ensureWithLockOverride func(context.Context, InstanceInfo, locks.Lock) (*whatsmeow.Client, bool, error)
+
+	pairingCodeCache *pairingCache
 }
 
 type clientState struct {
@@ -327,6 +329,7 @@ func NewClientRegistry(
 		lockRefreshInterval:  lockConfiguration.RefreshInterval,
 		lockKeyPrefix:        lockConfiguration.KeyPrefix,
 		obsMetrics:           obsMetrics,
+		pairingCodeCache:     newPairingCache(),
 	}, nil
 }
 
@@ -796,10 +799,10 @@ func (r *ClientRegistry) startLockRefresh(instanceID uuid.UUID, lock locks.Lock,
 						iterationLogger.Debug("checking circuit breaker state for lock reacquisition",
 							slog.Int("circuit_state", int(circuitState)))
 
-							if circuitState == locks.StateClosed {
-								iterationLogger.Info("Redis recovered - attempting to reacquire real lock")
+						if circuitState == locks.StateClosed {
+							iterationLogger.Info("Redis recovered - attempting to reacquire real lock")
 
-								lockKey := r.lockKey(instanceID)
+							lockKey := r.lockKey(instanceID)
 
 							var newLock locks.Lock
 							var acquired bool
@@ -808,7 +811,7 @@ func (r *ClientRegistry) startLockRefresh(instanceID uuid.UUID, lock locks.Lock,
 							for attempt := 1; attempt <= 3; attempt++ {
 								attemptLogger := iterationLogger.With(slog.Int("attempt", attempt))
 								acquireCtx, acquireCancel := context.WithTimeout(workerCtx, 3*time.Second)
-									newLock, acquired, acquireErr = r.lockManager.Acquire(acquireCtx, lockKey, r.lockTTLSeconds())
+								newLock, acquired, acquireErr = r.lockManager.Acquire(acquireCtx, lockKey, r.lockTTLSeconds())
 								acquireCancel()
 
 								if acquireErr == nil && acquired && newLock != nil {
@@ -1116,6 +1119,42 @@ func logLevelOrDefault(level string) string {
 	return level
 }
 
+func (r *ClientRegistry) getCachedPairingCode(instanceID uuid.UUID, codeType PairingCodeType) (*CachedPairingCode, bool) {
+	if r.pairingCodeCache == nil {
+		return nil, false
+	}
+	return r.pairingCodeCache.Get(instanceID, codeType)
+}
+
+func (r *ClientRegistry) getCachedPhoneCode(instanceID uuid.UUID, phone string) (*CachedPairingCode, bool) {
+	if r.pairingCodeCache == nil {
+		return nil, false
+	}
+	return r.pairingCodeCache.GetForPhone(instanceID, phone)
+}
+
+func (r *ClientRegistry) setCachedPairingCode(instanceID uuid.UUID, code *CachedPairingCode) {
+	if r.pairingCodeCache == nil {
+		return
+	}
+	r.pairingCodeCache.Set(instanceID, code)
+	r.log.Debug("cached pairing code",
+		slog.String("instanceId", instanceID.String()),
+		slog.String("type", string(code.Type)),
+		slog.Duration("ttl", code.RemainingTTL()))
+}
+
+// invalidatePairingCache remove codigo do cache
+func (r *ClientRegistry) invalidatePairingCache(instanceID uuid.UUID, reason string) {
+	if r.pairingCodeCache == nil {
+		return
+	}
+	r.pairingCodeCache.Invalidate(instanceID)
+	r.log.Debug("invalidated pairing cache",
+		slog.String("instanceId", instanceID.String()),
+		slog.String("reason", reason))
+}
+
 func (r *ClientRegistry) registerPairingSession(instanceID uuid.UUID, cancel context.CancelFunc) {
 	var previous *pairingSession
 	var session *pairingSession
@@ -1159,6 +1198,8 @@ func (r *ClientRegistry) registerPairingSession(instanceID uuid.UUID, cancel con
 }
 
 func (r *ClientRegistry) cleanupPairingSession(instanceID uuid.UUID, reason string) {
+	r.invalidatePairingCache(instanceID, reason)
+
 	var session *pairingSession
 	var client *whatsmeow.Client
 
@@ -1565,6 +1606,8 @@ func (r *ClientRegistry) wrapEventHandler(instanceID uuid.UUID) func(evt interfa
 			r.announcePresenceAvailable(instanceID, "stream_replaced")
 
 		case *events.PairSuccess:
+			r.invalidatePairingCache(instanceID, "pair_success")
+
 			jid := e.ID.String()
 			r.mu.Lock()
 			if state, ok := r.clients[instanceID]; ok {
@@ -1605,6 +1648,8 @@ func (r *ClientRegistry) wrapEventHandler(instanceID uuid.UUID) func(evt interfa
 			r.persistConnectionStatus(instanceID, false, "disconnected", nil)
 
 		case *events.LoggedOut:
+			r.invalidatePairingCache(instanceID, "logged_out")
+
 			r.mu.Lock()
 			if state, ok := r.clients[instanceID]; ok {
 				state.connectionStatus = "logged_out"
@@ -1912,6 +1957,8 @@ func (r *ClientRegistry) Disconnect(ctx context.Context, info InstanceInfo) erro
 
 	r.cleanupPairingSession(info.ID, "manual")
 
+	r.invalidatePairingCache(info.ID, "disconnect")
+
 	r.mu.Lock()
 	state, ok := r.clients[info.ID]
 	if !ok {
@@ -1979,6 +2026,23 @@ func (r *ClientRegistry) Disconnect(ctx context.Context, info InstanceInfo) erro
 }
 
 func (r *ClientRegistry) GetQRCode(ctx context.Context, info InstanceInfo) (string, error) {
+	r.mu.RLock()
+	state, exists := r.clients[info.ID]
+	if exists && state != nil && state.client != nil {
+		if state.client.Store != nil && state.client.Store.ID != nil {
+			r.mu.RUnlock()
+			return "", ErrInstanceAlreadyPaired
+		}
+	}
+	r.mu.RUnlock()
+
+	if cached, ok := r.getCachedPairingCode(info.ID, PairingCodeTypeQR); ok {
+		r.log.Debug("returning cached QR code",
+			slog.String("instanceId", info.ID.String()),
+			slog.Duration("remaining_ttl", cached.RemainingTTL()))
+		return cached.Code, nil
+	}
+
 	_, qrChan, err := r.startPairingSession(ctx, info)
 	if err != nil {
 		return "", err
@@ -1993,14 +2057,71 @@ func (r *ClientRegistry) GetQRCode(ctx context.Context, info InstanceInfo) (stri
 				return "", errors.New("qr channel closed")
 			}
 			if item.Event == whatsmeow.QRChannelEventCode {
+				now := time.Now()
+				sessionID := uuid.NewString()
+				cached := &CachedPairingCode{
+					Code:      item.Code,
+					Type:      PairingCodeTypeQR,
+					CreatedAt: now,
+					ExpiresAt: now.Add(pairingCodeTTL),
+					SessionID: sessionID,
+				}
+				r.setCachedPairingCode(info.ID, cached)
+
+				go r.monitorQRCodeRenewals(info.ID, qrChan, sessionID)
+
 				return item.Code, nil
 			} else if item.Event == whatsmeow.QRChannelEventError {
 				return "", item.Error
-			} else if item.Event != "success" {
-				r.log.Info("qr channel event", slog.String("instanceId", info.ID.String()), slog.String("event", item.Event))
+			} else if item.Event == "success" {
+				r.invalidatePairingCache(info.ID, "paired_during_qr_generation")
+				return "", ErrInstanceAlreadyPaired
 			}
 		}
 	}
+}
+
+func (r *ClientRegistry) monitorQRCodeRenewals(instanceID uuid.UUID, qrChan <-chan whatsmeow.QRChannelItem, sessionID string) {
+	for item := range qrChan {
+		switch item.Event {
+		case whatsmeow.QRChannelEventCode:
+			now := time.Now()
+			cached := &CachedPairingCode{
+				Code:      item.Code,
+				Type:      PairingCodeTypeQR,
+				CreatedAt: now,
+				ExpiresAt: now.Add(pairingCodeTTL),
+				SessionID: sessionID,
+			}
+			r.setCachedPairingCode(instanceID, cached)
+			r.log.Debug("QR code renewed",
+				slog.String("instanceId", instanceID.String()),
+				slog.String("sessionId", sessionID))
+
+		case "success":
+			r.invalidatePairingCache(instanceID, "pair_success")
+			r.log.Info("pairing successful via QR code",
+				slog.String("instanceId", instanceID.String()))
+			return
+
+		case "timeout":
+			r.invalidatePairingCache(instanceID, "session_timeout")
+			r.log.Debug("QR session timed out",
+				slog.String("instanceId", instanceID.String()))
+			return
+
+		default:
+			if item.Error != nil {
+				r.invalidatePairingCache(instanceID, "error")
+				r.log.Warn("QR channel error",
+					slog.String("instanceId", instanceID.String()),
+					slog.String("event", item.Event),
+					slog.String("error", item.Error.Error()))
+				return
+			}
+		}
+	}
+	r.invalidatePairingCache(instanceID, "channel_closed")
 }
 
 func (r *ClientRegistry) PairPhone(ctx context.Context, info InstanceInfo, phone string) (string, error) {
@@ -2011,6 +2132,16 @@ func (r *ClientRegistry) PairPhone(ctx context.Context, info InstanceInfo, phone
 	if client.Store != nil && client.Store.ID != nil {
 		return "", ErrInstanceAlreadyPaired
 	}
+
+	if cached, ok := r.getCachedPhoneCode(info.ID, phone); ok {
+		r.log.Debug("returning cached phone code",
+			slog.String("instanceId", info.ID.String()),
+			slog.String("phone", phone),
+			slog.Duration("remaining_ttl", cached.RemainingTTL()))
+		return cached.Code, nil
+	}
+
+	r.invalidatePairingCache(info.ID, "phone_changed")
 
 	if !client.IsConnected() {
 		r.log.Info("connecting to websocket before generating pairing code",
@@ -2026,13 +2157,24 @@ func (r *ClientRegistry) PairPhone(ctx context.Context, info InstanceInfo, phone
 		time.Sleep(500 * time.Millisecond)
 	}
 
-	pairCtx := context.Background()
+	pairCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	defer cancel()
 
 	code, err := client.PairPhone(pairCtx, phone, true, whatsmeow.PairClientSafari, "Safari (macOS)")
-
 	if err != nil {
 		return "", fmt.Errorf("failed to generate pairing code: %w", err)
 	}
+
+	now := time.Now()
+	cached := &CachedPairingCode{
+		Code:      code,
+		Type:      PairingCodeTypePhone,
+		Phone:     phone,
+		CreatedAt: now,
+		ExpiresAt: now.Add(pairingCodeTTL),
+		SessionID: uuid.NewString(),
+	}
+	r.setCachedPairingCode(info.ID, cached)
 
 	r.log.Info("pairing code generated successfully",
 		slog.String("instanceId", info.ID.String()),
