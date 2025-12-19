@@ -31,6 +31,8 @@ type InstanceStatusProvider interface {
 // ContactsService provides contact-related operations
 type ContactsService interface {
 	List(ctx context.Context, instanceID uuid.UUID, params contacts.ListParams) (contacts.ListResult, error)
+	IsOnWhatsApp(ctx context.Context, instanceID uuid.UUID, phone string) (contacts.PhoneExistsResponse, error)
+	IsOnWhatsAppBatch(ctx context.Context, instanceID uuid.UUID, phones []string) ([]contacts.PhoneExistsBatchResponse, error)
 }
 
 // ChatsService provides chat-related operations
@@ -103,8 +105,10 @@ func (h *MessageHandler) RegisterRoutes(r chi.Router) {
 	r.Delete("/queue/{zaapId}", h.cancelQueueMessage) // DELETE /queue/{zaapId}
 
 	// Data retrieval endpoints (Z-API compatible)
-	r.Get("/contacts", h.getContacts) // GET /contacts?page=1&pageSize=100
-	r.Get("/chats", h.getChats)       // GET /chats?page=1&pageSize=100
+	r.Get("/contacts", h.getContacts)                 // GET /contacts?page=1&pageSize=100
+	r.Get("/chats", h.getChats)                       // GET /chats?page=1&pageSize=100
+	r.Get("/phone-exists/{phone}", h.phoneExists)     // GET /phone-exists/{phone}
+	r.Post("/phone-exists-batch", h.phoneExistsBatch) // POST /phone-exists-batch
 }
 
 // GroupMention represents a group mention in a community (Z-API compatible format)
@@ -2118,6 +2122,159 @@ func (h *MessageHandler) getChats(w http.ResponseWriter, r *http.Request) {
 
 	// Z-API returns array of chats (not wrapped in object)
 	respondJSON(w, http.StatusOK, result.Chats)
+}
+
+// phoneExists handles GET /instances/{instanceId}/token/{token}/phone-exists/{phone}
+//
+// Z-API Compatible endpoint that:
+// 1. Validates instanceId and token from URL
+// 2. Validates Client-Token header
+// 3. Checks if phone number is registered on WhatsApp
+// 4. Returns Z-API compatible response array
+//
+// Path parameters:
+// - phone: Phone number in format DDI DDD NUMBER (e.g., 551199999999)
+//
+// Compatible with Z-API specification
+func (h *MessageHandler) phoneExists(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx, instanceID, _, ok := h.resolveInstance(ctx, w, r)
+	if !ok {
+		return
+	}
+
+	phone := chi.URLParam(r, "phone")
+	if phone == "" {
+		h.log.WarnContext(ctx, "missing phone parameter")
+		respondError(w, http.StatusBadRequest, "Phone number is required")
+		return
+	}
+
+	// Validate phone format (only digits allowed)
+	for _, c := range phone {
+		if c < '0' || c > '9' {
+			h.log.WarnContext(ctx, "invalid phone format",
+				slog.String("phone", phone))
+			respondError(w, http.StatusBadRequest, "Phone number must contain only digits")
+			return
+		}
+	}
+
+	h.log.InfoContext(ctx, "checking phone exists",
+		slog.String("phone", phone))
+
+	if h.contactsService == nil {
+		h.log.ErrorContext(ctx, "contacts service not available")
+		respondError(w, http.StatusServiceUnavailable, "Contacts service not available")
+		return
+	}
+
+	result, err := h.contactsService.IsOnWhatsApp(ctx, instanceID, phone)
+	if err != nil {
+		h.log.ErrorContext(ctx, "failed to check phone exists",
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusInternalServerError, "Failed to check phone number")
+		return
+	}
+
+	h.log.InfoContext(ctx, "phone check completed",
+		slog.Bool("exists", result.Exists))
+
+	// Z-API returns the response object directly
+	respondJSON(w, http.StatusOK, result)
+}
+
+// phoneExistsBatch handles POST /instances/{instanceId}/token/{token}/phone-exists-batch
+//
+// Z-API Compatible endpoint that:
+// 1. Validates instanceId and token from URL
+// 2. Validates Client-Token header
+// 3. Accepts a JSON body with array of phone numbers
+// 4. Checks if each phone number is registered on WhatsApp
+// 5. Returns Z-API compatible response array with validation results
+//
+// Request body:
+// - phones: Array of phone numbers in format DDI DDD NUMBER (e.g., ["551199999999", "551188888888"])
+//
+// Maximum batch size: 50,000 numbers per request (Z-API limit)
+//
+// Compatible with Z-API specification
+func (h *MessageHandler) phoneExistsBatch(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx, instanceID, _, ok := h.resolveInstance(ctx, w, r)
+	if !ok {
+		return
+	}
+
+	// Parse request body
+	var req contacts.PhoneExistsBatchRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		h.log.WarnContext(ctx, "invalid request body",
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	// Validate phones array
+	if len(req.Phones) == 0 {
+		h.log.WarnContext(ctx, "empty phones array")
+		respondError(w, http.StatusBadRequest, "Phones array is required and cannot be empty")
+		return
+	}
+
+	// Z-API limit: 50,000 numbers per request
+	const maxBatchSize = 50000
+	if len(req.Phones) > maxBatchSize {
+		h.log.WarnContext(ctx, "batch size exceeds limit",
+			slog.Int("requested", len(req.Phones)),
+			slog.Int("max", maxBatchSize))
+		respondError(w, http.StatusBadRequest, fmt.Sprintf("Batch size exceeds maximum limit of %d numbers", maxBatchSize))
+		return
+	}
+
+	// Validate each phone format (only digits allowed)
+	for i, phone := range req.Phones {
+		if phone == "" {
+			h.log.WarnContext(ctx, "empty phone in batch",
+				slog.Int("index", i))
+			respondError(w, http.StatusBadRequest, fmt.Sprintf("Phone at index %d is empty", i))
+			return
+		}
+		for _, c := range phone {
+			if c < '0' || c > '9' {
+				h.log.WarnContext(ctx, "invalid phone format in batch",
+					slog.Int("index", i),
+					slog.String("phone", phone))
+				respondError(w, http.StatusBadRequest, fmt.Sprintf("Phone at index %d must contain only digits", i))
+				return
+			}
+		}
+	}
+
+	h.log.InfoContext(ctx, "checking batch phone exists",
+		slog.Int("phone_count", len(req.Phones)))
+
+	if h.contactsService == nil {
+		h.log.ErrorContext(ctx, "contacts service not available")
+		respondError(w, http.StatusServiceUnavailable, "Contacts service not available")
+		return
+	}
+
+	results, err := h.contactsService.IsOnWhatsAppBatch(ctx, instanceID, req.Phones)
+	if err != nil {
+		h.log.ErrorContext(ctx, "failed to check batch phone exists",
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusInternalServerError, "Failed to check phone numbers")
+		return
+	}
+
+	h.log.InfoContext(ctx, "batch phone check completed",
+		slog.Int("results_count", len(results)))
+
+	// Z-API returns array of results
+	respondJSON(w, http.StatusOK, results)
 }
 
 // Helper functions
