@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+
 	"go.mau.fi/whatsmeow/types"
 
 	"go.mau.fi/whatsmeow/api/internal/logging"
@@ -16,6 +17,8 @@ import (
 // Client exposes the WhatsApp operations required by the contacts service.
 type Client interface {
 	GetAllContacts(ctx context.Context) (map[types.JID]types.ContactInfo, error)
+	IsOnWhatsApp(ctx context.Context, phones []string) ([]types.IsOnWhatsAppResponse, error)
+	GetUserInfo(ctx context.Context, jids []types.JID) (map[types.JID]types.UserInfo, error)
 }
 
 // ClientProvider resolves a WhatsApp client for a given instance.
@@ -154,4 +157,138 @@ func (s *Service) toContact(jid types.JID, info types.ContactInfo) Contact {
 		Notify: notify,
 		Vname:  vname,
 	}
+}
+
+// IsOnWhatsApp checks if a phone number is registered on WhatsApp.
+// Returns PhoneExistsResponse with exists status, phone number, and LID if available.
+func (s *Service) IsOnWhatsApp(ctx context.Context, instanceID uuid.UUID, phone string) (PhoneExistsResponse, error) {
+	logger := logging.ContextLogger(ctx, s.log)
+
+	logger.InfoContext(ctx, "checking if phone is on whatsapp",
+		slog.String("instance_id", instanceID.String()),
+		slog.String("phone", phone))
+
+	// Get whatsmeow client for this instance
+	client, err := s.provider.Get(ctx, instanceID)
+	if err != nil {
+		logger.ErrorContext(ctx, "failed to get client",
+			slog.String("error", err.Error()))
+		return PhoneExistsResponse{Exists: false}, fmt.Errorf("get client: %w", err)
+	}
+
+	// Check if phone is on WhatsApp
+	responses, err := client.IsOnWhatsApp(ctx, []string{phone})
+	if err != nil {
+		logger.ErrorContext(ctx, "failed to check whatsapp",
+			slog.String("error", err.Error()))
+		return PhoneExistsResponse{Exists: false}, fmt.Errorf("check whatsapp: %w", err)
+	}
+
+	if len(responses) == 0 {
+		logger.InfoContext(ctx, "no response from whatsapp check")
+		return PhoneExistsResponse{Exists: false}, nil
+	}
+
+	resp := responses[0]
+	exists := resp.IsIn
+
+	// If phone doesn't exist on WhatsApp, return early
+	if !exists {
+		logger.InfoContext(ctx, "phone not on whatsapp",
+			slog.String("phone", phone))
+		return PhoneExistsResponse{Exists: false}, nil
+	}
+
+	// Phone exists - get the canonical phone number from JID
+	phoneNumber := resp.JID.User
+	result := PhoneExistsResponse{
+		Exists: true,
+		Phone:  &phoneNumber,
+	}
+
+	// Try to get LID using GetUserInfo
+	userInfoMap, err := client.GetUserInfo(ctx, []types.JID{resp.JID})
+	if err != nil {
+		// Log the error but don't fail - LID is optional
+		logger.WarnContext(ctx, "failed to get user info for LID",
+			slog.String("error", err.Error()),
+			slog.String("phone", phone))
+	} else if userInfo, ok := userInfoMap[resp.JID]; ok && !userInfo.LID.IsEmpty() {
+		lidStr := userInfo.LID.String()
+		result.LID = &lidStr
+		logger.InfoContext(ctx, "phone check completed with LID",
+			slog.Bool("exists", exists),
+			slog.String("phone", phoneNumber),
+			slog.String("lid", lidStr))
+	} else {
+		logger.InfoContext(ctx, "phone check completed without LID",
+			slog.Bool("exists", exists),
+			slog.String("phone", phoneNumber))
+	}
+
+	return result, nil
+}
+
+// IsOnWhatsAppBatch checks if multiple phone numbers are registered on WhatsApp.
+// Returns a slice of batch responses with validation results for each phone.
+// Maximum batch size is 50,000 numbers per request (Z-API limit).
+func (s *Service) IsOnWhatsAppBatch(ctx context.Context, instanceID uuid.UUID, phones []string) ([]PhoneExistsBatchResponse, error) {
+	logger := logging.ContextLogger(ctx, s.log)
+
+	logger.InfoContext(ctx, "checking batch phones on whatsapp",
+		slog.String("instance_id", instanceID.String()),
+		slog.Int("phone_count", len(phones)))
+
+	// Get whatsmeow client for this instance
+	client, err := s.provider.Get(ctx, instanceID)
+	if err != nil {
+		logger.ErrorContext(ctx, "failed to get client",
+			slog.String("error", err.Error()))
+		return nil, fmt.Errorf("get client: %w", err)
+	}
+
+	// Check if phones are on WhatsApp
+	responses, err := client.IsOnWhatsApp(ctx, phones)
+	if err != nil {
+		logger.ErrorContext(ctx, "failed to check whatsapp batch",
+			slog.String("error", err.Error()))
+		return nil, fmt.Errorf("check whatsapp batch: %w", err)
+	}
+
+	// Build a map of query -> response for fast lookup
+	responseMap := make(map[string]types.IsOnWhatsAppResponse, len(responses))
+	for _, resp := range responses {
+		responseMap[resp.Query] = resp
+	}
+
+	// Build results maintaining input order
+	results := make([]PhoneExistsBatchResponse, len(phones))
+	for i, phone := range phones {
+		resp, found := responseMap[phone]
+		if found {
+			// Use the JID user part as the output phone (formatted by WhatsApp)
+			outputPhone := resp.JID.User
+			if outputPhone == "" {
+				outputPhone = phone
+			}
+			results[i] = PhoneExistsBatchResponse{
+				Exists:      resp.IsIn,
+				InputPhone:  phone,
+				OutputPhone: outputPhone,
+			}
+		} else {
+			// Phone not found in response - mark as not existing
+			results[i] = PhoneExistsBatchResponse{
+				Exists:      false,
+				InputPhone:  phone,
+				OutputPhone: phone,
+			}
+		}
+	}
+
+	logger.InfoContext(ctx, "batch phone check completed",
+		slog.Int("total_checked", len(phones)),
+		slog.Int("results_count", len(results)))
+
+	return results, nil
 }

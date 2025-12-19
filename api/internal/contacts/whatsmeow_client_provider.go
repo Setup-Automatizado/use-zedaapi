@@ -39,3 +39,21 @@ func (w *whatsmeowClient) GetAllContacts(ctx context.Context) (map[types.JID]typ
 
 	return contacts, nil
 }
+
+// IsOnWhatsApp checks if the given phone numbers are registered on WhatsApp.
+func (w *whatsmeowClient) IsOnWhatsApp(ctx context.Context, phones []string) ([]types.IsOnWhatsAppResponse, error) {
+	if w.client == nil {
+		return nil, fmt.Errorf("whatsmeow client is nil")
+	}
+
+	return w.client.IsOnWhatsApp(ctx, phones)
+}
+
+// GetUserInfo gets basic user info (avatar, status, verified business name, device list, LID).
+func (w *whatsmeowClient) GetUserInfo(ctx context.Context, jids []types.JID) (map[types.JID]types.UserInfo, error) {
+	if w.client == nil {
+		return nil, fmt.Errorf("whatsmeow client is nil")
+	}
+
+	return w.client.GetUserInfo(ctx, jids)
+}

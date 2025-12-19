@@ -21,3 +21,24 @@ type ListResult struct {
 	Items []Contact
 	Total int
 }
+
+// PhoneExistsResponse represents the Z-API compatible response for phone validation.
+// Returns whether a phone number is registered on WhatsApp along with phone and LID.
+type PhoneExistsResponse struct {
+	Exists bool    `json:"exists"` // Whether the phone is registered on WhatsApp
+	Phone  *string `json:"phone"`  // Phone number if exists, null otherwise
+	LID    *string `json:"lid"`    // LID (Linked ID) if available, null otherwise
+}
+
+// PhoneExistsBatchRequest represents the Z-API compatible request for batch phone validation.
+type PhoneExistsBatchRequest struct {
+	Phones []string `json:"phones"`
+}
+
+// PhoneExistsBatchResponse represents the Z-API compatible response for batch phone validation.
+// Contains the validation result for each phone number in the batch.
+type PhoneExistsBatchResponse struct {
+	Exists      bool   `json:"exists"`      // true if the phone has WhatsApp
+	InputPhone  string `json:"inputPhone"`  // Phone number as sent in the request
+	OutputPhone string `json:"outputPhone"` // Formatted phone number from WhatsApp response
+}
