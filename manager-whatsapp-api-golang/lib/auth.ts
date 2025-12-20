@@ -188,7 +188,9 @@ export const auth = betterAuth({
 	// Advanced configuration
 	advanced: {
 		cookiePrefix: "whatsapp-manager",
-		useSecureCookies: process.env.NODE_ENV === "production",
+		// Usar secure cookies apenas se SECURE_COOKIES=true ou se estiver em HTTPS
+		// Em homolog com HTTP, precisa ser false para cookies funcionarem
+		useSecureCookies: process.env.SECURE_COOKIES === "true",
 		defaultCookieAttributes: {
 			sameSite: "lax",
 			path: "/",
@@ -234,24 +236,30 @@ export const auth = betterAuth({
 	hooks: {
 		after: createAuthMiddleware(async (ctx) => {
 			// Send login alert on successful sign-in
-			if (ctx.path === "/sign-in/email" || ctx.path === "/sign-in/social") {
+			if (
+				ctx.path === "/sign-in/email" ||
+				ctx.path === "/sign-in/social"
+			) {
 				const returned = ctx.context.returned as
 					| Record<string, unknown>
 					| undefined;
 				// Check if sign-in was successful (returns user/session data)
 				if (returned && ("user" in returned || "session" in returned)) {
-					const session = ctx.context.session;
-					if (session?.user) {
-						const user = session.user;
-						const { device, ipAddress } = getRequestContextFromHeaders(
-							ctx.request?.headers,
-						);
+					// Pegar usuario do returned (session ainda nao existe no contexto)
+					const user =
+						(returned.user as Record<string, unknown>) ||
+						((returned.session as Record<string, unknown>)
+							?.user as Record<string, unknown>);
+
+					if (user && user.email) {
+						const { device, ipAddress } =
+							getRequestContextFromHeaders(ctx.request?.headers);
 						console.log(
 							`[Login] Sending login alert to ${user.email}`,
 						);
-						void sendLoginAlert(user.email, {
-							userName: user.name || "",
-							userEmail: user.email,
+						void sendLoginAlert(user.email as string, {
+							userName: (user.name as string) || "",
+							userEmail: user.email as string,
 							device,
 							ipAddress,
 							loginTime: new Date(),
