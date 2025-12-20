@@ -36,9 +36,8 @@ export default function AuthLayout({
 								Manage your WhatsApp instances
 							</h1>
 							<p className="text-lg text-muted-foreground max-w-md">
-								Centralized panel to create, configure and
-								monitor your WhatsApp connections simply and
-								efficiently.
+								Centralized panel to create, configure and monitor your WhatsApp
+								connections simply and efficiently.
 							</p>
 						</div>
 						<div className="flex flex-col gap-4 pt-4">
@@ -55,34 +54,10 @@ export default function AuthLayout({
 										className="h-5 w-5 text-primary"
 										aria-hidden="true"
 									>
-										<rect
-											width="7"
-											height="7"
-											x="3"
-											y="3"
-											rx="1"
-										/>
-										<rect
-											width="7"
-											height="7"
-											x="14"
-											y="3"
-											rx="1"
-										/>
-										<rect
-											width="7"
-											height="7"
-											x="14"
-											y="14"
-											rx="1"
-										/>
-										<rect
-											width="7"
-											height="7"
-											x="3"
-											y="14"
-											rx="1"
-										/>
+										<rect width="7" height="7" x="3" y="3" rx="1" />
+										<rect width="7" height="7" x="14" y="3" rx="1" />
+										<rect width="7" height="7" x="14" y="14" rx="1" />
+										<rect width="7" height="7" x="3" y="14" rx="1" />
 									</svg>
 								</div>
 								<div>

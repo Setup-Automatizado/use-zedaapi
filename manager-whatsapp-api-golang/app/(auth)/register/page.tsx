@@ -1,13 +1,17 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import Link from "next/link";
+import {
+	AlertTriangle,
+	CheckCircle2,
+	Github,
+	Loader2,
+	UserPlus,
+} from "lucide-react";
 import Image from "next/image";
-import { signUp, signIn } from "@/lib/auth-client";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
 	Card,
 	CardContent,
@@ -15,15 +19,11 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-	Loader2,
-	Github,
-	UserPlus,
-	CheckCircle2,
-	AlertTriangle,
-} from "lucide-react";
+import { signIn, signUp } from "@/lib/auth-client";
 
 function RegisterForm() {
 	const router = useRouter();
@@ -105,8 +105,7 @@ function RegisterForm() {
 					);
 				} else {
 					setError(
-						result.error.message ||
-							"Error creating account. Please try again.",
+						result.error.message || "Error creating account. Please try again.",
 					);
 				}
 				return;
@@ -197,13 +196,10 @@ function RegisterForm() {
 						<div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-4 text-sm text-amber-600 dark:text-amber-400 flex items-start gap-3">
 							<AlertTriangle className="h-5 w-5 mt-0.5 shrink-0" />
 							<div>
-								<p className="font-medium">
-									Invitation required
-								</p>
+								<p className="font-medium">Invitation required</p>
 								<p className="mt-1 text-amber-600/80 dark:text-amber-400/80">
-									To access the platform, you need an
-									invitation from an administrator. Contact
-									the administrator to request access.
+									To access the platform, you need an invitation from an
+									administrator. Contact the administrator to request access.
 								</p>
 							</div>
 						</div>
@@ -255,8 +251,8 @@ function RegisterForm() {
 						<div className="rounded-lg bg-primary/10 border border-primary/20 p-3 text-sm text-primary flex items-start gap-2">
 							<CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" />
 							<span>
-								You have been invited to access the platform.
-								Complete your registration below.
+								You have been invited to access the platform. Complete your
+								registration below.
 							</span>
 						</div>
 					)}
@@ -287,11 +283,7 @@ function RegisterForm() {
 							{isGoogleLoading ? (
 								<Loader2 className="h-4 w-4 animate-spin" />
 							) : (
-								<svg
-									className="h-4 w-4"
-									viewBox="0 0 24 24"
-									aria-hidden="true"
-								>
+								<svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
 									<path
 										d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
 										fill="#4285F4"
@@ -372,8 +364,7 @@ function RegisterForm() {
 							/>
 							{isEmailLocked && (
 								<p className="text-xs text-muted-foreground">
-									This email was set by the invitation and
-									cannot be changed.
+									This email was set by the invitation and cannot be changed.
 								</p>
 							)}
 						</div>
@@ -395,9 +386,7 @@ function RegisterForm() {
 						</div>
 
 						<div className="space-y-2">
-							<Label htmlFor="confirmPassword">
-								Confirm Password
-							</Label>
+							<Label htmlFor="confirmPassword">Confirm Password</Label>
 							<Input
 								id="confirmPassword"
 								name="confirmPassword"

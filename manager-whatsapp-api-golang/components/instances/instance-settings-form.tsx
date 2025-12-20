@@ -1,16 +1,10 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2, Save } from "lucide-react";
 import { useTransition } from "react";
 import { useForm, useWatch } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Loader2, Save } from "lucide-react";
-
-import {
-	InstanceSettingsSchema,
-	type InstanceSettings,
-	type InstanceSettingsInput,
-} from "@/schemas";
 import { updateInstanceSettings } from "@/actions";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,10 +16,15 @@ import {
 	FormLabel,
 	FormMessage,
 } from "@/components/ui/form";
+import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import {
+	type InstanceSettings,
+	type InstanceSettingsInput,
+	InstanceSettingsSchema,
+} from "@/schemas";
 
 export interface InstanceSettingsFormProps {
 	instanceId: string;
@@ -112,8 +111,7 @@ export function InstanceSettingsForm({
 									Mark Messages as Read
 								</FormLabel>
 								<FormDescription>
-									Automatically mark all received messages as
-									read
+									Automatically mark all received messages as read
 								</FormDescription>
 							</div>
 							<FormControl>
@@ -163,21 +161,18 @@ export function InstanceSettingsForm({
 							<FormItem>
 								<FormLabel>
 									Call Rejection Message
-									<span className="text-destructive ml-1">
-										*
-									</span>
+									<span className="text-destructive ml-1">*</span>
 								</FormLabel>
 								<FormDescription>
-									Message sent automatically when a call is
-									rejected. Maximum 500 characters.
+									Message sent automatically when a call is rejected. Maximum
+									500 characters.
 								</FormDescription>
 								<FormControl>
 									<Textarea
 										placeholder="Sorry, I can't answer calls right now. Please send a text message."
 										className={cn(
 											"resize-none",
-											errors.callRejectMessage &&
-												"border-destructive",
+											errors.callRejectMessage && "border-destructive",
 										)}
 										rows={4}
 										maxLength={500}
@@ -210,8 +205,7 @@ export function InstanceSettingsForm({
 									Notify Sent Messages
 								</FormLabel>
 								<FormDescription>
-									Receive notifications for messages sent by
-									this instance
+									Receive notifications for messages sent by this instance
 								</FormDescription>
 							</div>
 							<FormControl>

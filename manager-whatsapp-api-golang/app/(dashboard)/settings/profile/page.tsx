@@ -7,9 +7,25 @@
 
 "use client";
 
-import * as React from "react";
-import { useSession, signIn } from "@/lib/auth-client";
+import {
+	AlertCircle,
+	Calendar,
+	Camera,
+	Check,
+	Github,
+	Link as LinkIcon,
+	Loader2,
+	Shield,
+	Trash2,
+	Unlink,
+	User,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
+import * as React from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -17,26 +33,10 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import {
-	AlertCircle,
-	Camera,
-	Check,
-	Github,
-	Loader2,
-	Trash2,
-	Link as LinkIcon,
-	Unlink,
-	User,
-	Calendar,
-	Shield,
-} from "lucide-react";
+import { signIn, useSession } from "@/lib/auth-client";
 
 // Google icon component
 function GoogleIcon({ className }: { className?: string }) {
@@ -149,18 +149,14 @@ export default function ProfileSettingsPage() {
 			setSuccess("Profile updated successfully");
 			fetchProfile();
 		} catch (err) {
-			setError(
-				err instanceof Error ? err.message : "Failed to update profile",
-			);
+			setError(err instanceof Error ? err.message : "Failed to update profile");
 		} finally {
 			setIsSaving(false);
 		}
 	};
 
 	// Handle avatar upload
-	const handleAvatarUpload = async (
-		e: React.ChangeEvent<HTMLInputElement>,
-	) => {
+	const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
 		if (!file) return;
 
@@ -185,9 +181,7 @@ export default function ProfileSettingsPage() {
 			setSuccess("Avatar updated successfully");
 			fetchProfile();
 		} catch (err) {
-			setError(
-				err instanceof Error ? err.message : "Failed to upload avatar",
-			);
+			setError(err instanceof Error ? err.message : "Failed to upload avatar");
 		} finally {
 			setIsUploading(false);
 			if (fileInputRef.current) {
@@ -215,9 +209,7 @@ export default function ProfileSettingsPage() {
 			setSuccess("Avatar removed successfully");
 			fetchProfile();
 		} catch (err) {
-			setError(
-				err instanceof Error ? err.message : "Failed to remove avatar",
-			);
+			setError(err instanceof Error ? err.message : "Failed to remove avatar");
 		} finally {
 			setIsUploading(false);
 		}
@@ -254,9 +246,7 @@ export default function ProfileSettingsPage() {
 			setSuccess("Account unlinked successfully");
 			fetchProfile();
 		} catch (err) {
-			setError(
-				err instanceof Error ? err.message : "Failed to unlink account",
-			);
+			setError(err instanceof Error ? err.message : "Failed to unlink account");
 		} finally {
 			setIsUnlinking(null);
 		}
@@ -298,9 +288,7 @@ export default function ProfileSettingsPage() {
 			{/* Header */}
 			<div>
 				<h1 className="text-2xl font-bold tracking-tight">Profile</h1>
-				<p className="text-muted-foreground">
-					Manage your account settings
-				</p>
+				<p className="text-muted-foreground">Manage your account settings</p>
 			</div>
 
 			{/* Messages */}
@@ -333,10 +321,7 @@ export default function ProfileSettingsPage() {
 										alt={profile?.name || "Avatar"}
 									/>
 									<AvatarFallback className="text-xl bg-primary text-primary-foreground">
-										{getInitials(
-											profile?.name || null,
-											profile?.email || "",
-										)}
+										{getInitials(profile?.name || null, profile?.email || "")}
 									</AvatarFallback>
 								</Avatar>
 								{isUploading && (
@@ -352,9 +337,8 @@ export default function ProfileSettingsPage() {
 									className="hidden"
 								/>
 								<button
-									onClick={() =>
-										fileInputRef.current?.click()
-									}
+									type="button"
+									onClick={() => fileInputRef.current?.click()}
 									disabled={isUploading}
 									className="absolute bottom-0 right-0 p-1.5 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-colors"
 								>
@@ -366,9 +350,7 @@ export default function ProfileSettingsPage() {
 							<h3 className="mt-4 font-semibold text-lg">
 								{profile?.name || "No name set"}
 							</h3>
-							<p className="text-sm text-muted-foreground">
-								{profile?.email}
-							</p>
+							<p className="text-sm text-muted-foreground">{profile?.email}</p>
 
 							{/* Role Badge */}
 							<Badge variant="secondary" className="mt-2">
@@ -401,12 +383,13 @@ export default function ProfileSettingsPage() {
 									</span>
 									<span className="font-medium">
 										{profile?.createdAt
-											? new Date(
-													profile.createdAt,
-												).toLocaleDateString("en-US", {
-													month: "short",
-													year: "numeric",
-												})
+											? new Date(profile.createdAt).toLocaleDateString(
+													"en-US",
+													{
+														month: "short",
+														year: "numeric",
+													},
+												)
 											: "-"}
 									</span>
 								</div>
@@ -432,9 +415,7 @@ export default function ProfileSettingsPage() {
 									<Input
 										id="name"
 										value={name}
-										onChange={(e) =>
-											setName(e.target.value)
-										}
+										onChange={(e) => setName(e.target.value)}
 										placeholder="Enter your name"
 										disabled={isSaving}
 									/>
@@ -450,11 +431,7 @@ export default function ProfileSettingsPage() {
 								</div>
 							</div>
 							<div className="flex justify-end">
-								<Button
-									onClick={handleSaveName}
-									disabled={isSaving}
-									size="sm"
-								>
+								<Button onClick={handleSaveName} disabled={isSaving} size="sm">
 									{isSaving ? (
 										<>
 											<Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -488,9 +465,7 @@ export default function ProfileSettingsPage() {
 											<Github className="h-4 w-4" />
 										</div>
 										<div>
-											<p className="font-medium text-sm">
-												GitHub
-											</p>
+											<p className="font-medium text-sm">GitHub</p>
 											<p className="text-xs text-muted-foreground">
 												{isProviderLinked("github")
 													? "Connected"
@@ -503,18 +478,11 @@ export default function ProfileSettingsPage() {
 											variant="outline"
 											size="sm"
 											onClick={() =>
-												handleUnlinkAccount(
-													getLinkedAccount("github")!
-														.id,
-												)
+												handleUnlinkAccount(getLinkedAccount("github")!.id)
 											}
-											disabled={
-												isUnlinking ===
-												getLinkedAccount("github")?.id
-											}
+											disabled={isUnlinking === getLinkedAccount("github")?.id}
 										>
-											{isUnlinking ===
-											getLinkedAccount("github")?.id ? (
+											{isUnlinking === getLinkedAccount("github")?.id ? (
 												<Loader2 className="h-4 w-4 animate-spin" />
 											) : (
 												<>
@@ -527,9 +495,7 @@ export default function ProfileSettingsPage() {
 										<Button
 											variant="outline"
 											size="sm"
-											onClick={() =>
-												handleLinkAccount("github")
-											}
+											onClick={() => handleLinkAccount("github")}
 										>
 											<LinkIcon className="h-3.5 w-3.5 mr-1.5" />
 											Link
@@ -544,9 +510,7 @@ export default function ProfileSettingsPage() {
 											<GoogleIcon className="h-4 w-4" />
 										</div>
 										<div>
-											<p className="font-medium text-sm">
-												Google
-											</p>
+											<p className="font-medium text-sm">Google</p>
 											<p className="text-xs text-muted-foreground">
 												{isProviderLinked("google")
 													? "Connected"
@@ -559,18 +523,11 @@ export default function ProfileSettingsPage() {
 											variant="outline"
 											size="sm"
 											onClick={() =>
-												handleUnlinkAccount(
-													getLinkedAccount("google")!
-														.id,
-												)
+												handleUnlinkAccount(getLinkedAccount("google")!.id)
 											}
-											disabled={
-												isUnlinking ===
-												getLinkedAccount("google")?.id
-											}
+											disabled={isUnlinking === getLinkedAccount("google")?.id}
 										>
-											{isUnlinking ===
-											getLinkedAccount("google")?.id ? (
+											{isUnlinking === getLinkedAccount("google")?.id ? (
 												<Loader2 className="h-4 w-4 animate-spin" />
 											) : (
 												<>
@@ -583,9 +540,7 @@ export default function ProfileSettingsPage() {
 										<Button
 											variant="outline"
 											size="sm"
-											onClick={() =>
-												handleLinkAccount("google")
-											}
+											onClick={() => handleLinkAccount("google")}
 										>
 											<LinkIcon className="h-3.5 w-3.5 mr-1.5" />
 											Link

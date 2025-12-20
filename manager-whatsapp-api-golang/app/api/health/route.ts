@@ -11,8 +11,8 @@
  */
 
 import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
 import { getHealth } from "@/lib/api/health";
+import prisma from "@/lib/prisma";
 
 /**
  * GET /api/health
@@ -41,9 +41,7 @@ export async function GET() {
 				service: "manager",
 				timestamp,
 				error:
-					error instanceof Error
-						? error.message
-						: "Database connection failed",
+					error instanceof Error ? error.message : "Database connection failed",
 			},
 			{ status: 503 },
 		);

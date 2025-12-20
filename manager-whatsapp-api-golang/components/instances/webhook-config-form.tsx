@@ -1,18 +1,11 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2, Save } from "lucide-react";
 import { useState, useTransition } from "react";
 import { useForm, useWatch } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Loader2, Save } from "lucide-react";
-
-import {
-	WebhookConfigSchema,
-	type WebhookConfig,
-	type WebhookConfigInput,
-} from "@/schemas";
 import { updateWebhookSettings } from "@/actions";
-import { WebhookField } from "./webhook-field";
 import { Button } from "@/components/ui/button";
 import {
 	Form,
@@ -22,8 +15,14 @@ import {
 	FormItem,
 	FormLabel,
 } from "@/components/ui/form";
-import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import {
+	type WebhookConfig,
+	type WebhookConfigInput,
+	WebhookConfigSchema,
+} from "@/schemas";
+import { WebhookField } from "./webhook-field";
 
 export interface WebhookConfigFormProps {
 	instanceId: string;
@@ -65,13 +64,10 @@ export function WebhookConfigForm({
 			receivedCallbackUrl: initialValues?.receivedCallbackUrl || "",
 			receivedAndDeliveryCallbackUrl:
 				initialValues?.receivedAndDeliveryCallbackUrl || "",
-			messageStatusCallbackUrl:
-				initialValues?.messageStatusCallbackUrl || "",
+			messageStatusCallbackUrl: initialValues?.messageStatusCallbackUrl || "",
 			connectedCallbackUrl: initialValues?.connectedCallbackUrl || "",
-			disconnectedCallbackUrl:
-				initialValues?.disconnectedCallbackUrl || "",
-			presenceChatCallbackUrl:
-				initialValues?.presenceChatCallbackUrl || "",
+			disconnectedCallbackUrl: initialValues?.disconnectedCallbackUrl || "",
+			presenceChatCallbackUrl: initialValues?.presenceChatCallbackUrl || "",
 			notifySentByMe: initialValues?.notifySentByMe || false,
 		},
 	});
@@ -89,8 +85,7 @@ export function WebhookConfigForm({
 		{
 			name: "deliveryCallbackUrl" as const,
 			label: "Delivery Webhook",
-			description:
-				"Notifications when messages are delivered to the recipient",
+			description: "Notifications when messages are delivered to the recipient",
 		},
 		{
 			name: "receivedCallbackUrl" as const,
@@ -100,8 +95,7 @@ export function WebhookConfigForm({
 		{
 			name: "receivedAndDeliveryCallbackUrl" as const,
 			label: "Received and Delivery Webhook",
-			description:
-				"Combined notifications for received and delivered messages",
+			description: "Combined notifications for received and delivered messages",
 		},
 		{
 			name: "messageStatusCallbackUrl" as const,
@@ -116,14 +110,12 @@ export function WebhookConfigForm({
 		{
 			name: "disconnectedCallbackUrl" as const,
 			label: "Disconnection Webhook",
-			description:
-				"Notifications when the instance disconnects from WhatsApp",
+			description: "Notifications when the instance disconnects from WhatsApp",
 		},
 		{
 			name: "presenceChatCallbackUrl" as const,
 			label: "Chat Presence Webhook",
-			description:
-				"Notifications about presence status (typing, online, etc.)",
+			description: "Notifications about presence status (typing, online, etc.)",
 		},
 	];
 
@@ -214,8 +206,7 @@ export function WebhookConfigForm({
 									Notify Sent Messages
 								</FormLabel>
 								<FormDescription>
-									Receive webhooks for messages sent by this
-									instance
+									Receive webhooks for messages sent by this instance
 								</FormDescription>
 							</div>
 							<FormControl>

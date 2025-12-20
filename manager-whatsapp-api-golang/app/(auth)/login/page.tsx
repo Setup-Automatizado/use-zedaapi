@@ -1,13 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { Github, Loader2, Mail } from "lucide-react";
 import Image from "next/image";
-import { signIn } from "@/lib/auth-client";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
 	Card,
 	CardContent,
@@ -15,8 +13,10 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, Github, Mail } from "lucide-react";
+import { signIn } from "@/lib/auth-client";
 
 export default function LoginPage() {
 	const router = useRouter();
@@ -49,8 +49,7 @@ export default function LoginPage() {
 
 			if (result.error) {
 				setError(
-					result.error.message ||
-						"Invalid credentials. Please try again.",
+					result.error.message || "Invalid credentials. Please try again.",
 				);
 				return;
 			}
@@ -149,11 +148,7 @@ export default function LoginPage() {
 							{isGoogleLoading ? (
 								<Loader2 className="h-4 w-4 animate-spin" />
 							) : (
-								<svg
-									className="h-4 w-4"
-									viewBox="0 0 24 24"
-									aria-hidden="true"
-								>
+								<svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
 									<path
 										d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
 										fill="#4285F4"
