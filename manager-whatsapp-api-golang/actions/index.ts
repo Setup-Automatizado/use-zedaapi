@@ -12,29 +12,27 @@
 
 // Instance management actions
 export {
-  createInstance,
-  deleteInstance,
-  restartInstance,
-  disconnectInstance,
-  activateSubscription,
-  cancelSubscription,
-} from './instances';
-
-// Webhook configuration actions
-export {
-  updateWebhook,
-  updateAllWebhooks,
-  updateNotifySentByMe,
-  updateWebhookSettings,
-} from './webhooks';
-
+	activateSubscription,
+	cancelSubscription,
+	createInstance,
+	deleteInstance,
+	disconnectInstance,
+	restartInstance,
+} from "./instances";
 // Instance settings actions
 export {
-  updateInstanceSettings,
-  updateCallRejectAuto,
-  updateCallRejectMessage,
-  updateAutoReadMessage,
-  updateProfileName,
-  updateProfileDescription,
-  updateProfilePicture,
-} from './settings';
+	updateAutoReadMessage,
+	updateCallRejectAuto,
+	updateCallRejectMessage,
+	updateInstanceSettings,
+	updateProfileDescription,
+	updateProfileName,
+	updateProfilePicture,
+} from "./settings";
+// Webhook configuration actions
+export {
+	updateAllWebhooks,
+	updateNotifySentByMe,
+	updateWebhook,
+	updateWebhookSettings,
+} from "./webhooks";

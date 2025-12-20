@@ -12,8 +12,8 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { api } from "@/lib/api/client";
-import { success, error, validationError } from "@/types";
 import type { ActionResult, InstanceSettings } from "@/types";
+import { error, success, validationError } from "@/types";
 
 /**
  * Instance settings validation schema
@@ -146,9 +146,7 @@ export async function updateCallRejectAuto(
 		return success(undefined);
 	} catch (err) {
 		const message =
-			err instanceof Error
-				? err.message
-				: "Failed to update call rejection";
+			err instanceof Error ? err.message : "Failed to update call rejection";
 		return error(message);
 	}
 }
@@ -186,9 +184,7 @@ export async function updateCallRejectMessage(
 		return success(undefined);
 	} catch (err) {
 		const message =
-			err instanceof Error
-				? err.message
-				: "Failed to update rejection message";
+			err instanceof Error ? err.message : "Failed to update rejection message";
 		return error(message);
 	}
 }
@@ -221,9 +217,7 @@ export async function updateAutoReadMessage(
 		return success(undefined);
 	} catch (err) {
 		const message =
-			err instanceof Error
-				? err.message
-				: "Failed to update auto-read setting";
+			err instanceof Error ? err.message : "Failed to update auto-read setting";
 		return error(message);
 	}
 }
@@ -269,9 +263,7 @@ export async function updateProfileName(
 		return success(undefined);
 	} catch (err) {
 		const message =
-			err instanceof Error
-				? err.message
-				: "Failed to update profile name";
+			err instanceof Error ? err.message : "Failed to update profile name";
 		return error(message);
 	}
 }
@@ -356,9 +348,7 @@ export async function updateProfilePicture(
 		return success(undefined);
 	} catch (err) {
 		const message =
-			err instanceof Error
-				? err.message
-				: "Failed to update profile picture";
+			err instanceof Error ? err.message : "Failed to update profile picture";
 		return error(message);
 	}
 }
