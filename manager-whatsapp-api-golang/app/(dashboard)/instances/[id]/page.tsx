@@ -1,20 +1,16 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
+import { ArrowLeft, Settings, Webhook } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Settings, Webhook, ArrowLeft } from "lucide-react";
-
-import { useInstance, useInstanceStatus } from "@/hooks";
+import { use, useEffect, useState } from "react";
 import {
 	InstanceOverview,
-	WebhookConfigForm,
 	InstanceSettingsForm,
+	WebhookConfigForm,
 } from "@/components/instances";
 import { PageHeader } from "@/components/shared/page-header";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -22,6 +18,9 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useInstance, useInstanceStatus } from "@/hooks";
 import type { DeviceInfo } from "@/types";
 
 interface InstancePageProps {
@@ -62,15 +61,12 @@ export default function InstancePage({ params }: InstancePageProps) {
 
 		const fetchDeviceInfo = async () => {
 			try {
-				const response = await fetch(
-					`/api/instances/${instance.id}/device`,
-					{
-						method: "GET",
-						headers: {
-							"Content-Type": "application/json",
-						},
+				const response = await fetch(`/api/instances/${instance.id}/device`, {
+					method: "GET",
+					headers: {
+						"Content-Type": "application/json",
 					},
-				);
+				});
 
 				if (response.ok && !cancelled) {
 					const data = await response.json();
@@ -96,19 +92,14 @@ export default function InstancePage({ params }: InstancePageProps) {
 	if (error) {
 		return (
 			<div className="space-y-6">
-				<Button
-					variant="ghost"
-					onClick={() => router.back()}
-					className="mb-4"
-				>
+				<Button variant="ghost" onClick={() => router.back()} className="mb-4">
 					<ArrowLeft className="mr-2 h-4 w-4" />
 					Back
 				</Button>
 				<Alert variant="destructive">
 					<AlertTitle>Error loading instance</AlertTitle>
 					<AlertDescription>
-						{error.message ||
-							"Could not load instance information."}
+						{error.message || "Could not load instance information."}
 					</AlertDescription>
 				</Alert>
 			</div>
@@ -130,11 +121,7 @@ export default function InstancePage({ params }: InstancePageProps) {
 	return (
 		<div className="space-y-6">
 			<div className="flex items-center gap-4">
-				<Button
-					variant="ghost"
-					onClick={() => router.back()}
-					size="icon"
-				>
+				<Button variant="ghost" onClick={() => router.back()} size="icon">
 					<ArrowLeft className="h-4 w-4" />
 				</Button>
 				<PageHeader
@@ -170,9 +157,8 @@ export default function InstancePage({ params }: InstancePageProps) {
 						<CardHeader>
 							<CardTitle>Webhook URLs</CardTitle>
 							<CardDescription>
-								Configure the endpoints to receive WhatsApp
-								event notifications. Leave blank to disable
-								specific webhooks.
+								Configure the endpoints to receive WhatsApp event notifications.
+								Leave blank to disable specific webhooks.
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
@@ -180,23 +166,18 @@ export default function InstancePage({ params }: InstancePageProps) {
 								instanceId={instance.id}
 								instanceToken={instance.instanceToken}
 								initialValues={{
-									deliveryCallbackUrl:
-										instance.deliveryCallbackUrl || "",
-									receivedCallbackUrl:
-										instance.receivedCallbackUrl || "",
+									deliveryCallbackUrl: instance.deliveryCallbackUrl || "",
+									receivedCallbackUrl: instance.receivedCallbackUrl || "",
 									receivedAndDeliveryCallbackUrl:
-										instance.receivedAndDeliveryCallbackUrl ||
-										"",
+										instance.receivedAndDeliveryCallbackUrl || "",
 									messageStatusCallbackUrl:
 										instance.messageStatusCallbackUrl || "",
-									connectedCallbackUrl:
-										instance.connectedCallbackUrl || "",
+									connectedCallbackUrl: instance.connectedCallbackUrl || "",
 									disconnectedCallbackUrl:
 										instance.disconnectedCallbackUrl || "",
 									presenceChatCallbackUrl:
 										instance.presenceChatCallbackUrl || "",
-									notifySentByMe:
-										instance.notifySentByMe || false,
+									notifySentByMe: instance.notifySentByMe || false,
 								}}
 							/>
 						</CardContent>
@@ -208,8 +189,7 @@ export default function InstancePage({ params }: InstancePageProps) {
 						<CardHeader>
 							<CardTitle>Message and Call Settings</CardTitle>
 							<CardDescription>
-								Customize how your instance handles incoming
-								messages and calls.
+								Customize how your instance handles incoming messages and calls.
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
@@ -217,14 +197,10 @@ export default function InstancePage({ params }: InstancePageProps) {
 								instanceId={instance.id}
 								instanceToken={instance.instanceToken}
 								initialValues={{
-									autoReadMessage:
-										instance.autoReadMessage || false,
-									callRejectAuto:
-										instance.callRejectAuto || false,
-									callRejectMessage:
-										instance.callRejectMessage || "",
-									notifySentByMe:
-										instance.notifySentByMe || false,
+									autoReadMessage: instance.autoReadMessage || false,
+									callRejectAuto: instance.callRejectAuto || false,
+									callRejectMessage: instance.callRejectMessage || "",
+									notifySentByMe: instance.notifySentByMe || false,
 								}}
 							/>
 						</CardContent>

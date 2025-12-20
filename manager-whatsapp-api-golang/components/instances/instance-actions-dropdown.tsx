@@ -1,8 +1,19 @@
 "use client";
 
-import * as React from "react";
+import {
+	Eye,
+	LogOut,
+	MoreVertical,
+	RotateCcw,
+	Settings,
+	Trash,
+	Webhook,
+} from "lucide-react";
+
 import Link from "next/link";
-import { Instance } from "@/types";
+import { useState } from "react";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -10,17 +21,7 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { ConfirmDialog } from "@/components/shared/confirm-dialog";
-import {
-	Eye,
-	MoreVertical,
-	Webhook,
-	Settings,
-	RotateCcw,
-	LogOut,
-	Trash,
-} from "lucide-react";
+import type { Instance } from "@/types";
 
 export interface InstanceActionsDropdownProps {
 	instance: Instance;
@@ -35,8 +36,8 @@ export function InstanceActionsDropdown({
 	onDisconnect,
 	onDelete,
 }: InstanceActionsDropdownProps) {
-	const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
-	const [isOpen, setIsOpen] = React.useState(false);
+	const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+	const [isOpen, setIsOpen] = useState(false);
 
 	const handleDelete = async () => {
 		if (onDelete) {
