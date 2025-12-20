@@ -1,0 +1,253 @@
+# ==================================================
+# Manager WhatsApp API - CI/CD Pipeline
+# ==================================================
+# Faz build, push para ECR e deploy no ECS
+# ==================================================
+
+name: Manager Deploy
+
+on:
+  push:
+    branches:
+      - production
+      - develop
+    paths:
+      - "manager-whatsapp-api-golang/**"
+      - ".github/workflows/manager-deploy.yml"
+  pull_request:
+    branches:
+      - production
+      - develop
+    paths:
+      - "manager-whatsapp-api-golang/**"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Ambiente de deploy"
+        required: true
+        default: "homolog"
+        type: choice
+        options:
+          - homolog
+          - production
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: manager-whatsapp-api
+
+jobs:
+  # --------------------------------------------------
+  # Build and Test
+  # --------------------------------------------------
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: manager-whatsapp-api-golang
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.4
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: bun prisma generate
+
+      - name: Type check
+        run: bun run --bun tsc --noEmit
+
+      - name: Lint
+        run: bun lint
+
+      - name: Build
+        run: bun run build
+
+  # --------------------------------------------------
+  # Deploy to Homolog
+  # --------------------------------------------------
+  deploy-homolog:
+    name: Deploy to Homolog
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'homolog')
+    environment: homolog
+
+    env:
+      ECS_CLUSTER: homolog-whatsmeow-cluster
+      ECS_SERVICE: homolog-manager-service
+      IMAGE_TAG: homolog
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push image to ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          MANAGER_URL: http://homolog-whatsmeow-alb-731186848.us-east-1.elb.amazonaws.com
+        run: |
+          cd manager-whatsapp-api-golang
+          docker build \
+            --build-arg BUILD_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
+            --build-arg VERSION=${{ env.IMAGE_TAG }} \
+            --build-arg COMMIT=${{ github.sha }} \
+            --build-arg NEXT_PUBLIC_APP_URL=${{ env.MANAGER_URL }} \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }} \
+            .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Run database migrations
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          # Rodar task de migracao (one-shot)
+          TASK_ARN=$(aws ecs run-task \
+            --cluster $ECS_CLUSTER \
+            --task-definition ${ECS_CLUSTER%-cluster}-manager-migrate \
+            --launch-type FARGATE \
+            --network-configuration "awsvpcConfiguration={subnets=[${{ secrets.SUBNET_IDS }}],securityGroups=[${{ secrets.SECURITY_GROUP_ID }}],assignPublicIp=ENABLED}" \
+            --query 'tasks[0].taskArn' \
+            --output text) || true
+
+          if [ -n "$TASK_ARN" ] && [ "$TASK_ARN" != "None" ]; then
+            echo "Migration task started: $TASK_ARN"
+            # Aguardar conclusao da task
+            aws ecs wait tasks-stopped --cluster $ECS_CLUSTER --tasks $TASK_ARN
+            echo "Migration task completed"
+          else
+            echo "No migration task definition found or task failed to start, skipping migrations"
+          fi
+
+      - name: Deploy to ECS
+        run: |
+          aws ecs update-service \
+            --cluster $ECS_CLUSTER \
+            --service $ECS_SERVICE \
+            --force-new-deployment
+
+      - name: Wait for deployment
+        run: |
+          aws ecs wait services-stable \
+            --cluster $ECS_CLUSTER \
+            --services $ECS_SERVICE
+
+      - name: Deployment summary
+        env:
+          MANAGER_URL: http://homolog-whatsmeow-alb-731186848.us-east-1.elb.amazonaws.com
+        run: |
+          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment:** Homolog" >> $GITHUB_STEP_SUMMARY
+          echo "- **Image:** ${{ steps.build-image.outputs.image }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **URL:** ${{ env.MANAGER_URL }}" >> $GITHUB_STEP_SUMMARY
+
+  # --------------------------------------------------
+  # Deploy to Production
+  # --------------------------------------------------
+  deploy-production:
+    name: Deploy to Production
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/production' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production')
+    environment: production
+
+    env:
+      ECS_CLUSTER: production-whatsmeow-cluster
+      ECS_SERVICE: production-manager-service
+      IMAGE_TAG: latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push image to ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          cd manager-whatsapp-api-golang
+          docker build \
+            --build-arg BUILD_TIME=$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
+            --build-arg VERSION=${{ env.IMAGE_TAG }} \
+            --build-arg COMMIT=${{ github.sha }} \
+            --build-arg NEXT_PUBLIC_APP_URL=${{ secrets.MANAGER_PUBLIC_URL }} \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }} \
+            .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:${{ github.sha }}
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Run database migrations
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          TASK_ARN=$(aws ecs run-task \
+            --cluster $ECS_CLUSTER \
+            --task-definition ${ECS_CLUSTER%-cluster}-manager-migrate \
+            --launch-type FARGATE \
+            --network-configuration "awsvpcConfiguration={subnets=[${{ secrets.SUBNET_IDS }}],securityGroups=[${{ secrets.SECURITY_GROUP_ID }}],assignPublicIp=ENABLED}" \
+            --query 'tasks[0].taskArn' \
+            --output text) || true
+
+          if [ -n "$TASK_ARN" ] && [ "$TASK_ARN" != "None" ]; then
+            echo "Migration task started: $TASK_ARN"
+            aws ecs wait tasks-stopped --cluster $ECS_CLUSTER --tasks $TASK_ARN
+            echo "Migration task completed"
+          else
+            echo "No migration task definition found, skipping migrations"
+          fi
+
+      - name: Deploy to ECS
+        run: |
+          aws ecs update-service \
+            --cluster $ECS_CLUSTER \
+            --service $ECS_SERVICE \
+            --force-new-deployment
+
+      - name: Wait for deployment
+        run: |
+          aws ecs wait services-stable \
+            --cluster $ECS_CLUSTER \
+            --services $ECS_SERVICE
+
+      - name: Deployment summary
+        run: |
+          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment:** Production" >> $GITHUB_STEP_SUMMARY
+          echo "- **Image:** ${{ steps.build-image.outputs.image }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
