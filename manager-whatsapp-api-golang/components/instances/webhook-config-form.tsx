@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Loader2, Save } from "lucide-react";
@@ -78,10 +78,12 @@ export function WebhookConfigForm({
 
 	const {
 		formState: { errors, isDirty },
-		watch,
 		setValue,
 		reset,
+		control,
 	} = form;
+
+	const notifySentByMe = useWatch({ control, name: "notifySentByMe" });
 
 	const webhookFields = [
 		{
@@ -159,7 +161,7 @@ export function WebhookConfigForm({
 			connectedCallbackUrl: "",
 			disconnectedCallbackUrl: "",
 			presenceChatCallbackUrl: "",
-			notifySentByMe: watch("notifySentByMe") ?? false,
+			notifySentByMe: notifySentByMe ?? false,
 		};
 
 		reset(clearedValues);

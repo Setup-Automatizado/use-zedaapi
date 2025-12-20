@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Loader2, Save } from "lucide-react";
@@ -70,11 +70,11 @@ export function InstanceSettingsForm({
 
 	const {
 		formState: { errors, isDirty },
-		watch,
 		reset,
+		control,
 	} = form;
 
-	const callRejectAuto = watch("callRejectAuto");
+	const callRejectAuto = useWatch({ control, name: "callRejectAuto" });
 
 	const onSubmit = async (data: InstanceSettings) => {
 		startTransition(async () => {

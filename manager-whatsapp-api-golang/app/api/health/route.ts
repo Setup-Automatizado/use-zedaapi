@@ -54,7 +54,7 @@ export async function GET() {
 		const backendHealth = await getHealth();
 		// Return backend health response
 		return NextResponse.json(backendHealth);
-	} catch (error) {
+	} catch {
 		// Backend is down, but manager is still healthy
 		// Return ok status so frontend doesn't show error
 		// Frontend will show "API Offline" based on backend status
