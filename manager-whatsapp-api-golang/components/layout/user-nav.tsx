@@ -1,5 +1,7 @@
 "use client";
 
+import { LogOut, Settings, User } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,8 +13,6 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, Settings, User } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { signOut } from "@/lib/auth-client";
 
 interface UserNavProps {
@@ -41,10 +41,7 @@ export function UserNav({ user }: UserNavProps) {
 		}
 	};
 
-	const getInitials = (
-		name?: string | null,
-		email?: string | null,
-	): string => {
+	const getInitials = (name?: string | null, email?: string | null): string => {
 		if (name) {
 			const parts = name.split(" ");
 			if (parts.length >= 2) {
@@ -64,15 +61,9 @@ export function UserNav({ user }: UserNavProps) {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<Button
-					variant="ghost"
-					className="relative h-9 w-9 rounded-full"
-				>
+				<Button variant="ghost" className="relative h-9 w-9 rounded-full">
 					<Avatar className="h-9 w-9">
-						<AvatarImage
-							src={user?.image || undefined}
-							alt={displayName}
-						/>
+						<AvatarImage src={user?.image || undefined} alt={displayName} />
 						<AvatarFallback>{initials}</AvatarFallback>
 					</Avatar>
 				</Button>
@@ -80,9 +71,7 @@ export function UserNav({ user }: UserNavProps) {
 			<DropdownMenuContent className="w-56" align="end" forceMount>
 				<DropdownMenuLabel className="font-normal">
 					<div className="flex flex-col space-y-1">
-						<p className="text-sm font-medium leading-none">
-							{displayName}
-						</p>
+						<p className="text-sm font-medium leading-none">{displayName}</p>
 						{user?.email && (
 							<p className="text-xs leading-none text-muted-foreground">
 								{user.email}
@@ -92,9 +81,7 @@ export function UserNav({ user }: UserNavProps) {
 				</DropdownMenuLabel>
 				<DropdownMenuSeparator />
 				<DropdownMenuGroup>
-					<DropdownMenuItem
-						onClick={() => router.push("/settings/profile")}
-					>
+					<DropdownMenuItem onClick={() => router.push("/settings/profile")}>
 						<User className="mr-2 h-4 w-4" />
 						<span>Profile</span>
 					</DropdownMenuItem>

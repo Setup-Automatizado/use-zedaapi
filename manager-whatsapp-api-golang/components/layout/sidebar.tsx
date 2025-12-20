@@ -1,10 +1,16 @@
 "use client";
 
-import * as React from "react";
-import Link from "next/link";
+import {
+	Activity,
+	LayoutDashboard,
+	LogOut,
+	Settings,
+	Smartphone,
+} from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
+import * as React from "react";
 import { Button } from "@/components/ui/button";
 import {
 	Tooltip,
@@ -12,14 +18,8 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-	LayoutDashboard,
-	Smartphone,
-	Activity,
-	Settings,
-	LogOut,
-} from "lucide-react";
 import { useSidebar } from "@/lib/sidebar-context";
+import { cn } from "@/lib/utils";
 
 interface NavItem {
 	name: string;
@@ -63,9 +63,7 @@ export function Sidebar({ user, onSignOut }: SidebarProps) {
 						href="/"
 						className={cn(
 							"flex items-center",
-							isCollapsed
-								? "justify-center w-full"
-								: "space-x-2 flex-1 px-3",
+							isCollapsed ? "justify-center w-full" : "space-x-2 flex-1 px-3",
 						)}
 					>
 						<Image
@@ -76,9 +74,7 @@ export function Sidebar({ user, onSignOut }: SidebarProps) {
 							className="flex-shrink-0 rounded"
 						/>
 						{!isCollapsed && (
-							<span className="font-bold text-lg">
-								WhatsApp API
-							</span>
+							<span className="font-bold text-lg">WhatsApp API</span>
 						)}
 					</Link>
 				</div>
@@ -108,13 +104,8 @@ export function Sidebar({ user, onSignOut }: SidebarProps) {
 						if (isCollapsed) {
 							return (
 								<Tooltip key={item.href}>
-									<TooltipTrigger asChild>
-										{linkContent}
-									</TooltipTrigger>
-									<TooltipContent
-										side="right"
-										sideOffset={10}
-									>
+									<TooltipTrigger asChild>{linkContent}</TooltipTrigger>
+									<TooltipContent side="right" sideOffset={10}>
 										{item.name}
 									</TooltipContent>
 								</Tooltip>
@@ -122,9 +113,7 @@ export function Sidebar({ user, onSignOut }: SidebarProps) {
 						}
 
 						return (
-							<React.Fragment key={item.href}>
-								{linkContent}
-							</React.Fragment>
+							<React.Fragment key={item.href}>{linkContent}</React.Fragment>
 						);
 					})}
 				</nav>
@@ -158,10 +147,7 @@ export function Sidebar({ user, onSignOut }: SidebarProps) {
 											<LogOut className="h-4 w-4" />
 										</Button>
 									</TooltipTrigger>
-									<TooltipContent
-										side="right"
-										sideOffset={10}
-									>
+									<TooltipContent side="right" sideOffset={10}>
 										Sign out
 									</TooltipContent>
 								</Tooltip>

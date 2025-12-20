@@ -1,7 +1,7 @@
 "use client";
 
-import * as React from "react";
 import { BarChart3, TrendingUp, Zap } from "lucide-react";
+import type * as React from "react";
 import {
 	Card,
 	CardContent,
@@ -80,9 +80,8 @@ function PlaceholderMetrics() {
 				</p>
 				<p className="text-xs text-muted-foreground">
 					Integracao com Prometheus e visualizacao de graficos em
-					desenvolvimento. Esta area exibira metricas de latencia,
-					throughput, taxa de erro e outros indicadores de
-					performance.
+					desenvolvimento. Esta area exibira metricas de latencia, throughput,
+					taxa de erro e outros indicadores de performance.
 				</p>
 			</div>
 
@@ -94,15 +93,11 @@ function PlaceholderMetrics() {
 				<ul className="space-y-1 text-xs text-muted-foreground">
 					<li className="flex items-start gap-2">
 						<span className="text-primary mt-0.5">•</span>
-						<span>
-							Graficos de latencia (p50, p95, p99) em tempo real
-						</span>
+						<span>Graficos de latencia (p50, p95, p99) em tempo real</span>
 					</li>
 					<li className="flex items-start gap-2">
 						<span className="text-primary mt-0.5">•</span>
-						<span>
-							Metricas de fila de mensagens (backlog, throughput)
-						</span>
+						<span>Metricas de fila de mensagens (backlog, throughput)</span>
 					</li>
 					<li className="flex items-start gap-2">
 						<span className="text-primary mt-0.5">•</span>
@@ -135,7 +130,8 @@ function MetricPlaceholder({
 }) {
 	const colorClasses = {
 		blue: "bg-blue-50/50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400",
-		green: "bg-green-50/50 dark:bg-green-950/20 border-green-200 dark:border-green-800 text-green-600 dark:text-green-400",
+		green:
+			"bg-green-50/50 dark:bg-green-950/20 border-green-200 dark:border-green-800 text-green-600 dark:text-green-400",
 		red: "bg-red-50/50 dark:bg-red-950/20 border-red-200 dark:border-red-800 text-red-600 dark:text-red-400",
 	};
 
@@ -183,19 +179,15 @@ export function MetricCard({
 				<div className="flex items-baseline gap-1">
 					<span className="text-2xl font-bold">{value}</span>
 					{unit && (
-						<span className="text-sm text-muted-foreground">
-							{unit}
-						</span>
+						<span className="text-sm text-muted-foreground">{unit}</span>
 					)}
 				</div>
 				{trend && (
 					<div
 						className={cn(
 							"text-xs mt-1",
-							trend === "up" &&
-								"text-green-600 dark:text-green-400",
-							trend === "down" &&
-								"text-red-600 dark:text-red-400",
+							trend === "up" && "text-green-600 dark:text-green-400",
+							trend === "down" && "text-red-600 dark:text-red-400",
 							trend === "neutral" && "text-muted-foreground",
 						)}
 					>

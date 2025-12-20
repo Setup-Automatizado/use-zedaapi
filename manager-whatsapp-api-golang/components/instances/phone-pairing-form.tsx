@@ -1,11 +1,10 @@
 "use client";
 
+import { CheckCircle2, Copy, Loader2, Phone } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Phone, Loader2, Copy, CheckCircle2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
 	Card,
 	CardContent,
@@ -20,6 +19,7 @@ import {
 	FieldError,
 	FieldLabel,
 } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 
 export interface PhonePairingFormProps {
 	instanceId: string;
@@ -47,8 +47,7 @@ export function PhonePairingForm({
 
 		// Format as (XX) XXXXX-XXXX
 		if (digits.length <= 2) return digits;
-		if (digits.length <= 7)
-			return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+		if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
 		return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
 	};
 
@@ -142,9 +141,7 @@ export function PhonePairingForm({
 								onClick={handleGenerateCode}
 								disabled={isLoading || phone.length < 14}
 							>
-								{isLoading && (
-									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-								)}
+								{isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
 								{isLoading ? "Generating..." : "Generate Code"}
 							</Button>
 						</div>
@@ -188,15 +185,9 @@ export function PhonePairingForm({
 							<p className="font-medium">How to use the code:</p>
 							<ol className="list-inside list-decimal space-y-1">
 								<li>Open WhatsApp on your phone</li>
-								<li>
-									Tap Menu (3 dots) and select &quot;Linked
-									devices&quot;
-								</li>
+								<li>Tap Menu (3 dots) and select &quot;Linked devices&quot;</li>
 								<li>Tap &quot;Link a device&quot;</li>
-								<li>
-									Select &quot;Link with phone number
-									instead&quot;
-								</li>
+								<li>Select &quot;Link with phone number instead&quot;</li>
 								<li>Enter the code shown above</li>
 							</ol>
 						</div>
@@ -206,9 +197,8 @@ export function PhonePairingForm({
 				{!pairingCode && (
 					<div className="rounded-md bg-blue-50 p-4 dark:bg-blue-950/20">
 						<p className="text-sm text-blue-900 dark:text-blue-100">
-							<strong>Tip:</strong> This option is ideal if you
-							cannot scan the QR Code or prefer a faster
-							connection.
+							<strong>Tip:</strong> This option is ideal if you cannot scan the
+							QR Code or prefer a faster connection.
 						</p>
 					</div>
 				)}

@@ -89,10 +89,8 @@ export function WebhookField({
 					disabled={disabled}
 					className={cn(
 						"pr-10",
-						isValid &&
-							"border-green-500 focus-visible:ring-green-500",
-						isInvalid &&
-							"border-destructive focus-visible:ring-destructive",
+						isValid && "border-green-500 focus-visible:ring-green-500",
+						isInvalid && "border-destructive focus-visible:ring-destructive",
 					)}
 					aria-invalid={isInvalid ? "true" : undefined}
 					aria-describedby={
@@ -107,16 +105,10 @@ export function WebhookField({
 				{/* Validation indicator */}
 				<div className="absolute right-3 top-1/2 -translate-y-1/2">
 					{isValid && (
-						<Check
-							className="h-4 w-4 text-green-500"
-							aria-label="Valid URL"
-						/>
+						<Check className="h-4 w-4 text-green-500" aria-label="Valid URL" />
 					)}
 					{isInvalid && (
-						<X
-							className="h-4 w-4 text-destructive"
-							aria-label="Invalid URL"
-						/>
+						<X className="h-4 w-4 text-destructive" aria-label="Invalid URL" />
 					)}
 				</div>
 			</div>

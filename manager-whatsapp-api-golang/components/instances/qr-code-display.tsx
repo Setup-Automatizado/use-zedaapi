@@ -1,16 +1,15 @@
 "use client";
 
-import { useState } from "react";
 import {
-	RefreshCw,
+	AlertCircle,
 	CheckCircle2,
 	Loader2,
-	AlertCircle,
 	QrCode,
+	RefreshCw,
 } from "lucide-react";
 import Image from "next/image";
-
-import { useQRCode } from "@/hooks";
+import { useState } from "react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -19,7 +18,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useQRCode } from "@/hooks";
 import { cn } from "@/lib/utils";
 
 export interface QRCodeDisplayProps {
@@ -51,12 +50,7 @@ export function QRCodeDisplay({
 	// Show success message when connected
 	if (isConnected) {
 		return (
-			<Card
-				className={cn(
-					"border-green-200 dark:border-green-800",
-					className,
-				)}
-			>
+			<Card className={cn("border-green-200 dark:border-green-800", className)}>
 				<CardContent className="flex flex-col items-center justify-center py-12">
 					<div className="mb-4 rounded-full bg-green-100 p-3 dark:bg-green-950">
 						<CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
@@ -88,8 +82,7 @@ export function QRCodeDisplay({
 							<QrCode className="h-12 w-12 text-muted-foreground" />
 						</div>
 						<p className="mb-4 text-center text-sm text-muted-foreground">
-							Click the button below to generate a connection QR
-							Code
+							Click the button below to generate a connection QR Code
 						</p>
 						<Button onClick={handleGenerateQRCode}>
 							<QrCode className="mr-2 h-4 w-4" />
@@ -98,20 +91,13 @@ export function QRCodeDisplay({
 					</div>
 
 					<div className="rounded-md bg-muted p-4">
-						<h4 className="mb-2 text-sm font-medium">
-							How to connect:
-						</h4>
+						<h4 className="mb-2 text-sm font-medium">How to connect:</h4>
 						<ol className="list-inside list-decimal space-y-1 text-sm text-muted-foreground">
 							<li>Click &quot;Generate QR Code&quot;</li>
 							<li>Open WhatsApp on your phone</li>
-							<li>
-								Tap Menu (3 dots) and select &quot;Linked
-								devices&quot;
-							</li>
+							<li>Tap Menu (3 dots) and select &quot;Linked devices&quot;</li>
 							<li>Tap &quot;Link a device&quot;</li>
-							<li>
-								Point your phone at this screen to scan the code
-							</li>
+							<li>Point your phone at this screen to scan the code</li>
 						</ol>
 					</div>
 				</CardContent>
@@ -125,9 +111,7 @@ export function QRCodeDisplay({
 			<Card className={className}>
 				<CardContent className="flex flex-col items-center justify-center py-12">
 					<Loader2 className="mb-4 h-12 w-12 animate-spin text-muted-foreground" />
-					<p className="text-sm text-muted-foreground">
-						Generating QR Code...
-					</p>
+					<p className="text-sm text-muted-foreground">Generating QR Code...</p>
 				</CardContent>
 			</Card>
 		);
@@ -192,9 +176,7 @@ export function QRCodeDisplay({
 								</>
 							) : (
 								<>
-									<span>
-										QR Code auto-refreshes every 30 seconds
-									</span>
+									<span>QR Code auto-refreshes every 30 seconds</span>
 								</>
 							)}
 						</div>
@@ -207,10 +189,7 @@ export function QRCodeDisplay({
 								disabled={isRefreshing}
 							>
 								<RefreshCw
-									className={cn(
-										"mr-2 h-4 w-4",
-										isRefreshing && "animate-spin",
-									)}
+									className={cn("mr-2 h-4 w-4", isRefreshing && "animate-spin")}
 								/>
 								Refresh Now
 							</Button>
@@ -233,19 +212,12 @@ export function QRCodeDisplay({
 				)}
 
 				<div className="rounded-md bg-muted p-4">
-					<h4 className="mb-2 text-sm font-medium">
-						How to connect:
-					</h4>
+					<h4 className="mb-2 text-sm font-medium">How to connect:</h4>
 					<ol className="list-inside list-decimal space-y-1 text-sm text-muted-foreground">
 						<li>Open WhatsApp on your phone</li>
-						<li>
-							Tap Menu (3 dots) and select &quot;Linked
-							devices&quot;
-						</li>
+						<li>Tap Menu (3 dots) and select &quot;Linked devices&quot;</li>
 						<li>Tap &quot;Link a device&quot;</li>
-						<li>
-							Point your phone at this screen to scan the code
-						</li>
+						<li>Point your phone at this screen to scan the code</li>
 					</ol>
 				</div>
 			</CardContent>

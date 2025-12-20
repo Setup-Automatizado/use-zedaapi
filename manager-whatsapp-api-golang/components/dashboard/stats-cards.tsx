@@ -1,12 +1,12 @@
-import * as React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-	Smartphone,
 	CheckCircle,
-	XCircle,
 	Clock,
 	type LucideIcon,
+	Smartphone,
+	XCircle,
 } from "lucide-react";
+import * as React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 export interface StatsCardsProps {
@@ -76,9 +76,7 @@ export function StatsCards({
 									stat.iconBg,
 								)}
 							>
-								<stat.icon
-									className={cn("h-5 w-5", stat.iconColor)}
-								/>
+								<stat.icon className={cn("h-5 w-5", stat.iconColor)} />
 							</div>
 						</div>
 					</CardHeader>

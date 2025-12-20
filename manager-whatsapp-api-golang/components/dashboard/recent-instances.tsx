@@ -5,21 +5,21 @@
  * connection status, phone numbers, and metadata in a clean row layout.
  */
 
-import * as React from "react";
+import { ArrowRight, Inbox } from "lucide-react";
 import Link from "next/link";
+import * as React from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
 	Card,
+	CardAction,
 	CardContent,
 	CardHeader,
 	CardTitle,
-	CardAction,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { ArrowRight, Inbox } from "lucide-react";
-import { type Instance, type DeviceInfo } from "@/types";
 import { INSTANCE_STATUS, type InstanceStatus } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import type { DeviceInfo, Instance } from "@/types";
 
 export interface DeviceMap {
 	[instanceId: string]: DeviceInfo | null;
@@ -153,10 +153,7 @@ export function RecentInstances({
 					<Button variant="ghost" size="sm" asChild>
 						<Link href="/instances">
 							View all
-							<ArrowRight
-								className="h-4 w-4"
-								data-icon="inline-end"
-							/>
+							<ArrowRight className="h-4 w-4" data-icon="inline-end" />
 						</Link>
 					</Button>
 				</CardAction>
@@ -181,21 +178,18 @@ export function RecentInstances({
 					<div className="divide-y divide-border/40">
 						{recentInstances.map((instance) => {
 							const status = getInstanceStatus(instance);
-							const isConnected =
-								status === INSTANCE_STATUS.CONNECTED;
+							const isConnected = status === INSTANCE_STATUS.CONNECTED;
 							const deviceInfo = deviceMap[instance.instanceId];
 
 							// Get phone from device info or storeJid
 							const phone =
-								deviceInfo?.phone ||
-								instance.storeJid?.split("@")[0];
+								deviceInfo?.phone || instance.storeJid?.split("@")[0];
 
 							// Get avatar URL from device info
 							const avatarUrl = deviceInfo?.imgUrl;
 
 							// Get display name (prefer device name if available)
-							const displayName =
-								deviceInfo?.name || instance.name;
+							const displayName = deviceInfo?.name || instance.name;
 
 							return (
 								<Link
@@ -216,9 +210,7 @@ export function RecentInstances({
 											<AvatarFallback
 												className={cn(
 													"text-xs font-medium text-white",
-													getAvatarColor(
-														instance.name,
-													),
+													getAvatarColor(instance.name),
 												)}
 											>
 												{getInitials(instance.name)}
@@ -248,9 +240,7 @@ export function RecentInstances({
 										<span
 											className={cn(
 												"h-1.5 w-1.5 rounded-full",
-												isConnected
-													? "bg-emerald-500"
-													: "bg-red-400",
+												isConnected ? "bg-emerald-500" : "bg-red-400",
 											)}
 										/>
 										<span
@@ -261,9 +251,7 @@ export function RecentInstances({
 													: "text-red-500 dark:text-red-400",
 											)}
 										>
-											{isConnected
-												? "Connected"
-												: "Disconnected"}
+											{isConnected ? "Connected" : "Disconnected"}
 										</span>
 									</div>
 

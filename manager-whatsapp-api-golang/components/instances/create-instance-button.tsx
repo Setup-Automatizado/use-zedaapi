@@ -1,7 +1,7 @@
-import * as React from "react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import Link from "next/link";
+import * as React from "react";
+import { Button } from "@/components/ui/button";
 
 export interface CreateInstanceButtonProps {
 	className?: string;

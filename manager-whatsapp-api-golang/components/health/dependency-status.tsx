@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import {
 	AlertCircle,
 	AlertTriangle,
@@ -11,12 +10,13 @@ import {
 	Lock,
 	MessageSquare,
 } from "lucide-react";
+import * as React from "react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type {
+	CircuitState,
 	ComponentStatus,
 	HealthStatus,
-	CircuitState,
 } from "@/types/health";
 
 export interface DependencyStatusProps {
@@ -102,46 +102,28 @@ export function DependencyStatus({ name, status }: DependencyStatusProps) {
 				{/* Component Info */}
 				<div className="flex-1 min-w-0">
 					<div className="flex items-center gap-2">
-						<p className="text-sm font-medium capitalize truncate">
-							{name}
-						</p>
+						<p className="text-sm font-medium capitalize truncate">{name}</p>
 						<Badge variant={config.variant} className="shrink-0">
-							<StatusIcon
-								data-icon="inline-start"
-								className="size-3"
-							/>
+							<StatusIcon data-icon="inline-start" className="size-3" />
 							{config.label}
 						</Badge>
 					</div>
 
 					<div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
 						<span className="flex items-center gap-1">
-							Latency:{" "}
-							<span className="font-mono">
-								{status.duration_ms}ms
-							</span>
+							Latency: <span className="font-mono">{status.duration_ms}ms</span>
 						</span>
 
 						{status.circuit_state &&
 							circuitStateConfig[status.circuit_state] && (
 								<>
-									<span className="text-muted-foreground/50">
-										•
-									</span>
+									<span className="text-muted-foreground/50">•</span>
 									<span className="flex items-center gap-1">
 										Circuit:{" "}
 										<span
-											className={
-												circuitStateConfig[
-													status.circuit_state
-												].color
-											}
+											className={circuitStateConfig[status.circuit_state].color}
 										>
-											{
-												circuitStateConfig[
-													status.circuit_state
-												].label
-											}
+											{circuitStateConfig[status.circuit_state].label}
 										</span>
 									</span>
 								</>
@@ -189,18 +171,16 @@ export function DependencyStatus({ name, status }: DependencyStatusProps) {
 						<div className="bg-muted/50 rounded-lg p-3">
 							<p className="text-xs font-medium mb-2">Metadata</p>
 							<dl className="space-y-1 text-xs">
-								{Object.entries(status.metadata).map(
-									([key, value]) => (
-										<div key={key} className="flex gap-2">
-											<dt className="text-muted-foreground font-medium capitalize">
-												{key}:
-											</dt>
-											<dd className="font-mono text-foreground">
-												{JSON.stringify(value)}
-											</dd>
-										</div>
-									),
-								)}
+								{Object.entries(status.metadata).map(([key, value]) => (
+									<div key={key} className="flex gap-2">
+										<dt className="text-muted-foreground font-medium capitalize">
+											{key}:
+										</dt>
+										<dd className="font-mono text-foreground">
+											{JSON.stringify(value)}
+										</dd>
+									</div>
+								))}
 							</dl>
 						</div>
 					</div>

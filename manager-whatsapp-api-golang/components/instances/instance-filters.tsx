@@ -1,8 +1,9 @@
 "use client";
 
+import { Search, X } from "lucide-react";
 import * as React from "react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
 	Select,
 	SelectContent,
@@ -10,7 +11,6 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { Search, X } from "lucide-react";
 
 export interface InstanceFiltersProps {
 	status?: string;
@@ -83,11 +83,7 @@ export function InstanceFilters({
 				</Select>
 
 				{hasActiveFilters && (
-					<Button
-						variant="ghost"
-						size="sm"
-						onClick={handleClearFilters}
-					>
+					<Button variant="ghost" size="sm" onClick={handleClearFilters}>
 						<X className="h-4 w-4" />
 						Clear filters
 					</Button>

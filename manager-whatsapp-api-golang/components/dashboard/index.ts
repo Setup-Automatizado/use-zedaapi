@@ -6,11 +6,11 @@
  * and health monitoring for the WhatsApp Instance Manager.
  */
 
-export { StatsCards, type StatsCardsProps } from "./stats-cards";
+export { HealthSummary, type HealthSummaryProps } from "./health-summary";
+export { QuickActions } from "./quick-actions";
 export {
+	type DeviceMap,
 	RecentInstances,
 	type RecentInstancesProps,
-	type DeviceMap,
 } from "./recent-instances";
-export { QuickActions } from "./quick-actions";
-export { HealthSummary, type HealthSummaryProps } from "./health-summary";
+export { StatsCards, type StatsCardsProps } from "./stats-cards";

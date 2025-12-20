@@ -1,7 +1,7 @@
-import * as React from "react";
+import { List, Plus } from "lucide-react";
 import Link from "next/link";
+import type * as React from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, List } from "lucide-react";
 
 interface QuickAction {
 	label: string;
@@ -29,17 +29,9 @@ export function QuickActions() {
 	return (
 		<div className="flex items-center gap-2">
 			{actions.map((action) => (
-				<Button
-					key={action.href}
-					variant={action.variant}
-					size="sm"
-					asChild
-				>
+				<Button key={action.href} variant={action.variant} size="sm" asChild>
 					<Link href={action.href}>
-						<action.icon
-							className="h-4 w-4"
-							data-icon="inline-start"
-						/>
+						<action.icon className="h-4 w-4" data-icon="inline-start" />
 						{action.label}
 					</Link>
 				</Button>

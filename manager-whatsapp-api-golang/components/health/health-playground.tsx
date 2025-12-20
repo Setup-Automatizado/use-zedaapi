@@ -1,20 +1,17 @@
 "use client";
 
 import * as React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import {
-	HealthStatusCard,
-	ReadinessCard,
-	DependencyStatus,
 	AutoRefreshIndicator,
 	AutoRefreshIndicatorCompact,
+	DependencyStatus,
+	HealthStatusCard,
 	MetricsDisplay,
+	ReadinessCard,
 } from "@/components/health";
-import type {
-	HealthResponse,
-	ReadinessResponse,
-} from "@/types/health";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { HealthResponse, ReadinessResponse } from "@/types/health";
 
 /**
  * Health Components Playground
@@ -56,41 +53,31 @@ export function HealthPlayground() {
 				<CardContent>
 					<div className="flex flex-wrap gap-2">
 						<Button
-							variant={
-								scenario === "healthy" ? "default" : "outline"
-							}
+							variant={scenario === "healthy" ? "default" : "outline"}
 							onClick={() => setScenario("healthy")}
 						>
 							Healthy
 						</Button>
 						<Button
-							variant={
-								scenario === "degraded" ? "default" : "outline"
-							}
+							variant={scenario === "degraded" ? "default" : "outline"}
 							onClick={() => setScenario("degraded")}
 						>
 							Degraded
 						</Button>
 						<Button
-							variant={
-								scenario === "unhealthy" ? "default" : "outline"
-							}
+							variant={scenario === "unhealthy" ? "default" : "outline"}
 							onClick={() => setScenario("unhealthy")}
 						>
 							Unhealthy
 						</Button>
 						<Button
-							variant={
-								scenario === "loading" ? "default" : "outline"
-							}
+							variant={scenario === "loading" ? "default" : "outline"}
 							onClick={() => setScenario("loading")}
 						>
 							Loading
 						</Button>
 						<Button
-							variant={
-								scenario === "error" ? "default" : "outline"
-							}
+							variant={scenario === "error" ? "default" : "outline"}
 							onClick={() => setScenario("error")}
 						>
 							Error
@@ -101,14 +88,10 @@ export function HealthPlayground() {
 
 			{/* Auto Refresh Indicators */}
 			<div className="space-y-4">
-				<h2 className="text-xl font-semibold">
-					Auto Refresh Indicator
-				</h2>
+				<h2 className="text-xl font-semibold">Auto Refresh Indicator</h2>
 
 				<div>
-					<p className="text-sm text-muted-foreground mb-2">
-						Versao Completa
-					</p>
+					<p className="text-sm text-muted-foreground mb-2">Versao Completa</p>
 					<AutoRefreshIndicator
 						interval={30000}
 						lastRefresh={lastRefresh}
@@ -118,9 +101,7 @@ export function HealthPlayground() {
 				</div>
 
 				<div>
-					<p className="text-sm text-muted-foreground mb-2">
-						Versao Compacta
-					</p>
+					<p className="text-sm text-muted-foreground mb-2">Versao Compacta</p>
 					<AutoRefreshIndicatorCompact
 						interval={30000}
 						lastRefresh={lastRefresh}
@@ -133,9 +114,7 @@ export function HealthPlayground() {
 			{/* Main Cards */}
 			<div className="grid gap-6 md:grid-cols-2">
 				<div className="space-y-2">
-					<h2 className="text-xl font-semibold">
-						Health Status Card
-					</h2>
+					<h2 className="text-xl font-semibold">Health Status Card</h2>
 					<HealthStatusCard
 						health={mockData.health}
 						isLoading={scenario === "loading"}
@@ -157,15 +136,11 @@ export function HealthPlayground() {
 
 			{/* Individual Dependency Status */}
 			<div className="space-y-4">
-				<h2 className="text-xl font-semibold">
-					Individual Dependency Status
-				</h2>
+				<h2 className="text-xl font-semibold">Individual Dependency Status</h2>
 
 				<Card>
 					<CardHeader>
-						<CardTitle className="text-base">
-							Todos os Estados
-						</CardTitle>
+						<CardTitle className="text-base">Todos os Estados</CardTitle>
 					</CardHeader>
 					<CardContent className="space-y-0">
 						<DependencyStatus
@@ -211,9 +186,7 @@ export function HealthPlayground() {
 
 			{/* Metrics Display */}
 			<div className="space-y-2">
-				<h2 className="text-xl font-semibold">
-					Metrics Display (Placeholder)
-				</h2>
+				<h2 className="text-xl font-semibold">Metrics Display (Placeholder)</h2>
 				<MetricsDisplay />
 			</div>
 		</div>
@@ -318,12 +291,8 @@ function getMockData(scenario: string) {
 			return {
 				health: undefined,
 				readiness: undefined,
-				healthError: new Error(
-					"Failed to fetch health status: Network error",
-				),
-				readinessError: new Error(
-					"Failed to fetch readiness status: Timeout",
-				),
+				healthError: new Error("Failed to fetch health status: Network error"),
+				readinessError: new Error("Failed to fetch readiness status: Timeout"),
 			};
 
 		default:

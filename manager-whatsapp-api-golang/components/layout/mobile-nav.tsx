@@ -1,24 +1,24 @@
 "use client";
 
-import * as React from "react";
+import {
+	Activity,
+	LayoutDashboard,
+	LogOut,
+	Settings,
+	Smartphone,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
+import type * as React from "react";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import {
 	Sheet,
 	SheetContent,
 	SheetHeader,
 	SheetTitle,
 } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import {
-	LayoutDashboard,
-	Smartphone,
-	Activity,
-	Settings,
-	LogOut,
-} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface NavItem {
 	name: string;

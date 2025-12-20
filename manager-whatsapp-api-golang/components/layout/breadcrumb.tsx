@@ -1,8 +1,8 @@
 "use client";
 
-import * as React from "react";
-import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+import * as React from "react";
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -40,8 +40,7 @@ export function DynamicBreadcrumb() {
 			currentPath += `/${path}`;
 			const isLast = index === paths.length - 1;
 			const label =
-				routeNameMap[path] ||
-				path.charAt(0).toUpperCase() + path.slice(1);
+				routeNameMap[path] || path.charAt(0).toUpperCase() + path.slice(1);
 
 			breadcrumbs.push({
 				label,

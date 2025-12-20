@@ -1,12 +1,12 @@
 "use client";
 
+import { Menu, PanelLeft, PanelLeftClose } from "lucide-react";
 import * as React from "react";
-import { Menu, PanelLeftClose, PanelLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useSidebar } from "@/lib/sidebar-context";
+import { DynamicBreadcrumb } from "./breadcrumb";
 import { ThemeToggle } from "./theme-toggle";
 import { UserNav } from "./user-nav";
-import { DynamicBreadcrumb } from "./breadcrumb";
-import { useSidebar } from "@/lib/sidebar-context";
 
 interface HeaderProps {
 	user?: {

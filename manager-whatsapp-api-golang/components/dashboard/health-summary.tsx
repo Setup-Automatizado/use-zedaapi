@@ -1,8 +1,8 @@
-import * as React from "react";
+import { Activity, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import type * as React from "react";
 import { Badge } from "@/components/ui/badge";
-import { Activity, CheckCircle, AlertTriangle, XCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export interface HealthSummaryProps {
@@ -63,12 +63,7 @@ export function HealthSummary({ isHealthy, isDegraded }: HealthSummaryProps) {
 						config.textColor,
 					)}
 				>
-					<span
-						className={cn(
-							"h-1.5 w-1.5 rounded-full",
-							config.dotColor,
-						)}
-					/>
+					<span className={cn("h-1.5 w-1.5 rounded-full", config.dotColor)} />
 					{config.label}
 				</Badge>
 			</Link>

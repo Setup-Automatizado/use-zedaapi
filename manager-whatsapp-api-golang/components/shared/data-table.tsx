@@ -1,6 +1,8 @@
 "use client";
 
-import * as React from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import type * as React from "react";
+import { Button } from "@/components/ui/button";
 import {
 	Table,
 	TableBody,
@@ -9,11 +11,9 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { TableRowSkeleton } from "./loading-skeleton";
-import { EmptyState } from "./empty-state";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { EmptyState } from "./empty-state";
+import { TableRowSkeleton } from "./loading-skeleton";
 
 export interface Column<T> {
 	key: string;
@@ -86,10 +86,7 @@ export function DataTable<T extends Record<string, any>>({
 					<TableHeader>
 						<TableRow>
 							{columns.map((column) => (
-								<TableHead
-									key={column.key}
-									className={column.className}
-								>
+								<TableHead key={column.key} className={column.className}>
 									{column.label}
 								</TableHead>
 							))}
@@ -98,23 +95,15 @@ export function DataTable<T extends Record<string, any>>({
 					<TableBody>
 						{isLoading
 							? Array.from({ length: 5 }).map((_, index) => (
-									<TableRowSkeleton
-										key={index}
-										columns={columns.length}
-									/>
+									<TableRowSkeleton key={index} columns={columns.length} />
 								))
 							: data.map((item, index) => (
 									<TableRow key={getRowKey(item, index)}>
 										{columns.map((column) => (
-											<TableCell
-												key={column.key}
-												className={column.className}
-											>
+											<TableCell key={column.key} className={column.className}>
 												{column.render
 													? column.render(item)
-													: item[
-															column.key
-														]?.toString() || "-"}
+													: item[column.key]?.toString() || "-"}
 											</TableCell>
 										))}
 									</TableRow>
@@ -126,16 +115,13 @@ export function DataTable<T extends Record<string, any>>({
 			{showPagination && !isLoading && (
 				<div className="flex items-center justify-between">
 					<div className="text-sm text-muted-foreground">
-						Showing {startItem} to {endItem} of {pagination.total}{" "}
-						results
+						Showing {startItem} to {endItem} of {pagination.total} results
 					</div>
 					<div className="flex items-center gap-2">
 						<Button
 							variant="outline"
 							size="sm"
-							onClick={() =>
-								pagination.onPageChange(pagination.page - 1)
-							}
+							onClick={() => pagination.onPageChange(pagination.page - 1)}
 							disabled={!canGoPrevious}
 						>
 							<ChevronLeft className="h-4 w-4" />
@@ -149,9 +135,7 @@ export function DataTable<T extends Record<string, any>>({
 						<Button
 							variant="outline"
 							size="sm"
-							onClick={() =>
-								pagination.onPageChange(pagination.page + 1)
-							}
+							onClick={() => pagination.onPageChange(pagination.page + 1)}
 							disabled={!canGoNext}
 						>
 							Next

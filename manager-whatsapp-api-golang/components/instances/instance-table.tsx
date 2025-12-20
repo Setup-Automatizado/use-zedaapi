@@ -1,15 +1,15 @@
 "use client";
 
-import * as React from "react";
-import { Instance, DeviceInfo } from "@/types";
-import { DataTable, type Column } from "@/components/shared/data-table";
-import { InstanceStatusBadge } from "./instance-status-badge";
-import { InstanceActionsDropdown } from "./instance-actions-dropdown";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
 import { enUS } from "date-fns/locale";
+import * as React from "react";
+import { type Column, DataTable } from "@/components/shared/data-table";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import type { DeviceInfo, Instance } from "@/types";
+import { InstanceActionsDropdown } from "./instance-actions-dropdown";
+import { InstanceStatusBadge } from "./instance-status-badge";
 
 export interface DeviceMap {
 	[instanceId: string]: DeviceInfo | null;
@@ -149,9 +149,7 @@ export function InstanceTable({
 							)}
 						</div>
 						<div className="flex flex-col min-w-0">
-							<span className="font-medium truncate">
-								{instance.name}
-							</span>
+							<span className="font-medium truncate">{instance.name}</span>
 							<span className="text-xs text-muted-foreground truncate">
 								{instance.sessionName}
 							</span>
@@ -176,8 +174,7 @@ export function InstanceTable({
 			render: (instance) => {
 				// Get phone from device info (preferred) or storeJid as fallback
 				const deviceInfo = deviceMap[instance.instanceId];
-				const phone =
-					deviceInfo?.phone || instance.storeJid?.split("@")[0];
+				const phone = deviceInfo?.phone || instance.storeJid?.split("@")[0];
 
 				if (phone) {
 					return (
@@ -199,8 +196,7 @@ export function InstanceTable({
 
 				const dueDate = instance.due ? new Date(instance.due) : null;
 				const isExpiringSoon =
-					dueDate &&
-					dueDate.getTime() - Date.now() < 7 * 24 * 60 * 60 * 1000;
+					dueDate && dueDate.getTime() - Date.now() < 7 * 24 * 60 * 60 * 1000;
 
 				return (
 					<Badge variant={isExpiringSoon ? "outline" : "secondary"}>
@@ -241,12 +237,8 @@ export function InstanceTable({
 			render: (instance) => (
 				<InstanceActionsDropdown
 					instance={instance}
-					onRestart={
-						onRestart ? () => onRestart(instance) : undefined
-					}
-					onDisconnect={
-						onDisconnect ? () => onDisconnect(instance) : undefined
-					}
+					onRestart={onRestart ? () => onRestart(instance) : undefined}
+					onDisconnect={onDisconnect ? () => onDisconnect(instance) : undefined}
 					onDelete={onDelete ? () => onDelete(instance) : undefined}
 				/>
 			),

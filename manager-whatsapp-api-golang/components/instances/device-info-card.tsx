@@ -1,6 +1,6 @@
 "use client";
 
-import { Smartphone, Building2, Info } from "lucide-react";
+import { Building2, Info, Smartphone } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -262,46 +262,32 @@ export function DeviceInfoCard({ deviceInfo, className }: DeviceInfoCardProps) {
 
 					<div className="grid gap-3 text-sm">
 						<div className="flex justify-between">
-							<span className="text-muted-foreground">
-								Model:
-							</span>
+							<span className="text-muted-foreground">Model:</span>
 							<span className="font-medium">
 								{device.device_model || "N/A"}
 							</span>
 						</div>
 
 						<div className="flex justify-between">
-							<span className="text-muted-foreground">
-								Platform:
-							</span>
+							<span className="text-muted-foreground">Platform:</span>
 							<span className="font-medium capitalize">
 								{device.platform || "N/A"}
 							</span>
 						</div>
 
 						<div className="flex justify-between">
-							<span className="text-muted-foreground">
-								WhatsApp Version:
-							</span>
-							<span className="font-medium">
-								{device.wa_version || "N/A"}
-							</span>
+							<span className="text-muted-foreground">WhatsApp Version:</span>
+							<span className="font-medium">{device.wa_version || "N/A"}</span>
 						</div>
 
 						<div className="flex justify-between">
-							<span className="text-muted-foreground">
-								OS Version:
-							</span>
-							<span className="font-medium">
-								{device.os_version || "N/A"}
-							</span>
+							<span className="text-muted-foreground">OS Version:</span>
+							<span className="font-medium">{device.os_version || "N/A"}</span>
 						</div>
 
 						{device.device_manufacturer && (
 							<div className="flex justify-between">
-								<span className="text-muted-foreground">
-									Manufacturer:
-								</span>
+								<span className="text-muted-foreground">Manufacturer:</span>
 								<span className="font-medium">
 									{device.device_manufacturer}
 								</span>
@@ -310,12 +296,8 @@ export function DeviceInfoCard({ deviceInfo, className }: DeviceInfoCardProps) {
 
 						{device.sessionName && (
 							<div className="flex justify-between">
-								<span className="text-muted-foreground">
-									Session:
-								</span>
-								<span className="font-mono text-xs">
-									{device.sessionName}
-								</span>
+								<span className="text-muted-foreground">Session:</span>
+								<span className="font-mono text-xs">{device.sessionName}</span>
 							</div>
 						)}
 					</div>
@@ -332,22 +314,14 @@ export function DeviceInfoCard({ deviceInfo, className }: DeviceInfoCardProps) {
 							<div className="grid gap-2 text-sm">
 								{device.mcc && (
 									<div className="flex justify-between">
-										<span className="text-muted-foreground">
-											MCC:
-										</span>
-										<span className="font-medium">
-											{device.mcc}
-										</span>
+										<span className="text-muted-foreground">MCC:</span>
+										<span className="font-medium">{device.mcc}</span>
 									</div>
 								)}
 								{device.mnc && (
 									<div className="flex justify-between">
-										<span className="text-muted-foreground">
-											MNC:
-										</span>
-										<span className="font-medium">
-											{device.mnc}
-										</span>
+										<span className="text-muted-foreground">MNC:</span>
+										<span className="font-medium">{device.mnc}</span>
 									</div>
 								)}
 							</div>

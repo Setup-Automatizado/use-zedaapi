@@ -1,5 +1,6 @@
 "use client";
 
+import { Loader2 } from "lucide-react";
 import * as React from "react";
 import {
 	AlertDialog,
@@ -11,7 +12,6 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Loader2 } from "lucide-react";
 
 export interface ConfirmDialogProps {
 	open: boolean;
@@ -57,9 +57,7 @@ export function ConfirmDialog({
 			<AlertDialogContent>
 				<AlertDialogHeader>
 					<AlertDialogTitle>{title}</AlertDialogTitle>
-					<AlertDialogDescription>
-						{description}
-					</AlertDialogDescription>
+					<AlertDialogDescription>{description}</AlertDialogDescription>
 				</AlertDialogHeader>
 				<AlertDialogFooter>
 					<AlertDialogCancel disabled={loading}>
@@ -73,9 +71,7 @@ export function ConfirmDialog({
 						}}
 						disabled={loading}
 					>
-						{loading && (
-							<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-						)}
+						{loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
 						{confirmLabel}
 					</AlertDialogAction>
 				</AlertDialogFooter>

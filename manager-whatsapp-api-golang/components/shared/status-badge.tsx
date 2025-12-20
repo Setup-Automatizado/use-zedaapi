@@ -1,11 +1,11 @@
 import * as React from "react";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 import {
 	INSTANCE_STATUS,
-	STATUS_COLORS,
 	type InstanceStatus,
+	STATUS_COLORS,
 } from "@/lib/constants";
+import { cn } from "@/lib/utils";
 
 export interface StatusBadgeProps {
 	status: InstanceStatus;

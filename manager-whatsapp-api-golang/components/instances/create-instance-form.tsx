@@ -1,25 +1,20 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-
-import { CreateInstanceSchema, type CreateInstanceInput } from "@/schemas";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { createInstance } from "@/actions";
-import { isError } from "@/types";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
 	Accordion,
 	AccordionContent,
 	AccordionItem,
 	AccordionTrigger,
 } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
 	Field,
 	FieldContent,
@@ -29,6 +24,10 @@ import {
 	FieldLabel,
 	FieldTitle,
 } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { type CreateInstanceInput, CreateInstanceSchema } from "@/schemas";
+import { isError } from "@/types";
 
 export function CreateInstanceForm() {
 	const router = useRouter();
@@ -71,8 +70,7 @@ export function CreateInstanceForm() {
 
 			// Add all form fields
 			formData.append("name", data.name);
-			if (data.sessionName)
-				formData.append("sessionName", data.sessionName);
+			if (data.sessionName) formData.append("sessionName", data.sessionName);
 			formData.append("isDevice", String(data.isDevice));
 			formData.append("businessDevice", String(data.businessDevice));
 			formData.append("notifySentByMe", String(data.notifySentByMe));
@@ -83,15 +81,9 @@ export function CreateInstanceForm() {
 
 			// Add webhook URLs
 			if (data.deliveryCallbackUrl)
-				formData.append(
-					"deliveryCallbackUrl",
-					data.deliveryCallbackUrl,
-				);
+				formData.append("deliveryCallbackUrl", data.deliveryCallbackUrl);
 			if (data.receivedCallbackUrl)
-				formData.append(
-					"receivedCallbackUrl",
-					data.receivedCallbackUrl,
-				);
+				formData.append("receivedCallbackUrl", data.receivedCallbackUrl);
 			if (data.receivedAndDeliveryCallbackUrl)
 				formData.append(
 					"receivedAndDeliveryCallbackUrl",
@@ -103,10 +95,7 @@ export function CreateInstanceForm() {
 					data.messageStatusCallbackUrl,
 				);
 			if (data.connectedCallbackUrl)
-				formData.append(
-					"connectedCallbackUrl",
-					data.connectedCallbackUrl,
-				);
+				formData.append("connectedCallbackUrl", data.connectedCallbackUrl);
 			if (data.disconnectedCallbackUrl)
 				formData.append(
 					"disconnectedCallbackUrl",
@@ -154,8 +143,7 @@ export function CreateInstanceForm() {
 			<FieldGroup>
 				<Field>
 					<FieldLabel htmlFor="name">
-						Instance Name{" "}
-						<span className="text-destructive">*</span>
+						Instance Name <span className="text-destructive">*</span>
 					</FieldLabel>
 					<FieldContent>
 						<Input
@@ -167,9 +155,7 @@ export function CreateInstanceForm() {
 						<FieldDescription>
 							Identifier name for this instance
 						</FieldDescription>
-						{errors.name && (
-							<FieldError>{errors.name.message}</FieldError>
-						)}
+						{errors.name && <FieldError>{errors.name.message}</FieldError>}
 					</FieldContent>
 				</Field>
 
@@ -186,32 +172,23 @@ export function CreateInstanceForm() {
 							Technical session identifier (optional)
 						</FieldDescription>
 						{errors.sessionName && (
-							<FieldError>
-								{errors.sessionName.message}
-							</FieldError>
+							<FieldError>{errors.sessionName.message}</FieldError>
 						)}
 					</FieldContent>
 				</Field>
 
 				<div className="grid gap-4 sm:grid-cols-2">
 					<Field orientation="horizontal">
-						<FieldLabel
-							htmlFor="isDevice"
-							className="flex items-center gap-2"
-						>
+						<FieldLabel htmlFor="isDevice" className="flex items-center gap-2">
 							<Checkbox
 								id="isDevice"
 								checked={watch("isDevice")}
-								onCheckedChange={(checked) =>
-									setValue("isDevice", !!checked)
-								}
+								onCheckedChange={(checked) => setValue("isDevice", !!checked)}
 								disabled={isSubmitting}
 							/>
 							<FieldTitle>Use as Device</FieldTitle>
 						</FieldLabel>
-						<FieldDescription>
-							Connect as linked device
-						</FieldDescription>
+						<FieldDescription>Connect as linked device</FieldDescription>
 					</Field>
 
 					<Field orientation="horizontal">
@@ -229,9 +206,7 @@ export function CreateInstanceForm() {
 							/>
 							<FieldTitle>WhatsApp Business</FieldTitle>
 						</FieldLabel>
-						<FieldDescription>
-							Configure as business account
-						</FieldDescription>
+						<FieldDescription>Configure as business account</FieldDescription>
 					</Field>
 				</div>
 			</FieldGroup>
@@ -240,9 +215,7 @@ export function CreateInstanceForm() {
 			<Accordion type="multiple" className="w-full">
 				{/* Webhooks Section */}
 				<AccordionItem value="webhooks">
-					<AccordionTrigger>
-						Webhook Configuration (Optional)
-					</AccordionTrigger>
+					<AccordionTrigger>Webhook Configuration (Optional)</AccordionTrigger>
 					<AccordionContent>
 						<FieldGroup className="pt-4">
 							<Field>
@@ -280,9 +253,7 @@ export function CreateInstanceForm() {
 										{...register("receivedCallbackUrl")}
 										disabled={isSubmitting}
 									/>
-									<FieldDescription>
-										Receive incoming messages
-									</FieldDescription>
+									<FieldDescription>Receive incoming messages</FieldDescription>
 									{errors.receivedCallbackUrl && (
 										<FieldError>
 											{errors.receivedCallbackUrl.message}
@@ -300,22 +271,15 @@ export function CreateInstanceForm() {
 										id="receivedAndDeliveryCallbackUrl"
 										type="url"
 										placeholder="https://your-server.com/webhook/messages"
-										{...register(
-											"receivedAndDeliveryCallbackUrl",
-										)}
+										{...register("receivedAndDeliveryCallbackUrl")}
 										disabled={isSubmitting}
 									/>
 									<FieldDescription>
-										Receive both incoming messages and
-										deliveries
+										Receive both incoming messages and deliveries
 									</FieldDescription>
 									{errors.receivedAndDeliveryCallbackUrl && (
 										<FieldError>
-											{
-												errors
-													.receivedAndDeliveryCallbackUrl
-													.message
-											}
+											{errors.receivedAndDeliveryCallbackUrl.message}
 										</FieldError>
 									)}
 								</FieldContent>
@@ -330,21 +294,15 @@ export function CreateInstanceForm() {
 										id="messageStatusCallbackUrl"
 										type="url"
 										placeholder="https://your-server.com/webhook/status"
-										{...register(
-											"messageStatusCallbackUrl",
-										)}
+										{...register("messageStatusCallbackUrl")}
 										disabled={isSubmitting}
 									/>
 									<FieldDescription>
-										Receive status updates (sent, delivered,
-										read)
+										Receive status updates (sent, delivered, read)
 									</FieldDescription>
 									{errors.messageStatusCallbackUrl && (
 										<FieldError>
-											{
-												errors.messageStatusCallbackUrl
-													.message
-											}
+											{errors.messageStatusCallbackUrl.message}
 										</FieldError>
 									)}
 								</FieldContent>
@@ -367,10 +325,7 @@ export function CreateInstanceForm() {
 									</FieldDescription>
 									{errors.connectedCallbackUrl && (
 										<FieldError>
-											{
-												errors.connectedCallbackUrl
-													.message
-											}
+											{errors.connectedCallbackUrl.message}
 										</FieldError>
 									)}
 								</FieldContent>
@@ -393,10 +348,7 @@ export function CreateInstanceForm() {
 									</FieldDescription>
 									{errors.disconnectedCallbackUrl && (
 										<FieldError>
-											{
-												errors.disconnectedCallbackUrl
-													.message
-											}
+											{errors.disconnectedCallbackUrl.message}
 										</FieldError>
 									)}
 								</FieldContent>
@@ -415,15 +367,11 @@ export function CreateInstanceForm() {
 										disabled={isSubmitting}
 									/>
 									<FieldDescription>
-										Receive presence updates (typing,
-										online, etc.)
+										Receive presence updates (typing, online, etc.)
 									</FieldDescription>
 									{errors.presenceChatCallbackUrl && (
 										<FieldError>
-											{
-												errors.presenceChatCallbackUrl
-													.message
-											}
+											{errors.presenceChatCallbackUrl.message}
 										</FieldError>
 									)}
 								</FieldContent>
@@ -434,9 +382,7 @@ export function CreateInstanceForm() {
 
 				{/* Settings Section */}
 				<AccordionItem value="settings">
-					<AccordionTrigger>
-						Advanced Settings (Optional)
-					</AccordionTrigger>
+					<AccordionTrigger>Advanced Settings (Optional)</AccordionTrigger>
 					<AccordionContent>
 						<FieldGroup className="pt-4">
 							<Field orientation="horizontal">
@@ -448,20 +394,14 @@ export function CreateInstanceForm() {
 										id="notifySentByMe"
 										checked={watch("notifySentByMe")}
 										onCheckedChange={(checked) =>
-											setValue(
-												"notifySentByMe",
-												!!checked,
-											)
+											setValue("notifySentByMe", !!checked)
 										}
 										disabled={isSubmitting}
 									/>
-									<FieldTitle>
-										Notify Messages Sent by Me
-									</FieldTitle>
+									<FieldTitle>Notify Messages Sent by Me</FieldTitle>
 								</FieldLabel>
 								<FieldDescription>
-									Receive webhooks for messages sent by this
-									instance
+									Receive webhooks for messages sent by this instance
 								</FieldDescription>
 							</Field>
 
@@ -474,16 +414,11 @@ export function CreateInstanceForm() {
 										id="callRejectAuto"
 										checked={watch("callRejectAuto")}
 										onCheckedChange={(checked) =>
-											setValue(
-												"callRejectAuto",
-												!!checked,
-											)
+											setValue("callRejectAuto", !!checked)
 										}
 										disabled={isSubmitting}
 									/>
-									<FieldTitle>
-										Reject Calls Automatically
-									</FieldTitle>
+									<FieldTitle>Reject Calls Automatically</FieldTitle>
 								</FieldLabel>
 								<FieldDescription>
 									Automatically reject all incoming calls
@@ -504,15 +439,12 @@ export function CreateInstanceForm() {
 											disabled={isSubmitting}
 										/>
 										<FieldDescription>
-											Custom message sent when rejecting
-											calls (max. 500 characters)
+											Custom message sent when rejecting calls (max. 500
+											characters)
 										</FieldDescription>
 										{errors.callRejectMessage && (
 											<FieldError>
-												{
-													errors.callRejectMessage
-														.message
-												}
+												{errors.callRejectMessage.message}
 											</FieldError>
 										)}
 									</FieldContent>
@@ -528,20 +460,14 @@ export function CreateInstanceForm() {
 										id="autoReadMessage"
 										checked={watch("autoReadMessage")}
 										onCheckedChange={(checked) =>
-											setValue(
-												"autoReadMessage",
-												!!checked,
-											)
+											setValue("autoReadMessage", !!checked)
 										}
 										disabled={isSubmitting}
 									/>
-									<FieldTitle>
-										Mark Messages as Read Automatically
-									</FieldTitle>
+									<FieldTitle>Mark Messages as Read Automatically</FieldTitle>
 								</FieldLabel>
 								<FieldDescription>
-									Automatically mark all received messages as
-									read
+									Automatically mark all received messages as read
 								</FieldDescription>
 							</Field>
 						</FieldGroup>
@@ -560,9 +486,7 @@ export function CreateInstanceForm() {
 					Cancel
 				</Button>
 				<Button type="submit" disabled={isSubmitting}>
-					{isSubmitting && (
-						<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-					)}
+					{isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
 					{isSubmitting ? "Creating..." : "Create Instance"}
 				</Button>
 			</div>

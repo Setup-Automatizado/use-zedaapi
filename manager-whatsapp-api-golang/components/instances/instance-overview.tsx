@@ -1,16 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { AlertCircle, Loader2, Power, RefreshCw, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { toast } from "sonner";
-import { RefreshCw, Power, Trash2, Loader2, AlertCircle } from "lucide-react";
 
-import { restartInstance, disconnectInstance, deleteInstance } from "@/actions";
-import { isError } from "@/types";
-import { InstanceStatusBadge } from "./instance-status-badge";
-import { QRCodeDisplay } from "./qr-code-display";
-import { PhonePairingForm } from "./phone-pairing-form";
-import { DeviceInfoCard } from "./device-info-card";
+import { deleteInstance, disconnectInstance, restartInstance } from "@/actions";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -19,11 +16,14 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
-import { ConfirmDialog } from "@/components/shared/confirm-dialog";
-import type { Instance, DeviceInfo } from "@/types";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { DeviceInfo, Instance } from "@/types";
+import { isError } from "@/types";
+import { DeviceInfoCard } from "./device-info-card";
+import { InstanceStatusBadge } from "./instance-status-badge";
+import { PhonePairingForm } from "./phone-pairing-form";
+import { QRCodeDisplay } from "./qr-code-display";
 
 export interface InstanceOverviewProps {
 	instance: Instance;
@@ -65,10 +65,7 @@ export function InstanceOverview({
 	const handleDisconnect = async () => {
 		setIsDisconnecting(true);
 		try {
-			const result = await disconnectInstance(
-				instance.id,
-				instance.token,
-			);
+			const result = await disconnectInstance(instance.id, instance.token);
 
 			if (isError(result)) {
 				toast.error(result.error || "Error disconnecting instance");
@@ -113,8 +110,7 @@ export function InstanceOverview({
 						<div className="space-y-1">
 							<CardTitle>{instance.name}</CardTitle>
 							<CardDescription>
-								{instance.sessionName &&
-									`Session: ${instance.sessionName}`}
+								{instance.sessionName && `Session: ${instance.sessionName}`}
 							</CardDescription>
 						</div>
 						<InstanceStatusBadge
@@ -127,36 +123,22 @@ export function InstanceOverview({
 					{/* Instance Details */}
 					<div className="grid gap-3 text-sm">
 						<div className="flex justify-between">
-							<span className="text-muted-foreground">
-								Instance ID:
-							</span>
-							<span className="font-mono text-xs">
-								{instance.id}
-							</span>
+							<span className="text-muted-foreground">Instance ID:</span>
+							<span className="font-mono text-xs">{instance.id}</span>
 						</div>
 						<div className="flex justify-between">
-							<span className="text-muted-foreground">
-								Middleware Type:
-							</span>
-							<span className="capitalize">
-								{instance.middleware}
-							</span>
+							<span className="text-muted-foreground">Middleware Type:</span>
+							<span className="capitalize">{instance.middleware}</span>
 						</div>
 						{instance.created && (
 							<div className="flex justify-between">
-								<span className="text-muted-foreground">
-									Created Date:
-								</span>
+								<span className="text-muted-foreground">Created Date:</span>
 								<span>
 									{(() => {
-										const createdDate = new Date(
-											instance.created,
-										);
+										const createdDate = new Date(instance.created);
 										return isNaN(createdDate.getTime())
 											? "N/A"
-											: createdDate.toLocaleDateString(
-													"en-US",
-												);
+											: createdDate.toLocaleDateString("en-US");
 									})()}
 								</span>
 							</div>
@@ -178,9 +160,7 @@ export function InstanceOverview({
 										const dueDate = new Date(instance.due);
 										return isNaN(dueDate.getTime())
 											? "N/A"
-											: dueDate.toLocaleDateString(
-													"en-US",
-												);
+											: dueDate.toLocaleDateString("en-US");
 									})()}
 								</span>
 							</div>
@@ -191,8 +171,7 @@ export function InstanceOverview({
 						<Alert variant="destructive">
 							<AlertCircle className="h-4 w-4" />
 							<AlertDescription>
-								Subscription expired. Renew to continue using
-								the instance.
+								Subscription expired. Renew to continue using the instance.
 							</AlertDescription>
 						</Alert>
 					)}
@@ -203,9 +182,7 @@ export function InstanceOverview({
 					<div className="flex flex-wrap gap-2">
 						<Button
 							onClick={handleRestart}
-							disabled={
-								isRestarting || isDisconnecting || isDeleting
-							}
+							disabled={isRestarting || isDisconnecting || isDeleting}
 							variant="outline"
 							size="sm"
 						>
@@ -220,11 +197,7 @@ export function InstanceOverview({
 						{isConnected && (
 							<Button
 								onClick={handleDisconnect}
-								disabled={
-									isRestarting ||
-									isDisconnecting ||
-									isDeleting
-								}
+								disabled={isRestarting || isDisconnecting || isDeleting}
 								variant="outline"
 								size="sm"
 							>
@@ -239,9 +212,7 @@ export function InstanceOverview({
 
 						<Button
 							onClick={() => setShowDeleteDialog(true)}
-							disabled={
-								isRestarting || isDisconnecting || isDeleting
-							}
+							disabled={isRestarting || isDisconnecting || isDeleting}
 							variant="destructive"
 							size="sm"
 						>
@@ -263,9 +234,7 @@ export function InstanceOverview({
 				<Tabs defaultValue="qr-code" className="w-full">
 					<TabsList className="grid w-full grid-cols-2">
 						<TabsTrigger value="qr-code">QR Code</TabsTrigger>
-						<TabsTrigger value="phone-pairing">
-							Phone Pairing
-						</TabsTrigger>
+						<TabsTrigger value="phone-pairing">Phone Pairing</TabsTrigger>
 					</TabsList>
 					<TabsContent value="qr-code" className="mt-4">
 						<QRCodeDisplay

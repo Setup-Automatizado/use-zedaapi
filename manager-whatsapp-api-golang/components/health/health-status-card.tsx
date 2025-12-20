@@ -1,7 +1,9 @@
 "use client";
 
-import * as React from "react";
 import { AlertCircle, CheckCircle2, RefreshCw } from "lucide-react";
+import * as React from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -9,8 +11,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import type { HealthResponse } from "@/types/health";
@@ -45,10 +45,7 @@ export function HealthStatusCard({
 							onClick={onRetry}
 							aria-label="Retry"
 						>
-							<RefreshCw
-								data-icon="inline-end"
-								className="size-4"
-							/>
+							<RefreshCw data-icon="inline-end" className="size-4" />
 						</Button>
 					)}
 				</div>
@@ -114,14 +111,11 @@ function StatusDisplay({
 					</Badge>
 				</div>
 				{health?.service && (
-					<p className="text-sm text-muted-foreground">
-						{health.service}
-					</p>
+					<p className="text-sm text-muted-foreground">{health.service}</p>
 				)}
 				{health?.timestamp && (
 					<p className="text-xs text-muted-foreground">
-						Timestamp:{" "}
-						{new Date(health.timestamp).toLocaleString("en-US")}
+						Timestamp: {new Date(health.timestamp).toLocaleString("en-US")}
 					</p>
 				)}
 			</div>

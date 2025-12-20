@@ -1,10 +1,10 @@
 "use client";
 
+import { CheckCircle2, Copy, Download } from "lucide-react";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Copy, Download, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface BackupCodesDisplayProps {
@@ -125,9 +125,9 @@ export function BackupCodesDisplay({
 						htmlFor="confirm-backup"
 						className="text-sm leading-relaxed cursor-pointer"
 					>
-						I have saved these backup codes in a secure location. I
-						understand that each code can only be used once and I
-						will need them if I lose access to my authenticator app.
+						I have saved these backup codes in a secure location. I understand
+						that each code can only be used once and I will need them if I lose
+						access to my authenticator app.
 					</Label>
 				</div>
 			)}

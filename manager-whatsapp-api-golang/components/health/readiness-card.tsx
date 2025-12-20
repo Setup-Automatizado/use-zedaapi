@@ -1,7 +1,8 @@
 "use client";
 
-import * as React from "react";
 import { Activity, AlertCircle, CheckCircle2 } from "lucide-react";
+import * as React from "react";
+import { Badge } from "@/components/ui/badge";
 import {
 	Card,
 	CardContent,
@@ -9,12 +10,11 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { DependencyStatus } from "./dependency-status";
 import { cn } from "@/lib/utils";
 import type { ReadinessResponse } from "@/types/health";
 import { getCriticalStatus } from "@/types/health";
+import { DependencyStatus } from "./dependency-status";
 
 export interface ReadinessCardProps {
 	readiness?: ReadinessResponse;
@@ -43,18 +43,12 @@ export function ReadinessCard({
 						<Badge variant={isReady ? "default" : "destructive"}>
 							{isReady ? (
 								<>
-									<CheckCircle2
-										data-icon="inline-start"
-										className="size-3"
-									/>
+									<CheckCircle2 data-icon="inline-start" className="size-3" />
 									Ready
 								</>
 							) : (
 								<>
-									<AlertCircle
-										data-icon="inline-start"
-										className="size-3"
-									/>
+									<AlertCircle data-icon="inline-start" className="size-3" />
 									Not Ready
 								</>
 							)}
@@ -64,13 +58,10 @@ export function ReadinessCard({
 				{readiness?.observed_at && (
 					<CardDescription>
 						Observed at:{" "}
-						{new Date(readiness.observed_at).toLocaleString(
-							"en-US",
-							{
-								dateStyle: "short",
-								timeStyle: "medium",
-							},
-						)}
+						{new Date(readiness.observed_at).toLocaleString("en-US", {
+							dateStyle: "short",
+							timeStyle: "medium",
+						})}
 					</CardDescription>
 				)}
 			</CardHeader>
@@ -135,12 +126,10 @@ function DependenciesList({
 						)}
 					/>
 					<p className="text-sm font-medium">
-						{criticalStatus === "healthy" &&
-							"All dependencies healthy"}
+						{criticalStatus === "healthy" && "All dependencies healthy"}
 						{criticalStatus === "degraded" &&
 							"Some dependencies with degraded performance"}
-						{criticalStatus === "unhealthy" &&
-							"Some dependencies unavailable"}
+						{criticalStatus === "unhealthy" && "Some dependencies unavailable"}
 					</p>
 				</div>
 			</div>
@@ -161,19 +150,14 @@ function DependenciesList({
 				/>
 				<StatCard
 					label="Healthy"
-					value={
-						checkEntries.filter(([, s]) => s.status === "healthy")
-							.length
-					}
+					value={checkEntries.filter(([, s]) => s.status === "healthy").length}
 					variant="success"
 				/>
 				<StatCard
 					label="Issues"
 					value={
 						checkEntries.filter(
-							([, s]) =>
-								s.status === "degraded" ||
-								s.status === "unhealthy",
+							([, s]) => s.status === "degraded" || s.status === "unhealthy",
 						).length
 					}
 					variant="error"
@@ -211,8 +195,7 @@ function StatCard({
 			<p
 				className={cn(
 					"text-2xl font-bold",
-					variant === "success" &&
-						"text-green-600 dark:text-green-400",
+					variant === "success" && "text-green-600 dark:text-green-400",
 					variant === "error" && "text-red-600 dark:text-red-400",
 				)}
 			>

@@ -1,15 +1,15 @@
 "use client";
 
-import * as React from "react";
-import Link from "next/link";
-import { Instance, DeviceInfo } from "@/types";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { InstanceStatusBadge } from "./instance-status-badge";
-import { InstanceActionsDropdown } from "./instance-actions-dropdown";
-import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
 import { enUS } from "date-fns/locale";
 import { Calendar, Phone } from "lucide-react";
+import Link from "next/link";
+import * as React from "react";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import type { DeviceInfo, Instance } from "@/types";
+import { InstanceActionsDropdown } from "./instance-actions-dropdown";
+import { InstanceStatusBadge } from "./instance-status-badge";
 
 function formatPhoneNumber(phone: string | undefined): string {
 	if (!phone) return "-";
@@ -129,9 +129,7 @@ export function InstanceCard({
 			</CardHeader>
 			<CardContent className="space-y-3">
 				<div className="flex items-center justify-between">
-					<span className="text-sm text-muted-foreground">
-						Status
-					</span>
+					<span className="text-sm text-muted-foreground">Status</span>
 					<InstanceStatusBadge
 						connected={instance.whatsappConnected}
 						smartphoneConnected={instance.phoneConnected}
@@ -151,13 +149,9 @@ export function InstanceCard({
 				)}
 
 				<div className="flex items-center justify-between">
-					<span className="text-sm text-muted-foreground">
-						Subscription
-					</span>
+					<span className="text-sm text-muted-foreground">Subscription</span>
 					{hasActiveSubscription ? (
-						<Badge
-							variant={isExpiringSoon ? "outline" : "secondary"}
-						>
+						<Badge variant={isExpiringSoon ? "outline" : "secondary"}>
 							Active
 						</Badge>
 					) : (
@@ -170,9 +164,7 @@ export function InstanceCard({
 						<Calendar className="h-3 w-3" />
 						Created
 					</span>
-					<span className="text-xs text-muted-foreground">
-						{createdDate}
-					</span>
+					<span className="text-xs text-muted-foreground">{createdDate}</span>
 				</div>
 			</CardContent>
 		</Card>
