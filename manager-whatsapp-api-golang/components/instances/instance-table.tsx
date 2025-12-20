@@ -2,7 +2,7 @@
 
 import { formatDistanceToNow } from "date-fns";
 import { enUS } from "date-fns/locale";
-import * as React from "react";
+import { useRouter } from "next/navigation";
 import { type Column, DataTable } from "@/components/shared/data-table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -114,6 +114,12 @@ export function InstanceTable({
 	onDisconnect,
 	onDelete,
 }: InstanceTableProps) {
+	const router = useRouter();
+
+	const handleRowClick = (instance: Instance) => {
+		router.push(`/instances/${instance.id}`);
+	};
+
 	const columns: Column<Instance>[] = [
 		{
 			key: "name",
@@ -126,8 +132,8 @@ export function InstanceTable({
 
 				return (
 					<div className="flex items-center gap-3">
-						<div className="relative flex-shrink-0">
-							<Avatar className="h-8 w-8">
+						<div className="relative shrink-0">
+							<Avatar className="h-9 w-9 ring-2 ring-background">
 								{avatarUrl ? (
 									<AvatarImage
 										src={avatarUrl}
@@ -137,16 +143,19 @@ export function InstanceTable({
 								) : null}
 								<AvatarFallback
 									className={cn(
-										"text-xs font-medium text-white",
+										"text-xs font-semibold text-white",
 										getAvatarColor(instance.name),
 									)}
 								>
 									{getInitials(instance.name)}
 								</AvatarFallback>
 							</Avatar>
-							{isConnected && (
-								<span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-background bg-emerald-500" />
-							)}
+							<span
+								className={cn(
+									"absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full ring-2 ring-background",
+									isConnected ? "bg-emerald-500" : "bg-zinc-400",
+								)}
+							/>
 						</div>
 						<div className="flex flex-col min-w-0">
 							<span className="font-medium truncate">{instance.name}</span>
@@ -172,7 +181,6 @@ export function InstanceTable({
 			key: "phone",
 			label: "Phone",
 			render: (instance) => {
-				// Get phone from device info (preferred) or storeJid as fallback
 				const deviceInfo = deviceMap[instance.instanceId];
 				const phone = deviceInfo?.phone || instance.storeJid?.split("@")[0];
 
@@ -214,7 +222,7 @@ export function InstanceTable({
 						return <span className="text-muted-foreground">-</span>;
 					}
 					const date = new Date(instance.created);
-					if (isNaN(date.getTime())) {
+					if (Number.isNaN(date.getTime())) {
 						return <span className="text-muted-foreground">-</span>;
 					}
 					return (
@@ -234,6 +242,7 @@ export function InstanceTable({
 			key: "actions",
 			label: "",
 			className: "w-[50px]",
+			preventRowClick: true,
 			render: (instance) => (
 				<InstanceActionsDropdown
 					instance={instance}
@@ -254,6 +263,7 @@ export function InstanceTable({
 			emptyDescription="Create your first instance to get started"
 			pagination={pagination}
 			getRowKey={(instance) => instance.id}
+			onRowClick={handleRowClick}
 		/>
 	);
 }

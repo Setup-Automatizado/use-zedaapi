@@ -20,6 +20,8 @@ export interface Column<T> {
 	label: string;
 	render?: (item: T) => React.ReactNode;
 	className?: string;
+	/** If true, clicking this cell won't trigger row click */
+	preventRowClick?: boolean;
 }
 
 export interface DataTableProps<T> {
@@ -30,6 +32,8 @@ export interface DataTableProps<T> {
 	emptyDescription?: string;
 	emptyIcon?: React.ReactNode;
 	getRowKey?: (item: T, index: number) => string;
+	/** Called when a row is clicked */
+	onRowClick?: (item: T) => void;
 	pagination?: {
 		page: number;
 		pageSize: number;
@@ -48,6 +52,7 @@ export function DataTable<T extends Record<string, any>>({
 	emptyDescription,
 	emptyIcon,
 	getRowKey = (item, index) => item.id?.toString() || index.toString(),
+	onRowClick,
 	pagination,
 	className,
 }: DataTableProps<T>) {
@@ -98,9 +103,24 @@ export function DataTable<T extends Record<string, any>>({
 									<TableRowSkeleton key={index} columns={columns.length} />
 								))
 							: data.map((item, index) => (
-									<TableRow key={getRowKey(item, index)}>
+									<TableRow
+										key={getRowKey(item, index)}
+										className={cn(
+											onRowClick &&
+												"cursor-pointer transition-colors hover:bg-muted/50",
+										)}
+										onClick={() => onRowClick?.(item)}
+									>
 										{columns.map((column) => (
-											<TableCell key={column.key} className={column.className}>
+											<TableCell
+												key={column.key}
+												className={column.className}
+												onClick={
+													column.preventRowClick
+														? (e) => e.stopPropagation()
+														: undefined
+												}
+											>
 												{column.render
 													? column.render(item)
 													: item[column.key]?.toString() || "-"}
