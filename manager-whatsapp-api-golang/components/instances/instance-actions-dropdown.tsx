@@ -16,6 +16,7 @@ import {
 	Eye,
 	MoreVertical,
 	Webhook,
+	Settings,
 	RotateCcw,
 	LogOut,
 	Trash,
@@ -76,9 +77,15 @@ export function InstanceActionsDropdown({
 						</Link>
 					</DropdownMenuItem>
 					<DropdownMenuItem asChild>
-						<Link href={`/instances/${instance.id}/webhooks`}>
+						<Link href={`/instances/${instance.id}?tab=webhooks`}>
 							<Webhook className="h-4 w-4" />
-							Configure Webhooks
+							Webhooks
+						</Link>
+					</DropdownMenuItem>
+					<DropdownMenuItem asChild>
+						<Link href={`/instances/${instance.id}?tab=settings`}>
+							<Settings className="h-4 w-4" />
+							Settings
 						</Link>
 					</DropdownMenuItem>
 					{onRestart && (

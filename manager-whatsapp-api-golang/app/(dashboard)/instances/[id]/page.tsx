@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Settings, Webhook, ArrowLeft } from "lucide-react";
 
 import { useInstance, useInstanceStatus } from "@/hooks";
@@ -31,6 +31,13 @@ interface InstancePageProps {
 export default function InstancePage({ params }: InstancePageProps) {
 	const resolvedParams = use(params);
 	const router = useRouter();
+	const searchParams = useSearchParams();
+	const tabParam = searchParams.get("tab");
+	const defaultTab = ["overview", "webhooks", "settings"].includes(
+		tabParam || "",
+	)
+		? tabParam!
+		: "overview";
 	const { instance, isLoading, error } = useInstance(resolvedParams.id);
 	const { isConnected, smartphoneConnected } = useInstanceStatus(
 		resolvedParams.id,
@@ -43,7 +50,9 @@ export default function InstancePage({ params }: InstancePageProps) {
 	const [deviceInfo, setDeviceInfo] = useState<DeviceInfo | undefined>();
 
 	// Determine if we should fetch device info
-	const shouldFetchDeviceInfo = Boolean(instance && isConnected && smartphoneConnected);
+	const shouldFetchDeviceInfo = Boolean(
+		instance && isConnected && smartphoneConnected,
+	);
 
 	// Fetch device info when connected
 	useEffect(() => {
@@ -136,7 +145,7 @@ export default function InstancePage({ params }: InstancePageProps) {
 				/>
 			</div>
 
-			<Tabs defaultValue="overview" className="w-full">
+			<Tabs defaultValue={defaultTab} className="w-full">
 				<TabsList>
 					<TabsTrigger value="overview">Overview</TabsTrigger>
 					<TabsTrigger value="webhooks">
