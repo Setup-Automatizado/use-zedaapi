@@ -15,8 +15,8 @@
 
 "use client";
 
-import { usePolling } from "./use-polling";
 import type { HealthResponse, ReadinessResponse } from "@/types";
+import { usePolling } from "./use-polling";
 
 /**
  * Health check hook options
@@ -83,11 +83,7 @@ export interface UseHealthResult {
  * @returns Health and readiness status with component details
  */
 export function useHealth(options: UseHealthOptions = {}): UseHealthResult {
-	const {
-		enabled = true,
-		interval = 30000,
-		includeReadiness = true,
-	} = options;
+	const { enabled = true, interval = 30000, includeReadiness = true } = options;
 
 	// Fetch basic health status
 	const {
@@ -142,13 +138,10 @@ export function useHealth(options: UseHealthOptions = {}): UseHealthResult {
 		isDegraded,
 		isLoading: healthLoading || (includeReadiness && readinessLoading),
 		error: healthError || readinessError,
-		isValidating:
-			healthValidating || (includeReadiness && readinessValidating),
+		isValidating: healthValidating || (includeReadiness && readinessValidating),
 		refresh: async () => {
 			await Promise.all(
-				[mutateHealth(), includeReadiness && mutateReadiness()].filter(
-					Boolean,
-				),
+				[mutateHealth(), includeReadiness && mutateReadiness()].filter(Boolean),
 			);
 		},
 	};

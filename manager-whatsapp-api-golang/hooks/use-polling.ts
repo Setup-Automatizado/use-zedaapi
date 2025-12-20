@@ -13,79 +13,81 @@
  * ```
  */
 
-'use client';
+"use client";
 
-import useSWR, { type SWRConfiguration } from 'swr';
+import useSWR, { type SWRConfiguration } from "swr";
 
 /**
  * Polling hook configuration options
  */
 export interface UsePollingOptions<T> extends SWRConfiguration<T> {
-  /**
-   * Polling interval in milliseconds
-   * @default 30000 (30 seconds)
-   */
-  interval?: number;
+	/**
+	 * Polling interval in milliseconds
+	 * @default 30000 (30 seconds)
+	 */
+	interval?: number;
 
-  /**
-   * Enable or disable polling
-   * @default true
-   */
-  enabled?: boolean;
+	/**
+	 * Enable or disable polling
+	 * @default true
+	 */
+	enabled?: boolean;
 
-  /**
-   * Custom fetcher function
-   * If not provided, uses default fetch with error handling
-   */
-  fetcher?: (url: string) => Promise<T>;
+	/**
+	 * Custom fetcher function
+	 * If not provided, uses default fetch with error handling
+	 */
+	fetcher?: (url: string) => Promise<T>;
 
-  /**
-   * Dedupe interval in milliseconds
-   * Prevents duplicate requests within this time window
-   * @default 2000
-   */
-  dedupingInterval?: number;
+	/**
+	 * Dedupe interval in milliseconds
+	 * Prevents duplicate requests within this time window
+	 * @default 2000
+	 */
+	dedupingInterval?: number;
 }
 
 /**
  * Polling hook result
  */
 export interface UsePollingResult<T> {
-  /** Response data */
-  data: T | undefined;
+	/** Response data */
+	data: T | undefined;
 
-  /** Error object if request failed */
-  error: Error | undefined;
+	/** Error object if request failed */
+	error: Error | undefined;
 
-  /** Loading state (true on initial load) */
-  isLoading: boolean;
+	/** Loading state (true on initial load) */
+	isLoading: boolean;
 
-  /** Validating state (true on revalidation) */
-  isValidating: boolean;
+	/** Validating state (true on revalidation) */
+	isValidating: boolean;
 
-  /** Manual revalidation function */
-  mutate: () => Promise<T | undefined>;
+	/** Manual revalidation function */
+	mutate: () => Promise<T | undefined>;
 }
 
 /**
  * Default fetcher with error handling
  */
 async function defaultFetcher<T>(url: string): Promise<T> {
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    cache: 'no-store',
-  });
+	const response = await fetch(url, {
+		method: "GET",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		cache: "no-store",
+	});
 
-  if (!response.ok) {
-    const error = new Error(`HTTP ${response.status}: ${response.statusText}`) as Error & { status: number };
-    error.status = response.status;
-    throw error;
-  }
+	if (!response.ok) {
+		const error = new Error(
+			`HTTP ${response.status}: ${response.statusText}`,
+		) as Error & { status: number };
+		error.status = response.status;
+		throw error;
+	}
 
-  return response.json();
+	return response.json();
 }
 
 /**
@@ -104,50 +106,50 @@ async function defaultFetcher<T>(url: string): Promise<T> {
  * @returns Polling result with data, error, loading states, and mutate function
  */
 export function usePolling<T = unknown>(
-  key: string | null,
-  options: UsePollingOptions<T> = {}
+	key: string | null,
+	options: UsePollingOptions<T> = {},
 ): UsePollingResult<T> {
-  const {
-    interval = 30000,
-    enabled = true,
-    fetcher = defaultFetcher,
-    dedupingInterval = 2000,
-    ...swrOptions
-  } = options;
+	const {
+		interval = 30000,
+		enabled = true,
+		fetcher = defaultFetcher,
+		dedupingInterval = 2000,
+		...swrOptions
+	} = options;
 
-  const { data, error, isLoading, isValidating, mutate } = useSWR<T>(
-    enabled && key ? key : null,
-    fetcher,
-    {
-      // Polling configuration
-      refreshInterval: enabled ? interval : 0,
+	const { data, error, isLoading, isValidating, mutate } = useSWR<T>(
+		enabled && key ? key : null,
+		fetcher,
+		{
+			// Polling configuration
+			refreshInterval: enabled ? interval : 0,
 
-      // Deduplication
-      dedupingInterval,
+			// Deduplication
+			dedupingInterval,
 
-      // Revalidation behavior
-      revalidateOnFocus: true,
-      revalidateOnReconnect: true,
-      revalidateIfStale: true,
+			// Revalidation behavior
+			revalidateOnFocus: true,
+			revalidateOnReconnect: true,
+			revalidateIfStale: true,
 
-      // Error handling
-      shouldRetryOnError: true,
-      errorRetryCount: 3,
-      errorRetryInterval: 5000,
+			// Error handling
+			shouldRetryOnError: true,
+			errorRetryCount: 3,
+			errorRetryInterval: 5000,
 
-      // Performance
-      keepPreviousData: true,
+			// Performance
+			keepPreviousData: true,
 
-      // Merge with custom options
-      ...swrOptions,
-    }
-  );
+			// Merge with custom options
+			...swrOptions,
+		},
+	);
 
-  return {
-    data,
-    error,
-    isLoading,
-    isValidating,
-    mutate,
-  };
+	return {
+		data,
+		error,
+		isLoading,
+		isValidating,
+		mutate,
+	};
 }

@@ -19,8 +19,8 @@
 "use client";
 
 import useSWR from "swr";
-import { useInstances, type UseInstancesParams } from "./use-instances";
-import type { Instance, DeviceInfo } from "@/types";
+import type { DeviceInfo, Instance } from "@/types";
+import { type UseInstancesParams, useInstances } from "./use-instances";
 
 export interface DeviceMap {
 	[instanceId: string]: DeviceInfo | null;
@@ -113,8 +113,7 @@ function filterInstancesByStatus(
 	}
 
 	return instances.filter((instance) => {
-		const isConnected =
-			instance.whatsappConnected && instance.phoneConnected;
+		const isConnected = instance.whatsappConnected && instance.phoneConnected;
 
 		if (status === "connected") {
 			return isConnected;

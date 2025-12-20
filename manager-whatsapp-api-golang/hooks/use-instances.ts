@@ -92,8 +92,7 @@ function buildQueryString(params: UseInstancesParams): string {
 	const searchParams = new URLSearchParams();
 
 	if (params.page) searchParams.set("page", params.page.toString());
-	if (params.pageSize)
-		searchParams.set("pageSize", params.pageSize.toString());
+	if (params.pageSize) searchParams.set("pageSize", params.pageSize.toString());
 	if (params.query) searchParams.set("query", params.query);
 	if (params.status && params.status !== "all")
 		searchParams.set("status", params.status);

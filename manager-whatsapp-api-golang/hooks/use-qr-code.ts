@@ -13,9 +13,9 @@
 "use client";
 
 import { useEffect } from "react";
-import { usePolling } from "./use-polling";
-import { useInstanceStatus } from "./use-instance-status";
 import type { QRCodeResponse } from "@/types";
+import { useInstanceStatus } from "./use-instance-status";
+import { usePolling } from "./use-polling";
 
 /**
  * QR code hook options

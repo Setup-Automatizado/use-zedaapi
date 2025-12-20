@@ -11,52 +11,52 @@
  * ```
  */
 
-'use client';
+"use client";
 
-import { usePolling } from './use-polling';
-import type { InstanceStatus } from '@/types';
+import type { InstanceStatus } from "@/types";
+import { usePolling } from "./use-polling";
 
 /**
  * Instance status hook options
  */
 export interface UseInstanceStatusOptions {
-  /**
-   * Enable or disable polling
-   * @default true
-   */
-  enabled?: boolean;
+	/**
+	 * Enable or disable polling
+	 * @default true
+	 */
+	enabled?: boolean;
 
-  /**
-   * Polling interval in milliseconds
-   * @default 5000 (5 seconds)
-   */
-  interval?: number;
+	/**
+	 * Polling interval in milliseconds
+	 * @default 5000 (5 seconds)
+	 */
+	interval?: number;
 }
 
 /**
  * Instance status hook result
  */
 export interface UseInstanceStatusResult {
-  /** Complete status object */
-  status: InstanceStatus | undefined;
+	/** Complete status object */
+	status: InstanceStatus | undefined;
 
-  /** Overall connection status */
-  isConnected: boolean;
+	/** Overall connection status */
+	isConnected: boolean;
 
-  /** Physical device connection status */
-  smartphoneConnected: boolean;
+	/** Physical device connection status */
+	smartphoneConnected: boolean;
 
-  /** Error message from status or request error */
-  error: string | undefined;
+	/** Error message from status or request error */
+	error: string | undefined;
 
-  /** Loading state */
-  isLoading: boolean;
+	/** Loading state */
+	isLoading: boolean;
 
-  /** Revalidation state */
-  isValidating: boolean;
+	/** Revalidation state */
+	isValidating: boolean;
 
-  /** Manual refresh function */
-  refresh: () => Promise<void>;
+	/** Manual refresh function */
+	refresh: () => Promise<void>;
 }
 
 /**
@@ -74,31 +74,34 @@ export interface UseInstanceStatusResult {
  * @returns Instance status with connection information
  */
 export function useInstanceStatus(
-  instanceId: string | null | undefined,
-  options: UseInstanceStatusOptions = {}
+	instanceId: string | null | undefined,
+	options: UseInstanceStatusOptions = {},
 ): UseInstanceStatusResult {
-  const { enabled = true, interval = 5000 } = options;
+	const { enabled = true, interval = 5000 } = options;
 
-  const endpoint = instanceId ? `/api/instances/${instanceId}/status` : null;
+	const endpoint = instanceId ? `/api/instances/${instanceId}/status` : null;
 
-  const { data, error: requestError, isLoading, isValidating, mutate } = usePolling<InstanceStatus>(
-    endpoint,
-    {
-      interval,
-      enabled,
-      dedupingInterval: 1000,
-    }
-  );
+	const {
+		data,
+		error: requestError,
+		isLoading,
+		isValidating,
+		mutate,
+	} = usePolling<InstanceStatus>(endpoint, {
+		interval,
+		enabled,
+		dedupingInterval: 1000,
+	});
 
-  return {
-    status: data,
-    isConnected: data?.connected ?? false,
-    smartphoneConnected: data?.smartphoneConnected ?? false,
-    error: data?.error || requestError?.message,
-    isLoading,
-    isValidating,
-    refresh: async () => {
-      await mutate();
-    },
-  };
+	return {
+		status: data,
+		isConnected: data?.connected ?? false,
+		smartphoneConnected: data?.smartphoneConnected ?? false,
+		error: data?.error || requestError?.message,
+		isLoading,
+		isValidating,
+		refresh: async () => {
+			await mutate();
+		},
+	};
 }
