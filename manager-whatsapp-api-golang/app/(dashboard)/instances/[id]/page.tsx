@@ -33,11 +33,9 @@ export default function InstancePage({ params }: InstancePageProps) {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const tabParam = searchParams.get("tab");
-	const defaultTab = ["overview", "webhooks", "settings"].includes(
-		tabParam || "",
-	)
-		? tabParam!
-		: "overview";
+	const validTabs = ["overview", "webhooks", "settings"];
+	const defaultTab =
+		tabParam && validTabs.includes(tabParam) ? tabParam : "overview";
 	const { instance, isLoading, error } = useInstance(resolvedParams.id);
 	const { isConnected, smartphoneConnected } = useInstanceStatus(
 		resolvedParams.id,

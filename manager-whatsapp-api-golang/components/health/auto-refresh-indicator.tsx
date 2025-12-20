@@ -1,7 +1,9 @@
 "use client";
 
-import * as React from "react";
+import { useEffect, useState } from "react";
+
 import { RefreshCw } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 
 export interface AutoRefreshIndicatorProps {
@@ -19,9 +21,9 @@ export function AutoRefreshIndicator({
 	isRefreshing = false,
 	className,
 }: AutoRefreshIndicatorProps) {
-	const [timeRemaining, setTimeRemaining] = React.useState(interval);
+	const [timeRemaining, setTimeRemaining] = useState(interval);
 
-	React.useEffect(() => {
+	useEffect(() => {
 		const calculateRemaining = () => {
 			const now = Date.now();
 			const elapsed = now - lastRefresh.getTime();
@@ -40,6 +42,7 @@ export function AutoRefreshIndicator({
 
 	return (
 		<button
+			type="button"
 			onClick={onManualRefresh}
 			disabled={isRefreshing}
 			className={cn(
@@ -75,9 +78,9 @@ export function AutoRefreshIndicatorCompact({
 	isRefreshing = false,
 	className,
 }: AutoRefreshIndicatorProps) {
-	const [timeRemaining, setTimeRemaining] = React.useState(interval);
+	const [timeRemaining, setTimeRemaining] = useState(interval);
 
-	React.useEffect(() => {
+	useEffect(() => {
 		const calculateRemaining = () => {
 			const now = Date.now();
 			const elapsed = now - lastRefresh.getTime();
@@ -95,6 +98,7 @@ export function AutoRefreshIndicatorCompact({
 
 	return (
 		<button
+			type="button"
 			onClick={onManualRefresh}
 			disabled={isRefreshing}
 			title="Click to refresh"
