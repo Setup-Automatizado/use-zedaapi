@@ -17,8 +17,7 @@ enable_nat_gateway = false
 
 # IPs com acesso administrativo direto a RDS/Redis
 allowed_admin_ips = [
-  "177.192.10.4/32",
-  "102.216.82.164/32",
+  "186.205.11.185/32",
 ]
 
 # --------------------------------------------------
@@ -127,3 +126,38 @@ s3_endpoint               = ""
 api_base_url              = "http://homolog-whatsmeow-alb-731186848.us-east-1.elb.amazonaws.com"
 extra_environment         = {}
 secret_env_mapping        = {}
+
+# --------------------------------------------------
+# Manager Frontend Configuration
+# --------------------------------------------------
+enable_manager              = true
+manager_image               = "873839854709.dkr.ecr.us-east-1.amazonaws.com/manager-whatsapp-api:homolog"
+manager_app_url             = "http://homolog-whatsmeow-alb-731186848.us-east-1.elb.amazonaws.com"
+manager_host_header         = ""  # Path-based routing (Manager as default)
+manager_task_cpu            = 256
+manager_task_memory         = 512
+manager_desired_count       = 1
+manager_db_name             = "manager_db"
+
+# SMTP Configuration for Manager
+manager_smtp_host           = "smtp-relay.brevo.com"
+manager_smtp_port           = 587
+manager_smtp_user           = "6a53de001@smtp-brevo.com"
+manager_email_from_name     = "WhatsApp Manager"
+manager_email_from_address  = "noreply@setupautomatizado.com.br"
+manager_support_email       = "suporte@setupautomatizado.com.br"
+
+# S3/MinIO Configuration for Manager (external MinIO)
+manager_s3_endpoint   = "https://s3.setupautomatizado.com.br"
+manager_s3_bucket     = "funnelchat"
+manager_s3_public_url = "https://s3.setupautomatizado.com.br/insightzap"
+
+# OAuth Configuration for Manager
+manager_github_client_id = "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"
+manager_google_client_id = "57219513982-t59t8r298t0tngihig5fvc54i0huh0c0.apps.googleusercontent.com"
+
+# Manager Secrets (sensitive - override via environment or tfvars.local)
+manager_additional_secrets = {
+  better_auth_secret = "s2fVn34EJ3dEWt9cHHrltPHipfpCBsqE"
+  smtp_password      = "xsmtpsib-6f1c61ab72982976c2b0f00be2876a16f59dda8be94bd25070aeddd4dd205eba-1YJO7T03Q6dxFyVZ"
+}

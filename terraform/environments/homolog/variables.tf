@@ -399,3 +399,136 @@ variable "allowed_admin_ips" {
   type        = list(string)
   default     = []
 }
+
+# ==================================================
+# Manager Frontend Variables
+# ==================================================
+
+variable "enable_manager" {
+  description = "Enable Manager frontend service"
+  type        = bool
+  default     = false
+}
+
+variable "manager_image" {
+  description = "Docker image URI for Manager"
+  type        = string
+  default     = ""
+}
+
+variable "manager_app_url" {
+  description = "Public URL for Manager application"
+  type        = string
+  default     = ""
+}
+
+variable "manager_host_header" {
+  description = "Host header for Manager routing (empty for path-based routing)"
+  type        = string
+  default     = ""
+}
+
+variable "manager_task_cpu" {
+  description = "Manager task CPU"
+  type        = number
+  default     = 256
+}
+
+variable "manager_task_memory" {
+  description = "Manager task memory"
+  type        = number
+  default     = 512
+}
+
+variable "manager_desired_count" {
+  description = "Manager desired task count"
+  type        = number
+  default     = 1
+}
+
+variable "manager_db_name" {
+  description = "Manager database name"
+  type        = string
+  default     = "manager_db"
+}
+
+variable "manager_smtp_host" {
+  description = "SMTP host for Manager emails"
+  type        = string
+  default     = ""
+}
+
+variable "manager_smtp_port" {
+  description = "SMTP port for Manager emails"
+  type        = number
+  default     = 587
+}
+
+variable "manager_smtp_user" {
+  description = "SMTP username for Manager emails"
+  type        = string
+  default     = ""
+}
+
+variable "manager_email_from_name" {
+  description = "Email sender display name"
+  type        = string
+  default     = "WhatsApp Manager"
+}
+
+variable "manager_email_from_address" {
+  description = "Email sender address"
+  type        = string
+  default     = "noreply@example.com"
+}
+
+variable "manager_support_email" {
+  description = "Support email address"
+  type        = string
+  default     = "support@example.com"
+}
+
+variable "manager_additional_secrets" {
+  description = "Additional secrets for Manager (better_auth_secret, smtp_password)"
+  type        = map(string)
+  default     = {}
+  sensitive   = true
+}
+
+# --------------------------------------------------
+# Manager OAuth Configuration
+# --------------------------------------------------
+
+variable "manager_github_client_id" {
+  description = "GitHub OAuth Client ID for Manager"
+  type        = string
+  default     = ""
+}
+
+variable "manager_google_client_id" {
+  description = "Google OAuth Client ID for Manager"
+  type        = string
+  default     = ""
+}
+
+# --------------------------------------------------
+# Manager S3/MinIO Override Configuration
+# --------------------------------------------------
+
+variable "manager_s3_endpoint" {
+  description = "Custom S3/MinIO endpoint for Manager (overrides default)"
+  type        = string
+  default     = ""
+}
+
+variable "manager_s3_bucket" {
+  description = "Custom S3 bucket for Manager"
+  type        = string
+  default     = ""
+}
+
+variable "manager_s3_public_url" {
+  description = "Custom S3 public URL for Manager"
+  type        = string
+  default     = ""
+}
