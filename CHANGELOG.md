@@ -82,6 +82,114 @@ Benefits:
 
 ### 🐛 Bug Fixes
 
+* **manager:** add Settings to instance actions and fix tab navigation ([1bdb965](https://github.com/Funnelchat20/whatsapp-api-golang/commit/1bdb965e5c96e6ca7a8c1cb13e275e9f15f0860f))
+* **manager:** fix email URLs and translate subjects to English ([6cdc6a3](https://github.com/Funnelchat20/whatsapp-api-golang/commit/6cdc6a35a898dac3cfec32900ba8441a8e214fab))
+* **manager:** fix secure cookies and login alert email ([7460a29](https://github.com/Funnelchat20/whatsapp-api-golang/commit/7460a29721e7041944898080957f59bf9b8cc6cd))
+* **manager:** fix seed.ts user creation order ([d8438c4](https://github.com/Funnelchat20/whatsapp-api-golang/commit/d8438c447d5aa7d85fe9f7e25128212b1e7f906b))
+* **manager:** improve instance detail navigation with tab query params ([63454d2](https://github.com/Funnelchat20/whatsapp-api-golang/commit/63454d202f73226337b8121c709738408e8cc059))
+* improve S3 credential handling for IAM roles ([911ae5a](https://github.com/Funnelchat20/whatsapp-api-golang/commit/911ae5a67485960c7888530617c69aac64ef051d))
+* **manager:** prioritize APP_URL for email links and format email modules ([72d9da1](https://github.com/Funnelchat20/whatsapp-api-golang/commit/72d9da19be50700179c0f12d11ecf063f17c954e))
+* **manager:** remove backend check from health endpoint ([15f3de7](https://github.com/Funnelchat20/whatsapp-api-golang/commit/15f3de7ff4f800f9b1b7b33f7fd5bd86554ebeb2))
+* **manager:** resolve Biome linter warnings ([0db4f0d](https://github.com/Funnelchat20/whatsapp-api-golang/commit/0db4f0dad01775ea607f3acdb329c07225397af6))
+* **manager:** resolve eslint warnings and improve accessibility ([cb0f74f](https://github.com/Funnelchat20/whatsapp-api-golang/commit/cb0f74fa33cbc45dc8a8553c0b1f708eae2f97df))
+* **manager:** resolve lint warnings and improve accessibility ([90b3372](https://github.com/Funnelchat20/whatsapp-api-golang/commit/90b3372ecc4c4cc9d93a5f2556dffdfa7fd6895a))
+* **manager:** restore backend check in health endpoint for frontend monitoring ([57ab6bb](https://github.com/Funnelchat20/whatsapp-api-golang/commit/57ab6bbbaa617f5f04d57ac2a22f77c9d0883c6f))
+* **manager:** return correct health response format for frontend ([e80a558](https://github.com/Funnelchat20/whatsapp-api-golang/commit/e80a5587b0e892626bf47aae8265e86951fbede2))
+* **manager:** use window.location.origin for auth client baseURL ([54d3141](https://github.com/Funnelchat20/whatsapp-api-golang/commit/54d3141cef92f3a1ee2e9ee6d6552cd5a0f19f72))
+
+### ♻️ Code Refactoring
+
+* **terraform:** allow environment suffix in secrets module ([e572a83](https://github.com/Funnelchat20/whatsapp-api-golang/commit/e572a830b941612a7bed87c4b53d8eefaf467c50))
+* **terraform:** remove Manager routing from API ALB ([641add8](https://github.com/Funnelchat20/whatsapp-api-golang/commit/641add83213a19e6b05cfa1eb5284323bd6b215c))
+* **manager:** remove redundant webhooks and settings routes ([3e4b18c](https://github.com/Funnelchat20/whatsapp-api-golang/commit/3e4b18cceec196e9b11e1de9294cb96f93085d19))
+* **manager:** simplify auto-refresh indicator component ([c35f37f](https://github.com/Funnelchat20/whatsapp-api-golang/commit/c35f37f396c184830916e6a18c548204d2e1b987))
+
+### 📝 Documentation
+
+* add OpenAPI schemas for contacts and instance settings ([afdfe05](https://github.com/Funnelchat20/whatsapp-api-golang/commit/afdfe05da377e81778d36f3cd5faa61a7f8434c0))
+* add z-api playbooks and handler references ([c330d54](https://github.com/Funnelchat20/whatsapp-api-golang/commit/c330d54886a6af1c8938ca883ef6f8d253685d33))
+* update endpoint implementation status tracking ([8eae8c5](https://github.com/Funnelchat20/whatsapp-api-golang/commit/8eae8c55210169cac61f6d7503ca9f2b5058969c))
+
+## [2.0.0-develop.1](https://github.com/Funnelchat20/whatsapp-api-golang/compare/v1.2.0-develop.3...v2.0.0-develop.1) (2025-12-20)
+
+### ⚠ BREAKING CHANGES
+
+* **terraform:** Replace containerized data stores with AWS managed
+services (RDS PostgreSQL, ElastiCache Redis, S3) for improved
+reliability, scalability, and operational efficiency.
+
+New Terraform Modules:
+- RDS PostgreSQL with Multi-AZ, automated backups, encryption
+- ElastiCache Redis with replication and automatic failover
+- S3 buckets with versioning, encryption, lifecycle policies
+
+Module Refactoring:
+- ECS Service: Simplified to API-only container, removed Postgres/Redis/MinIO
+- Security Groups: Added RDS and ElastiCache SGs, removed EFS
+- Secrets Manager: Flexible payload structure per environment
+
+Environment Migration:
+Production:
+- RDS db.r6g.large Multi-AZ, 100GB gp3, 7-day backups
+- ElastiCache cache.r6g.large with 2 replicas
+- S3 whatsmeow-production-media
+- Cost: ~$575/month
+
+Staging:
+- RDS db.t4g.medium single-AZ, 20GB, 3-day backups
+- ElastiCache cache.t4g.small with 1 replica
+- FARGATE_SPOT enabled
+- Cost: ~$126/month
+
+Homolog:
+- RDS db.t4g.small single-AZ, 10GB, 1-day backups
+- ElastiCache cache.t4g.small no replicas
+- FARGATE_SPOT, NAT Gateway disabled
+- Cost: ~$84/month
+
+Documentation:
+- Updated architecture diagram with managed services
+- New cost breakdown per environment
+- Updated troubleshooting for RDS/ElastiCache/S3
+- Removed EFS and container-based service documentation
+
+Benefits:
+- Automated backups and point-in-time recovery
+- Managed patching and maintenance
+- Better scalability with auto-scaling support
+- Enhanced security with encryption at rest/transit
+- Reduced operational complexity
+
+### ✨ Features
+
+* add contacts service with phone validation ([5bacdcc](https://github.com/Funnelchat20/whatsapp-api-golang/commit/5bacdcce46a5ac071bbb18b654939fd5ff3ad182))
+* **terraform:** add dedicated ALB module for Manager frontend ([3108f0b](https://github.com/Funnelchat20/whatsapp-api-golang/commit/3108f0bb7975b705d1fbc90fac0789fd1b0872a6))
+* **manager:** add deployment and setup scripts ([f97bf46](https://github.com/Funnelchat20/whatsapp-api-golang/commit/f97bf465f15028cab47c9838aad4b7501b6d8f76))
+* **api:** add deployment script for API backend ([73969f5](https://github.com/Funnelchat20/whatsapp-api-golang/commit/73969f56befa4e6532ff3c537141219533f5d0e6))
+* **manager:** add Dockerfile for containerized deployment ([3c8e993](https://github.com/Funnelchat20/whatsapp-api-golang/commit/3c8e99339cf37ef631da3c65fa20225966154f3d))
+* **docs:** add dynamic OpenAPI specification generation ([d6f6b86](https://github.com/Funnelchat20/whatsapp-api-golang/commit/d6f6b866b34807402544a0df01c6f83392351a53))
+* **terraform:** add ECS service module for Manager frontend ([afd46ba](https://github.com/Funnelchat20/whatsapp-api-golang/commit/afd46ba414171499337dd5c4eb7649a2a6646dce))
+* **ci:** add GitHub Actions workflow for Manager deployment ([aa10df9](https://github.com/Funnelchat20/whatsapp-api-golang/commit/aa10df98eb0cc3c388d823b6cfc8113126007abb))
+* add instance configuration settings for calls and messages ([5ef7f60](https://github.com/Funnelchat20/whatsapp-api-golang/commit/5ef7f60d793cf85d1912df99ae4e98a2830b9cd5))
+* add PDF processing and image manipulation dependencies ([869074e](https://github.com/Funnelchat20/whatsapp-api-golang/commit/869074e31349f7fb5e3d700db39d7a5b139f7649))
+* add phone validation endpoints ([c96a8f9](https://github.com/Funnelchat20/whatsapp-api-golang/commit/c96a8f99cce50d4362542e9c3a0fa69540486463))
+* **terraform:** add security group rule for Manager port 3000 ([b237970](https://github.com/Funnelchat20/whatsapp-api-golang/commit/b237970dfee1e68722e175ffbe04f8781cf141f7))
+* add WhatsApp Manager web application ([baacc6c](https://github.com/Funnelchat20/whatsapp-api-golang/commit/baacc6cd0f4f4f6bc78990af663dab9099ec1f9b))
+* add z-api services, queues, and poll events ([cd21306](https://github.com/Funnelchat20/whatsapp-api-golang/commit/cd213062fab5ba6f64e55f86e7370d8441fd2cd8))
+* **terraform:** configure homolog environment with dedicated Manager ALB ([42dec6f](https://github.com/Funnelchat20/whatsapp-api-golang/commit/42dec6fe91826514c519773c40f3a0f2063f8bf7))
+* **terraform:** enhance configuration for S3 and media handling ([a9de795](https://github.com/Funnelchat20/whatsapp-api-golang/commit/a9de795bb7fda9bc4e250eb4c27f573091c8da16))
+* enrich group membership and interactive payloads ([f3487bc](https://github.com/Funnelchat20/whatsapp-api-golang/commit/f3487bc34331e049d0e9fc448e9a6380f768e5c6))
+* implement pairing code cache with TTL ([14ab61d](https://github.com/Funnelchat20/whatsapp-api-golang/commit/14ab61d0b53404fafac21a98222fc393df026dec))
+* **manager:** improve health check endpoint for container orchestration ([dc55f78](https://github.com/Funnelchat20/whatsapp-api-golang/commit/dc55f78d56744f576ba6d01c59bc6cf03afc1971))
+* **terraform:** migrate to AWS managed services architecture ([768916d](https://github.com/Funnelchat20/whatsapp-api-golang/commit/768916d2b924e40644676bda2f5e4e686f42d2db))
+* **core:** sync whatsmeow core library with upstream changes ([0512728](https://github.com/Funnelchat20/whatsapp-api-golang/commit/0512728ae7a423543b187a1225cc45430503c72e))
+* **api:** update API internals with improved configuration and error handling ([bc11341](https://github.com/Funnelchat20/whatsapp-api-golang/commit/bc1134114be8351ed8b42ab0a2697bd159667f2f))
+* **proto:** update protobuf definitions from upstream whatsmeow ([a56671f](https://github.com/Funnelchat20/whatsapp-api-golang/commit/a56671f39a46f1eb6a1996fc742500973ac3a4e0))
+* **terraform:** update S3 URL expiration and enhance media storage configuration ([4f7b2d3](https://github.com/Funnelchat20/whatsapp-api-golang/commit/4f7b2d33368a80c57c1812711efec302eb254f3d))
+* **socket:** update socket layer and store with upstream improvements ([591bd77](https://github.com/Funnelchat20/whatsapp-api-golang/commit/591bd7701278818625438c541f4721a22f94124f))
+
+### 🐛 Bug Fixes
+
 * **manager:** fix secure cookies and login alert email ([7460a29](https://github.com/Funnelchat20/whatsapp-api-golang/commit/7460a29721e7041944898080957f59bf9b8cc6cd))
 * **manager:** fix seed.ts user creation order ([d8438c4](https://github.com/Funnelchat20/whatsapp-api-golang/commit/d8438c447d5aa7d85fe9f7e25128212b1e7f906b))
 * improve S3 credential handling for IAM roles ([911ae5a](https://github.com/Funnelchat20/whatsapp-api-golang/commit/911ae5a67485960c7888530617c69aac64ef051d))
