@@ -1,12 +1,18 @@
 "use client";
 
-import { useState, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
-import Link from "next/link";
+import {
+	ArrowLeft,
+	CheckCircle2,
+	Eye,
+	EyeOff,
+	Loader2,
+	Lock,
+} from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
 	Card,
 	CardContent,
@@ -14,14 +20,8 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import {
-	Loader2,
-	ArrowLeft,
-	Lock,
-	CheckCircle2,
-	Eye,
-	EyeOff,
-} from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import authClient from "@/lib/auth-client";
 
 function ResetPasswordForm() {
@@ -67,9 +67,7 @@ function ResetPasswordForm() {
 			});
 
 			if (resetError) {
-				throw new Error(
-					resetError.message || "Error resetting password",
-				);
+				throw new Error(resetError.message || "Error resetting password");
 			}
 
 			setIsSuccess(true);
@@ -108,15 +106,13 @@ function ResetPasswordForm() {
 							Invalid link
 						</CardTitle>
 						<CardDescription className="text-muted-foreground">
-							The recovery link is invalid or has expired. Please
-							request a new one.
+							The recovery link is invalid or has expired. Please request a new
+							one.
 						</CardDescription>
 					</CardHeader>
 					<CardContent>
 						<Link href="/forgot-password" className="block">
-							<Button className="w-full h-11">
-								Request new link
-							</Button>
+							<Button className="w-full h-11">Request new link</Button>
 						</Link>
 					</CardContent>
 				</Card>
@@ -151,8 +147,7 @@ function ResetPasswordForm() {
 							Password reset!
 						</CardTitle>
 						<CardDescription className="text-muted-foreground">
-							Your password has been changed successfully. You can
-							now login.
+							Your password has been changed successfully. You can now login.
 						</CardDescription>
 					</CardHeader>
 					<CardContent>
@@ -226,9 +221,7 @@ function ResetPasswordForm() {
 									variant="ghost"
 									size="sm"
 									className="absolute right-0 top-0 h-11 px-3 hover:bg-transparent"
-									onClick={() =>
-										setShowPassword(!showPassword)
-									}
+									onClick={() => setShowPassword(!showPassword)}
 								>
 									{showPassword ? (
 										<EyeOff className="h-4 w-4 text-muted-foreground" />
@@ -240,18 +233,12 @@ function ResetPasswordForm() {
 						</div>
 
 						<div className="space-y-2">
-							<Label htmlFor="confirmPassword">
-								Confirm new password
-							</Label>
+							<Label htmlFor="confirmPassword">Confirm new password</Label>
 							<div className="relative">
 								<Input
 									id="confirmPassword"
 									name="confirmPassword"
-									type={
-										showConfirmPassword
-											? "text"
-											: "password"
-									}
+									type={showConfirmPassword ? "text" : "password"}
 									placeholder="********"
 									value={confirmPassword}
 									onChange={(e) => {
@@ -269,11 +256,7 @@ function ResetPasswordForm() {
 									variant="ghost"
 									size="sm"
 									className="absolute right-0 top-0 h-11 px-3 hover:bg-transparent"
-									onClick={() =>
-										setShowConfirmPassword(
-											!showConfirmPassword,
-										)
-									}
+									onClick={() => setShowConfirmPassword(!showConfirmPassword)}
 								>
 									{showConfirmPassword ? (
 										<EyeOff className="h-4 w-4 text-muted-foreground" />

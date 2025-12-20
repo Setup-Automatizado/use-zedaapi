@@ -1,13 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import {
+	ArrowLeft,
+	KeyRound,
+	Loader2,
+	Mail,
+	ShieldCheck,
+	Smartphone,
+} from "lucide-react";
 import Image from "next/image";
-import { twoFactor } from "@/lib/auth-client";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { TotpInput } from "@/components/two-factor/totp-input";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
 	Card,
 	CardContent,
@@ -16,16 +22,10 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { TotpInput } from "@/components/two-factor/totp-input";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { twoFactor } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
-import {
-	Loader2,
-	ShieldCheck,
-	KeyRound,
-	Mail,
-	Smartphone,
-	ArrowLeft,
-} from "lucide-react";
 
 type VerificationMode = "totp" | "email" | "backup";
 
@@ -90,18 +90,14 @@ export default function Verify2FAPage() {
 			});
 
 			if (result.error) {
-				setError(
-					result.error.message || "Invalid code. Please try again.",
-				);
+				setError(result.error.message || "Invalid code. Please try again.");
 				return;
 			}
 
 			router.push("/dashboard");
 			router.refresh();
 		} catch {
-			setError(
-				"An error occurred while verifying the code. Please try again.",
-			);
+			setError("An error occurred while verifying the code. Please try again.");
 		} finally {
 			setIsLoading(false);
 		}
@@ -117,8 +113,7 @@ export default function Verify2FAPage() {
 
 			if (result.error) {
 				setError(
-					result.error.message ||
-						"Failed to send code. Please try again.",
+					result.error.message || "Failed to send code. Please try again.",
 				);
 				return;
 			}
@@ -151,18 +146,14 @@ export default function Verify2FAPage() {
 			});
 
 			if (result.error) {
-				setError(
-					result.error.message || "Invalid code. Please try again.",
-				);
+				setError(result.error.message || "Invalid code. Please try again.");
 				return;
 			}
 
 			router.push("/dashboard");
 			router.refresh();
 		} catch {
-			setError(
-				"An error occurred while verifying the code. Please try again.",
-			);
+			setError("An error occurred while verifying the code. Please try again.");
 		} finally {
 			setIsLoading(false);
 		}
@@ -187,8 +178,7 @@ export default function Verify2FAPage() {
 
 			if (result.error) {
 				setError(
-					result.error.message ||
-						"Invalid backup code. Please try again.",
+					result.error.message || "Invalid backup code. Please try again.",
 				);
 				return;
 			}
@@ -196,9 +186,7 @@ export default function Verify2FAPage() {
 			router.push("/dashboard");
 			router.refresh();
 		} catch {
-			setError(
-				"An error occurred while verifying the code. Please try again.",
-			);
+			setError("An error occurred while verifying the code. Please try again.");
 		} finally {
 			setIsLoading(false);
 		}
@@ -387,9 +375,8 @@ export default function Verify2FAPage() {
 											<Mail className="h-6 w-6 text-primary" />
 										</div>
 										<p className="text-sm text-muted-foreground">
-											Click the button below to receive a
-											verification code at your registered
-											email address.
+											Click the button below to receive a verification code at
+											your registered email address.
 										</p>
 									</div>
 
@@ -413,10 +400,7 @@ export default function Verify2FAPage() {
 									</Button>
 								</div>
 							) : (
-								<form
-									onSubmit={handleEmailSubmit}
-									className="space-y-6"
-								>
+								<form onSubmit={handleEmailSubmit} className="space-y-6">
 									<div className="space-y-4">
 										<TotpInput
 											value={emailCode}
@@ -430,9 +414,7 @@ export default function Verify2FAPage() {
 												id="trust-device-email"
 												checked={trustDevice}
 												onCheckedChange={(checked) =>
-													setTrustDevice(
-														checked === true,
-													)
+													setTrustDevice(checked === true)
 												}
 												disabled={isLoading}
 											/>
@@ -448,9 +430,7 @@ export default function Verify2FAPage() {
 									<Button
 										type="submit"
 										className="w-full h-11 font-medium"
-										disabled={
-											isLoading || emailCode.length !== 6
-										}
+										disabled={isLoading || emailCode.length !== 6}
 									>
 										{isLoading ? (
 											<>
@@ -469,9 +449,7 @@ export default function Verify2FAPage() {
 										<button
 											type="button"
 											onClick={handleSendEmailOtp}
-											disabled={
-												resendCooldown > 0 || isLoading
-											}
+											disabled={resendCooldown > 0 || isLoading}
 											className="text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 										>
 											{resendCooldown > 0
@@ -486,10 +464,7 @@ export default function Verify2FAPage() {
 
 					{/* Backup Mode */}
 					{mode === "backup" && (
-						<form
-							onSubmit={handleBackupSubmit}
-							className="space-y-6"
-						>
+						<form onSubmit={handleBackupSubmit} className="space-y-6">
 							<div className="space-y-2">
 								<Label htmlFor="backup-code">Backup code</Label>
 								<Input

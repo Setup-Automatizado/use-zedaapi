@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
+import { ArrowLeft, CheckCircle2, Loader2, Mail } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
 	Card,
 	CardContent,
@@ -13,7 +12,8 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Loader2, ArrowLeft, Mail, CheckCircle2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function ForgotPasswordPage() {
 	const [isLoading, setIsLoading] = useState(false);
@@ -82,14 +82,14 @@ export default function ForgotPasswordPage() {
 							Email sent!
 						</CardTitle>
 						<CardDescription className="text-muted-foreground">
-							We sent a recovery link to <strong>{email}</strong>.
-							Check your inbox.
+							We sent a recovery link to <strong>{email}</strong>. Check your
+							inbox.
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-4">
 						<p className="text-sm text-muted-foreground text-center">
-							Didn&apos;t receive the email? Check your spam folder or
-							try again.
+							Didn&apos;t receive the email? Check your spam folder or try
+							again.
 						</p>
 						<div className="flex flex-col gap-3">
 							<Button
