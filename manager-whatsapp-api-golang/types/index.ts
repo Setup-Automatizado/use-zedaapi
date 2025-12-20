@@ -10,104 +10,99 @@
  * ```
  */
 
-// Instance types
-export type {
-	Instance,
-	InstanceData,
-	InstanceMiddleware,
-	InstanceStatus,
-	DeviceInfo,
-	DeviceDetails,
-	InstanceListResponse,
-	RawInstanceListResponse,
-	CreateInstanceRequest,
-	CreateInstanceResponse,
-	QRCodeResponse,
-	PhonePairingResponse,
-	InstanceSettings,
-	WebhookSettings as InstanceWebhookSettings,
-} from "./instance";
-
-export {
-	normalizeInstance,
-	normalizeInstances,
-	isInstanceConnected,
-	hasActiveSubscription,
-	getInstanceId,
-	getInstanceToken,
-} from "./instance";
-
-// Health check types
-export type {
-	HealthStatus,
-	CircuitState,
-	HealthResponse,
-	ReadinessResponse,
-	HealthChecks,
-	ComponentStatus,
-	DetailedHealthResponse,
-	HealthCheckOptions,
-} from "./health";
-
-export {
-	isHealthy,
-	isDegraded,
-	isComponentOperational,
-	getCriticalStatus,
-	getAverageHealthCheckDuration,
-} from "./health";
-
-// Webhook types
-export type {
-	WebhookType,
-	WebhookSettings,
-	WebhookUpdateRequest,
-	WebhookUpdateResponse,
-	NotifySentByMeRequest,
-	AllWebhooksUpdateRequest,
-	WebhookEventBase,
-	WebhookDeliveryConfig,
-	WebhookValidation,
-	WebhookTestRequest,
-	WebhookTestResponse,
-} from "./webhook";
-
-export {
-	WEBHOOK_TYPE_MAP,
-	validateWebhookUrl,
-	isWebhookConfigured,
-	getConfiguredWebhooks,
-	countConfiguredWebhooks,
-	hasAnyWebhook,
-} from "./webhook";
-
 // Generic API types
 export type {
 	ActionResult,
-	PaginationParams,
-	PaginatedResponse,
+	ApiClientConfig,
 	ApiError,
 	ApiResponse,
-	ResponseMetadata,
-	SortOptions,
-	FilterOptions,
-	DateRange,
 	BatchRequest,
 	BatchResponse,
 	BatchResult,
+	DateRange,
+	FilterOptions,
 	HttpMethod,
+	PaginatedResponse,
+	PaginationParams,
 	RequestConfig,
-	ApiClientConfig,
+	ResponseMetadata,
+	SortOptions,
 } from "./api";
-
 export {
-	isSuccess,
-	isError,
-	success,
+	calculatePagination,
 	error,
-	validationError,
+	isError,
+	isSuccess,
+	success,
 	unwrap,
 	unwrapOr,
-	calculatePagination,
 	validatePaginationParams,
+	validationError,
 } from "./api";
+
+// Health check types
+export type {
+	CircuitState,
+	ComponentStatus,
+	DetailedHealthResponse,
+	HealthCheckOptions,
+	HealthChecks,
+	HealthResponse,
+	HealthStatus,
+	ReadinessResponse,
+} from "./health";
+
+export {
+	getAverageHealthCheckDuration,
+	getCriticalStatus,
+	isComponentOperational,
+	isDegraded,
+	isHealthy,
+} from "./health";
+// Instance types
+export type {
+	CreateInstanceRequest,
+	CreateInstanceResponse,
+	DeviceDetails,
+	DeviceInfo,
+	Instance,
+	InstanceData,
+	InstanceListResponse,
+	InstanceMiddleware,
+	InstanceSettings,
+	InstanceStatus,
+	PhonePairingResponse,
+	QRCodeResponse,
+	RawInstanceListResponse,
+	WebhookSettings as InstanceWebhookSettings,
+} from "./instance";
+export {
+	getInstanceId,
+	getInstanceToken,
+	hasActiveSubscription,
+	isInstanceConnected,
+	normalizeInstance,
+	normalizeInstances,
+} from "./instance";
+// Webhook types
+export type {
+	AllWebhooksUpdateRequest,
+	NotifySentByMeRequest,
+	WebhookDeliveryConfig,
+	WebhookEventBase,
+	WebhookSettings,
+	WebhookTestRequest,
+	WebhookTestResponse,
+	WebhookType,
+	WebhookUpdateRequest,
+	WebhookUpdateResponse,
+	WebhookValidation,
+} from "./webhook";
+export {
+	countConfiguredWebhooks,
+	getConfiguredWebhooks,
+	hasAnyWebhook,
+	isWebhookConfigured,
+	validateWebhookUrl,
+	WEBHOOK_TYPE_MAP,
+} from "./webhook";

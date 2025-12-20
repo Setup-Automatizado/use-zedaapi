@@ -8,43 +8,41 @@
 
 // Instance schemas
 export {
-	CreateInstanceSchema,
-	UpdateInstanceSchema,
-	InstanceInfoSchema,
 	type CreateInstanceInput,
-	type UpdateInstanceInput,
+	CreateInstanceSchema,
 	type InstanceInfo,
+	InstanceInfoSchema,
+	type UpdateInstanceInput,
+	UpdateInstanceSchema,
 } from "./instance";
-
-// Webhook schemas
-export {
-	WebhookUrlSchema,
-	WebhookConfigSchema,
-	SingleWebhookUpdateSchema,
-	WebhookTestSchema,
-	WebhookEventSchema,
-	BulkWebhookUpdateSchema,
-	type WebhookConfig,
-	type WebhookConfigInput,
-	type SingleWebhookUpdate,
-	type WebhookTest,
-	type WebhookEvent,
-	type BulkWebhookUpdate,
-} from "./webhook";
-
 // Settings schemas
 export {
-	InstanceSettingsSchema,
-	UpdateSettingsSchema,
-	ProfileSettingsSchema,
-	PrivacySettingsSchema,
-	MessageSettingsSchema,
+	type AllSettings,
 	AllSettingsSchema,
 	type InstanceSettings,
 	type InstanceSettingsInput,
-	type UpdateSettings,
-	type ProfileSettings,
-	type PrivacySettings,
+	InstanceSettingsSchema,
 	type MessageSettings,
-	type AllSettings,
+	MessageSettingsSchema,
+	type PrivacySettings,
+	PrivacySettingsSchema,
+	type ProfileSettings,
+	ProfileSettingsSchema,
+	type UpdateSettings,
+	UpdateSettingsSchema,
 } from "./settings";
+// Webhook schemas
+export {
+	type BulkWebhookUpdate,
+	BulkWebhookUpdateSchema,
+	type SingleWebhookUpdate,
+	SingleWebhookUpdateSchema,
+	type WebhookConfig,
+	type WebhookConfigInput,
+	WebhookConfigSchema,
+	type WebhookEvent,
+	WebhookEventSchema,
+	type WebhookTest,
+	WebhookTestSchema,
+	WebhookUrlSchema,
+} from "./webhook";
