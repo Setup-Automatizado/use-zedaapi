@@ -7,7 +7,6 @@
 
 import { ArrowRight, Inbox } from "lucide-react";
 import Link from "next/link";
-import * as React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -43,7 +42,7 @@ function getInstanceStatus(instance: Instance): InstanceStatus {
 function formatRelativeDate(dateString: string | undefined): string {
 	if (!dateString) return "-";
 	const date = new Date(dateString);
-	if (isNaN(date.getTime())) return "-";
+	if (Number.isNaN(date.getTime())) return "-";
 	const now = new Date();
 	const diffMs = now.getTime() - date.getTime();
 	const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
@@ -51,7 +50,7 @@ function formatRelativeDate(dateString: string | undefined): string {
 	const diffMinutes = Math.floor(diffMs / (1000 * 60));
 
 	if (diffMinutes < 1) return "now";
-	if (diffMinutes < 60) return `${diffMinutes}min`;
+	if (diffMinutes < 60) return `${diffMinutes}m`;
 	if (diffHours < 24) return `${diffHours}h`;
 	if (diffDays < 7) return `${diffDays}d`;
 	if (diffDays < 30) {
@@ -63,7 +62,7 @@ function formatRelativeDate(dateString: string | undefined): string {
 }
 
 function formatPhoneNumber(phone: string | undefined): string {
-	if (!phone) return "-";
+	if (!phone) return "";
 	const cleaned = phone.replace(/\D/g, "");
 
 	// Brazilian: +55 DD NNNNN-NNNN
@@ -79,17 +78,6 @@ function formatPhoneNumber(phone: string | undefined): string {
 			const firstPart = localNumber.substring(0, 4);
 			const secondPart = localNumber.substring(4);
 			return `+55 ${areaCode} ${firstPart}-${secondPart}`;
-		}
-	}
-
-	// Argentina mobile: +54 9 XXXX XX-XXXX
-	if (cleaned.startsWith("549") && cleaned.length >= 13) {
-		const areaCode = cleaned.substring(3, 7);
-		const localNumber = cleaned.substring(7);
-		if (localNumber.length >= 6) {
-			const firstPart = localNumber.substring(0, 2);
-			const secondPart = localNumber.substring(2);
-			return `+54 9 ${areaCode} ${firstPart}-${secondPart}`;
 		}
 	}
 
@@ -145,7 +133,7 @@ export function RecentInstances({
 
 	return (
 		<Card>
-			<CardHeader className="pb-3">
+			<CardHeader>
 				<CardTitle className="text-base font-medium">
 					Recent Instances
 				</CardTitle>
@@ -153,16 +141,16 @@ export function RecentInstances({
 					<Button variant="ghost" size="sm" asChild>
 						<Link href="/instances">
 							View all
-							<ArrowRight className="h-4 w-4" data-icon="inline-end" />
+							<ArrowRight className="h-4 w-4" />
 						</Link>
 					</Button>
 				</CardAction>
 			</CardHeader>
-			<CardContent className="pt-0">
+			<CardContent>
 				{recentInstances.length === 0 ? (
 					<div className="flex flex-col items-center justify-center py-12 text-center">
-						<div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-muted">
-							<Inbox className="h-6 w-6 text-muted-foreground" />
+						<div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-muted">
+							<Inbox className="h-7 w-7 text-muted-foreground" />
 						</div>
 						<p className="text-sm font-medium text-foreground">
 							No instances registered
@@ -175,93 +163,82 @@ export function RecentInstances({
 						</Button>
 					</div>
 				) : (
-					<div className="divide-y divide-border/40">
+					<div className="space-y-1">
 						{recentInstances.map((instance) => {
 							const status = getInstanceStatus(instance);
 							const isConnected = status === INSTANCE_STATUS.CONNECTED;
 							const deviceInfo = deviceMap[instance.instanceId];
-
-							// Get phone from device info or storeJid
 							const phone =
 								deviceInfo?.phone || instance.storeJid?.split("@")[0];
-
-							// Get avatar URL from device info
 							const avatarUrl = deviceInfo?.imgUrl;
-
-							// Get display name (prefer device name if available)
-							const displayName = deviceInfo?.name || instance.name;
 
 							return (
 								<Link
 									key={instance.id}
 									href={`/instances/${instance.id}`}
-									className="group flex items-center gap-3 px-1 py-3 transition-colors hover:bg-muted/40 -mx-1 first:pt-0 last:pb-0"
+									className="group flex items-center gap-4 rounded-lg px-3 py-2.5 transition-colors hover:bg-muted/50"
 								>
-									{/* Avatar */}
-									<div className="relative flex-shrink-0">
-										<Avatar className="h-9 w-9">
+									{/* Avatar with status indicator */}
+									<div className="relative shrink-0">
+										<Avatar className="h-10 w-10 ring-2 ring-background">
 											{avatarUrl ? (
 												<AvatarImage
 													src={avatarUrl}
-													alt={displayName}
+													alt={instance.name}
 													className="object-cover"
 												/>
 											) : null}
 											<AvatarFallback
 												className={cn(
-													"text-xs font-medium text-white",
+													"text-xs font-semibold text-white",
 													getAvatarColor(instance.name),
 												)}
 											>
 												{getInitials(instance.name)}
 											</AvatarFallback>
 										</Avatar>
-										{isConnected && (
-											<span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-card bg-emerald-500" />
+										<span
+											className={cn(
+												"absolute bottom-0 right-0 h-3 w-3 rounded-full ring-2 ring-background",
+												isConnected ? "bg-emerald-500" : "bg-zinc-400",
+											)}
+										/>
+									</div>
+
+									{/* Name and phone */}
+									<div className="min-w-0 flex-1">
+										<p className="truncate text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+											{instance.name}
+										</p>
+										{phone && (
+											<p className="truncate text-xs text-muted-foreground font-mono">
+												{formatPhoneNumber(phone)}
+											</p>
 										)}
 									</div>
 
-									{/* Name */}
-									<div className="min-w-0 flex-1">
-										<p className="truncate text-sm font-medium text-foreground group-hover:text-primary">
-											{instance.name}
-										</p>
-									</div>
-
-									{/* Phone - hidden on mobile */}
-									<div className="hidden sm:block min-w-[140px] text-right">
-										<span className="text-xs font-mono text-muted-foreground">
-											{formatPhoneNumber(phone)}
-										</span>
-									</div>
-
-									{/* Status */}
-									<div className="flex items-center gap-1.5 min-w-[90px]">
+									{/* Status badge */}
+									<div className="hidden sm:flex items-center gap-1.5 shrink-0">
 										<span
 											className={cn(
-												"h-1.5 w-1.5 rounded-full",
-												isConnected ? "bg-emerald-500" : "bg-red-400",
-											)}
-										/>
-										<span
-											className={cn(
-												"text-xs",
+												"inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium",
 												isConnected
-													? "text-emerald-600 dark:text-emerald-400"
-													: "text-red-500 dark:text-red-400",
+													? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+													: "bg-zinc-500/10 text-zinc-600 dark:text-zinc-400",
 											)}
 										>
+											<span
+												className={cn(
+													"h-1.5 w-1.5 rounded-full",
+													isConnected ? "bg-emerald-500" : "bg-zinc-400",
+												)}
+											/>
 											{isConnected ? "Connected" : "Disconnected"}
 										</span>
 									</div>
 
-									{/* Middleware - hidden on tablet and mobile */}
-									<span className="hidden lg:block text-xs text-muted-foreground w-10 text-center capitalize">
-										{instance.middleware || "web"}
-									</span>
-
 									{/* Time */}
-									<span className="text-xs text-muted-foreground w-10 text-right">
+									<span className="text-xs text-muted-foreground shrink-0 tabular-nums">
 										{formatRelativeDate(instance.created)}
 									</span>
 								</Link>

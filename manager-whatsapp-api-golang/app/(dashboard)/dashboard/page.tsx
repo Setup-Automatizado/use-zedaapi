@@ -8,7 +8,7 @@
 "use client";
 
 import { AlertCircle } from "lucide-react";
-import * as React from "react";
+import { useMemo } from "react";
 import {
 	HealthSummary,
 	QuickActions,
@@ -22,7 +22,6 @@ import { useHealth } from "@/hooks/use-health";
 import { useInstancesWithDevice } from "@/hooks/use-instances-with-device";
 
 export default function DashboardPage() {
-	// Fetch instances with device info for avatars
 	const {
 		instances,
 		deviceMap,
@@ -30,21 +29,19 @@ export default function DashboardPage() {
 		error: instancesError,
 	} = useInstancesWithDevice({
 		page: 1,
-		pageSize: 10, // Recent instances with avatars
+		pageSize: 10,
 	});
 
-	// Fetch health status
 	const {
 		isHealthy,
 		isDegraded,
 		isLoading: healthLoading,
 	} = useHealth({
-		interval: 30000, // Poll every 30 seconds
+		interval: 30000,
 		enabled: true,
 	});
 
-	// Calculate statistics
-	const stats = React.useMemo(() => {
+	const stats = useMemo(() => {
 		if (!instances) {
 			return { total: 0, connected: 0, disconnected: 0, pending: 0 };
 		}
@@ -63,7 +60,6 @@ export default function DashboardPage() {
 		return { total, connected, disconnected, pending };
 	}, [instances]);
 
-	// Show error state
 	if (instancesError) {
 		return (
 			<div className="space-y-6">
@@ -84,14 +80,14 @@ export default function DashboardPage() {
 	}
 
 	return (
-		<div className="space-y-6">
-			{/* Header with Quick Actions */}
-			<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+		<div className="space-y-8">
+			{/* Header */}
+			<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 				<PageHeader
 					title="Dashboard"
 					description="Welcome to the WhatsApp API Manager"
 				/>
-				<div className="flex items-center gap-2">
+				<div className="flex items-center gap-2 shrink-0">
 					<QuickActions />
 					{!healthLoading && (
 						<HealthSummary
@@ -105,9 +101,9 @@ export default function DashboardPage() {
 
 			{/* Stats Cards */}
 			{instancesLoading ? (
-				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+				<div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
 					{Array.from({ length: 4 }).map((_, i) => (
-						<Skeleton key={i} className="h-32" />
+						<Skeleton key={i} className="h-28 rounded-xl" />
 					))}
 				</div>
 			) : (
@@ -119,9 +115,9 @@ export default function DashboardPage() {
 				/>
 			)}
 
-			{/* Recent Instances - Full Width */}
+			{/* Recent Instances */}
 			{instancesLoading ? (
-				<Skeleton className="h-96" />
+				<Skeleton className="h-[400px] rounded-xl" />
 			) : (
 				<RecentInstances instances={instances || []} deviceMap={deviceMap} />
 			)}

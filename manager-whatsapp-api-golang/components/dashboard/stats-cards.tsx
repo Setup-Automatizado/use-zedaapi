@@ -5,8 +5,7 @@ import {
 	Smartphone,
 	XCircle,
 } from "lucide-react";
-import * as React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 export interface StatsCardsProps {
@@ -21,7 +20,7 @@ interface StatCardData {
 	value: number;
 	icon: LucideIcon;
 	iconColor: string;
-	iconBg: string;
+	bgColor: string;
 }
 
 export function StatsCards({
@@ -35,53 +34,53 @@ export function StatsCards({
 			title: "Total Instances",
 			value: total,
 			icon: Smartphone,
-			iconColor: "text-primary",
-			iconBg: "bg-primary/10",
+			iconColor: "text-blue-600 dark:text-blue-400",
+			bgColor: "bg-blue-500/10",
 		},
 		{
 			title: "Connected",
 			value: connected,
 			icon: CheckCircle,
-			iconColor: "text-green-600 dark:text-green-500",
-			iconBg: "bg-green-50 dark:bg-green-950/20",
+			iconColor: "text-emerald-600 dark:text-emerald-400",
+			bgColor: "bg-emerald-500/10",
 		},
 		{
 			title: "Disconnected",
 			value: disconnected,
 			icon: XCircle,
-			iconColor: "text-red-600 dark:text-red-500",
-			iconBg: "bg-red-50 dark:bg-red-950/20",
+			iconColor: "text-red-600 dark:text-red-400",
+			bgColor: "bg-red-500/10",
 		},
 		{
 			title: "Pending",
 			value: pending,
 			icon: Clock,
-			iconColor: "text-yellow-600 dark:text-yellow-500",
-			iconBg: "bg-yellow-50 dark:bg-yellow-950/20",
+			iconColor: "text-amber-600 dark:text-amber-400",
+			bgColor: "bg-amber-500/10",
 		},
 	];
 
 	return (
-		<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+		<div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
 			{stats.map((stat) => (
-				<Card key={stat.title} size="sm">
-					<CardHeader>
+				<Card key={stat.title} className="relative overflow-hidden">
+					<CardContent className="p-5">
 						<div className="flex items-center justify-between">
-							<CardTitle className="text-sm font-medium text-muted-foreground">
-								{stat.title}
-							</CardTitle>
+							<div className="space-y-1">
+								<p className="text-sm text-muted-foreground">{stat.title}</p>
+								<p className="text-3xl font-bold tracking-tight tabular-nums">
+									{stat.value}
+								</p>
+							</div>
 							<div
 								className={cn(
-									"flex h-9 w-9 items-center justify-center rounded-2xl",
-									stat.iconBg,
+									"flex h-12 w-12 items-center justify-center rounded-full",
+									stat.bgColor,
 								)}
 							>
-								<stat.icon className={cn("h-5 w-5", stat.iconColor)} />
+								<stat.icon className={cn("h-6 w-6", stat.iconColor)} />
 							</div>
 						</div>
-					</CardHeader>
-					<CardContent>
-						<div className="text-2xl font-bold">{stat.value}</div>
 					</CardContent>
 				</Card>
 			))}
