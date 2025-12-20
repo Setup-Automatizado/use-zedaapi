@@ -7,17 +7,17 @@
 
 "use client";
 
+import { AlertCircle, RefreshCw } from "lucide-react";
 import * as React from "react";
-import { useHealth } from "@/hooks/use-health";
-import { PageHeader } from "@/components/shared/page-header";
 import {
+	AutoRefreshIndicator,
 	HealthStatusCard,
 	ReadinessCard,
-	AutoRefreshIndicator,
 } from "@/components/health";
+import { PageHeader } from "@/components/shared/page-header";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useHealth } from "@/hooks/use-health";
 
 const POLLING_INTERVAL = 30000; // 30 seconds
 
@@ -99,8 +99,8 @@ export default function HealthPage() {
 							<AlertCircle className="h-4 w-4" />
 							<AlertTitle>System Unavailable</AlertTitle>
 							<AlertDescription>
-								One or more critical components have issues.
-								Check the details below.
+								One or more critical components have issues. Check the details
+								below.
 							</AlertDescription>
 						</Alert>
 					)}
@@ -109,8 +109,8 @@ export default function HealthPage() {
 							<AlertCircle className="h-4 w-4" />
 							<AlertTitle>System Degraded</AlertTitle>
 							<AlertDescription>
-								The system is operational, but some components
-								have reduced performance.
+								The system is operational, but some components have reduced
+								performance.
 							</AlertDescription>
 						</Alert>
 					)}
@@ -120,11 +120,7 @@ export default function HealthPage() {
 			{/* Health Cards Grid */}
 			<div className="grid gap-6 md:grid-cols-2">
 				{/* Basic Health Status */}
-				<HealthStatusCard
-					health={health}
-					isLoading={isLoading}
-					error={error}
-				/>
+				<HealthStatusCard health={health} isLoading={isLoading} error={error} />
 
 				{/* Detailed Readiness Status */}
 				<ReadinessCard

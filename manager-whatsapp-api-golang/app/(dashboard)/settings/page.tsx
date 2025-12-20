@@ -1,7 +1,8 @@
 "use client";
 
+import { ShieldCheck, User, Users } from "lucide-react";
 import Link from "next/link";
-import { useSession } from "@/lib/auth-client";
+import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardContent,
@@ -9,8 +10,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ShieldCheck, User, Users } from "lucide-react";
+import { useSession } from "@/lib/auth-client";
 
 interface SettingsSection {
 	title: string;
@@ -74,12 +74,8 @@ export default function SettingsPage() {
 										<Icon className="h-5 w-5 text-primary" />
 									</div>
 									<div>
-										<CardTitle className="text-lg">
-											{section.title}
-										</CardTitle>
-										<CardDescription>
-											{section.description}
-										</CardDescription>
+										<CardTitle className="text-lg">{section.title}</CardTitle>
+										<CardDescription>{section.description}</CardDescription>
 									</div>
 								</div>
 							</CardHeader>

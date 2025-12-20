@@ -1,11 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useSession, twoFactor } from "@/lib/auth-client";
+import {
+	AlertTriangle,
+	CheckCircle2,
+	KeyRound,
+	Loader2,
+	Mail,
+	RefreshCw,
+	ShieldCheck,
+	ShieldOff,
+	Smartphone,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import QRCode from "react-qr-code";
+import { BackupCodesDisplay } from "@/components/two-factor/backup-codes-display";
+import { TotpInput } from "@/components/two-factor/totp-input";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
 	Card,
 	CardContent,
@@ -13,19 +23,9 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { TotpInput } from "@/components/two-factor/totp-input";
-import { BackupCodesDisplay } from "@/components/two-factor/backup-codes-display";
-import {
-	Loader2,
-	ShieldCheck,
-	ShieldOff,
-	KeyRound,
-	RefreshCw,
-	CheckCircle2,
-	AlertTriangle,
-	Smartphone,
-	Mail,
-} from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { twoFactor, useSession } from "@/lib/auth-client";
 
 type TwoFactorMethod = "totp" | "email";
 
@@ -43,8 +43,9 @@ type SetupStep =
 export default function SecuritySettingsPage() {
 	const { data: session, isPending: isSessionLoading } = useSession();
 	const [setupStep, setSetupStep] = useState<SetupStep>("idle");
-	const [selectedMethod, setSelectedMethod] =
-		useState<TwoFactorMethod | null>(null);
+	const [selectedMethod, setSelectedMethod] = useState<TwoFactorMethod | null>(
+		null,
+	);
 	const [currentMethod, setCurrentMethod] = useState<TwoFactorMethod | null>(
 		null,
 	);
@@ -96,9 +97,7 @@ export default function SecuritySettingsPage() {
 		setSetupStep("password");
 	};
 
-	const handlePasswordSubmit = async (
-		e: React.FormEvent<HTMLFormElement>,
-	) => {
+	const handlePasswordSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
 		if (!password) {
@@ -196,9 +195,7 @@ export default function SecuritySettingsPage() {
 		setVerificationCode("");
 	};
 
-	const handleVerifyTotpCode = async (
-		e: React.FormEvent<HTMLFormElement>,
-	) => {
+	const handleVerifyTotpCode = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
 		if (verificationCode.length !== 6) {
@@ -216,8 +213,7 @@ export default function SecuritySettingsPage() {
 
 			if (verifyResult.error) {
 				setError(
-					verifyResult.error.message ||
-						"Invalid code. Please try again.",
+					verifyResult.error.message || "Invalid code. Please try again.",
 				);
 				return;
 			}
@@ -230,9 +226,7 @@ export default function SecuritySettingsPage() {
 		}
 	};
 
-	const handleVerifyEmailOtp = async (
-		e: React.FormEvent<HTMLFormElement>,
-	) => {
+	const handleVerifyEmailOtp = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
 		if (verificationCode.length !== 6) {
@@ -250,8 +244,7 @@ export default function SecuritySettingsPage() {
 
 			if (verifyResult.error) {
 				setError(
-					verifyResult.error.message ||
-						"Invalid code. Please try again.",
+					verifyResult.error.message || "Invalid code. Please try again.",
 				);
 				return;
 			}
@@ -382,9 +375,7 @@ export default function SecuritySettingsPage() {
 	return (
 		<div className="space-y-6">
 			<div>
-				<h1 className="text-3xl font-bold tracking-tight">
-					Security Settings
-				</h1>
+				<h1 className="text-3xl font-bold tracking-tight">Security Settings</h1>
 				<p className="text-muted-foreground">
 					Manage your account security and two-factor authentication
 				</p>
@@ -429,8 +420,7 @@ export default function SecuritySettingsPage() {
 									<div className="flex items-center gap-2 p-3 bg-primary/5 rounded-lg">
 										<CheckCircle2 className="h-5 w-5 text-primary" />
 										<span className="text-sm">
-											Your account is protected with
-											two-factor authentication
+											Your account is protected with two-factor authentication
 										</span>
 									</div>
 									{currentMethod && (
@@ -461,9 +451,8 @@ export default function SecuritySettingsPage() {
 								</div>
 							) : (
 								<p className="text-sm text-muted-foreground">
-									Two-factor authentication adds an extra
-									layer of security to your account. Choose
-									between an authenticator app or email
+									Two-factor authentication adds an extra layer of security to
+									your account. Choose between an authenticator app or email
 									verification.
 								</p>
 							)}
@@ -471,18 +460,13 @@ export default function SecuritySettingsPage() {
 							<div className="flex gap-3">
 								{isTwoFactorEnabled ? (
 									<>
-										<Button
-											variant="outline"
-											onClick={handleStartDisable}
-										>
+										<Button variant="outline" onClick={handleStartDisable}>
 											<ShieldOff className="mr-2 h-4 w-4" />
 											Disable 2FA
 										</Button>
 										<Button
 											variant="outline"
-											onClick={
-												handleRegenerateBackupCodes
-											}
+											onClick={handleRegenerateBackupCodes}
 										>
 											<RefreshCw className="mr-2 h-4 w-4" />
 											Regenerate backup codes
@@ -502,8 +486,7 @@ export default function SecuritySettingsPage() {
 					{setupStep === "choose-method" && (
 						<div className="space-y-4">
 							<p className="text-sm text-muted-foreground">
-								Choose your preferred two-factor authentication
-								method:
+								Choose your preferred two-factor authentication method:
 							</p>
 
 							<div className="grid gap-4 sm:grid-cols-2">
@@ -516,12 +499,9 @@ export default function SecuritySettingsPage() {
 										<Smartphone className="h-6 w-6 text-primary" />
 									</div>
 									<div className="text-center">
-										<h3 className="font-semibold">
-											Authenticator App
-										</h3>
+										<h3 className="font-semibold">Authenticator App</h3>
 										<p className="text-sm text-muted-foreground mt-1">
-											Use Google Authenticator, Authy, or
-											similar apps
+											Use Google Authenticator, Authy, or similar apps
 										</p>
 									</div>
 								</button>
@@ -535,12 +515,9 @@ export default function SecuritySettingsPage() {
 										<Mail className="h-6 w-6 text-primary" />
 									</div>
 									<div className="text-center">
-										<h3 className="font-semibold">
-											Email Code
-										</h3>
+										<h3 className="font-semibold">Email Code</h3>
 										<p className="text-sm text-muted-foreground mt-1">
-											Receive a verification code via
-											email
+											Receive a verification code via email
 										</p>
 									</div>
 								</button>
@@ -554,39 +531,28 @@ export default function SecuritySettingsPage() {
 
 					{/* Password Confirmation Step */}
 					{setupStep === "password" && (
-						<form
-							onSubmit={handlePasswordSubmit}
-							className="space-y-4"
-						>
+						<form onSubmit={handlePasswordSubmit} className="space-y-4">
 							<div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
 								{isRegenerating ? (
 									<>
 										<RefreshCw className="h-4 w-4" />
-										<span className="text-sm">
-											Regenerate Backup Codes
-										</span>
+										<span className="text-sm">Regenerate Backup Codes</span>
 									</>
 								) : selectedMethod === "totp" ? (
 									<>
 										<Smartphone className="h-4 w-4" />
-										<span className="text-sm">
-											Authenticator App
-										</span>
+										<span className="text-sm">Authenticator App</span>
 									</>
 								) : (
 									<>
 										<Mail className="h-4 w-4" />
-										<span className="text-sm">
-											Email Code
-										</span>
+										<span className="text-sm">Email Code</span>
 									</>
 								)}
 							</div>
 
 							<div className="space-y-2">
-								<Label htmlFor="password">
-									Confirm your password
-								</Label>
+								<Label htmlFor="password">Confirm your password</Label>
 								<Input
 									id="password"
 									name="password"
@@ -617,10 +583,7 @@ export default function SecuritySettingsPage() {
 								>
 									{isRegenerating ? "Cancel" : "Back"}
 								</Button>
-								<Button
-									type="submit"
-									disabled={isLoading || !password}
-								>
+								<Button type="submit" disabled={isLoading || !password}>
 									{isLoading ? (
 										<>
 											<Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -643,9 +606,8 @@ export default function SecuritySettingsPage() {
 						<div className="space-y-6">
 							<div className="space-y-4">
 								<p className="text-sm text-muted-foreground">
-									Scan this QR code with your authenticator
-									app (such as Google Authenticator, Authy, or
-									1Password).
+									Scan this QR code with your authenticator app (such as Google
+									Authenticator, Authy, or 1Password).
 								</p>
 
 								<div className="flex justify-center p-6 bg-white rounded-xl">
@@ -657,19 +619,13 @@ export default function SecuritySettingsPage() {
 										Can&apos;t scan the code? Enter manually
 									</summary>
 									<div className="mt-2 p-3 bg-muted rounded-lg">
-										<code className="text-xs break-all">
-											{totpUri}
-										</code>
+										<code className="text-xs break-all">{totpUri}</code>
 									</div>
 								</details>
 							</div>
 
 							<div className="flex gap-3">
-								<Button
-									type="button"
-									variant="outline"
-									onClick={resetState}
-								>
+								<Button type="button" variant="outline" onClick={resetState}>
 									Cancel
 								</Button>
 								<Button onClick={handleQrCodeNext}>
@@ -681,14 +637,11 @@ export default function SecuritySettingsPage() {
 
 					{/* Verify TOTP Code Step */}
 					{setupStep === "verify" && (
-						<form
-							onSubmit={handleVerifyTotpCode}
-							className="space-y-6"
-						>
+						<form onSubmit={handleVerifyTotpCode} className="space-y-6">
 							<div className="space-y-4">
 								<p className="text-sm text-muted-foreground">
-									Enter the 6-digit code from your
-									authenticator app to verify the setup.
+									Enter the 6-digit code from your authenticator app to verify
+									the setup.
 								</p>
 
 								<TotpInput
@@ -710,10 +663,7 @@ export default function SecuritySettingsPage() {
 								</Button>
 								<Button
 									type="submit"
-									disabled={
-										isLoading ||
-										verificationCode.length !== 6
-									}
+									disabled={isLoading || verificationCode.length !== 6}
 								>
 									{isLoading ? (
 										<>
@@ -730,10 +680,7 @@ export default function SecuritySettingsPage() {
 
 					{/* Email OTP Sent Step */}
 					{setupStep === "email-sent" && (
-						<form
-							onSubmit={handleVerifyEmailOtp}
-							className="space-y-6"
-						>
+						<form onSubmit={handleVerifyEmailOtp} className="space-y-6">
 							<div className="space-y-4">
 								<div className="flex items-center gap-2 p-3 bg-primary/5 rounded-lg">
 									<Mail className="h-5 w-5 text-primary" />
@@ -744,8 +691,8 @@ export default function SecuritySettingsPage() {
 								</div>
 
 								<p className="text-sm text-muted-foreground">
-									Enter the 6-digit code from your email to
-									enable two-factor authentication.
+									Enter the 6-digit code from your email to enable two-factor
+									authentication.
 								</p>
 
 								<TotpInput
@@ -776,10 +723,7 @@ export default function SecuritySettingsPage() {
 								</Button>
 								<Button
 									type="submit"
-									disabled={
-										isLoading ||
-										verificationCode.length !== 6
-									}
+									disabled={isLoading || verificationCode.length !== 6}
 								>
 									{isLoading ? (
 										<>
@@ -800,14 +744,11 @@ export default function SecuritySettingsPage() {
 							<div className="space-y-2">
 								<div className="flex items-center gap-2">
 									<KeyRound className="h-5 w-5 text-primary" />
-									<h3 className="font-semibold">
-										Backup Codes
-									</h3>
+									<h3 className="font-semibold">Backup Codes</h3>
 								</div>
 								<p className="text-sm text-muted-foreground">
-									Save these backup codes in a secure
-									location. You can use them to sign in if you
-									lose access to your authenticator app. Each
+									Save these backup codes in a secure location. You can use them
+									to sign in if you lose access to your authenticator app. Each
 									code can only be used once.
 								</p>
 							</div>
@@ -820,9 +761,7 @@ export default function SecuritySettingsPage() {
 
 							<Button
 								onClick={handleSetupComplete}
-								disabled={
-									!backupConfirmed && !isTwoFactorEnabled
-								}
+								disabled={!backupConfirmed && !isTwoFactorEnabled}
 								className="w-full"
 							>
 								<CheckCircle2 className="mr-2 h-4 w-4" />
@@ -838,12 +777,9 @@ export default function SecuritySettingsPage() {
 								<CheckCircle2 className="h-8 w-8 text-primary" />
 							</div>
 							<div className="text-center">
-								<h3 className="font-semibold text-lg">
-									2FA Enabled!
-								</h3>
+								<h3 className="font-semibold text-lg">2FA Enabled!</h3>
 								<p className="text-sm text-muted-foreground mt-1">
-									Your account is now protected with
-									two-factor authentication.
+									Your account is now protected with two-factor authentication.
 								</p>
 							</div>
 						</div>
@@ -854,9 +790,8 @@ export default function SecuritySettingsPage() {
 						<form onSubmit={handleDisable} className="space-y-4">
 							<div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
 								<p className="text-sm text-destructive">
-									<strong>Warning:</strong> Disabling
-									two-factor authentication will make your
-									account less secure.
+									<strong>Warning:</strong> Disabling two-factor authentication
+									will make your account less secure.
 								</p>
 							</div>
 
@@ -937,9 +872,7 @@ function PasswordChangeSection() {
 		setPasswordSuccess(false);
 	};
 
-	const handleChangePassword = async (
-		e: React.FormEvent<HTMLFormElement>,
-	) => {
+	const handleChangePassword = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		setPasswordError(null);
 
@@ -1019,10 +952,7 @@ function PasswordChangeSection() {
 			</CardHeader>
 			<CardContent>
 				{!isChangingPassword ? (
-					<Button
-						variant="outline"
-						onClick={() => setIsChangingPassword(true)}
-					>
+					<Button variant="outline" onClick={() => setIsChangingPassword(true)}>
 						<KeyRound className="mr-2 h-4 w-4" />
 						Change password
 					</Button>
@@ -1036,9 +966,7 @@ function PasswordChangeSection() {
 						)}
 
 						<div className="space-y-2">
-							<Label htmlFor="currentPassword">
-								Current password
-							</Label>
+							<Label htmlFor="currentPassword">Current password</Label>
 							<Input
 								id="currentPassword"
 								type="password"
@@ -1075,9 +1003,7 @@ function PasswordChangeSection() {
 						</div>
 
 						<div className="space-y-2">
-							<Label htmlFor="confirmPassword">
-								Confirm new password
-							</Label>
+							<Label htmlFor="confirmPassword">Confirm new password</Label>
 							<Input
 								id="confirmPassword"
 								type="password"

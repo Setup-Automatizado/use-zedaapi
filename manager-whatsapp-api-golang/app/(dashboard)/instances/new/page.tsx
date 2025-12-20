@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+import type { Metadata } from "next";
 import { CreateInstanceForm } from "@/components/instances/create-instance-form";
 import { PageHeader } from "@/components/shared/page-header";
 import {
@@ -26,8 +26,8 @@ export default function NewInstancePage() {
 				<CardHeader>
 					<CardTitle>Instance Configuration</CardTitle>
 					<CardDescription>
-						Fill in the basic information and configure optional
-						webhooks and preferences
+						Fill in the basic information and configure optional webhooks and
+						preferences
 					</CardDescription>
 				</CardHeader>
 				<CardContent>

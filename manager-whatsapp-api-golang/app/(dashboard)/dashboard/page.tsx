@@ -7,19 +7,19 @@
 
 "use client";
 
+import { AlertCircle } from "lucide-react";
 import * as React from "react";
-import { useInstancesWithDevice } from "@/hooks/use-instances-with-device";
-import { useHealth } from "@/hooks/use-health";
 import {
-	StatsCards,
-	RecentInstances,
-	QuickActions,
 	HealthSummary,
+	QuickActions,
+	RecentInstances,
+	StatsCards,
 } from "@/components/dashboard";
 import { PageHeader } from "@/components/shared/page-header";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useHealth } from "@/hooks/use-health";
+import { useInstancesWithDevice } from "@/hooks/use-instances-with-device";
 
 export default function DashboardPage() {
 	// Fetch instances with device info for avatars
@@ -54,8 +54,7 @@ export default function DashboardPage() {
 			(instance) => instance.whatsappConnected && instance.phoneConnected,
 		).length;
 		const disconnected = instances.filter(
-			(instance) =>
-				!instance.whatsappConnected || !instance.phoneConnected,
+			(instance) => !instance.whatsappConnected || !instance.phoneConnected,
 		).length;
 		const pending = instances.filter(
 			(instance) => !instance.phoneConnected,
@@ -124,10 +123,7 @@ export default function DashboardPage() {
 			{instancesLoading ? (
 				<Skeleton className="h-96" />
 			) : (
-				<RecentInstances
-					instances={instances || []}
-					deviceMap={deviceMap}
-				/>
+				<RecentInstances instances={instances || []} deviceMap={deviceMap} />
 			)}
 		</div>
 	);

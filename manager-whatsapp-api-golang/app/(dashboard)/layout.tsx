@@ -1,12 +1,12 @@
 "use client";
 
-import * as React from "react";
 import { useRouter } from "next/navigation";
-import { Sidebar } from "@/components/layout/sidebar";
+import * as React from "react";
 import { Header } from "@/components/layout/header";
 import { MobileNav } from "@/components/layout/mobile-nav";
-import { SidebarProvider, useSidebar } from "@/lib/sidebar-context";
+import { Sidebar } from "@/components/layout/sidebar";
 import { signOut, useSession } from "@/lib/auth-client";
+import { SidebarProvider, useSidebar } from "@/lib/sidebar-context";
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
 	const router = useRouter();
@@ -66,10 +66,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 					isCollapsed ? "md:pl-16" : "md:pl-64"
 				}`}
 			>
-				<Header
-					user={user}
-					onMobileMenuToggle={() => setMobileNavOpen(true)}
-				/>
+				<Header user={user} onMobileMenuToggle={() => setMobileNavOpen(true)} />
 
 				<main className="p-6">{children}</main>
 			</div>

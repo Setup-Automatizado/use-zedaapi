@@ -1,11 +1,20 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import {
+	AlertTriangle,
+	CheckCircle2,
+	Clock,
+	Loader2,
+	Mail,
+	Shield,
+	Trash2,
+	UserPlus,
+	Users,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useSession } from "@/lib/auth-client";
+import { useCallback, useEffect, useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
 	Card,
 	CardContent,
@@ -13,21 +22,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "@/components/ui/table";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
 import {
 	Dialog,
 	DialogContent,
@@ -37,19 +31,25 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-	Loader2,
-	UserPlus,
-	Trash2,
-	Shield,
-	Users,
-	Mail,
-	CheckCircle2,
-	Clock,
-	AlertTriangle,
-} from "lucide-react";
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/components/ui/table";
+import { useSession } from "@/lib/auth-client";
 
 interface Invitation {
 	id: string;
@@ -146,9 +146,7 @@ export default function AdminSettingsPage() {
 			setIsDialogOpen(false);
 			fetchInvitations();
 		} catch (err) {
-			setError(
-				err instanceof Error ? err.message : "Error sending invitation",
-			);
+			setError(err instanceof Error ? err.message : "Error sending invitation");
 		} finally {
 			setIsSubmitting(false);
 		}
@@ -174,9 +172,7 @@ export default function AdminSettingsPage() {
 			setDeleteEmail(null);
 			fetchInvitations();
 		} catch (err) {
-			setError(
-				err instanceof Error ? err.message : "Error removing user",
-			);
+			setError(err instanceof Error ? err.message : "Error removing user");
 		} finally {
 			setIsDeleting(false);
 		}
@@ -226,9 +222,7 @@ export default function AdminSettingsPage() {
 		<div className="space-y-6">
 			<div className="flex items-center justify-between">
 				<div>
-					<h1 className="text-3xl font-bold tracking-tight">
-						User Management
-					</h1>
+					<h1 className="text-3xl font-bold tracking-tight">User Management</h1>
 					<p className="text-muted-foreground">
 						Invite new users and manage platform access
 					</p>
@@ -245,8 +239,7 @@ export default function AdminSettingsPage() {
 						<DialogHeader>
 							<DialogTitle>Invite New User</DialogTitle>
 							<DialogDescription>
-								Send an email invitation for a new user to
-								access the platform.
+								Send an email invitation for a new user to access the platform.
 							</DialogDescription>
 						</DialogHeader>
 						<form onSubmit={handleInvite} className="space-y-4">
@@ -300,10 +293,7 @@ export default function AdminSettingsPage() {
 								>
 									Cancel
 								</Button>
-								<Button
-									type="submit"
-									disabled={isSubmitting || !email}
-								>
+								<Button type="submit" disabled={isSubmitting || !email}>
 									{isSubmitting ? (
 										<>
 											<Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -340,28 +330,20 @@ export default function AdminSettingsPage() {
 			<div className="grid gap-4 md:grid-cols-3">
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">
-							Total Users
-						</CardTitle>
+						<CardTitle className="text-sm font-medium">Total Users</CardTitle>
 						<Users className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">
-							{invitations.length}
-						</div>
+						<div className="text-2xl font-bold">{invitations.length}</div>
 					</CardContent>
 				</Card>
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">
-							Active Users
-						</CardTitle>
+						<CardTitle className="text-sm font-medium">Active Users</CardTitle>
 						<CheckCircle2 className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">
-							{activeUsers.length}
-						</div>
+						<div className="text-2xl font-bold">{activeUsers.length}</div>
 					</CardContent>
 				</Card>
 				<Card>
@@ -393,8 +375,7 @@ export default function AdminSettingsPage() {
 							<Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
 							<p>No users found</p>
 							<p className="text-sm">
-								Invite the first user by clicking the button
-								above.
+								Invite the first user by clicking the button above.
 							</p>
 						</div>
 					) : (
@@ -406,9 +387,7 @@ export default function AdminSettingsPage() {
 									<TableHead>Role</TableHead>
 									<TableHead>Status</TableHead>
 									<TableHead>Invited at</TableHead>
-									<TableHead className="text-right">
-										Actions
-									</TableHead>
+									<TableHead className="text-right">Actions</TableHead>
 								</TableRow>
 							</TableHeader>
 							<TableBody>
@@ -417,15 +396,11 @@ export default function AdminSettingsPage() {
 										<TableCell className="font-medium">
 											{invitation.email}
 										</TableCell>
-										<TableCell>
-											{invitation.user?.name || "-"}
-										</TableCell>
+										<TableCell>{invitation.user?.name || "-"}</TableCell>
 										<TableCell>
 											<Badge
 												variant={
-													invitation.role === "ADMIN"
-														? "default"
-														: "secondary"
+													invitation.role === "ADMIN" ? "default" : "secondary"
 												}
 											>
 												{invitation.role === "ADMIN" ? (
@@ -457,63 +432,33 @@ export default function AdminSettingsPage() {
 												</Badge>
 											)}
 										</TableCell>
-										<TableCell>
-											{formatDate(invitation.invitedAt)}
-										</TableCell>
+										<TableCell>{formatDate(invitation.invitedAt)}</TableCell>
 										<TableCell className="text-right">
-											{invitation.email !==
-												session?.user?.email && (
+											{invitation.email !== session?.user?.email && (
 												<Dialog
-													open={
-														deleteEmail ===
-														invitation.email
-													}
-													onOpenChange={(open) =>
-														!open &&
-														setDeleteEmail(null)
-													}
+													open={deleteEmail === invitation.email}
+													onOpenChange={(open) => !open && setDeleteEmail(null)}
 												>
 													<DialogTrigger asChild>
 														<Button
 															variant="ghost"
 															size="sm"
 															className="text-destructive hover:text-destructive"
-															onClick={() =>
-																setDeleteEmail(
-																	invitation.email,
-																)
-															}
+															onClick={() => setDeleteEmail(invitation.email)}
 														>
 															<Trash2 className="h-4 w-4" />
 														</Button>
 													</DialogTrigger>
 													<DialogContent>
 														<DialogHeader>
-															<DialogTitle>
-																Remove User
-															</DialogTitle>
+															<DialogTitle>Remove User</DialogTitle>
 															<DialogDescription>
-																Are you sure you
-																want to remove
-																access for{" "}
-																<strong>
-																	{
-																		invitation.email
-																	}
-																</strong>
-																?
+																Are you sure you want to remove access for{" "}
+																<strong>{invitation.email}</strong>?
 																{invitation.acceptedAt && (
 																	<span className="block mt-2 text-destructive">
-																		This
-																		user
-																		already
-																		has an
-																		active
-																		account.
-																		It will
-																		be
-																		permanently
-																		removed.
+																		This user already has an active account. It
+																		will be permanently removed.
 																	</span>
 																)}
 															</DialogDescription>
@@ -521,27 +466,15 @@ export default function AdminSettingsPage() {
 														<DialogFooter>
 															<Button
 																variant="outline"
-																onClick={() =>
-																	setDeleteEmail(
-																		null,
-																	)
-																}
-																disabled={
-																	isDeleting
-																}
+																onClick={() => setDeleteEmail(null)}
+																disabled={isDeleting}
 															>
 																Cancel
 															</Button>
 															<Button
 																variant="destructive"
-																onClick={() =>
-																	handleDelete(
-																		invitation.email,
-																	)
-																}
-																disabled={
-																	isDeleting
-																}
+																onClick={() => handleDelete(invitation.email)}
+																disabled={isDeleting}
 															>
 																{isDeleting ? (
 																	<>

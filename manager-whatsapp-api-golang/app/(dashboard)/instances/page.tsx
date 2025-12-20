@@ -7,16 +7,18 @@
 
 "use client";
 
-import * as React from "react";
+import { AlertCircle, Smartphone } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useInstancesWithDevice } from "@/hooks/use-instances-with-device";
-import { PageHeader } from "@/components/shared/page-header";
+import * as React from "react";
 import {
-	InstanceTable,
+	CreateInstanceButton,
 	InstanceCard,
 	InstanceFilters,
-	CreateInstanceButton,
+	InstanceTable,
 } from "@/components/instances";
+import { EmptyState } from "@/components/shared/empty-state";
+import { PageHeader } from "@/components/shared/page-header";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
 	Pagination,
 	PaginationContent,
@@ -25,9 +27,7 @@ import {
 	PaginationNext,
 	PaginationPrevious,
 } from "@/components/ui/pagination";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, Smartphone } from "lucide-react";
-import { EmptyState } from "@/components/shared/empty-state";
+import { useInstancesWithDevice } from "@/hooks/use-instances-with-device";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import type { Instance } from "@/types";
 
@@ -44,10 +44,8 @@ export default function InstancesPage() {
 		pageSize: Number(searchParams.get("pageSize")) || DEFAULT_PAGE_SIZE,
 		query: searchParams.get("query") || "",
 		status:
-			(searchParams.get("status") as
-				| "all"
-				| "connected"
-				| "disconnected") || "all",
+			(searchParams.get("status") as "all" | "connected" | "disconnected") ||
+			"all",
 	});
 
 	// Fetch instances with filters and device info
@@ -68,19 +66,16 @@ export default function InstancesPage() {
 
 			// Update URL
 			const params = new URLSearchParams();
-			if (newFilters.page > 1)
-				params.set("page", newFilters.page.toString());
+			if (newFilters.page > 1) params.set("page", newFilters.page.toString());
 			if (newFilters.pageSize !== DEFAULT_PAGE_SIZE)
 				params.set("pageSize", newFilters.pageSize.toString());
 			if (newFilters.query) params.set("query", newFilters.query);
-			if (newFilters.status !== "all")
-				params.set("status", newFilters.status);
+			if (newFilters.status !== "all") params.set("status", newFilters.status);
 
 			const queryString = params.toString();
-			router.replace(
-				`/instances${queryString ? `?${queryString}` : ""}`,
-				{ scroll: false },
-			);
+			router.replace(`/instances${queryString ? `?${queryString}` : ""}`, {
+				scroll: false,
+			});
 		},
 		[filters, router],
 	);
@@ -135,9 +130,7 @@ export default function InstancesPage() {
 					action={<CreateInstanceButton />}
 				/>
 				<EmptyState
-					icon={
-						<Smartphone className="h-8 w-8 text-muted-foreground" />
-					}
+					icon={<Smartphone className="h-8 w-8 text-muted-foreground" />}
 					title="No instances created"
 					description="Create your first instance to start using the WhatsApp API"
 					action={<CreateInstanceButton />}
@@ -164,9 +157,7 @@ export default function InstancesPage() {
 					})
 				}
 				onQueryChange={(query) => updateFilters({ query })}
-				onClearFilters={() =>
-					updateFilters({ status: "all", query: "" })
-				}
+				onClearFilters={() => updateFilters({ status: "all", query: "" })}
 			/>
 
 			{/* Table (Desktop) / Cards (Mobile) */}
@@ -174,10 +165,7 @@ export default function InstancesPage() {
 				<div className="space-y-4">
 					{isLoading ? (
 						Array.from({ length: 3 }).map((_, i) => (
-							<div
-								key={i}
-								className="h-48 animate-pulse rounded-lg bg-muted"
-							/>
+							<div key={i} className="h-48 animate-pulse rounded-lg bg-muted" />
 						))
 					) : instances && instances.length > 0 ? (
 						instances.map((instance) => (
@@ -192,9 +180,7 @@ export default function InstancesPage() {
 						))
 					) : (
 						<EmptyState
-							icon={
-								<Smartphone className="h-8 w-8 text-muted-foreground" />
-							}
+							icon={<Smartphone className="h-8 w-8 text-muted-foreground" />}
 							title="No instances found"
 							description="Try adjusting the filters or create a new instance"
 							action={<CreateInstanceButton />}
@@ -241,8 +227,7 @@ export default function InstancesPage() {
 									const shouldShow =
 										pageNumber === 1 ||
 										pageNumber === pagination.totalPage ||
-										Math.abs(pageNumber - filters.page) <=
-											1;
+										Math.abs(pageNumber - filters.page) <= 1;
 
 									if (!shouldShow) return null;
 
@@ -255,9 +240,7 @@ export default function InstancesPage() {
 														page: pageNumber,
 													})
 												}
-												isActive={
-													pageNumber === filters.page
-												}
+												isActive={pageNumber === filters.page}
 												className="cursor-pointer"
 											>
 												{pageNumber}
@@ -272,10 +255,7 @@ export default function InstancesPage() {
 									size="default"
 									onClick={() =>
 										updateFilters({
-											page: Math.min(
-												pagination.totalPage,
-												filters.page + 1,
-											),
+											page: Math.min(pagination.totalPage, filters.page + 1),
 										})
 									}
 									className={
@@ -293,8 +273,7 @@ export default function InstancesPage() {
 			{/* Results count */}
 			{pagination && (
 				<p className="text-center text-sm text-muted-foreground">
-					Showing {instances?.length || 0} of {pagination.total}{" "}
-					instance(s)
+					Showing {instances?.length || 0} of {pagination.total} instance(s)
 				</p>
 			)}
 		</div>
