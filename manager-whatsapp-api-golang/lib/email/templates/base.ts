@@ -9,19 +9,19 @@
  * @module lib/email/templates/base
  */
 
-import { appConfig, brandColors } from '../config';
+import { appConfig, brandColors } from "../config";
 
 export interface BaseTemplateProps {
-  /** Email title (used in preview) */
-  title: string;
-  /** Preview text shown in email client */
-  previewText?: string;
-  /** Main content HTML */
-  content: string;
-  /** Optional footer content */
-  footerContent?: string;
-  /** Current year for copyright */
-  year?: number;
+	/** Email title (used in preview) */
+	title: string;
+	/** Preview text shown in email client */
+	previewText?: string;
+	/** Main content HTML */
+	content: string;
+	/** Optional footer content */
+	footerContent?: string;
+	/** Current year for copyright */
+	year?: number;
 }
 
 /**
@@ -29,16 +29,16 @@ export interface BaseTemplateProps {
  * Fully responsive with dark mode support
  */
 export function baseTemplate({
-  title,
-  previewText,
-  content,
-  footerContent,
-  year = new Date().getFullYear(),
+	title,
+	previewText,
+	content,
+	footerContent,
+	year = new Date().getFullYear(),
 }: BaseTemplateProps): string {
-  const { name, url, supportEmail, logoUrl } = appConfig;
-  const c = brandColors;
+	const { name, url, supportEmail, logoUrl } = appConfig;
+	const c = brandColors;
 
-  return `
+	return `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -100,13 +100,17 @@ export function baseTemplate({
   </style>
 </head>
 <body class="email-body" style="margin: 0; padding: 0; background-color: ${c.background}; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
-  ${previewText ? `
+  ${
+		previewText
+			? `
   <!-- Preview Text -->
   <div style="display: none; max-height: 0; overflow: hidden; mso-hide: all;">
     ${previewText}
-    ${'&nbsp;'.repeat(150)}
+    ${"&nbsp;".repeat(150)}
   </div>
-  ` : ''}
+  `
+			: ""
+	}
 
   <!-- Email Wrapper -->
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: ${c.background};">
@@ -135,7 +139,9 @@ export function baseTemplate({
           <!-- Footer -->
           <tr>
             <td style="padding: 24px 40px; background-color: #fafafa; border-top: 1px solid ${c.border};" class="border-color">
-              ${footerContent || `
+              ${
+								footerContent ||
+								`
               <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                 <tr>
                   <td style="text-align: center;">
@@ -151,7 +157,8 @@ export function baseTemplate({
                   </td>
                 </tr>
               </table>
-              `}
+              `
+							}
             </td>
           </tr>
 
@@ -177,8 +184,8 @@ export function baseTemplate({
  * Creates a primary action button
  */
 export function primaryButton(text: string, href: string): string {
-  const c = brandColors;
-  return `
+	const c = brandColors;
+	return `
     <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 24px 0;">
       <tr>
         <td>
@@ -195,8 +202,8 @@ export function primaryButton(text: string, href: string): string {
  * Creates a secondary/outline button
  */
 export function secondaryButton(text: string, href: string): string {
-  const c = brandColors;
-  return `
+	const c = brandColors;
+	return `
     <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin: 24px 0;">
       <tr>
         <td>
@@ -212,27 +219,34 @@ export function secondaryButton(text: string, href: string): string {
 /**
  * Creates an info box for codes or important text
  */
-export function infoBox(content: string, variant: 'code' | 'info' | 'warning' | 'success' = 'info'): string {
-  const c = brandColors;
-  const colors = {
-    code: { bg: '#f5f5f5', border: c.border, text: c.foreground },
-    info: { bg: '#f0f9ff', border: '#bae6fd', text: '#0369a1' },
-    warning: { bg: '#fffbeb', border: '#fde68a', text: '#b45309' },
-    success: { bg: '#f0fdf4', border: '#bbf7d0', text: '#15803d' },
-  };
-  const style = colors[variant];
+export function infoBox(
+	content: string,
+	variant: "code" | "info" | "warning" | "success" = "info",
+): string {
+	const c = brandColors;
+	const colors = {
+		code: { bg: "#f5f5f5", border: c.border, text: c.foreground },
+		info: { bg: "#f0f9ff", border: "#bae6fd", text: "#0369a1" },
+		warning: { bg: "#fffbeb", border: "#fde68a", text: "#b45309" },
+		success: { bg: "#f0fdf4", border: "#bbf7d0", text: "#15803d" },
+	};
+	const style = colors[variant];
 
-  return `
-    <div style="padding: 20px; background-color: ${style.bg}; border: 1px solid ${style.border}; border-radius: 12px; margin: 16px 0; ${variant === 'code' ? 'text-align: center;' : ''}">
-      ${variant === 'code' ? `
+	return `
+    <div style="padding: 20px; background-color: ${style.bg}; border: 1px solid ${style.border}; border-radius: 12px; margin: 16px 0; ${variant === "code" ? "text-align: center;" : ""}">
+      ${
+				variant === "code"
+					? `
         <span style="font-family: 'SF Mono', Monaco, 'Courier New', monospace; font-size: 28px; font-weight: 700; letter-spacing: 4px; color: ${style.text};">
           ${content}
         </span>
-      ` : `
+      `
+					: `
         <p style="margin: 0; font-size: 14px; color: ${style.text}; line-height: 1.6;">
           ${content}
         </p>
-      `}
+      `
+			}
     </div>
   `;
 }
@@ -241,32 +255,37 @@ export function infoBox(content: string, variant: 'code' | 'info' | 'warning' | 
  * Creates a divider line
  */
 export function divider(): string {
-  return `<hr style="border: none; border-top: 1px solid ${brandColors.border}; margin: 24px 0;">`;
+	return `<hr style="border: none; border-top: 1px solid ${brandColors.border}; margin: 24px 0;">`;
 }
 
 /**
  * Creates a text paragraph
  */
-export function paragraph(text: string, options?: { muted?: boolean; small?: boolean; center?: boolean }): string {
-  const c = brandColors;
-  const style = [
-    'margin: 0 0 16px',
-    `font-size: ${options?.small ? '13px' : '15px'}`,
-    `color: ${options?.muted ? c.muted : c.foreground}`,
-    'line-height: 1.6',
-    options?.center ? 'text-align: center' : '',
-  ].filter(Boolean).join('; ');
+export function paragraph(
+	text: string,
+	options?: { muted?: boolean; small?: boolean; center?: boolean },
+): string {
+	const c = brandColors;
+	const style = [
+		"margin: 0 0 16px",
+		`font-size: ${options?.small ? "13px" : "15px"}`,
+		`color: ${options?.muted ? c.muted : c.foreground}`,
+		"line-height: 1.6",
+		options?.center ? "text-align: center" : "",
+	]
+		.filter(Boolean)
+		.join("; ");
 
-  return `<p class="text-${options?.muted ? 'secondary' : 'primary'}" style="${style}">${text}</p>`;
+	return `<p class="text-${options?.muted ? "secondary" : "primary"}" style="${style}">${text}</p>`;
 }
 
 /**
  * Creates a heading
  */
 export function heading(text: string, level: 1 | 2 | 3 = 1): string {
-  const c = brandColors;
-  const sizes = { 1: '28px', 2: '22px', 3: '18px' };
-  const margins = { 1: '0 0 24px', 2: '0 0 16px', 3: '0 0 12px' };
+	const c = brandColors;
+	const sizes = { 1: "28px", 2: "22px", 3: "18px" };
+	const margins = { 1: "0 0 24px", 2: "0 0 16px", 3: "0 0 12px" };
 
-  return `<h${level} class="text-primary" style="margin: ${margins[level]}; font-size: ${sizes[level]}; font-weight: 700; color: ${c.foreground}; line-height: 1.3; letter-spacing: -0.5px;">${text}</h${level}>`;
+	return `<h${level} class="text-primary" style="margin: ${margins[level]}; font-size: ${sizes[level]}; font-weight: 700; color: ${c.foreground}; line-height: 1.3; letter-spacing: -0.5px;">${text}</h${level}>`;
 }

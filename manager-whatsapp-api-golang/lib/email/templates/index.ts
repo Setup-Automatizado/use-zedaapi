@@ -8,46 +8,46 @@
 
 // Base template and helpers
 export {
-  baseTemplate,
-  primaryButton,
-  secondaryButton,
-  infoBox,
-  divider,
-  paragraph,
-  heading,
-  type BaseTemplateProps,
-} from './base';
+	type BaseTemplateProps,
+	baseTemplate,
+	divider,
+	heading,
+	infoBox,
+	paragraph,
+	primaryButton,
+	secondaryButton,
+} from "./base";
 
 // Login alert template
 export {
-  loginAlertTemplate,
-  type LoginAlertData,
-} from './login-alert';
+	type LoginAlertData,
+	loginAlertTemplate,
+} from "./login-alert";
 
 // Password reset templates
 export {
-  passwordResetTemplate,
-  passwordChangedTemplate,
-  type PasswordResetData,
-  type PasswordChangedData,
-} from './password-reset';
+	type PasswordChangedData,
+	type PasswordResetData,
+	passwordChangedTemplate,
+	passwordResetTemplate,
+} from "./password-reset";
 
 // Two-factor authentication templates
 export {
-  twoFactorCodeTemplate,
-  twoFactorEnabledTemplate,
-  twoFactorDisabledTemplate,
-  type TwoFactorCodeData,
-  type TwoFactorEnabledData,
-  type TwoFactorDisabledData,
-} from './two-factor';
+	type TwoFactorCodeData,
+	type TwoFactorDisabledData,
+	type TwoFactorEnabledData,
+	twoFactorCodeTemplate,
+	twoFactorDisabledTemplate,
+	twoFactorEnabledTemplate,
+} from "./two-factor";
 
 // User invite templates
 export {
-  userInviteTemplate,
-  inviteAcceptedTemplate,
-  inviteExpiredTemplate,
-  type UserInviteData,
-  type InviteAcceptedData,
-  type InviteExpiredData,
-} from './user-invite';
+	type InviteAcceptedData,
+	type InviteExpiredData,
+	inviteAcceptedTemplate,
+	inviteExpiredTemplate,
+	type UserInviteData,
+	userInviteTemplate,
+} from "./user-invite";

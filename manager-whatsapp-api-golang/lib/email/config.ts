@@ -7,8 +7,8 @@
  * @module lib/email/config
  */
 
-import nodemailer from "nodemailer";
 import type { Transporter } from "nodemailer";
+import nodemailer from "nodemailer";
 
 /**
  * Email configuration from environment variables
@@ -23,8 +23,7 @@ export const emailConfig = {
 	},
 	from: {
 		name: process.env.EMAIL_FROM_NAME || "WhatsApp Manager",
-		address:
-			process.env.EMAIL_FROM_ADDRESS || "noreply@whatsapp-manager.com",
+		address: process.env.EMAIL_FROM_ADDRESS || "noreply@whatsapp-manager.com",
 	},
 } as const;
 

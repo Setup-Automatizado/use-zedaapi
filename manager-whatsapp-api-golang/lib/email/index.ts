@@ -9,27 +9,25 @@
 
 // Configuration
 export {
-  emailConfig,
-  appConfig,
-  brandColors,
-  getTransporter,
-  verifyEmailConnection,
-} from './config';
-
-// Templates
-export * from './templates';
-
+	appConfig,
+	brandColors,
+	emailConfig,
+	getTransporter,
+	verifyEmailConnection,
+} from "./config";
 // Sender service
 export {
-  emailService,
-  sendLoginAlert,
-  sendPasswordReset,
-  sendPasswordChanged,
-  sendTwoFactorCode,
-  sendTwoFactorEnabled,
-  sendTwoFactorDisabled,
-  sendUserInvite,
-  sendInviteAccepted,
-  sendInviteExpired,
-  type EmailResult,
-} from './sender';
+	type EmailResult,
+	emailService,
+	sendInviteAccepted,
+	sendInviteExpired,
+	sendLoginAlert,
+	sendPasswordChanged,
+	sendPasswordReset,
+	sendTwoFactorCode,
+	sendTwoFactorDisabled,
+	sendTwoFactorEnabled,
+	sendUserInvite,
+} from "./sender";
+// Templates
+export * from "./templates";

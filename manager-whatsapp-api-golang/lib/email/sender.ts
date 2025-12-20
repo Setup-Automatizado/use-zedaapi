@@ -8,26 +8,26 @@
  */
 
 import type { SendMailOptions } from "nodemailer";
-import { emailConfig, getTransporter, appConfig } from "./config";
+import { appConfig, emailConfig, getTransporter } from "./config";
 import {
-	loginAlertTemplate,
-	passwordResetTemplate,
-	passwordChangedTemplate,
-	twoFactorCodeTemplate,
-	twoFactorEnabledTemplate,
-	twoFactorDisabledTemplate,
-	userInviteTemplate,
+	type InviteAcceptedData,
+	type InviteExpiredData,
 	inviteAcceptedTemplate,
 	inviteExpiredTemplate,
 	type LoginAlertData,
-	type PasswordResetData,
+	loginAlertTemplate,
 	type PasswordChangedData,
+	type PasswordResetData,
+	passwordChangedTemplate,
+	passwordResetTemplate,
 	type TwoFactorCodeData,
-	type TwoFactorEnabledData,
 	type TwoFactorDisabledData,
+	type TwoFactorEnabledData,
+	twoFactorCodeTemplate,
+	twoFactorDisabledTemplate,
+	twoFactorEnabledTemplate,
 	type UserInviteData,
-	type InviteAcceptedData,
-	type InviteExpiredData,
+	userInviteTemplate,
 } from "./templates";
 
 /**

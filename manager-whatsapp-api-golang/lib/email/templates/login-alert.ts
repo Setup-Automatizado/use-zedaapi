@@ -7,65 +7,66 @@
  * @module lib/email/templates/login-alert
  */
 
-import { appConfig, brandColors } from '../config';
+import { appConfig, brandColors } from "../config";
 import {
-  baseTemplate,
-  heading,
-  paragraph,
-  primaryButton,
-  secondaryButton,
-  infoBox,
-  divider,
-} from './base';
+	baseTemplate,
+	divider,
+	heading,
+	infoBox,
+	paragraph,
+	primaryButton,
+	secondaryButton,
+} from "./base";
 
 export interface LoginAlertData {
-  /** User's name */
-  userName: string;
-  /** User's email */
-  userEmail: string;
-  /** Device/browser information */
-  device: string;
-  /** IP address */
-  ipAddress: string;
-  /** Location (city, country) */
-  location?: string;
-  /** Login timestamp */
-  loginTime: Date;
-  /** Link to security settings */
-  securitySettingsUrl?: string;
-  /** Link to report unauthorized access */
-  reportUrl?: string;
+	/** User's name */
+	userName: string;
+	/** User's email */
+	userEmail: string;
+	/** Device/browser information */
+	device: string;
+	/** IP address */
+	ipAddress: string;
+	/** Location (city, country) */
+	location?: string;
+	/** Login timestamp */
+	loginTime: Date;
+	/** Link to security settings */
+	securitySettingsUrl?: string;
+	/** Link to report unauthorized access */
+	reportUrl?: string;
 }
 
 /**
  * Generates a login alert email
  */
 export function loginAlertTemplate(data: LoginAlertData): string {
-  const {
-    userName,
-    userEmail,
-    device,
-    ipAddress,
-    location,
-    loginTime,
-    securitySettingsUrl = `${appConfig.url}/settings/security`,
-    reportUrl = `${appConfig.url}/settings/security?action=report`,
-  } = data;
+	const {
+		userName,
+		userEmail,
+		device,
+		ipAddress,
+		location,
+		loginTime,
+		securitySettingsUrl = `${appConfig.url}/settings/security`,
+		reportUrl = `${appConfig.url}/settings/security?action=report`,
+	} = data;
 
-  const c = brandColors;
-  const formattedTime = loginTime.toLocaleString('en-US', {
-    dateStyle: 'full',
-    timeStyle: 'short',
-  });
+	const c = brandColors;
+	const formattedTime = loginTime.toLocaleString("en-US", {
+		dateStyle: "full",
+		timeStyle: "short",
+	});
 
-  const content = `
-    ${heading('New login detected')}
+	const content = `
+    ${heading("New login detected")}
 
-    ${paragraph(`Hello, <strong>${userName || 'User'}</strong>!`)}
+    ${paragraph(`Hello, <strong>${userName || "User"}</strong>!`)}
 
-    ${paragraph('We detected a new login to your account. If this was you, you can ignore this email. Otherwise, we recommend that you change your password immediately.')}
+    ${paragraph("We detected a new login to your account. If this was you, you can ignore this email. Otherwise, we recommend that you change your password immediately.")}
 
-    ${infoBox(`
+    ${infoBox(
+			`
       <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
         <tr>
           <td style="padding: 8px 0;">
@@ -85,14 +86,18 @@ export function loginAlertTemplate(data: LoginAlertData): string {
             <span style="color: ${c.muted}; margin-left: 8px;">${ipAddress}</span>
           </td>
         </tr>
-        ${location ? `
+        ${
+					location
+						? `
         <tr>
           <td style="padding: 8px 0;">
             <strong style="color: ${c.foreground};">Location:</strong>
             <span style="color: ${c.muted}; margin-left: 8px;">${location}</span>
           </td>
         </tr>
-        ` : ''}
+        `
+						: ""
+				}
         <tr>
           <td style="padding: 8px 0;">
             <strong style="color: ${c.foreground};">Date and time:</strong>
@@ -100,13 +105,15 @@ export function loginAlertTemplate(data: LoginAlertData): string {
           </td>
         </tr>
       </table>
-    `, 'info')}
+    `,
+			"info",
+		)}
 
     ${divider()}
 
-    ${paragraph('If you recognize this login, no action is required.', { muted: true })}
+    ${paragraph("If you recognize this login, no action is required.", { muted: true })}
 
-    ${paragraph('<strong>Was this not you?</strong> We recommend that you:', { muted: false })}
+    ${paragraph("<strong>Was this not you?</strong> We recommend that you:", { muted: false })}
 
     <ul style="margin: 16px 0; padding-left: 24px; color: ${c.foreground};">
       <li style="margin-bottom: 8px; line-height: 1.6;">Change your password immediately</li>
@@ -117,20 +124,20 @@ export function loginAlertTemplate(data: LoginAlertData): string {
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
       <tr>
         <td align="center">
-          ${primaryButton('Check Security Settings', securitySettingsUrl)}
+          ${primaryButton("Check Security Settings", securitySettingsUrl)}
         </td>
       </tr>
       <tr>
         <td align="center">
-          ${secondaryButton('This was not me - Report access', reportUrl)}
+          ${secondaryButton("This was not me - Report access", reportUrl)}
         </td>
       </tr>
     </table>
   `;
 
-  return baseTemplate({
-    title: 'New login detected - WhatsApp Manager',
-    previewText: `New login detected on your account from ${device}`,
-    content,
-  });
+	return baseTemplate({
+		title: "New login detected - WhatsApp Manager",
+		previewText: `New login detected on your account from ${device}`,
+		content,
+	});
 }
