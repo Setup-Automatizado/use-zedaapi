@@ -113,7 +113,19 @@ async function main() {
 
 	console.log("Creating new admin user...");
 
-	// Create AllowedUser entry first
+	// Create user first
+	await prisma.user.create({
+		data: {
+			id: userId,
+			email: ADMIN_EMAIL,
+			name: ADMIN_NAME,
+			role: "ADMIN",
+			emailVerified: true,
+			twoFactorEnabled: false,
+		},
+	});
+
+	// Create AllowedUser entry (userId now exists)
 	await prisma.allowedUser.upsert({
 		where: { email: ADMIN_EMAIL },
 		update: {
@@ -126,18 +138,6 @@ async function main() {
 			role: "ADMIN",
 			acceptedAt: new Date(),
 			userId: userId,
-		},
-	});
-
-	// Create user
-	await prisma.user.create({
-		data: {
-			id: userId,
-			email: ADMIN_EMAIL,
-			name: ADMIN_NAME,
-			role: "ADMIN",
-			emailVerified: true,
-			twoFactorEnabled: false,
 		},
 	});
 
