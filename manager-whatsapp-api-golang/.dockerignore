@@ -1,0 +1,62 @@
+# ==================================================
+# Docker Ignore - Manager WhatsApp API
+# ==================================================
+
+# Dependencies
+node_modules
+.pnpm-store
+
+# Build outputs
+.next
+out
+dist
+build
+
+# Development
+.env
+.env*.local
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Git
+.git
+.gitignore
+
+# Documentation (nao necessario no container)
+docs/
+*.md
+!README.md
+
+# Tests
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+__tests__
+coverage
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Prisma (geramos fresh no build)
+lib/generated/
+
+# Claude/AI
+.claude/
+CLAUDE.md
+
+# Scripts de desenvolvimento
+scripts/*.sh
+!scripts/migrate.sh
+
+# Misc
+*.tsbuildinfo
