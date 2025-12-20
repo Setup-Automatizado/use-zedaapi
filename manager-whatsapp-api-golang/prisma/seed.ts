@@ -9,9 +9,9 @@
  * @module prisma/seed
  */
 
-import { PrismaClient } from "../lib/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { hashPassword as betterAuthHashPassword } from "better-auth/crypto";
+import { PrismaClient } from "../lib/generated/prisma/client";
 
 // Create Prisma client with PostgreSQL adapter
 const adapter = new PrismaPg({
