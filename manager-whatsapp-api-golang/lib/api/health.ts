@@ -7,9 +7,9 @@
  * @module lib/api/health
  */
 
-import 'server-only';
-import { api } from './client';
-import type { HealthResponse, ReadinessResponse } from '@/types';
+import "server-only";
+import type { HealthResponse, ReadinessResponse } from "@/types";
+import { api } from "./client";
 
 /**
  * Gets overall service health status
@@ -20,7 +20,7 @@ import type { HealthResponse, ReadinessResponse } from '@/types';
  * @returns Health status object
  */
 export async function getHealth(): Promise<HealthResponse> {
-  return api.get<HealthResponse>('/health');
+	return api.get<HealthResponse>("/health");
 }
 
 /**
@@ -37,7 +37,7 @@ export async function getHealth(): Promise<HealthResponse> {
  * @returns Readiness status with dependency details
  */
 export async function getReadiness(): Promise<ReadinessResponse> {
-  return api.get<ReadinessResponse>('/ready');
+	return api.get<ReadinessResponse>("/ready");
 }
 
 /**
@@ -53,5 +53,5 @@ export async function getReadiness(): Promise<ReadinessResponse> {
  * @returns Plain text Prometheus metrics
  */
 export async function getMetrics(): Promise<string> {
-  return api.get<string>('/metrics');
+	return api.get<string>("/metrics");
 }

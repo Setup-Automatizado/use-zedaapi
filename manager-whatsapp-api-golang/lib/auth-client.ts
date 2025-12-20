@@ -7,8 +7,8 @@
  * @module lib/auth-client
  */
 
+import { adminClient, twoFactorClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
-import { twoFactorClient, adminClient } from "better-auth/client/plugins";
 import { ac, adminRole, userRole } from "@/lib/auth/permissions";
 
 const authClient = createAuthClient({

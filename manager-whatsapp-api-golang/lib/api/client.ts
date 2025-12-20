@@ -67,13 +67,8 @@ export async function apiClient<T>(
 	endpoint: string,
 	options: FetchOptions = {},
 ): Promise<T> {
-	const {
-		instanceId,
-		instanceToken,
-		usePartnerToken,
-		body,
-		...fetchOptions
-	} = options;
+	const { instanceId, instanceToken, usePartnerToken, body, ...fetchOptions } =
+		options;
 
 	// Build URL with optional instance path parameters
 	let url: string;
@@ -107,21 +102,15 @@ export async function apiClient<T>(
 	// Add authentication tokens
 	if (usePartnerToken) {
 		if (!PARTNER_TOKEN) {
-			throw new Error(
-				"WHATSAPP_PARTNER_TOKEN environment variable is not set",
-			);
+			throw new Error("WHATSAPP_PARTNER_TOKEN environment variable is not set");
 		}
 		headers["Authorization"] = `Bearer ${PARTNER_TOKEN}`;
 	} else if (!isPublicEndpoint(endpoint)) {
 		if (!CLIENT_TOKEN) {
-			throw new Error(
-				"WHATSAPP_CLIENT_TOKEN environment variable is not set",
-			);
+			throw new Error("WHATSAPP_CLIENT_TOKEN environment variable is not set");
 		}
 		if (CLIENT_TOKEN.length < 16) {
-			throw new Error(
-				"WHATSAPP_CLIENT_TOKEN must be at least 16 characters",
-			);
+			throw new Error("WHATSAPP_CLIENT_TOKEN must be at least 16 characters");
 		}
 		headers["Client-Token"] = CLIENT_TOKEN;
 	}

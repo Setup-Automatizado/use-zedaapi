@@ -9,19 +9,19 @@
  */
 
 import "server-only";
-import { api } from "./client";
 import type {
-	Instance,
-	InstanceListResponse,
-	RawInstanceListResponse,
-	InstanceStatus,
-	DeviceInfo,
 	CreateInstanceRequest,
 	CreateInstanceResponse,
-	QRCodeResponse,
+	DeviceInfo,
+	Instance,
+	InstanceListResponse,
+	InstanceStatus,
 	PhonePairingResponse,
+	QRCodeResponse,
+	RawInstanceListResponse,
 } from "@/types";
 import { normalizeInstances } from "@/types";
+import { api } from "./client";
 
 // ============================================================================
 // Partner-level endpoints (require Partner-Token)

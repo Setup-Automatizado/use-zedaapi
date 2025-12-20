@@ -8,19 +8,19 @@
  * @module lib/auth
  */
 
-import { prismaAdapter } from "better-auth/adapters/prisma";
 import { betterAuth } from "better-auth";
+import { prismaAdapter } from "better-auth/adapters/prisma";
 import { createAuthMiddleware } from "better-auth/api";
-import { twoFactor, admin } from "better-auth/plugins";
-import prisma from "@/lib/prisma";
+import { admin, twoFactor } from "better-auth/plugins";
 import { ac, adminRole, userRole } from "@/lib/auth/permissions";
 import {
+	sendLoginAlert,
 	sendPasswordReset,
 	sendTwoFactorCode,
-	sendTwoFactorEnabled,
 	sendTwoFactorDisabled,
-	sendLoginAlert,
+	sendTwoFactorEnabled,
 } from "@/lib/email";
+import prisma from "@/lib/prisma";
 
 /**
  * Get user agent and IP from request context
@@ -236,10 +236,7 @@ export const auth = betterAuth({
 	hooks: {
 		after: createAuthMiddleware(async (ctx) => {
 			// Send login alert on successful sign-in
-			if (
-				ctx.path === "/sign-in/email" ||
-				ctx.path === "/sign-in/social"
-			) {
+			if (ctx.path === "/sign-in/email" || ctx.path === "/sign-in/social") {
 				const returned = ctx.context.returned as
 					| Record<string, unknown>
 					| undefined;
@@ -248,15 +245,16 @@ export const auth = betterAuth({
 					// Pegar usuario do returned (session ainda nao existe no contexto)
 					const user =
 						(returned.user as Record<string, unknown>) ||
-						((returned.session as Record<string, unknown>)
-							?.user as Record<string, unknown>);
+						((returned.session as Record<string, unknown>)?.user as Record<
+							string,
+							unknown
+						>);
 
 					if (user && user.email) {
-						const { device, ipAddress } =
-							getRequestContextFromHeaders(ctx.request?.headers);
-						console.log(
-							`[Login] Sending login alert to ${user.email}`,
+						const { device, ipAddress } = getRequestContextFromHeaders(
+							ctx.request?.headers,
 						);
+						console.log(`[Login] Sending login alert to ${user.email}`);
 						void sendLoginAlert(user.email as string, {
 							userName: (user.name as string) || "",
 							userEmail: user.email as string,
@@ -282,9 +280,7 @@ export const auth = betterAuth({
 					const session = ctx.context.session;
 					if (session?.user) {
 						const user = session.user;
-						console.log(
-							`[2FA] Sending enable notification to ${user.email}`,
-						);
+						console.log(`[2FA] Sending enable notification to ${user.email}`);
 						void sendTwoFactorEnabled(user.email, {
 							userName: user.name || "",
 							userEmail: user.email,
@@ -304,9 +300,7 @@ export const auth = betterAuth({
 					const session = ctx.context.session;
 					if (session?.user) {
 						const user = session.user;
-						console.log(
-							`[2FA] Sending disable notification to ${user.email}`,
-						);
+						console.log(`[2FA] Sending disable notification to ${user.email}`);
 						void sendTwoFactorDisabled(user.email, {
 							userName: user.name || "",
 							userEmail: user.email,

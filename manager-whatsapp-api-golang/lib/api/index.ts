@@ -23,48 +23,45 @@
 
 import "server-only";
 
-// Core client and error handling
-export { api, apiClient } from "./client";
-export { ApiError, isApiError } from "./errors";
-
-// Instance management
-export {
-	listInstances,
-	createInstance,
-	deleteInstance,
-	getInstanceStatus,
-	getQRCode,
-	getQRCodeImage,
-	getPhonePairingCode,
-	getDeviceInfo,
-	restartInstance,
-	disconnectInstance,
-	activateSubscription,
-	cancelSubscription,
-} from "./instances";
-
-// Health and monitoring
-export { getHealth, getReadiness, getMetrics } from "./health";
-
-// Webhook configuration
-export {
-	updateWebhook,
-	updateAllWebhooks,
-	updateNotifySentByMe,
-} from "./webhooks";
-
 // Re-export types for convenience
 export type {
+	CreateInstanceRequest,
+	CreateInstanceResponse,
+	DeviceInfo,
+	HealthResponse,
 	Instance,
 	InstanceListResponse,
 	InstanceStatus,
-	DeviceInfo,
-	CreateInstanceRequest,
-	CreateInstanceResponse,
-	QRCodeResponse,
 	PhonePairingResponse,
-	HealthResponse,
+	QRCodeResponse,
 	ReadinessResponse,
 	WebhookType,
 	WebhookUpdateResponse,
 } from "@/types";
+// Core client and error handling
+export { api, apiClient } from "./client";
+export { ApiError, isApiError } from "./errors";
+
+// Health and monitoring
+export { getHealth, getMetrics, getReadiness } from "./health";
+// Instance management
+export {
+	activateSubscription,
+	cancelSubscription,
+	createInstance,
+	deleteInstance,
+	disconnectInstance,
+	getDeviceInfo,
+	getInstanceStatus,
+	getPhonePairingCode,
+	getQRCode,
+	getQRCodeImage,
+	listInstances,
+	restartInstance,
+} from "./instances";
+// Webhook configuration
+export {
+	updateAllWebhooks,
+	updateNotifySentByMe,
+	updateWebhook,
+} from "./webhooks";

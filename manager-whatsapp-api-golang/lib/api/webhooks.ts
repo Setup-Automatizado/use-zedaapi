@@ -10,14 +10,14 @@
  */
 
 import "server-only";
-import { api } from "./client";
 import type {
+	AllWebhooksUpdateRequest,
+	NotifySentByMeRequest,
 	WebhookType,
 	WebhookUpdateRequest,
 	WebhookUpdateResponse,
-	NotifySentByMeRequest,
-	AllWebhooksUpdateRequest,
 } from "@/types";
+import { api } from "./client";
 
 /**
  * Webhook endpoint mapping
