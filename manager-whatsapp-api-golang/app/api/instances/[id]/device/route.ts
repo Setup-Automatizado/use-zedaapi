@@ -6,8 +6,8 @@
  * @module app/api/instances/[id]/device
  */
 
-import { NextRequest, NextResponse } from "next/server";
-import { getInstance, getDeviceInfo } from "@/lib/api/instances";
+import { type NextRequest, NextResponse } from "next/server";
+import { getDeviceInfo, getInstance } from "@/lib/api/instances";
 
 /**
  * GET /api/instances/[id]/device

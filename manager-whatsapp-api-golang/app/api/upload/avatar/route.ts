@@ -7,17 +7,17 @@
  * @module app/api/upload/avatar
  */
 
-import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { type NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import {
-	uploadFile,
 	deleteFile,
 	generateUniqueFilename,
-	validateImageFile,
 	isS3Configured,
 	s3PublicUrl,
+	uploadFile,
+	validateImageFile,
 } from "@/lib/s3";
 
 /**
@@ -48,19 +48,13 @@ export async function POST(request: NextRequest) {
 		const file = formData.get("file") as File | null;
 
 		if (!file) {
-			return NextResponse.json(
-				{ error: "No file provided" },
-				{ status: 400 },
-			);
+			return NextResponse.json({ error: "No file provided" }, { status: 400 });
 		}
 
 		// Validate file
 		const validation = validateImageFile(file);
 		if (!validation.valid) {
-			return NextResponse.json(
-				{ error: validation.error },
-				{ status: 400 },
-			);
+			return NextResponse.json({ error: validation.error }, { status: 400 });
 		}
 
 		// Generate unique filename

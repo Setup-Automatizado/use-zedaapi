@@ -7,10 +7,10 @@
  * @module app/api/invitations
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import prisma from "@/lib/prisma";
 import { sendUserInvite } from "@/lib/email";
+import prisma from "@/lib/prisma";
 
 /**
  * GET /api/invitations
@@ -21,10 +21,7 @@ export async function GET(request: NextRequest) {
 		const session = await auth.api.getSession({ headers: request.headers });
 
 		if (!session?.user) {
-			return NextResponse.json(
-				{ error: "Unauthorized" },
-				{ status: 401 },
-			);
+			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 		}
 
 		// Check if user is admin
@@ -64,10 +61,7 @@ export async function POST(request: NextRequest) {
 		const session = await auth.api.getSession({ headers: request.headers });
 
 		if (!session?.user) {
-			return NextResponse.json(
-				{ error: "Unauthorized" },
-				{ status: 401 },
-			);
+			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 		}
 
 		// Check if user is admin
@@ -101,10 +95,7 @@ export async function POST(request: NextRequest) {
 
 		// Validate role
 		if (!["ADMIN", "USER"].includes(role)) {
-			return NextResponse.json(
-				{ error: "Invalid role" },
-				{ status: 400 },
-			);
+			return NextResponse.json({ error: "Invalid role" }, { status: 400 });
 		}
 
 		// Check if already exists
@@ -164,10 +155,7 @@ export async function DELETE(request: NextRequest) {
 		const session = await auth.api.getSession({ headers: request.headers });
 
 		if (!session?.user) {
-			return NextResponse.json(
-				{ error: "Unauthorized" },
-				{ status: 401 },
-			);
+			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 		}
 
 		// Check if user is admin
@@ -184,10 +172,7 @@ export async function DELETE(request: NextRequest) {
 		const email = searchParams.get("email");
 
 		if (!email) {
-			return NextResponse.json(
-				{ error: "Email is required" },
-				{ status: 400 },
-			);
+			return NextResponse.json({ error: "Email is required" }, { status: 400 });
 		}
 
 		// Don't allow removing yourself

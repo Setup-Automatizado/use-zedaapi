@@ -9,7 +9,7 @@
  * Response: { devices: { [instanceId]: DeviceInfo | null } }
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 const API_BASE_URL = process.env.WHATSAPP_API_URL || "http://localhost:8080";
 const CLIENT_TOKEN =
@@ -103,10 +103,7 @@ export async function POST(request: NextRequest) {
 
 			const results = await Promise.allSettled(
 				batch.map((instance) =>
-					fetchDeviceInfo(
-						instance.instanceId,
-						instance.instanceToken,
-					),
+					fetchDeviceInfo(instance.instanceId, instance.instanceToken),
 				),
 			);
 

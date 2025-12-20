@@ -6,9 +6,9 @@
  * @module app/api/profile/accounts/[accountId]
  */
 
-import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { type NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
 interface RouteParams {
@@ -40,10 +40,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 		});
 
 		if (!account) {
-			return NextResponse.json(
-				{ error: "Account not found" },
-				{ status: 404 },
-			);
+			return NextResponse.json({ error: "Account not found" }, { status: 404 });
 		}
 
 		// Check if user has a password or other accounts before unlinking
@@ -62,7 +59,8 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 			},
 		});
 
-		const otherAccounts = user?.accounts.filter((a) => a.id !== accountId) || [];
+		const otherAccounts =
+			user?.accounts.filter((a) => a.id !== accountId) || [];
 
 		// User must have at least one way to login
 		if (!hasPassword && otherAccounts.length === 0) {

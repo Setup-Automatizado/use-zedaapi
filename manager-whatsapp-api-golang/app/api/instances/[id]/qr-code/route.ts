@@ -7,7 +7,7 @@
  * @module app/api/instances/[id]/qr-code
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { getInstance, getQRCodeImage } from "@/lib/api/instances";
 
 /**

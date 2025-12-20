@@ -5,9 +5,9 @@
  * PATCH: Update 2FA method for authenticated user
  */
 
-import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { type NextRequest, NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
 export async function GET() {
@@ -17,10 +17,7 @@ export async function GET() {
 		});
 
 		if (!session?.user) {
-			return NextResponse.json(
-				{ error: "Unauthorized" },
-				{ status: 401 }
-			);
+			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 		}
 
 		const twoFactor = await prisma.twoFactor.findUnique({
@@ -36,7 +33,7 @@ export async function GET() {
 		console.error("Error fetching 2FA method:", error);
 		return NextResponse.json(
 			{ error: "Internal server error" },
-			{ status: 500 }
+			{ status: 500 },
 		);
 	}
 }
@@ -48,10 +45,7 @@ export async function PATCH(request: NextRequest) {
 		});
 
 		if (!session?.user) {
-			return NextResponse.json(
-				{ error: "Unauthorized" },
-				{ status: 401 }
-			);
+			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 		}
 
 		const body = await request.json();
@@ -60,7 +54,7 @@ export async function PATCH(request: NextRequest) {
 		if (!method || !["totp", "email"].includes(method)) {
 			return NextResponse.json(
 				{ error: "Invalid method. Must be 'totp' or 'email'" },
-				{ status: 400 }
+				{ status: 400 },
 			);
 		}
 
@@ -69,10 +63,7 @@ export async function PATCH(request: NextRequest) {
 		});
 
 		if (!twoFactor) {
-			return NextResponse.json(
-				{ error: "2FA not enabled" },
-				{ status: 404 }
-			);
+			return NextResponse.json({ error: "2FA not enabled" }, { status: 404 });
 		}
 
 		await prisma.twoFactor.update({
@@ -85,7 +76,7 @@ export async function PATCH(request: NextRequest) {
 		console.error("Error updating 2FA method:", error);
 		return NextResponse.json(
 			{ error: "Internal server error" },
-			{ status: 500 }
+			{ status: 500 },
 		);
 	}
 }

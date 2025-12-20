@@ -7,7 +7,7 @@
  * @module app/api/instances/[id]
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { getInstance } from "@/lib/api/instances";
 
 /**

@@ -6,7 +6,7 @@
  * @module app/api/instances/[id]/phone-code/[phone]
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { getInstance, getPhonePairingCode } from "@/lib/api/instances";
 
 /**
@@ -39,11 +39,7 @@ export async function GET(
 			);
 		}
 
-		const pairingCode = await getPhonePairingCode(
-			id,
-			instance.token,
-			phone,
-		);
+		const pairingCode = await getPhonePairingCode(id, instance.token, phone);
 
 		return NextResponse.json(pairingCode);
 	} catch (error) {
@@ -53,9 +49,7 @@ export async function GET(
 			const apiError = error as { message?: string; status?: number };
 			return NextResponse.json(
 				{
-					error:
-						apiError.message ||
-						"Failed to fetch pairing code",
+					error: apiError.message || "Failed to fetch pairing code",
 				},
 				{ status: apiError.status || 500 },
 			);
