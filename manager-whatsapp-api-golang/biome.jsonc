@@ -1,11 +1,11 @@
 {
 	"$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-	"extends": ["ultracite"],
+	"extends": ["ultracite/next"],
 	"assist": {
 		"actions": {
 			"source": {
-				"organizeImports": "on",
-			},
-		},
-	},
+				"organizeImports": "on"
+			}
+		}
+	}
 }
