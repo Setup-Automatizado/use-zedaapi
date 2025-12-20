@@ -46,3 +46,5 @@ output "https_listener_arn" {
   description = "HTTPS listener ARN (null if no certificate)"
   value       = var.certificate_arn != null ? aws_lb_listener.https[0].arn : null
 }
+
+# NOTA: Manager tem seu proprio ALB em alb-manager/

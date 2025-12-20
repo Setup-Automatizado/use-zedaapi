@@ -55,3 +55,5 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+# NOTA: Manager Frontend tem seu proprio ALB em alb-manager/
