@@ -12,7 +12,12 @@ import { twoFactorClient, adminClient } from "better-auth/client/plugins";
 import { ac, adminRole, userRole } from "@/lib/auth/permissions";
 
 const authClient = createAuthClient({
-	baseURL: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+	// Usar URL do navegador em runtime para funcionar em qualquer dominio
+	// Fallback para NEXT_PUBLIC_APP_URL durante SSR ou se window nao estiver disponivel
+	baseURL:
+		typeof window !== "undefined"
+			? window.location.origin
+			: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
 	plugins: [
 		twoFactorClient({
 			/**
