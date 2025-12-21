@@ -31,7 +31,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { TAILWIND_CHART_COLORS } from "@/lib/metrics/constants";
 
 export interface ChartDataPoint {
-	[key: string]: string | number;
+	[key: string]: string | number | string[];
 }
 
 export interface ChartKey {
@@ -196,7 +196,15 @@ export function MetricChart({
 								fill={yKey.color}
 								radius={[4, 4, 0, 0]}
 								stackId={stacked ? "stack" : undefined}
-							/>
+							>
+								{/* Support individual bar colors when colors prop is provided */}
+								{colors && data.map((_, index) => (
+									<Cell
+										key={`cell-${index}`}
+										fill={colors[index] || yKey.color}
+									/>
+								))}
+							</Bar>
 						))}
 					</BarChart>
 				);

@@ -29,18 +29,29 @@ export function HTTPMetricsTab({
 	isLoading = false,
 }: HTTPMetricsTabProps) {
 	// Prepare status code data for pie chart with friendly labels
-	const statusCodeData = Object.entries(metrics?.byStatus ?? {}).map(
-		([status, count]) => {
-			const statusKey = `${status}xx`;
-			const info = HTTP_STATUS_LABELS[statusKey];
-			return {
-				name: info ? info.label : statusKey,
-				fullLabel: info ? `${statusKey} - ${info.description}` : statusKey,
-				value: count,
-				color: info?.color || TAILWIND_CHART_COLORS.muted,
-			};
-		},
-	);
+	// Group by status code category (2xx, 4xx, 5xx) for cleaner visualization
+	const statusGroups: Record<string, { count: number; codes: string[] }> = {};
+
+	for (const [status, count] of Object.entries(metrics?.byStatus ?? {})) {
+		// Derive group from status code (e.g., "200" -> "2xx", "404" -> "4xx")
+		const group = status.length === 3 ? `${status[0]}xx` : status;
+		if (!statusGroups[group]) {
+			statusGroups[group] = { count: 0, codes: [] };
+		}
+		statusGroups[group].count += count;
+		statusGroups[group].codes.push(status);
+	}
+
+	const statusCodeData = Object.entries(statusGroups).map(([group, data]) => {
+		const info = HTTP_STATUS_LABELS[group];
+		return {
+			name: info ? info.label : group,
+			fullLabel: info ? `${group} - ${info.description}` : group,
+			value: data.count,
+			color: info?.color || TAILWIND_CHART_COLORS.muted,
+			codes: data.codes,
+		};
+	});
 
 	// Prepare path data for horizontal bar
 	const pathData = Object.entries(metrics?.byPath ?? {})
@@ -51,11 +62,23 @@ export function HTTPMetricsTab({
 		.sort((a, b) => b.value - a.value)
 		.slice(0, 10);
 
-	// Prepare method data
+	// HTTP method colors for better visual distinction
+	const METHOD_COLORS: Record<string, string> = {
+		GET: "#10b981",      // emerald-500 - safe, read-only
+		POST: "#3b82f6",     // blue-500 - create
+		PUT: "#f59e0b",      // amber-500 - update
+		PATCH: "#8b5cf6",    // violet-500 - partial update
+		DELETE: "#ef4444",   // red-500 - destructive
+		OPTIONS: "#6b7280",  // gray-500 - preflight
+		HEAD: "#06b6d4",     // cyan-500 - metadata
+	};
+
+	// Prepare method data with colors
 	const methodData = Object.entries(metrics?.byMethod ?? {}).map(
 		([method, count]) => ({
 			name: method,
 			value: count,
+			color: METHOD_COLORS[method.toUpperCase()] || TAILWIND_CHART_COLORS.muted,
 		}),
 	);
 
@@ -136,11 +159,12 @@ export function HTTPMetricsTab({
 					data={methodData}
 					xKey="name"
 					yKeys={[
-						{ key: "value", color: TAILWIND_CHART_COLORS.secondary, label: "Requests" },
+						{ key: "value", color: TAILWIND_CHART_COLORS.primary, label: "Requests" },
 					]}
 					height={250}
 					showLegend={false}
 					isLoading={isLoading}
+					colors={methodData.map((d) => d.color)}
 				/>
 			</div>
 
@@ -209,7 +233,7 @@ export function HTTPMetricsTab({
 function StatusCodeLegend({
 	data,
 }: {
-	data: Array<{ name: string; fullLabel: string; value: number; color: string }>;
+	data: Array<{ name: string; fullLabel: string; value: number; color: string; codes?: string[] }>;
 }) {
 	// Only show if we have data
 	if (data.length === 0) return null;
@@ -222,11 +246,12 @@ function StatusCodeLegend({
 		<div className="flex flex-wrap gap-4 px-2">
 			{sorted.map((item) => {
 				const percentage = total > 0 ? ((item.value / total) * 100).toFixed(1) : "0";
+				const codesInfo = item.codes?.length ? ` (${item.codes.sort().join(", ")})` : "";
 				return (
 					<div
 						key={item.name}
 						className="flex items-center gap-2"
-						title={item.fullLabel}
+						title={`${item.fullLabel}${codesInfo}`}
 					>
 						<span
 							className="h-3 w-3 rounded-full"
