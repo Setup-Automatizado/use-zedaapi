@@ -274,7 +274,7 @@ func main() {
 	httpTransportConfig := transporthttp.DefaultConfig()
 	httpTransportConfig.Timeout = cfg.Events.WebhookTimeout
 	httpTransportConfig.MaxRetries = cfg.Events.WebhookMaxRetries
-	transportRegistry := transport.NewRegistry(httpTransportConfig)
+	transportRegistry := transport.NewRegistry(httpTransportConfig, metrics)
 	defer transportRegistry.Close()
 
 	dispatchCoordinator := dispatch.NewCoordinator(
