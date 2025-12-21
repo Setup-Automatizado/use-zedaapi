@@ -8,19 +8,22 @@
 
 "use client";
 
+import { Phone } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useInstanceNames } from "@/hooks/use-instance-names";
 import {
 	formatBytes,
 	formatDuration,
 	formatNumber,
 	TAILWIND_CHART_COLORS,
 } from "@/lib/metrics/constants";
+import { formatPhoneNumber } from "@/lib/phone";
 import { cn } from "@/lib/utils";
 import type { MediaMetrics } from "@/types/metrics";
 import { HorizontalBarChart, MetricChart } from "../metric-chart";
 import { MetricGaugeGroup } from "../metric-gauge";
-import { MetricTable, NumberCell } from "../metric-table";
 import { StatusIndicator } from "../status-indicator";
 
 export interface MediaMetricsTabProps {
@@ -32,6 +35,8 @@ export function MediaMetricsTab({
 	metrics,
 	isLoading = false,
 }: MediaMetricsTabProps) {
+	const { getDisplayName, getInstanceInfo } = useInstanceNames();
+
 	// Operation success rates
 	const downloadSuccessRate =
 		metrics && metrics.downloads.total > 0
@@ -53,23 +58,32 @@ export function MediaMetricsTab({
 		}))
 		.sort((a, b) => b.downloads + b.uploads - (a.downloads + a.uploads));
 
-	// Instance data
-	const instanceData = Object.entries(metrics?.byInstance ?? {})
-		.map(([instanceId, data]) => ({
-			name: instanceId.slice(0, 8) + "...",
-			value: data.downloads + data.uploads,
-		}))
+	// Instance chart data with friendly names
+	const instanceChartData = Object.entries(metrics?.byInstance ?? {})
+		.map(([instanceId, data]) => {
+			const info = getInstanceInfo(instanceId);
+			return {
+				name: info?.name || getDisplayName(instanceId),
+				value: data.downloads + data.uploads,
+			};
+		})
 		.sort((a, b) => b.value - a.value)
 		.slice(0, 10);
 
-	// Instance table data
-	const instanceTableData = Object.entries(metrics?.byInstance ?? {})
-		.map(([instanceId, data]) => ({
-			instanceId,
-			downloads: data.downloads,
-			uploads: data.uploads,
-			failures: data.failures,
-		}))
+	// Instance data with full info
+	const instanceData = Object.entries(metrics?.byInstance ?? {})
+		.map(([instanceId, data]) => {
+			const info = getInstanceInfo(instanceId);
+			return {
+				instanceId,
+				name: info?.name || getDisplayName(instanceId),
+				phone: info?.phone || null,
+				avatarUrl: info?.avatarUrl || null,
+				downloads: data.downloads,
+				uploads: data.uploads,
+				failures: data.failures,
+			};
+		})
 		.sort((a, b) => b.downloads + b.uploads - (a.downloads + a.uploads));
 
 	return (
@@ -293,7 +307,7 @@ export function MediaMetricsTab({
 				{/* Operations by Instance */}
 				<HorizontalBarChart
 					title="Operations by Instance"
-					data={instanceData}
+					data={instanceChartData}
 					maxItems={10}
 					color={TAILWIND_CHART_COLORS.tertiary}
 					isLoading={isLoading}
@@ -332,51 +346,82 @@ export function MediaMetricsTab({
 				</CardContent>
 			</Card>
 
-			{/* Instance Details Table */}
-			<MetricTable
-				title="Media by Instance"
-				data={instanceTableData}
-				columns={[
-					{
-						key: "instanceId",
-						header: "Instance",
-						format: (v) => (
-							<span className="font-mono text-xs">
-								{String(v).slice(0, 12)}...
-							</span>
-						),
-					},
-					{
-						key: "downloads",
-						header: "Downloads",
-						align: "right",
-						format: (v) => <NumberCell value={Number(v)} />,
-					},
-					{
-						key: "uploads",
-						header: "Uploads",
-						align: "right",
-						format: (v) => <NumberCell value={Number(v)} />,
-					},
-					{
-						key: "failures",
-						header: "Failures",
-						align: "right",
-						format: (v) => (
-							<span
-								className={cn(
-									"tabular-nums",
-									Number(v) > 0 && "text-red-600 dark:text-red-400",
-								)}
-							>
-								{Number(v).toLocaleString()}
-							</span>
-						),
-					},
-				]}
-				isLoading={isLoading}
-				emptyMessage="No instance media data available"
-			/>
+			{/* Instance Details */}
+			<Card>
+				<CardHeader className="pb-2">
+					<CardTitle className="text-base font-medium">
+						Media by Instance
+					</CardTitle>
+				</CardHeader>
+				<CardContent>
+					{isLoading ? (
+						<div className="space-y-3">
+							{Array.from({ length: 3 }).map((_, i) => (
+								<Skeleton key={i} className="h-16 w-full" />
+							))}
+						</div>
+					) : instanceData.length === 0 ? (
+						<p className="text-center text-sm text-muted-foreground py-8">
+							No instance media data available
+						</p>
+					) : (
+						<div className="space-y-3">
+							{instanceData.map((instance) => (
+								<div
+									key={instance.instanceId}
+									className="flex items-center gap-4 rounded-lg border p-4 transition-colors hover:bg-muted/50"
+								>
+									{/* Avatar */}
+									<Avatar className="h-10 w-10 shrink-0">
+										{instance.avatarUrl && (
+											<AvatarImage src={instance.avatarUrl} alt={instance.name} />
+										)}
+										<AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
+											{instance.name.slice(0, 2).toUpperCase()}
+										</AvatarFallback>
+									</Avatar>
+
+									{/* Name & Phone */}
+									<div className="min-w-0 flex-1">
+										<p className="font-medium truncate">{instance.name}</p>
+										{instance.phone && (
+											<p className="text-xs text-muted-foreground flex items-center gap-1">
+												<Phone className="h-3 w-3" />
+												{formatPhoneNumber(instance.phone)}
+											</p>
+										)}
+									</div>
+
+									{/* Stats Grid */}
+									<div className="grid grid-cols-3 gap-6 text-center shrink-0">
+										<div>
+											<p className="text-xs text-muted-foreground">Downloads</p>
+											<p className="font-semibold tabular-nums text-blue-600 dark:text-blue-400">
+												{instance.downloads.toLocaleString()}
+											</p>
+										</div>
+										<div>
+											<p className="text-xs text-muted-foreground">Uploads</p>
+											<p className="font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">
+												{instance.uploads.toLocaleString()}
+											</p>
+										</div>
+										<div>
+											<p className="text-xs text-muted-foreground">Failures</p>
+											<p className={cn(
+												"font-semibold tabular-nums",
+												instance.failures > 0 ? "text-red-600 dark:text-red-400" : "text-muted-foreground"
+											)}>
+												{instance.failures.toLocaleString()}
+											</p>
+										</div>
+									</div>
+								</div>
+							))}
+						</div>
+					)}
+				</CardContent>
+			</Card>
 		</div>
 	);
 }
