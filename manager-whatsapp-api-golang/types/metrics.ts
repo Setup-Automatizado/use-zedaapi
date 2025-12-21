@@ -76,6 +76,7 @@ export interface DashboardMetrics {
 	media: MediaMetrics;
 	system: SystemMetrics;
 	workers: WorkerMetrics;
+	transport: TransportMetrics;
 	instances: string[];
 }
 
@@ -241,6 +242,29 @@ export interface WorkerMetrics {
 	avgTaskDurationMs: Record<string, number>;
 	totalActive: number;
 	totalErrors: number;
+}
+
+/** Transport/Webhook delivery metrics */
+export interface TransportMetrics {
+	totalDeliveries: number;
+	successfulDeliveries: number;
+	failedDeliveries: number;
+	totalRetries: number;
+	successRate: number;
+	avgDurationMs: number;
+	p50DurationMs: number;
+	p95DurationMs: number;
+	p99DurationMs: number;
+	byInstance: Record<string, TransportInstanceMetrics>;
+	byErrorType: Record<string, number>;
+}
+
+export interface TransportInstanceMetrics {
+	deliveries: number;
+	success: number;
+	failed: number;
+	retries: number;
+	avgDurationMs: number;
 }
 
 // ============================================================================
