@@ -2,6 +2,7 @@
 
 import {
 	Activity,
+	BarChart3,
 	LayoutDashboard,
 	LogOut,
 	Settings,
@@ -31,6 +32,7 @@ const navItems: NavItem[] = [
 	{ name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
 	{ name: "Instances", href: "/instances", icon: Smartphone },
 	{ name: "Health", href: "/health", icon: Activity },
+	{ name: "Metrics", href: "/metrics", icon: BarChart3 },
 	{ name: "Settings", href: "/settings", icon: Settings },
 ];
 
