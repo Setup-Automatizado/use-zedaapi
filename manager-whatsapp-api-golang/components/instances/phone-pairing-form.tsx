@@ -20,6 +20,7 @@ import {
 	FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { formatPhoneInput } from "@/lib/phone";
 
 export interface PhonePairingFormProps {
 	instanceId: string;
@@ -40,19 +41,8 @@ export function PhonePairingForm({
 	const [error, setError] = useState<string | null>(null);
 	const [copied, setCopied] = useState(false);
 
-	// Format phone number as user types (Brazilian format)
-	const formatPhoneNumber = (value: string) => {
-		// Remove all non-digits
-		const digits = value.replace(/\D/g, "");
-
-		// Format as (XX) XXXXX-XXXX
-		if (digits.length <= 2) return digits;
-		if (digits.length <= 7) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-		return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
-	};
-
 	const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const formatted = formatPhoneNumber(e.target.value);
+		const formatted = formatPhoneInput(e.target.value);
 		setPhone(formatted);
 		setError(null);
 	};

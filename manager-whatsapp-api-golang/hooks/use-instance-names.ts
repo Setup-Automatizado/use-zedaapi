@@ -2,15 +2,16 @@
  * Instance Names Hook
  *
  * Maps instance UUIDs to friendly display names with phone and avatar.
- * Fetches instance data and device info for connected instances.
+ * Supports large instance counts (5000+) with pagination and caching.
  *
  * @module hooks/use-instance-names
  */
 
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
+import { formatPhoneNumber } from "@/lib/phone";
 
 interface Instance {
 	id: string;
@@ -52,12 +53,38 @@ export interface InstanceInfo {
 	name: string;
 	sessionName?: string;
 	phone?: string;
+	formattedPhone?: string;
 	avatarUrl?: string;
 	connected: boolean;
 	isBusiness?: boolean;
 }
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
+/**
+ * Fetch all instances with pagination support for large counts
+ */
+async function fetchAllInstances(): Promise<Instance[]> {
+	const PAGE_SIZE = 100;
+	const allInstances: Instance[] = [];
+	let page = 1;
+	let hasMore = true;
+
+	while (hasMore) {
+		const response = await fetcher(`/api/instances?page=${page}&pageSize=${PAGE_SIZE}`);
+		const instances = response.content || [];
+		allInstances.push(...instances);
+
+		// Check if there are more pages
+		hasMore = instances.length === PAGE_SIZE && allInstances.length < response.total;
+		page++;
+
+		// Safety limit to prevent infinite loops
+		if (page > 100) break;
+	}
+
+	return allInstances;
+}
 
 const deviceFetcher = async (instances: Instance[]): Promise<DeviceBatchResponse> => {
 	const connectedInstances = instances
@@ -72,35 +99,74 @@ const deviceFetcher = async (instances: Instance[]): Promise<DeviceBatchResponse
 		return { devices: {} };
 	}
 
-	const response = await fetch("/api/instances/device", {
-		method: "POST",
-		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify({ instances: connectedInstances }),
-	});
+	// Batch requests to avoid overwhelming the API
+	const BATCH_SIZE = 50;
+	const allDevices: Record<string, DeviceInfo | null> = {};
 
-	if (!response.ok) {
-		return { devices: {} };
+	for (let i = 0; i < connectedInstances.length; i += BATCH_SIZE) {
+		const batch = connectedInstances.slice(i, i + BATCH_SIZE);
+
+		try {
+			const response = await fetch("/api/instances/device", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ instances: batch }),
+			});
+
+			if (response.ok) {
+				const data = await response.json();
+				Object.assign(allDevices, data.devices || {});
+			}
+		} catch {
+			// Continue with next batch on error
+		}
 	}
 
-	return response.json();
+	return { devices: allDevices };
 };
 
 /**
  * Hook to get instance name mapping with phone and avatar
+ * Supports 5000+ instances with automatic pagination
  */
 export function useInstanceNames() {
-	const { data, error, isLoading } = useSWR<InstancesResponse>(
-		"/api/instances?pageSize=100",
-		fetcher,
-		{
-			revalidateOnFocus: false,
-			dedupingInterval: 60000, // Cache for 1 minute
+	const [allInstances, setAllInstances] = useState<Instance[]>([]);
+	const [isLoadingInstances, setIsLoadingInstances] = useState(true);
+	const [instancesError, setInstancesError] = useState<Error | null>(null);
+
+	// Fetch all instances with pagination on mount
+	useEffect(() => {
+		let mounted = true;
+
+		async function loadInstances() {
+			try {
+				setIsLoadingInstances(true);
+				const instances = await fetchAllInstances();
+				if (mounted) {
+					setAllInstances(instances);
+					setInstancesError(null);
+				}
+			} catch (error) {
+				if (mounted) {
+					setInstancesError(error instanceof Error ? error : new Error("Failed to load instances"));
+				}
+			} finally {
+				if (mounted) {
+					setIsLoadingInstances(false);
+				}
+			}
 		}
-	);
+
+		loadInstances();
+
+		return () => {
+			mounted = false;
+		};
+	}, []);
 
 	// Fetch device info for connected instances
 	const { data: deviceData } = useSWR<DeviceBatchResponse>(
-		data?.content ? ["devices", data.content] : null,
+		allInstances.length > 0 ? ["devices", allInstances] : null,
 		([, instances]: [string, Instance[]]) => deviceFetcher(instances),
 		{
 			revalidateOnFocus: false,
@@ -110,24 +176,24 @@ export function useInstanceNames() {
 
 	const instanceMap = useMemo(() => {
 		const map = new Map<string, InstanceInfo>();
-		if (data?.content) {
-			for (const instance of data.content) {
-				const id = instance.id || instance.instanceId || "";
-				const device = deviceData?.devices?.[id];
+		for (const instance of allInstances) {
+			const id = instance.id || instance.instanceId || "";
+			const device = deviceData?.devices?.[id];
+			const phone = device?.phone;
 
-				map.set(id, {
-					id,
-					name: instance.sessionName || instance.name || truncateId(id),
-					sessionName: instance.sessionName,
-					phone: device?.phone,
-					avatarUrl: device?.imgUrl,
-					connected: Boolean(instance.whatsappConnected && instance.phoneConnected),
-					isBusiness: device?.isBusiness,
-				});
-			}
+			map.set(id, {
+				id,
+				name: instance.sessionName || instance.name || truncateId(id),
+				sessionName: instance.sessionName,
+				phone,
+				formattedPhone: phone ? formatPhoneNumber(phone) : undefined,
+				avatarUrl: device?.imgUrl,
+				connected: Boolean(instance.whatsappConnected && instance.phoneConnected),
+				isBusiness: device?.isBusiness,
+			});
 		}
 		return map;
-	}, [data, deviceData]);
+	}, [allInstances, deviceData]);
 
 	/**
 	 * Get friendly display name for an instance
@@ -159,6 +225,13 @@ export function useInstanceNames() {
 	}, [instanceMap]);
 
 	/**
+	 * Get formatted phone number for an instance
+	 */
+	const getFormattedPhone = useCallback((instanceId: string): string | undefined => {
+		return instanceMap.get(instanceId)?.formattedPhone;
+	}, [instanceMap]);
+
+	/**
 	 * Get avatar URL for an instance
 	 */
 	const getAvatarUrl = useCallback((instanceId: string): string | undefined => {
@@ -173,30 +246,33 @@ export function useInstanceNames() {
 	}, [instanceMap]);
 
 	/**
-	 * Format phone number for display (e.g., +55 11 99999-9999)
+	 * Search instances by name or phone
 	 */
-	const formatPhone = useCallback((phone: string | undefined): string => {
-		if (!phone) return "";
-		// Remove all non-digits
-		const digits = phone.replace(/\D/g, "");
-		if (digits.length < 10) return phone;
+	const searchInstances = useCallback((query: string): InstanceInfo[] => {
+		if (!query.trim()) return [];
 
-		// Format Brazilian numbers
-		if (digits.startsWith("55") && digits.length >= 12) {
-			const country = digits.slice(0, 2);
-			const area = digits.slice(2, 4);
-			const part1 = digits.slice(4, digits.length - 4);
-			const part2 = digits.slice(-4);
-			return `+${country} ${area} ${part1}-${part2}`;
+		const lowerQuery = query.toLowerCase().trim();
+		const results: InstanceInfo[] = [];
+
+		for (const info of instanceMap.values()) {
+			// Search by name
+			if (info.name.toLowerCase().includes(lowerQuery)) {
+				results.push(info);
+				continue;
+			}
+			// Search by phone (raw or formatted)
+			if (info.phone?.includes(lowerQuery) || info.formattedPhone?.toLowerCase().includes(lowerQuery)) {
+				results.push(info);
+				continue;
+			}
+			// Search by ID
+			if (info.id.toLowerCase().includes(lowerQuery)) {
+				results.push(info);
+			}
 		}
 
-		// Generic international format
-		if (digits.length > 10) {
-			return `+${digits.slice(0, digits.length - 10)} ${digits.slice(-10, -4)}-${digits.slice(-4)}`;
-		}
-
-		return phone;
-	}, []);
+		return results;
+	}, [instanceMap]);
 
 	/**
 	 * Get all instances with display info
@@ -210,12 +286,14 @@ export function useInstanceNames() {
 		getDisplayName,
 		getShortName,
 		getPhone,
+		getFormattedPhone,
 		getAvatarUrl,
 		getInstanceInfo,
-		formatPhone,
+		searchInstances,
 		instancesWithInfo,
-		isLoading,
-		error,
+		isLoading: isLoadingInstances,
+		error: instancesError,
+		totalInstances: allInstances.length,
 	};
 }
 

@@ -27,6 +27,7 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { useInstanceNames } from "@/hooks/use-instance-names";
+import { formatPhoneNumber } from "@/lib/phone";
 import { cn } from "@/lib/utils";
 
 export interface InstanceFilterProps {
@@ -50,7 +51,7 @@ export function InstanceFilter({
 	disabled = false,
 }: InstanceFilterProps) {
 	const [open, setOpen] = React.useState(false);
-	const { getDisplayName, getInstanceInfo, formatPhone } = useInstanceNames();
+	const { getDisplayName, getInstanceInfo } = useInstanceNames();
 
 	const selectedInfo = selectedInstance
 		? getInstanceInfo(selectedInstance)
@@ -84,9 +85,9 @@ export function InstanceFilter({
 						)}
 						<div className="flex flex-col items-start min-w-0">
 							<span className="truncate text-sm">{displayValue}</span>
-							{selectedInfo?.phone && (
+							{selectedInfo?.formattedPhone && (
 								<span className="truncate text-xs text-muted-foreground">
-									{formatPhone(selectedInfo.phone)}
+									{selectedInfo.formattedPhone}
 								</span>
 							)}
 						</div>
@@ -122,14 +123,14 @@ export function InstanceFilter({
 							{instances.map((instanceId) => {
 								const info = getInstanceInfo(instanceId);
 								const displayName = info?.name || getDisplayName(instanceId);
-								const phone = info?.phone;
+								const formattedPhone = info?.formattedPhone;
 								const avatarUrl = info?.avatarUrl;
 								const isSelected = selectedInstance === instanceId;
 
 								return (
 									<CommandItem
 										key={instanceId}
-										value={`${instanceId} ${displayName} ${phone || ""}`}
+										value={`${instanceId} ${displayName} ${info?.phone || ""}`}
 										onSelect={() => {
 											onSelect(instanceId);
 											setOpen(false);
@@ -154,10 +155,10 @@ export function InstanceFilter({
 											<span className="truncate font-medium">
 												{displayName}
 											</span>
-											{phone ? (
+											{formattedPhone ? (
 												<span className="truncate text-xs text-muted-foreground flex items-center gap-1">
 													<Phone className="h-3 w-3" />
-													{formatPhone(phone)}
+													{formattedPhone}
 												</span>
 											) : (
 												<span className="truncate text-xs text-muted-foreground font-mono">
@@ -203,7 +204,7 @@ export function InstanceBadge({
 	showPhone?: boolean;
 	size?: "sm" | "md" | "lg";
 }) {
-	const { getDisplayName, getInstanceInfo, formatPhone } = useInstanceNames();
+	const { getDisplayName, getInstanceInfo } = useInstanceNames();
 	const info = getInstanceInfo(instanceId);
 	const displayName = info?.name || getDisplayName(instanceId);
 
@@ -237,9 +238,9 @@ export function InstanceBadge({
 				</AvatarFallback>
 			</Avatar>
 			<span className="font-medium">{displayName}</span>
-			{showPhone && info?.phone && (
+			{showPhone && info?.formattedPhone && (
 				<span className="text-muted-foreground">
-					({formatPhone(info.phone)})
+					({info.formattedPhone})
 				</span>
 			)}
 		</span>
@@ -260,7 +261,7 @@ export function InstanceDisplay({
 	className?: string;
 	showId?: boolean;
 }) {
-	const { getDisplayName, getInstanceInfo, formatPhone } = useInstanceNames();
+	const { getDisplayName, getInstanceInfo } = useInstanceNames();
 	const info = getInstanceInfo(instanceId);
 	const displayName = info?.name || getDisplayName(instanceId);
 
@@ -276,10 +277,10 @@ export function InstanceDisplay({
 			</Avatar>
 			<div className="flex flex-col min-w-0">
 				<span className="font-medium truncate">{displayName}</span>
-				{info?.phone ? (
+				{info?.formattedPhone ? (
 					<span className="text-sm text-muted-foreground flex items-center gap-1">
 						<Phone className="h-3 w-3" />
-						{formatPhone(info.phone)}
+						{info.formattedPhone}
 					</span>
 				) : showId ? (
 					<span className="text-xs text-muted-foreground font-mono">

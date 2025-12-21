@@ -20,6 +20,7 @@ import {
 	formatNumber,
 	TAILWIND_CHART_COLORS,
 } from "@/lib/metrics/constants";
+import { formatPhoneNumber } from "@/lib/phone";
 import { cn } from "@/lib/utils";
 import type { CircuitBreakerState, HealthLevel, SystemMetrics, WorkerMetrics } from "@/types/metrics";
 import { MetricChart } from "../metric-chart";
@@ -34,7 +35,7 @@ export interface SystemTabProps {
 }
 
 export function SystemTab({ metrics, workers, isLoading = false }: SystemTabProps) {
-	const { getDisplayName, getInstanceInfo, formatPhone } = useInstanceNames();
+	const { getDisplayName, getInstanceInfo } = useInstanceNames();
 
 	// Circuit breaker instance data
 	const circuitBreakerData = Object.entries(
@@ -131,7 +132,7 @@ export function SystemTab({ metrics, workers, isLoading = false }: SystemTabProp
 										{phone ? (
 											<span className="text-xs text-muted-foreground flex items-center gap-1">
 												<Phone className="h-3 w-3" />
-												{formatPhone(phone)}
+												{formatPhoneNumber(phone)}
 											</span>
 										) : (
 											<span className="text-xs text-muted-foreground font-mono truncate">
@@ -389,7 +390,7 @@ export function SystemTab({ metrics, workers, isLoading = false }: SystemTabProp
 										{data.phone && (
 											<span className="text-xs text-muted-foreground flex items-center gap-1">
 												<Phone className="h-3 w-3" />
-												{formatPhone(data.phone)}
+												{formatPhoneNumber(data.phone)}
 											</span>
 										)}
 									</div>

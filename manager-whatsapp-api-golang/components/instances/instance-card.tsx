@@ -7,58 +7,10 @@ import Link from "next/link";
 import * as React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { formatPhoneNumber } from "@/lib/phone";
 import type { DeviceInfo, Instance } from "@/types";
 import { InstanceActionsDropdown } from "./instance-actions-dropdown";
 import { InstanceStatusBadge } from "./instance-status-badge";
-
-function formatPhoneNumber(phone: string | undefined): string {
-	if (!phone) return "-";
-	const cleaned = phone.replace(/\D/g, "");
-
-	// Brazilian: +55 DD NNNNN-NNNN
-	if (cleaned.startsWith("55") && cleaned.length >= 12) {
-		const areaCode = cleaned.substring(2, 4);
-		const localNumber = cleaned.substring(4);
-		if (localNumber.length === 9) {
-			const firstPart = localNumber.substring(0, 5);
-			const secondPart = localNumber.substring(5);
-			return `+55 ${areaCode} ${firstPart}-${secondPart}`;
-		}
-		if (localNumber.length === 8) {
-			const firstPart = localNumber.substring(0, 4);
-			const secondPart = localNumber.substring(4);
-			return `+55 ${areaCode} ${firstPart}-${secondPart}`;
-		}
-	}
-
-	// Argentina mobile: +54 9 XXXX XX-XXXX
-	if (cleaned.startsWith("549") && cleaned.length >= 13) {
-		const areaCode = cleaned.substring(3, 7);
-		const localNumber = cleaned.substring(7);
-		if (localNumber.length >= 6) {
-			const firstPart = localNumber.substring(0, 2);
-			const secondPart = localNumber.substring(2);
-			return `+54 9 ${areaCode} ${firstPart}-${secondPart}`;
-		}
-	}
-
-	// USA/Canada: +1 XXX XXX-XXXX
-	if (cleaned.startsWith("1") && cleaned.length === 11) {
-		const areaCode = cleaned.substring(1, 4);
-		const firstPart = cleaned.substring(4, 7);
-		const secondPart = cleaned.substring(7);
-		return `+1 ${areaCode} ${firstPart}-${secondPart}`;
-	}
-
-	// Default international format
-	if (cleaned.length > 6) {
-		const countryCode = cleaned.substring(0, 2);
-		const rest = cleaned.substring(2);
-		return `+${countryCode} ${rest.replace(/(\d{4,5})(\d{4})$/, "$1-$2")}`;
-	}
-
-	return phone;
-}
 
 export interface InstanceCardProps {
 	instance: Instance;
@@ -143,7 +95,7 @@ export function InstanceCard({
 							Phone
 						</span>
 						<span className="font-mono text-sm">
-							{formatPhoneNumber(phone)}
+							{formatPhoneNumber(phone, "-")}
 						</span>
 					</div>
 				)}

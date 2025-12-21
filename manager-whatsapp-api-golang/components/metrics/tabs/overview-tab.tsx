@@ -19,6 +19,7 @@ import {
 	formatNumber,
 	METRIC_THRESHOLDS,
 } from "@/lib/metrics/constants";
+import { formatPhoneNumber } from "@/lib/phone";
 import type { DashboardMetrics, HealthLevel } from "@/types/metrics";
 import { MetricGauge } from "../metric-gauge";
 import { MetricsOverview } from "../metrics-overview";
@@ -358,7 +359,7 @@ function InstanceSummaryCard({
 	instances: string[];
 	circuitBreakerByInstance: Record<string, string>;
 }) {
-	const { getDisplayName, getInstanceInfo, formatPhone } = useInstanceNames();
+	const { getDisplayName, getInstanceInfo } = useInstanceNames();
 
 	return (
 		<Card>
@@ -401,10 +402,10 @@ function InstanceSummaryCard({
 										</span>
 										<StatusIndicator status={status} size="sm" />
 									</div>
-									{info?.phone ? (
+									{info?.formattedPhone ? (
 										<span className="text-xs text-muted-foreground flex items-center gap-1 truncate">
 											<Phone className="h-3 w-3 shrink-0" />
-											{formatPhone(info.phone)}
+											{info.formattedPhone}
 										</span>
 									) : (
 										<span className="text-xs text-muted-foreground font-mono truncate">
