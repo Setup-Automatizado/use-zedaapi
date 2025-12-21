@@ -20,6 +20,7 @@ import {
   RefreshControl,
   SystemTab,
 } from "@/components/metrics";
+import { PageHeader } from "@/components/shared/page-header";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -49,13 +50,11 @@ export default function MetricsPage() {
 
   if (error) {
     return (
-      <div className="flex flex-col gap-6 p-6">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-2xl font-semibold tracking-tight">Metrics</h1>
-          <p className="text-sm text-muted-foreground">
-            Real-time system metrics and performance monitoring
-          </p>
-        </div>
+      <div className="space-y-6">
+        <PageHeader
+          title="Metrics"
+          description="Real-time system metrics and performance monitoring"
+        />
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Failed to load metrics</AlertTitle>
@@ -68,16 +67,14 @@ export default function MetricsPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 p-6">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold tracking-tight">Metrics</h1>
-          <p className="text-sm text-muted-foreground">
-            Real-time system metrics and performance monitoring
-          </p>
-        </div>
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <PageHeader
+          title="Metrics"
+          description="Real-time system metrics and performance monitoring"
+        />
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center shrink-0">
           <InstanceFilter
             instances={instances}
             selectedInstance={selectedInstance}
@@ -99,29 +96,29 @@ export default function MetricsPage() {
       {/* Content */}
       {metrics && (
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6">
-            <TabsTrigger value="overview" className="flex items-center gap-2">
-              <Activity className="h-4 w-4" />
+          <TabsList className="h-auto flex flex-wrap gap-1 bg-muted/50 p-1 rounded-lg">
+            <TabsTrigger value="overview" className="flex items-center gap-2 px-3 py-2 text-sm data-[state=active]:bg-background rounded-md">
+              <Activity className="h-4 w-4 shrink-0" />
               <span className="hidden sm:inline">Overview</span>
             </TabsTrigger>
-            <TabsTrigger value="http" className="flex items-center gap-2">
-              <Globe className="h-4 w-4" />
+            <TabsTrigger value="http" className="flex items-center gap-2 px-3 py-2 text-sm data-[state=active]:bg-background rounded-md">
+              <Globe className="h-4 w-4 shrink-0" />
               <span className="hidden sm:inline">HTTP</span>
             </TabsTrigger>
-            <TabsTrigger value="events" className="flex items-center gap-2">
-              <Zap className="h-4 w-4" />
+            <TabsTrigger value="events" className="flex items-center gap-2 px-3 py-2 text-sm data-[state=active]:bg-background rounded-md">
+              <Zap className="h-4 w-4 shrink-0" />
               <span className="hidden sm:inline">Events</span>
             </TabsTrigger>
-            <TabsTrigger value="queue" className="flex items-center gap-2">
-              <MessageSquare className="h-4 w-4" />
+            <TabsTrigger value="queue" className="flex items-center gap-2 px-3 py-2 text-sm data-[state=active]:bg-background rounded-md">
+              <MessageSquare className="h-4 w-4 shrink-0" />
               <span className="hidden sm:inline">Queue</span>
             </TabsTrigger>
-            <TabsTrigger value="media" className="flex items-center gap-2">
-              <ImageIcon className="h-4 w-4" />
+            <TabsTrigger value="media" className="flex items-center gap-2 px-3 py-2 text-sm data-[state=active]:bg-background rounded-md">
+              <ImageIcon className="h-4 w-4 shrink-0" />
               <span className="hidden sm:inline">Media</span>
             </TabsTrigger>
-            <TabsTrigger value="system" className="flex items-center gap-2">
-              <Settings className="h-4 w-4" />
+            <TabsTrigger value="system" className="flex items-center gap-2 px-3 py-2 text-sm data-[state=active]:bg-background rounded-md">
+              <Settings className="h-4 w-4 shrink-0" />
               <span className="hidden sm:inline">System</span>
             </TabsTrigger>
           </TabsList>

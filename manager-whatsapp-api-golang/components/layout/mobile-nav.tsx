@@ -2,6 +2,7 @@
 
 import {
 	Activity,
+	BarChart3,
 	LayoutDashboard,
 	LogOut,
 	Settings,
@@ -27,9 +28,10 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-	{ name: "Dashboard", href: "/", icon: LayoutDashboard },
+	{ name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
 	{ name: "Instances", href: "/instances", icon: Smartphone },
 	{ name: "Health", href: "/health", icon: Activity },
+	{ name: "Metrics", href: "/metrics", icon: BarChart3 },
 	{ name: "Settings", href: "/settings", icon: Settings },
 ];
 
@@ -53,8 +55,8 @@ export function MobileNav({
 	const pathname = usePathname();
 
 	const isActive = (href: string) => {
-		if (href === "/") {
-			return pathname === "/";
+		if (href === "/dashboard") {
+			return pathname === "/dashboard" || pathname === "/";
 		}
 		return pathname.startsWith(href);
 	};
