@@ -279,7 +279,7 @@ func (p *EventProcessor) handleRetryableError(ctx context.Context, event *persis
 		return fmt.Errorf("update for retry: %w", err)
 	}
 
-	p.metrics.EventRetries.WithLabelValues(p.instanceID.String(), event.EventType).Inc()
+	p.metrics.EventRetries.WithLabelValues(p.instanceID.String(), event.EventType, fmt.Sprintf("%d", newAttemptCount)).Inc()
 	p.metrics.EventsProcessed.WithLabelValues(p.instanceID.String(), event.EventType, "retrying").Inc()
 
 	return fmt.Errorf("retryable error: %s", errorMsg)
@@ -379,7 +379,7 @@ func (p *EventProcessor) handleDeliveryError(ctx context.Context, event *persist
 		return fmt.Errorf("update for retry: %w", updateErr)
 	}
 
-	p.metrics.EventRetries.WithLabelValues(p.instanceID.String(), event.EventType).Inc()
+	p.metrics.EventRetries.WithLabelValues(p.instanceID.String(), event.EventType, fmt.Sprintf("%d", newAttemptCount)).Inc()
 
 	return fmt.Errorf("delivery error (will retry): %w", err)
 }
