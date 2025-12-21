@@ -193,7 +193,7 @@ func (w *Worker) processNext(ctx context.Context) error {
 
 		// Update error metrics
 		if w.metrics != nil {
-			w.metrics.MessageQueueErrors.WithLabelValues(w.instanceID.String(), "processing", "processing_error").Inc()
+			w.metrics.MessageQueueErrors.WithLabelValues(w.instanceID.String(), "message", "processing_error").Inc()
 		}
 
 		// Handle failure with retry logic

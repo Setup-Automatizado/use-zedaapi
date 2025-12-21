@@ -263,7 +263,16 @@ func (c *Coordinator) Enqueue(ctx context.Context, instanceID uuid.UUID, payload
 	// Enqueue message
 	id, err := c.repo.Enqueue(ctx, instanceID, payload, scheduledAt, c.config.MaxAttempts)
 	if err != nil {
+		// Track enqueue errors
+		if c.metrics != nil {
+			c.metrics.MessageQueueErrors.WithLabelValues(instanceID.String(), "message", "enqueue").Inc()
+		}
 		return 0, fmt.Errorf("enqueue message: %w", err)
+	}
+
+	// Track successful enqueue
+	if c.metrics != nil {
+		c.metrics.MessageQueueEnqueued.WithLabelValues(instanceID.String(), "message", "success").Inc()
 	}
 
 	c.log.Debug("message enqueued",
