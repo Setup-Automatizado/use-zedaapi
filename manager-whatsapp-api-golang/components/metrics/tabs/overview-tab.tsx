@@ -8,10 +8,12 @@
 
 "use client";
 
-import { AlertCircle, XCircle } from "lucide-react";
+import { AlertCircle, Phone, XCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useInstanceNames } from "@/hooks/use-instance-names";
 import {
 	formatBytes,
 	formatNumber,
@@ -209,44 +211,10 @@ export function OverviewTab({ metrics, isLoading = false }: OverviewTabProps) {
 
 			{/* Instance Summary */}
 			{metrics && metrics.instances.length > 0 && (
-				<Card>
-					<CardHeader className="pb-2">
-						<CardTitle className="text-base font-medium">
-							Active Instances ({metrics.instances.length})
-						</CardTitle>
-					</CardHeader>
-					<CardContent>
-						<div className="flex flex-wrap gap-2">
-							{metrics.instances.slice(0, 10).map((instanceId) => {
-								const circuitState =
-									metrics.system.circuitBreakerByInstance[instanceId];
-								const status: HealthLevel =
-									circuitState === "open"
-										? "critical"
-										: circuitState === "half-open"
-											? "warning"
-											: "healthy";
-
-								return (
-									<div
-										key={instanceId}
-										className="flex items-center gap-1.5 rounded-md bg-muted px-2 py-1"
-									>
-										<StatusIndicator status={status} size="sm" />
-										<span className="font-mono text-xs">
-											{instanceId.slice(0, 8)}...
-										</span>
-									</div>
-								);
-							})}
-							{metrics.instances.length > 10 && (
-								<span className="text-sm text-muted-foreground">
-									+{metrics.instances.length - 10} more
-								</span>
-							)}
-						</div>
-					</CardContent>
-				</Card>
+				<InstanceSummaryCard
+					instances={metrics.instances}
+					circuitBreakerByInstance={metrics.system.circuitBreakerByInstance}
+				/>
 			)}
 		</div>
 	);
@@ -375,6 +343,84 @@ function ComponentStatusCard({
 						</div>
 					</div>
 				))}
+			</CardContent>
+		</Card>
+	);
+}
+
+/**
+ * Instance Summary Card with avatar, name, and phone
+ */
+function InstanceSummaryCard({
+	instances,
+	circuitBreakerByInstance,
+}: {
+	instances: string[];
+	circuitBreakerByInstance: Record<string, string>;
+}) {
+	const { getDisplayName, getInstanceInfo, formatPhone } = useInstanceNames();
+
+	return (
+		<Card>
+			<CardHeader className="pb-2">
+				<CardTitle className="text-base font-medium">
+					Active Instances ({instances.length})
+				</CardTitle>
+			</CardHeader>
+			<CardContent>
+				<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+					{instances.slice(0, 12).map((instanceId) => {
+						const info = getInstanceInfo(instanceId);
+						const displayName = info?.name || getDisplayName(instanceId);
+						const circuitState = circuitBreakerByInstance[instanceId];
+						const status: HealthLevel =
+							circuitState === "open"
+								? "critical"
+								: circuitState === "half-open"
+									? "warning"
+									: "healthy";
+
+						return (
+							<div
+								key={instanceId}
+								className="flex items-center gap-3 rounded-lg border bg-card p-3 transition-colors hover:bg-muted/50"
+								title={instanceId}
+							>
+								<Avatar className="h-10 w-10 shrink-0">
+									{info?.avatarUrl ? (
+										<AvatarImage src={info.avatarUrl} alt={displayName} />
+									) : null}
+									<AvatarFallback className="text-sm bg-muted">
+										{displayName.slice(0, 2).toUpperCase()}
+									</AvatarFallback>
+								</Avatar>
+								<div className="flex flex-col min-w-0 flex-1">
+									<div className="flex items-center gap-2">
+										<span className="text-sm font-medium truncate">
+											{displayName}
+										</span>
+										<StatusIndicator status={status} size="sm" />
+									</div>
+									{info?.phone ? (
+										<span className="text-xs text-muted-foreground flex items-center gap-1 truncate">
+											<Phone className="h-3 w-3 shrink-0" />
+											{formatPhone(info.phone)}
+										</span>
+									) : (
+										<span className="text-xs text-muted-foreground font-mono truncate">
+											{instanceId.slice(0, 8)}...
+										</span>
+									)}
+								</div>
+							</div>
+						);
+					})}
+				</div>
+				{instances.length > 12 && (
+					<p className="mt-3 text-sm text-muted-foreground text-center">
+						+{instances.length - 12} more instances
+					</p>
+				)}
 			</CardContent>
 		</Card>
 	);

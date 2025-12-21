@@ -65,6 +65,8 @@ export interface MetricChartProps {
 	isLoading?: boolean;
 	/** Additional CSS classes */
 	className?: string;
+	/** Custom colors for pie chart segments (one per data point) */
+	colors?: string[];
 }
 
 export function MetricChart({
@@ -80,6 +82,7 @@ export function MetricChart({
 	stacked = false,
 	isLoading = false,
 	className,
+	colors,
 }: MetricChartProps) {
 	if (isLoading) {
 		return (
@@ -217,6 +220,7 @@ export function MetricChart({
 								<Cell
 									key={`cell-${index}`}
 									fill={
+										colors?.[index] ||
 										yKeys[index % yKeys.length]?.color ||
 										Object.values(TAILWIND_CHART_COLORS)[
 											index % Object.values(TAILWIND_CHART_COLORS).length

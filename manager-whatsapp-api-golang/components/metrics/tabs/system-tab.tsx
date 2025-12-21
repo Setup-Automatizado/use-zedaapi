@@ -8,11 +8,13 @@
 
 "use client";
 
-import { AlertCircle, XCircle } from "lucide-react";
+import { AlertCircle, Phone, XCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useInstanceNames } from "@/hooks/use-instance-names";
 import {
 	formatDuration,
 	formatNumber,
@@ -32,22 +34,36 @@ export interface SystemTabProps {
 }
 
 export function SystemTab({ metrics, workers, isLoading = false }: SystemTabProps) {
+	const { getDisplayName, getInstanceInfo, formatPhone } = useInstanceNames();
+
 	// Circuit breaker instance data
 	const circuitBreakerData = Object.entries(
 		metrics?.circuitBreakerByInstance ?? {},
-	).map(([instanceId, state]) => ({
-		instanceId,
-		state,
-	}));
+	).map(([instanceId, state]) => {
+		const info = getInstanceInfo(instanceId);
+		return {
+			instanceId,
+			displayName: info?.name || getDisplayName(instanceId),
+			phone: info?.phone,
+			avatarUrl: info?.avatarUrl,
+			state,
+		};
+	});
 
-	// Worker data
+	// Worker data - worker_type in metrics is actually instance_id
 	const workerData = Object.entries(workers?.active ?? {}).map(
-		([type, count]) => ({
-			name: type,
-			active: count,
-			errors: workers?.errors[type] ?? 0,
-			avgDuration: workers?.avgTaskDurationMs[type] ?? 0,
-		}),
+		([instanceId, count]) => {
+			const info = getInstanceInfo(instanceId);
+			return {
+				instanceId,
+				name: info?.name || getDisplayName(instanceId),
+				phone: info?.phone || "",
+				avatarUrl: info?.avatarUrl || "",
+				active: count,
+				errors: workers?.errors[instanceId] ?? 0,
+				avgDuration: workers?.avgTaskDurationMs[instanceId] ?? 0,
+			};
+		},
 	);
 
 	// Health check data
@@ -93,15 +109,36 @@ export function SystemTab({ metrics, workers, isLoading = false }: SystemTabProp
 					{isLoading ? (
 						<Skeleton className="h-24 w-full" />
 					) : circuitBreakerData.length > 0 ? (
-						<div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
-							{circuitBreakerData.map(({ instanceId, state }) => (
+						<div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+							{circuitBreakerData.map(({ instanceId, displayName, phone, avatarUrl, state }) => (
 								<div
 									key={instanceId}
-									className="flex items-center justify-between rounded-md border p-3"
+									className="flex items-center gap-3 rounded-lg border p-3"
+									title={instanceId}
 								>
-									<span className="font-mono text-xs">
-										{instanceId.slice(0, 12)}...
-									</span>
+									<Avatar className="h-9 w-9 shrink-0">
+										{avatarUrl ? (
+											<AvatarImage src={avatarUrl} alt={displayName} />
+										) : null}
+										<AvatarFallback className="text-xs bg-muted">
+											{displayName.slice(0, 2).toUpperCase()}
+										</AvatarFallback>
+									</Avatar>
+									<div className="flex flex-col min-w-0 flex-1">
+										<span className="text-sm font-medium truncate">
+											{displayName}
+										</span>
+										{phone ? (
+											<span className="text-xs text-muted-foreground flex items-center gap-1">
+												<Phone className="h-3 w-3" />
+												{formatPhone(phone)}
+											</span>
+										) : (
+											<span className="text-xs text-muted-foreground font-mono truncate">
+												{instanceId.slice(0, 8)}...
+											</span>
+										)}
+									</div>
 									<CircuitBreakerBadge state={state} size="sm" />
 								</div>
 							))}
@@ -334,7 +371,31 @@ export function SystemTab({ metrics, workers, isLoading = false }: SystemTabProp
 				columns={[
 					{
 						key: "name",
-						header: "Worker Type",
+						header: "Instance",
+						format: (_, row) => {
+							const data = row as typeof workerData[0];
+							return (
+								<div className="flex items-center gap-2">
+									<Avatar className="h-7 w-7">
+										{data.avatarUrl ? (
+											<AvatarImage src={data.avatarUrl} alt={data.name} />
+										) : null}
+										<AvatarFallback className="text-xs bg-muted">
+											{data.name.slice(0, 2).toUpperCase()}
+										</AvatarFallback>
+									</Avatar>
+									<div className="flex flex-col min-w-0">
+										<span className="font-medium truncate">{data.name}</span>
+										{data.phone && (
+											<span className="text-xs text-muted-foreground flex items-center gap-1">
+												<Phone className="h-3 w-3" />
+												{formatPhone(data.phone)}
+											</span>
+										)}
+									</div>
+								</div>
+							);
+						},
 					},
 					{
 						key: "active",
