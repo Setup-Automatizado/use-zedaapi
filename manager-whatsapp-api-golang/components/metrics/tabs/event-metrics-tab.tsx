@@ -25,18 +25,45 @@ import { ProgressBar } from "../metric-gauge";
 import { MetricTable, NumberCell } from "../metric-table";
 import { StatusIndicator } from "../status-indicator";
 
-// Event type friendly names and colors
+// Event type friendly names and colors (24 event types from backend)
 const EVENT_TYPE_CONFIG: Record<string, { label: string; color: string }> = {
-	message: { label: "Messages", color: "#3b82f6" }, // blue
-	receipt: { label: "Receipts", color: "#10b981" }, // emerald
-	connected: { label: "Connected", color: "#22c55e" }, // green
-	disconnected: { label: "Disconnected", color: "#ef4444" }, // red
-	presence: { label: "Presence", color: "#8b5cf6" }, // violet
-	picture: { label: "Pictures", color: "#f59e0b" }, // amber
-	business_name: { label: "Business", color: "#06b6d4" }, // cyan
-	user_about: { label: "About", color: "#ec4899" }, // pink
-	group: { label: "Groups", color: "#6366f1" }, // indigo
-	call: { label: "Calls", color: "#14b8a6" }, // teal
+	// Core messaging events
+	message: { label: "Messages", color: "#3b82f6" }, // blue-500
+	receipt: { label: "Receipts", color: "#10b981" }, // emerald-500
+	undecryptable: { label: "Undecryptable", color: "#f87171" }, // red-400
+	history_sync: { label: "History Sync", color: "#a78bfa" }, // violet-400
+
+	// Connection events
+	connected: { label: "Connected", color: "#22c55e" }, // green-500
+	disconnected: { label: "Disconnected", color: "#ef4444" }, // red-500
+
+	// Presence events
+	presence: { label: "Presence", color: "#8b5cf6" }, // violet-500
+	chat_presence: { label: "Chat Presence", color: "#a855f7" }, // purple-500
+
+	// Profile events
+	picture: { label: "Pictures", color: "#f59e0b" }, // amber-500
+	push_name: { label: "Push Name", color: "#fb923c" }, // orange-400
+	business_name: { label: "Business Name", color: "#06b6d4" }, // cyan-500
+	user_about: { label: "User About", color: "#ec4899" }, // pink-500
+
+	// Group events
+	group_info: { label: "Group Info", color: "#6366f1" }, // indigo-500
+	group_joined: { label: "Group Joined", color: "#818cf8" }, // indigo-400
+
+	// Call events
+	call_offer: { label: "Call Offer", color: "#14b8a6" }, // teal-500
+	call_offer_notice: { label: "Call Notice", color: "#2dd4bf" }, // teal-400
+	call_relay_latency: { label: "Call Latency", color: "#5eead4" }, // teal-300
+	call_transport: { label: "Call Transport", color: "#99f6e4" }, // teal-200
+	call_terminate: { label: "Call End", color: "#f97316" }, // orange-500
+	call_reject: { label: "Call Reject", color: "#fb7185" }, // rose-400
+
+	// Newsletter events
+	newsletter_join: { label: "Newsletter Join", color: "#0ea5e9" }, // sky-500
+	newsletter_leave: { label: "Newsletter Leave", color: "#38bdf8" }, // sky-400
+	newsletter_mute_change: { label: "Newsletter Mute", color: "#7dd3fc" }, // sky-300
+	newsletter_live_update: { label: "Newsletter Update", color: "#0284c7" }, // sky-600
 };
 
 export interface EventMetricsTabProps {
