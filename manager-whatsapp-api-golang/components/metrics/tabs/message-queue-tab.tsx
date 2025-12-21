@@ -82,8 +82,8 @@ export function MessageQueueTab({
 		return (
 			<Card>
 				<CardContent className="py-12">
-					<div className="text-center space-y-3">
-						<div className="mx-auto w-12 h-12 rounded-full bg-muted flex items-center justify-center">
+					<div className="text-center space-y-4">
+						<div className="mx-auto w-14 h-14 rounded-full bg-amber-500/10 flex items-center justify-center">
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
 								viewBox="0 0 24 24"
@@ -92,19 +92,38 @@ export function MessageQueueTab({
 								strokeWidth="2"
 								strokeLinecap="round"
 								strokeLinejoin="round"
-								className="w-6 h-6 text-muted-foreground"
+								className="w-7 h-7 text-amber-600 dark:text-amber-400"
 							>
-								<rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-								<line x1="9" y1="9" x2="15" y2="9" />
-								<line x1="9" y1="13" x2="15" y2="13" />
-								<line x1="9" y1="17" x2="12" y2="17" />
+								<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+								<line x1="12" y1="9" x2="12" y2="13" />
+								<line x1="12" y1="17" x2="12.01" y2="17" />
 							</svg>
 						</div>
-						<h3 className="text-lg font-medium">No Queue Data Available</h3>
-						<p className="text-sm text-muted-foreground max-w-md mx-auto">
-							The message queue system is not currently reporting metrics.
-							This may indicate the queue feature is not yet active or no messages have been processed.
-						</p>
+						<div>
+							<h3 className="text-lg font-semibold">Message Queue Metrics Not Available</h3>
+							<p className="text-sm text-muted-foreground mt-2 max-w-lg mx-auto">
+								The message queue system is not reporting metrics. This feature requires the backend
+								to expose <code className="text-xs bg-muted px-1.5 py-0.5 rounded">message_queue_*</code> Prometheus metrics.
+							</p>
+						</div>
+						<div className="pt-2 space-y-2">
+							<p className="text-xs text-muted-foreground font-medium">Expected metrics:</p>
+							<div className="flex flex-wrap justify-center gap-2">
+								{[
+									"message_queue_size",
+									"message_queue_enqueued_total",
+									"message_queue_processed_total",
+									"message_queue_workers_active",
+								].map((metric) => (
+									<span
+										key={metric}
+										className="text-xs font-mono bg-muted px-2 py-1 rounded"
+									>
+										{metric}
+									</span>
+								))}
+							</div>
+						</div>
 					</div>
 				</CardContent>
 			</Card>
