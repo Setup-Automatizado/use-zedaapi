@@ -4,10 +4,12 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
 	wameow "go.mau.fi/whatsmeow"
+	"go.mau.fi/whatsmeow/api/internal/observability"
 )
 
 // ClientRegistry defines the interface for retrieving WhatsApp clients
@@ -30,6 +32,7 @@ type Worker struct {
 	processor      MessageProcessor
 	config         *Config
 	log            *slog.Logger
+	metrics        *observability.Metrics
 
 	// Control channels
 	stopCh chan struct{}
@@ -47,6 +50,7 @@ func NewWorker(
 	processor MessageProcessor,
 	config *Config,
 	log *slog.Logger,
+	metrics *observability.Metrics,
 ) *Worker {
 	return &Worker{
 		instanceID:     instanceID,
@@ -55,6 +59,7 @@ func NewWorker(
 		processor:      processor,
 		config:         config,
 		log:            log.With(slog.String("instance_id", instanceID.String())),
+		metrics:        metrics,
 		stopCh:         make(chan struct{}),
 		doneCh:         make(chan struct{}),
 	}
@@ -186,6 +191,11 @@ func (w *Worker) processNext(ctx context.Context) error {
 			slog.Int("attempt", msg.Attempts),
 			slog.Duration("duration", duration))
 
+		// Update error metrics
+		if w.metrics != nil {
+			w.metrics.MessageQueueErrors.WithLabelValues(w.instanceID.String(), "processing", "processing_error").Inc()
+		}
+
 		// Handle failure with retry logic
 		return w.handleFailure(ctx, msg, err.Error())
 	}
@@ -196,6 +206,12 @@ func (w *Worker) processNext(ctx context.Context) error {
 			slog.Int64("message_id", msg.ID),
 			slog.String("error", err.Error()))
 		return err
+	}
+
+	// Update success metrics
+	if w.metrics != nil {
+		w.metrics.MessageQueueProcessed.WithLabelValues(w.instanceID.String(), "message", "success").Inc()
+		w.metrics.MessageQueueDuration.WithLabelValues(w.instanceID.String(), "message").Observe(duration.Seconds())
 	}
 
 	w.log.Info("message processed successfully",
@@ -227,11 +243,22 @@ func (w *Worker) handleFailure(ctx context.Context, msg *QueueMessage, errorMsg 
 			slog.Int("attempt", msg.Attempts),
 			slog.Int("max_attempts", msg.MaxAttempts),
 			slog.Duration("retry_after", backoff))
+
+		// Update retry metrics
+		if w.metrics != nil {
+			w.metrics.MessageQueueRetries.WithLabelValues(w.instanceID.String(), "message", strconv.Itoa(msg.Attempts+1)).Inc()
+		}
 	} else {
 		w.log.Warn("message moved to DLQ after max retries",
 			slog.Int64("message_id", msg.ID),
 			slog.Int("final_attempts", msg.Attempts),
 			slog.String("final_error", errorMsg))
+
+		// Update DLQ metrics
+		if w.metrics != nil {
+			w.metrics.MessageQueueDLQSize.Inc()
+			w.metrics.MessageQueueProcessed.WithLabelValues(w.instanceID.String(), "message", "failed").Inc()
+		}
 	}
 
 	return nil
