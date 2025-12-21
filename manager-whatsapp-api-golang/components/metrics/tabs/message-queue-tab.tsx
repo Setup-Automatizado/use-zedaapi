@@ -8,18 +8,21 @@
 
 "use client";
 
+import { Phone } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useInstanceNames } from "@/hooks/use-instance-names";
 import {
 	formatDuration,
 	formatNumber,
 	TAILWIND_CHART_COLORS,
 } from "@/lib/metrics/constants";
+import { formatPhoneNumber } from "@/lib/phone";
 import { cn } from "@/lib/utils";
 import type { MessageQueueMetrics } from "@/types/metrics";
 import { HorizontalBarChart, MetricChart } from "../metric-chart";
 import { MetricGaugeGroup, ProgressBar } from "../metric-gauge";
-import { MetricTable, NumberCell } from "../metric-table";
 import { StatusIndicator } from "../status-indicator";
 
 export interface MessageQueueTabProps {
@@ -31,6 +34,8 @@ export function MessageQueueTab({
 	metrics,
 	isLoading = false,
 }: MessageQueueTabProps) {
+	const { getDisplayName, getInstanceInfo } = useInstanceNames();
+
 	// Check if queue system is active (has any data)
 	const hasQueueData = metrics && (
 		metrics.totalSize > 0 ||
@@ -51,30 +56,39 @@ export function MessageQueueTab({
 		}))
 		.sort((a, b) => b.enqueued - a.enqueued);
 
-	// Instance queue data
+	// Instance queue data with friendly names
 	const instanceQueueData = Object.entries(
 		metrics?.byInstance ?? {},
 	)
-		.map(([instanceId, data]) => ({
-			name: instanceId.slice(0, 8) + "...",
-			value: data.pending,
-		}))
+		.map(([instanceId, data]) => {
+			const info = getInstanceInfo(instanceId);
+			return {
+				name: info?.name || getDisplayName(instanceId),
+				value: data.pending,
+			};
+		})
 		.sort((a, b) => b.value - a.value)
 		.slice(0, 10);
 
-	// Instance table data
-	const instanceTableData = Object.entries(
+	// Instance data with full info
+	const instanceData = Object.entries(
 		metrics?.byInstance ?? {},
 	)
-		.map(([instanceId, data]) => ({
-			instanceId,
-			size: data.size,
-			pending: data.pending,
-			processing: data.processing,
-			sent: data.sent,
-			failed: data.failed,
-			workers: data.workers,
-		}))
+		.map(([instanceId, data]) => {
+			const info = getInstanceInfo(instanceId);
+			return {
+				instanceId,
+				name: info?.name || getDisplayName(instanceId),
+				phone: info?.phone || null,
+				avatarUrl: info?.avatarUrl || null,
+				size: data.size,
+				pending: data.pending,
+				processing: data.processing,
+				sent: data.sent,
+				failed: data.failed,
+				workers: data.workers,
+			};
+		})
 		.sort((a, b) => b.pending - a.pending);
 
 	// Show info message when no queue data is available
@@ -330,72 +344,97 @@ export function MessageQueueTab({
 				isLoading={isLoading}
 			/>
 
-			{/* Instance Details Table */}
-			<MetricTable
-				title="Queue by Instance"
-				data={instanceTableData}
-				columns={[
-					{
-						key: "instanceId",
-						header: "Instance",
-						format: (v) => (
-							<span className="font-mono text-xs">
-								{String(v).slice(0, 12)}...
-							</span>
-						),
-					},
-					{
-						key: "workers",
-						header: "Workers",
-						align: "right",
-						format: (v) => <NumberCell value={Number(v)} />,
-					},
-					{
-						key: "pending",
-						header: "Pending",
-						align: "right",
-						format: (v) => (
-							<span
-								className={cn(
-									"tabular-nums",
-									Number(v) > 100 && "text-amber-600 dark:text-amber-400",
-								)}
-							>
-								{Number(v).toLocaleString()}
-							</span>
-						),
-					},
-					{
-						key: "processing",
-						header: "Processing",
-						align: "right",
-						format: (v) => <NumberCell value={Number(v)} />,
-					},
-					{
-						key: "sent",
-						header: "Sent",
-						align: "right",
-						format: (v) => <NumberCell value={Number(v)} />,
-					},
-					{
-						key: "failed",
-						header: "Failed",
-						align: "right",
-						format: (v) => (
-							<span
-								className={cn(
-									"tabular-nums",
-									Number(v) > 0 && "text-red-600 dark:text-red-400",
-								)}
-							>
-								{Number(v).toLocaleString()}
-							</span>
-						),
-					},
-				]}
-				isLoading={isLoading}
-				emptyMessage="No instance queue data available"
-			/>
+			{/* Instance Details */}
+			<Card>
+				<CardHeader className="pb-2">
+					<CardTitle className="text-base font-medium">
+						Queue by Instance
+					</CardTitle>
+				</CardHeader>
+				<CardContent>
+					{isLoading ? (
+						<div className="space-y-3">
+							{Array.from({ length: 3 }).map((_, i) => (
+								<Skeleton key={i} className="h-16 w-full" />
+							))}
+						</div>
+					) : instanceData.length === 0 ? (
+						<p className="text-center text-sm text-muted-foreground py-8">
+							No instance queue data available
+						</p>
+					) : (
+						<div className="space-y-3">
+							{instanceData.map((instance) => (
+								<div
+									key={instance.instanceId}
+									className="flex items-center gap-4 rounded-lg border p-4 transition-colors hover:bg-muted/50"
+								>
+									{/* Avatar */}
+									<Avatar className="h-10 w-10 shrink-0">
+										{instance.avatarUrl && (
+											<AvatarImage src={instance.avatarUrl} alt={instance.name} />
+										)}
+										<AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
+											{instance.name.slice(0, 2).toUpperCase()}
+										</AvatarFallback>
+									</Avatar>
+
+									{/* Name & Phone */}
+									<div className="min-w-0 flex-1">
+										<p className="font-medium truncate">{instance.name}</p>
+										{instance.phone && (
+											<p className="text-xs text-muted-foreground flex items-center gap-1">
+												<Phone className="h-3 w-3" />
+												{formatPhoneNumber(instance.phone)}
+											</p>
+										)}
+									</div>
+
+									{/* Stats Grid */}
+									<div className="grid grid-cols-5 gap-4 text-center shrink-0">
+										<div>
+											<p className="text-xs text-muted-foreground">Workers</p>
+											<p className="font-semibold tabular-nums">
+												{instance.workers.toLocaleString()}
+											</p>
+										</div>
+										<div>
+											<p className="text-xs text-muted-foreground">Pending</p>
+											<p className={cn(
+												"font-semibold tabular-nums",
+												instance.pending > 100 ? "text-amber-600 dark:text-amber-400" : ""
+											)}>
+												{instance.pending.toLocaleString()}
+											</p>
+										</div>
+										<div>
+											<p className="text-xs text-muted-foreground">Processing</p>
+											<p className="font-semibold tabular-nums text-cyan-600 dark:text-cyan-400">
+												{instance.processing.toLocaleString()}
+											</p>
+										</div>
+										<div>
+											<p className="text-xs text-muted-foreground">Sent</p>
+											<p className="font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">
+												{instance.sent.toLocaleString()}
+											</p>
+										</div>
+										<div>
+											<p className="text-xs text-muted-foreground">Failed</p>
+											<p className={cn(
+												"font-semibold tabular-nums",
+												instance.failed > 0 ? "text-red-600 dark:text-red-400" : "text-muted-foreground"
+											)}>
+												{instance.failed.toLocaleString()}
+											</p>
+										</div>
+									</div>
+								</div>
+							))}
+						</div>
+					)}
+				</CardContent>
+			</Card>
 		</div>
 	);
 }
