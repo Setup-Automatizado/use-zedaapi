@@ -17,6 +17,7 @@ import type {
 	MetricFamily,
 	ParsedMetrics,
 	SystemMetrics,
+	TransportMetrics,
 	WorkerMetrics,
 } from "@/types/metrics";
 import { extractHistograms } from "./parser";
@@ -103,6 +104,7 @@ export function transformToDashboard(
 		media: transformMediaMetrics(families, instanceId),
 		system: transformSystemMetrics(families, instanceId),
 		workers: transformWorkerMetrics(families),
+		transport: transformTransportMetrics(families, instanceId),
 		instances,
 	};
 }
@@ -971,6 +973,148 @@ function transformWorkerMetrics(
 				}
 			}
 		}
+	}
+
+	return metrics;
+}
+
+/**
+ * Transform transport/webhook delivery metrics
+ */
+function transformTransportMetrics(
+	families: ParsedMetrics["families"],
+	instanceId?: string | null,
+): TransportMetrics {
+	const metrics: TransportMetrics = {
+		totalDeliveries: 0,
+		successfulDeliveries: 0,
+		failedDeliveries: 0,
+		totalRetries: 0,
+		successRate: 0,
+		avgDurationMs: 0,
+		p50DurationMs: 0,
+		p95DurationMs: 0,
+		p99DurationMs: 0,
+		byInstance: {},
+		byErrorType: {},
+	};
+
+	const shouldInclude = (labels: Record<string, string>) => {
+		if (!instanceId) return true;
+		return labels.instance_id === instanceId;
+	};
+
+	// transport_deliveries_total
+	const deliveriesFamily = getFamily(families, "transport_deliveries_total");
+	if (deliveriesFamily) {
+		for (const sample of deliveriesFamily.samples) {
+			if (!shouldInclude(sample.labels)) continue;
+
+			const status = sample.labels.status || "unknown";
+			const instId = sample.labels.instance_id;
+
+			metrics.totalDeliveries += sample.value;
+
+			if (status === "success") {
+				metrics.successfulDeliveries += sample.value;
+			} else if (status === "failed") {
+				metrics.failedDeliveries += sample.value;
+			}
+
+			if (instId) {
+				if (!metrics.byInstance[instId]) {
+					metrics.byInstance[instId] = {
+						deliveries: 0,
+						success: 0,
+						failed: 0,
+						retries: 0,
+						avgDurationMs: 0,
+					};
+				}
+				metrics.byInstance[instId].deliveries += sample.value;
+				if (status === "success") {
+					metrics.byInstance[instId].success += sample.value;
+				} else if (status === "failed") {
+					metrics.byInstance[instId].failed += sample.value;
+				}
+			}
+		}
+	}
+
+	// transport_errors_total
+	const errorsFamily = getFamily(families, "transport_errors_total");
+	if (errorsFamily) {
+		for (const sample of errorsFamily.samples) {
+			if (!shouldInclude(sample.labels)) continue;
+
+			const errorType = sample.labels.error_type || "unknown";
+			metrics.byErrorType[errorType] = (metrics.byErrorType[errorType] || 0) + sample.value;
+		}
+	}
+
+	// transport_retries_total
+	const retriesFamily = getFamily(families, "transport_retries_total");
+	if (retriesFamily) {
+		for (const sample of retriesFamily.samples) {
+			if (!shouldInclude(sample.labels)) continue;
+
+			metrics.totalRetries += sample.value;
+
+			const instId = sample.labels.instance_id;
+			if (instId && metrics.byInstance[instId]) {
+				metrics.byInstance[instId].retries += sample.value;
+			}
+		}
+	}
+
+	// transport_duration_seconds (histogram)
+	const durationFamily = getFamily(families, "transport_duration_seconds");
+	if (durationFamily) {
+		const histograms = extractHistograms(durationFamily);
+		let totalSum = 0;
+		let totalCount = 0;
+		let p50Sum = 0;
+		let p95Sum = 0;
+		let p99Sum = 0;
+		let validHistograms = 0;
+
+		for (const h of histograms) {
+			if (instanceId && h.labels.instance_id !== instanceId) continue;
+
+			totalSum += h.sum;
+			totalCount += h.count;
+
+			if (h.p50 !== undefined) {
+				p50Sum += h.p50;
+				validHistograms++;
+			}
+			if (h.p95 !== undefined) {
+				p95Sum += h.p95;
+			}
+			if (h.p99 !== undefined) {
+				p99Sum += h.p99;
+			}
+
+			// Update per-instance avg duration
+			const instId = h.labels.instance_id;
+			if (instId && metrics.byInstance[instId] && h.count > 0) {
+				metrics.byInstance[instId].avgDurationMs = (h.sum / h.count) * 1000;
+			}
+		}
+
+		if (totalCount > 0) {
+			metrics.avgDurationMs = (totalSum / totalCount) * 1000;
+		}
+		if (validHistograms > 0) {
+			metrics.p50DurationMs = (p50Sum / validHistograms) * 1000;
+			metrics.p95DurationMs = (p95Sum / validHistograms) * 1000;
+			metrics.p99DurationMs = (p99Sum / validHistograms) * 1000;
+		}
+	}
+
+	// Calculate success rate
+	if (metrics.totalDeliveries > 0) {
+		metrics.successRate = (metrics.successfulDeliveries / metrics.totalDeliveries) * 100;
 	}
 
 	return metrics;
