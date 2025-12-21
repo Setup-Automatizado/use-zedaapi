@@ -38,3 +38,4 @@ export { MessageQueueTab } from "./tabs/message-queue-tab";
 // Tab components
 export { OverviewTab } from "./tabs/overview-tab";
 export { SystemTab } from "./tabs/system-tab";
+export { TransportMetricsTab } from "./tabs/transport-metrics-tab";
