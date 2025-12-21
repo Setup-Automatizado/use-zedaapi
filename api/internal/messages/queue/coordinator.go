@@ -113,7 +113,57 @@ func NewCoordinator(ctx context.Context, cfg *CoordinatorConfig) (*Coordinator, 
 		slog.Duration("poll_interval", cfg.Config.PollInterval),
 		slog.Duration("cleanup_interval", cfg.CleanupInterval))
 
+	// Start periodic metrics update
+	c.wg.Add(1)
+	go c.metricsUpdateLoop()
+
 	return c, nil
+}
+
+// metricsUpdateLoop periodically updates queue size metrics
+func (c *Coordinator) metricsUpdateLoop() {
+	defer c.wg.Done()
+
+	ticker := time.NewTicker(30 * time.Second)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-c.ctx.Done():
+			return
+		case <-c.cleanupStop:
+			return
+		case <-ticker.C:
+			c.updateQueueMetrics()
+		}
+	}
+}
+
+// updateQueueMetrics updates the MessageQueueSize gauge for all registered instances
+func (c *Coordinator) updateQueueMetrics() {
+	if c.metrics == nil {
+		return
+	}
+
+	c.mu.RLock()
+	instanceIDs := make([]uuid.UUID, 0, len(c.workers))
+	for id := range c.workers {
+		instanceIDs = append(instanceIDs, id)
+	}
+	c.mu.RUnlock()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	for _, instanceID := range instanceIDs {
+		stats, err := c.repo.GetStats(ctx, instanceID)
+		if err != nil {
+			continue
+		}
+		c.metrics.MessageQueueSize.WithLabelValues(instanceID.String(), "pending").Set(float64(stats.PendingCount))
+		c.metrics.MessageQueueSize.WithLabelValues(instanceID.String(), "processing").Set(float64(stats.ProcessingCount))
+		c.metrics.MessageQueueSize.WithLabelValues(instanceID.String(), "failed").Set(float64(stats.FailedCount))
+	}
 }
 
 func (c *Coordinator) setDraining(active bool) {
@@ -148,6 +198,7 @@ func (c *Coordinator) AddInstance(instanceID uuid.UUID) error {
 		c.processor,
 		c.config,
 		c.log,
+		c.metrics,
 	)
 
 	// Start worker
@@ -155,6 +206,11 @@ func (c *Coordinator) AddInstance(instanceID uuid.UUID) error {
 
 	// Track worker
 	c.workers[instanceID] = worker
+
+	// Update metrics
+	if c.metrics != nil {
+		c.metrics.MessageQueueWorkers.WithLabelValues(instanceID.String()).Inc()
+	}
 
 	c.log.Info("added queue worker for instance",
 		slog.String("instance_id", instanceID.String()),
@@ -180,6 +236,11 @@ func (c *Coordinator) RemoveInstance(ctx context.Context, instanceID uuid.UUID) 
 			slog.String("instance_id", instanceID.String()),
 			slog.String("error", err.Error()))
 		return err
+	}
+
+	// Update metrics
+	if c.metrics != nil {
+		c.metrics.MessageQueueWorkers.WithLabelValues(instanceID.String()).Dec()
 	}
 
 	c.log.Info("removed queue worker for instance",
