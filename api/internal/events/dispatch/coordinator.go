@@ -70,11 +70,56 @@ func (c *Coordinator) Start(ctx context.Context) error {
 
 	c.running = true
 
+	// Start periodic metrics update routine
+	c.wg.Add(1)
+	go c.metricsUpdateLoop(ctx)
+
 	logger := logging.ContextLogger(ctx, nil)
 	logger.Info("dispatch coordinator started",
 		slog.Int("workers", len(c.workers)))
 
 	return nil
+}
+
+// metricsUpdateLoop periodically updates outbox backlog metrics
+func (c *Coordinator) metricsUpdateLoop(ctx context.Context) {
+	defer c.wg.Done()
+
+	ticker := time.NewTicker(30 * time.Second)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-c.stopChan:
+			return
+		case <-ticker.C:
+			c.updateBacklogMetrics(ctx)
+		}
+	}
+}
+
+// updateBacklogMetrics updates the EventOutboxBacklog gauge for all registered instances
+func (c *Coordinator) updateBacklogMetrics(ctx context.Context) {
+	if c.metrics == nil {
+		return
+	}
+
+	c.mu.RLock()
+	instanceIDs := make([]uuid.UUID, 0, len(c.workers))
+	for id := range c.workers {
+		instanceIDs = append(instanceIDs, id)
+	}
+	c.mu.RUnlock()
+
+	for _, instanceID := range instanceIDs {
+		count, err := c.outboxRepo.CountPendingByInstance(ctx, instanceID)
+		if err != nil {
+			continue
+		}
+		c.metrics.EventOutboxBacklog.WithLabelValues(instanceID.String()).Set(float64(count))
+	}
 }
 
 func (c *Coordinator) RegisterInstance(ctx context.Context, instanceID uuid.UUID) error {
