@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strconv"
 	"time"
 
 	"go.mau.fi/whatsmeow/api/internal/logging"
+	"go.mau.fi/whatsmeow/api/internal/observability"
 )
 
 type DeliveryRequest struct {
@@ -135,9 +137,14 @@ type HTTPTransport struct {
 	client          *http.Client
 	config          *Config
 	responseHandler *ResponseHandler
+	metrics         *observability.Metrics
 }
 
 func NewHTTPTransport(config *Config) *HTTPTransport {
+	return NewHTTPTransportWithMetrics(config, nil)
+}
+
+func NewHTTPTransportWithMetrics(config *Config, metrics *observability.Metrics) *HTTPTransport {
 	if config == nil {
 		config = DefaultConfig()
 	}
@@ -146,6 +153,7 @@ func NewHTTPTransport(config *Config) *HTTPTransport {
 		client:          NewHTTPClient(config),
 		config:          config,
 		responseHandler: NewResponseHandler(),
+		metrics:         metrics,
 	}
 }
 
@@ -213,6 +221,12 @@ func (t *HTTPTransport) deliverWithRetry(ctx context.Context, httpReq *http.Requ
 				slog.Int("attempt", attempt),
 				slog.Int("status_code", lastResult.StatusCode),
 				slog.Duration("duration", duration))
+
+			// Record success metrics
+			if t.metrics != nil {
+				t.metrics.TransportDeliveries.WithLabelValues(request.InstanceID, "http", "success").Inc()
+				t.metrics.TransportDuration.WithLabelValues(request.InstanceID, "http").Observe(duration.Seconds())
+			}
 			return lastResult
 		}
 
@@ -222,6 +236,12 @@ func (t *HTTPTransport) deliverWithRetry(ctx context.Context, httpReq *http.Requ
 				slog.Int("attempt", attempt),
 				slog.String("error", lastResult.ErrorMessage),
 				slog.String("error_type", lastResult.ErrorType))
+
+			// Record permanent failure metrics
+			if t.metrics != nil {
+				t.metrics.TransportDeliveries.WithLabelValues(request.InstanceID, "http", "failed").Inc()
+				t.metrics.TransportErrors.WithLabelValues(request.InstanceID, "http", lastResult.ErrorType).Inc()
+			}
 			return lastResult
 		}
 
@@ -233,6 +253,11 @@ func (t *HTTPTransport) deliverWithRetry(ctx context.Context, httpReq *http.Requ
 				slog.Int("max_attempts", maxAttempts),
 				slog.String("error", lastResult.ErrorMessage),
 				slog.Duration("wait", waitDuration))
+
+			// Record retry metrics
+			if t.metrics != nil {
+				t.metrics.TransportRetries.WithLabelValues(request.InstanceID, "http", strconv.Itoa(attempt)).Inc()
+			}
 
 			timer := time.NewTimer(waitDuration)
 			select {
