@@ -6,6 +6,7 @@ import {
   Globe,
   Image as ImageIcon,
   MessageSquare,
+  Send,
   Settings,
   Zap,
 } from "lucide-react";
@@ -19,6 +20,7 @@ import {
   OverviewTab,
   RefreshControl,
   SystemTab,
+  TransportMetricsTab,
 } from "@/components/metrics";
 import { PageHeader } from "@/components/shared/page-header";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -117,6 +119,10 @@ export default function MetricsPage() {
               <ImageIcon className="h-4 w-4 shrink-0" />
               <span className="hidden sm:inline">Media</span>
             </TabsTrigger>
+            <TabsTrigger value="transport" className="flex items-center gap-2 px-3 py-2 text-sm data-[state=active]:bg-background rounded-md">
+              <Send className="h-4 w-4 shrink-0" />
+              <span className="hidden sm:inline">Transport</span>
+            </TabsTrigger>
             <TabsTrigger value="system" className="flex items-center gap-2 px-3 py-2 text-sm data-[state=active]:bg-background rounded-md">
               <Settings className="h-4 w-4 shrink-0" />
               <span className="hidden sm:inline">System</span>
@@ -143,6 +149,10 @@ export default function MetricsPage() {
             <MediaMetricsTab metrics={metrics.media} />
           </TabsContent>
 
+          <TabsContent value="transport" className="mt-6">
+            <TransportMetricsTab metrics={metrics.transport} />
+          </TabsContent>
+
           <TabsContent value="system" className="mt-6">
             <SystemTab metrics={metrics.system} workers={metrics.workers} />
           </TabsContent>
@@ -157,7 +167,7 @@ function MetricsLoadingSkeleton() {
     <div className="flex flex-col gap-6">
       {/* Tabs skeleton */}
       <div className="flex gap-2">
-        {Array.from({ length: 6 }).map((_, i) => (
+        {Array.from({ length: 7 }).map((_, i) => (
           <Skeleton key={i} className="h-10 w-24" />
         ))}
       </div>
