@@ -1,6 +1,14 @@
 //go:build ignore
 // +build ignore
 
+// NOTE: This file contains message queue service implementation with correct metrics.
+// Once the supporting types (SendTextRequest, etc.) are implemented in types.go,
+// remove the build ignore tags from both files.
+//
+// Metrics fixed in this file:
+// - MessageQueueEnqueued (was MessagesQueued)
+// - MessageQueueDuration (was MessageQueueLatency)
+
 package messages
 
 import (
@@ -65,7 +73,7 @@ func (s *Service) SendText(ctx context.Context, instanceID uuid.UUID, clientToke
 	// Validate request
 	if err := s.validator.ValidateSendTextRequest(req); err != nil {
 		logger.Warn("validation failed", slog.String("error", err.Error()))
-		s.metrics.MessagesQueued.WithLabelValues(instanceID.String(), "text", "validation_failed").Inc()
+		s.metrics.MessageQueueEnqueued.WithLabelValues(instanceID.String(), "text", "validation_failed").Inc()
 		return nil, fmt.Errorf("validation failed: %w", err)
 	}
 
@@ -135,14 +143,14 @@ func (s *Service) SendText(ctx context.Context, instanceID uuid.UUID, clientToke
 
 	if err := s.queueRepo.Enqueue(ctx, queuedMsg); err != nil {
 		logger.Error("failed to enqueue message", slog.String("error", err.Error()))
-		s.metrics.MessagesQueued.WithLabelValues(instanceID.String(), "text", "enqueue_failed").Inc()
+		s.metrics.MessageQueueEnqueued.WithLabelValues(instanceID.String(), "text", "enqueue_failed").Inc()
 		return nil, fmt.Errorf("failed to enqueue message: %w", err)
 	}
 
 	// Update metrics
 	duration := time.Since(start)
-	s.metrics.MessagesQueued.WithLabelValues(instanceID.String(), "text", "success").Inc()
-	s.metrics.MessageQueueLatency.WithLabelValues(instanceID.String(), "text").Observe(duration.Seconds())
+	s.metrics.MessageQueueEnqueued.WithLabelValues(instanceID.String(), "text", "success").Inc()
+	s.metrics.MessageQueueDuration.WithLabelValues(instanceID.String(), "text").Observe(duration.Seconds())
 
 	logger.Info("text message queued successfully",
 		slog.String("zaap_id", zaapID),
@@ -174,7 +182,7 @@ func (s *Service) SendImage(ctx context.Context, instanceID uuid.UUID, clientTok
 	// Validate request
 	if err := s.validator.ValidateSendImageRequest(req); err != nil {
 		logger.Warn("validation failed", slog.String("error", err.Error()))
-		s.metrics.MessagesQueued.WithLabelValues(instanceID.String(), "image", "validation_failed").Inc()
+		s.metrics.MessageQueueEnqueued.WithLabelValues(instanceID.String(), "image", "validation_failed").Inc()
 		return nil, fmt.Errorf("validation failed: %w", err)
 	}
 
@@ -252,14 +260,14 @@ func (s *Service) SendImage(ctx context.Context, instanceID uuid.UUID, clientTok
 
 	if err := s.queueRepo.Enqueue(ctx, queuedMsg); err != nil {
 		logger.Error("failed to enqueue message", slog.String("error", err.Error()))
-		s.metrics.MessagesQueued.WithLabelValues(instanceID.String(), "image", "enqueue_failed").Inc()
+		s.metrics.MessageQueueEnqueued.WithLabelValues(instanceID.String(), "image", "enqueue_failed").Inc()
 		return nil, fmt.Errorf("failed to enqueue message: %w", err)
 	}
 
 	// Update metrics
 	duration := time.Since(start)
-	s.metrics.MessagesQueued.WithLabelValues(instanceID.String(), "image", "success").Inc()
-	s.metrics.MessageQueueLatency.WithLabelValues(instanceID.String(), "image").Observe(duration.Seconds())
+	s.metrics.MessageQueueEnqueued.WithLabelValues(instanceID.String(), "image", "success").Inc()
+	s.metrics.MessageQueueDuration.WithLabelValues(instanceID.String(), "image").Observe(duration.Seconds())
 
 	logger.Info("image message queued successfully",
 		slog.String("zaap_id", zaapID),
@@ -291,7 +299,7 @@ func (s *Service) SendAudio(ctx context.Context, instanceID uuid.UUID, clientTok
 	// Validate request
 	if err := s.validator.ValidateSendAudioRequest(req); err != nil {
 		logger.Warn("validation failed", slog.String("error", err.Error()))
-		s.metrics.MessagesQueued.WithLabelValues(instanceID.String(), "audio", "validation_failed").Inc()
+		s.metrics.MessageQueueEnqueued.WithLabelValues(instanceID.String(), "audio", "validation_failed").Inc()
 		return nil, fmt.Errorf("validation failed: %w", err)
 	}
 
@@ -361,14 +369,14 @@ func (s *Service) SendAudio(ctx context.Context, instanceID uuid.UUID, clientTok
 
 	if err := s.queueRepo.Enqueue(ctx, queuedMsg); err != nil {
 		logger.Error("failed to enqueue message", slog.String("error", err.Error()))
-		s.metrics.MessagesQueued.WithLabelValues(instanceID.String(), "audio", "enqueue_failed").Inc()
+		s.metrics.MessageQueueEnqueued.WithLabelValues(instanceID.String(), "audio", "enqueue_failed").Inc()
 		return nil, fmt.Errorf("failed to enqueue message: %w", err)
 	}
 
 	// Update metrics
 	duration := time.Since(start)
-	s.metrics.MessagesQueued.WithLabelValues(instanceID.String(), "audio", "success").Inc()
-	s.metrics.MessageQueueLatency.WithLabelValues(instanceID.String(), "audio").Observe(duration.Seconds())
+	s.metrics.MessageQueueEnqueued.WithLabelValues(instanceID.String(), "audio", "success").Inc()
+	s.metrics.MessageQueueDuration.WithLabelValues(instanceID.String(), "audio").Observe(duration.Seconds())
 
 	logger.Info("audio message queued successfully",
 		slog.String("zaap_id", zaapID),
@@ -400,7 +408,7 @@ func (s *Service) SendVideo(ctx context.Context, instanceID uuid.UUID, clientTok
 	// Validate request
 	if err := s.validator.ValidateSendVideoRequest(req); err != nil {
 		logger.Warn("validation failed", slog.String("error", err.Error()))
-		s.metrics.MessagesQueued.WithLabelValues(instanceID.String(), "video", "validation_failed").Inc()
+		s.metrics.MessageQueueEnqueued.WithLabelValues(instanceID.String(), "video", "validation_failed").Inc()
 		return nil, fmt.Errorf("validation failed: %w", err)
 	}
 
@@ -478,14 +486,14 @@ func (s *Service) SendVideo(ctx context.Context, instanceID uuid.UUID, clientTok
 
 	if err := s.queueRepo.Enqueue(ctx, queuedMsg); err != nil {
 		logger.Error("failed to enqueue message", slog.String("error", err.Error()))
-		s.metrics.MessagesQueued.WithLabelValues(instanceID.String(), "video", "enqueue_failed").Inc()
+		s.metrics.MessageQueueEnqueued.WithLabelValues(instanceID.String(), "video", "enqueue_failed").Inc()
 		return nil, fmt.Errorf("failed to enqueue message: %w", err)
 	}
 
 	// Update metrics
 	duration := time.Since(start)
-	s.metrics.MessagesQueued.WithLabelValues(instanceID.String(), "video", "success").Inc()
-	s.metrics.MessageQueueLatency.WithLabelValues(instanceID.String(), "video").Observe(duration.Seconds())
+	s.metrics.MessageQueueEnqueued.WithLabelValues(instanceID.String(), "video", "success").Inc()
+	s.metrics.MessageQueueDuration.WithLabelValues(instanceID.String(), "video").Observe(duration.Seconds())
 
 	logger.Info("video message queued successfully",
 		slog.String("zaap_id", zaapID),
@@ -517,7 +525,7 @@ func (s *Service) SendSticker(ctx context.Context, instanceID uuid.UUID, clientT
 	// Validate request
 	if err := s.validator.ValidateSendStickerRequest(req); err != nil {
 		logger.Warn("validation failed", slog.String("error", err.Error()))
-		s.metrics.MessagesQueued.WithLabelValues(instanceID.String(), "sticker", "validation_failed").Inc()
+		s.metrics.MessageQueueEnqueued.WithLabelValues(instanceID.String(), "sticker", "validation_failed").Inc()
 		return nil, fmt.Errorf("validation failed: %w", err)
 	}
 
@@ -590,14 +598,14 @@ func (s *Service) SendSticker(ctx context.Context, instanceID uuid.UUID, clientT
 
 	if err := s.queueRepo.Enqueue(ctx, queuedMsg); err != nil {
 		logger.Error("failed to enqueue message", slog.String("error", err.Error()))
-		s.metrics.MessagesQueued.WithLabelValues(instanceID.String(), "sticker", "enqueue_failed").Inc()
+		s.metrics.MessageQueueEnqueued.WithLabelValues(instanceID.String(), "sticker", "enqueue_failed").Inc()
 		return nil, fmt.Errorf("failed to enqueue message: %w", err)
 	}
 
 	// Update metrics
 	duration := time.Since(start)
-	s.metrics.MessagesQueued.WithLabelValues(instanceID.String(), "sticker", "success").Inc()
-	s.metrics.MessageQueueLatency.WithLabelValues(instanceID.String(), "sticker").Observe(duration.Seconds())
+	s.metrics.MessageQueueEnqueued.WithLabelValues(instanceID.String(), "sticker", "success").Inc()
+	s.metrics.MessageQueueDuration.WithLabelValues(instanceID.String(), "sticker").Observe(duration.Seconds())
 
 	logger.Info("sticker message queued successfully",
 		slog.String("zaap_id", zaapID),
@@ -629,7 +637,7 @@ func (s *Service) SendGif(ctx context.Context, instanceID uuid.UUID, clientToken
 	// Validate request
 	if err := s.validator.ValidateSendGifRequest(req); err != nil {
 		logger.Warn("validation failed", slog.String("error", err.Error()))
-		s.metrics.MessagesQueued.WithLabelValues(instanceID.String(), "gif", "validation_failed").Inc()
+		s.metrics.MessageQueueEnqueued.WithLabelValues(instanceID.String(), "gif", "validation_failed").Inc()
 		return nil, fmt.Errorf("validation failed: %w", err)
 	}
 
@@ -710,14 +718,14 @@ func (s *Service) SendGif(ctx context.Context, instanceID uuid.UUID, clientToken
 
 	if err := s.queueRepo.Enqueue(ctx, queuedMsg); err != nil {
 		logger.Error("failed to enqueue message", slog.String("error", err.Error()))
-		s.metrics.MessagesQueued.WithLabelValues(instanceID.String(), "gif", "enqueue_failed").Inc()
+		s.metrics.MessageQueueEnqueued.WithLabelValues(instanceID.String(), "gif", "enqueue_failed").Inc()
 		return nil, fmt.Errorf("failed to enqueue message: %w", err)
 	}
 
 	// Update metrics
 	duration := time.Since(start)
-	s.metrics.MessagesQueued.WithLabelValues(instanceID.String(), "gif", "success").Inc()
-	s.metrics.MessageQueueLatency.WithLabelValues(instanceID.String(), "gif").Observe(duration.Seconds())
+	s.metrics.MessageQueueEnqueued.WithLabelValues(instanceID.String(), "gif", "success").Inc()
+	s.metrics.MessageQueueDuration.WithLabelValues(instanceID.String(), "gif").Observe(duration.Seconds())
 
 	logger.Info("gif message queued successfully",
 		slog.String("zaap_id", zaapID),
