@@ -283,3 +283,104 @@ export const METRICS_TABS = [
 ] as const;
 
 export type MetricsTabId = (typeof METRICS_TABS)[number]["id"];
+
+/**
+ * HTTP Status Code Labels
+ * Maps status codes and status code groups to friendly labels
+ */
+export const HTTP_STATUS_LABELS: Record<string, { label: string; description: string; color: string }> = {
+	// Status code groups (used in charts)
+	"1xx": { label: "Info", description: "Informational responses", color: TAILWIND_CHART_COLORS.muted },
+	"2xx": { label: "Success", description: "Successful requests", color: TAILWIND_CHART_COLORS.success },
+	"3xx": { label: "Redirect", description: "Redirection responses", color: TAILWIND_CHART_COLORS.tertiary },
+	"4xx": { label: "Client Error", description: "Client-side errors", color: TAILWIND_CHART_COLORS.warning },
+	"5xx": { label: "Server Error", description: "Server-side errors", color: TAILWIND_CHART_COLORS.error },
+
+	// Individual status codes
+	"100": { label: "Continue", description: "Continue with the request", color: TAILWIND_CHART_COLORS.muted },
+	"101": { label: "Switching", description: "Switching protocols", color: TAILWIND_CHART_COLORS.muted },
+	"200": { label: "Success", description: "Request succeeded", color: TAILWIND_CHART_COLORS.success },
+	"201": { label: "Created", description: "Resource created", color: TAILWIND_CHART_COLORS.success },
+	"202": { label: "Accepted", description: "Request accepted", color: TAILWIND_CHART_COLORS.success },
+	"204": { label: "No Content", description: "No content to return", color: TAILWIND_CHART_COLORS.success },
+	"301": { label: "Moved", description: "Resource moved permanently", color: TAILWIND_CHART_COLORS.tertiary },
+	"302": { label: "Found", description: "Resource found (redirect)", color: TAILWIND_CHART_COLORS.tertiary },
+	"304": { label: "Not Modified", description: "Resource not modified", color: TAILWIND_CHART_COLORS.tertiary },
+	"400": { label: "Bad Request", description: "Invalid request syntax", color: TAILWIND_CHART_COLORS.warning },
+	"401": { label: "Unauthorized", description: "Authentication required", color: TAILWIND_CHART_COLORS.warning },
+	"403": { label: "Forbidden", description: "Access denied", color: TAILWIND_CHART_COLORS.warning },
+	"404": { label: "Not Found", description: "Resource not found", color: TAILWIND_CHART_COLORS.warning },
+	"405": { label: "Method Not Allowed", description: "HTTP method not allowed", color: TAILWIND_CHART_COLORS.warning },
+	"409": { label: "Conflict", description: "Request conflicts with current state", color: TAILWIND_CHART_COLORS.warning },
+	"422": { label: "Unprocessable", description: "Validation failed", color: TAILWIND_CHART_COLORS.warning },
+	"429": { label: "Rate Limited", description: "Too many requests", color: TAILWIND_CHART_COLORS.warning },
+	"500": { label: "Server Error", description: "Internal server error", color: TAILWIND_CHART_COLORS.error },
+	"501": { label: "Not Implemented", description: "Feature not implemented", color: TAILWIND_CHART_COLORS.error },
+	"502": { label: "Bad Gateway", description: "Invalid response from upstream", color: TAILWIND_CHART_COLORS.error },
+	"503": { label: "Unavailable", description: "Service unavailable", color: TAILWIND_CHART_COLORS.error },
+	"504": { label: "Gateway Timeout", description: "Upstream timeout", color: TAILWIND_CHART_COLORS.error },
+};
+
+/**
+ * Get friendly label for HTTP status code
+ */
+export function getHttpStatusLabel(status: string | number): string {
+	const statusStr = String(status);
+
+	// Check for exact match first
+	const exactMatch = HTTP_STATUS_LABELS[statusStr];
+	if (exactMatch) {
+		return exactMatch.label;
+	}
+
+	// Derive group from numeric status
+	if (/^\d{3}$/.test(statusStr)) {
+		const group = `${statusStr[0]}xx`;
+		const groupMatch = HTTP_STATUS_LABELS[group];
+		if (groupMatch) {
+			return `${statusStr} ${groupMatch.label}`;
+		}
+	}
+
+	// Check for status group directly (e.g., "2xx")
+	if (statusStr.endsWith("xx")) {
+		const groupMatch = HTTP_STATUS_LABELS[statusStr];
+		if (groupMatch) {
+			return groupMatch.label;
+		}
+	}
+
+	return statusStr;
+}
+
+/**
+ * Get color for HTTP status code
+ */
+export function getHttpStatusColor(status: string | number): string {
+	const statusStr = String(status);
+
+	// Check for exact match first
+	const exactMatch = HTTP_STATUS_LABELS[statusStr];
+	if (exactMatch) {
+		return exactMatch.color;
+	}
+
+	// Derive group from numeric status
+	if (/^\d{3}$/.test(statusStr)) {
+		const group = `${statusStr[0]}xx`;
+		const groupMatch = HTTP_STATUS_LABELS[group];
+		if (groupMatch) {
+			return groupMatch.color;
+		}
+	}
+
+	// Check for status group directly
+	if (statusStr.endsWith("xx")) {
+		const groupMatch = HTTP_STATUS_LABELS[statusStr];
+		if (groupMatch) {
+			return groupMatch.color;
+		}
+	}
+
+	return TAILWIND_CHART_COLORS.muted;
+}

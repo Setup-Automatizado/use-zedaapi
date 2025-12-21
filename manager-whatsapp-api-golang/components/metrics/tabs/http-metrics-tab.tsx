@@ -1,14 +1,19 @@
 /**
  * HTTP Metrics Tab Component
  *
- * HTTP request metrics, latency, and error rates.
+ * HTTP request metrics, latency, and error rates with friendly status labels.
  *
  * @module components/metrics/tabs/http-metrics-tab
  */
 
 "use client";
 
-import { TAILWIND_CHART_COLORS } from "@/lib/metrics/constants";
+import {
+	getHttpStatusColor,
+	getHttpStatusLabel,
+	HTTP_STATUS_LABELS,
+	TAILWIND_CHART_COLORS,
+} from "@/lib/metrics/constants";
 import type { HTTPMetrics } from "@/types/metrics";
 import { HorizontalBarChart, MetricChart } from "../metric-chart";
 import { MetricGaugeGroup } from "../metric-gauge";
@@ -23,12 +28,18 @@ export function HTTPMetricsTab({
 	metrics,
 	isLoading = false,
 }: HTTPMetricsTabProps) {
-	// Prepare status code data for pie chart
+	// Prepare status code data for pie chart with friendly labels
 	const statusCodeData = Object.entries(metrics?.byStatus ?? {}).map(
-		([status, count]) => ({
-			name: `${status}xx`,
-			value: count,
-		}),
+		([status, count]) => {
+			const statusKey = `${status}xx`;
+			const info = HTTP_STATUS_LABELS[statusKey];
+			return {
+				name: info ? info.label : statusKey,
+				fullLabel: info ? `${statusKey} - ${info.description}` : statusKey,
+				value: count,
+				color: info?.color || TAILWIND_CHART_COLORS.muted,
+			};
+		},
 	);
 
 	// Prepare path data for horizontal bar
@@ -104,10 +115,10 @@ export function HTTPMetricsTab({
 
 			{/* Charts Grid */}
 			<div className="grid gap-4 md:grid-cols-2">
-				{/* Status Code Distribution */}
+				{/* Status Code Distribution with friendly labels */}
 				<MetricChart
 					type="pie"
-					title="Status Codes"
+					title="Response Status"
 					data={statusCodeData}
 					xKey="name"
 					yKeys={[
@@ -115,6 +126,7 @@ export function HTTPMetricsTab({
 					]}
 					height={250}
 					isLoading={isLoading}
+					colors={statusCodeData.map((d) => d.color)}
 				/>
 
 				{/* Method Distribution */}
@@ -131,6 +143,11 @@ export function HTTPMetricsTab({
 					isLoading={isLoading}
 				/>
 			</div>
+
+			{/* Status Code Legend */}
+			{statusCodeData.length > 0 && (
+				<StatusCodeLegend data={statusCodeData} />
+			)}
 
 			{/* Top Endpoints */}
 			<HorizontalBarChart
@@ -182,5 +199,80 @@ export function HTTPMetricsTab({
 				emptyMessage="No endpoint data available"
 			/>
 		</div>
+	);
+}
+
+/**
+ * Status Code Legend Component
+ * Shows friendly descriptions for each status code category
+ */
+function StatusCodeLegend({
+	data,
+}: {
+	data: Array<{ name: string; fullLabel: string; value: number; color: string }>;
+}) {
+	// Only show if we have data
+	if (data.length === 0) return null;
+
+	// Sort by value descending
+	const sorted = [...data].sort((a, b) => b.value - a.value);
+	const total = sorted.reduce((sum, d) => sum + d.value, 0);
+
+	return (
+		<div className="flex flex-wrap gap-4 px-2">
+			{sorted.map((item) => {
+				const percentage = total > 0 ? ((item.value / total) * 100).toFixed(1) : "0";
+				return (
+					<div
+						key={item.name}
+						className="flex items-center gap-2"
+						title={item.fullLabel}
+					>
+						<span
+							className="h-3 w-3 rounded-full"
+							style={{ backgroundColor: item.color }}
+						/>
+						<span className="text-sm font-medium">{item.name}</span>
+						<span className="text-sm text-muted-foreground">
+							{item.value.toLocaleString()} ({percentage}%)
+						</span>
+					</div>
+				);
+			})}
+		</div>
+	);
+}
+
+/**
+ * HTTP Status Badge
+ * Shows a colored badge with the friendly status label
+ */
+export function HttpStatusBadge({
+	status,
+	count,
+}: {
+	status: string | number;
+	count?: number;
+}) {
+	const label = getHttpStatusLabel(status);
+	const color = getHttpStatusColor(status);
+
+	return (
+		<span
+			className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium"
+			style={{
+				backgroundColor: `${color}20`,
+				color: color,
+			}}
+		>
+			<span
+				className="h-2 w-2 rounded-full"
+				style={{ backgroundColor: color }}
+			/>
+			{label}
+			{count !== undefined && (
+				<span className="opacity-75">({count.toLocaleString()})</span>
+			)}
+		</span>
 	);
 }
