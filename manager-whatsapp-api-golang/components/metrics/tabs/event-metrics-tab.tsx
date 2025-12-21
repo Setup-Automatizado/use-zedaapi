@@ -262,32 +262,35 @@ export function EventMetricsTab({
 							{instanceTableData.map((instance) => (
 								<div
 									key={instance.instanceId}
-									className="flex items-center gap-4 rounded-lg border p-4 transition-colors hover:bg-muted/50"
+									className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 rounded-lg border p-4 transition-colors hover:bg-muted/50"
 								>
-									{/* Avatar */}
-									<Avatar className="h-10 w-10 shrink-0">
-										{instance.avatarUrl && (
-											<AvatarImage src={instance.avatarUrl} alt={instance.name || ""} />
-										)}
-										<AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
-											{instance.name?.slice(0, 2).toUpperCase() || instance.instanceId.slice(0, 2).toUpperCase()}
-										</AvatarFallback>
-									</Avatar>
+									{/* Instance Info */}
+									<div className="flex items-center gap-3 min-w-0 sm:w-48 shrink-0">
+										{/* Avatar */}
+										<Avatar className="h-10 w-10 shrink-0">
+											{instance.avatarUrl && (
+												<AvatarImage src={instance.avatarUrl} alt={instance.name || ""} />
+											)}
+											<AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
+												{instance.name?.slice(0, 2).toUpperCase() || instance.instanceId.slice(0, 2).toUpperCase()}
+											</AvatarFallback>
+										</Avatar>
 
-									{/* Name & Phone */}
-									<div className="min-w-0 flex-1">
-										<p className="font-medium truncate">
-											{instance.name || instance.instanceId.slice(0, 12) + "..."}
-										</p>
-										{instance.phone && (
-											<p className="text-xs text-muted-foreground font-mono">
-												{formatPhoneNumber(instance.phone)}
+										{/* Name & Phone */}
+										<div className="min-w-0 flex-1">
+											<p className="font-medium truncate">
+												{instance.name || instance.instanceId.slice(0, 12) + "..."}
 											</p>
-										)}
+											{instance.phone && (
+												<p className="text-xs text-muted-foreground font-mono truncate">
+													{formatPhoneNumber(instance.phone)}
+												</p>
+											)}
+										</div>
 									</div>
 
 									{/* Stats Grid */}
-									<div className="grid grid-cols-5 gap-4 text-center shrink-0">
+									<div className="grid grid-cols-5 gap-2 sm:gap-4 text-center flex-1">
 										<div>
 											<p className="text-xs text-muted-foreground">Captured</p>
 											<p className="font-semibold tabular-nums text-blue-600 dark:text-blue-400">

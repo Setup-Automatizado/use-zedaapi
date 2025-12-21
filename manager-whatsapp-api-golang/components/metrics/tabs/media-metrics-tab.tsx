@@ -369,31 +369,34 @@ export function MediaMetricsTab({
 							{instanceData.map((instance) => (
 								<div
 									key={instance.instanceId}
-									className="flex items-center gap-4 rounded-lg border p-4 transition-colors hover:bg-muted/50"
+									className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 rounded-lg border p-4 transition-colors hover:bg-muted/50"
 								>
-									{/* Avatar */}
-									<Avatar className="h-10 w-10 shrink-0">
-										{instance.avatarUrl && (
-											<AvatarImage src={instance.avatarUrl} alt={instance.name} />
-										)}
-										<AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
-											{instance.name.slice(0, 2).toUpperCase()}
-										</AvatarFallback>
-									</Avatar>
+									{/* Instance Info */}
+									<div className="flex items-center gap-3 min-w-0 sm:w-48 shrink-0">
+										{/* Avatar */}
+										<Avatar className="h-10 w-10 shrink-0">
+											{instance.avatarUrl && (
+												<AvatarImage src={instance.avatarUrl} alt={instance.name} />
+											)}
+											<AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
+												{instance.name.slice(0, 2).toUpperCase()}
+											</AvatarFallback>
+										</Avatar>
 
-									{/* Name & Phone */}
-									<div className="min-w-0 flex-1">
-										<p className="font-medium truncate">{instance.name}</p>
-										{instance.phone && (
-											<p className="text-xs text-muted-foreground flex items-center gap-1">
-												<Phone className="h-3 w-3" />
-												{formatPhoneNumber(instance.phone)}
-											</p>
-										)}
+										{/* Name & Phone */}
+										<div className="min-w-0 flex-1">
+											<p className="font-medium truncate">{instance.name}</p>
+											{instance.phone && (
+												<p className="text-xs text-muted-foreground flex items-center gap-1 truncate">
+													<Phone className="h-3 w-3 shrink-0" />
+													{formatPhoneNumber(instance.phone)}
+												</p>
+											)}
+										</div>
 									</div>
 
 									{/* Stats Grid */}
-									<div className="grid grid-cols-3 gap-6 text-center shrink-0">
+									<div className="grid grid-cols-3 gap-4 sm:gap-6 text-center flex-1">
 										<div>
 											<p className="text-xs text-muted-foreground">Downloads</p>
 											<p className="font-semibold tabular-nums text-blue-600 dark:text-blue-400">
