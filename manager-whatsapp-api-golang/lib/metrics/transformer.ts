@@ -14,11 +14,61 @@ import type {
 	HTTPMetrics,
 	MediaMetrics,
 	MessageQueueMetrics,
+	MetricFamily,
 	ParsedMetrics,
 	SystemMetrics,
 	WorkerMetrics,
 } from "@/types/metrics";
 import { extractHistograms } from "./parser";
+
+/**
+ * Metric name prefixes to try when looking up families
+ * The backend may expose metrics with or without the whatsmeow_api_ prefix
+ */
+const METRIC_PREFIXES = ["whatsmeow_api_", ""];
+
+/**
+ * Get metric family by name, trying common prefixes and suffix variations
+ * This handles the whatsmeow_api_ prefix used by the backend and
+ * the parser's behavior of grouping samples under base names (without _total suffix)
+ */
+function getFamily(
+	families: ParsedMetrics["families"],
+	baseName: string,
+): MetricFamily | undefined {
+	// Try with and without _total suffix
+	// Prefer the version without _total first as that's where the parser puts samples
+	const namesToTry: string[] = [];
+	if (baseName.endsWith("_total")) {
+		namesToTry.push(baseName.slice(0, -6)); // without _total first
+		namesToTry.push(baseName); // then with _total
+	} else {
+		namesToTry.push(baseName);
+	}
+
+	for (const prefix of METRIC_PREFIXES) {
+		for (const name of namesToTry) {
+			const fullName = prefix + name;
+			const family = families[fullName];
+			// Only return if family exists and has samples
+			if (family && family.samples.length > 0) {
+				return family;
+			}
+		}
+	}
+
+	// Fallback: return any existing family even without samples
+	for (const prefix of METRIC_PREFIXES) {
+		for (const name of namesToTry) {
+			const fullName = prefix + name;
+			if (families[fullName]) {
+				return families[fullName];
+			}
+		}
+	}
+
+	return undefined;
+}
 
 /**
  * Transform options
@@ -97,7 +147,7 @@ function transformHTTPMetrics(
 	};
 
 	// http_requests_total
-	const requestsFamily = families.http_requests_total;
+	const requestsFamily = getFamily(families, "http_requests_total");
 	if (requestsFamily) {
 		let totalRequests = 0;
 		let errorRequests = 0;
@@ -137,7 +187,7 @@ function transformHTTPMetrics(
 	}
 
 	// http_request_duration_seconds (histogram)
-	const durationFamily = families.http_request_duration_seconds;
+	const durationFamily = getFamily(families, "http_request_duration_seconds");
 	if (durationFamily) {
 		const histograms = extractHistograms(durationFamily);
 
@@ -209,7 +259,7 @@ function transformEventMetrics(
 	};
 
 	// events_captured_total
-	const capturedFamily = families.events_captured_total;
+	const capturedFamily = getFamily(families, "events_captured_total");
 	if (capturedFamily) {
 		for (const sample of capturedFamily.samples) {
 			if (!shouldInclude(sample.labels)) continue;
@@ -234,7 +284,7 @@ function transformEventMetrics(
 	}
 
 	// events_buffered (gauge)
-	const bufferedFamily = families.events_buffered;
+	const bufferedFamily = getFamily(families, "events_buffered");
 	if (bufferedFamily) {
 		for (const sample of bufferedFamily.samples) {
 			metrics.buffered += sample.value;
@@ -242,7 +292,7 @@ function transformEventMetrics(
 	}
 
 	// events_inserted_total
-	const insertedFamily = families.events_inserted_total;
+	const insertedFamily = getFamily(families, "events_inserted_total");
 	if (insertedFamily) {
 		for (const sample of insertedFamily.samples) {
 			if (!shouldInclude(sample.labels)) continue;
@@ -251,7 +301,7 @@ function transformEventMetrics(
 	}
 
 	// events_processed_total
-	const processedFamily = families.events_processed_total;
+	const processedFamily = getFamily(families, "events_processed_total");
 	if (processedFamily) {
 		for (const sample of processedFamily.samples) {
 			if (!shouldInclude(sample.labels)) continue;
@@ -274,7 +324,7 @@ function transformEventMetrics(
 	}
 
 	// events_delivered_total
-	const deliveredFamily = families.events_delivered_total;
+	const deliveredFamily = getFamily(families, "events_delivered_total");
 	if (deliveredFamily) {
 		for (const sample of deliveredFamily.samples) {
 			if (!shouldInclude(sample.labels)) continue;
@@ -297,7 +347,7 @@ function transformEventMetrics(
 	}
 
 	// events_failed_total
-	const failedFamily = families.events_failed_total;
+	const failedFamily = getFamily(families, "events_failed_total");
 	if (failedFamily) {
 		for (const sample of failedFamily.samples) {
 			if (!shouldInclude(sample.labels)) continue;
@@ -320,7 +370,7 @@ function transformEventMetrics(
 	}
 
 	// event_retries_total
-	const retriesFamily = families.event_retries_total;
+	const retriesFamily = getFamily(families, "event_retries_total");
 	if (retriesFamily) {
 		for (const sample of retriesFamily.samples) {
 			if (!shouldInclude(sample.labels)) continue;
@@ -329,7 +379,7 @@ function transformEventMetrics(
 	}
 
 	// event_outbox_backlog (gauge)
-	const backlogFamily = families.event_outbox_backlog;
+	const backlogFamily = getFamily(families, "event_outbox_backlog");
 	if (backlogFamily) {
 		for (const sample of backlogFamily.samples) {
 			if (!shouldInclude(sample.labels)) continue;
@@ -343,7 +393,7 @@ function transformEventMetrics(
 	}
 
 	// dlq_backlog (gauge)
-	const dlqFamily = families.dlq_backlog;
+	const dlqFamily = getFamily(families, "dlq_backlog");
 	if (dlqFamily) {
 		for (const sample of dlqFamily.samples) {
 			metrics.dlqSize += sample.value;
@@ -351,7 +401,7 @@ function transformEventMetrics(
 	}
 
 	// event_processing_duration_seconds (histogram)
-	const processingDurationFamily = families.event_processing_duration_seconds;
+	const processingDurationFamily = getFamily(families, "event_processing_duration_seconds");
 	if (processingDurationFamily) {
 		const histograms = extractHistograms(processingDurationFamily);
 		let totalSum = 0;
@@ -369,7 +419,7 @@ function transformEventMetrics(
 	}
 
 	// event_delivery_duration_seconds (histogram)
-	const deliveryDurationFamily = families.event_delivery_duration_seconds;
+	const deliveryDurationFamily = getFamily(families, "event_delivery_duration_seconds");
 	if (deliveryDurationFamily) {
 		const histograms = extractHistograms(deliveryDurationFamily);
 		let totalSum = 0;
@@ -419,7 +469,7 @@ function transformMessageQueueMetrics(
 	};
 
 	// message_queue_size (gauge)
-	const sizeFamily = families.message_queue_size;
+	const sizeFamily = getFamily(families, "message_queue_size");
 	if (sizeFamily) {
 		for (const sample of sizeFamily.samples) {
 			if (!shouldInclude(sample.labels)) continue;
@@ -458,7 +508,7 @@ function transformMessageQueueMetrics(
 	}
 
 	// message_queue_enqueued_total
-	const enqueuedFamily = families.message_queue_enqueued_total;
+	const enqueuedFamily = getFamily(families, "message_queue_enqueued_total");
 	if (enqueuedFamily) {
 		for (const sample of enqueuedFamily.samples) {
 			if (!shouldInclude(sample.labels)) continue;
@@ -473,7 +523,7 @@ function transformMessageQueueMetrics(
 	}
 
 	// message_queue_processed_total
-	const processedFamily = families.message_queue_processed_total;
+	const processedFamily = getFamily(families, "message_queue_processed_total");
 	if (processedFamily) {
 		for (const sample of processedFamily.samples) {
 			if (!shouldInclude(sample.labels)) continue;
@@ -493,7 +543,7 @@ function transformMessageQueueMetrics(
 	}
 
 	// message_queue_retries_total
-	const retriesFamily = families.message_queue_retries_total;
+	const retriesFamily = getFamily(families, "message_queue_retries_total");
 	if (retriesFamily) {
 		for (const sample of retriesFamily.samples) {
 			if (!shouldInclude(sample.labels)) continue;
@@ -502,7 +552,7 @@ function transformMessageQueueMetrics(
 	}
 
 	// message_queue_errors_total
-	const errorsFamily = families.message_queue_errors_total;
+	const errorsFamily = getFamily(families, "message_queue_errors_total");
 	if (errorsFamily) {
 		for (const sample of errorsFamily.samples) {
 			if (!shouldInclude(sample.labels)) continue;
@@ -511,7 +561,7 @@ function transformMessageQueueMetrics(
 	}
 
 	// message_queue_dlq_size (gauge)
-	const dlqFamily = families.message_queue_dlq_size;
+	const dlqFamily = getFamily(families, "message_queue_dlq_size");
 	if (dlqFamily) {
 		for (const sample of dlqFamily.samples) {
 			metrics.dlqSize += sample.value;
@@ -519,7 +569,7 @@ function transformMessageQueueMetrics(
 	}
 
 	// message_queue_workers_active (gauge)
-	const workersFamily = families.message_queue_workers_active;
+	const workersFamily = getFamily(families, "message_queue_workers_active");
 	if (workersFamily) {
 		for (const sample of workersFamily.samples) {
 			if (!shouldInclude(sample.labels)) continue;
@@ -533,7 +583,7 @@ function transformMessageQueueMetrics(
 	}
 
 	// message_queue_processing_duration_seconds (histogram)
-	const durationFamily = families.message_queue_processing_duration_seconds;
+	const durationFamily = getFamily(families, "message_queue_processing_duration_seconds");
 	if (durationFamily) {
 		const histograms = extractHistograms(durationFamily);
 		let totalSum = 0;
@@ -582,7 +632,7 @@ function transformMediaMetrics(
 	};
 
 	// media_downloads_total
-	const downloadsFamily = families.media_downloads_total;
+	const downloadsFamily = getFamily(families, "media_downloads_total");
 	if (downloadsFamily) {
 		for (const sample of downloadsFamily.samples) {
 			if (!shouldInclude(sample.labels)) continue;
@@ -618,7 +668,7 @@ function transformMediaMetrics(
 	}
 
 	// media_uploads_total
-	const uploadsFamily = families.media_uploads_total;
+	const uploadsFamily = getFamily(families, "media_uploads_total");
 	if (uploadsFamily) {
 		for (const sample of uploadsFamily.samples) {
 			if (!shouldInclude(sample.labels)) continue;
@@ -648,7 +698,7 @@ function transformMediaMetrics(
 	}
 
 	// media_backlog (gauge)
-	const backlogFamily = families.media_backlog;
+	const backlogFamily = getFamily(families, "media_backlog");
 	if (backlogFamily) {
 		for (const sample of backlogFamily.samples) {
 			metrics.backlog += sample.value;
@@ -656,7 +706,7 @@ function transformMediaMetrics(
 	}
 
 	// media_local_storage_bytes (gauge)
-	const storageBytesFamily = families.media_local_storage_bytes;
+	const storageBytesFamily = getFamily(families, "media_local_storage_bytes");
 	if (storageBytesFamily) {
 		for (const sample of storageBytesFamily.samples) {
 			metrics.localStorageBytes += sample.value;
@@ -664,7 +714,7 @@ function transformMediaMetrics(
 	}
 
 	// media_local_storage_files (gauge)
-	const storageFilesFamily = families.media_local_storage_files;
+	const storageFilesFamily = getFamily(families, "media_local_storage_files");
 	if (storageFilesFamily) {
 		for (const sample of storageFilesFamily.samples) {
 			metrics.localStorageFiles += sample.value;
@@ -672,7 +722,7 @@ function transformMediaMetrics(
 	}
 
 	// media_cleanup_runs_total
-	const cleanupFamily = families.media_cleanup_runs_total;
+	const cleanupFamily = getFamily(families, "media_cleanup_runs_total");
 	if (cleanupFamily) {
 		for (const sample of cleanupFamily.samples) {
 			metrics.cleanupRuns += sample.value;
@@ -680,7 +730,7 @@ function transformMediaMetrics(
 	}
 
 	// media_cleanup_deleted_bytes_total
-	const cleanupBytesFamily = families.media_cleanup_deleted_bytes_total;
+	const cleanupBytesFamily = getFamily(families, "media_cleanup_deleted_bytes_total");
 	if (cleanupBytesFamily) {
 		for (const sample of cleanupBytesFamily.samples) {
 			metrics.cleanupDeletedBytes += sample.value;
@@ -688,7 +738,7 @@ function transformMediaMetrics(
 	}
 
 	// media_download_duration_seconds (histogram)
-	const downloadDurationFamily = families.media_download_duration_seconds;
+	const downloadDurationFamily = getFamily(families, "media_download_duration_seconds");
 	if (downloadDurationFamily) {
 		const histograms = extractHistograms(downloadDurationFamily);
 		let totalSum = 0;
@@ -706,7 +756,7 @@ function transformMediaMetrics(
 	}
 
 	// media_upload_duration_seconds (histogram)
-	const uploadDurationFamily = families.media_upload_duration_seconds;
+	const uploadDurationFamily = getFamily(families, "media_upload_duration_seconds");
 	if (uploadDurationFamily) {
 		const histograms = extractHistograms(uploadDurationFamily);
 		let totalSum = 0;
@@ -744,7 +794,7 @@ function transformSystemMetrics(
 	};
 
 	// circuit_breaker_state (gauge)
-	const circuitFamily = families.circuit_breaker_state;
+	const circuitFamily = getFamily(families, "circuit_breaker_state");
 	if (circuitFamily) {
 		for (const sample of circuitFamily.samples) {
 			metrics.circuitBreakerState = mapCircuitState(sample.value);
@@ -752,7 +802,7 @@ function transformSystemMetrics(
 	}
 
 	// circuit_breaker_state_per_instance (gauge)
-	const circuitPerInstanceFamily = families.circuit_breaker_state_per_instance;
+	const circuitPerInstanceFamily = getFamily(families, "circuit_breaker_state_per_instance");
 	if (circuitPerInstanceFamily) {
 		for (const sample of circuitPerInstanceFamily.samples) {
 			const instId = sample.labels.instance_id;
@@ -763,7 +813,7 @@ function transformSystemMetrics(
 	}
 
 	// lock_acquisitions_total
-	const lockAcqFamily = families.lock_acquisitions_total;
+	const lockAcqFamily = getFamily(families, "lock_acquisitions_total");
 	if (lockAcqFamily) {
 		for (const sample of lockAcqFamily.samples) {
 			const status = sample.labels.status;
@@ -776,7 +826,7 @@ function transformSystemMetrics(
 	}
 
 	// lock_reacquisition_attempts_total
-	const reacqFamily = families.lock_reacquisition_attempts_total;
+	const reacqFamily = getFamily(families, "lock_reacquisition_attempts_total");
 	if (reacqFamily) {
 		for (const sample of reacqFamily.samples) {
 			metrics.lockAcquisitions.reacquisitions += sample.value;
@@ -784,7 +834,7 @@ function transformSystemMetrics(
 	}
 
 	// lock_reacquisition_fallbacks_total
-	const fallbacksFamily = families.lock_reacquisition_fallbacks_total;
+	const fallbacksFamily = getFamily(families, "lock_reacquisition_fallbacks_total");
 	if (fallbacksFamily) {
 		for (const sample of fallbacksFamily.samples) {
 			metrics.lockAcquisitions.fallbacks += sample.value;
@@ -792,7 +842,7 @@ function transformSystemMetrics(
 	}
 
 	// split_brain_detected_total
-	const splitBrainFamily = families.split_brain_detected_total;
+	const splitBrainFamily = getFamily(families, "split_brain_detected_total");
 	if (splitBrainFamily) {
 		for (const sample of splitBrainFamily.samples) {
 			metrics.splitBrainDetected += sample.value;
@@ -800,7 +850,7 @@ function transformSystemMetrics(
 	}
 
 	// health_checks_total
-	const healthFamily = families.health_checks_total;
+	const healthFamily = getFamily(families, "health_checks_total");
 	if (healthFamily) {
 		for (const sample of healthFamily.samples) {
 			const component = sample.labels.component || "unknown";
@@ -821,7 +871,7 @@ function transformSystemMetrics(
 	}
 
 	// orphaned_instances (gauge)
-	const orphanedFamily = families.orphaned_instances;
+	const orphanedFamily = getFamily(families, "orphaned_instances");
 	if (orphanedFamily) {
 		for (const sample of orphanedFamily.samples) {
 			metrics.orphanedInstances += sample.value;
@@ -829,7 +879,7 @@ function transformSystemMetrics(
 	}
 
 	// reconciliation_attempts_total
-	const reconFamily = families.reconciliation_attempts_total;
+	const reconFamily = getFamily(families, "reconciliation_attempts_total");
 	if (reconFamily) {
 		for (const sample of reconFamily.samples) {
 			const result = sample.labels.result;
@@ -851,7 +901,7 @@ function transformSystemMetrics(
 	}
 
 	// reconciliation_duration_seconds (histogram)
-	const reconDurationFamily = families.reconciliation_duration_seconds;
+	const reconDurationFamily = getFamily(families, "reconciliation_duration_seconds");
 	if (reconDurationFamily) {
 		const histograms = extractHistograms(reconDurationFamily);
 		let totalSum = 0;
@@ -885,7 +935,7 @@ function transformWorkerMetrics(
 	};
 
 	// workers_active (gauge)
-	const activeFamily = families.workers_active;
+	const activeFamily = getFamily(families, "workers_active");
 	if (activeFamily) {
 		for (const sample of activeFamily.samples) {
 			const workerType = sample.labels.worker_type || "unknown";
@@ -895,7 +945,7 @@ function transformWorkerMetrics(
 	}
 
 	// worker_errors_total
-	const errorsFamily = families.worker_errors_total;
+	const errorsFamily = getFamily(families, "worker_errors_total");
 	if (errorsFamily) {
 		for (const sample of errorsFamily.samples) {
 			const workerType = sample.labels.worker_type || "unknown";
@@ -905,7 +955,7 @@ function transformWorkerMetrics(
 	}
 
 	// worker_task_duration_seconds (histogram)
-	const durationFamily = families.worker_task_duration_seconds;
+	const durationFamily = getFamily(families, "worker_task_duration_seconds");
 	if (durationFamily) {
 		const histograms = extractHistograms(durationFamily);
 
