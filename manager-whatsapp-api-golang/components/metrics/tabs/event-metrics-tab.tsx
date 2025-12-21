@@ -8,19 +8,36 @@
 
 "use client";
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useInstanceNames } from "@/hooks/use-instance-names";
 import {
 	formatDuration,
 	formatNumber,
 	TAILWIND_CHART_COLORS,
 } from "@/lib/metrics/constants";
+import { formatPhoneNumber } from "@/lib/phone";
 import { cn } from "@/lib/utils";
 import type { EventMetrics, HealthLevel } from "@/types/metrics";
 import { HorizontalBarChart, MetricChart } from "../metric-chart";
 import { ProgressBar } from "../metric-gauge";
 import { MetricTable, NumberCell } from "../metric-table";
 import { StatusIndicator } from "../status-indicator";
+
+// Event type friendly names and colors
+const EVENT_TYPE_CONFIG: Record<string, { label: string; color: string }> = {
+	message: { label: "Messages", color: "#3b82f6" }, // blue
+	receipt: { label: "Receipts", color: "#10b981" }, // emerald
+	connected: { label: "Connected", color: "#22c55e" }, // green
+	disconnected: { label: "Disconnected", color: "#ef4444" }, // red
+	presence: { label: "Presence", color: "#8b5cf6" }, // violet
+	picture: { label: "Pictures", color: "#f59e0b" }, // amber
+	business_name: { label: "Business", color: "#06b6d4" }, // cyan
+	user_about: { label: "About", color: "#ec4899" }, // pink
+	group: { label: "Groups", color: "#6366f1" }, // indigo
+	call: { label: "Calls", color: "#14b8a6" }, // teal
+};
 
 export interface EventMetricsTabProps {
 	metrics?: EventMetrics;
@@ -31,10 +48,19 @@ export function EventMetricsTab({
 	metrics,
 	isLoading = false,
 }: EventMetricsTabProps) {
-	// Event type data for charts
+	// Get instance names for friendly display
+	const { getInstanceInfo } = useInstanceNames();
+
+	// Helper to get friendly event type name
+	const getEventTypeName = (type: string) => {
+		return EVENT_TYPE_CONFIG[type]?.label || type.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+	};
+
+	// Event type data for charts with friendly names
 	const eventTypeData = Object.entries(metrics?.byType ?? {}).map(
 		([type, data]) => ({
-			name: type,
+			name: getEventTypeName(type),
+			originalType: type,
 			captured: data.captured,
 			processed: data.processed,
 			delivered: data.delivered,
@@ -42,26 +68,36 @@ export function EventMetricsTab({
 		}),
 	);
 
-	// Instance backlog data
+	// Instance backlog data with friendly names
 	const instanceBacklogData = Object.entries(metrics?.byInstance ?? {})
-		.map(([instanceId, data]) => ({
-			name: instanceId.slice(0, 8) + "...",
-			value: data.backlog,
-		}))
+		.map(([instanceId, data]) => {
+			const info = getInstanceInfo(instanceId);
+			return {
+				name: info?.name || instanceId.slice(0, 8) + "...",
+				fullId: instanceId,
+				value: data.backlog,
+			};
+		})
 		.sort((a, b) => b.value - a.value)
 		.slice(0, 10);
 
-	// Instance table data
+	// Instance table data with full info
 	const instanceTableData = Object.entries(metrics?.byInstance ?? {})
-		.map(([instanceId, data]) => ({
-			instanceId,
-			captured: data.captured,
-			processed: data.processed,
-			delivered: data.delivered,
-			failed: data.failed,
-			backlog: data.backlog,
-		}))
-		.sort((a, b) => b.backlog - a.backlog);
+		.map(([instanceId, data]) => {
+			const info = getInstanceInfo(instanceId);
+			return {
+				instanceId,
+				name: info?.name || null,
+				phone: info?.phone || null,
+				avatarUrl: info?.avatarUrl || null,
+				captured: data.captured,
+				processed: data.processed,
+				delivered: data.delivered,
+				failed: data.failed,
+				backlog: data.backlog,
+			};
+		})
+		.sort((a, b) => b.captured - a.captured);
 
 	return (
 		<div className="space-y-6">
@@ -178,72 +214,96 @@ export function EventMetricsTab({
 				/>
 			</div>
 
-			{/* Instance Details Table */}
-			<MetricTable
-				title="Events by Instance"
-				data={instanceTableData}
-				columns={[
-					{
-						key: "instanceId",
-						header: "Instance",
-						format: (v) => (
-							<span className="font-mono text-xs">
-								{String(v).slice(0, 12)}...
-							</span>
-						),
-					},
-					{
-						key: "captured",
-						header: "Captured",
-						align: "right",
-						format: (v) => <NumberCell value={Number(v)} />,
-					},
-					{
-						key: "processed",
-						header: "Processed",
-						align: "right",
-						format: (v) => <NumberCell value={Number(v)} />,
-					},
-					{
-						key: "delivered",
-						header: "Delivered",
-						align: "right",
-						format: (v) => <NumberCell value={Number(v)} />,
-					},
-					{
-						key: "failed",
-						header: "Failed",
-						align: "right",
-						format: (v) => (
-							<span
-								className={cn(
-									"tabular-nums",
-									Number(v) > 0 && "text-red-600 dark:text-red-400",
-								)}
-							>
-								{Number(v).toLocaleString()}
-							</span>
-						),
-					},
-					{
-						key: "backlog",
-						header: "Backlog",
-						align: "right",
-						format: (v) => (
-							<span
-								className={cn(
-									"tabular-nums",
-									Number(v) > 50 && "text-amber-600 dark:text-amber-400",
-								)}
-							>
-								{Number(v).toLocaleString()}
-							</span>
-						),
-					},
-				]}
-				isLoading={isLoading}
-				emptyMessage="No instance data available"
-			/>
+			{/* Instance Details Card */}
+			<Card>
+				<CardHeader className="pb-2">
+					<CardTitle className="text-base font-medium">Events by Instance</CardTitle>
+				</CardHeader>
+				<CardContent>
+					{isLoading ? (
+						<div className="space-y-3">
+							{Array.from({ length: 3 }).map((_, i) => (
+								<Skeleton key={i} className="h-16 w-full" />
+							))}
+						</div>
+					) : instanceTableData.length === 0 ? (
+						<p className="text-center text-sm text-muted-foreground py-8">
+							No instance data available
+						</p>
+					) : (
+						<div className="space-y-3">
+							{instanceTableData.map((instance) => (
+								<div
+									key={instance.instanceId}
+									className="flex items-center gap-4 rounded-lg border p-4 transition-colors hover:bg-muted/50"
+								>
+									{/* Avatar */}
+									<Avatar className="h-10 w-10 shrink-0">
+										{instance.avatarUrl && (
+											<AvatarImage src={instance.avatarUrl} alt={instance.name || ""} />
+										)}
+										<AvatarFallback className="bg-primary/10 text-primary text-sm font-medium">
+											{instance.name?.slice(0, 2).toUpperCase() || instance.instanceId.slice(0, 2).toUpperCase()}
+										</AvatarFallback>
+									</Avatar>
+
+									{/* Name & Phone */}
+									<div className="min-w-0 flex-1">
+										<p className="font-medium truncate">
+											{instance.name || instance.instanceId.slice(0, 12) + "..."}
+										</p>
+										{instance.phone && (
+											<p className="text-xs text-muted-foreground font-mono">
+												{formatPhoneNumber(instance.phone)}
+											</p>
+										)}
+									</div>
+
+									{/* Stats Grid */}
+									<div className="grid grid-cols-5 gap-4 text-center shrink-0">
+										<div>
+											<p className="text-xs text-muted-foreground">Captured</p>
+											<p className="font-semibold tabular-nums text-blue-600 dark:text-blue-400">
+												{instance.captured.toLocaleString()}
+											</p>
+										</div>
+										<div>
+											<p className="text-xs text-muted-foreground">Processed</p>
+											<p className="font-semibold tabular-nums">
+												{instance.processed.toLocaleString()}
+											</p>
+										</div>
+										<div>
+											<p className="text-xs text-muted-foreground">Delivered</p>
+											<p className="font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">
+												{instance.delivered.toLocaleString()}
+											</p>
+										</div>
+										<div>
+											<p className="text-xs text-muted-foreground">Failed</p>
+											<p className={cn(
+												"font-semibold tabular-nums",
+												instance.failed > 0 ? "text-red-600 dark:text-red-400" : "text-muted-foreground"
+											)}>
+												{instance.failed.toLocaleString()}
+											</p>
+										</div>
+										<div>
+											<p className="text-xs text-muted-foreground">Backlog</p>
+											<p className={cn(
+												"font-semibold tabular-nums",
+												instance.backlog > 50 ? "text-amber-600 dark:text-amber-400" : "text-muted-foreground"
+											)}>
+												{instance.backlog.toLocaleString()}
+											</p>
+										</div>
+									</div>
+								</div>
+							))}
+						</div>
+					)}
+				</CardContent>
+			</Card>
 		</div>
 	);
 }
