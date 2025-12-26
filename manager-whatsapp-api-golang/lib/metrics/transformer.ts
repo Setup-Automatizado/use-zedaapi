@@ -16,6 +16,7 @@ import type {
 	MessageQueueMetrics,
 	MetricFamily,
 	ParsedMetrics,
+	StatusCacheMetrics,
 	SystemMetrics,
 	TransportMetrics,
 	WorkerMetrics,
@@ -105,6 +106,7 @@ export function transformToDashboard(
 		system: transformSystemMetrics(families, instanceId),
 		workers: transformWorkerMetrics(families),
 		transport: transformTransportMetrics(families, instanceId),
+		statusCache: transformStatusCacheMetrics(families, instanceId),
 		instances,
 	};
 }
@@ -112,9 +114,7 @@ export function transformToDashboard(
 /**
  * Collect all unique instance IDs from metrics
  */
-function collectInstanceIds(
-	families: ParsedMetrics["families"],
-): string[] {
+function collectInstanceIds(families: ParsedMetrics["families"]): string[] {
 	const instanceIds = new Set<string>();
 
 	for (const family of Object.values(families)) {
@@ -155,13 +155,17 @@ function transformHTTPMetrics(
 		let errorRequests = 0;
 
 		for (const sample of requestsFamily.samples) {
-			if (sample.name.endsWith("_total") || sample.name === "http_requests_total") {
+			if (
+				sample.name.endsWith("_total") ||
+				sample.name === "http_requests_total"
+			) {
 				const value = sample.value;
 				totalRequests += value;
 
 				// Count by status
 				const status = sample.labels.status || "unknown";
-				metrics.byStatus[status] = (metrics.byStatus[status] || 0) + value;
+				metrics.byStatus[status] =
+					(metrics.byStatus[status] || 0) + value;
 
 				// Count errors (4xx and 5xx)
 				if (status.startsWith("4") || status.startsWith("5")) {
@@ -171,7 +175,11 @@ function transformHTTPMetrics(
 				// Count by path
 				const path = sample.labels.path || "/";
 				if (!metrics.byPath[path]) {
-					metrics.byPath[path] = { count: 0, avgLatencyMs: 0, errorCount: 0 };
+					metrics.byPath[path] = {
+						count: 0,
+						avgLatencyMs: 0,
+						errorCount: 0,
+					};
 				}
 				metrics.byPath[path].count += value;
 				if (status.startsWith("4") || status.startsWith("5")) {
@@ -180,12 +188,14 @@ function transformHTTPMetrics(
 
 				// Count by method
 				const method = sample.labels.method || "GET";
-				metrics.byMethod[method] = (metrics.byMethod[method] || 0) + value;
+				metrics.byMethod[method] =
+					(metrics.byMethod[method] || 0) + value;
 			}
 		}
 
 		metrics.totalRequests = totalRequests;
-		metrics.errorRate = totalRequests > 0 ? (errorRequests / totalRequests) * 100 : 0;
+		metrics.errorRate =
+			totalRequests > 0 ? (errorRequests / totalRequests) * 100 : 0;
 	}
 
 	// http_request_duration_seconds (histogram)
@@ -270,7 +280,12 @@ function transformEventMetrics(
 			// By type
 			const eventType = sample.labels.event_type || "unknown";
 			if (!metrics.byType[eventType]) {
-				metrics.byType[eventType] = { captured: 0, processed: 0, delivered: 0, failed: 0 };
+				metrics.byType[eventType] = {
+					captured: 0,
+					processed: 0,
+					delivered: 0,
+					failed: 0,
+				};
 			}
 			metrics.byType[eventType].captured += sample.value;
 
@@ -278,7 +293,13 @@ function transformEventMetrics(
 			const instId = sample.labels.instance_id;
 			if (instId) {
 				if (!metrics.byInstance[instId]) {
-					metrics.byInstance[instId] = { captured: 0, processed: 0, delivered: 0, failed: 0, backlog: 0 };
+					metrics.byInstance[instId] = {
+						captured: 0,
+						processed: 0,
+						delivered: 0,
+						failed: 0,
+						backlog: 0,
+					};
 				}
 				metrics.byInstance[instId].captured += sample.value;
 			}
@@ -311,14 +332,25 @@ function transformEventMetrics(
 
 			const eventType = sample.labels.event_type || "unknown";
 			if (!metrics.byType[eventType]) {
-				metrics.byType[eventType] = { captured: 0, processed: 0, delivered: 0, failed: 0 };
+				metrics.byType[eventType] = {
+					captured: 0,
+					processed: 0,
+					delivered: 0,
+					failed: 0,
+				};
 			}
 			metrics.byType[eventType].processed += sample.value;
 
 			const instId = sample.labels.instance_id;
 			if (instId) {
 				if (!metrics.byInstance[instId]) {
-					metrics.byInstance[instId] = { captured: 0, processed: 0, delivered: 0, failed: 0, backlog: 0 };
+					metrics.byInstance[instId] = {
+						captured: 0,
+						processed: 0,
+						delivered: 0,
+						failed: 0,
+						backlog: 0,
+					};
 				}
 				metrics.byInstance[instId].processed += sample.value;
 			}
@@ -334,14 +366,25 @@ function transformEventMetrics(
 
 			const eventType = sample.labels.event_type || "unknown";
 			if (!metrics.byType[eventType]) {
-				metrics.byType[eventType] = { captured: 0, processed: 0, delivered: 0, failed: 0 };
+				metrics.byType[eventType] = {
+					captured: 0,
+					processed: 0,
+					delivered: 0,
+					failed: 0,
+				};
 			}
 			metrics.byType[eventType].delivered += sample.value;
 
 			const instId = sample.labels.instance_id;
 			if (instId) {
 				if (!metrics.byInstance[instId]) {
-					metrics.byInstance[instId] = { captured: 0, processed: 0, delivered: 0, failed: 0, backlog: 0 };
+					metrics.byInstance[instId] = {
+						captured: 0,
+						processed: 0,
+						delivered: 0,
+						failed: 0,
+						backlog: 0,
+					};
 				}
 				metrics.byInstance[instId].delivered += sample.value;
 			}
@@ -357,14 +400,25 @@ function transformEventMetrics(
 
 			const eventType = sample.labels.event_type || "unknown";
 			if (!metrics.byType[eventType]) {
-				metrics.byType[eventType] = { captured: 0, processed: 0, delivered: 0, failed: 0 };
+				metrics.byType[eventType] = {
+					captured: 0,
+					processed: 0,
+					delivered: 0,
+					failed: 0,
+				};
 			}
 			metrics.byType[eventType].failed += sample.value;
 
 			const instId = sample.labels.instance_id;
 			if (instId) {
 				if (!metrics.byInstance[instId]) {
-					metrics.byInstance[instId] = { captured: 0, processed: 0, delivered: 0, failed: 0, backlog: 0 };
+					metrics.byInstance[instId] = {
+						captured: 0,
+						processed: 0,
+						delivered: 0,
+						failed: 0,
+						backlog: 0,
+					};
 				}
 				metrics.byInstance[instId].failed += sample.value;
 			}
@@ -403,7 +457,10 @@ function transformEventMetrics(
 	}
 
 	// event_processing_duration_seconds (histogram)
-	const processingDurationFamily = getFamily(families, "event_processing_duration_seconds");
+	const processingDurationFamily = getFamily(
+		families,
+		"event_processing_duration_seconds",
+	);
 	if (processingDurationFamily) {
 		const histograms = extractHistograms(processingDurationFamily);
 		let totalSum = 0;
@@ -421,7 +478,10 @@ function transformEventMetrics(
 	}
 
 	// event_delivery_duration_seconds (histogram)
-	const deliveryDurationFamily = getFamily(families, "event_delivery_duration_seconds");
+	const deliveryDurationFamily = getFamily(
+		families,
+		"event_delivery_duration_seconds",
+	);
 	if (deliveryDurationFamily) {
 		const histograms = extractHistograms(deliveryDurationFamily);
 		let totalSum = 0;
@@ -498,13 +558,24 @@ function transformMessageQueueMetrics(
 
 			if (instId) {
 				if (!metrics.byInstance[instId]) {
-					metrics.byInstance[instId] = { size: 0, workers: 0, pending: 0, processing: 0, sent: 0, failed: 0 };
+					metrics.byInstance[instId] = {
+						size: 0,
+						workers: 0,
+						pending: 0,
+						processing: 0,
+						sent: 0,
+						failed: 0,
+					};
 				}
 				metrics.byInstance[instId].size += sample.value;
-				if (status === "pending") metrics.byInstance[instId].pending += sample.value;
-				if (status === "processing") metrics.byInstance[instId].processing += sample.value;
-				if (status === "sent") metrics.byInstance[instId].sent += sample.value;
-				if (status === "failed") metrics.byInstance[instId].failed += sample.value;
+				if (status === "pending")
+					metrics.byInstance[instId].pending += sample.value;
+				if (status === "processing")
+					metrics.byInstance[instId].processing += sample.value;
+				if (status === "sent")
+					metrics.byInstance[instId].sent += sample.value;
+				if (status === "failed")
+					metrics.byInstance[instId].failed += sample.value;
 			}
 		}
 	}
@@ -518,14 +589,21 @@ function transformMessageQueueMetrics(
 
 			const msgType = sample.labels.message_type || "unknown";
 			if (!metrics.byType[msgType]) {
-				metrics.byType[msgType] = { enqueued: 0, processed: 0, failed: 0 };
+				metrics.byType[msgType] = {
+					enqueued: 0,
+					processed: 0,
+					failed: 0,
+				};
 			}
 			metrics.byType[msgType].enqueued += sample.value;
 		}
 	}
 
 	// message_queue_processed_total
-	const processedFamily = getFamily(families, "message_queue_processed_total");
+	const processedFamily = getFamily(
+		families,
+		"message_queue_processed_total",
+	);
 	if (processedFamily) {
 		for (const sample of processedFamily.samples) {
 			if (!shouldInclude(sample.labels)) continue;
@@ -533,7 +611,11 @@ function transformMessageQueueMetrics(
 
 			const msgType = sample.labels.message_type || "unknown";
 			if (!metrics.byType[msgType]) {
-				metrics.byType[msgType] = { enqueued: 0, processed: 0, failed: 0 };
+				metrics.byType[msgType] = {
+					enqueued: 0,
+					processed: 0,
+					failed: 0,
+				};
 			}
 			const status = sample.labels.status;
 			if (status === "failed") {
@@ -585,7 +667,10 @@ function transformMessageQueueMetrics(
 	}
 
 	// message_queue_processing_duration_seconds (histogram)
-	const durationFamily = getFamily(families, "message_queue_processing_duration_seconds");
+	const durationFamily = getFamily(
+		families,
+		"message_queue_processing_duration_seconds",
+	);
 	if (durationFamily) {
 		const histograms = extractHistograms(durationFamily);
 		let totalSum = 0;
@@ -649,7 +734,12 @@ function transformMediaMetrics(
 
 			const mediaType = sample.labels.media_type || "unknown";
 			if (!metrics.byType[mediaType]) {
-				metrics.byType[mediaType] = { downloads: 0, uploads: 0, avgSizeBytes: 0, failures: 0 };
+				metrics.byType[mediaType] = {
+					downloads: 0,
+					uploads: 0,
+					avgSizeBytes: 0,
+					failures: 0,
+				};
 			}
 			metrics.byType[mediaType].downloads += sample.value;
 			if (status === "failure") {
@@ -659,7 +749,11 @@ function transformMediaMetrics(
 			const instId = sample.labels.instance_id;
 			if (instId) {
 				if (!metrics.byInstance[instId]) {
-					metrics.byInstance[instId] = { downloads: 0, uploads: 0, failures: 0 };
+					metrics.byInstance[instId] = {
+						downloads: 0,
+						uploads: 0,
+						failures: 0,
+					};
 				}
 				metrics.byInstance[instId].downloads += sample.value;
 				if (status === "failure") {
@@ -685,14 +779,23 @@ function transformMediaMetrics(
 
 			const mediaType = sample.labels.media_type || "unknown";
 			if (!metrics.byType[mediaType]) {
-				metrics.byType[mediaType] = { downloads: 0, uploads: 0, avgSizeBytes: 0, failures: 0 };
+				metrics.byType[mediaType] = {
+					downloads: 0,
+					uploads: 0,
+					avgSizeBytes: 0,
+					failures: 0,
+				};
 			}
 			metrics.byType[mediaType].uploads += sample.value;
 
 			const instId = sample.labels.instance_id;
 			if (instId) {
 				if (!metrics.byInstance[instId]) {
-					metrics.byInstance[instId] = { downloads: 0, uploads: 0, failures: 0 };
+					metrics.byInstance[instId] = {
+						downloads: 0,
+						uploads: 0,
+						failures: 0,
+					};
 				}
 				metrics.byInstance[instId].uploads += sample.value;
 			}
@@ -732,7 +835,10 @@ function transformMediaMetrics(
 	}
 
 	// media_cleanup_deleted_bytes_total
-	const cleanupBytesFamily = getFamily(families, "media_cleanup_deleted_bytes_total");
+	const cleanupBytesFamily = getFamily(
+		families,
+		"media_cleanup_deleted_bytes_total",
+	);
 	if (cleanupBytesFamily) {
 		for (const sample of cleanupBytesFamily.samples) {
 			metrics.cleanupDeletedBytes += sample.value;
@@ -740,7 +846,10 @@ function transformMediaMetrics(
 	}
 
 	// media_download_duration_seconds (histogram)
-	const downloadDurationFamily = getFamily(families, "media_download_duration_seconds");
+	const downloadDurationFamily = getFamily(
+		families,
+		"media_download_duration_seconds",
+	);
 	if (downloadDurationFamily) {
 		const histograms = extractHistograms(downloadDurationFamily);
 		let totalSum = 0;
@@ -758,7 +867,10 @@ function transformMediaMetrics(
 	}
 
 	// media_upload_duration_seconds (histogram)
-	const uploadDurationFamily = getFamily(families, "media_upload_duration_seconds");
+	const uploadDurationFamily = getFamily(
+		families,
+		"media_upload_duration_seconds",
+	);
 	if (uploadDurationFamily) {
 		const histograms = extractHistograms(uploadDurationFamily);
 		let totalSum = 0;
@@ -788,11 +900,22 @@ function transformSystemMetrics(
 	const metrics: SystemMetrics = {
 		circuitBreakerState: "unknown",
 		circuitBreakerByInstance: {},
-		lockAcquisitions: { success: 0, failure: 0, reacquisitions: 0, fallbacks: 0 },
+		lockAcquisitions: {
+			success: 0,
+			failure: 0,
+			reacquisitions: 0,
+			fallbacks: 0,
+		},
 		splitBrainDetected: 0,
 		healthChecks: {},
 		orphanedInstances: 0,
-		reconciliation: { success: 0, failure: 0, skipped: 0, error: 0, avgDurationMs: 0 },
+		reconciliation: {
+			success: 0,
+			failure: 0,
+			skipped: 0,
+			error: 0,
+			avgDurationMs: 0,
+		},
 	};
 
 	// circuit_breaker_state (gauge)
@@ -804,12 +927,17 @@ function transformSystemMetrics(
 	}
 
 	// circuit_breaker_state_per_instance (gauge)
-	const circuitPerInstanceFamily = getFamily(families, "circuit_breaker_state_per_instance");
+	const circuitPerInstanceFamily = getFamily(
+		families,
+		"circuit_breaker_state_per_instance",
+	);
 	if (circuitPerInstanceFamily) {
 		for (const sample of circuitPerInstanceFamily.samples) {
 			const instId = sample.labels.instance_id;
 			if (instId) {
-				metrics.circuitBreakerByInstance[instId] = mapCircuitState(sample.value);
+				metrics.circuitBreakerByInstance[instId] = mapCircuitState(
+					sample.value,
+				);
 			}
 		}
 	}
@@ -828,7 +956,10 @@ function transformSystemMetrics(
 	}
 
 	// lock_reacquisition_attempts_total
-	const reacqFamily = getFamily(families, "lock_reacquisition_attempts_total");
+	const reacqFamily = getFamily(
+		families,
+		"lock_reacquisition_attempts_total",
+	);
 	if (reacqFamily) {
 		for (const sample of reacqFamily.samples) {
 			metrics.lockAcquisitions.reacquisitions += sample.value;
@@ -836,7 +967,10 @@ function transformSystemMetrics(
 	}
 
 	// lock_reacquisition_fallbacks_total
-	const fallbacksFamily = getFamily(families, "lock_reacquisition_fallbacks_total");
+	const fallbacksFamily = getFamily(
+		families,
+		"lock_reacquisition_fallbacks_total",
+	);
 	if (fallbacksFamily) {
 		for (const sample of fallbacksFamily.samples) {
 			metrics.lockAcquisitions.fallbacks += sample.value;
@@ -859,7 +993,11 @@ function transformSystemMetrics(
 			const status = sample.labels.status || "unknown";
 
 			if (!metrics.healthChecks[component]) {
-				metrics.healthChecks[component] = { healthy: 0, unhealthy: 0, degraded: 0 };
+				metrics.healthChecks[component] = {
+					healthy: 0,
+					unhealthy: 0,
+					degraded: 0,
+				};
 			}
 
 			if (status === "healthy") {
@@ -903,7 +1041,10 @@ function transformSystemMetrics(
 	}
 
 	// reconciliation_duration_seconds (histogram)
-	const reconDurationFamily = getFamily(families, "reconciliation_duration_seconds");
+	const reconDurationFamily = getFamily(
+		families,
+		"reconciliation_duration_seconds",
+	);
 	if (reconDurationFamily) {
 		const histograms = extractHistograms(reconDurationFamily);
 		let totalSum = 0;
@@ -915,7 +1056,8 @@ function transformSystemMetrics(
 		}
 
 		if (totalCount > 0) {
-			metrics.reconciliation.avgDurationMs = (totalSum / totalCount) * 1000;
+			metrics.reconciliation.avgDurationMs =
+				(totalSum / totalCount) * 1000;
 		}
 	}
 
@@ -941,7 +1083,8 @@ function transformWorkerMetrics(
 	if (activeFamily) {
 		for (const sample of activeFamily.samples) {
 			const workerType = sample.labels.worker_type || "unknown";
-			metrics.active[workerType] = (metrics.active[workerType] || 0) + sample.value;
+			metrics.active[workerType] =
+				(metrics.active[workerType] || 0) + sample.value;
 			metrics.totalActive += sample.value;
 		}
 	}
@@ -951,7 +1094,8 @@ function transformWorkerMetrics(
 	if (errorsFamily) {
 		for (const sample of errorsFamily.samples) {
 			const workerType = sample.labels.worker_type || "unknown";
-			metrics.errors[workerType] = (metrics.errors[workerType] || 0) + sample.value;
+			metrics.errors[workerType] =
+				(metrics.errors[workerType] || 0) + sample.value;
 			metrics.totalErrors += sample.value;
 		}
 	}
@@ -967,7 +1111,8 @@ function transformWorkerMetrics(
 				const avgMs = (h.sum / h.count) * 1000;
 				// Average if multiple task types
 				if (metrics.avgTaskDurationMs[workerType]) {
-					metrics.avgTaskDurationMs[workerType] = (metrics.avgTaskDurationMs[workerType] + avgMs) / 2;
+					metrics.avgTaskDurationMs[workerType] =
+						(metrics.avgTaskDurationMs[workerType] + avgMs) / 2;
 				} else {
 					metrics.avgTaskDurationMs[workerType] = avgMs;
 				}
@@ -1048,7 +1193,8 @@ function transformTransportMetrics(
 			if (!shouldInclude(sample.labels)) continue;
 
 			const errorType = sample.labels.error_type || "unknown";
-			metrics.byErrorType[errorType] = (metrics.byErrorType[errorType] || 0) + sample.value;
+			metrics.byErrorType[errorType] =
+				(metrics.byErrorType[errorType] || 0) + sample.value;
 		}
 	}
 
@@ -1098,7 +1244,8 @@ function transformTransportMetrics(
 			// Update per-instance avg duration
 			const instId = h.labels.instance_id;
 			if (instId && metrics.byInstance[instId] && h.count > 0) {
-				metrics.byInstance[instId].avgDurationMs = (h.sum / h.count) * 1000;
+				metrics.byInstance[instId].avgDurationMs =
+					(h.sum / h.count) * 1000;
 			}
 		}
 
@@ -1114,7 +1261,276 @@ function transformTransportMetrics(
 
 	// Calculate success rate
 	if (metrics.totalDeliveries > 0) {
-		metrics.successRate = (metrics.successfulDeliveries / metrics.totalDeliveries) * 100;
+		metrics.successRate =
+			(metrics.successfulDeliveries / metrics.totalDeliveries) * 100;
+	}
+
+	return metrics;
+}
+
+/**
+ * Transform status cache metrics
+ * Handles message status caching for read, delivered, played, sent events
+ */
+function transformStatusCacheMetrics(
+	families: ParsedMetrics["families"],
+	instanceId?: string | null,
+): StatusCacheMetrics {
+	const metrics: StatusCacheMetrics = {
+		totalOperations: 0,
+		totalSize: 0,
+		totalHits: 0,
+		totalMisses: 0,
+		hitRate: 0,
+		totalSuppressions: 0,
+		totalFlushed: 0,
+		avgDurationMs: 0,
+		p50DurationMs: 0,
+		p95DurationMs: 0,
+		p99DurationMs: 0,
+		byOperation: {},
+		byInstance: {},
+		byStatusType: {},
+		byTrigger: {},
+	};
+
+	const shouldInclude = (labels: Record<string, string>) => {
+		if (!instanceId) return true;
+		return labels.instance_id === instanceId;
+	};
+
+	// status_cache_operations_total (labels: instance_id, operation, status)
+	const operationsFamily = getFamily(
+		families,
+		"status_cache_operations_total",
+	);
+	if (operationsFamily) {
+		for (const sample of operationsFamily.samples) {
+			if (!shouldInclude(sample.labels)) continue;
+
+			const operation = sample.labels.operation || "unknown";
+			const status = sample.labels.status || "unknown";
+			const instId = sample.labels.instance_id;
+
+			metrics.totalOperations += sample.value;
+
+			// By operation
+			if (!metrics.byOperation[operation]) {
+				metrics.byOperation[operation] = {
+					count: 0,
+					success: 0,
+					failed: 0,
+					avgDurationMs: 0,
+				};
+			}
+			metrics.byOperation[operation].count += sample.value;
+			if (status === "success") {
+				metrics.byOperation[operation].success += sample.value;
+			} else if (status === "failed" || status === "error") {
+				metrics.byOperation[operation].failed += sample.value;
+			}
+
+			// By instance
+			if (instId) {
+				if (!metrics.byInstance[instId]) {
+					metrics.byInstance[instId] = {
+						size: 0,
+						operations: 0,
+						hits: 0,
+						misses: 0,
+						hitRate: 0,
+						suppressions: 0,
+						flushed: 0,
+					};
+				}
+				metrics.byInstance[instId].operations += sample.value;
+			}
+		}
+	}
+
+	// status_cache_size (gauge, labels: instance_id)
+	const sizeFamily = getFamily(families, "status_cache_size");
+	if (sizeFamily) {
+		for (const sample of sizeFamily.samples) {
+			if (!shouldInclude(sample.labels)) continue;
+
+			metrics.totalSize += sample.value;
+
+			const instId = sample.labels.instance_id;
+			if (instId) {
+				if (!metrics.byInstance[instId]) {
+					metrics.byInstance[instId] = {
+						size: 0,
+						operations: 0,
+						hits: 0,
+						misses: 0,
+						hitRate: 0,
+						suppressions: 0,
+						flushed: 0,
+					};
+				}
+				metrics.byInstance[instId].size = sample.value;
+			}
+		}
+	}
+
+	// status_cache_hits_total (labels: instance_id)
+	const hitsFamily = getFamily(families, "status_cache_hits_total");
+	if (hitsFamily) {
+		for (const sample of hitsFamily.samples) {
+			if (!shouldInclude(sample.labels)) continue;
+
+			metrics.totalHits += sample.value;
+
+			const instId = sample.labels.instance_id;
+			if (instId && metrics.byInstance[instId]) {
+				metrics.byInstance[instId].hits += sample.value;
+			}
+		}
+	}
+
+	// status_cache_misses_total (labels: instance_id)
+	const missesFamily = getFamily(families, "status_cache_misses_total");
+	if (missesFamily) {
+		for (const sample of missesFamily.samples) {
+			if (!shouldInclude(sample.labels)) continue;
+
+			metrics.totalMisses += sample.value;
+
+			const instId = sample.labels.instance_id;
+			if (instId && metrics.byInstance[instId]) {
+				metrics.byInstance[instId].misses += sample.value;
+			}
+		}
+	}
+
+	// Calculate hit rates
+	const totalLookups = metrics.totalHits + metrics.totalMisses;
+	if (totalLookups > 0) {
+		metrics.hitRate = (metrics.totalHits / totalLookups) * 100;
+	}
+
+	// Calculate per-instance hit rates
+	for (const instId of Object.keys(metrics.byInstance)) {
+		const inst = metrics.byInstance[instId];
+		const instLookups = inst.hits + inst.misses;
+		if (instLookups > 0) {
+			inst.hitRate = (inst.hits / instLookups) * 100;
+		}
+	}
+
+	// status_cache_suppressions_total (labels: instance_id, status_type)
+	const suppressionsFamily = getFamily(
+		families,
+		"status_cache_suppressions_total",
+	);
+	if (suppressionsFamily) {
+		for (const sample of suppressionsFamily.samples) {
+			if (!shouldInclude(sample.labels)) continue;
+
+			const statusType = sample.labels.status_type || "unknown";
+			const instId = sample.labels.instance_id;
+
+			metrics.totalSuppressions += sample.value;
+
+			// By status type (read, delivered, played, sent)
+			metrics.byStatusType[statusType] =
+				(metrics.byStatusType[statusType] || 0) + sample.value;
+
+			// By instance
+			if (instId && metrics.byInstance[instId]) {
+				metrics.byInstance[instId].suppressions += sample.value;
+			}
+		}
+	}
+
+	// status_cache_flushed_total (labels: instance_id, trigger)
+	const flushedFamily = getFamily(families, "status_cache_flushed_total");
+	if (flushedFamily) {
+		for (const sample of flushedFamily.samples) {
+			if (!shouldInclude(sample.labels)) continue;
+
+			const trigger = sample.labels.trigger || "unknown";
+			const instId = sample.labels.instance_id;
+
+			metrics.totalFlushed += sample.value;
+
+			// By trigger (manual, ttl, shutdown)
+			metrics.byTrigger[trigger] =
+				(metrics.byTrigger[trigger] || 0) + sample.value;
+
+			// By instance
+			if (instId && metrics.byInstance[instId]) {
+				metrics.byInstance[instId].flushed += sample.value;
+			}
+		}
+	}
+
+	// status_cache_operation_duration_seconds (histogram, labels: instance_id, operation)
+	const durationFamily = getFamily(
+		families,
+		"status_cache_operation_duration_seconds",
+	);
+	if (durationFamily) {
+		const histograms = extractHistograms(durationFamily);
+		let totalSum = 0;
+		let totalCount = 0;
+		let p50Sum = 0;
+		let p95Sum = 0;
+		let p99Sum = 0;
+		let validHistograms = 0;
+
+		// Track per-operation durations
+		const operationDurations: Record<
+			string,
+			{ sum: number; count: number }
+		> = {};
+
+		for (const h of histograms) {
+			if (instanceId && h.labels.instance_id !== instanceId) continue;
+
+			const operation = h.labels.operation || "unknown";
+
+			totalSum += h.sum;
+			totalCount += h.count;
+
+			if (h.p50 !== undefined) {
+				p50Sum += h.p50;
+				validHistograms++;
+			}
+			if (h.p95 !== undefined) {
+				p95Sum += h.p95;
+			}
+			if (h.p99 !== undefined) {
+				p99Sum += h.p99;
+			}
+
+			// Track per-operation
+			if (!operationDurations[operation]) {
+				operationDurations[operation] = { sum: 0, count: 0 };
+			}
+			operationDurations[operation].sum += h.sum;
+			operationDurations[operation].count += h.count;
+		}
+
+		if (totalCount > 0) {
+			metrics.avgDurationMs = (totalSum / totalCount) * 1000;
+		}
+		if (validHistograms > 0) {
+			metrics.p50DurationMs = (p50Sum / validHistograms) * 1000;
+			metrics.p95DurationMs = (p95Sum / validHistograms) * 1000;
+			metrics.p99DurationMs = (p99Sum / validHistograms) * 1000;
+		}
+
+		// Update per-operation avg durations
+		for (const [operation, durations] of Object.entries(
+			operationDurations,
+		)) {
+			if (metrics.byOperation[operation] && durations.count > 0) {
+				metrics.byOperation[operation].avgDurationMs =
+					(durations.sum / durations.count) * 1000;
+			}
+		}
 	}
 
 	return metrics;
