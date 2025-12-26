@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"log/slog"
 	"os"
@@ -43,6 +44,7 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/observability"
 	redisinit "go.mau.fi/whatsmeow/api/internal/redis"
 	sentryinit "go.mau.fi/whatsmeow/api/internal/sentry"
+	"go.mau.fi/whatsmeow/api/internal/statuscache"
 	"go.mau.fi/whatsmeow/api/internal/whatsmeow"
 	"go.mau.fi/whatsmeow/api/internal/workers"
 	"go.mau.fi/whatsmeow/api/migrations"
@@ -302,6 +304,105 @@ func main() {
 
 	logger.Info("dispatch system initialized",
 		slog.Int("workers", dispatchCoordinator.GetWorkerCount()))
+
+	// Initialize status cache system if enabled
+	var statusCacheService *statuscache.ServiceImpl
+	if cfg.StatusCache.Enabled {
+		statusCacheRepo := statuscache.NewRedisRepository(
+			redisClient,
+			cfg.StatusCache.TTL,
+			"funnelchat",
+		)
+
+		// Create webhook dispatcher for flush operations
+		// This will look up the instance's webhook URL and send via HTTP transport
+		webhookDispatcher := statuscache.NewFlushDispatcher(func(ctx context.Context, instanceID string, payload []byte) error {
+			// Look up instance webhook configuration
+			instID, parseErr := uuid.Parse(instanceID)
+			if parseErr != nil {
+				return fmt.Errorf("invalid instance ID: %w", parseErr)
+			}
+
+			webhookConfig, err := repo.GetWebhookConfig(ctx, instID)
+			if err != nil {
+				return fmt.Errorf("failed to get webhook config: %w", err)
+			}
+
+			// Use message status URL, fallback to delivery URL
+			var targetURL string
+			if webhookConfig.MessageStatusURL != nil && *webhookConfig.MessageStatusURL != "" {
+				targetURL = *webhookConfig.MessageStatusURL
+			} else if webhookConfig.DeliveryURL != nil && *webhookConfig.DeliveryURL != "" {
+				targetURL = *webhookConfig.DeliveryURL
+			} else {
+				// No webhook URL configured, skip silently
+				return nil
+			}
+
+			// Get HTTP transport
+			trans, err := transportRegistry.GetTransport(transport.TransportTypeHTTP)
+			if err != nil {
+				return fmt.Errorf("failed to get transport: %w", err)
+			}
+
+			// Build request
+			request := &transport.DeliveryRequest{
+				Endpoint:    targetURL,
+				Payload:     payload,
+				Headers:     map[string]string{"Content-Type": "application/json"},
+				EventID:     fmt.Sprintf("flush-%s-%d", instanceID, time.Now().UnixNano()),
+				EventType:   "receipt",
+				InstanceID:  instanceID,
+				Attempt:     1,
+				MaxAttempts: 3,
+			}
+
+			// Deliver webhook
+			result, err := trans.Deliver(ctx, request)
+			if err != nil {
+				return fmt.Errorf("delivery failed: %w", err)
+			}
+			if !result.Success {
+				return fmt.Errorf("delivery unsuccessful: %s", result.ErrorMessage)
+			}
+
+			return nil
+		})
+
+		statusCacheService = statuscache.NewService(
+			statusCacheRepo,
+			&cfg,
+			webhookDispatcher,
+			metrics,
+			logger,
+		)
+
+		if err := statusCacheService.Start(ctx); err != nil {
+			logger.Error("failed to start status cache service", slog.String("error", err.Error()))
+		} else {
+			logger.Info("status cache service started",
+				slog.Duration("ttl", cfg.StatusCache.TTL),
+				slog.Bool("suppress_webhooks", cfg.StatusCache.SuppressWebhooks),
+			)
+
+			// Create interceptor and wire to dispatch coordinator
+			statusInterceptor := statuscache.NewInterceptor(statusCacheService, &cfg, logger)
+			dispatchCoordinator.SetStatusInterceptor(statusInterceptor)
+			logger.Info("status cache interceptor configured for dispatch coordinator")
+		}
+
+		defer func() {
+			if statusCacheService != nil {
+				logger.Info("stopping status cache service")
+				stopCtx, stopCancel := context.WithTimeout(context.Background(), 10*time.Second)
+				if err := statusCacheService.Stop(stopCtx); err != nil {
+					logger.Error("status cache service stop error", slog.String("error", err.Error()))
+				}
+				stopCancel()
+				logger.Info("status cache service stopped")
+			}
+		}()
+	}
 
 	mediaRepo := persistence.NewMediaRepository(pgPool)
 	mediaCoordinator := media.NewMediaCoordinator(
@@ -586,6 +687,12 @@ func main() {
 	communitiesHandler := handlers.NewCommunitiesHandler(instanceService, communitiesService, metrics, logger)
 	newslettersHandler := handlers.NewNewslettersHandler(instanceService, newslettersService, metrics, logger)
 
+	// Create StatusCacheHandler if service is enabled
+	var statusCacheHTTPHandler *handlers.StatusCacheHandler
+	if statusCacheService != nil {
+		statusCacheHTTPHandler = handlers.NewStatusCacheHandler(statusCacheService, logger)
+	}
+
 	healthHandler.SetMetrics(func(component, status string) {
 		metrics.HealthChecks.WithLabelValues(component, status).Inc()
 	})
@@ -602,6 +709,7 @@ func main() {
 		GroupsHandler:      groupsHandler,
 		CommunitiesHandler: communitiesHandler,
 		NewslettersHandler: newslettersHandler,
+		StatusCacheHandler: statusCacheHTTPHandler,
 		PartnerToken:       cfg.Partner.AuthToken,
 		DocsConfig:         docs.Config{BaseURL: cfg.HTTP.BaseURL},
 	})
