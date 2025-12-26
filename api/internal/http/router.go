@@ -29,6 +29,7 @@ type RouterDeps struct {
 	GroupsHandler      *handlers.GroupsHandler
 	CommunitiesHandler *handlers.CommunitiesHandler
 	NewslettersHandler *handlers.NewslettersHandler
+	StatusCacheHandler *handlers.StatusCacheHandler
 	PartnerToken       string
 	DocsConfig         docs.Config
 }
@@ -85,6 +86,9 @@ func NewRouter(deps RouterDeps) http.Handler {
 		}
 		if deps.NewslettersHandler != nil {
 			deps.InstanceHandler.SetNewslettersHandler(deps.NewslettersHandler)
+		}
+		if deps.StatusCacheHandler != nil {
+			deps.InstanceHandler.SetStatusCacheHandler(deps.StatusCacheHandler)
 		}
 	}
 
