@@ -134,6 +134,16 @@ locals {
     SHUTDOWN_EVENT_TIMEOUT   = "10s"
     SHUTDOWN_CLIENT_TIMEOUT  = "10s"
     SHUTDOWN_LOCK_TIMEOUT    = "5s"
+
+    # Status Cache Configuration
+    STATUS_CACHE_ENABLED            = "true"
+    STATUS_CACHE_TTL                = "24h"
+    STATUS_CACHE_TYPES              = "read,delivered,played,sent"
+    STATUS_CACHE_SCOPE              = "groups"
+    STATUS_CACHE_SUPPRESS_WEBHOOKS  = "true"
+    STATUS_CACHE_FLUSH_BATCH_SIZE   = tostring(100)
+    STATUS_CACHE_CLEANUP_INTERVAL   = "1h"
+    STATUS_CACHE_OPERATION_TIMEOUT  = "10s"
   }, var.extra_environment)
 
   environment_definitions = [
