@@ -56,3 +56,6 @@ tmp/
 
 # Claude Code
 .claude/
+
+# Auto Claude data directory
+.auto-claude/
