@@ -77,6 +77,7 @@ export interface DashboardMetrics {
 	system: SystemMetrics;
 	workers: WorkerMetrics;
 	transport: TransportMetrics;
+	statusCache: StatusCacheMetrics;
 	instances: string[];
 }
 
@@ -265,6 +266,68 @@ export interface TransportInstanceMetrics {
 	failed: number;
 	retries: number;
 	avgDurationMs: number;
+}
+
+/** Status cache metrics for message status events (read, delivered, played, sent) */
+export interface StatusCacheMetrics {
+	/** Total cache operations (upsert, get, delete, flush) */
+	totalOperations: number;
+	/** Current total entries in cache across all instances */
+	totalSize: number;
+	/** Total cache hits */
+	totalHits: number;
+	/** Total cache misses */
+	totalMisses: number;
+	/** Hit rate percentage (0-100) */
+	hitRate: number;
+	/** Total webhook suppressions */
+	totalSuppressions: number;
+	/** Total flushed entries */
+	totalFlushed: number;
+	/** Average operation duration in ms */
+	avgDurationMs: number;
+	/** P50 operation duration in ms */
+	p50DurationMs: number;
+	/** P95 operation duration in ms */
+	p95DurationMs: number;
+	/** P99 operation duration in ms */
+	p99DurationMs: number;
+	/** Operations breakdown by type */
+	byOperation: Record<string, StatusCacheOperationMetrics>;
+	/** Metrics per instance */
+	byInstance: Record<string, StatusCacheInstanceMetrics>;
+	/** Suppressions by status type (read, delivered, played, sent) */
+	byStatusType: Record<string, number>;
+	/** Flushed entries by trigger (manual, ttl, shutdown) */
+	byTrigger: Record<string, number>;
+}
+
+export interface StatusCacheOperationMetrics {
+	/** Total count of this operation */
+	count: number;
+	/** Successful operations */
+	success: number;
+	/** Failed operations */
+	failed: number;
+	/** Average duration in ms */
+	avgDurationMs: number;
+}
+
+export interface StatusCacheInstanceMetrics {
+	/** Current cache size for this instance */
+	size: number;
+	/** Total operations */
+	operations: number;
+	/** Cache hits */
+	hits: number;
+	/** Cache misses */
+	misses: number;
+	/** Hit rate percentage */
+	hitRate: number;
+	/** Total suppressions */
+	suppressions: number;
+	/** Total flushed */
+	flushed: number;
 }
 
 // ============================================================================
