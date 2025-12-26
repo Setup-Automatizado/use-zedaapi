@@ -12,6 +12,38 @@ servers:
     description: Production placeholder
   - url: http://localhost:8080
     description: Local development
+tags:
+  - name: System
+    description: Health checks and system status endpoints
+  - name: Instance
+    description: WhatsApp instance lifecycle management (connect, disconnect, QR code)
+  - name: Webhooks
+    description: Webhook configuration for receiving events
+  - name: Messages
+    description: Send and manage WhatsApp messages
+  - name: Contacts
+    description: Contact management and validation
+  - name: Groups
+    description: Group chat management
+  - name: Communities
+    description: WhatsApp Communities management
+  - name: Newsletters
+    description: WhatsApp Channels/Newsletters management
+  - name: Partner
+    description: Partner/integrator management endpoints
+  - name: Queue
+    description: Message queue inspection and management
+  - name: Status Cache
+    description: |
+      Message delivery status caching system for tracking receipts (sent, delivered, read, played).
+      Particularly useful for group messages where tracking individual participant statuses is important.
+
+      **Key Features:**
+      - Cache status events in Redis for 24 hours
+      - Query by messageId, groupId, or phone
+      - Aggregate participant statistics for group messages
+      - Optional webhook suppression to reduce serverless costs
+      - Manual flush to trigger pending webhooks
 components:
   securitySchemes:
     ClientTokenAuth:
@@ -2830,6 +2862,293 @@ components:
         - inputPhone
         - outputPhone
       additionalProperties: false
+
+    # ==========================================
+    # Status Cache Schemas
+    # ==========================================
+    StatusCacheParticipantStatus:
+      type: object
+      description: Individual participant's status within a group message.
+      properties:
+        phone:
+          type: string
+          description: Participant's phone number (MSISDN format)
+          example: "5511999999999"
+        status:
+          type: string
+          description: |
+            Current status of the message for this participant.
+            - `sent`: Message sent to WhatsApp servers
+            - `delivered`: Message delivered to participant's device
+            - `read`: Message read by participant
+            - `played`: Audio/video/PTT played by participant
+          enum: [sent, delivered, read, played]
+          example: "read"
+        timestamp:
+          type: integer
+          format: int64
+          description: Unix timestamp in milliseconds when status was received
+          example: 1735200000000
+        device:
+          type: integer
+          description: WhatsApp device ID (0 = primary, 1+ = linked devices)
+          example: 0
+      required:
+        - phone
+        - status
+        - timestamp
+      additionalProperties: false
+
+    StatusCacheAggregatedStatus:
+      type: object
+      description: |
+        Aggregated status summary for a message, showing delivery statistics
+        across all recipients (for groups) or the single recipient (for direct messages).
+      properties:
+        messageId:
+          type: string
+          description: WhatsApp message ID
+          example: "3EB0A1B2C3D4E5F6"
+        instanceId:
+          type: string
+          format: uuid
+          description: Instance that sent the message
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        groupId:
+          type: string
+          description: Group ID (only present for group messages)
+          example: "120363182823169824"
+        phone:
+          type: string
+          description: |
+            For direct messages: recipient phone number.
+            For groups: group JID or identifier.
+          example: "5511999999999"
+        isGroup:
+          type: boolean
+          description: Whether this is a group message
+          example: true
+        totalParticipants:
+          type: integer
+          description: Total number of participants with status updates
+          example: 25
+        status:
+          type: object
+          description: Count of participants by status type
+          additionalProperties:
+            type: integer
+          example:
+            sent: 25
+            delivered: 23
+            read: 15
+            played: 0
+        participants:
+          type: array
+          description: Individual participant statuses (only included when requested)
+          items:
+            $ref: "#/components/schemas/StatusCacheParticipantStatus"
+        createdAt:
+          type: integer
+          format: int64
+          description: Unix timestamp (ms) when first status was cached
+          example: 1735200000000
+        updatedAt:
+          type: integer
+          format: int64
+          description: Unix timestamp (ms) of most recent status update
+          example: 1735200060000
+      required:
+        - messageId
+        - instanceId
+        - phone
+        - isGroup
+        - totalParticipants
+        - status
+        - createdAt
+        - updatedAt
+      additionalProperties: false
+
+    StatusCacheQueryMeta:
+      type: object
+      description: Pagination metadata for status cache queries.
+      properties:
+        total:
+          type: integer
+          format: int64
+          description: Total number of matching entries
+          example: 150
+        limit:
+          type: integer
+          description: Maximum entries per page
+          example: 100
+        offset:
+          type: integer
+          description: Current page offset
+          example: 0
+      required:
+        - total
+        - limit
+        - offset
+      additionalProperties: false
+
+    StatusCacheQueryResult:
+      type: object
+      description: |
+        Aggregated query result with human-readable status summaries.
+        Returns processed data with participant counts by status type.
+      properties:
+        data:
+          type: array
+          description: Array of aggregated status entries
+          items:
+            $ref: "#/components/schemas/StatusCacheAggregatedStatus"
+        meta:
+          $ref: "#/components/schemas/StatusCacheQueryMeta"
+      required:
+        - data
+        - meta
+      additionalProperties: false
+
+    StatusCacheRawStatusPayload:
+      type: object
+      description: |
+        Raw status payload as originally received from WhatsApp.
+        Useful for debugging or when exact original data is needed.
+      properties:
+        messageId:
+          type: string
+          description: WhatsApp message ID
+          example: "3EB0A1B2C3D4E5F6"
+        instanceId:
+          type: string
+          format: uuid
+          description: Instance ID
+          example: "550e8400-e29b-41d4-a716-446655440000"
+        payload:
+          type: object
+          description: Original Z-API format webhook payload
+          additionalProperties: true
+        cachedAt:
+          type: integer
+          format: int64
+          description: Unix timestamp (ms) when entry was cached
+          example: 1735200000000
+      required:
+        - messageId
+        - instanceId
+        - payload
+        - cachedAt
+      additionalProperties: false
+
+    StatusCacheRawQueryResult:
+      type: object
+      description: |
+        Raw query result with original webhook payloads.
+        Use format=raw to retrieve this format.
+      properties:
+        data:
+          type: array
+          description: Array of raw status payloads
+          items:
+            $ref: "#/components/schemas/StatusCacheRawStatusPayload"
+        meta:
+          $ref: "#/components/schemas/StatusCacheQueryMeta"
+      required:
+        - data
+        - meta
+      additionalProperties: false
+
+    StatusCacheFlushRequest:
+      type: object
+      description: |
+        Request to flush (deliver) pending webhooks.
+        Specify either `messageId` for a single message or `all: true` for all pending.
+      properties:
+        messageId:
+          type: string
+          description: Flush webhooks for a specific message ID
+          example: "3EB0A1B2C3D4E5F6"
+        all:
+          type: boolean
+          description: Set to true to flush all pending webhooks
+          default: false
+      additionalProperties: false
+
+    StatusCacheFlushResult:
+      type: object
+      description: Result of a flush operation.
+      properties:
+        flushed:
+          type: integer
+          description: Number of pending webhook entries processed
+          example: 15
+        webhooksTriggered:
+          type: integer
+          description: Number of webhooks actually dispatched
+          example: 15
+      required:
+        - flushed
+        - webhooksTriggered
+      additionalProperties: false
+
+    StatusCacheClearSingleResult:
+      type: object
+      description: Result of clearing a single message from cache.
+      properties:
+        cleared:
+          type: integer
+          description: Number of entries cleared (0 or 1)
+          example: 1
+        messageId:
+          type: string
+          description: The message ID that was cleared
+          example: "3EB0A1B2C3D4E5F6"
+      required:
+        - cleared
+        - messageId
+      additionalProperties: false
+
+    StatusCacheClearAllResult:
+      type: object
+      description: Result of clearing all cached entries for an instance.
+      properties:
+        cleared:
+          type: integer
+          format: int64
+          description: Total number of entries cleared
+          example: 150
+      required:
+        - cleared
+      additionalProperties: false
+
+    StatusCacheStats:
+      type: object
+      description: Statistics about the status cache for an instance.
+      properties:
+        totalEntries:
+          type: integer
+          format: int64
+          description: Total number of cached status entries
+          example: 1500
+        entriesByInstance:
+          type: object
+          description: Breakdown of entries by instance ID
+          additionalProperties:
+            type: integer
+            format: int64
+          example:
+            "550e8400-e29b-41d4-a716-446655440000": 1500
+        pendingWebhooks:
+          type: integer
+          format: int64
+          description: Number of webhooks pending delivery (waiting for flush)
+          example: 45
+      required:
+        - totalEntries
+        - entriesByInstance
+        - pendingWebhooks
+      additionalProperties: false
+
 paths:
   /health:
     get:
@@ -7879,6 +8198,424 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
         "503":
           description: Instance not connected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # ===== Status Cache Schemas =====
+  /instances/{instanceId}/token/{instanceToken}/messages-status:
+    get:
+      tags:
+        - Status Cache
+      summary: Query message delivery status
+      description: |
+        Query the cached status of message deliveries. Status Cache stores delivery receipts
+        (sent, delivered, read, played) for messages, especially useful for group messages
+        where tracking individual participant statuses is important.
+        
+        **Query Types:**
+        - By `messageId`: Get status for a specific message
+        - By `groupId`: Get all message statuses for a group
+        - By `phone`: Get all message statuses for a phone number
+        
+        **Response Formats:**
+        - `aggregated` (default): Returns aggregated counts and optionally participant details
+        - `raw`: Returns data in Z-API webhook format for compatibility
+        
+        **Use Cases:**
+        - Check if a message was read by all group participants
+        - Get delivery statistics for messages to a specific contact
+        - Retrieve batch status updates for UI dashboards
+        
+        **Note:** Status data is cached with a configurable TTL (default 24h).
+      operationId: getMessagesStatus
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+        - name: messageId
+          in: query
+          required: false
+          schema:
+            type: string
+          description: |
+            Query status for a specific message. When provided, returns detailed status
+            for that message including all participant statuses.
+          example: "3EB0A1B2C3D4E5F6"
+        - name: groupId
+          in: query
+          required: false
+          schema:
+            type: string
+          description: |
+            Query all message statuses for a group. Returns paginated results.
+            The groupId should be the numeric part of the WhatsApp JID (without @g.us).
+          example: "120363182823169824"
+        - name: phone
+          in: query
+          required: false
+          schema:
+            type: string
+          description: |
+            Query all message statuses for messages to/from a phone number.
+            Use E.164 format without the + prefix.
+          example: "5511999999999"
+        - name: format
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - aggregated
+              - raw
+            default: aggregated
+          description: |
+            Response format:
+            - `aggregated`: Returns aggregated counts with optional participant details
+            - `raw`: Returns data in Z-API MessageStatusCallback webhook format
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 100
+          description: Maximum number of results to return (1-1000).
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Number of results to skip for pagination.
+        - name: includeParticipants
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+          description: |
+            When true and format is `aggregated`, includes the full list of 
+            participant statuses in the response. Useful for detailed analysis
+            but increases response size significantly for groups.
+      responses:
+        "200":
+          description: Status data retrieved successfully.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/StatusCacheQueryResult"
+                  - $ref: "#/components/schemas/StatusCacheRawQueryResult"
+              examples:
+                aggregatedSingle:
+                  summary: Single message aggregated status
+                  value:
+                    data:
+                      - messageId: "3EB0A1B2C3D4E5F6"
+                        instanceId: "550e8400-e29b-41d4-a716-446655440000"
+                        groupId: "120363182823169824"
+                        phone: "120363182823169824-group"
+                        isGroup: true
+                        totalParticipants: 100
+                        status:
+                          sent: 100
+                          delivered: 95
+                          read: 42
+                          played: 0
+                        createdAt: 1703548800000
+                        updatedAt: 1703552400000
+                    meta:
+                      total: 1
+                      limit: 100
+                      offset: 0
+                aggregatedWithParticipants:
+                  summary: With participant details
+                  value:
+                    data:
+                      - messageId: "3EB0A1B2C3D4E5F6"
+                        instanceId: "550e8400-e29b-41d4-a716-446655440000"
+                        phone: "5511999999999"
+                        isGroup: false
+                        totalParticipants: 1
+                        status:
+                          sent: 1
+                          delivered: 1
+                          read: 1
+                          played: 0
+                        participants:
+                          - phone: "5511999999999"
+                            status: "read"
+                            timestamp: 1703548900000
+                            device: 1
+                        createdAt: 1703548800000
+                        updatedAt: 1703548900000
+                    meta:
+                      total: 1
+                      limit: 100
+                      offset: 0
+                rawFormat:
+                  summary: Raw Z-API format
+                  value:
+                    data:
+                      - status: "read"
+                        ids:
+                          - "3EB0A1B2C3D4E5F6"
+                        momment: 1703548900000
+                        phone: "5511999999999"
+                        isGroup: false
+                        instanceId: "550e8400-e29b-41d4-a716-446655440000"
+                        type: "MessageStatusCallback"
+                        fromMe: true
+                        senderDevice: 1
+                    meta:
+                      total: 1
+                      limit: 100
+                      offset: 0
+                empty:
+                  summary: No cached status found
+                  value:
+                    data: []
+                    meta:
+                      total: 0
+                      limit: 0
+                      offset: 0
+        "400":
+          description: Bad request - missing required parameter
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "missing required parameter: messageId, groupId, or phone"
+        "401":
+          description: Unauthorized - invalid or missing Client-Token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /instances/{instanceId}/token/{instanceToken}/messages-status/flush:
+    post:
+      tags:
+        - Status Cache
+      summary: Flush pending webhooks
+      description: |
+        Triggers delivery of suppressed webhooks for cached status events.
+        
+        When `STATUS_CACHE_SUPPRESS_WEBHOOKS=true`, status webhooks are not immediately
+        sent but stored for later delivery. This endpoint allows manual triggering
+        of those pending webhooks.
+        
+        **Use Cases:**
+        - Force immediate delivery of status updates to webhook endpoints
+        - Recover from webhook endpoint downtime
+        - Batch process status updates at specific intervals
+        
+        **Options:**
+        - Flush by specific `messageId`: Delivers webhooks for one message
+        - Flush all (`all: true`): Delivers all pending webhooks for the instance
+        
+        **Note:** Flushing is idempotent - already-flushed webhooks won't be re-sent.
+      operationId: flushMessagesStatus
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StatusCacheFlushRequest"
+            examples:
+              flushMessage:
+                summary: Flush specific message
+                value:
+                  messageId: "3EB0A1B2C3D4E5F6"
+              flushAll:
+                summary: Flush all pending
+                value:
+                  all: true
+      responses:
+        "200":
+          description: Flush completed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatusCacheFlushResult"
+              examples:
+                success:
+                  summary: Flush completed
+                  value:
+                    flushed: 15
+                    webhooksTriggered: 15
+                noPending:
+                  summary: No pending webhooks
+                  value:
+                    flushed: 0
+                    webhooksTriggered: 0
+        "400":
+          description: Bad request - invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                missingParam:
+                  summary: Missing parameter
+                  value:
+                    error: "specify messageId or set all=true"
+                invalidBody:
+                  summary: Invalid request body
+                  value:
+                    error: "invalid request body"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /instances/{instanceId}/token/{instanceToken}/messages-status/cache:
+    delete:
+      tags:
+        - Status Cache
+      summary: Clear cached status entries
+      description: |
+        Removes cached status entries from the status cache.
+        
+        **Options:**
+        - Clear by `messageId`: Removes cache for a specific message
+        - Clear all (`all=true`): Removes all cached entries for the instance
+        
+        **Warning:** Clearing cache is irreversible. Cached status data and pending
+        webhooks for cleared entries will be permanently deleted.
+        
+        **Use Cases:**
+        - Free up cache storage space
+        - Remove obsolete message status data
+        - Reset cache after testing
+      operationId: clearMessagesStatusCache
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+        - name: messageId
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Clear cache for a specific message ID.
+          example: "3EB0A1B2C3D4E5F6"
+        - name: all
+          in: query
+          required: false
+          schema:
+            type: boolean
+            default: false
+          description: Set to true to clear all cached entries for this instance.
+      responses:
+        "200":
+          description: Cache cleared successfully.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/StatusCacheClearSingleResult"
+                  - $ref: "#/components/schemas/StatusCacheClearAllResult"
+              examples:
+                singleMessage:
+                  summary: Single message cleared
+                  value:
+                    cleared: 1
+                    messageId: "3EB0A1B2C3D4E5F6"
+                allCleared:
+                  summary: All entries cleared
+                  value:
+                    cleared: 150
+        "400":
+          description: Bad request - missing parameter
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "specify messageId or set all=true"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /instances/{instanceId}/token/{instanceToken}/messages-status/stats:
+    get:
+      tags:
+        - Status Cache
+      summary: Get cache statistics
+      description: |
+        Returns statistics about the status cache for this instance.
+        
+        **Metrics included:**
+        - Total cached entries
+        - Entries breakdown by instance
+        - Number of pending webhooks awaiting flush
+        
+        **Use Cases:**
+        - Monitor cache usage and storage
+        - Determine if flush is needed
+        - Debug cache behavior
+      operationId: getMessagesStatusStats
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      responses:
+        "200":
+          description: Statistics retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatusCacheStats"
+              example:
+                totalEntries: 1500
+                entriesByInstance:
+                  "550e8400-e29b-41d4-a716-446655440000": 1500
+                pendingWebhooks: 45
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
           content:
             application/json:
               schema:
