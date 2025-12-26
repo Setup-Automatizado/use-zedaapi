@@ -188,6 +188,17 @@ type Config struct {
 		ClientDisconnectTimeout time.Duration
 		LockReleaseTimeout      time.Duration
 	}
+
+	StatusCache struct {
+		Enabled          bool
+		TTL              time.Duration
+		Types            []string // read, delivered, played, sent
+		Scope            []string // groups, direct
+		SuppressWebhooks bool
+		FlushBatchSize   int
+		CleanupInterval  time.Duration
+		OperationTimeout time.Duration
+	}
 }
 
 func Load() (Config, error) {
@@ -684,6 +695,47 @@ func Load() (Config, error) {
 		MuPDFVersion: getEnv("MUPDF_VERSION", "1.24.10"),
 	}
 
+	// Status Cache Configuration
+	statusCacheEnabled := parseBool(getEnv("STATUS_CACHE_ENABLED", "false"))
+	statusCacheTTL, err := parseDuration(getEnv("STATUS_CACHE_TTL", "24h"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid STATUS_CACHE_TTL: %w", err)
+	}
+	statusCacheTypesStr := getEnv("STATUS_CACHE_TYPES", "read,delivered,played,sent")
+	statusCacheTypes := parseStringSlice(statusCacheTypesStr)
+	statusCacheScopeStr := getEnv("STATUS_CACHE_SCOPE", "groups")
+	statusCacheScope := parseStringSlice(statusCacheScopeStr)
+	statusCacheSuppressWebhooks := parseBool(getEnv("STATUS_CACHE_SUPPRESS_WEBHOOKS", "true"))
+	statusCacheFlushBatchSize := mustParsePositiveInt(getEnv("STATUS_CACHE_FLUSH_BATCH_SIZE", "100"))
+	statusCacheCleanupInterval, err := parseDuration(getEnv("STATUS_CACHE_CLEANUP_INTERVAL", "1h"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid STATUS_CACHE_CLEANUP_INTERVAL: %w", err)
+	}
+	statusCacheOperationTimeout, err := parseDuration(getEnv("STATUS_CACHE_OPERATION_TIMEOUT", "10s"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid STATUS_CACHE_OPERATION_TIMEOUT: %w", err)
+	}
+
+	cfg.StatusCache = struct {
+		Enabled          bool
+		TTL              time.Duration
+		Types            []string
+		Scope            []string
+		SuppressWebhooks bool
+		FlushBatchSize   int
+		CleanupInterval  time.Duration
+		OperationTimeout time.Duration
+	}{
+		Enabled:          statusCacheEnabled,
+		TTL:              statusCacheTTL,
+		Types:            statusCacheTypes,
+		Scope:            statusCacheScope,
+		SuppressWebhooks: statusCacheSuppressWebhooks,
+		FlushBatchSize:   statusCacheFlushBatchSize,
+		CleanupInterval:  statusCacheCleanupInterval,
+		OperationTimeout: statusCacheOperationTimeout,
+	}
+
 	cfg.Events = struct {
 		BufferSize          int
 		BatchSize           int
@@ -854,4 +906,16 @@ func parseRetryDelays(val string) ([]time.Duration, error) {
 	}
 
 	return delays, nil
+}
+
+func parseStringSlice(val string) []string {
+	parts := strings.Split(val, ",")
+	result := make([]string, 0, len(parts))
+	for _, part := range parts {
+		trimmed := strings.TrimSpace(part)
+		if trimmed != "" {
+			result = append(result, trimmed)
+		}
+	}
+	return result
 }
