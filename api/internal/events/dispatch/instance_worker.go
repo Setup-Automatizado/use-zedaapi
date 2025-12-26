@@ -131,6 +131,11 @@ func (w *InstanceWorker) isRunning() bool {
 	return w.running
 }
 
+// SetStatusInterceptor sets the status cache interceptor for receipt events
+func (w *InstanceWorker) SetStatusInterceptor(interceptor StatusInterceptor) {
+	w.processor.SetStatusInterceptor(interceptor)
+}
+
 func (w *InstanceWorker) pollAndProcess(ctx context.Context) error {
 	start := time.Now()
 	logger := logging.ContextLogger(ctx, nil)

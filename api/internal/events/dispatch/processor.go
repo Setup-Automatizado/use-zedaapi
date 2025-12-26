@@ -44,6 +44,7 @@ type EventProcessor struct {
 	lookup            InstanceLookup
 	metrics           *observability.Metrics
 	pollStore         pollstore.Store
+	statusInterceptor StatusInterceptor
 }
 
 type transportConfig struct {
@@ -78,6 +79,11 @@ func NewEventProcessor(
 	}
 }
 
+// SetStatusInterceptor sets the status cache interceptor for receipt events
+func (p *EventProcessor) SetStatusInterceptor(interceptor StatusInterceptor) {
+	p.statusInterceptor = interceptor
+}
+
 func (p *EventProcessor) Process(ctx context.Context, event *persistence.OutboxEvent) error {
 	start := time.Now()
 	logger := logging.ContextLogger(ctx, nil)
@@ -105,6 +111,17 @@ func (p *EventProcessor) Process(ctx context.Context, event *persistence.OutboxE
 			return p.handleSkippedEvent(ctx, event, skippedErr.Reason)
 		}
 		return p.handleTransformError(ctx, event, err)
+	}
+
+	// Check if status cache should intercept this event (receipt events)
+	if p.statusInterceptor != nil && p.statusInterceptor.ShouldIntercept(event.EventType) {
+		suppress, interceptErr := p.statusInterceptor.InterceptAndCache(ctx, p.instanceID.String(), event.EventType, webhookPayload)
+		if interceptErr != nil {
+			logger.Warn("status cache intercept error, continuing with webhook delivery",
+				slog.String("error", interceptErr.Error()))
+		} else if suppress {
+			return p.handleCachedStatusEvent(ctx, event, start)
+		}
 	}
 
 	deliveryResult, err := p.deliverWebhook(ctx, event, webhookPayload)
@@ -456,6 +473,34 @@ func (p *EventProcessor) handleSkippedEvent(ctx context.Context, event *persiste
 	}
 
 	p.metrics.EventsProcessed.WithLabelValues(p.instanceID.String(), event.EventType, "skipped").Inc()
+
+	return nil
+}
+
+// handleCachedStatusEvent marks the event as delivered when it was cached and webhook suppressed
+func (p *EventProcessor) handleCachedStatusEvent(ctx context.Context, event *persistence.OutboxEvent, startTime time.Time) error {
+	logger := logging.ContextLogger(ctx, nil)
+
+	duration := time.Since(startTime)
+
+	responseJSON, _ := json.Marshal(map[string]interface{}{
+		"status":    "cached",
+		"reason":    "status_cache_webhook_suppressed",
+		"timestamp": time.Now(),
+	})
+
+	if err := p.outboxRepo.MarkDelivered(ctx, event.EventID, responseJSON); err != nil {
+		logger.Error("failed to mark cached event as delivered",
+			slog.String("error", err.Error()))
+		return fmt.Errorf("mark cached event as delivered: %w", err)
+	}
+
+	logger.Debug("status event cached and webhook suppressed",
+		slog.String("event_id", event.EventID.String()),
+		slog.String("event_type", event.EventType),
+		slog.Duration("duration", duration))
+
+	p.metrics.EventsProcessed.WithLabelValues(p.instanceID.String(), event.EventType, "cached").Inc()
 
 	return nil
 }

@@ -18,6 +18,12 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/observability"
 )
 
+// StatusInterceptor is an interface for status cache interception
+type StatusInterceptor interface {
+	ShouldIntercept(eventType string) bool
+	InterceptAndCache(ctx context.Context, instanceID string, eventType string, payload []byte) (suppress bool, err error)
+}
+
 type Coordinator struct {
 	cfg               *config.Config
 	pool              *pgxpool.Pool
@@ -27,6 +33,7 @@ type Coordinator struct {
 	lookup            InstanceLookup
 	metrics           *observability.Metrics
 	pollStore         pollstore.Store
+	statusInterceptor StatusInterceptor
 
 	mu       sync.RWMutex
 	workers  map[uuid.UUID]*InstanceWorker
@@ -149,6 +156,11 @@ func (c *Coordinator) RegisterInstance(ctx context.Context, instanceID uuid.UUID
 		c.metrics,
 	)
 
+	// Set status interceptor if available
+	if c.statusInterceptor != nil {
+		worker.SetStatusInterceptor(c.statusInterceptor)
+	}
+
 	c.wg.Add(1)
 	go func() {
 		defer c.wg.Done()
@@ -246,4 +258,16 @@ func (c *Coordinator) IsInstanceRegistered(instanceID uuid.UUID) bool {
 func (c *Coordinator) createWorkerContext() context.Context {
 	ctx := context.Background()
 	return ctx
+}
+
+// SetStatusInterceptor sets the status cache interceptor for receipt events
+func (c *Coordinator) SetStatusInterceptor(interceptor StatusInterceptor) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.statusInterceptor = interceptor
+
+	// Update existing workers
+	for _, worker := range c.workers {
+		worker.SetStatusInterceptor(interceptor)
+	}
 }
