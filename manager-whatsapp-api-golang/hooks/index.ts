@@ -10,6 +10,8 @@
  * ```
  */
 
+// Client token hook
+export { useClientToken } from "./use-client-token";
 export type { UseHealthOptions, UseHealthResult } from "./use-health";
 // Health check hook
 export { useHealth } from "./use-health";

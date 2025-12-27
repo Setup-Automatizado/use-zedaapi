@@ -111,6 +111,7 @@ export function useMetrics(options: UseMetricsOptions = {}): UseMetricsResult {
 	return {
 		metrics,
 		isLoading,
+		isError: Boolean(error),
 		isValidating,
 		error,
 		lastUpdated,
