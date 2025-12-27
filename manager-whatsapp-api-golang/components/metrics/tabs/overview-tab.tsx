@@ -211,10 +211,10 @@ export function OverviewTab({ metrics, isLoading = false }: OverviewTabProps) {
 			</div>
 
 			{/* Instance Summary */}
-			{metrics && metrics.instances.length > 0 && (
+			{metrics && metrics.instances && metrics.instances.length > 0 && (
 				<InstanceSummaryCard
 					instances={metrics.instances}
-					circuitBreakerByInstance={metrics.system.circuitBreakerByInstance}
+					circuitBreakerByInstance={metrics.system.circuitBreakerByInstance ?? {}}
 				/>
 			)}
 		</div>

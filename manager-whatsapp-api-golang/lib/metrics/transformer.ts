@@ -100,6 +100,10 @@ export function transformToDashboard(
 	return {
 		timestamp: parsed.timestamp,
 		http: transformHTTPMetrics(families, instanceId),
+		queue: {
+			size: 0,
+			processing: 0,
+		},
 		events: transformEventMetrics(families, instanceId),
 		messageQueue: transformMessageQueueMetrics(families, instanceId),
 		media: transformMediaMetrics(families, instanceId),
@@ -164,6 +168,7 @@ function transformHTTPMetrics(
 
 				// Count by status
 				const status = sample.labels.status || "unknown";
+				if (!metrics.byStatus) metrics.byStatus = {};
 				metrics.byStatus[status] =
 					(metrics.byStatus[status] || 0) + value;
 
@@ -174,6 +179,7 @@ function transformHTTPMetrics(
 
 				// Count by path
 				const path = sample.labels.path || "/";
+				if (!metrics.byPath) metrics.byPath = {};
 				if (!metrics.byPath[path]) {
 					metrics.byPath[path] = {
 						count: 0,
@@ -188,6 +194,7 @@ function transformHTTPMetrics(
 
 				// Count by method
 				const method = sample.labels.method || "GET";
+				if (!metrics.byMethod) metrics.byMethod = {};
 				metrics.byMethod[method] =
 					(metrics.byMethod[method] || 0) + value;
 			}
@@ -279,9 +286,12 @@ function transformEventMetrics(
 
 			// By type
 			const eventType = sample.labels.event_type || "unknown";
+			if (!metrics.byType) metrics.byType = {};
 			if (!metrics.byType[eventType]) {
 				metrics.byType[eventType] = {
 					captured: 0,
+					buffered: 0,
+					inserted: 0,
 					processed: 0,
 					delivered: 0,
 					failed: 0,
@@ -292,9 +302,12 @@ function transformEventMetrics(
 			// By instance
 			const instId = sample.labels.instance_id;
 			if (instId) {
+				if (!metrics.byInstance) metrics.byInstance = {};
 				if (!metrics.byInstance[instId]) {
 					metrics.byInstance[instId] = {
 						captured: 0,
+						buffered: 0,
+						inserted: 0,
 						processed: 0,
 						delivered: 0,
 						failed: 0,
@@ -331,9 +344,13 @@ function transformEventMetrics(
 			metrics.processed += sample.value;
 
 			const eventType = sample.labels.event_type || "unknown";
+			if (!metrics.byType) metrics.byType = {};
+
 			if (!metrics.byType[eventType]) {
 				metrics.byType[eventType] = {
 					captured: 0,
+					buffered: 0,
+					inserted: 0,
 					processed: 0,
 					delivered: 0,
 					failed: 0,
@@ -343,9 +360,13 @@ function transformEventMetrics(
 
 			const instId = sample.labels.instance_id;
 			if (instId) {
+				if (!metrics.byInstance) metrics.byInstance = {};
+
 				if (!metrics.byInstance[instId]) {
 					metrics.byInstance[instId] = {
 						captured: 0,
+						buffered: 0,
+						inserted: 0,
 						processed: 0,
 						delivered: 0,
 						failed: 0,
@@ -365,9 +386,13 @@ function transformEventMetrics(
 			metrics.delivered += sample.value;
 
 			const eventType = sample.labels.event_type || "unknown";
+			if (!metrics.byType) metrics.byType = {};
+
 			if (!metrics.byType[eventType]) {
 				metrics.byType[eventType] = {
 					captured: 0,
+					buffered: 0,
+					inserted: 0,
 					processed: 0,
 					delivered: 0,
 					failed: 0,
@@ -377,9 +402,13 @@ function transformEventMetrics(
 
 			const instId = sample.labels.instance_id;
 			if (instId) {
+				if (!metrics.byInstance) metrics.byInstance = {};
+
 				if (!metrics.byInstance[instId]) {
 					metrics.byInstance[instId] = {
 						captured: 0,
+						buffered: 0,
+						inserted: 0,
 						processed: 0,
 						delivered: 0,
 						failed: 0,
@@ -399,9 +428,13 @@ function transformEventMetrics(
 			metrics.failed += sample.value;
 
 			const eventType = sample.labels.event_type || "unknown";
+			if (!metrics.byType) metrics.byType = {};
+
 			if (!metrics.byType[eventType]) {
 				metrics.byType[eventType] = {
 					captured: 0,
+					buffered: 0,
+					inserted: 0,
 					processed: 0,
 					delivered: 0,
 					failed: 0,
@@ -411,9 +444,13 @@ function transformEventMetrics(
 
 			const instId = sample.labels.instance_id;
 			if (instId) {
+				if (!metrics.byInstance) metrics.byInstance = {};
+
 				if (!metrics.byInstance[instId]) {
 					metrics.byInstance[instId] = {
 						captured: 0,
+						buffered: 0,
+						inserted: 0,
 						processed: 0,
 						delivered: 0,
 						failed: 0,
@@ -442,6 +479,7 @@ function transformEventMetrics(
 			metrics.outboxBacklog += sample.value;
 
 			const instId = sample.labels.instance_id;
+			if (!metrics.byInstance) metrics.byInstance = {};
 			if (instId && metrics.byInstance[instId]) {
 				metrics.byInstance[instId].backlog = sample.value;
 			}
@@ -557,6 +595,8 @@ function transformMessageQueueMetrics(
 			}
 
 			if (instId) {
+				if (!metrics.byInstance) metrics.byInstance = {};
+
 				if (!metrics.byInstance[instId]) {
 					metrics.byInstance[instId] = {
 						size: 0,
@@ -588,6 +628,8 @@ function transformMessageQueueMetrics(
 			metrics.enqueued += sample.value;
 
 			const msgType = sample.labels.message_type || "unknown";
+			if (!metrics.byType) metrics.byType = {};
+
 			if (!metrics.byType[msgType]) {
 				metrics.byType[msgType] = {
 					enqueued: 0,
@@ -610,6 +652,8 @@ function transformMessageQueueMetrics(
 			metrics.processed += sample.value;
 
 			const msgType = sample.labels.message_type || "unknown";
+			if (!metrics.byType) metrics.byType = {};
+
 			if (!metrics.byType[msgType]) {
 				metrics.byType[msgType] = {
 					enqueued: 0,
@@ -660,6 +704,7 @@ function transformMessageQueueMetrics(
 			metrics.activeWorkers += sample.value;
 
 			const instId = sample.labels.instance_id;
+			if (!metrics.byInstance) metrics.byInstance = {};
 			if (instId && metrics.byInstance[instId]) {
 				metrics.byInstance[instId].workers = sample.value;
 			}
@@ -702,12 +747,16 @@ function transformMediaMetrics(
 		uploads: { total: 0, success: 0, failed: 0 },
 		avgDownloadMs: 0,
 		avgUploadMs: 0,
+		avgProcessingMs: 0,
 		totalDownloadBytes: 0,
 		totalUploadBytes: 0,
 		localStorageBytes: 0,
 		localStorageFiles: 0,
+		s3StorageBytes: 0,
+		s3StorageFiles: 0,
 		backlog: 0,
 		cleanupRuns: 0,
+		filesDeleted: 0,
 		cleanupDeletedBytes: 0,
 		byType: {},
 		byInstance: {},
@@ -733,11 +782,12 @@ function transformMediaMetrics(
 			}
 
 			const mediaType = sample.labels.media_type || "unknown";
+			if (!metrics.byType) metrics.byType = {};
+
 			if (!metrics.byType[mediaType]) {
 				metrics.byType[mediaType] = {
 					downloads: 0,
 					uploads: 0,
-					avgSizeBytes: 0,
 					failures: 0,
 				};
 			}
@@ -748,6 +798,8 @@ function transformMediaMetrics(
 
 			const instId = sample.labels.instance_id;
 			if (instId) {
+				if (!metrics.byInstance) metrics.byInstance = {};
+
 				if (!metrics.byInstance[instId]) {
 					metrics.byInstance[instId] = {
 						downloads: 0,
@@ -778,11 +830,12 @@ function transformMediaMetrics(
 			}
 
 			const mediaType = sample.labels.media_type || "unknown";
+			if (!metrics.byType) metrics.byType = {};
+
 			if (!metrics.byType[mediaType]) {
 				metrics.byType[mediaType] = {
 					downloads: 0,
 					uploads: 0,
-					avgSizeBytes: 0,
 					failures: 0,
 				};
 			}
@@ -790,6 +843,8 @@ function transformMediaMetrics(
 
 			const instId = sample.labels.instance_id;
 			if (instId) {
+				if (!metrics.byInstance) metrics.byInstance = {};
+
 				if (!metrics.byInstance[instId]) {
 					metrics.byInstance[instId] = {
 						downloads: 0,
@@ -1075,7 +1130,6 @@ function transformWorkerMetrics(
 		errors: {},
 		avgTaskDurationMs: {},
 		totalActive: 0,
-		totalErrors: 0,
 	};
 
 	// workers_active (gauge)
@@ -1096,7 +1150,6 @@ function transformWorkerMetrics(
 			const workerType = sample.labels.worker_type || "unknown";
 			metrics.errors[workerType] =
 				(metrics.errors[workerType] || 0) + sample.value;
-			metrics.totalErrors += sample.value;
 		}
 	}
 
@@ -1131,12 +1184,21 @@ function transformTransportMetrics(
 	instanceId?: string | null,
 ): TransportMetrics {
 	const metrics: TransportMetrics = {
+		totalMessages: 0,
 		totalDeliveries: 0,
-		successfulDeliveries: 0,
-		failedDeliveries: 0,
 		totalRetries: 0,
+		sent: 0,
+		received: 0,
+		failed: 0,
+		errors: 0,
+		avgLatencyMs: 0,
+		p50LatencyMs: 0,
+		p95LatencyMs: 0,
+		p99LatencyMs: 0,
 		successRate: 0,
 		avgDurationMs: 0,
+		successfulDeliveries: 0,
+		failedDeliveries: 0,
 		p50DurationMs: 0,
 		p95DurationMs: 0,
 		p99DurationMs: 0,
@@ -1167,12 +1229,19 @@ function transformTransportMetrics(
 			}
 
 			if (instId) {
+				if (!metrics.byInstance) metrics.byInstance = {};
+
 				if (!metrics.byInstance[instId]) {
 					metrics.byInstance[instId] = {
+						sent: 0,
+						received: 0,
+						failed: 0,
+						errors: 0,
+						avgLatencyMs: 0,
 						deliveries: 0,
 						success: 0,
-						failed: 0,
 						retries: 0,
+						errorRate: 0,
 						avgDurationMs: 0,
 					};
 				}
@@ -1207,6 +1276,7 @@ function transformTransportMetrics(
 			metrics.totalRetries += sample.value;
 
 			const instId = sample.labels.instance_id;
+			if (!metrics.byInstance) metrics.byInstance = {};
 			if (instId && metrics.byInstance[instId]) {
 				metrics.byInstance[instId].retries += sample.value;
 			}
@@ -1315,12 +1385,13 @@ function transformStatusCacheMetrics(
 			metrics.totalOperations += sample.value;
 
 			// By operation
+			if (!metrics.byOperation) metrics.byOperation = {};
+
 			if (!metrics.byOperation[operation]) {
 				metrics.byOperation[operation] = {
 					count: 0,
 					success: 0,
 					failed: 0,
-					avgDurationMs: 0,
 				};
 			}
 			metrics.byOperation[operation].count += sample.value;
@@ -1332,6 +1403,8 @@ function transformStatusCacheMetrics(
 
 			// By instance
 			if (instId) {
+				if (!metrics.byInstance) metrics.byInstance = {};
+
 				if (!metrics.byInstance[instId]) {
 					metrics.byInstance[instId] = {
 						size: 0,
@@ -1358,6 +1431,8 @@ function transformStatusCacheMetrics(
 
 			const instId = sample.labels.instance_id;
 			if (instId) {
+				if (!metrics.byInstance) metrics.byInstance = {};
+
 				if (!metrics.byInstance[instId]) {
 					metrics.byInstance[instId] = {
 						size: 0,
@@ -1383,6 +1458,7 @@ function transformStatusCacheMetrics(
 			metrics.totalHits += sample.value;
 
 			const instId = sample.labels.instance_id;
+			if (!metrics.byInstance) metrics.byInstance = {};
 			if (instId && metrics.byInstance[instId]) {
 				metrics.byInstance[instId].hits += sample.value;
 			}
@@ -1398,6 +1474,7 @@ function transformStatusCacheMetrics(
 			metrics.totalMisses += sample.value;
 
 			const instId = sample.labels.instance_id;
+			if (!metrics.byInstance) metrics.byInstance = {};
 			if (instId && metrics.byInstance[instId]) {
 				metrics.byInstance[instId].misses += sample.value;
 			}
@@ -1434,10 +1511,12 @@ function transformStatusCacheMetrics(
 			metrics.totalSuppressions += sample.value;
 
 			// By status type (read, delivered, played, sent)
+			if (!metrics.byStatusType) metrics.byStatusType = {};
 			metrics.byStatusType[statusType] =
 				(metrics.byStatusType[statusType] || 0) + sample.value;
 
 			// By instance
+			if (!metrics.byInstance) metrics.byInstance = {};
 			if (instId && metrics.byInstance[instId]) {
 				metrics.byInstance[instId].suppressions += sample.value;
 			}
@@ -1456,10 +1535,12 @@ function transformStatusCacheMetrics(
 			metrics.totalFlushed += sample.value;
 
 			// By trigger (manual, ttl, shutdown)
+			if (!metrics.byTrigger) metrics.byTrigger = {};
 			metrics.byTrigger[trigger] =
 				(metrics.byTrigger[trigger] || 0) + sample.value;
 
 			// By instance
+			if (!metrics.byInstance) metrics.byInstance = {};
 			if (instId && metrics.byInstance[instId]) {
 				metrics.byInstance[instId].flushed += sample.value;
 			}
@@ -1526,10 +1607,8 @@ function transformStatusCacheMetrics(
 		for (const [operation, durations] of Object.entries(
 			operationDurations,
 		)) {
-			if (metrics.byOperation[operation] && durations.count > 0) {
-				metrics.byOperation[operation].avgDurationMs =
-					(durations.sum / durations.count) * 1000;
-			}
+			// Note: avgDurationMs is not part of the byOperation interface
+			// It's calculated at the top level only
 		}
 	}
 

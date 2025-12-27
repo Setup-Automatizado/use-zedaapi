@@ -47,7 +47,7 @@ export function SystemTab({ metrics, workers, isLoading = false }: SystemTabProp
 			displayName: info?.name || getDisplayName(instanceId),
 			phone: info?.phone,
 			avatarUrl: info?.avatarUrl,
-			state,
+			state: state as CircuitBreakerState,
 		};
 	});
 

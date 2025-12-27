@@ -409,7 +409,7 @@ export function StatusCacheTab({
 						value:
 							metrics && metrics.totalOperations > 0
 								? Math.min(
-										(Object.values(metrics.byOperation).reduce(
+										(Object.values(metrics.byOperation ?? {}).reduce(
 											(acc, op) => acc + op.failed,
 											0,
 										) /
