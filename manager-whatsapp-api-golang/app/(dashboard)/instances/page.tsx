@@ -10,6 +10,12 @@
 import { AlertCircle, Smartphone } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import * as React from "react";
+import { toast } from "sonner";
+import {
+	deleteInstance,
+	disconnectInstance,
+	restartInstance,
+} from "@/actions";
 import {
 	CreateInstanceButton,
 	InstanceCard,
@@ -30,6 +36,7 @@ import {
 import { useInstancesWithDevice } from "@/hooks/use-instances-with-device";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import type { Instance } from "@/types";
+import { isError } from "@/types";
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -49,7 +56,7 @@ export default function InstancesPage() {
 	});
 
 	// Fetch instances with filters and device info
-	const { instances, deviceMap, pagination, isLoading, error } =
+	const { instances, deviceMap, pagination, isLoading, error, mutate } =
 		useInstancesWithDevice(filters);
 
 	// Update URL params when filters change
@@ -82,18 +89,51 @@ export default function InstancesPage() {
 
 	// Handle instance actions
 	const handleRestart = async (instance: Instance) => {
-		// TODO: Implement restart action
-		console.log("Restart instance:", instance.id);
+		const result = await restartInstance(instance.id, instance.token);
+
+		if (isError(result)) {
+			toast.error("Erro ao reiniciar", {
+				description: result.error || "Erro desconhecido",
+			});
+			return;
+		}
+
+		toast.success("Instância reiniciada", {
+			description: `${instance.name} foi reiniciada com sucesso.`,
+		});
+		mutate();
 	};
 
 	const handleDisconnect = async (instance: Instance) => {
-		// TODO: Implement disconnect action
-		console.log("Disconnect instance:", instance.id);
+		const result = await disconnectInstance(instance.id, instance.token);
+
+		if (isError(result)) {
+			toast.error("Erro ao desconectar", {
+				description: result.error || "Erro desconhecido",
+			});
+			return;
+		}
+
+		toast.success("Instância desconectada", {
+			description: `${instance.name} foi desconectada com sucesso.`,
+		});
+		mutate();
 	};
 
 	const handleDelete = async (instance: Instance) => {
-		// TODO: Implement delete action with confirmation
-		console.log("Delete instance:", instance.id);
+		const result = await deleteInstance(instance.id);
+
+		if (isError(result)) {
+			toast.error("Erro ao deletar", {
+				description: result.error || "Erro desconhecido",
+			});
+			return;
+		}
+
+		toast.success("Instância deletada", {
+			description: `${instance.name} foi deletada permanentemente.`,
+		});
+		mutate();
 	};
 
 	// Show error state
