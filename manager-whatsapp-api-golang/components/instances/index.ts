@@ -30,10 +30,20 @@ export { InstanceOverview } from "./instance-overview";
 export type { InstanceSettingsFormProps } from "./instance-settings-form";
 // Settings components
 export { InstanceSettingsForm } from "./instance-settings-form";
+export type { InstanceStatisticsProps } from "./instance-statistics";
+export { InstanceStatistics } from "./instance-statistics";
 export type { InstanceStatusBadgeProps } from "./instance-status-badge";
 export { InstanceStatusBadge } from "./instance-status-badge";
 export type { InstanceTableProps } from "./instance-table";
 export { InstanceTable } from "./instance-table";
+export type { MessageTestFormProps } from "./message-test-form";
+export { MessageTestForm } from "./message-test-form";
+export type { QueueStatusCardProps } from "./queue-status-card";
+export { QueueStatusCard } from "./queue-status-card";
+export type { SubscriptionManagementProps } from "./subscription-management";
+export { SubscriptionManagement } from "./subscription-management";
+export type { TokenDisplayProps } from "./token-display";
+export { TokenDisplay } from "./token-display";
 export type { WebhookConfigFormProps } from "./webhook-config-form";
 // Webhook configuration components
 export { WebhookConfigForm } from "./webhook-config-form";
