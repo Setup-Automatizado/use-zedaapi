@@ -1,11 +1,25 @@
 "use client";
 
-import { ArrowLeft, Settings, Webhook } from "lucide-react";
+import {
+	ArrowLeft,
+	BarChart3,
+	Check,
+	Copy,
+	Key,
+	Settings,
+	TestTube,
+	Webhook,
+} from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { use, useEffect, useState } from "react";
+import { toast } from "sonner";
 import {
 	InstanceOverview,
 	InstanceSettingsForm,
+	InstanceStatistics,
+	MessageTestForm,
+	SubscriptionManagement,
+	TokenDisplay,
 	WebhookConfigForm,
 } from "@/components/instances";
 import { PageHeader } from "@/components/shared/page-header";
@@ -20,7 +34,7 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useInstance, useInstanceStatus } from "@/hooks";
+import { useClientToken, useInstance, useInstanceStatus } from "@/hooks";
 import type { DeviceInfo } from "@/types";
 
 interface InstancePageProps {
@@ -32,10 +46,10 @@ export default function InstancePage({ params }: InstancePageProps) {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const tabParam = searchParams.get("tab");
-	const validTabs = ["overview", "webhooks", "settings"];
+	const validTabs = ["overview", "statistics", "tokens", "webhooks", "settings"];
 	const defaultTab =
 		tabParam && validTabs.includes(tabParam) ? tabParam : "overview";
-	const { instance, isLoading, error } = useInstance(resolvedParams.id);
+	const { instance, isLoading, error, mutate } = useInstance(resolvedParams.id);
 	const { isConnected, smartphoneConnected } = useInstanceStatus(
 		resolvedParams.id,
 		{
@@ -43,8 +57,35 @@ export default function InstancePage({ params }: InstancePageProps) {
 			interval: 5000,
 		},
 	);
+	const { clientToken } = useClientToken();
 
 	const [deviceInfo, setDeviceInfo] = useState<DeviceInfo | undefined>();
+	const [isCurlCopied, setIsCurlCopied] = useState(false);
+
+	// Copy cURL command to clipboard
+	const handleCopyCurl = async () => {
+		const curlCommand = `curl -X POST \\
+  ${process.env.NEXT_PUBLIC_WHATSAPP_API_URL}/instances/${instance?.id}/token/${instance?.instanceToken}/send-text \\
+  -H "Content-Type: application/json" \\
+  -H "Client-Token: ${clientToken}" \\
+  -d '{
+    "phone": "5511999999999",
+    "message": "Hello from WhatsApp API!"
+  }'`;
+
+		try {
+			await navigator.clipboard.writeText(curlCommand);
+			setIsCurlCopied(true);
+			toast.success("cURL command copied!", {
+				description: "The command has been copied to your clipboard.",
+			});
+			setTimeout(() => setIsCurlCopied(false), 2000);
+		} catch (error) {
+			toast.error("Failed to copy", {
+				description: "Could not copy the cURL command.",
+			});
+		}
+	};
 
 	// Determine if we should fetch device info
 	const shouldFetchDeviceInfo = Boolean(
@@ -133,6 +174,18 @@ export default function InstancePage({ params }: InstancePageProps) {
 			<Tabs defaultValue={defaultTab} className="w-full">
 				<TabsList>
 					<TabsTrigger value="overview">Overview</TabsTrigger>
+					<TabsTrigger value="statistics">
+						<BarChart3 className="mr-2 h-4 w-4" />
+						Statistics
+					</TabsTrigger>
+					<TabsTrigger value="tokens">
+						<Key className="mr-2 h-4 w-4" />
+						Tokens
+					</TabsTrigger>
+					<TabsTrigger value="test">
+						<TestTube className="mr-2 h-4 w-4" />
+						Test
+					</TabsTrigger>
 					<TabsTrigger value="webhooks">
 						<Webhook className="mr-2 h-4 w-4" />
 						Webhooks
@@ -144,11 +197,89 @@ export default function InstancePage({ params }: InstancePageProps) {
 				</TabsList>
 
 				<TabsContent value="overview" className="mt-6">
-					<InstanceOverview
-						instance={instance}
-						deviceInfo={deviceInfo}
-						isConnected={isConnected}
-						smartphoneConnected={smartphoneConnected}
+					<div className="space-y-6">
+						<InstanceOverview
+							instance={instance}
+							deviceInfo={deviceInfo}
+							isConnected={isConnected}
+							smartphoneConnected={smartphoneConnected}
+						/>
+
+						<SubscriptionManagement instance={instance} onUpdate={mutate} />
+					</div>
+				</TabsContent>
+
+				<TabsContent value="statistics" className="mt-6">
+					<InstanceStatistics instance={instance} />
+				</TabsContent>
+
+				<TabsContent value="tokens" className="mt-6">
+					<div className="space-y-6">
+						<Card>
+							<CardHeader>
+								<CardTitle>Authentication Tokens</CardTitle>
+								<CardDescription>
+									Use these tokens to authenticate API requests for this
+									instance.
+								</CardDescription>
+							</CardHeader>
+							<CardContent className="space-y-6">
+								<TokenDisplay
+									label="Instance Token"
+									token={instance.token}
+									description="Instance-specific authentication token"
+								/>
+
+								<TokenDisplay
+									label="Client Token"
+									token={clientToken}
+									description="Global client authentication token (same for all instances)"
+								/>
+							</CardContent>
+						</Card>
+
+						<Card>
+							<CardHeader className="flex flex-row items-center justify-between">
+								<div>
+									<CardTitle>Usage Example</CardTitle>
+									<CardDescription>
+										Example cURL request to send a text message
+									</CardDescription>
+								</div>
+								<Button
+									variant="outline"
+									size="icon"
+									onClick={handleCopyCurl}
+									title="Copy cURL command"
+								>
+									{isCurlCopied ? (
+										<Check className="h-4 w-4 text-green-600" />
+									) : (
+										<Copy className="h-4 w-4" />
+									)}
+								</Button>
+							</CardHeader>
+							<CardContent>
+								<pre className="rounded-lg bg-muted p-4 text-sm overflow-x-auto">
+									<code>{`curl -X POST \\
+  ${process.env.NEXT_PUBLIC_WHATSAPP_API_URL}/instances/${instance.id}/token/${instance.instanceToken}/send-text \\
+  -H "Content-Type: application/json" \\
+  -H "Client-Token: ${clientToken}" \\
+  -d '{
+    "phone": "5511999999999",
+    "message": "Hello from WhatsApp API!"
+  }'`}</code>
+								</pre>
+							</CardContent>
+						</Card>
+					</div>
+				</TabsContent>
+
+				<TabsContent value="test" className="mt-6">
+					<MessageTestForm
+						instanceId={instance.id}
+						instanceToken={instance.instanceToken}
+						clientToken={clientToken}
 					/>
 				</TabsContent>
 
