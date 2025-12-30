@@ -55,7 +55,7 @@ export async function updateWebhook(
 
 	const body: WebhookUpdateRequest = { value: url };
 
-	return api.post<WebhookUpdateResponse>(endpoint, body, {
+	return api.put<WebhookUpdateResponse>(endpoint, body, {
 		instanceId,
 		instanceToken,
 	});
@@ -74,7 +74,7 @@ export async function updateAllWebhooks(
 	instanceToken: string,
 	settings: AllWebhooksUpdateRequest,
 ): Promise<WebhookUpdateResponse> {
-	return api.post<WebhookUpdateResponse>("/update-every-webhooks", settings, {
+	return api.put<WebhookUpdateResponse>("/update-every-webhooks", settings, {
 		instanceId,
 		instanceToken,
 	});
@@ -96,7 +96,7 @@ export async function updateNotifySentByMe(
 ): Promise<{ value: boolean }> {
 	const body: NotifySentByMeRequest = { notifySentByMe: enabled };
 
-	return api.post<{ value: boolean }>("/update-notify-sent-by-me", body, {
+	return api.put<{ value: boolean }>("/update-notify-sent-by-me", body, {
 		instanceId,
 		instanceToken,
 	});
