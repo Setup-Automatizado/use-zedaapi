@@ -7,7 +7,7 @@ title: Edit description
 
 #### /update-community-description
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/update-community-description
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/update-community-description
 
 ### Header
 
@@ -89,4 +89,4 @@ Link to webhook response (on receipt)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/update-community-description.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/update-community-description.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

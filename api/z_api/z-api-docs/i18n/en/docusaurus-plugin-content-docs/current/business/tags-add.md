@@ -7,7 +7,7 @@ title: Assigning labels to a chat.
 
 #### /chats/{phone}/tags/{tag}/add
 
-`PUT` https://api.z-api.io/instances/{{instanceId}}/token/{{instanceToken}}/chats/{phone}/tags/{tag}/add
+`PUT` https://api.funnelchat/instances/{{instanceId}}/token/{{instanceToken}}/chats/{phone}/tags/{tag}/add
 
 ### Header
 

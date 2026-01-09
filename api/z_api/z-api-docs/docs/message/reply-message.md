@@ -7,7 +7,7 @@ title: Responder mensagem
 
 #### /send-text
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/send-text
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/send-text
 
 ### Header
 
@@ -56,7 +56,7 @@ Caso tenha qualquer dúvida sobre como enviar uma mensagem de texto, você pode 
 ```json
 {
   "phone": "5511999999999",
-  "message": "Welcome to *Z-API*",
+  "message": "Welcome to *FUNNELCHAT*",
   "messageId": "3999984263738042930CD6ECDE9VDWSA"
 }
 ```
@@ -64,7 +64,7 @@ Caso tenha qualquer dúvida sobre como enviar uma mensagem de texto, você pode 
 ```json
 {
   "phone": "342532456234453-group",
-  "message": "Welcome to *Z-API*",
+  "message": "Welcome to *FUNNELCHAT*",
   "messageId": "3999984263738042930CD6ECDE9VDWSA",
   "privateAnswer": true
 }
@@ -78,7 +78,7 @@ Caso tenha qualquer dúvida sobre como enviar uma mensagem de texto, você pode 
 
 | Atributos | Tipo   | Descrição      |
 | :-------- | :----- | :------------- |
-| zaapId    | string | id no z-api    |
+| zaapId    | string | id no funnelchat    |
 | messageId | string | id no whatsapp |
 | id | string | Adicionado para compatibilidade com zapier, ele tem o mesmo valor do messageId |
 
@@ -110,4 +110,4 @@ Link para a response do webhook (ao receber)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/reply-message.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/reply-message.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

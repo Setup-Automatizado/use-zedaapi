@@ -12,7 +12,7 @@ Este método te permite descobrir se sua instância está ou não conectada a um
 
 #### /Status
 
-`GET` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/status
+`GET` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/status
 
 ### Header
 
@@ -27,7 +27,7 @@ Este método te permite descobrir se sua instância está ou não conectada a um
 
 | Atributos | Tipo | Descrição |
 | :-- | :-: | :-- |
-| connected | boolean | Indica se seu número está conectado ao Z-API |
+| connected | boolean | Indica se seu número está conectado ao FUNNELCHAT |
 | error | string | Informa detalhes caso algum dos atributos não esteja true - 'You are already connected.' - 'You need to restore the session.' - 'You are not connected.' |
 | smartphoneConnected | boolean | Indica se o celular está conectado à internet |
 
@@ -35,4 +35,4 @@ Este método te permite descobrir se sua instância está ou não conectada a um
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/instance-status.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/instance-status.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

@@ -7,7 +7,7 @@ title: Get chats
 
 #### /chats
 
-`GET` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/chats
+`GET` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/chats
 
 ### Header
 
@@ -46,7 +46,7 @@ This method is responsible for returning all of your chats
 
 Method 
 
-`GET` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/chats
+`GET` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/chats
 
 ---
 
@@ -70,7 +70,7 @@ Example
 ```json
 [
   {
-    "name": "Z-API SUPORTE",
+    "name": "FUNNELCHAT SUPORTE",
     "phone": "5511999999999",
     "unread": "0",
     "lastMessageTime": "1622991687",
@@ -104,4 +104,4 @@ In case you receive 415 error, make sure to add the “Content-Type” of the ob
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/get-chats.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/get-chats.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

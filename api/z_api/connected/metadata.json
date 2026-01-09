@@ -17,7 +17,7 @@
       "headers.origin",
       "headers.server",
       "headers.user-agent",
-      "headers.z-api-token",
+      "headers.funnelchat-token",
       "body",
       "body.type",
       "body.connected",
@@ -43,10 +43,10 @@
           "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
           "upgrade": "h2c",
           "content-type": "application/json",
-          "origin": "https://api.z-api.io",
-          "server": "Z-API",
+          "origin": "https://api.funnelchat",
+          "server": "FUNNELCHAT",
           "user-agent": "Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:111.0) Gecko/20100101 Firefox/111.0",
-          "z-api-token": "0B039DE5C908EDAF88346CED"
+          "funnelchat-token": "0B039DE5C908EDAF88346CED"
         },
         "body": {
           "type": "ConnectedCallback",
@@ -71,10 +71,10 @@
             "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
             "upgrade": "h2c",
             "content-type": "application/json",
-            "origin": "https://api.z-api.io",
-            "server": "Z-API",
+            "origin": "https://api.funnelchat",
+            "server": "FUNNELCHAT",
             "user-agent": "Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:111.0) Gecko/20100101 Firefox/111.0",
-            "z-api-token": "0B039DE5C908EDAF88346CED"
+            "funnelchat-token": "0B039DE5C908EDAF88346CED"
           }
         ],
         "children": {
@@ -131,7 +131,7 @@
             "type": "string",
             "optional": false,
             "examples": [
-              "https://api.z-api.io"
+              "https://api.funnelchat"
             ]
           },
           "server": {
@@ -139,7 +139,7 @@
             "type": "string",
             "optional": false,
             "examples": [
-              "Z-API"
+              "FUNNELCHAT"
             ]
           },
           "user-agent": {
@@ -150,8 +150,8 @@
               "Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:111.0) Gecko/20100101 Firefox/111.0"
             ]
           },
-          "z-api-token": {
-            "path": "headers.z-api-token",
+          "funnelchat-token": {
+            "path": "headers.funnelchat-token",
             "type": "string",
             "optional": false,
             "examples": [

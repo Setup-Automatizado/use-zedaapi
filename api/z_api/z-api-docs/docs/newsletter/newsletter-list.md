@@ -7,7 +7,7 @@ title: Listar canais
 
 #### /newsletter
 
-`GET` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/newsletter
+`GET` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/newsletter
 
 ### Header
 
@@ -25,7 +25,7 @@ Este método retorna uma lista com o metadata dos canais próprios e seguidos co
 
 ## URL
 
-`GET` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/newsletter
+`GET` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/newsletter
 
 
 ---
@@ -64,8 +64,8 @@ Object (viewMetadata)
       "id": "999999999999999999@newsletter",
       "creationTime": "1695643504",
       "state": "ACTIVE",
-      "name": "Z-API",
-      "description": "Canal oficial Z-API",
+      "name": "FUNNELCHAT",
+      "description": "Canal oficial FUNNELCHAT",
       "subscribersCount": "123",
       "inviteLink": "https://www.whatsapp.com/channel/0029Va5Xk71a",
       "verification": "VERIFIED",
@@ -114,4 +114,4 @@ Link para a response do webhook (ao receber)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/get-newsletter-list.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/get-newsletter-list.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

@@ -7,7 +7,7 @@ title: Respond to a poll
 
 #### /send-poll
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-poll-vote
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-poll-vote
 
 ### Header
 
@@ -51,7 +51,7 @@ In this method, you can vote in a specific poll.
   "phone": "5511999999999",
   "pollMessageId": "Poll message ID",
   "pollVote": [
-    {"name": "Z-API"}
+    {"name": "FUNNELCHAT"}
   ]
 }
 ```
@@ -64,7 +64,7 @@ In this method, you can vote in a specific poll.
 
 | Attributes | Type   | Description      |
 | :-------- | :----- | :------------- |
-| zaapId    | string | id on z-api    |
+| zaapId    | string | id on funnelchat    |
 | messageId | string | id on whatsapp |
 
 Example 
@@ -96,4 +96,4 @@ Webhook response link (upon receiving)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/send-poll-vote.json&targets=all" frameBorder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/send-poll-vote.json&targets=all" frameBorder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

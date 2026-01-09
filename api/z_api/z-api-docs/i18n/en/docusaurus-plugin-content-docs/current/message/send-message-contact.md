@@ -7,7 +7,7 @@ title: Send contact
 
 #### /send-contact
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-contact
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-contact
 
 ### Header
 
@@ -51,7 +51,7 @@ Simple and object, this method allows you to send a contact. You don't need to h
 ```json
 {
   "phone": "5511999999999",
-  "contactName": "Z-API Contato",
+  "contactName": "FUNNELCHAT Contato",
   "contactPhone": "554498398733"
 }
 ```
@@ -64,7 +64,7 @@ Simple and object, this method allows you to send a contact. You don't need to h
 
 | Attributes | Type   | Description       |
 | :-------- | :----- | :------------- |
-| zaapId    | string | id on z-api    |
+| zaapId    | string | id on funnelchat    |
 | messageId | string | id on whatsapp |
 
 Example 
@@ -96,4 +96,4 @@ Link for webhooks response (upon receiving)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/send-contact.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/send-contact.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

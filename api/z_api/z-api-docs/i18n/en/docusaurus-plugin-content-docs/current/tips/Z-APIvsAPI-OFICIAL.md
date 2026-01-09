@@ -1,9 +1,9 @@
 ---
-id: Z-APIvsAPI-OFICIAL
-title: Z-API vs API Oficial
+id: FUNNELCHATvsAPI-OFICIAL
+title: FUNNELCHAT vs API Oficial
 ---
 
-## As Diferenças do Z-API e o WhatsApp Business API.
+## As Diferenças do FUNNELCHAT e o WhatsApp Business API.
 
 Which is best for you for you? 
 
@@ -13,9 +13,9 @@ Mainly in this case we are talking about a company with multiple solutions in th
 
 With time, these companies are becoming more conscious of how using an API like this could make for an easier time getting the business started, not to mention the numerous business possibilities.
 
-We all know just how big this market is, but let’s go deeper into the numbers. Beyond being the most used messaging in the world with its 1,7 billion users today, the majority of business happens in the tool. A few of the reasons why tons of businesses are using this is because the user could center everything in just one channel. This means more practicality, agility to manage your business in one place and bring your contacts closer. Companies started to surge in the market offering their APIs to work with WhatsApp. As a rule, they all work on the basis of WhatsApp WEB protocol and of course Z-API also provides WhatsApp API. We developed our solution in 2019. As soon as we integrated with a Brazilian solution, soon came numerous DEV’s and business partners from all over the world to also begin the integration process with us. 
+We all know just how big this market is, but let’s go deeper into the numbers. Beyond being the most used messaging in the world with its 1,7 billion users today, the majority of business happens in the tool. A few of the reasons why tons of businesses are using this is because the user could center everything in just one channel. This means more practicality, agility to manage your business in one place and bring your contacts closer. Companies started to surge in the market offering their APIs to work with WhatsApp. As a rule, they all work on the basis of WhatsApp WEB protocol and of course FUNNELCHAT also provides WhatsApp API. We developed our solution in 2019. As soon as we integrated with a Brazilian solution, soon came numerous DEV’s and business partners from all over the world to also begin the integration process with us. 
 
-We always make very clear the purpose of our solution and we have carried it with us everywhere, “Z-API wings for your imagination”. We want to give possibilities to DEV’s, technological solutions and software houses to develop extraordinary products and businesses with the best technology on the market, Quality service and a Brazilian solution that you pay in REAL that gives you the liberty to create
+We always make very clear the purpose of our solution and we have carried it with us everywhere, “FUNNELCHAT wings for your imagination”. We want to give possibilities to DEV’s, technological solutions and software houses to develop extraordinary products and businesses with the best technology on the market, Quality service and a Brazilian solution that you pay in REAL that gives you the liberty to create
 
 In 2017, WhatsApp opened access to its official API. In the beginning, WhatsApp official was tested behind closed doors and only a handful of global companies could get their hands on it. However with time, more and more organizations obtained access to WhatsApp’s official API. 
 
@@ -56,14 +56,14 @@ Depending on which program  your app is integrated, it is possible to extract im
 
 According to some WhatsApp statistics, the messenger blocks around 2.000.000 users per month who violate WhatsApp’s terms and agreement. 
 
-However this doesn’t mean that non official API’s are irresponsible with their clients. For example, Z-API for the users security provides clients with individual IP,  executes secure authorization and has a system of artificial protectors, like a queue to send messages to prevent sending messages en masse and protecting them from being banned.
+However this doesn’t mean that non official API’s are irresponsible with their clients. For example, FUNNELCHAT for the users security provides clients with individual IP,  executes secure authorization and has a system of artificial protectors, like a queue to send messages to prevent sending messages en masse and protecting them from being banned.
 
-Also, there are systems that emulate a telephone in a computer so that the work doesn’t depend on a physical device. Of course, these methods won’t work if the user neglects the rules for working with clients on WhatsApp and sends spam. Even with the official API, it is still possible to be banned for violating the politics of WhatsApp. However, if you combine the tools of security from Z-API with use within the recommendations of WhatsApp you will be much more secure.
+Also, there are systems that emulate a telephone in a computer so that the work doesn’t depend on a physical device. Of course, these methods won’t work if the user neglects the rules for working with clients on WhatsApp and sends spam. Even with the official API, it is still possible to be banned for violating the politics of WhatsApp. However, if you combine the tools of security from FUNNELCHAT with use within the recommendations of WhatsApp you will be much more secure.
 
-After analyzing the main points, you can go straight to what is the most interesting part, that is the analysis. Comparing which of the two solutions suits you best with WhatsApp. Let’s start with the benefits of Z-API: 
+After analyzing the main points, you can go straight to what is the most interesting part, that is the analysis. Comparing which of the two solutions suits you best with WhatsApp. Let’s start with the benefits of FUNNELCHAT: 
 ### Comparative
 
-| Z-API | Business Api |
+| FUNNELCHAT | Business Api |
 | :-- | :-- |
 | Works with any number, either personal or an already existing commercial line | Only works with new dedicated numbers |
 | You can start working immediately after registering your number, however it is important that you follow our recommendations. | The number must be working for at least 3-4 weeks before you can connect |

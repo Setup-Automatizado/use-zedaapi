@@ -7,7 +7,7 @@ title: Número com WhatsApp ?
 
 #### /phone-exists
 
-`GET` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/phone-exists
+`GET` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/phone-exists
 
 ### Header
 
@@ -23,9 +23,9 @@ Este método retorna se o número tem ou não WhatsApp.
 :::important Importante
 
 Utilize essa API sempre que quiser verificar se um número possui WhatsApp, geralmente para validação de formulários.
-Não utilize essa API caso queira fazer uma verificação antes de enviar uma mensagem, pois o Z-API já valida a existência do número a cada mensagem enviada.
+Não utilize essa API caso queira fazer uma verificação antes de enviar uma mensagem, pois o FUNNELCHAT já valida a existência do número a cada mensagem enviada.
 A utilização desse método para esse fim, pode gerar problemas, visto que a verificação ficaria duplicada. 
-Z-API não foi desenvolvido para dissiminação de spam para contatos que você não conhece, utilize com sabedoria!
+FUNNELCHAT não foi desenvolvido para dissiminação de spam para contatos que você não conhece, utilize com sabedoria!
 
 :::
 
@@ -53,7 +53,7 @@ Z-API não foi desenvolvido para dissiminação de spam para contatos que você 
 
 Método
 
-`GET` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/phone-exists/5511999999999
+`GET` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/phone-exists/5511999999999
 
 ---
 
@@ -87,4 +87,4 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/get-iswhatsapp.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/get-iswhatsapp.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

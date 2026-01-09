@@ -7,7 +7,7 @@ title: Pegar metadata do contato
 
 #### /contacts/{phone}
 
-`GET` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/contacts/{phone}
+`GET` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/contacts/{phone}
 
 ### Header
 
@@ -50,7 +50,7 @@ Se você pretente armazenar a imagem do seu contato observe que sempre retornamo
 
 Método
 
-`GET` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/contacts/5511999999999
+`GET` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/contacts/5511999999999
 
 ---
 
@@ -91,4 +91,4 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/get-metadata-contact.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/get-metadata-contact.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

@@ -13,7 +13,7 @@ export interface ZApiPresenceChatRecording {
     origin?: string;
     server?: string;
     'user-agent'?: string;
-    'z-api-token'?: string;
+    'funnelchat-token'?: string;
   };
   body?: {
     type?: string;

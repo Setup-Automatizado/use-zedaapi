@@ -7,7 +7,7 @@ title: Criar/editar Produto
 
 #### /products
 
-`POST` https://api.z-api.io/instances/{{instanceId}}/token/{{instanceToken}}/products
+`POST` https://api.funnelchat/instances/{{instanceId}}/token/{{instanceToken}}/products
 
 ### Header
 
@@ -36,7 +36,7 @@ Nesse método você será capaz de cadastrar e atualizar um produto no seu catá
 | price       | integer | Preço do produto                               |
 | salePrice   | integer | Preço promocional                              |
 | retailerId  | string  | Id do produto                                  |
-| url         | string  | Url da rota do z-api                           |
+| url         | string  | Url da rota do funnelchat                           |
 
 ## Request Body
 
@@ -50,7 +50,7 @@ Nesse método você será capaz de cadastrar e atualizar um produto no seu catá
   "price": 20,
   "salePrice": 18,
   "retailerId": "002",
-  "url": "https://z-api.io"
+  "url": "https://funnelchat"
 }
 ```
 
@@ -92,4 +92,4 @@ Link para a response do webhook (ao receber)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/edit-product.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/edit-product.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

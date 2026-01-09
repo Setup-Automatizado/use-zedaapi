@@ -7,7 +7,7 @@ title: Mencionar grupo
 
 #### /send-text
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/send-text
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/send-text
 
 ### Header
 
@@ -55,11 +55,11 @@ Este método é responsável por fazer a menção de grupos relacionados a uma c
 ```json
 {
   "phone": "5511999999999-group",
-  "message": "Welcome to *Z-API group* @1203634230225498-group",
+  "message": "Welcome to *FUNNELCHAT group* @1203634230225498-group",
   "groupMentioned": [
     {
       "phone": "1203634230225498-group",
-      "subject": "Z-API subgroup"
+      "subject": "FUNNELCHAT subgroup"
     }
   ]
 }
@@ -77,7 +77,7 @@ Também é possível mencionar participantes na mensagem juntamente com a menç�
 
 | Atributos | Tipo   | Descrição      |
 | :-------- | :----- | :------------- |
-| zaapId    | string | id no z-api    |
+| zaapId    | string | id no funnelchat    |
 | messageId | string | id no whatsapp |
 | id | string | Adicionado para compatibilidade com zapier, ele tem o mesmo valor do messageId |
 
@@ -111,4 +111,4 @@ Link para a response do webhook (ao receber)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/send-text.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/send-text.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

@@ -2543,7 +2543,7 @@ CREATE TABLE IF NOT EXISTS event_outbox (
     event_type VARCHAR(50) NOT NULL,
     source_lib VARCHAR(20) NOT NULL DEFAULT 'whatsmeow',
 
-    -- Event data (Z-API compatible)
+    -- Event data
     payload JSONB NOT NULL,
     metadata JSONB,
 
@@ -4105,7 +4105,7 @@ PARTNER_TOKEN=secret_token_here
 
 ### 10.5. Z-API Compatibility
 
-**Target**: 200+ endpoints compatible with Z-API specification
+**Target**: 200+ endpoints
 
 **Endpoint Mapping**:
 ```
@@ -4116,7 +4116,7 @@ PUT  /instances/{id}/token/{token}/update-webhook-delivery
 ...
 ```
 
-**Response Format** (Z-API compatible):
+**Response Format**:
 ```json
 {
   "connected": true,

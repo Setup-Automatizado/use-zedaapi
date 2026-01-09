@@ -7,7 +7,7 @@ title: Fila
 
 #### /queue
 
-`GET` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/queue
+`GET` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/queue
 
 ### Header
 
@@ -45,11 +45,11 @@ Este método é responsável por retornar todas mensagens que estão em sua fila
 
 Método
 
-`GET` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/queue?page=1&pageSize=100
+`GET` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/queue?page=1&pageSize=100
 
  ou
 
-`GET` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/queue/count
+`GET` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/queue/count
 
 
 ---
@@ -66,13 +66,13 @@ Array Messages
 
 | Atributos    | Tipo     | Descrição                   |
 | :----------  | :------- | :-------------------------- |
-| _id          | string   | ID da mensagem no Z-API     |
+| _id          | string   | ID da mensagem no FUNNELCHAT     |
 | DelayMessage | string   | Tempo em segundos entre o envio das mensagens |
 | Message      | string   | Texto da Mensagem           |
 | IsTrial      | boolean  | Indica se a instância está utilizando trial   |
 | InstanceId   | string   | ID da instância             |
 | Phone        | string   | Número do destinatário      |
-| ZaapId       | string   | ID da mensagem no Z-API     |
+| ZaapId       | string   | ID da mensagem no FUNNELCHAT     |
 | DelayTyping  | string   | Duração do indicador do chat "digitando..."   |
 | MessageId    | string   | ID da mensagem              |
 | Created      | timetamp | Data da mensagem            |
@@ -123,4 +123,4 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/get-queue.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/get-queue.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

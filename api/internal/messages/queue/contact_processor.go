@@ -46,7 +46,7 @@ func (p *ContactProcessor) Process(ctx context.Context, client *wameow.Client, a
 	}
 
 	// Build vCard (contact card)
-	// If VCard is provided directly (Z-API format), use it
+	// If VCard is provided directly, use it
 	// Otherwise, build from individual fields
 	var vcard string
 	var displayName string

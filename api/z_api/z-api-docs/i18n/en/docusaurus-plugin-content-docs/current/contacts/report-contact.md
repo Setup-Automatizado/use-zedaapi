@@ -7,7 +7,7 @@ title: Report Contact
 
 #### /contacts/{{phone}}/report
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/contacts/{{phone}}/report
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/contacts/{{phone}}/report
 
 ### Header
 
@@ -39,7 +39,7 @@ This method is responsible for reporting a contact.
 
 Method
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/contacts/5544999999999/report
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/contacts/5544999999999/report
 
 ---
 
@@ -80,4 +80,4 @@ If you receive a 415 error, make sure to add the "Content-Type" header to the re
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/report-contact.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/report-contact.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

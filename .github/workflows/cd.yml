@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  GO_VERSION: '1.25'
+  GO_VERSION: "1.25"
   DOCKER_IMAGE_NAME: whatsapp-api-golang
 
 jobs:
@@ -43,7 +43,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 'lts/*'
+          node-version: "lts/*"
 
       - name: Install semantic-release dependencies
         run: |
@@ -144,7 +144,7 @@ jobs:
             type=sha,prefix={{branch}}-
           labels: |
             org.opencontainers.image.title=WhatsApp API
-            org.opencontainers.image.description=WhatsApp Web Multi-device API with Z-API compatibility
+            org.opencontainers.image.description=WhatsApp Web Multi-device API
             org.opencontainers.image.version=${{ steps.version.outputs.VERSION }}
             org.opencontainers.image.revision=${{ github.sha }}
 

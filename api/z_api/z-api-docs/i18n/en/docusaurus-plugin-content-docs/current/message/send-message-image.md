@@ -7,7 +7,7 @@ title: Sending Image
 
 #### /send-image
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-image
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-image
 
 ### Header
 
@@ -78,7 +78,7 @@ In this [link] you can find everything that you need to know about formatting an
 ```json
 {
   "phone": "5511999999999",
-  "image": "https://www.z-api.io/wp-content/themes/z-api/dist/images/logo.svg",
+  "image": "https://www.funnelchat/wp-content/themes/funnelchat/dist/images/logo.svg",
   "caption": "Logo",
   "viewOnce": false
 }
@@ -102,7 +102,7 @@ In this [link] you can find everything that you need to know about formatting an
 
 | Attributes | Type  | Description    |
 | :-------- | :----- | :------------- |
-| zaapId    | string | id on z-api   |
+| zaapId    | string | id on funnelchat   |
 | messageId | string | id on whatsapp |
 
 Example
@@ -134,4 +134,4 @@ Link for webhooks response (upon receiving)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/send-image.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/send-image.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

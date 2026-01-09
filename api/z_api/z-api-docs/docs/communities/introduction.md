@@ -9,7 +9,7 @@ O WhatsApp agora oferece a funcionalidade de Comunidades, que permite aos usuár
 
 Para exemplificar como funciona a estrutura de comunidades, veja a imagem abaixo:
 
-<img src="https://raw.githubusercontent.com/Z-API/z-api-docs/main/img/communities.png" />
+<img src="https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/img/communities.png" />
 
 
 **Observações:**
@@ -31,11 +31,11 @@ Primeiro é importante verificar se o aplicativo do whatsapp do seu celular já 
 
 #### 2. Consigo listar as comunidades que faço parte?
 
-Sim, o Z-API disponibiliza os métodos para que você consiga saber quais comunidades você faz parte, veja a documentação de como <a href="/communities/list-communities">listar suas comunidades.</a>
+Sim, o FUNNELCHAT disponibiliza os métodos para que você consiga saber quais comunidades você faz parte, veja a documentação de como <a href="/communities/list-communities">listar suas comunidades.</a>
 
 #### 3. Consigo vincular e desvincular grupos a uma comunidade?
 
-Com certeza! o Z-API te entrega outras duas APIs para que você consiga gerenciar os grupos de uma comunidade, veja como <a href="/communities/link-groups">vincular grupos</a> ou <a href="/communities/unlink-groups">desvincular grupos</a> de uma comunidade.
+Com certeza! o FUNNELCHAT te entrega outras duas APIs para que você consiga gerenciar os grupos de uma comunidade, veja como <a href="/communities/link-groups">vincular grupos</a> ou <a href="/communities/unlink-groups">desvincular grupos</a> de uma comunidade.
 
 #### 4. Como enviar mensagem para toda comunidade?
 

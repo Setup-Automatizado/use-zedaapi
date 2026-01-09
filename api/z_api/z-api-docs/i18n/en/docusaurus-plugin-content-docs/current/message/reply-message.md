@@ -7,7 +7,7 @@ title: Answer Messages
 
 #### /send-text
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-text
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-text
 
 ### Header
 
@@ -60,7 +60,7 @@ If you have any questions about how to send a text message, you can read about i
 ```json
 {
   "phone": "5511999999999",
-  "message": "Welcome to *Z-API*",
+  "message": "Welcome to *FUNNELCHAT*",
   "messageId": "3999984263738042930CD6ECDE9VDWSA"
 }
 ```
@@ -68,7 +68,7 @@ If you have any questions about how to send a text message, you can read about i
 ```json
 {
   "phone": "342532456234453-group",
-  "message": "Welcome to *Z-API*",
+  "message": "Welcome to *FUNNELCHAT*",
   "messageId": "3999984263738042930CD6ECDE9VDWSA",
   "privateAnswer": true
 }
@@ -107,4 +107,4 @@ Link for webhooks response (upon receiving)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/reply-message.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/reply-message.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

@@ -7,7 +7,7 @@ title: Link groups
 
 #### /communities/link
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/communities/link
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/communities/link
 
 ### Header
 
@@ -45,7 +45,7 @@ It's important to remember that you cannot link the same group to more than one 
 
 #### URL
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/communities/link
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/communities/link
 
 #### Body
 
@@ -86,4 +86,4 @@ In case you receive 415 error, make sure to add the “Content-Type” of the ob
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/link-groups.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/link-groups.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

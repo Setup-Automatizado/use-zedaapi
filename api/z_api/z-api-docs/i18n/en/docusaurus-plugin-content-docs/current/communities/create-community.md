@@ -7,7 +7,7 @@ title: Create community
 
 #### /create-group
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/communities
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/communities
 
 ### Header
 
@@ -39,7 +39,7 @@ Before using this feature, it's important to check if the WhatsApp application o
 
 **Method**
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/communities
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/communities
 
 **Example**
 
@@ -85,4 +85,4 @@ In case you receive 415 error, make sure to add the “Content-Type” of the ob
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/create-community.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/create-community.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

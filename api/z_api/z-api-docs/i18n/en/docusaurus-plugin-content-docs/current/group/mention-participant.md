@@ -7,7 +7,7 @@ title: Mentioning a member
 
 #### /send-text
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-text
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-text
 
 ### Header
 
@@ -48,7 +48,7 @@ This method is responsible for mentioning participants in a group.
 ```json
 {
   "phone": "5511999999999",
-  "message": "Welcome to *Z-API group* @number",
+  "message": "Welcome to *FUNNELCHAT group* @number",
   "mentioned": [number]
 }
 ```
@@ -62,7 +62,7 @@ This method allows you to mention multiple members of a WhatsApp group without t
 ```json
 {
   "phone": "5511999999999-group",
-  "message": "Welcome to *Z-API group*",
+  "message": "Welcome to *FUNNELCHAT group*",
   "mentioned": [number,number,number,number,number,number]
 }
 ```
@@ -74,7 +74,7 @@ This method allows you to mention multiple members of a WhatsApp group without t
 
 | Atributos | Tipo   | Descrição      |
 | :-------- | :----- | :------------- |
-| zaapId    | string | id on z-api    |
+| zaapId    | string | id on funnelchat    |
 | messageId | string | id on whatsapp |
 | id | string | Added for compatibility with Zapier, it has the same value as the messageId.|
 
@@ -108,4 +108,4 @@ Link to webhook response (on receipt)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/send-text.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/send-text.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

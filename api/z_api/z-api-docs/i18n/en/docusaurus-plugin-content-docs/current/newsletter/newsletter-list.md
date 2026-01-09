@@ -7,7 +7,7 @@ title: List Newsletter
 
 #### /newsletter
 
-`GET` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/newsletter
+`GET` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/newsletter
 
 ### Header
 
@@ -25,7 +25,7 @@ This method returns a list with metadata of your own newsletter and followed new
 
 ## URL
 
-`GET` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/newsletter
+`GET` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/newsletter
 
 ---
 
@@ -62,8 +62,8 @@ Object (viewMetadata)
       "id": "999999999999999999@newsletter",
       "creationTime": "1695643504",
       "state": "ACTIVE",
-      "name": "Z-API",
-      "description": "Official Z-API Newsletter",
+      "name": "FUNNELCHAT",
+      "description": "Official FUNNELCHAT Newsletter",
       "subscribersCount": "123",
       "inviteLink": "https://www.whatsapp.com/channel/0029Va5Xk71a",
       "verification": "VERIFIED",
@@ -106,4 +106,4 @@ If you receive a 415 error, make sure to add the "Content-Type" to the headers o
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/get-newsletter-list.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/get-newsletter-list.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

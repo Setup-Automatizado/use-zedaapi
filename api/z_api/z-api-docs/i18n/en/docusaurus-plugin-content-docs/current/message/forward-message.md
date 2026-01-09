@@ -8,7 +8,7 @@ title: Forward message
 #### /forward-message
 
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/forward-message
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/forward-message
 
 ### Header
 
@@ -68,7 +68,7 @@ To use this method it is necessary to configure the webhook, if it has not yet b
 
 | Atributos | Tipo   | Descrição      |
 | :-------- | :----- | :------------- |
-| zaapId    | string | id no z-api    |
+| zaapId    | string | id no funnelchat    |
 
 Example
 
@@ -98,4 +98,4 @@ Link para a response do webhook (ao receber)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/forward-message.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/forward-message.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

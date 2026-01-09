@@ -19,7 +19,7 @@ Para que funcione você deve ter a [Leitura automática](./auto-read.md) habilit
 
 #### /update-auto-read-status
 
-`PUT` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-auto-read-status
+`PUT` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-auto-read-status
 
 ### Header
 

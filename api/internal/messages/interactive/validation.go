@@ -195,7 +195,7 @@ func (v *Validator) ValidateButtonActions(req *SendButtonActionsRequest) error {
 		}
 
 		// Validate type-specific fields using normalized type
-		// Accepts both Z-API uppercase (CALL, URL) and lowercase (cta_call, cta_url)
+		// Accepts both FUNNELCHAT uppercase (CALL, URL) and lowercase (cta_call, cta_url)
 		normalizedType := btn.GetNormalizedType()
 		switch normalizedType {
 		case ButtonTypeQuickReply:

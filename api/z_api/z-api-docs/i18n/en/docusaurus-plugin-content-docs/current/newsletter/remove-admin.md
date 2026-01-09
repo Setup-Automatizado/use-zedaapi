@@ -7,7 +7,7 @@ title: Remove newsletter admin
 
 #### /newsletter/remove-admin/{newsletterId}
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/newsletter/remove-admin/{newsletterId}
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/newsletter/remove-admin/{newsletterId}
 
 ### Header
 
@@ -65,4 +65,4 @@ Link to the webhook response (upon receipt)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/newsletter-remove-admin.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/newsletter-remove-admin.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

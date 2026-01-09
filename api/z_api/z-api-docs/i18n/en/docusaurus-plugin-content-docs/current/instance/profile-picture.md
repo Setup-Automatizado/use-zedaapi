@@ -7,7 +7,7 @@ title: Update profile picture
 
 #### /profile-picture
 
-`PUT` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/profile-picture
+`PUT` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/profile-picture
 
 ### Header
 

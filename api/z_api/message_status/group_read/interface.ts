@@ -10,7 +10,7 @@ export interface ZApiMessageStatusGroupRead {
     origin?: string;
     server?: string;
     'user-agent'?: string;
-    'z-api-token'?: string;
+    'funnelchat-token'?: string;
   };
   body?: {
     instanceId?: string;

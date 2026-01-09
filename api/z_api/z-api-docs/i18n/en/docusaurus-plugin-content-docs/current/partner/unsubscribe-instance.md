@@ -7,7 +7,7 @@ title: Canceling an instance
 
 #### /cancel
 
-`POST` https://api.z-api.io/instances/{id}/token/{token}/integrator/on-demand/cancel
+`POST` https://api.funnelchat/instances/{id}/token/{token}/integrator/on-demand/cancel
 
 ---
 
@@ -43,7 +43,7 @@ From the moment you subscribe to an instance, it will be available for use for 3
 
 **Method**
 
-`POST` https://api.z-api.io/instances/{id}/token/{token}/integrator/on-demand/cancel
+`POST` https://api.funnelchat/instances/{id}/token/{token}/integrator/on-demand/cancel
 
 ---
 
@@ -73,4 +73,4 @@ Link to webhook response (on receipt)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/unsubscribe-instance.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/unsubscribe-instance.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

@@ -1,9 +1,9 @@
 ---
-id: Z-APIvsAPI-OFICIAL
-title: Z-API vs API Oficial
+id: FUNNELCHATvsAPI-OFICIAL
+title: FUNNELCHAT vs API Oficial
 ---
 
-## As Diferenças do Z-API e o WhatsApp Business API.
+## As Diferenças do FUNNELCHAT e o WhatsApp Business API.
 
 Qual é a melhor alternativa para você?
 
@@ -13,7 +13,7 @@ Principalmente nesse cenário estamos falando de empresas com soluções diversa
 
 Com o tempo, as empresas estão cada vez mais conscientes do quanto utilizar de uma API como essa pode facilitar e alavancar muito o seu negócio, sem contar as inúmeras possibilidades de criação.
 
-Todos sabem que esse mercado é gigantesco, mas vamos nos aprofundar em números, além do mensageiro mais utilizado no mundo com 1,7 bilhão de usuários hoje a grande parte dos negócios acontece na ferramenta. Algumas das razões pelo qual muitos negócios estão utilizando, o usuário pode centralizar tudo em um só canal, mais praticidade, agilidade para gerir seus negócios em um só lugar, contato mais próximos e muita praticidade. As empresas começaram a surgir no mercado oferecendo sua API para funcionar com WhatsApp. Como regra, todos funcionam com base no protocolo WhatsApp WEB. E claro, o Z-API também fornece WhatsApp API. Desenvolvemos nossa solução em 2019, quando nos integramos a uma solução Brasileira, logo inúmeros DEV’S e parceiros de negócios em diversos lugares do mundo também iniciaram o processo de integração conosco.
+Todos sabem que esse mercado é gigantesco, mas vamos nos aprofundar em números, além do mensageiro mais utilizado no mundo com 1,7 bilhão de usuários hoje a grande parte dos negócios acontece na ferramenta. Algumas das razões pelo qual muitos negócios estão utilizando, o usuário pode centralizar tudo em um só canal, mais praticidade, agilidade para gerir seus negócios em um só lugar, contato mais próximos e muita praticidade. As empresas começaram a surgir no mercado oferecendo sua API para funcionar com WhatsApp. Como regra, todos funcionam com base no protocolo WhatsApp WEB. E claro, o FUNNELCHAT também fornece WhatsApp API. Desenvolvemos nossa solução em 2019, quando nos integramos a uma solução Brasileira, logo inúmeros DEV’S e parceiros de negócios em diversos lugares do mundo também iniciaram o processo de integração conosco.
 
 O propósito da nossa solução sempre deixamos bem claro e temos levado para todos os lugares “Z-Api, Asas para a sua imaginação”. Nós queremos dar a possibilidade para DEV’S, soluções tecnológicas e Software houses a desenvolverem produtos e negócios extraordinários com a melhor tecnologia do mercado, um atendimento de qualidade, uma solução brasileira, paga em real e que te dá liberdade para criar.
 
@@ -49,15 +49,15 @@ dependendo de com qual programa o app é integrado, é possível extrair dados r
 
 Segundo algumas estatísticas do WhatsApp, o messenger bloqueia cerca de 2.000.000 de usuários por mês que violam os termos da política do WhatsApp.
 
-Mas isso não significa que API’s não oficiais sejam irresponsáveis com seus clientes. Por exemplo, o Z-API para segurança do usuário fornece aos clientes IPs individuais, executa autorização segura e insere um sistema de protetores artificiais, como uma fila para enviar mensagens para evitar envios em massa e protegê-los de banimento.
+Mas isso não significa que API’s não oficiais sejam irresponsáveis com seus clientes. Por exemplo, o FUNNELCHAT para segurança do usuário fornece aos clientes IPs individuais, executa autorização segura e insere um sistema de protetores artificiais, como uma fila para enviar mensagens para evitar envios em massa e protegê-los de banimento.
 
-Também existem sistemas para emular um telefone em um computador para que o trabalho não dependa de um dispositivo físico. Claro, esses métodos não ajudarão se o usuário negligenciar as regras para trabalhar com clientes de WhatsApp e spam. Mesmo com a API oficial, é possível ser banido por violar as políticas do WhatsApp. Mas se você combinar as ferramentas de segurança da Z-API com o uso dentro das recomendações do WhatsApp.
+Também existem sistemas para emular um telefone em um computador para que o trabalho não dependa de um dispositivo físico. Claro, esses métodos não ajudarão se o usuário negligenciar as regras para trabalhar com clientes de WhatsApp e spam. Mesmo com a API oficial, é possível ser banido por violar as políticas do WhatsApp. Mas se você combinar as ferramentas de segurança da FUNNELCHAT com o uso dentro das recomendações do WhatsApp.
 
-Depois de analisar os pontos principais, você pode ir direto ao mais interessante, ou seja, a análise, e comparar qual a solução te atende melhor com o WhatsApp. Vamos começar com os benefícios do Z-API:
+Depois de analisar os pontos principais, você pode ir direto ao mais interessante, ou seja, a análise, e comparar qual a solução te atende melhor com o WhatsApp. Vamos começar com os benefícios do FUNNELCHAT:
 
 ### Comparativo
 
-| Z-API | Business Api |
+| FUNNELCHAT | Business Api |
 | :-- | :-- |
 | Funciona com qualquer número pessoal ou comercial existente | Só funciona com novos números dedicados |
 | Você pode começar a trabalhar imediatamente após registrar o número, mas é importante seguir nossas recomendações | O número deve funcionar pelo menos 3-4 semanas para que você possa se conectar |

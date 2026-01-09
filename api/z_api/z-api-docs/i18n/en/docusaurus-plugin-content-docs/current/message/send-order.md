@@ -7,7 +7,7 @@ title: Send approve order message
 
 #### /send-order
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-order
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-order
 
 ### Header
 
@@ -156,7 +156,7 @@ When sending a product in the "products" list without the "productId" attribute,
 
 | Attribute | Type   | Description      |
 | :-------- | :----- | :------------- |
-| zaapId    | string | z-api ID    |
+| zaapId    | string | funnelchat ID    |
 | messageId | string | WhatsApp ID |
 | id        | string | Added for compatibility with Zapier; it has the same value as messageId |
 
@@ -190,4 +190,4 @@ Link to the webhook response (upon receiving)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/send-order.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/send-order.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

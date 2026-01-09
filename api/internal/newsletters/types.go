@@ -60,7 +60,7 @@ type IDParams struct {
 	ID string
 }
 
-// Summary represents the Z-API compatible newsletter payload.
+// Summary represents the newsletter payload.
 type Summary struct {
 	ID               string        `json:"id"`
 	CreationTime     string        `json:"creationTime"`
@@ -75,7 +75,7 @@ type Summary struct {
 	ViewMetadata     *ViewMetadata `json:"viewMetadata,omitempty"`
 }
 
-// ViewMetadata mirrors the nested object returned by Z-API for newsletters.
+// ViewMetadata mirrors the nested object returned by FUNNELCHAT for newsletters.
 type ViewMetadata struct {
 	Mute string `json:"mute"`
 	Role string `json:"role"`
@@ -113,7 +113,7 @@ type SearchResult struct {
 	Data   []SearchItem `json:"data"`
 }
 
-// OperationResult mirrors the boolean success envelope used across Z-API mutations.
+// OperationResult mirrors the boolean success envelope used across FUNNELCHAT mutations.
 type OperationResult struct {
 	Value   bool    `json:"value"`
 	Message *string `json:"message,omitempty"`

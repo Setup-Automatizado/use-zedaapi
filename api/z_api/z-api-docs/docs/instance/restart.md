@@ -17,7 +17,7 @@ Este método basicamente é o botão "Reiniciar" do seu sistema operacional ou s
 
 #### /restart
 
-`GET` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/restart
+`GET` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/restart
 
 ### Header
 

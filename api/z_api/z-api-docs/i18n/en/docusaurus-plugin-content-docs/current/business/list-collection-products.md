@@ -7,7 +7,7 @@ title: List Collection Products
 
 #### /catalogs/collection-products/{{catalog-owner-phone}}
 
-`GET` https://api.z-api.io/instances/{{instanceId}}/token/{{instanceToken}}/catalogs/collection-products/{{catalog-owner-phone}}
+`GET` https://api.funnelchat/instances/{{instanceId}}/token/{{instanceToken}}/catalogs/collection-products/{{catalog-owner-phone}}
 
 ### Header
 
@@ -42,7 +42,7 @@ Using this method, you will be able to list the products that are part of a coll
 
 Method
 
-`GET` https://api.z-api.io/instances/{{instanceId}}/token/{{instanceToken}}/catalogs/collection-products/{{catalog-owner-phone}}?collectionId=12312312312&nextCursor=CURSOR_VALUE
+`GET` https://api.funnelchat/instances/{{instanceId}}/token/{{instanceToken}}/catalogs/collection-products/{{catalog-owner-phone}}?collectionId=12312312312&nextCursor=CURSOR_VALUE
 
 ---
 
@@ -108,4 +108,4 @@ If you receive a 415 error, make sure to add the "Content-Type" of the object yo
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/list-collection-products.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/list-collection-products.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

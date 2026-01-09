@@ -7,7 +7,7 @@ title: Unlink groups
 
 #### /communities/unlink
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/communities/unlink
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/communities/unlink
 
 ### Header
 
@@ -45,7 +45,7 @@ A community must have at least 1 group linked to it, not including the announcem
 
 #### URL
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/communities/unlink
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/communities/unlink
 
 #### Body
 
@@ -86,4 +86,4 @@ In case you receive 415 error, make sure to add the “Content-Type” of the ob
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/unlink-groups.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/unlink-groups.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

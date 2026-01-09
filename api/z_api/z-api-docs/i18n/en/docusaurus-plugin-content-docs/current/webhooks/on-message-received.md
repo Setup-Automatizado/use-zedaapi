@@ -9,7 +9,7 @@ This is the incoming message return webhook
 
 :::caution Attention
 
-Z-API does not accept webhooks that aren’t HTTPS
+FUNNELCHAT does not accept webhooks that aren’t HTTPS
 
 :::
 
@@ -29,7 +29,7 @@ You can change all webhooks at once to the same value using [this endpoint](./up
 
 #### /update-webhook-received
 
-`PUT` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/update-webhook-received
+`PUT` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/update-webhook-received
 
 #### Or
 
@@ -37,7 +37,7 @@ You can also update the route with the "sent by me" option enabled.
 
 #### /update-webhook-received-delivery
 
-`PUT` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/update-webhook-received-delivery
+`PUT` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/update-webhook-received-delivery
 
 ### Header
 
@@ -284,8 +284,8 @@ The possible returns of the **on-message-received** webhook are registered below
   "forwarded": false,
   "type": "ReceivedCallback",
   "listResponseMessage": {
-    "message": "Z-API Wings for your imagination",
-    "title": "Z-API",
+    "message": "FUNNELCHAT Wings for your imagination",
+    "title": "FUNNELCHAT",
     "selectedRowId": "1"
   },
   "instanceId": "instance.id"
@@ -1334,7 +1334,7 @@ The possible returns of the **on-message-received** webhook are registered below
     "pollMaxOptions": 0,
     "options": [
       {
-        "name": "Z-API"
+        "name": "FUNNELCHAT"
       },
       {
         "name": "Others"
@@ -1371,7 +1371,7 @@ The possible returns of the **on-message-received** webhook are registered below
     "pollMessageId": "ID of the poll message that was responded to",
     "options": [
       {
-        "name": "Z-API"
+        "name": "FUNNELCHAT"
       }
     ]
   }
@@ -1897,4 +1897,4 @@ break;
 
 <!-- ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/on-message-received.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe> -->
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/on-message-received.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe> -->

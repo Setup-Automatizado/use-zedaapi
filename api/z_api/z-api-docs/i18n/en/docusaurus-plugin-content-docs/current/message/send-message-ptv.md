@@ -7,7 +7,7 @@ title: Send PTV
 
 #### /send-ptv
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-ptv
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-ptv
 
 ### Header
 
@@ -82,7 +82,7 @@ In this [link], you will find everything you need to know about file formats and
 
 | Atributos | Tipo   | Descrição      |
 | :-------- | :----- | :------------- |
-| zaapId    | string | id on z-api    |
+| zaapId    | string | id on funnelchat    |
 | messageId | string | id on whatsapp |
 | id        | string | Added for compatibility with Zapier, it has the same value as the messageId |
 
@@ -116,4 +116,4 @@ Link for webhooks response (upon receiving)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/send-ptv.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/send-ptv.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

@@ -11,7 +11,7 @@ ID de Canais
 Criando canais
 Método#
 /create-newsletter#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/create-newsletter
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/create-newsletter
 
 Header#
 Key	Value
@@ -29,7 +29,7 @@ description	string	Descrição do canal
 Request Body#
 Método
 
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/create-newsletter
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/create-newsletter
 
 Exemplo
 
@@ -60,7 +60,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Atualizar imagem do canal
 Método#
 /update-newsletter-picture#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-newsletter-picture
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-newsletter-picture
 
 Header#
 Key	Value
@@ -77,12 +77,12 @@ Request Body#
 URL#
 Método
 
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-newsletter-picture
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-newsletter-picture
 
 Body#
 {
   "id": "999999999999999999@newsletter",
-  "pictureUrl": "https://www.z-api.io/wp-content/themes/z-api/dist/images/logo.svg"
+  "pictureUrl": "https://www.funnelchat/wp-content/themes/funnelchat/dist/images/logo.svg"
 }
 warning
 O id do canal sempre deve conter o sufixo "@newsletter", pois esse é o padrão utilizado pelo próprio WhatsApp.
@@ -108,7 +108,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Atualizar nome do canal
 Método#
 /update-newsletter-name#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-newsletter-name
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-newsletter-name
 
 Header#
 Key	Value
@@ -125,7 +125,7 @@ Request Body#
 URL#
 Método
 
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-newsletter-name
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-newsletter-name
 
 Body#
 {
@@ -153,7 +153,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Atualizar descrição do canal
 Método#
 /update-newsletter-description#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-newsletter-description
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-newsletter-description
 
 Header#
 Key	Value
@@ -170,7 +170,7 @@ Request Body#
 URL#
 Método
 
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-newsletter-description
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-newsletter-description
 
 Body#
 {
@@ -198,7 +198,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Seguir canal
 Método#
 /follow-newsletter#
-PUT https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/follow-newsletter
+PUT https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/follow-newsletter
 
 Header#
 Key	Value
@@ -214,7 +214,7 @@ Request Body#
 URL#
 Método
 
-PUT https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/follow-newsletter
+PUT https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/follow-newsletter
 
 Body#
 {
@@ -241,7 +241,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Deixar de seguir canal
 Método#
 /unfollow-newsletter#
-PUT https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/unfollow-newsletter
+PUT https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/unfollow-newsletter
 
 Header#
 Key	Value
@@ -257,7 +257,7 @@ Request Body#
 URL#
 Método
 
-PUT https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/unfollow-newsletter
+PUT https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/unfollow-newsletter
 
 Body#
 {
@@ -284,7 +284,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Mutar canal
 Método#
 /mute-newsletter#
-PUT https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/mute-newsletter
+PUT https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/mute-newsletter
 
 Header#
 Key	Value
@@ -300,7 +300,7 @@ Request Body#
 URL#
 Método
 
-PUT https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/mute-newsletter
+PUT https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/mute-newsletter
 
 Body#
 {
@@ -327,7 +327,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Desmutar canal
 Método#
 /unmute-newsletter#
-PUT https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/unmute-newsletter
+PUT https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/unmute-newsletter
 
 Header#
 Key	Value
@@ -343,7 +343,7 @@ Request Body#
 URL#
 Método
 
-PUT https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/unmute-newsletter
+PUT https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/unmute-newsletter
 
 Body#
 {
@@ -370,7 +370,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Deletar canal
 Método#
 /delete-newsletter#
-DELETE https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/delete-newsletter
+DELETE https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/delete-newsletter
 
 Header#
 Key	Value
@@ -386,7 +386,7 @@ Request Body#
 URL#
 Método
 
-DELETE https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/delete-newsletter
+DELETE https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/delete-newsletter
 
 Body#
 {
@@ -413,7 +413,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Metadata do canal
 Método#
 /newsletter/metadata#
-GET https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/newsletter/metadata/{newsletterId}
+GET https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/newsletter/metadata/{newsletterId}
 
 Header#
 Key	Value
@@ -427,7 +427,7 @@ Atributos	Tipo	Descrição
 id	string	ID do canal
 Request Params#
 URL#
-GET https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/newsletter/metadata/{newsletterId}
+GET https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/newsletter/metadata/{newsletterId}
 
 warning
 O id do canal sempre deve conter o sufixo "@newsletter", pois esse é o padrão utilizado pelo próprio WhatsApp.
@@ -457,8 +457,8 @@ Exemplo
     "id": "999999999999999999@newsletter",
     "creationTime": "1695643504",
     "state": "ACTIVE",
-    "name": "Z-API",
-    "description": "Canal oficial Z-API",
+    "name": "FUNNELCHAT",
+    "description": "Canal oficial FUNNELCHAT",
     "subscribersCount": "123",
     "inviteLink": "https://www.whatsapp.com/channel/0029Va5Xk71a",
     "verification": "VERIFIED",
@@ -479,7 +479,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Listar canais
 Método#
 /newsletter#
-GET https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/newsletter
+GET https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/newsletter
 
 Header#
 Key	Value
@@ -488,7 +488,7 @@ Conceituação#
 Este método retorna uma lista com o metadata dos canais próprios e seguidos com todas as informações do canal e de sua visualização.
 
 URL#
-GET https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/newsletter
+GET https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/newsletter
 
 Response#
 200#
@@ -516,8 +516,8 @@ Exemplo
       "id": "999999999999999999@newsletter",
       "creationTime": "1695643504",
       "state": "ACTIVE",
-      "name": "Z-API",
-      "description": "Canal oficial Z-API",
+      "name": "FUNNELCHAT",
+      "description": "Canal oficial FUNNELCHAT",
       "subscribersCount": "123",
       "inviteLink": "https://www.whatsapp.com/channel/0029Va5Xk71a",
       "verification": "VERIFIED",
@@ -553,7 +553,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Encontrar canais
 Método#
 /search-newsletter#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/search-newsletter
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/search-newsletter
 
 Header#
 Key	Value
@@ -578,7 +578,7 @@ Request Body#
 URL#
 Método
 
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/search-newsletter
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/search-newsletter
 
 Body#
   {
@@ -587,7 +587,7 @@ Body#
     "filters": {
       "countryCodes": ["BR", "AF", "CA"]
     },
-    "searchText": "Z-API"
+    "searchText": "FUNNELCHAT"
   }
 Response#
 200#
@@ -604,8 +604,8 @@ Exemplo
     "data": [
       {
         "id": "999999999999999999@newsletter",
-        "name": "Z-API",
-        "description": "Canal oficial Z-API",
+        "name": "FUNNELCHAT",
+        "description": "Canal oficial FUNNELCHAT",
         "subscribersCount": "123",
         "picture": "https://mmg.whatsapp.net/v/t61.24694-24/345237462_968463277797373_5339431038113115975_n.jpg?stp=dst-jpg_s192x192&ccb=11-4&oh=01_AdTMyhA5kdwCdSqV0v784czJ1dHP_nkNhJ8TdgnANHro7Q&oe=651E6909&_nc_sid=000000&_nc_cat=109"
       },
@@ -630,7 +630,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Atualizar configurações do canal
 Método#
 /newsletter/settings/{newsletterId}#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/newsletter/settings/{newsletterId}
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/newsletter/settings/{newsletterId}
 
 Header#
 Key	Value
@@ -652,7 +652,7 @@ Request Body#
 URL#
 Método
 
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/newsletter/settings/999999999999999999@newsletter
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/newsletter/settings/999999999999999999@newsletter
 
 Body#
 {
@@ -679,7 +679,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Aceitar convite de admin do canal
 Método#
 /newsletter/accept-admin-invite/{newsletterId}#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/newsletter/accept-admin-invite/{newsletterId}
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/newsletter/accept-admin-invite/{newsletterId}
 
 Header#
 Key	Value
@@ -694,7 +694,7 @@ newsletterId	string	Id do canal o qual pertence o convite
 Request#
 Exemplo
 
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/newsletter/accept-admin-invite/120363166555745933@newsletter
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/newsletter/accept-admin-invite/120363166555745933@newsletter
 
 Response#
 201#
@@ -707,7 +707,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Remover admin do canal
 Método#
 /newsletter/remove-admin/{newsletterId}#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/newsletter/remove-admin/{newsletterId}
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/newsletter/remove-admin/{newsletterId}
 
 Header#
 Key	Value
@@ -735,7 +735,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Anular convite de admin do canal
 Método#
 /newsletter/revoke-admin-invite/{newsletterId}#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/newsletter/revoke-admin-invite/{newsletterId}
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/newsletter/revoke-admin-invite/{newsletterId}
 
 Header#
 Key	Value
@@ -763,7 +763,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Enviar convite de admin do canal
 Método#
 /send-newsletter-admin-invite#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/send-newsletter-admin-invite
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/send-newsletter-admin-invite
 
 Header#
 Key	Value
@@ -783,7 +783,7 @@ Request Body#
 URL#
 Método
 
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/send-newsletter-admin-invite
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/send-newsletter-admin-invite
 
 Body#
 {
@@ -818,7 +818,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Transferir propriedade do canal
 Método#
 /newsletter/transfer-ownership/{newsletterId}#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/newsletter/transfer-ownership/{newsletterId}
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/newsletter/transfer-ownership/{newsletterId}
 
 Header#
 Key	Value

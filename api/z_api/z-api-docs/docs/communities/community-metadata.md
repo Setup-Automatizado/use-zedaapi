@@ -7,7 +7,7 @@ title: Metadata da comunidade
 
 #### /communities-metadata/{communityId}
 
-`GET` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities-metadata/{idDaComunidade}
+`GET` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities-metadata/{idDaComunidade}
 
 ### Header
 
@@ -40,7 +40,7 @@ Este método retorna o metadata da comunidade, como nome, descrição e grupos q
 
 #### URL
 
-`GET` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities-metadata/{idDaComunidade}
+`GET` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities-metadata/{idDaComunidade}
 
 ---
 
@@ -97,4 +97,4 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/community-metadata.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/community-metadata.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

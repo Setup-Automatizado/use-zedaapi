@@ -7,7 +7,7 @@ title: Listando instâncias
 
 #### /instances
 
-`GET` <https://api.z-api.io/instances>
+`GET` <https://api.funnelchat/instances>
 
 ---
 
@@ -39,7 +39,7 @@ Método utilizado para listar todas as instâncias criadas.
 
 **Método**
 
-`GET` <https://api.z-api.io/instances?page=1&pageSize=2/>
+`GET` <https://api.funnelchat/instances?page=1&pageSize=2/>
 
 **Exemplo**
 
@@ -117,4 +117,4 @@ Link para a response do webhook (ao receber)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/list-instances.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/list-instances.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

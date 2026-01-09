@@ -13,7 +13,7 @@ export interface ZApiReceivedCallbackGroupMessage {
     origin?: string;
     server?: string;
     'user-agent'?: string;
-    'z-api-token'?: string;
+    'funnelchat-token'?: string;
   };
   body?: {
     connectedPhone?: string;

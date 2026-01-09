@@ -7,7 +7,7 @@ title: Criando grupos
 
 #### /create-group
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/create-group
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/create-group
 
 ### Header
 
@@ -27,13 +27,13 @@ Assim como no WhatsApp Web você vai precisar adicionar ao menos um contato para
 :::
 
 :::warning
- Você não deve passar o número conectado ao Z-API que é responsável pela criação do grupo no array de números que vão compor o grupo.
+ Você não deve passar o número conectado ao FUNNELCHAT que é responsável pela criação do grupo no array de números que vão compor o grupo.
 
 :::
 
 :::tip Novo atributo
 
-Recentemente, o WhatsApp implementou uma validação para verificar se o número de telefone conectado à API possui o contato do cliente salvo. No entanto, a Z-API desenvolveu uma solução para contornar essa validação, introduzindo um novo recurso chamado **"autoInvite"**. Agora, quando uma solicitação é enviada para adicionar 10 clientes a um grupo e apenas 5 deles são adicionados com sucesso, a API envia convites privados para os cinco clientes que não foram adicionados. Esses convites permitem que eles entrem no grupo, mesmo que seus números de telefone não estejam salvos como contatos.
+Recentemente, o WhatsApp implementou uma validação para verificar se o número de telefone conectado à API possui o contato do cliente salvo. No entanto, a FUNNELCHAT desenvolveu uma solução para contornar essa validação, introduzindo um novo recurso chamado **"autoInvite"**. Agora, quando uma solicitação é enviada para adicionar 10 clientes a um grupo e apenas 5 deles são adicionados com sucesso, a API envia convites privados para os cinco clientes que não foram adicionados. Esses convites permitem que eles entrem no grupo, mesmo que seus números de telefone não estejam salvos como contatos.
 
 :::
 ---
@@ -60,14 +60,14 @@ Recentemente, o WhatsApp implementou uma validação para verificar se o número
 
 **Método**
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/create-group
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/create-group
 
 **Exemplo**
 
 ```json
 {
   "autoInvite": true,
-  "groupName": "Grupo Z-API",
+  "groupName": "Grupo FUNNELCHAT",
   "phones": ["5544999999999", "5544888888888"]
 }
 ```
@@ -123,4 +123,4 @@ Link para a response do webhook (ao receber)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/create-group.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/create-group.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

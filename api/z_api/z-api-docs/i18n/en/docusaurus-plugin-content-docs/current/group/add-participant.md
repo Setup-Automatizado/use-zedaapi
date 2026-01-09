@@ -7,7 +7,7 @@ title: Adding partocipants
 
 #### /add-participant
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/add-participant
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/add-participant
 
 ### Header
 
@@ -29,7 +29,7 @@ On November 4, 2021 whatsapp changed the format of creating new groups. before: 
 
 :::tip Novo atributo
 
-WhatsApp has recently implemented a validation process to check if the phone number connected to the API has the client's contact saved. However, Z-API has developed a solution to bypass this validation by introducing a new attribute called "autoInvite." Now, when a request is made to add 10 clients to a group and only 5 of them are successfully added, the API sends private invitations to the remaining five clients who were not added. These invitations allow them to join the group even if their phone numbers are not saved as contacts.
+WhatsApp has recently implemented a validation process to check if the phone number connected to the API has the client's contact saved. However, FUNNELCHAT has developed a solution to bypass this validation by introducing a new attribute called "autoInvite." Now, when a request is made to add 10 clients to a group and only 5 of them are successfully added, the API sends private invitations to the remaining five clients who were not added. These invitations allow them to join the group even if their phone numbers are not saved as contacts.
 
 :::
 
@@ -56,7 +56,7 @@ WhatsApp has recently implemented a validation process to check if the phone num
 
 #### URL
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/add-participant
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/add-participant
 
 #### Body
 
@@ -118,4 +118,4 @@ Link to webhook response (on receipt)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/add-participant.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/add-participant.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

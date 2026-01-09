@@ -7,7 +7,7 @@ title: Get business account data
 
 #### /business/profile
 
-`GET` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/business/profile?phone={phone}
+`GET` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/business/profile?phone={phone}
 
 ### Header
 
@@ -46,7 +46,7 @@ Métodos
 
 **Método**
 
-`GET` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/business/profile?phone=5511999999999
+`GET` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/business/profile?phone=5511999999999
 
 #### Query params
 
@@ -102,7 +102,7 @@ Example
     "address": "Maringá",
     "email": "zapi@example.com",
     "websites": [
-        "https://www.z-api.io"
+        "https://www.funnelchat"
     ],
     "categories": [
         {

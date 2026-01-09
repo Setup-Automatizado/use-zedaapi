@@ -13,7 +13,7 @@ export interface ZApiReceivedCallbackReaction {
     origin?: string;
     server?: string;
     'user-agent'?: string;
-    'z-api-token'?: string;
+    'funnelchat-token'?: string;
   };
   body?: {
     isStatusReply?: boolean;

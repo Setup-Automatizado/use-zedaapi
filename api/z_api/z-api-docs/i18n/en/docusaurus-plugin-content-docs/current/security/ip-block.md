@@ -11,11 +11,11 @@ The IP blocking security method introduces an additional layer of protection, al
 
 To activate this feature, follow the simple steps below:
 
-1. Log in to Z-API:
-   Access the Z-API control panel using your administrator credentials.
+1. Log in to FUNNELCHAT:
+   Access the FUNNELCHAT control panel using your administrator credentials.
 
 2. Navigate to the Security Page:
-   In the Z-API dashboard, find the "Security" option in the navigation menu or settings area.
+   In the FUNNELCHAT dashboard, find the "Security" option in the navigation menu or settings area.
 
 ![img](../../../../../img/ip-block-EN.jpeg)
 

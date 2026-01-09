@@ -7,7 +7,7 @@ title: Sending options list
 
 #### /send-option-list
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-option-list
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-option-list
 
 ### Header
 
@@ -76,8 +76,8 @@ In this method you will be able to send text messages with a list of options whe
     "options": [
       {
         "id": "1",
-        "description": "Z-API Asas para sua imaginação",
-        "title": "Z-API"
+        "description": "FUNNELCHAT Asas para sua imaginação",
+        "title": "FUNNELCHAT"
       },
       {
         "id": "2",
@@ -97,7 +97,7 @@ In this method you will be able to send text messages with a list of options whe
 
 | Attributes | Type   | Description       |
 | :-------- | :----- | :------------- |
-| zaapId    | string | id on z-api    |
+| zaapId    | string | id on funnelchat    |
 | messageId | string | id on whatsapp |
 
 Example 
@@ -129,4 +129,4 @@ Link for webhooks response (upon receiving)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/send-option-list.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/send-option-list.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

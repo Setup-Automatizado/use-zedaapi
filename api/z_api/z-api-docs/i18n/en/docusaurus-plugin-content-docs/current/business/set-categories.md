@@ -7,7 +7,7 @@ title: Assign Categories
 
 #### /business/categories
 
-`POST` https://api.z-api.io/instances/{{instanceId}}/token/{{instanceToken}}/business/categories
+`POST` https://api.funnelchat/instances/{{instanceId}}/token/{{instanceToken}}/business/categories
 
 ### Header
 
@@ -78,4 +78,4 @@ If you receive a 415 error, make sure to add the "Content-Type" header to the re
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/company-categories.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/company-categories.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

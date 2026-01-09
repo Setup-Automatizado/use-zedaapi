@@ -1,6 +1,6 @@
 {
   "method": "POST",
-  "url": "https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/business/categories",
+  "url": "https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/business/categories",
   "httpVersion": "HTTP/1.1",
   "queryString": [],
   "headers": [

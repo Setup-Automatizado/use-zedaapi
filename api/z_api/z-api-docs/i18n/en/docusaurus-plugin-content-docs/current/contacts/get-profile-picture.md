@@ -7,7 +7,7 @@ title: Get contact image
 
 #### /profile-picture
 
-`GET` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/profile-picture
+`GET` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/profile-picture
 
 ### Header
 
@@ -50,7 +50,7 @@ If you intend to store your contact's image, please note that we always return i
 
 Method
 
-`GET` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/profile-picture?phone=551199999999
+`GET` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/profile-picture?phone=551199999999
 
 ---
 
@@ -84,4 +84,4 @@ In case you receive 415 error, make sure to add the “Content-Type” of the ob
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/get-profile-picture.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/get-profile-picture.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

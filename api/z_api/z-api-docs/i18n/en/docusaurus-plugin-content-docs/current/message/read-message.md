@@ -7,7 +7,7 @@ title: Read texts
 
 #### /read-message
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/read-message
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/read-message
 
 ### Header
 
@@ -88,4 +88,4 @@ Link for webhooks response (upon receiving)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/read-message.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/read-message.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

@@ -7,7 +7,7 @@ title: Get Products (Phone)
 
 #### /catalogs/Phone-Number
 
-`GET` https://api.z-api.io/instances/{{instanceId}}/token/{{instanceToken}}/catalogs/{{Phone-Number}}
+`GET` https://api.funnelchat/instances/{{instanceId}}/token/{{instanceToken}}/catalogs/{{Phone-Number}}
 
 ### Header
 
@@ -36,7 +36,7 @@ In this method, you will be able to get products from a WhatsApp Business catalo
 
 Method
 
-`GET` https://api.z-api.io/instances/{{instanceId}}/token/{{instanceToken}}/catalogs/{{Phone-Number}}?nextCursor=CURSOR_VALUE
+`GET` https://api.funnelchat/instances/{{instanceId}}/token/{{instanceToken}}/catalogs/{{Phone-Number}}?nextCursor=CURSOR_VALUE
 
 ---
 
@@ -93,4 +93,4 @@ If you receive a 415 error, make sure to add the "Content-Type" of the object yo
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/get-products-phone.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/get-products-phone.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

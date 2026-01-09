@@ -5,7 +5,7 @@ title: Introdução
 
 ### Conceituação
 
-Agora com Z-API você pode fazer ligações para qualquer número, no momento não é possivel enviar um áudio durante a chamada. Essa funcionalidade chamamos de "chamar atenção", sabe lembra do cutucar no facebook?
+Agora com FUNNELCHAT você pode fazer ligações para qualquer número, no momento não é possivel enviar um áudio durante a chamada. Essa funcionalidade chamamos de "chamar atenção", sabe lembra do cutucar no facebook?
 
 Com essa API você dar um toque e aguardar até 15 segundos e desligar a ligação.
 

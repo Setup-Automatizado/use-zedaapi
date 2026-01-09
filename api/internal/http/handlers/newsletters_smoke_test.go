@@ -17,7 +17,7 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/newsletters"
 )
 
-// Smoke tests validate all 18 newsletter endpoints are callable and return Z-API compatible responses
+// Smoke tests validate all 18 newsletter endpoints are callable and return responses
 // These tests use mocks to verify handler -> service integration without requiring WhatsApp connection
 
 // mockNewslettersService implements newsletters.Service for smoke testing
@@ -740,5 +740,5 @@ func TestSmokeAll_EndpointCount(t *testing.T) {
 		}
 	}
 
-	assert.Equal(t, 18, registeredCount, "All 18 newsletter endpoints must be registered (17 Z-API + 1 bonus)")
+	assert.Equal(t, 18, registeredCount, "All 18 newsletter endpoints must be registered (17 FUNNELCHAT + 1 bonus)")
 }

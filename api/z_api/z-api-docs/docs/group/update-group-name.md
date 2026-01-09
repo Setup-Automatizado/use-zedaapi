@@ -7,7 +7,7 @@ title: Atualizar nome do grupo
 
 #### /update-group-name
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-group-name
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-group-name
 
 ### Header
 
@@ -48,7 +48,7 @@ No dia 4 de novembro de 2021 o whatsapp alterou a formato da criação de novos 
 
 #### URL
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-group-name
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-group-name
 
 #### Body
 
@@ -57,7 +57,7 @@ No dia 4 de novembro de 2021 o whatsapp alterou a formato da criação de novos 
 Forma antiga -
   {
     "groupId": "5511999999999-1623281429",
-    "groupName": "Mudou o nome Meu grupo no Z-API"
+    "groupName": "Mudou o nome Meu grupo no FUNNELCHAT"
   }
 
 -----------------------------------------------
@@ -65,7 +65,7 @@ Forma antiga -
 Forma nova -
   {
     "groupId": "120363019502650977-group",
-    "groupName": "Mudou o nome Meu grupo no Z-API"
+    "groupName": "Mudou o nome Meu grupo no FUNNELCHAT"
   }
 
 ```
@@ -108,4 +108,4 @@ Link para a response do webhook (ao receber)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/update-group-name.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/update-group-name.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

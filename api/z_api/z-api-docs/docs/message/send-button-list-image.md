@@ -7,7 +7,7 @@ title: Enviar botões com imagem
 
 #### /send-button-list
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/send-button-list
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/send-button-list
 
 ### Header
 
@@ -17,7 +17,7 @@ title: Enviar botões com imagem
 ---
 
 :::caution Atenção
-Envios de botões atualmente se encontram disponíveis, porém possui alguns fatores decisivos para o funcionamento. Para mais detalhes acesse o tópico [Funcionamento dos Botões](https://developer.z-api.io/tips/button-status)
+Envios de botões atualmente se encontram disponíveis, porém possui alguns fatores decisivos para o funcionamento. Para mais detalhes acesse o tópico [Funcionamento dos Botões](https://developer.funnelchat/tips/button-status)
 :::
 
 ## Conceituação
@@ -76,7 +76,7 @@ Neste método você poderá enviar imagens com opções de botões de ação, o 
 ```json
 {
   "phone": "5511999999999",
-  "message": "Z-API é Bom ?",
+  "message": "FUNNELCHAT é Bom ?",
   "buttonList": {
     "image": "https://avatars.githubusercontent.com/u/60630101?s=280&v=4",
     "buttons": [
@@ -101,7 +101,7 @@ Neste método você poderá enviar imagens com opções de botões de ação, o 
 
 | Atributos | Tipo   | Descrição      |
 | :-------- | :----- | :------------- |
-| zaapId    | string | id no z-api    |
+| zaapId    | string | id no funnelchat    |
 | messageId | string | id no whatsapp |
 | id | string | Adicionado para compatibilidade com zapier, ele tem o mesmo valor do messageId |
 
@@ -135,4 +135,4 @@ Link para a response do webhook (ao receber)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/send-button-list-image.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/send-button-list-image.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

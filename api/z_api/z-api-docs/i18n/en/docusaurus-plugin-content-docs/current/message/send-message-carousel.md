@@ -7,7 +7,7 @@ title: Send Carousel
 
 #### /send-carousel
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/send-carousel
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/send-carousel
 
 ### Header
 
@@ -17,7 +17,7 @@ title: Send Carousel
 ---
 
 :::caution Attention
-Sending buttons accompanying the carousel is currently available, but there are some decisive factors for functionality. For more details, access the topic [Button Functionality](https://developer.z-api.io/en/tips/button-status)
+Sending buttons accompanying the carousel is currently available, but there are some decisive factors for functionality. For more details, access the topic [Button Functionality](https://developer.funnelchat/en/tips/button-status)
 :::
 
 ## Concept
@@ -86,7 +86,7 @@ With this method, you can send carousel messages with images, text, and action b
                 {
                     "id": "1",
                     "label": "Button name",
-                    "url": "https://z-api.io",
+                    "url": "https://funnelchat",
                     "type": "URL"
                 },
                 {
@@ -103,7 +103,7 @@ With this method, you can send carousel messages with images, text, and action b
                 {
                     "id": "1",
                     "label": "Button name",
-                    "url": "https://z-api.io",
+                    "url": "https://funnelchat",
                     "type": "URL"
                 },
                 {
@@ -142,7 +142,7 @@ With this method, you can send carousel messages with images, text, and action b
 
 | Attributes | Type   | Description      |
 | :-------- | :----- | :------------- |
-| zaapId    | string | id in z-api    |
+| zaapId    | string | id in funnelchat    |
 | messageId | string | id in WhatsApp |
 | id | string | Added for compatibility with Zapier, it has the same value as messageId |
 
@@ -176,4 +176,4 @@ Link to the webhook response (upon receipt)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/send-carousel.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/send-carousel.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

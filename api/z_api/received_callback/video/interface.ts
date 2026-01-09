@@ -13,7 +13,7 @@ export interface ZApiReceivedCallbackVideo {
     origin?: string;
     server?: string;
     'user-agent'?: string;
-    'z-api-token'?: string;
+    'funnelchat-token'?: string;
   };
   body?: {
     isStatusReply?: boolean;

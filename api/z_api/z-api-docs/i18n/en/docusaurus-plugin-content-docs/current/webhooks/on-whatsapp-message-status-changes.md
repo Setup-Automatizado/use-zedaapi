@@ -9,7 +9,7 @@ This is the message status return webhook
 
 :::caution Attention
 
-Z-API does not accept webhooks that aren’t HTTPS
+FUNNELCHAT does not accept webhooks that aren’t HTTPS
 
 :::
 
@@ -29,7 +29,7 @@ You can change all webhooks at once to the same value using [this endpoint](./up
 
 #### /update-webhook-status
 
-`PUT` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/update-webhook-message-status
+`PUT` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/update-webhook-message-status
 
 ### Header
 
@@ -129,4 +129,4 @@ In case you receive 415 error, make sure to add the “Content-Type” of the ob
 <!--
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/on-whatsapp-message-status-changes.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe> -->
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/on-whatsapp-message-status-changes.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe> -->

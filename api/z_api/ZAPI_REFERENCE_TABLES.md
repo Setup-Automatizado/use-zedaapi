@@ -1,6 +1,6 @@
-# Z-API Reference Tables
+# FUNNELCHAT Reference Tables
 
-Consolida as rotas de grupos, comunidades e canais com campos obrigatórios/opcionais de request e principais atributos de resposta segundo a documentação Z-API (`*_zapi.md`).
+Consolida as rotas de grupos, comunidades e canais com campos obrigatórios/opcionais de request e principais atributos de resposta segundo a documentação FUNNELCHAT (`*_zapi.md`).
 
 ## Groups
 

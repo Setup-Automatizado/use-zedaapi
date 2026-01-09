@@ -7,7 +7,7 @@ title: Update Newsletter Image
 
 #### /update-newsletter-picture
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/update-newsletter-picture
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/update-newsletter-picture
 
 ### Header
 
@@ -41,14 +41,14 @@ This method is responsible for changing the image of an existing newsletter.
 
 Method
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/update-newsletter-picture
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/update-newsletter-picture
 
 #### Body
 
 ```json
 {
   "id": "999999999999999999@newsletter",
-  "pictureUrl": "https://www.z-api.io/wp-content/themes/z-api/dist/images/logo.svg"
+  "pictureUrl": "https://www.funnelchat/wp-content/themes/funnelchat/dist/images/logo.svg"
 }
 ```
 
@@ -102,4 +102,4 @@ Link to the response of the webhook (upon receiving)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/update-newsletter-picture.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/update-newsletter-picture.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

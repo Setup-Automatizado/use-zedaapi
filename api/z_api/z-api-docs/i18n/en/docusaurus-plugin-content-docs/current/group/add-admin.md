@@ -8,7 +8,7 @@ title: Promote group admin
 
 #### /add-admin
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/add-admin
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/add-admin
 
 ### Header
 
@@ -50,7 +50,7 @@ On November 4, 2021 whatsapp changed the format of creating new groups. before: 
 
 #### URL
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/add-admin
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/add-admin
 
 #### Body
 
@@ -110,4 +110,4 @@ Link to webhook response (on receipt)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/add-admin.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/add-admin.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

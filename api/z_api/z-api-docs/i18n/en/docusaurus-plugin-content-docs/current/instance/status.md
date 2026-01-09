@@ -7,7 +7,7 @@ title: Instance status
 
 #### /Status
 
-`GET` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/status
+`GET` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/status
 
 ### Header
 
@@ -19,9 +19,9 @@ title: Instance status
 
 ## Concept
 
-This method is responsible for giving you information about the health of your instance on Z-API. For good quality sending and receiving it is necessary to take the following precautions:
+This method is responsible for giving you information about the health of your instance on FUNNELCHAT. For good quality sending and receiving it is necessary to take the following precautions:
 
-- Configure your webhooks on Z-API to receive notifications about changes on the status of your instance. 
+- Configure your webhooks on FUNNELCHAT to receive notifications about changes on the status of your instance. 
 
 - Disable battery optimization of the cell phone that is connected, even if it is just an emulator (example for android https://youtu.be/Z1baLLXyvTM).    
 
@@ -33,7 +33,7 @@ This method is responsible for giving you information about the health of your i
 
 | Attributes | Type | Description |
 | :-- | :-: | :-- |
-| connected | boolean | Indicates if your number is connected to Z-API |
+| connected | boolean | Indicates if your number is connected to FUNNELCHAT |
 | error | string | nforms details if any of the attributes is not true.   - 'You are already connected.' - 'You need to restore the session.' - 'You are not connected.' |
 | smartphoneConnected | boolean | Indicates if the phone is connected to the internet |
 
@@ -41,4 +41,4 @@ This method is responsible for giving you information about the health of your i
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/instance-status.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/instance-status.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

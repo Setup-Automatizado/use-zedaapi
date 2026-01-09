@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: FunnelChat API (Whatsmeow Bridge)
   version: 0.1.0
-  description: "REST API compatible with Z-API schemas, backed by Whatsmeow.
+  description: "REST API, backed by Whatsmeow.
 
     The specification currently covers the instance management surface implemented in this phase.
 
@@ -146,17 +146,17 @@ components:
       additionalProperties: false
     InstanceStatusResponse:
       type: object
-      description: Z-API compatible payload returned by `/instances/{instanceId}/token/{instanceToken}/status`.
+      description: payload returned by `/instances/{instanceId}/token/{instanceToken}/status`.
       properties:
         connected:
           type: boolean
-          description: Mirrors Z-API `connected`, indicating if the instance is linked to WhatsApp.
+          description: Mirrors FUNNELCHAT `connected`, indicating if the instance is linked to WhatsApp.
         error:
           type: [string, "null"]
-          description: Same semantics as Z-API, detailing why the instance is not connected (empty string when everything is ok).
+          description: Same semantics as FUNNELCHAT, detailing why the instance is not connected (empty string when everything is ok).
         smartphoneConnected:
           type: boolean
-          description: Matches Z-API `smartphoneConnected`, signalling if the paired device has internet access.
+          description: Matches FUNNELCHAT `smartphoneConnected`, signalling if the paired device has internet access.
       required:
         - connected
         - error
@@ -391,14 +391,14 @@ components:
         id:
           type: string
           format: uuid
-          description: Z-API compatible identifier (duplicate of instanceId).
+          description: identifier (duplicate of instanceId).
         token:
           type: string
-          description: Z-API compatible instance token.
+          description: instance token.
         due:
           type: integer
           format: int64
-          description: Millisecond timestamp returned for Z-API compatibility.
+          description: Millisecond timestamp returned.
         instanceId:
           type: string
           format: uuid
@@ -439,19 +439,19 @@ components:
       additionalProperties: false
     InstanceListItem:
       type: object
-      description: Z-API compatible instance summary enriched with internal credentials.
+      description: instance summary enriched with internal credentials.
       properties:
         id:
           type: string
           format: uuid
-          description: Instance identifier (Z-API field).
+          description: Instance identifier (FUNNELCHAT field).
         token:
           type: string
-          description: Instance token used by Z-API clients.
+          description: Instance token used by FUNNELCHAT clients.
         due:
           type: integer
           format: int64
-          description: Millisecond timestamp used by Z-API tooling.
+          description: Millisecond timestamp used by FUNNELCHAT tooling.
         name:
           type: string
           description: Human friendly name for the instance.
@@ -467,7 +467,7 @@ components:
           description: True when the WhatsApp session is connected.
         middleware:
           type: string
-          description: Middleware flag returned for Z-API compatibility.
+          description: Middleware flag returned.
           enum:
             - web
             - mobile
@@ -532,7 +532,7 @@ components:
       additionalProperties: false
     InstanceListResponse:
       type: object
-      description: Z-API compatible pagination envelope for partner instances.
+      description: pagination envelope for partner instances.
       properties:
         total:
           type: integer
@@ -559,15 +559,15 @@ components:
       additionalProperties: false
     QueueMessageResponse:
       type: object
-      description: Represents a message in the queue with Z-API compatible format
+      description: Represents a message in the queue with format
       properties:
         _id:
           type: string
-          description: Message ID (same as zaapId for Z-API compatibility)
+          description: Message ID (same as zaapId)
           example: 39BB1684570F00E91090F6BBC7EE7646
         zaapId:
           type: string
-          description: Z-API message tracking ID
+          description: FUNNELCHAT message tracking ID
           example: 39BB1684570F00E91090F6BBC7EE7646
         messageId:
           type: string
@@ -585,7 +585,7 @@ components:
         message:
           type: [string, "null"]
           description: Message text content (only for text messages)
-          example: Hello from Z-API
+          example: Hello from FUNNELCHAT
         delayMessage:
           type: integer
           format: int64
@@ -653,7 +653,7 @@ components:
       additionalProperties: false
     QueueListResponse:
       type: array
-      description: Array of queue messages (Z-API compatible - direct array, not wrapped)
+      description: Array of queue messages
       items:
         $ref: "#/components/schemas/QueueMessageResponse"
     QueueCountResponse:
@@ -700,13 +700,13 @@ components:
         subject:
           type: string
           description: Group name
-          example: Z-API Community
+          example: FUNNELCHAT Community
       required:
         - phone
         - subject
     SendTextRequest:
       type: object
-      description: Request body for sending text messages (Z-API compatible)
+      description: Request body for sending text messages
       properties:
         phone:
           type: string
@@ -715,7 +715,7 @@ components:
         message:
           type: string
           description: Text message content
-          example: Hello from Z-API!
+          example: Hello from FUNNELCHAT!
         messageId:
           type: [string, "null"]
           description: Optional WhatsApp message ID to reply to
@@ -773,7 +773,7 @@ components:
       additionalProperties: false
     SendImageRequest:
       type: object
-      description: Request body for sending image messages (Z-API compatible)
+      description: Request body for sending image messages
       properties:
         phone:
           type: string
@@ -839,7 +839,7 @@ components:
       additionalProperties: false
     SendAudioRequest:
       type: object
-      description: Request body for sending audio/voice messages (Z-API compatible)
+      description: Request body for sending audio/voice messages
       properties:
         phone:
           type: string
@@ -901,7 +901,7 @@ components:
       additionalProperties: false
     SendVideoRequest:
       type: object
-      description: Request body for sending video messages (Z-API compatible)
+      description: Request body for sending video messages
       properties:
         phone:
           type: string
@@ -967,7 +967,7 @@ components:
     SendPTVRequest:
       type: object
       description: |
-        Request body for sending PTV (Push-To-Talk Video) messages (Z-API compatible).
+        Request body for sending PTV (Push-To-Talk Video) messages.
 
         **PTV Format**: Circular video notes displayed similarly to voice notes but with video content.
 
@@ -1090,7 +1090,7 @@ components:
       additionalProperties: false
     SendDocumentRequest:
       type: object
-      description: Request body for sending document messages (Z-API compatible)
+      description: Request body for sending document messages
       properties:
         phone:
           type: string
@@ -1156,7 +1156,7 @@ components:
     SendStickerRequest:
       type: object
       description: |
-        Request body for sending sticker messages (Z-API compatible).
+        Request body for sending sticker messages.
 
         **Sticker Format**: Accepts URL (http/https) or base64 data URI (data:image/webp;base64,...).
 
@@ -1266,7 +1266,7 @@ components:
     SendGifRequest:
       type: object
       description: |
-        Request body for sending GIF messages (Z-API compatible).
+        Request body for sending GIF messages.
 
         **GIF Format**: Accepts URL (http/https) or base64 data URI (data:image/gif;base64,...).
 
@@ -1389,7 +1389,7 @@ components:
     Contact:
       type: object
       description: |
-        WhatsApp contact information (Z-API compatible).
+        WhatsApp contact information.
 
         **Data Sources**:
         - Device contacts (if contact is in user's address book)
@@ -1441,7 +1441,7 @@ components:
     Chat:
       type: object
       description: |
-        WhatsApp chat information (Z-API compatible).
+        WhatsApp chat information.
 
         **Chat Types**:
         - Individual chats (person-to-person)
@@ -1455,7 +1455,7 @@ components:
 
         **Ordering**: By default, chats are ordered by lastMessageTime descending (most recent first).
 
-        **Unread Counts**: Both `unread` and `messagesUnread` represent the same count (Z-API compatibility).
+        **Unread Counts**: Both `unread` and `messagesUnread` represent the same count.
       properties:
         phone:
           type: string
@@ -1514,7 +1514,7 @@ components:
         messagesUnread:
           type: integer
           description: |
-            Alternative unread count field for Z-API compatibility.
+            Alternative unread count field.
             Contains the same value as `unread`.
           minimum: 0
           example: 5
@@ -1539,11 +1539,11 @@ components:
       additionalProperties: false
     SendMessageResponse:
       type: object
-      description: Response after enqueuing a message (Z-API compatible)
+      description: Response after enqueuing a message
       properties:
         zaapId:
           type: string
-          description: Unique message ID in our system (Z-API format)
+          description: Unique message ID in our system
           example: 39BB1684570F00E91090F6BBC7EE7646
         messageId:
           type: string
@@ -1651,7 +1651,7 @@ components:
       additionalProperties: false
     SendContactRequest:
       type: object
-      description: Request body for sending a single contact card (Z-API compatible)
+      description: Request body for sending a single contact card
       properties:
         phone:
           type: string
@@ -1659,15 +1659,15 @@ components:
           example: "5511999999999"
         contactName:
           type: string
-          description: Full name of the contact (Z-API compatible field)
+          description: Full name of the contact
           example: John Doe
         contactPhone:
           type: string
-          description: Phone number of the contact in international format (Z-API compatible field)
+          description: Phone number of the contact in international format
           example: "5511999999999"
         contactBusinessDescription:
           type: [string, "null"]
-          description: Optional business or organization description of the contact (Z-API compatible field)
+          description: Optional business or organization description of the contact
           example: Sales Manager at Example Corp
         firstName:
           type: [string, "null"]
@@ -1807,7 +1807,7 @@ components:
       additionalProperties: false
     ContactInfo:
       type: object
-      description: Contact information for multiple contacts (Z-API compatible)
+      description: Contact information for multiple contacts
       properties:
         contactName:
           type: string
@@ -1870,7 +1870,7 @@ components:
       additionalProperties: false
     SendContactsRequest:
       type: object
-      description: Request body for sending multiple contact cards (Z-API compatible)
+      description: Request body for sending multiple contact cards
       properties:
         phone:
           type: string
@@ -1928,7 +1928,7 @@ components:
       additionalProperties: false
     BooleanStatusResponse:
       type: object
-      description: "Z-API compatible acknowledgement payload using a boolean `value`."
+      description: "acknowledgement payload using a boolean `value`."
       properties:
         value:
           type: boolean
@@ -1938,7 +1938,7 @@ components:
       additionalProperties: false
     BooleanSuccessResponse:
       type: object
-      description: "Z-API compatible acknowledgement payload using a boolean `success`."
+      description: "acknowledgement payload using a boolean `success`."
       properties:
         success:
           type: boolean
@@ -1974,7 +1974,7 @@ components:
       additionalProperties: false
     GroupListItem:
       type: object
-      description: "Z-API compatible summary entry returned by `/groups`."
+      description: "summary entry returned by `/groups`."
       properties:
         archived:
           type: boolean
@@ -1987,7 +1987,7 @@ components:
           description: "Group JID identifier (`{id}-group`)."
         unread:
           type: string
-          description: Number of unread messages represented as string for Z-API parity.
+          description: Number of unread messages represented as string for FUNNELCHAT parity.
         name:
           type: string
           description: Group name.
@@ -2786,7 +2786,7 @@ components:
     PhoneExistsResponse:
       type: object
       description: |
-        Z-API compatible response for phone number validation.
+        response for phone number validation.
         Returns whether a phone number is registered on WhatsApp along with phone and LID.
       properties:
         exists:
@@ -2807,7 +2807,7 @@ components:
     PhoneExistsBatchRequest:
       type: object
       description: |
-        Z-API compatible request for batch phone number validation.
+        request for batch phone number validation.
         Allows validating up to 50,000 phone numbers in a single request.
       properties:
         phones:
@@ -2830,7 +2830,7 @@ components:
     PhoneExistsBatchResponse:
       type: object
       description: |
-        Z-API compatible response for batch phone number validation.
+        response for batch phone number validation.
         Contains the validation result for each phone number in the batch.
       properties:
         exists:
@@ -3016,7 +3016,7 @@ components:
           example: "550e8400-e29b-41d4-a716-446655440000"
         payload:
           type: object
-          description: Original Z-API format webhook payload
+          description: Original webhook payload
           additionalProperties: true
         cachedAt:
           type: integer
@@ -3461,7 +3461,7 @@ components:
     SendButtonListRequest:
       type: object
       description: |
-        Request body for sending simple reply button messages (Z-API compatible).
+        Request body for sending simple reply button messages.
 
         **Features:**
         - Simple reply buttons (1-3 buttons)
@@ -3550,7 +3550,7 @@ components:
     SendButtonActionsRequest:
       type: object
       description: |
-        Request body for sending button actions messages (Z-API compatible).
+        Request body for sending button actions messages.
 
         **Features:**
         - CTA buttons (URL, Call, Copy)
@@ -3625,7 +3625,7 @@ components:
     SendOptionListRequest:
       type: object
       description: |
-        Request body for sending interactive list/menu messages (Z-API compatible).
+        Request body for sending interactive list/menu messages.
 
         **Features:**
         - Multiple sections with rows
@@ -3701,7 +3701,7 @@ components:
     SendButtonPIXRequest:
       type: object
       description: |
-        Request body for sending PIX payment messages (Z-API compatible).
+        Request body for sending PIX payment messages.
 
         **Features:**
         - PIX QR code generation
@@ -3770,7 +3770,7 @@ components:
     SendButtonOTPRequest:
       type: object
       description: |
-        Request body for sending OTP (One-Time Password) messages (Z-API compatible).
+        Request body for sending OTP (One-Time Password) messages.
 
         **Features:**
         - One-tap copy button
@@ -3834,7 +3834,7 @@ components:
     SendCarouselRequest:
       type: object
       description: |
-        Request body for sending carousel messages (Z-API compatible).
+        Request body for sending carousel messages.
 
         **Features:**
         - Multiple swipeable cards with media
@@ -3940,10 +3940,10 @@ components:
         - data
       additionalProperties: false
 
-    # Poll message schemas (Z-API compatible)
+    # Poll message schemas
     PollOption:
       type: object
-      description: A single poll option (Z-API compatible format)
+      description: A single poll option
       properties:
         name:
           type: string
@@ -3956,7 +3956,7 @@ components:
     SendPollRequest:
       type: object
       description: |
-        Request body for sending poll messages (Z-API compatible).
+        Request body for sending poll messages.
 
         **Features:**
         - Create polls with 2-12 options
@@ -3964,7 +3964,6 @@ components:
         - Optional reply-to support
         - Typing indicator and delay support
 
-        **Z-API Compatible:** Matches Z-API request format exactly.
       properties:
         phone:
           type: string
@@ -3972,7 +3971,7 @@ components:
           example: "554499999999"
         message:
           type: string
-          description: Poll question text (Z-API uses "message" field for the question)
+          description: Poll question text (FUNNELCHAT uses "message" field for the question)
           example: "Outra enquete"
         poll:
           type: array
@@ -4011,10 +4010,10 @@ components:
         - poll
       additionalProperties: false
 
-    # Event message schemas (Z-API compatible)
+    # Event message schemas
     EventLocation:
       type: object
-      description: Event location information (Z-API compatible)
+      description: Event location information
       properties:
         name:
           type: string
@@ -4032,7 +4031,7 @@ components:
 
     EventPayload:
       type: object
-      description: Nested event object (Z-API compatible format)
+      description: Nested event object
       properties:
         name:
           type: string
@@ -4069,14 +4068,13 @@ components:
     SendEventRequest:
       type: object
       description: |
-        Request body for sending calendar event messages (Z-API compatible).
+        Request body for sending calendar event messages.
 
         **Features:**
         - Send calendar events to groups
         - Support for location and call links
         - Event cancellation support
 
-        **Z-API Compatible:** Matches Z-API request format exactly.
       properties:
         phone:
           type: string
@@ -4102,11 +4100,11 @@ components:
         - event
       additionalProperties: false
 
-    # Link preview message schemas (Z-API compatible)
+    # Link preview message schemas
     SendLinkRequest:
       type: object
       description: |
-        Request body for sending link messages with custom preview (Z-API compatible).
+        Request body for sending link messages with custom preview.
 
         **Features:**
         - Custom link preview title and description
@@ -4114,7 +4112,6 @@ components:
         - Optional message text before the link
         - Reply-to support
 
-        **Z-API Compatible:** Matches Z-API request format exactly.
       properties:
         phone:
           type: string
@@ -4160,11 +4157,11 @@ components:
         - linkUrl
       additionalProperties: false
 
-    # Chat modification schemas (Z-API compatible)
+    # Chat modification schemas
     ModifyChatRequest:
       type: object
       description: |
-        Request body for modifying chat state (Z-API compatible).
+        Request body for modifying chat state.
 
         **Supported Actions:**
         - read: Mark chat as read
@@ -4177,7 +4174,6 @@ components:
         - clear: Clear chat messages (not supported by whatsmeow)
         - delete: Delete the chat
 
-        **Z-API Compatible:** Matches Z-API request format exactly.
       properties:
         phone:
           type: string
@@ -4228,10 +4224,10 @@ components:
         - action
       additionalProperties: false
 
-    # Delete message schemas (Z-API compatible)
+    # Delete message schemas
     DeleteMessageResponse:
       type: object
-      description: Response for delete message operations (Z-API compatible)
+      description: Response for delete message operations
       properties:
         success:
           type: boolean
@@ -4416,7 +4412,7 @@ paths:
           name: middleware
           schema:
             type: string
-          description: Informational middleware flag (matches Z-API contract).
+          description: Informational middleware flag (matches FUNNELCHAT contract).
         - in: query
           name: page
           required: true
@@ -4432,7 +4428,7 @@ paths:
             type: integer
             minimum: 1
             maximum: 200
-          description: Page size (defaults to 15 as in Z-API examples).
+          description: Page size (defaults to 15 as in FUNNELCHAT examples).
           example: 15
       responses:
         "200":
@@ -4452,7 +4448,7 @@ paths:
       tags:
         - Partner
       summary: Partner creates an instance on demand
-      description: Mirrors Z-API partner endpoint for provisioning instances via integrator credentials.
+      description: Mirrors FUNNELCHAT partner endpoint for provisioning instances via integrator credentials.
       operationId: partnerCreateInstance
       security:
         - PartnerBearer: []
@@ -4624,7 +4620,7 @@ paths:
       tags:
         - Instances
       summary: Retrieve instance status
-      description: "Mirrors Z-API `/status`, returning live connectivity information for a provisioned instance."
+      description: "Mirrors FUNNELCHAT `/status`, returning live connectivity information for a provisioned instance."
       operationId: getInstanceStatus
       security:
         - ClientTokenAuth: []
@@ -4655,7 +4651,7 @@ paths:
       tags:
         - Instances
       summary: Fetch QR code for pairing
-      description: "Mirrors Z-API `/qr-code`, returning the current QR string required to link a phone."
+      description: "Mirrors FUNNELCHAT `/qr-code`, returning the current QR string required to link a phone."
       operationId: getInstanceQRCode
       security:
         - ClientTokenAuth: []
@@ -4680,7 +4676,7 @@ paths:
       tags:
         - Instances
       summary: Fetch QR code as base64 image
-      description: "Mirrors Z-API `/qr-code/image`, returning a PNG image encoded in base64 for rendering in clients."
+      description: "Mirrors FUNNELCHAT `/qr-code/image`, returning a PNG image encoded in base64 for rendering in clients."
       operationId: getInstanceQRCodeImage
       security:
         - ClientTokenAuth: []
@@ -4705,7 +4701,7 @@ paths:
       tags:
         - Instances
       summary: Retrieve device metadata
-      description: "Mirrors Z-API `/device`, returning information about the currently linked phone."
+      description: "Mirrors FUNNELCHAT `/device`, returning information about the currently linked phone."
       operationId: getInstanceDevice
       security:
         - ClientTokenAuth: []
@@ -4737,7 +4733,7 @@ paths:
         - Instances
       summary: Fetch phone pairing code
       description:
-        Mirrors Z-API `/phone-code/{phone}`, returning a code that can be typed into WhatsApp instead of scanning
+        Mirrors FUNNELCHAT `/phone-code/{phone}`, returning a code that can be typed into WhatsApp instead of scanning
         the QR code.
       operationId: getInstancePhoneCode
       security:
@@ -4775,7 +4771,7 @@ paths:
       tags:
         - Instances
       summary: Restart an instance connection
-      description: "Equivalent to Z-API `/restart`, forcing the client to reconnect to WhatsApp."
+      description: "Equivalent to FUNNELCHAT `/restart`, forcing the client to reconnect to WhatsApp."
       operationId: restartInstanceGet
       security:
         - ClientTokenAuth: []
@@ -4801,7 +4797,7 @@ paths:
       tags:
         - Instances
       summary: Restart an instance connection
-      description: "Equivalent to Z-API `/restart`, forcing the client to reconnect to WhatsApp."
+      description: "Equivalent to FUNNELCHAT `/restart`, forcing the client to reconnect to WhatsApp."
       operationId: restartInstance
       security:
         - ClientTokenAuth: []
@@ -4972,7 +4968,7 @@ paths:
       tags:
         - Instances
       summary: Update delivery webhook
-      description: "Mirrors Z-API `/update-webhook-delivery`, configuring the sent-message webhook endpoint."
+      description: "Mirrors FUNNELCHAT `/update-webhook-delivery`, configuring the sent-message webhook endpoint."
       operationId: updateWebhookDelivery
       security:
         - ClientTokenAuth: []
@@ -5009,7 +5005,7 @@ paths:
       tags:
         - Instances
       summary: Update received webhook
-      description: "Mirrors Z-API `/update-webhook-received`, configuring the incoming message webhook endpoint."
+      description: "Mirrors FUNNELCHAT `/update-webhook-received`, configuring the incoming message webhook endpoint."
       operationId: updateWebhookReceived
       security:
         - ClientTokenAuth: []
@@ -5047,7 +5043,7 @@ paths:
         - Instances
       summary: Update received+delivery webhook
       description:
-        Mirrors Z-API `/update-webhook-received-delivery`, configuring the webhook used when `notifySentByMe` is
+        Mirrors FUNNELCHAT `/update-webhook-received-delivery`, configuring the webhook used when `notifySentByMe` is
         enabled.
       operationId: updateWebhookReceivedDelivery
       security:
@@ -5085,7 +5081,7 @@ paths:
       tags:
         - Instances
       summary: Update message status webhook
-      description: "Mirrors Z-API `/update-webhook-message-status`, configuring delivery-read status updates."
+      description: "Mirrors FUNNELCHAT `/update-webhook-message-status`, configuring delivery-read status updates."
       operationId: updateWebhookMessageStatus
       security:
         - ClientTokenAuth: []
@@ -5122,7 +5118,7 @@ paths:
       tags:
         - Instances
       summary: Update disconnected webhook
-      description: "Mirrors Z-API `/update-webhook-disconnected`, configuring the disconnect notification endpoint."
+      description: "Mirrors FUNNELCHAT `/update-webhook-disconnected`, configuring the disconnect notification endpoint."
       operationId: updateWebhookDisconnected
       security:
         - ClientTokenAuth: []
@@ -5159,7 +5155,7 @@ paths:
       tags:
         - Instances
       summary: Update connected webhook
-      description: "Mirrors Z-API `/update-webhook-connected`, configuring the connection notification endpoint."
+      description: "Mirrors FUNNELCHAT `/update-webhook-connected`, configuring the connection notification endpoint."
       operationId: updateWebhookConnected
       security:
         - ClientTokenAuth: []
@@ -5196,7 +5192,7 @@ paths:
       tags:
         - Instances
       summary: Update chat presence webhook
-      description: "Mirrors Z-API `/update-webhook-chat-presence`, configuring the typing/presence webhook endpoint."
+      description: "Mirrors FUNNELCHAT `/update-webhook-chat-presence`, configuring the typing/presence webhook endpoint."
       operationId: updateWebhookChatPresence
       security:
         - ClientTokenAuth: []
@@ -5233,7 +5229,7 @@ paths:
       tags:
         - Instances
       summary: Toggle notify-sent-by-me
-      description: "Mirrors Z-API `/update-notify-sent-by-me`, enabling or disabling callbacks for messages sent by the instance."
+      description: "Mirrors FUNNELCHAT `/update-notify-sent-by-me`, enabling or disabling callbacks for messages sent by the instance."
       operationId: updateNotifySentByMe
       security:
         - ClientTokenAuth: []
@@ -5270,7 +5266,7 @@ paths:
       tags:
         - Instances
       summary: Update all webhooks at once
-      description: "Mirrors Z-API `/update-every-webhooks`, applying the same HTTPS endpoint to every webhook type."
+      description: "Mirrors FUNNELCHAT `/update-every-webhooks`, applying the same HTTPS endpoint to every webhook type."
       operationId: updateEveryWebhooks
       security:
         - ClientTokenAuth: []
@@ -5307,7 +5303,7 @@ paths:
       tags:
         - Instances
       summary: Toggle automatic call rejection
-      description: "Mirrors Z-API `/update-call-reject-auto`, enabling or disabling automatic rejection of incoming calls."
+      description: "Mirrors FUNNELCHAT `/update-call-reject-auto`, enabling or disabling automatic rejection of incoming calls."
       operationId: updateCallRejectAuto
       security:
         - ClientTokenAuth: []
@@ -5350,7 +5346,7 @@ paths:
       tags:
         - Instances
       summary: Update call rejection message
-      description: "Mirrors Z-API `/update-call-reject-message`, setting the message sent when rejecting calls."
+      description: "Mirrors FUNNELCHAT `/update-call-reject-message`, setting the message sent when rejecting calls."
       operationId: updateCallRejectMessage
       security:
         - ClientTokenAuth: []
@@ -5393,7 +5389,7 @@ paths:
       tags:
         - Instances
       summary: Toggle automatic message reading
-      description: "Mirrors Z-API `/update-auto-read-message`, enabling or disabling automatic marking of messages as read."
+      description: "Mirrors FUNNELCHAT `/update-auto-read-message`, enabling or disabling automatic marking of messages as read."
       operationId: updateAutoReadMessage
       security:
         - ClientTokenAuth: []
@@ -5436,7 +5432,7 @@ paths:
       tags:
         - Partner
       summary: Activate partner subscription
-      description: Enables on-demand billing/usage for the specified instance (Z-API parity).
+      description: Enables on-demand billing/usage for the specified instance (FUNNELCHAT parity).
       operationId: partnerSubscribeInstance
       security:
         - PartnerBearer: []
@@ -5467,7 +5463,7 @@ paths:
       tags:
         - Partner
       summary: Cancel partner subscription
-      description: Cancels the on-demand subscription for the instance, matching Z-API behaviour.
+      description: Cancels the on-demand subscription for the instance, matching FUNNELCHAT behaviour.
       operationId: partnerCancelInstance
       security:
         - PartnerBearer: []
@@ -5498,8 +5494,7 @@ paths:
       tags:
         - Messages
       summary: Send text message
-      description:
-        "Sends a text message via WhatsApp with Z-API compatible format.
+      description: "Sends a text message via WhatsApp with format.
 
 
         **Features:**
@@ -5521,7 +5516,7 @@ paths:
         - ✅ Non-blocking (returns immediately with zaapId)
 
 
-        **Z-API Compatible:** Matches Z-API request/response format exactly.
+
 
         "
       operationId: sendTextMessage
@@ -5538,7 +5533,7 @@ paths:
               $ref: "#/components/schemas/SendTextRequest"
             example:
               phone: "5511999999999"
-              message: Hello from Z-API!
+              message: Hello from FUNNELCHAT!
               delayMessage: 5
               delayTyping: 3
       responses:
@@ -5608,7 +5603,7 @@ paths:
         - Base64: `data:image/png;base64,iVBORw0KG...`
 
 
-        **Z-API Compatible:** Matches Z-API request/response format exactly.
+
 
         "
       operationId: sendImageMessage
@@ -5665,7 +5660,7 @@ paths:
         - Messages
       summary: Send sticker message
       description: |
-        Sends a sticker message via WhatsApp with Z-API compatible format.
+        Sends a sticker message via WhatsApp with format.
 
         **Features:**
         - ✅ Sticker URL or base64 data URI support
@@ -5688,7 +5683,6 @@ paths:
         - URL: `https://www.gstatic.com/webp/gallery/1.webp`
         - Base64: `data:image/webp;base64,UklGRiQAAABXRUJQ...`
 
-        **Z-API Compatible:** Matches Z-API request/response format exactly.
       operationId: sendStickerMessage
       security:
         - ClientTokenAuth: []
@@ -5781,7 +5775,6 @@ paths:
         - URL: `https://media.giphy.com/media/3o7abKhOpu0NwenH3O/giphy.gif`
         - Base64: `data:image/gif;base64,R0lGODlhAQABAIAAAP...`
 
-        **Z-API Compatible:** Matches Z-API request/response format exactly.
       operationId: sendGifMessage
       security:
         - ClientTokenAuth: []
@@ -5871,7 +5864,7 @@ paths:
         **Supported Formats:** OGG, MP3, WAV
 
 
-        **Z-API Compatible:** Matches Z-API request/response format exactly.
+
 
         '
       operationId: sendAudioMessage
@@ -5947,7 +5940,7 @@ paths:
         **Supported Formats:** MP4, 3GP, AVI, MOV
 
 
-        **Z-API Compatible:** Matches Z-API request/response format exactly.
+
 
         "
       operationId: sendVideoMessage
@@ -6003,7 +5996,7 @@ paths:
         - Messages
       summary: Send PTV (circular video) message
       description: |
-        Sends a PTV (Push-To-Talk Video) message via WhatsApp with Z-API compatible format.
+        Sends a PTV (Push-To-Talk Video) message via WhatsApp with format.
 
         **What is PTV?**
         PTV messages are circular video notes, displayed similarly to voice notes but with video content.
@@ -6030,7 +6023,6 @@ paths:
         - URL: `https://example.com/video.mp4`
         - Base64: `data:video/mp4;base64,AAAAIGZ0eXBpc29t...`
 
-        **Z-API Compatible:** Matches Z-API request/response format exactly.
       operationId: sendPTVMessage
       security:
         - ClientTokenAuth: []
@@ -6141,7 +6133,7 @@ paths:
         **Supported Formats:** PDF, DOC, DOCX, XLS, XLSX, TXT, CSV, ZIP, RAR
 
 
-        **Z-API Compatible:** Matches Z-API request/response format exactly.
+
 
         "
       operationId: sendDocumentMessage
@@ -6198,16 +6190,16 @@ paths:
         - Queue
       summary: List messages in queue with pagination
       description:
-        "Lists all messages in the queue for a specific instance with Z-API compatible pagination.
+        "Lists all messages in the queue for a specific instance with pagination.
 
 
-        **Z-API Compatibility:**
 
-        - Uses `page` and `pageSize` parameters (Z-API standard)
+
+        - Uses `page` and `pageSize` parameters
 
         - Returns direct array of messages (not wrapped in object)
 
-        - Field names in camelCase (Z-API format)
+        - Field names in camelCase
 
         - Delays in seconds (not milliseconds)
 
@@ -6266,7 +6258,7 @@ paths:
                   messageId: 7AD29EAA5EF34C301F0B
                   instanceId: 550e8400-e29b-41d4-a716-446655440000
                   phone: "5511999999999"
-                  message: Hello from Z-API
+                  message: Hello from FUNNELCHAT
                   delayMessage: 5
                   delayTyping: 3
                   created: 1624977905648
@@ -6325,7 +6317,7 @@ paths:
         - Cancel all scheduled messages at once
 
 
-        **Z-API Compatible:** Matches Z-API endpoint structure and behavior.
+
 
         "
       operationId: clearQueue
@@ -6364,7 +6356,7 @@ paths:
         "Returns the total number of messages in the queue for a specific instance.
 
 
-        **Z-API Compatible:** Matches Z-API response format exactly.
+
 
         "
       operationId: getQueueCount
@@ -6410,7 +6402,7 @@ paths:
         - ❌ Returns error if message already processed or doesn't exist
 
 
-        **Z-API Compatible:** Matches Z-API endpoint structure and behavior.
+
 
         "
       operationId: cancelQueueMessage
@@ -6462,7 +6454,7 @@ paths:
       summary: Send location message
       description:
         Sends a location pin via WhatsApp with GPS coordinates, optional name/address, replies, mentions, and ephemeral
-        support. Z-API compatible.
+        support..
       operationId: sendLocationMessage
       security:
         - ClientTokenAuth: []
@@ -6518,7 +6510,7 @@ paths:
         - Messages
       summary: Send single contact card
       description:
-        Sends a single contact card via WhatsApp. Fully compatible with Z-API format using contactName, contactPhone,
+        Sends a single contact card via WhatsApp.Using contactName, contactPhone,
         and optional contactBusinessDescription fields.
       operationId: sendContactMessage
       security:
@@ -6589,7 +6581,7 @@ paths:
         - Messages
       summary: Send multiple contact cards
       description:
-        Sends multiple contact cards via WhatsApp in a single message. Fully compatible with Z-API format. Maximum
+        Sends multiple contact cards via WhatsApp in a single message. Maximum
         10 contacts per request.
       operationId: sendContactsMessage
       security:
@@ -6690,7 +6682,6 @@ paths:
         - Confirmation dialogs
         - Simple navigation
 
-        **Z-API Compatible:** Matches Z-API request/response format exactly.
       operationId: sendButtonListMessage
       security:
         - ClientTokenAuth: []
@@ -6860,7 +6851,6 @@ paths:
         - Message: max 1024 characters
         - Footer: max 60 characters
 
-        **Z-API Compatible:** Matches Z-API request/response format exactly.
       operationId: sendButtonActionsMessage
       security:
         - ClientTokenAuth: []
@@ -7064,7 +7054,6 @@ paths:
         - Rating selection
         - Single-level menus
 
-        **Z-API Compatible:** Matches Z-API request/response format exactly.
       operationId: sendOptionListMessage
       security:
         - ClientTokenAuth: []
@@ -7272,7 +7261,6 @@ paths:
         - `payment.name` - Beneficiary name
         - `payment.amount` - Payment amount in BRL
 
-        **Z-API Compatible:** Matches Z-API request/response format exactly.
       operationId: sendButtonPixMessage
       security:
         - ClientTokenAuth: []
@@ -7461,7 +7449,6 @@ paths:
         - Messages automatically include security warnings
         - Never log or store OTP codes in plain text
 
-        **Z-API Compatible:** Matches Z-API request/response format exactly.
       operationId: sendButtonOtpMessage
       security:
         - ClientTokenAuth: []
@@ -7630,7 +7617,6 @@ paths:
         - Images: JPEG, PNG, WebP
         - Videos: MP4 (recommended), 3GP
 
-        **Z-API Compatible:** Matches Z-API request/response format exactly.
       operationId: sendCarouselMessage
       security:
         - ClientTokenAuth: []
@@ -7900,7 +7886,7 @@ paths:
     post:
       tags:
         - Messages
-      summary: Send poll message (Z-API compatible)
+      summary: Send poll message
       description: |
         Sends a poll (voting/survey) message to a WhatsApp user or group.
 
@@ -7911,7 +7897,7 @@ paths:
         - ✅ Delay message support
         - ✅ FIFO queue with per-recipient ordering
 
-        **Z-API Format:**
+
         - `message` field contains the poll question
         - `poll` array contains options with `name` field
         - `pollMaxOptions` controls voting: 0 or 1 = single choice, >1 = multiple choice
@@ -7921,7 +7907,6 @@ paths:
         - Option text: max 100 characters each
         - Question text: max 256 characters
 
-        **Z-API Compatible:** Matches Z-API request/response format exactly.
       operationId: sendPollMessage
       security:
         - ClientTokenAuth: []
@@ -8066,7 +8051,7 @@ paths:
     post:
       tags:
         - Messages
-      summary: Send event message (Z-API compatible)
+      summary: Send event message
       description: |
         Sends a scheduled event message to a WhatsApp group.
 
@@ -8079,7 +8064,7 @@ paths:
         - ✅ Custom message ID for tracking
         - ✅ FIFO queue with per-recipient ordering
 
-        **Z-API Format:**
+
         - Nested `event` object with all event details
         - `dateTime` in ISO 8601 format (e.g., "2024-04-29T09:30:53.309Z")
         - `location` object with name and optional coordinates
@@ -8089,7 +8074,6 @@ paths:
         - Events can only be sent to groups
         - Sender must be group admin for some event features
 
-        **Z-API Compatible:** Matches Z-API request/response format exactly.
       operationId: sendEventMessage
       security:
         - ClientTokenAuth: []
@@ -8270,7 +8254,7 @@ paths:
     post:
       tags:
         - Messages
-      summary: Send link with preview (Z-API compatible)
+      summary: Send link with preview
       description: |
         Sends a text message with a customized link preview.
 
@@ -8284,7 +8268,7 @@ paths:
         - ✅ Delay message support
         - ✅ FIFO queue with per-recipient ordering
 
-        **Z-API Format:**
+
         - `linkUrl` is the URL to preview (required)
         - `title` overrides the default link title
         - `linkDescription` overrides the default description
@@ -8296,7 +8280,6 @@ paths:
         - Will be downloaded and used as thumbnail
         - Falls back to default Open Graph image if download fails
 
-        **Z-API Compatible:** Matches Z-API request/response format exactly.
       operationId: sendLinkMessage
       security:
         - ClientTokenAuth: []
@@ -8438,7 +8421,7 @@ paths:
     delete:
       tags:
         - Messages
-      summary: Delete message (Z-API compatible)
+      summary: Delete message
       description: |
         Deletes (revokes) a previously sent message from a chat.
 
@@ -8446,9 +8429,9 @@ paths:
         - ✅ Delete own messages (sender = you)
         - ✅ Delete others' messages (group admin only)
         - ✅ Works in private chats and groups
-        - ✅ Z-API compatible query parameters
+        - ✅ query parameters
 
-        **Z-API Format:**
+
         Uses query parameters instead of request body:
         - `phone` - The chat phone number (recipient)
         - `messageId` - The WhatsApp message ID to delete
@@ -8464,7 +8447,6 @@ paths:
         - Admin delete: Requires group admin privileges
         - Once deleted, the message cannot be recovered
 
-        **Z-API Compatible:** Matches Z-API request/response format exactly.
       operationId: deleteMessage
       security:
         - ClientTokenAuth: []
@@ -8576,7 +8558,7 @@ paths:
     post:
       tags:
         - Messages
-      summary: Modify chat (Z-API compatible)
+      summary: Modify chat
       description: |
         Performs various chat modification actions like read, archive, pin, mute, clear, or delete.
 
@@ -8591,7 +8573,7 @@ paths:
         - `clear` - Clear all messages in chat
         - `delete` - Delete the entire chat
 
-        **Z-API Format:**
+
         Request body with `phone` and `action` fields.
 
         **Behavior:**
@@ -8602,7 +8584,6 @@ paths:
         - `clear`: Removes all messages but keeps chat
         - `delete`: Completely removes the chat
 
-        **Z-API Compatible:** Matches Z-API request/response format exactly.
       operationId: modifyChat
       security:
         - ClientTokenAuth: []
@@ -8787,7 +8768,6 @@ paths:
         **Privacy Notes:** Contact data respects WhatsApp privacy settings.
         Users who hide their profile will only show notify field.
 
-        **Z-API Compatible:** Matches Z-API request/response format exactly.
       operationId: getContacts
       security:
         - ClientTokenAuth: []
@@ -8889,7 +8869,7 @@ paths:
 
         **Important Notes:**
         - Use this API for form validation purposes
-        - Do NOT use before sending messages (Z-API validates automatically)
+        - Do NOT use before sending messages (FUNNELCHAT validates automatically)
         - Using for message validation creates duplicate checks
         - Not designed for spam - use responsibly
 
@@ -8898,7 +8878,6 @@ paths:
         - Numbers only (no formatting, spaces, or masks)
         - Example: `551199999999` (Brazil mobile)
 
-        **Z-API Compatible:** Matches Z-API request/response format exactly.
       operationId: phoneExists
       security:
         - ClientTokenAuth: []
@@ -9013,7 +8992,6 @@ paths:
         - `inputPhone`: The number as you sent it
         - `outputPhone`: The number formatted by WhatsApp (may include 9th digit)
 
-        **Z-API Compatible:** Matches Z-API request/response format exactly.
       operationId: phoneExistsBatch
       security:
         - ClientTokenAuth: []
@@ -9124,9 +9102,8 @@ paths:
 
         **Ordering:** Chats are ordered by lastMessageTime descending (most recent first).
 
-        **Unread Counts:** Both `unread` and `messagesUnread` fields represent the same count (Z-API compatibility).
+        **Unread Counts:** Both `unread` and `messagesUnread` fields represent the same count.
 
-        **Z-API Compatible:** Matches Z-API request/response format exactly.
       operationId: getChats
       security:
         - ClientTokenAuth: []
@@ -9236,7 +9213,7 @@ paths:
       tags:
         - Groups
       summary: List groups
-      description: Returns a paginated list of WhatsApp groups the instance participates in (Z-API compatible).
+      description: Returns a paginated list of WhatsApp groups the instance participates in.
       operationId: listGroups
       security:
         - ClientTokenAuth: []
@@ -9261,7 +9238,7 @@ paths:
           example: 10
       responses:
         "200":
-          description: Array of groups (unwrapped, matching Z-API behaviour).
+          description: Array of groups (unwrapped, matching FUNNELCHAT behaviour).
           content:
             application/json:
               schema:
@@ -9297,7 +9274,7 @@ paths:
       tags:
         - Groups
       summary: Create group
-      description: Creates a WhatsApp group with the provided participants (Z-API compatible).
+      description: Creates a WhatsApp group with the provided participants.
       operationId: createGroup
       security:
         - ClientTokenAuth: []
@@ -9312,7 +9289,7 @@ paths:
               $ref: "#/components/schemas/GroupCreateRequest"
             example:
               autoInvite: true
-              groupName: "Grupo Z-API"
+              groupName: "Grupo FUNNELCHAT"
               phones:
                 - "5544999999999"
                 - "5544888888888"
@@ -9419,7 +9396,7 @@ paths:
               $ref: "#/components/schemas/GroupUpdatePhotoRequest"
             example:
               groupId: "120363019502650977-group"
-              groupPhoto: "https://www.z-api.io/wp-content/themes/z-api/dist/images/logo.svg"
+              groupPhoto: "https://www.funnelchat/wp-content/themes/funnelchat/dist/images/logo.svg"
       responses:
         "200":
           description: Group photo updated successfully.
@@ -10289,7 +10266,7 @@ paths:
       tags:
         - Communities
       summary: Create community
-      description: Creates a new WhatsApp community (Z-API compatible).
+      description: Creates a new WhatsApp community.
       operationId: createCommunity
       security:
         - ClientTokenAuth: []
@@ -10363,7 +10340,7 @@ paths:
           example: 10
       responses:
         "200":
-          description: Array of communities (unwrapped, matching Z-API behaviour).
+          description: Array of communities (unwrapped, matching FUNNELCHAT behaviour).
           content:
             application/json:
               schema:
@@ -10660,7 +10637,7 @@ paths:
         - Communities
       summary: Delete community
       description: |
-        Mirrors Z-API `DELETE /communities/{communityId}`, permanently deleting a community.
+        Mirrors FUNNELCHAT `DELETE /communities/{communityId}`, permanently deleting a community.
 
         **Important**: This action is irreversible. All linked groups will be unlinked but not deleted.
       operationId: deleteCommunity
@@ -11186,7 +11163,7 @@ paths:
         - $ref: "#/components/parameters/InstanceToken"
       responses:
         "200":
-          description: Array of channels (unwrapped, matching Z-API behaviour).
+          description: Array of channels (unwrapped, matching FUNNELCHAT behaviour).
           content:
             application/json:
               schema:
@@ -11291,7 +11268,7 @@ paths:
                 countryCodes:
                   - BR
                   - CA
-              searchText: "Z-API"
+              searchText: "FUNNELCHAT"
       responses:
         "200":
           description: Search results returned successfully.
@@ -11679,7 +11656,7 @@ paths:
 
         **Response Formats:**
         - `aggregated` (default): Returns aggregated counts and optionally participant details
-        - `raw`: Returns data in Z-API webhook format for compatibility
+        - `raw`: Returns data in FUNNELCHAT webhook format for compatibility
 
         **Use Cases:**
         - Check if a message was read by all group participants
@@ -11732,7 +11709,7 @@ paths:
           description: |
             Response format:
             - `aggregated`: Returns aggregated counts with optional participant details
-            - `raw`: Returns data in Z-API MessageStatusCallback webhook format
+            - `raw`: Returns data in FUNNELCHAT MessageStatusCallback webhook format
         - name: limit
           in: query
           required: false
@@ -11817,7 +11794,7 @@ paths:
                       limit: 100
                       offset: 0
                 rawFormat:
-                  summary: Raw Z-API format
+                  summary: Raw
                   value:
                     data:
                       - status: "read"

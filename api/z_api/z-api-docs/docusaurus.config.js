@@ -21,15 +21,15 @@ module.exports = {
       },
     },
   },
-  title: 'Z-API Docs',
+  title: 'FUNNELCHAT Docs',
   tagline: 'Documentação completa da API',
-  url: 'https://developer.z-api.io',
+  url: 'https://developer.funnelchat',
   baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
-  favicon: 'https://www.z-api.io/wp-content/themes/z-api/favicon.png',
-  organizationName: 'Z-API',
-  projectName: 'z-api-docs',
+  favicon: 'https://www.funnelchat/wp-content/themes/funnelchat/favicon.png',
+  organizationName: 'FUNNELCHAT',
+  projectName: 'funnelchat-docs',
   scripts: [
     {
       src: 'https://app.gptmaker.ai/widget/3C0A35594CF700467B23BA6C8F512DC3/float.js',
@@ -40,8 +40,8 @@ module.exports = {
   themeConfig: {
     navbar: {
       logo: {
-        alt: 'Z-API Logo',
-        src: 'https://www.z-api.io/wp-content/themes/z-api/dist/images/logo.svg',
+        alt: 'FUNNELCHAT Logo',
+        src: 'https://www.funnelchat/wp-content/themes/funnelchat/dist/images/logo.svg',
       },
       items: [
         {
@@ -116,13 +116,13 @@ module.exports = {
     //     },
     //   ],
     //   logo: {
-    //     alt: 'Z-API Docs',
+    //     alt: 'FUNNELCHAT Docs',
     //     src:
-    //       'https://www.z-api.io/wp-content/themes/z-api/dist/images/logo.svg',
+    //       'https://www.funnelchat/wp-content/themes/funnelchat/dist/images/logo.svg',
     //     href: 'https://opensource.facebook.com',
     //   },
     //   // Please do not remove the credits, help to publicize Docusaurus :)
-    //   copyright: `Copyright © ${new Date().getFullYear()} Z-API.`,
+    //   copyright: `Copyright © ${new Date().getFullYear()} FUNNELCHAT.`,
     // },
   },
   presets: [
@@ -133,7 +133,7 @@ module.exports = {
           routeBasePath: '/',
           sidebarPath: require.resolve('./sidebars.js'),
           // Please change this to your repo.
-          editUrl: 'https://github.com/Z-API/z-api-docs/tree/main',
+          editUrl: 'https://github.com/FUNNELCHAT/funnelchat-docs/tree/main',
         },
         theme: {
           customCss: require.resolve('./src/css/custom.css'),

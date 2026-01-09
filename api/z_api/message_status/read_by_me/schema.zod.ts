@@ -12,7 +12,7 @@ export const ZApiMessageStatusReadByMeSchema = z.object({
     origin: z.string(),
     server: z.string(),
     'user-agent': z.string(),
-    'z-api-token': z.string(),
+    'funnelchat-token': z.string(),
   }),
   body: z.object({
     instanceId: z.string(),

@@ -7,7 +7,7 @@ title: Renaming the instance
 
 #### /update-name
 
-`PUT` <https://api.z-api.io/instances/ID_INSTANCE/token/TOKEN_INSTANCE/update-name>
+`PUT` <https://api.funnelchat/instances/ID_INSTANCE/token/TOKEN_INSTANCE/update-name>
 
 ### Header
 
@@ -67,4 +67,4 @@ In case you receive 415 error, make sure to add the “Content-Type” of the ob
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/rename-instance.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/rename-instance.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

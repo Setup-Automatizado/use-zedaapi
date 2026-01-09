@@ -21,7 +21,7 @@ module.exports = {
       // 'tips/android-active',
       // 'tips/stability',
       'tips/emulators',
-      'tips/Z-APIvsAPI-OFICIAL',
+      'tips/FUNNELCHATvsAPI-OFICIAL',
       'tips/button-status',
       'tips/file-expiration',
       'tips/postman-collection',

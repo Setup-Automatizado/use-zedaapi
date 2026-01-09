@@ -7,7 +7,7 @@ title: Enviar link
 
 #### /send-link
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/send-link
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/send-link
 
 ### Header
 
@@ -58,10 +58,10 @@ Método responsavel por enviar um link aos seus contatos, muito utilzado para co
 ```json
 {
   "phone": "5511999998888",
-  "message": "Aqui você coloca um texto sobre o site, atenção esse texto preciso ter o link que será enviado no final da mensagem! Assim: https://z-api.io",
+  "message": "Aqui você coloca um texto sobre o site, atenção esse texto preciso ter o link que será enviado no final da mensagem! Assim: https://funnelchat",
   "image": "https://firebasestorage.googleapis.com/v0/b/zaap-messenger-web.appspot.com/o/logo.png?alt=media",
-  "linkUrl": "https://z-api.io",
-  "title": "Z-API",
+  "linkUrl": "https://funnelchat",
+  "title": "FUNNELCHAT",
   "linkDescription": "Integração com o whatsapp"
 }
 ```
@@ -74,7 +74,7 @@ Método responsavel por enviar um link aos seus contatos, muito utilzado para co
 
 | Atributos | Tipo   | Descrição      |
 | :-------- | :----- | :------------- |
-| zaapId    | string | id no z-api    |
+| zaapId    | string | id no funnelchat    |
 | messageId | string | id no whatsapp |
 | id | string | Adicionado para compatibilidade com zapier, ele tem o mesmo valor do messageId |
 
@@ -108,4 +108,4 @@ Link para a response do webhook (ao receber)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/send-link.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/send-link.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

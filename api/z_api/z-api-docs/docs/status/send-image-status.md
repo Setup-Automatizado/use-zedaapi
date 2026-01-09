@@ -7,7 +7,7 @@ title: Enviando imagem status
 
 #### /send-image-status
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/send-image-status
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/send-image-status
 
 ### Header
 
@@ -44,17 +44,17 @@ Método responsavel por enviar uma imagem para seu status, lembre-se que os stat
 
 Método
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/send-image-status
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/send-image-status
 
 #### Body
 
 ```json
 {
-  "image": "https://www.z-api.io/wp-content/themes/z-api/dist/images/logo.svg"
+  "image": "https://www.funnelchat/wp-content/themes/funnelchat/dist/images/logo.svg"
 }
 
 {
-  "image": "https://www.z-api.io/wp-content/themes/z-api/dist/images/logo.svg",
+  "image": "https://www.funnelchat/wp-content/themes/funnelchat/dist/images/logo.svg",
   "caption": "texto da legenda"
 }
 ```
@@ -73,7 +73,7 @@ Se você tem duvidas em como enviar uma imagem Base64 acesse o tópico mensagens
 
 | Atributos | Tipo   | Descrição      |
 | :-------- | :----- | :------------- |
-| zaapId    | string | id no z-api    |
+| zaapId    | string | id no funnelchat    |
 | messageId | string | id no whatsapp |
 
 Exemplo
@@ -95,4 +95,4 @@ Neste caso certifique que esteja enviando o corretamente a especificação do m�
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/send-image-status.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/send-image-status.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

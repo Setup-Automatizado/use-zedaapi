@@ -7,7 +7,7 @@ title: Send catalog
 
 #### /send-catalog
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-catalog
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-catalog
 
 ### Header
 
@@ -63,7 +63,7 @@ In this method, you can send messages with a link to your catalog. The catalog f
 
 | Attribute | Type   | Description      |
 | :-------- | :----- | :------------- |
-| zaapId    | string | id in z-api    |
+| zaapId    | string | id in funnelchat    |
 | messageId | string | id in WhatsApp |
 | id        | string | Added for compatibility with Zapier, it has the same value as messageId |
 
@@ -98,4 +98,4 @@ Link to the webhook response (upon receipt)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/send-catalog.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/send-catalog.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

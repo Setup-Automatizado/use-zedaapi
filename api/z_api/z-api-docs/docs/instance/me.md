@@ -12,7 +12,7 @@ Este método te permite obter os dados da sua instância.
 
 #### /me
 
-`GET` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/me
+`GET` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/me
 
 ### Header
 
@@ -51,4 +51,4 @@ Este método te permite obter os dados da sua instância.
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/instance-me.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/instance-me.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

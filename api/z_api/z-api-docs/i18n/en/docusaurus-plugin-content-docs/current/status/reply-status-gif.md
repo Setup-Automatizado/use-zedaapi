@@ -7,7 +7,7 @@ title: Respond to Status with GIF
 
 #### /reply-status-gif
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/reply-status-gif
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/reply-status-gif
 
 ### Header
 
@@ -41,7 +41,7 @@ Method responsible for sending a gif response to a status.
 
 Method
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/reply-status-gif
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/reply-status-gif
 
 #### Body
 
@@ -61,7 +61,7 @@ Method
 
 | Attribute  |  Type   | Description                     |
 | :--------- | :-----  | :------------------------------ |
-| zaapId     | string  | id in z-api                      |
+| zaapId     | string  | id in funnelchat                      |
 | messageId  | string  | id in WhatsApp                   |
 | id         | string  | Added for compatibility with Zapier, it has the same value as messageId |
 
@@ -85,4 +85,4 @@ In this case, ensure you are sending the method specification correctly. Check i
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/reply-status-gif.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/reply-status-gif.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

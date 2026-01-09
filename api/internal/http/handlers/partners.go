@@ -53,10 +53,9 @@ type partnerCreateRequest struct {
 }
 
 type partnerCreateResponse struct {
-	// Z-API Standard Fields
-	ID    string `json:"id"`    // Instance ID (Z-API compatible)
-	Token string `json:"token"` // Instance Token (Z-API compatible)
-	Due   int64  `json:"due"`   // Timestamp in milliseconds (Z-API compatible)
+	ID    string `json:"id"`    // Instance ID
+	Token string `json:"token"` // Instance Token
+	Due   int64  `json:"due"`   // Timestamp in milliseconds
 
 	// Extended Fields (our API)
 	InstanceID         uuid.UUID                  `json:"instanceId"`
@@ -72,7 +71,7 @@ type partnerCreateResponse struct {
 	CreatedAt          string                     `json:"createdAt"`
 }
 
-// listInstancesResponse represents the Z-API compatible list response
+// listInstancesResponse represents the list response
 type listInstancesResponse struct {
 	Total     int                `json:"total"`
 	TotalPage int                `json:"totalPage"`
@@ -81,14 +80,13 @@ type listInstancesResponse struct {
 	Content   []instanceListItem `json:"content"`
 }
 
-// instanceListItem represents a single instance in the list (Z-API compatible)
+// instanceListItem represents a single instance in the list
 type instanceListItem struct {
-	// Z-API Standard Fields
 	ID    string `json:"id"`
 	Token string `json:"token"`
 	Due   int64  `json:"due"`
 
-	// Z-API Extended Fields
+	// FUNNELCHAT Extended Fields
 	Name              string `json:"name"`
 	Created           string `json:"created"`
 	PhoneConnected    bool   `json:"phoneConnected"`
@@ -148,7 +146,7 @@ func (h *PartnerHandler) createInstance(w http.ResponseWriter, r *http.Request) 
 	}
 
 	respondJSON(w, http.StatusCreated, partnerCreateResponse{
-		// Z-API Standard Fields
+
 		ID:    inst.ID.String(),
 		Token: inst.InstanceToken,
 		Due:   time.Now().UnixMilli(),
@@ -229,7 +227,6 @@ func (h *PartnerHandler) listInstances(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Convert to Z-API format
 	totalPage := int(result.Total) / result.PageSize
 	if int(result.Total)%result.PageSize > 0 {
 		totalPage++
@@ -238,7 +235,7 @@ func (h *PartnerHandler) listInstances(w http.ResponseWriter, r *http.Request) {
 	content := make([]instanceListItem, len(result.Data))
 	for i, inst := range result.Data {
 		item := instanceListItem{
-			// Z-API Standard Fields
+
 			ID:                 inst.ID.String(),
 			Token:              inst.InstanceToken,
 			Due:                time.Now().UnixMilli(), // Current timestamp as default

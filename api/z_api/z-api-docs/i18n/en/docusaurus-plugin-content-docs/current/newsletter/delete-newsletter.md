@@ -7,7 +7,7 @@ title: Delete Newsletter
 
 #### /delete-newsletter
 
-`DELETE` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/delete-newsletter
+`DELETE` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/delete-newsletter
 
 ### Header
 
@@ -39,7 +39,7 @@ This method is responsible for deleting a newsletter.
 
 Method
 
-`DELETE` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/delete-newsletter
+`DELETE` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/delete-newsletter
 
 #### Body
 
@@ -87,4 +87,4 @@ If you receive a 415 error, make sure to add the "Content-Type" to the headers o
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/delete-newsletter.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/delete-newsletter.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

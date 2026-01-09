@@ -12,7 +12,7 @@ This method activates the option of automatic call rejection in your API. When e
 
 #### /update-call-reject-auto
 
-`PUT` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/update-call-reject-auto
+`PUT` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/update-call-reject-auto
 
 ### Header
 

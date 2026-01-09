@@ -5,13 +5,13 @@ title: Account security token
 
 ### **Account security token**
 
-This Z-API security method uses token validation, providing an additional layer of protection for your instances, ensuring that only authorized requests have access to your resources.
+This FUNNELCHAT security method uses token validation, providing an additional layer of protection for your instances, ensuring that only authorized requests have access to your resources.
 
 ## Activating the feature.
 
 To enable the token validation feature, follow these simple steps:
 
-1. Log in to your Z-API account.
+1. Log in to your FUNNELCHAT account.
 
 2. In the "Security" tab, find the "Account Security Token" module.
 
@@ -53,4 +53,4 @@ Token validation offers numerous benefits for the security of your application:
 
 2. **Total Control**: You have full control over who can access your instances, ensuring that only legitimate requests are served.
 
-With token validation enabled, your Z-API application will be more secure and protected against cyber threats, ensuring the integrity and confidentiality of your data. Be sure to configure and activate this feature in all relevant instances to keep your application secure.
+With token validation enabled, your FUNNELCHAT application will be more secure and protected against cyber threats, ensuring the integrity and confidentiality of your data. Be sure to configure and activate this feature in all relevant instances to keep your application secure.

@@ -44,10 +44,10 @@ type WebhookSettings struct {
 }
 
 // Status represents the instance connection status response.
-// Z-API compatible fields: connected, error, smartphoneConnected
+// fields: connected, error, smartphoneConnected
 // Additional fields are hidden from JSON response but preserved for internal use.
 type Status struct {
-	Connected           bool       `json:"connected"`           // Z-API: Indica se seu número está conectado ao Z-API
+	Connected           bool       `json:"connected"`           // FUNNELCHAT: Indica se seu número está conectado ao FUNNELCHAT
 	ConnectionStatus    string     `json:"-"`                   // Hidden: internal connection state tracking
 	StoreJID            *string    `json:"-"`                   // Hidden: WhatsApp JID for internal use
 	LastConnected       *time.Time `json:"-"`                   // Hidden: last connection timestamp for internal tracking
@@ -55,11 +55,11 @@ type Status struct {
 	AutoReconnect       bool       `json:"-"`                   // Hidden: internal reconnection flag
 	WorkerAssigned      string     `json:"-"`                   // Hidden: internal worker assignment tracking
 	SubscriptionActive  bool       `json:"-"`                   // Hidden: internal subscription state
-	Error               string     `json:"error"`               // Z-API: Informa detalhes caso algum dos atributos não esteja true
-	SmartphoneConnected bool       `json:"smartphoneConnected"` // Z-API: Indica se o celular está conectado à internet
+	Error               string     `json:"error"`               // FUNNELCHAT: Informa detalhes caso algum dos atributos não esteja true
+	SmartphoneConnected bool       `json:"smartphoneConnected"` // FUNNELCHAT: Indica se o celular está conectado à internet
 }
 
-// DeviceMetadata espelha o objeto "device" retornado pela Z-API.
+// DeviceMetadata espelha o objeto "device" retornado pela FUNNELCHAT.
 type DeviceMetadata struct {
 	SessionName        string `json:"sessionName,omitempty"`
 	DeviceModel        string `json:"device_model,omitempty"`
@@ -72,7 +72,7 @@ type DeviceMetadata struct {
 	Platform           string `json:"platform,omitempty"`
 }
 
-// DeviceResponse replica o payload do GET /device da Z-API.
+// DeviceResponse replica o payload do GET /device da FUNNELCHAT.
 type DeviceResponse struct {
 	Phone          string         `json:"phone"`
 	ImgURL         *string        `json:"imgUrl"`

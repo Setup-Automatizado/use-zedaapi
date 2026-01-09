@@ -108,13 +108,13 @@ func (s *Service) List(ctx context.Context, instanceID uuid.UUID, params ListPar
 	return ListResult{Items: pageItems, Total: total}, nil
 }
 
-// toContact converts whatsmeow types to Z-API compatible Contact format.
+// toContact converts whatsmeow types to Contact format.
 // It handles optional fields by using pointers and setting them to nil when data is missing.
 func (s *Service) toContact(jid types.JID, info types.ContactInfo) Contact {
 	// Extract phone number from JID
 	phone := jid.User
 
-	// Z-API expects fields to be nil if not available (not empty strings)
+	// FUNNELCHAT expects fields to be nil if not available (not empty strings)
 	var name *string
 	if info.FullName != "" {
 		name = &info.FullName
@@ -231,7 +231,7 @@ func (s *Service) IsOnWhatsApp(ctx context.Context, instanceID uuid.UUID, phone 
 
 // IsOnWhatsAppBatch checks if multiple phone numbers are registered on WhatsApp.
 // Returns a slice of batch responses with validation results for each phone.
-// Maximum batch size is 50,000 numbers per request (Z-API limit).
+// Maximum batch size is 50,000 numbers per request (FUNNELCHAT limit).
 func (s *Service) IsOnWhatsAppBatch(ctx context.Context, instanceID uuid.UUID, phones []string) ([]PhoneExistsBatchResponse, error) {
 	logger := logging.ContextLogger(ctx, s.log)
 

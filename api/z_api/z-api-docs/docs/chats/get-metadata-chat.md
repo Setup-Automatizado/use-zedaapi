@@ -7,7 +7,7 @@ title: Pegar metadata do Chat
 
 #### /chat/{phone}
 
-`GET` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/chats/{phone}
+`GET` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/chats/{phone}
 
 ### Header
 
@@ -44,7 +44,7 @@ Este método é responsável por retornar as informações do metadata de um cha
 
 Método
 
-`GET` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/chats/5511999999999
+`GET` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/chats/5511999999999
 
 
 
@@ -90,4 +90,4 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/get-metadata-chat.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/get-metadata-chat.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

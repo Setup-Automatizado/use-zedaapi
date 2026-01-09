@@ -7,7 +7,7 @@ title: Buscar grupos
 
 #### /groups
 
-`GET` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/groups
+`GET` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/groups
 
 ### Header
 
@@ -45,7 +45,7 @@ Este método é responsável por retornar todos os grupos.
 
 Método
 
-`GET` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/groups?page=1&pageSize=10
+`GET` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/groups?page=1&pageSize=10
 
 ---
 
@@ -99,4 +99,4 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/get-groups.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/get-groups.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

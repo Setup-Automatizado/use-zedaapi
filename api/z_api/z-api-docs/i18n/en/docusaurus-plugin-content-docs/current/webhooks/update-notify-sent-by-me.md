@@ -21,7 +21,7 @@ In order for it to work you will need to have a webhook for the event [Upon rece
 
 #### /update-notify-sent-by-me
 
-`PUT` <https://api.z-api.io/instances/{id}/token/{token}/update-notify-sent-by-me>
+`PUT` <https://api.funnelchat/instances/{id}/token/{token}/update-notify-sent-by-me>
 
 ### Header
 

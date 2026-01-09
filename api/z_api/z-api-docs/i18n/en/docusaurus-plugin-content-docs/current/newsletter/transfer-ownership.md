@@ -7,7 +7,7 @@ title: Transfer Newsletter Ownership
 
 #### /newsletter/transfer-ownership/{newsletterId}
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/newsletter/transfer-ownership/{newsletterId}
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/newsletter/transfer-ownership/{newsletterId}
 
 ### Header
 
@@ -90,4 +90,4 @@ Link to the webhook response (upon receiving)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/transfer-newsletter-ownership.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/transfer-newsletter-ownership.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

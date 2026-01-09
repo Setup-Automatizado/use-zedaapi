@@ -7,7 +7,7 @@ title: Search Newsletters
 
 #### /search-newsletter
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/search-newsletter
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/search-newsletter
 
 ### Header
 
@@ -53,7 +53,7 @@ Object (filters)
 
 Method
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/search-newsletter
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/search-newsletter
 
 #### Body
 
@@ -64,7 +64,7 @@ Method
     "filters": { 
       "countryCodes": ["BR", "AF", "CA"]
     },
-    "searchText": "Z-API"
+    "searchText": "FUNNELCHAT"
   }
 ```
 
@@ -91,8 +91,8 @@ Method
     "data": [
       {
         "id": "999999999999999999@newsletter",
-        "name": "Z-API",
-        "description": "Official Z-API Newsletter",
+        "name": "FUNNELCHAT",
+        "description": "Official FUNNELCHAT Newsletter",
         "subscribersCount": "123",
         "picture": "https://mmg.whatsapp.net/v/t61.24694-24/345237462_968463277797373_5339431038113115975_n.jpg?stp=dst-jpg_s192x192&ccb=11-4&oh=01_AdTMyhA5kdwCdSqV0v784czJ1dHP_nkNhJ8TdgnANHro7Q&oe=651E6909&_nc_sid=000000&_nc_cat=109"
       },
@@ -132,4 +132,4 @@ Link to the response of the webhook (upon receiving)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/search-newsletter.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/search-newsletter.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

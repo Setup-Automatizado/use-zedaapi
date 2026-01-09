@@ -7,7 +7,7 @@ title: Online Visibility
 
 #### /privacy/online
 
-`POST` https://api.z-api.io/instances/{{instanceId}}/token/{{instanceToken}}/privacy/online
+`POST` https://api.funnelchat/instances/{{instanceId}}/token/{{instanceToken}}/privacy/online
 
 ### Header
 
@@ -40,7 +40,7 @@ Visibility scope. Accepted values:
 
 **Method**
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/privacy/online
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/privacy/online
 
 **Example**
 
@@ -80,4 +80,4 @@ If you receive a 415 error, make sure to add the "Content-Type" of the object yo
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/privacy-online.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/privacy-online.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

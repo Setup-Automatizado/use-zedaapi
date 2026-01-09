@@ -7,7 +7,7 @@ title: Batch Validate Numbers
 
 #### /phone-exists-batch
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/phone-exists-batch
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/phone-exists-batch
 
 ### Header
 
@@ -25,7 +25,7 @@ Batch Validation Limit: The maximum number of batch validations per request is 5
 :::
 
 :::important Important
-This method remains the ideal choice when you need to check if a number has WhatsApp, especially useful for form validation. However, it is crucial to note that it is not recommended to use this API to verify the existence of the number before sending a message. The Z-API automatically performs this validation with every message sent, and duplicate use of this method can lead to issues.
+This method remains the ideal choice when you need to check if a number has WhatsApp, especially useful for form validation. However, it is crucial to note that it is not recommended to use this API to verify the existence of the number before sending a message. The FUNNELCHAT automatically performs this validation with every message sent, and duplicate use of this method can lead to issues.
 :::
 
 ---
@@ -46,7 +46,7 @@ This method remains the ideal choice when you need to check if a number has What
 
 Method
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/phone-exists-batch
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/phone-exists-batch
 
 
 ```json
@@ -96,4 +96,4 @@ In case you receive 415 error, make sure to add the “Content-Type” of the ob
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/get-iswhatsapp-batch.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/get-iswhatsapp-batch.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

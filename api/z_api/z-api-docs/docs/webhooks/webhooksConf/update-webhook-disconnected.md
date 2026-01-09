@@ -8,15 +8,15 @@ title: Disconnected
 
 #### /update-webhook-disconnected
 
-`PUT` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-webhook-disconnected
+`PUT` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-webhook-disconnected
 
 ## Conceituação
 
-O Z-API oferece dentro das configurações da instância no painel admin o apontamento de webhooks para que ele possa notificar você sobre interações com seus chats/contatos. Este método é responsável por atualizar/adicionar esta informação via API, com ele você pode configurar os webhooks sem a necessidade de acessar o admin Z-API.
+O FUNNELCHAT oferece dentro das configurações da instância no painel admin o apontamento de webhooks para que ele possa notificar você sobre interações com seus chats/contatos. Este método é responsável por atualizar/adicionar esta informação via API, com ele você pode configurar os webhooks sem a necessidade de acessar o admin FUNNELCHAT.
 
 :::caution Atenção
 
-O Z-API não aceita webhooks que não sejam HTTPS
+O FUNNELCHAT não aceita webhooks que não sejam HTTPS
 
 :::
 
@@ -41,7 +41,7 @@ O Z-API não aceita webhooks que não sejam HTTPS
 
 #### URL
 
-`PUT` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-webhook-disconnected
+`PUT` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-webhook-disconnected
 
 #### Body
 
@@ -69,4 +69,4 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/update-webhook-disconnected.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/update-webhook-disconnected.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

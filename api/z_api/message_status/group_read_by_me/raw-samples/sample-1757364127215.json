@@ -3,10 +3,10 @@
     "content-length": "262",
     "host": "185.245.182.69:3000",
     "content-type": "application/json",
-    "origin": "https://api.z-api.io",
-    "server": "Z-API",
+    "origin": "https://api.funnelchat",
+    "server": "FUNNELCHAT",
     "user-agent": "Mozilla/5.0 (iPad; CPU OS 13_2_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) FxiOS/111.0 Mobile/15E148 Safari/605.1.15",
-    "z-api-token": "0B039DE5C908EDAF88346CED"
+    "funnelchat-token": "0B039DE5C908EDAF88346CED"
   },
   "body": {
     "instanceId": "3E6D06A438D501A5CD70265FDA264287",

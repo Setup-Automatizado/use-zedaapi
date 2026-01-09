@@ -11,11 +11,11 @@ O método de segurança de bloqueio por IP introduz uma camada adicional de prot
 
 Para ativar esse recurso, siga os passos simples abaixo:
 
-1. Faça o Login na Z-API:
-Acesse o painel de controle da Z-API com suas credenciais de administrador.
+1. Faça o Login na FUNNELCHAT:
+Acesse o painel de controle da FUNNELCHAT com suas credenciais de administrador.
 
 2. Navegue até a Página de Segurança:
-No painel da Z-API, encontre a opção "Segurança" no menu de navegação ou na área de configurações.
+No painel da FUNNELCHAT, encontre a opção "Segurança" no menu de navegação ou na área de configurações.
 
 ![img](../../img/ip-block.jpeg)
 

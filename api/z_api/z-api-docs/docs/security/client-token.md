@@ -5,13 +5,13 @@ title: Token de segurança da conta
 
 ### **Token de segurança da conta**
 
-Esse método de segurança da Z-API, utiliza a validação por token, proporcionando uma camada adicional de proteção para suas instâncias, garantindo que apenas solicitações autorizadas tenham acesso aos seus recursos.
+Esse método de segurança da FUNNELCHAT, utiliza a validação por token, proporcionando uma camada adicional de proteção para suas instâncias, garantindo que apenas solicitações autorizadas tenham acesso aos seus recursos.
 
 ## Ativando o Recurso
 
 Para habilitar o recurso de validação por token, siga estas etapas simples:
 
-1. Faça login na sua conta Z-API.
+1. Faça login na sua conta FUNNELCHAT.
 
 2. Na aba "Segurança", localize o módulo "Token de Segurança da Conta".
 
@@ -53,4 +53,4 @@ A validação por token oferece inúmeros benefícios para a segurança da sua a
 
 2. **Controle Total**: Você tem controle total sobre quem pode acessar suas instâncias, garantindo que apenas solicitações legítimas sejam atendidas.
 
-Com a validação por token habilitada, sua aplicação Z-API estará mais segura e protegida contra ameaças cibernéticas, garantindo a integridade e confidencialidade dos seus dados. Certifique-se de configurar e ativar esse recurso em todas as instâncias relevantes para manter sua aplicação segura.
+Com a validação por token habilitada, sua aplicação FUNNELCHAT estará mais segura e protegida contra ameaças cibernéticas, garantindo a integridade e confidencialidade dos seus dados. Certifique-se de configurar e ativar esse recurso em todas as instâncias relevantes para manter sua aplicação segura.

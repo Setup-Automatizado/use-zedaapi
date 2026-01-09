@@ -9,7 +9,7 @@ Esse endpoint serve para você que deseja alterar todos os webhooks para a mesma
 
 :::caution Atenção
 
-O Z-API não aceita webhooks que não sejam HTTPS
+O FUNNELCHAT não aceita webhooks que não sejam HTTPS
 
 :::
 
@@ -21,7 +21,7 @@ O Z-API não aceita webhooks que não sejam HTTPS
 
 #### /update-every-webhooks
 
-`PUT` <https://api.z-api.io/instances/{id}/token/{token}/update-every-webhooks>
+`PUT` <https://api.funnelchat/instances/{id}/token/{token}/update-every-webhooks>
 
 ### Header
 

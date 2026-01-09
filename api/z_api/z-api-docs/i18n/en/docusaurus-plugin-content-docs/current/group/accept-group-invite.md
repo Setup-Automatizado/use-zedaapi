@@ -7,7 +7,7 @@ title: Accept group invite
 
 #### /accept-invite-group?url={{INVITATION_URL}}
 
-`GET` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/accept-invite-group?url={{INVITATION_URL}}
+`GET` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/accept-invite-group?url={{INVITATION_URL}}
 
 ### Header
 
@@ -34,7 +34,7 @@ This method is responsible for accepting an invitation you received to join a gr
 
 #### URL
 
-`GET` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/accept-invite-group?url=https://chat.whatsapp.com/bh8XyNrIUj84YZoy5xcaa112
+`GET` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/accept-invite-group?url=https://chat.whatsapp.com/bh8XyNrIUj84YZoy5xcaa112
 
 ---
 
@@ -74,4 +74,4 @@ Link to the webhook response (upon receiving) invitation message
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/accept-group-invite.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/accept-group-invite.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

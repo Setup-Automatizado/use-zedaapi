@@ -554,7 +554,7 @@ func (c *Coordinator) EnqueueMessage(ctx context.Context, instanceID uuid.UUID, 
 }
 
 // ListQueueJobs retrieves messages from the queue with pagination
-// Returns QueueListResponse compatible with Z-API format
+// Returns QueueListResponse
 func (c *Coordinator) ListQueueJobs(ctx context.Context, instanceID uuid.UUID, limit, offset int) (*QueueListResponse, error) {
 	// Get messages from repository
 	messages, total, err := c.repo.ListMessages(ctx, instanceID, limit, offset)

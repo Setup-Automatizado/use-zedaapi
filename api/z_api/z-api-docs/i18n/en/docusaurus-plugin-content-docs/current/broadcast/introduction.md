@@ -4,7 +4,7 @@ title: Introduction
 ---
 
 :::warning WhatsApp Web Limitation
-Since this feature is **not available on WhatsApp Web**, **Z-API currently does not support sending messages via broadcast lists**. This is a limitation imposed by the WhatsApp Web platform itself.
+Since this feature is **not available on WhatsApp Web**, **FUNNELCHAT currently does not support sending messages via broadcast lists**. This is a limitation imposed by the WhatsApp Web platform itself.
 :::
 
 

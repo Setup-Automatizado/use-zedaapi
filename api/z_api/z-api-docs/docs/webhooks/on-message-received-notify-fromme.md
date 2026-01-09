@@ -9,7 +9,7 @@ Esse é o webhook de retorno de mensagens recebidas e enviadas por mim (atualiza
 
 :::caution Atenção
 
-O Z-API não aceita webhooks que não sejam HTTPS
+O FUNNELCHAT não aceita webhooks que não sejam HTTPS
 
 :::
 
@@ -23,7 +23,7 @@ Para atualizar a rota do webhook é possível fazer isso pela API ou pelo painel
 
 #### /update-webhook-received-delivery
 
-`PUT` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-webhook-received-delivery
+`PUT` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-webhook-received-delivery
 
 ### Header
 
@@ -211,8 +211,8 @@ Os possíveis retornos do webhook **on-message-received-delivery** estão cadast
   "forwarded": false,
   "type": "ReceivedCallback",
   "listResponseMessage": {
-    "message": "Z-API Asas para sua imaginação",
-    "title": "Z-API",
+    "message": "FUNNELCHAT Asas para sua imaginação",
+    "title": "FUNNELCHAT",
     "selectedRowId": "1"
   },
   "instanceId": "instance.id"
@@ -765,4 +765,4 @@ break;
 
 <!-- ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/on-message-received.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe> -->
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/on-message-received.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe> -->

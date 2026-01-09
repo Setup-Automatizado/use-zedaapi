@@ -9,7 +9,7 @@ Esse é o webhook de retorno do status da mensagem
 
 :::caution Atenção
 
-O Z-API não aceita webhooks que não sejam HTTPS
+O FUNNELCHAT não aceita webhooks que não sejam HTTPS
 
 :::
 
@@ -29,7 +29,7 @@ Para atualizar a rota do webhook é possível fazer isso pela API ou pelo painel
 
 #### /update-webhook-status
 
-`PUT` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-webhook-message-status
+`PUT` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-webhook-message-status
 
 ### Header
 
@@ -137,4 +137,4 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 <!--
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/on-whatsapp-message-status-changes.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe> -->
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/on-whatsapp-message-status-changes.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe> -->

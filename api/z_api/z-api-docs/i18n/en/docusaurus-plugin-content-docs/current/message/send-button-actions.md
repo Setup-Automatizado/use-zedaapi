@@ -7,7 +7,7 @@ title: Send text with action buttons
 
 #### /send-button-actions
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-button-actions
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-button-actions
 
 ### Header
 
@@ -18,7 +18,7 @@ title: Send text with action buttons
 ---
 
 :::caution Warning
-Button sending is currently available, but there are some decisive factors for operation. For more details visit the [Button Status](https://developer.z-api.io/en/tips/button-status) topic.
+Button sending is currently available, but there are some decisive factors for operation. For more details visit the [Button Status](https://developer.funnelchat/en/tips/button-status) topic.
 :::
 
 ## Concept
@@ -87,7 +87,7 @@ Currently, when sending the three types of buttons simultaneously, WhatsApp Web 
         {
             "id": "2",
             "type": "URL",
-            "url": "https://z-api.io",
+            "url": "https://funnelchat",
             "label": "Visit our website"
         }
     ]
@@ -118,7 +118,7 @@ Currently, when sending the three types of buttons simultaneously, WhatsApp Web 
 
 | Attributes| Type   | Description    |
 | :-------- | :----- | :------------- |
-| zaapId    | string | id on z-api    |
+| zaapId    | string | id on funnelchat    |
 | messageId | string | id on whatsapp |
 | id        | string | Added for compatibility with Zapier, it has the same value as the messageId |
 
@@ -152,6 +152,6 @@ Link for webhooks response (upon receiving)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/send-button-actions.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/send-button-actions.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
 
 

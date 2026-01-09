@@ -10,15 +10,15 @@ title: Status
 
 #### /update-webhook-status
 
-`PUT` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-webhook-message-status
+`PUT` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-webhook-message-status
 
 ## Conceituação
 
-Este método é responsável por atualizar/adicionar o seu EndPoint para o webhook de status via API ou seja, sem a necessidade de acessar o admin Z-API.
+Este método é responsável por atualizar/adicionar o seu EndPoint para o webhook de status via API ou seja, sem a necessidade de acessar o admin FUNNELCHAT.
 
 :::caution Atenção
 
-O Z-API não aceita webhooks que não sejam HTTPS
+O FUNNELCHAT não aceita webhooks que não sejam HTTPS
 
 :::
 
@@ -43,7 +43,7 @@ O Z-API não aceita webhooks que não sejam HTTPS
 
 #### URL
 
-`PUT` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-webhook-message-status
+`PUT` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-webhook-message-status
 
 #### Body
 
@@ -71,4 +71,4 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/update-webhook-message-status.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/update-webhook-message-status.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

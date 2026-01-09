@@ -7,7 +7,7 @@ title: Criando uma instância
 
 #### /on-demand
 
-`POST` https://api.z-api.io/instances/integrator/on-demand
+`POST` https://api.funnelchat/instances/integrator/on-demand
 
 ---
 
@@ -62,13 +62,13 @@ Caso você não realize a assinatura em até 2 dias nosso devops vai automaticam
 
 **Método**
 
-`POST` https://api.z-api.io/instances/integrator/on-demand
+`POST` https://api.funnelchat/instances/integrator/on-demand
 
 **Exemplo**
 
 ```json
 {
-  "name": "Instancia Z-API - 9292812",
+  "name": "Instancia FUNNELCHAT - 9292812",
   "sessionName": "Testes testes",
   "deliveryCallbackUrl": "https://meuwebhook.com.br/delivery",
   "receivedCallbackUrl": "https://meuwebhook.com.br/receive",
@@ -122,4 +122,4 @@ Link para a response do webhook (ao receber)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/create-instance.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/create-instance.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

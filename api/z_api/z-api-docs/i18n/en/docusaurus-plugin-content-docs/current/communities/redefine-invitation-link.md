@@ -7,7 +7,7 @@ title: Redefine community invitation link
 
 #### /redefine-invitation-link/{communityId}
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/redefine-invitation-link/{communityId}
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/redefine-invitation-link/{communityId}
 
 ### Header
 
@@ -36,7 +36,7 @@ This method allows you to redefine the invitation link of a community.
 
 #### URL
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/redefine-invitation-link/120363019502650977
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/redefine-invitation-link/120363019502650977
 
 ---
 
@@ -76,4 +76,4 @@ Link to the webhook response (upon receiving)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/redefine-community-invitation-link.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/redefine-community-invitation-link.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

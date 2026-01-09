@@ -1,6 +1,6 @@
 {
   "method": "POST",
-  "url": "https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/send-button-actions",
+  "url": "https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/send-button-actions",
   "httpVersion": "HTTP/1.1",
   "queryString": [],
   "headers": [
@@ -16,6 +16,6 @@
   "cookies": [],
   "postData": {
     "mimeType": "application/json",
-    "text": "{\"phone\": \"554499999999\",\"message\": \"uma mensagem\",\"title\": \"se quiser vincular um titulo\",\"footer\": \"se quiser vincular um rodape top\",\"buttonActions\": [{\"id\": \"1\",\"type\": \"CALL\",\"phone\": \"+554498398733\",\"label\": \"Fale conosco\"},{\"id\": \"2\",\"type\": \"URL\",\"url\": \"https://z-api.io\",\"label\": \"Visite nosso site\"}]}"
+    "text": "{\"phone\": \"554499999999\",\"message\": \"uma mensagem\",\"title\": \"se quiser vincular um titulo\",\"footer\": \"se quiser vincular um rodape top\",\"buttonActions\": [{\"id\": \"1\",\"type\": \"CALL\",\"phone\": \"+554498398733\",\"label\": \"Fale conosco\"},{\"id\": \"2\",\"type\": \"URL\",\"url\": \"https://funnelchat\",\"label\": \"Visite nosso site\"}]}"
   }
 }

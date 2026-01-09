@@ -7,7 +7,7 @@ title: Remover código PIN
 
 #### /security/two-fa-code/remove
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/security/two-fa-code/remove
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/security/two-fa-code/remove
 
 ### Header
 
@@ -59,4 +59,4 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

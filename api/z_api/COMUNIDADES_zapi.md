@@ -21,10 +21,10 @@ Perguntas sobre funcionamento das APIs#
 Primeiro é importante verificar se o aplicativo do whatsapp do seu celular já está compatível com as comunidades, caso não esteja, aguarde a atualização do aplicativo para sua conta, agora caso já tenha acesso a comunidades, veja a documentação de como criar comunidade via API.
 
 2. Consigo listar as comunidades que faço parte?#
-Sim, o Z-API disponibiliza os métodos para que você consiga saber quais comunidades você faz parte, veja a documentação de como listar suas comunidades.
+Sim, o FUNNELCHAT disponibiliza os métodos para que você consiga saber quais comunidades você faz parte, veja a documentação de como listar suas comunidades.
 
 3. Consigo vincular e desvincular grupos a uma comunidade?#
-Com certeza! o Z-API te entrega outras duas APIs para que você consiga gerenciar os grupos de uma comunidade, veja como vincular grupos ou desvincular grupos de uma comunidade.
+Com certeza! o FUNNELCHAT te entrega outras duas APIs para que você consiga gerenciar os grupos de uma comunidade, veja como vincular grupos ou desvincular grupos de uma comunidade.
 
 4. Como enviar mensagem para toda comunidade?#
 Como dito acima, a comunidade em si serve apenas para agrupar seus grupos e dar uma experiência e visão de todos os grupos da comunidade aos usuários. Você pode sim enviar mensagem para toda comunidade, más para isso é utilizado o Grupo anúncios. Como o grupo de avisos se trata de um grupo como qualquer outro, basta você possuir o phone do grupo e utilizar as APIs de envio de mensagem normalmente, assim como outros grupos comuns.
@@ -44,7 +44,7 @@ Como comentado anteriormente, a comunidade em si é apenas o que agrupa seus gru
 Criar comunidade
 Método#
 /create-group#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities
 
 Header#
 Key	Value
@@ -62,7 +62,7 @@ description	string	Descrição da comunidade
 Request Body#
 Método
 
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities
 
 Exemplo
 
@@ -95,7 +95,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Listar comunidades
 Método#
 /communities#
-GET https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities
+GET https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities
 
 Header#
 Key	Value
@@ -114,7 +114,7 @@ Request Params#
 URL exemplo#
 Método
 
-GET https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities
+GET https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities
 
 Response#
 200#
@@ -138,7 +138,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Vincular grupos
 Método#
 /communities/link#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities/link
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities/link
 
 Header#
 Key	Value
@@ -158,7 +158,7 @@ Opcionais#
 Atributos	Tipo	Descrição
 Request Body#
 URL#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities/link
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities/link
 
 Body#
 {
@@ -183,7 +183,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Desvincular grupos
 Método#
 /communities/unlink#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities/unlink
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities/unlink
 
 Header#
 Key	Value
@@ -203,7 +203,7 @@ Opcionais#
 Atributos	Tipo	Descrição
 Request Body#
 URL#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities/unlink
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities/unlink
 
 Body#
 {
@@ -228,7 +228,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Metadata da comunidade
 Método#
 /communities-metadata/{communityId}#
-GET https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities-metadata/{idDaComunidade}
+GET https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities-metadata/{idDaComunidade}
 
 Header#
 Key	Value
@@ -243,7 +243,7 @@ Opcionais#
 Atributos	Tipo	Descrição
 Request Params#
 URL#
-GET https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities-metadata/{idDaComunidade}
+GET https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities-metadata/{idDaComunidade}
 
 Response#
 200#
@@ -286,7 +286,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Redefinir link de convite da comunidade
 Método#
 /redefine-invitation-link/{communityId}#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/redefine-invitation-link/{communityId}
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/redefine-invitation-link/{communityId}
 
 Header#
 Key	Value
@@ -300,7 +300,7 @@ Atributos	Tipo	Descrição
 communityId	string	ID/Fone da comunidade
 Request url#
 URL#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/redefine-invitation-link/120363019502650977
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/redefine-invitation-link/120363019502650977
 
 Response#
 200#
@@ -320,7 +320,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Adicionar participantes
 Método#
 /add-participant#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/add-participant
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/add-participant
 
 Header#
 Key	Value
@@ -329,7 +329,7 @@ Conceituação#
 Este método é reponsável por adicionar novos participantes a comunidade.
 
 Novo atributo
-Recentemente, o WhatsApp implementou uma validação para verificar se o número de telefone conectado à API possui o contato do cliente salvo. No entanto, a Z-API desenvolveu uma solução para contornar essa validação, introduzindo um novo recurso chamado "autoInvite". Agora, quando uma solicitação é enviada para adicionar 10 clientes a um grupo e apenas 5 deles são adicionados com sucesso, a API envia convites privados para os cinco clientes que não foram adicionados. Esses convites permitem que eles entrem na comunidade, mesmo que seus números de telefone não estejam salvos como contatos.
+Recentemente, o WhatsApp implementou uma validação para verificar se o número de telefone conectado à API possui o contato do cliente salvo. No entanto, a FUNNELCHAT desenvolveu uma solução para contornar essa validação, introduzindo um novo recurso chamado "autoInvite". Agora, quando uma solicitação é enviada para adicionar 10 clientes a um grupo e apenas 5 deles são adicionados com sucesso, a API envia convites privados para os cinco clientes que não foram adicionados. Esses convites permitem que eles entrem na comunidade, mesmo que seus números de telefone não estejam salvos como contatos.
 
 Atributos#
 Obrigatórios#
@@ -339,7 +339,7 @@ communityId	string	ID/Fone da comunidade. Pode ser obtido na API de Listar comun
 phones	array string	Array com os número(s) do(s) participante(s) a serem adicionados
 Request Body#
 URL#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/add-participant
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/add-participant
 
 Body#
   {
@@ -365,7 +365,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Remover participantes
 Método#
 /remove-participant#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/remove-participant
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/remove-participant
 
 Header#
 Key	Value
@@ -380,7 +380,7 @@ communityId	string	ID/Fone da comunidade. Pode ser obtido na API de Listar comun
 phones	array string	Array com os número(s) do(s) participante(s) a serem removidos
 Request Body#
 URL#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/remove-participant
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/remove-participant
 
 Body#
   {
@@ -405,7 +405,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Promover admin da comunidade
 Método#
 /add-admin#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/add-admin
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/add-admin
 
 Header#
 Key	Value
@@ -420,7 +420,7 @@ communityId	string	ID/Fone da comunidade. Pode ser obtido na API de Listar comun
 phones	array string	Array com os número(s) do(s) participante(s) a serem promovidos
 Request Body#
 URL#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/add-admin
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/add-admin
 
 Body#
   {
@@ -445,7 +445,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Remover admin da comunidade
 Método#
 /remove-admin#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/remove-admin
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/remove-admin
 
 Header#
 Key	Value
@@ -460,7 +460,7 @@ communityId	string	id/fone da comunidade. Pode ser obtido na API de Listar comun
 phones	array string	Array com os número(s) a ser(em) removido(s) da administração do grupo
 Request Body#
 URL#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/remove-admin
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/remove-admin
 
 Body#
   {
@@ -485,7 +485,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Configurações da comunidade
 Método#
 /communities/settings#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities/settings
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities/settings
 
 Header#
 Key	Value
@@ -500,7 +500,7 @@ communityId	string	ID da comunidade que será alterado as configurações
 whoCanAddNewGroups	string (admins ou all)	Configuração de quem pode adicionar novos grupos a essa comunidade. Somente administradores (admins) ou todos (all)
 Request Body#
 URL#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities/settings
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities/settings
 
 Body#
 {
@@ -525,7 +525,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Desativar comunidade
 Método#
 /queue#
-DELETE https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities/{idDaComunidade}
+DELETE https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities/{idDaComunidade}
 
 Header#
 Key	Value
@@ -544,7 +544,7 @@ Request Params#
 URL exemplo#
 Método
 
-DELETE https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities/{idDaComunidade}
+DELETE https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities/{idDaComunidade}
 
 Response#
 200#
@@ -557,7 +557,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Alterar descrição
 Método#
 /update-community-description#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-community-description
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-community-description
 
 Header#
 Key	Value

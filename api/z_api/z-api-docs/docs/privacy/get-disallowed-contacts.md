@@ -7,7 +7,7 @@ title: Listar contatos não permitidos
 
 #### /privacy/disallowed-contacts
 
-`GET` https://api.z-api.io/instances/{{instanceId}}/token/{{instanceToken}}/privacy/disallowed-contacts?type=ESCOPO_DO_BLOQUEIO
+`GET` https://api.funnelchat/instances/{{instanceId}}/token/{{instanceToken}}/privacy/disallowed-contacts?type=ESCOPO_DO_BLOQUEIO
 
 ### Header
 
@@ -46,7 +46,7 @@ Escopo do bloqueio. Valores aceitos:
 
 Método
 
-`GET` https://api.z-api.io/instances/{{instanceId}}/token/{{instanceToken}}/disallowed-contacts?type=lastSeen
+`GET` https://api.funnelchat/instances/{{instanceId}}/token/{{instanceToken}}/disallowed-contacts?type=lastSeen
 
 ---
 
@@ -81,4 +81,4 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/disallowed-contacts.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/disallowed-contacts.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

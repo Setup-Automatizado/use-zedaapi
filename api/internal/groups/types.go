@@ -6,7 +6,7 @@ type ListParams struct {
 	PageSize int
 }
 
-// Summary represents the Z-API compatible payload for a single group item.
+// Summary represents the payload for a single group item.
 type Summary struct {
 	IsGroup         bool    `json:"isGroup"`
 	Name            string  `json:"name"`
@@ -80,7 +80,7 @@ type InvitationLinkResult struct {
 	InvitationLink string `json:"invitationLink"`
 }
 
-// ValueResult mirrors the generic Z-API boolean response.
+// ValueResult mirrors the generic FUNNELCHAT boolean response.
 type ValueResult struct {
 	Value bool `json:"value"`
 }
@@ -129,7 +129,7 @@ type Metadata struct {
 	SubjectOwner         string               `json:"subjectOwner"`
 }
 
-// ParticipantSummary adapts WhatsApp participant data to the Z-API schema.
+// ParticipantSummary adapts WhatsApp participant data to the FUNNELCHAT schema.
 type ParticipantSummary struct {
 	Phone        string  `json:"phone"`
 	LID          string  `json:"lid,omitempty"`

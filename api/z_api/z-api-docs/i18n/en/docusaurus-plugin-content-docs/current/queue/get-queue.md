@@ -7,7 +7,7 @@ title: Queue
 
 #### /queue
 
-`GET` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/queue
+`GET` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/queue
 
 ### Header
 
@@ -47,11 +47,11 @@ This method is responsible for returning all messages that are in your queue wai
 
 Method 
 
-`GET` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/queue?page=1&pageSize=100
+`GET` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/queue?page=1&pageSize=100
 
  or
 
-`GET` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/queue/count
+`GET` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/queue/count
 
 ---
 
@@ -71,7 +71,7 @@ Messages Array
 | size      | string   | Number of messages in queue |
 | Message   | string   | Text message                |
 | Phone     | string   | Recipients phone            |
-| ZaapId    | string   | Z-API message ID            |
+| ZaapId    | string   | FUNNELCHAT message ID            |
 | Created   | timetamp | Messages date               |
 | MessageId | string   | Message ID                  |
 
@@ -111,4 +111,4 @@ In case you receive 415 error, make sure to add the “Content-Type” of the ob
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/get-queue.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/get-queue.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

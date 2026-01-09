@@ -7,7 +7,7 @@ title: Adicionar Participantes
 
 #### /add-participant
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/add-participant
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/add-participant
 
 ### Header
 
@@ -28,7 +28,7 @@ No dia 4 de novembro de 2021 o whatsapp alterou a formato da criação de novos 
 
 :::tip Novo atributo
 
-Recentemente, o WhatsApp implementou uma validação para verificar se o número de telefone conectado à API possui o contato do cliente salvo. No entanto, a Z-API desenvolveu uma solução para contornar essa validação, introduzindo um novo recurso chamado **"autoInvite"**. Agora, quando uma solicitação é enviada para adicionar 10 clientes a um grupo e apenas 5 deles são adicionados com sucesso, a API envia convites privados para os cinco clientes que não foram adicionados. Esses convites permitem que eles entrem no grupo, mesmo que seus números de telefone não estejam salvos como contatos.
+Recentemente, o WhatsApp implementou uma validação para verificar se o número de telefone conectado à API possui o contato do cliente salvo. No entanto, a FUNNELCHAT desenvolveu uma solução para contornar essa validação, introduzindo um novo recurso chamado **"autoInvite"**. Agora, quando uma solicitação é enviada para adicionar 10 clientes a um grupo e apenas 5 deles são adicionados com sucesso, a API envia convites privados para os cinco clientes que não foram adicionados. Esses convites permitem que eles entrem no grupo, mesmo que seus números de telefone não estejam salvos como contatos.
 
 :::
 
@@ -55,7 +55,7 @@ Recentemente, o WhatsApp implementou uma validação para verificar se o número
 
 #### URL
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/add-participant
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/add-participant
 
 #### Body
 
@@ -117,4 +117,4 @@ Link para a response do webhook (ao receber)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/add-participant.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/add-participant.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

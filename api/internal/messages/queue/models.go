@@ -55,7 +55,7 @@ type SendMessageArgs struct {
 	Duration         *int   `json:"duration,omitempty"`            // Ephemeral message duration in seconds (0=off, 86400=24h, 604800=7d, 7776000=90d)
 	PrivateAnswer    bool   `json:"private_answer,omitempty"`      // For group messages: if true, reply in private to sender (not yourself)
 
-	// Mention options (Z-API compatible)
+	// Mention options
 	Mentioned      []string       `json:"mentioned,omitempty"`       // Array of phone numbers to mention (e.g., ["5511999999999"])
 	GroupMentioned []GroupMention `json:"group_mentioned,omitempty"` // Array of groups to mention in communities
 	MentionedAll   bool           `json:"mentioned_all,omitempty"`   // If true, mentions all members in a group (without listing them)
@@ -96,7 +96,7 @@ const (
 	MessageTypeSticker     MessageType = "sticker" // WebP sticker message
 	MessageTypePTV         MessageType = "ptv"     // Circular video (Push-To-Talk Video)
 
-	// Z-API compatible interactive message types
+	// interactive message types
 	MessageTypeButtonList    MessageType = "button_list"
 	MessageTypeButtonActions MessageType = "button_actions"
 	MessageTypeOptionList    MessageType = "option_list"
@@ -111,7 +111,7 @@ type TextMessage struct {
 }
 
 // GroupMention represents a group to be mentioned in a message (for communities)
-// Z-API compatible format
+// format
 type GroupMention struct {
 	Phone   string `json:"phone"`   // Group JID (e.g., "120363XXXXX@g.us")
 	Subject string `json:"subject"` // Group name/subject for display
@@ -135,9 +135,9 @@ type LocationMessage struct {
 }
 
 // ContactMessage represents a contact message
-// Supports both pre-formatted vCard (Z-API) and structured fields
+// Supports both pre-formatted vCard (FUNNELCHAT) and structured fields
 type ContactMessage struct {
-	// Option 1: Pre-formatted vCard string (Z-API compatible)
+	// Option 1: Pre-formatted vCard string
 	// If provided, this takes precedence over individual fields
 	VCard *string `json:"vcard,omitempty"`
 
@@ -191,7 +191,7 @@ type InteractiveMessage struct {
 	Buttons  []Button        `json:"buttons,omitempty"`  // For button type
 	Sections []Section       `json:"sections,omitempty"` // For list type
 
-	// Z-API compatible fields
+	// fields
 	ButtonLabel      *string `json:"button_label,omitempty"`      // For list messages - button text
 	Image            *string `json:"image,omitempty"`             // URL or base64 for header image
 	Video            *string `json:"video,omitempty"`             // URL or base64 for header video
@@ -252,7 +252,7 @@ type Row struct {
 }
 
 // PIXPayment represents PIX payment data for Brazilian payment messages
-// Used with button_pix message type (Z-API compatible)
+// Used with button_pix message type
 type PIXPayment struct {
 	Key           string   `json:"key"`                      // PIX key (CPF, CNPJ, email, phone, or EVP)
 	KeyType       string   `json:"key_type"`                 // Key type: CPF, CNPJ, EMAIL, PHONE, EVP

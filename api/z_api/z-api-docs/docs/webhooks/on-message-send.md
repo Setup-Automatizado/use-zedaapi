@@ -9,7 +9,7 @@ Esse é o webhook de retorno de mensagens enviadas
 
 :::caution Atenção
 
-O Z-API não aceita webhooks que não sejam HTTPS
+O FUNNELCHAT não aceita webhooks que não sejam HTTPS
 
 :::
 
@@ -29,7 +29,7 @@ Para atualizar a rota do webhook é possível fazer isso pela API ou pelo painel
 
 #### /update-webhook-delivery
 
-`PUT` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-webhook-delivery
+`PUT` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-webhook-delivery
 
 ### Header
 
@@ -90,4 +90,4 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 
 <!-- ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/on-message-send.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe> -->
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/on-message-send.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe> -->

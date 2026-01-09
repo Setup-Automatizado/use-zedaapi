@@ -7,7 +7,7 @@ title: Atualizar imagem da comunidade
 
 #### /update-community-photo
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-community-photo
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-community-photo
 
 ### Header
 
@@ -45,14 +45,14 @@ Este método é responsável alterar a imagem de uma comunidade já existente.
 
 Método
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-community-photo
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-community-photo
 
 #### Body
 
 ```json
 {
   "communityId": "string",
-  "communityPhoto": "https://www.z-api.io/wp-content/themes/z-api/dist/images/logo.svg"
+  "communityPhoto": "https://www.funnelchat/wp-content/themes/funnelchat/dist/images/logo.svg"
 }
 ```
 
@@ -100,4 +100,4 @@ Link para a response do webhook (ao receber)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/update-community-photo.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/update-community-photo.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

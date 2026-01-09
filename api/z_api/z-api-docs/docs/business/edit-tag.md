@@ -7,7 +7,7 @@ title: Editar etiqueta
 
 #### /business/edit-tag/{{ID_DA_ETIQUETA}}
 
-`POST` https://api.z-api.io/instances/{{instanceId}}/token/{{instanceToken}}/business/edit-tag/{{ID_DA_ETIQUETA}}
+`POST` https://api.funnelchat/instances/{{instanceId}}/token/{{instanceToken}}/business/edit-tag/{{ID_DA_ETIQUETA}}
 
 ### Header
 
@@ -45,7 +45,7 @@ Este método está disponível apenas para contas Business do whatsapp.
 
 Method
 
-`POST` https://api.z-api.io/instances/{{instanceId}}/token/{{instanceToken}}/business/edit-tag/{{ID_DA_ETIQUETA}}
+`POST` https://api.funnelchat/instances/{{instanceId}}/token/{{instanceToken}}/business/edit-tag/{{ID_DA_ETIQUETA}}
 
 ## Request Body
 
@@ -88,4 +88,4 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/edit-tag.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/edit-tag.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

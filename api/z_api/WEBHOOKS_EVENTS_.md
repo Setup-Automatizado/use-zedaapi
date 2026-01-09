@@ -2238,7 +2238,7 @@ Esse endpoint serve para você habilitar a opção de receber mensagens enviadas
 
 API#
 /update-notify-sent-by-me#
-PUT https://api.z-api.io/instances/{id}/token/{token}/update-notify-sent-by-me
+PUT https://api.funnelchat/instances/{id}/token/{token}/update-notify-sent-by-me
 
 Header#
 Key	Value

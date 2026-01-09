@@ -17,7 +17,7 @@ That's correct. In order for the message to be sent, the previous method (Reject
 
 #### /update-call-reject-message
 
-`PUT` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/update-call-reject-message
+`PUT` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/update-call-reject-message
 
 ### Header
 

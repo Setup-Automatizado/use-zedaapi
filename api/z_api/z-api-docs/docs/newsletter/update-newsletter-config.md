@@ -7,7 +7,7 @@ title: Atualizar configurações do canal
 
 #### /newsletter/settings/{newsletterId}
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/newsletter/settings/{newsletterId}
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/newsletter/settings/{newsletterId}
 
 ### Header
 
@@ -47,7 +47,7 @@ Este método é responsável por alterar as configurações de um canal.
 
 Método
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/newsletter/settings/999999999999999999@newsletter
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/newsletter/settings/999999999999999999@newsletter
 
 #### Body
 
@@ -101,4 +101,4 @@ Link para a response do webhook (ao receber)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/update-newsletter-config.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/update-newsletter-config.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

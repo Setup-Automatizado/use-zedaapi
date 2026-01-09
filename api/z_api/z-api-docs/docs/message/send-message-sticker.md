@@ -7,7 +7,7 @@ title: Enviar sticker
 
 #### /send-sticker
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/send-sticker
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/send-sticker
 
 ### Header
 
@@ -75,8 +75,8 @@ Neste [link] você encontra tudo que precisa saber sobre formatos e tamanhos de 
 ```json
 {
   "phone": "5511999999999",
-  "sticker": "https://www.z-api.io/wp-content/themes/z-api/dist/images/logo.svg",
-  "stickerAuthor": "Z-API"
+  "sticker": "https://www.funnelchat/wp-content/themes/funnelchat/dist/images/logo.svg",
+  "stickerAuthor": "FUNNELCHAT"
 }
 ```
 
@@ -85,7 +85,7 @@ Neste [link] você encontra tudo que precisa saber sobre formatos e tamanhos de 
 {
   "phone": "5511999999999",
   "sticker": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAyAAAAMgCAIAAABUEpE/",
-  "stickerAuthor": "Z-API"
+  "stickerAuthor": "FUNNELCHAT"
 }
 ```
 
@@ -97,7 +97,7 @@ Neste [link] você encontra tudo que precisa saber sobre formatos e tamanhos de 
 
 | Atributos | Tipo   | Descrição      |
 | :-------- | :----- | :------------- |
-| zaapId    | string | id no z-api    |
+| zaapId    | string | id no funnelchat    |
 | messageId | string | id no whatsapp |
 | id | string | Adicionado para compatibilidade com zapier, ele tem o mesmo valor do messageId |
 Exemplo
@@ -130,4 +130,4 @@ Link para a response do webhook (ao receber)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/send-sticker.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/send-sticker.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

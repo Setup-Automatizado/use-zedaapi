@@ -1,6 +1,6 @@
 # Website
 
-Z-API Documentation
+FUNNELCHAT Documentation
 
 ### Installation
 

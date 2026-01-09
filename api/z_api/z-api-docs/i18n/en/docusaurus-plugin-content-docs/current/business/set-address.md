@@ -7,7 +7,7 @@ title: Change Company Address
 
 #### /business/company-address
 
-`POST` https://api.z-api.io/instances/{{instanceId}}/token/{{instanceToken}}/business/company-address
+`POST` https://api.funnelchat/instances/{{instanceId}}/token/{{instanceToken}}/business/company-address
 
 ### Header
 
@@ -76,4 +76,4 @@ If you receive a 415 error, make sure to add the "Content-Type" of the object yo
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/company-address.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/company-address.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

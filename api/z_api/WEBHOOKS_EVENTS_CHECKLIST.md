@@ -1,16 +1,16 @@
 # WEBHOOKS Events Completion Checklist
 
-> Fonte de verdade para acompanhar o progresso do mapeamento Whatsmeow → Z-API.
+> Fonte de verdade para acompanhar o progresso do mapeamento Whatsmeow → FUNNELCHAT.
 > Atualize **apenas** depois de validar que cada item está coberto no código, documentação e testes.
 
 ## Fase 0 — Inventário & Planejamento
 
 - [x] Levantar todos os eventos Whatsmeow disponíveis em `api/whatsmeow_schema_webhooks/`.
-- [x] Cruzar cada evento com o webhook Z-API correspondente (endpoint, schema, exemplo) e registrar neste arquivo.
+- [x] Cruzar cada evento com o webhook FUNNELCHAT correspondente (endpoint, schema, exemplo) e registrar neste arquivo.
 
-### Inventário Whatsmeow → Z-API
+### Inventário Whatsmeow → FUNNELCHAT
 
-| Whatsmeow event | Pasta schema | Webhook Z-API esperado | Pastas/schema Z-API |
+| Whatsmeow event | Pasta schema | Webhook FUNNELCHAT esperado | Pastas/schema FUNNELCHAT |
 | --- | --- | --- | --- |
 | Message | `Message/` | ReceivedCallback (mensagens + conteúdos) | `api/z_api/received_callback/{text,image,video,audio,...}` |
 | UndecryptableMessage | `Undecryptablemessage/` | ReceivedCallback (waitingMessage=true) | `received_callback/unknown` |
@@ -70,13 +70,13 @@
 ## Fase 4 — Delivery & Presence
 
 - [ ] Implementar `DeliveryCallback` completo (webhook "Ao enviar").
-- [ ] Garantir todos os `message_status` (`read`, `played`, `group_*`, `read_by_me`) no padrão Z-API.
+- [ ] Garantir todos os `message_status` (`read`, `played`, `group_*`, `read_by_me`) no padrão FUNNELCHAT.
 - [ ] Ampliar `presence_chat` e `connected/disconnected` para cobrir eventos adicionais.
 
 ## Fase 5 — Testes & Documentação
 
-- [ ] Suite de testes table-driven cobrindo cada transformador Z-API.
-- [ ] Documentação sincronizada (`api/z_api/WEBHOOKS_EVENTS.md`, docs em `z-api-docs`).
+- [ ] Suite de testes table-driven cobrindo cada transformador FUNNELCHAT.
+- [ ] Documentação sincronizada (`api/z_api/WEBHOOKS_EVENTS.md`, docs em `funnelchat-docs`).
 - [ ] Execução validada de `go test ./api/internal/events/...` com toolchain disponível.
 
 ### Registro de Execuções

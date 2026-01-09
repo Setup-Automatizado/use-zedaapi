@@ -7,7 +7,7 @@ title: Restoring session
 
 #### /restore-session
 
-`GET` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/restore-session
+`GET` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/restore-session
 
 ### Header
 
@@ -19,7 +19,7 @@ title: Restoring session
 
 ## Concept
 
-This method tries to restore your connection with WhatsApp based off of the information saved in the Z-API session.
+This method tries to restore your connection with WhatsApp based off of the information saved in the FUNNELCHAT session.
 
 ---
 

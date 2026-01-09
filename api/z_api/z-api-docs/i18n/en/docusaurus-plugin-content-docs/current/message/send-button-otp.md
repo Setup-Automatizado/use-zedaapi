@@ -7,7 +7,7 @@ title: Send OTP Button
 
 #### /send-button-otp
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-button-otp
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-button-otp
 
 ### Header
 
@@ -17,7 +17,7 @@ title: Send OTP Button
 ---
 
 :::caution Warning
-Button sending is currently available, but there are some decisive factors for operation. For more details visit the [Button Status](https://developer.z-api.io/en/tips/button-status) topic.
+Button sending is currently available, but there are some decisive factors for operation. For more details visit the [Button Status](https://developer.funnelchat/en/tips/button-status) topic.
 :::
 
 ## Concept
@@ -73,7 +73,7 @@ This method allows you to send text messages with a button to copy a value.
 
 | Attributes | Type   | Description      |
 | :--------- | :----- | :--------------- |
-| zaapId     | string | ID on Z-API      |
+| zaapId     | string | ID on FUNNELCHAT      |
 | messageId  | string | ID on WhatsApp   |
 | id         | string | Added for compatibility with Zapier, it has the same value as messageId |
 
@@ -107,4 +107,4 @@ Link to the webhook response (upon receiving)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/send-button-otp.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/send-button-otp.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

@@ -48,4 +48,4 @@ You will receive a code, however since you can't receive texts on a fixed number
 ### Fourth step
 Be happy!
 
-Make any alterations to your settings on WhatsApp business and read Z-API’s QrCode to give wings to your imagination !
+Make any alterations to your settings on WhatsApp business and read FUNNELCHAT’s QrCode to give wings to your imagination !

@@ -8,7 +8,7 @@ title: Metadata do Grupo
 
 #### /group-metadata
 
-`GET` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/group-metadata/{phone}
+`GET` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/group-metadata/{phone}
 
 ### Header
 
@@ -48,7 +48,7 @@ No dia 4 de novembro de 2021 o whatsapp alterou a formato da criação de novos 
 
 #### URL
 
-`GET` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/group-metadata/{phone}
+`GET` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/group-metadata/{phone}
 
 ---
 
@@ -91,7 +91,7 @@ Forma antiga -
   {
     "phone": "5511999999999-1623281429",
     "owner": "5511999999999",
-    "subject": "Meu grupo no Z-API",
+    "subject": "Meu grupo no FUNNELCHAT",
     "creation": 1588721491000,
     "participants": [
       {
@@ -116,9 +116,9 @@ Forma antiga -
   Forma nova -
   {
   "phone": "120363019502650977-group",
-  "description": "Grupo Z-API",
+  "description": "Grupo FUNNELCHAT",
   "owner": "5511999999999",
-  "subject": "Meu grupo no Z-API",
+  "subject": "Meu grupo no FUNNELCHAT",
   "creation": 1588721491000,
   "invitationLink": "https://chat.whatsapp.com/40Aasd6af1",
   "invitationLinkError": null,
@@ -159,4 +159,4 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/get-group-metadata.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/get-group-metadata.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

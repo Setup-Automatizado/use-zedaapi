@@ -7,7 +7,7 @@ title: Get QRCode
 
 #### /qr-code
 
-`GET` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/qr-code
+`GET` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/qr-code
 
 Getting QRCode - bytes
 
@@ -15,7 +15,7 @@ This method returns the bytes of the QR code. You can render this in a component
 
 #### /qr-code/image
 
-`GET` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/qr-code/image
+`GET` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/qr-code/image
 
 Getting QRCode - Image
 
@@ -23,7 +23,7 @@ This method returns an image of the type base64. You can render this in a compon
 
 #### /phone-code/{phone}
 
-`GET` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/phone-code/{phone}
+`GET` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/phone-code/{phone}
 
 Getting QRCode - Phone
 
@@ -41,7 +41,7 @@ You can enter the code generated through the API directly in WhatsApp, on the sa
 
 ## Concept
 
-Yes! Just like on WhatsApp Web you will need to read a QR code to connect to Z-API.
+Yes! Just like on WhatsApp Web you will need to read a QR code to connect to FUNNELCHAT.
 
 There are two ways that you can do the reading of the QR code. They are:
 
@@ -70,7 +70,7 @@ If you opted to implement the Qr code reading feature in your app, you need to k
 
 In case you call on this method and it is already connected it will not allow you to connect again.
 
-Once you care connected you can start using Z-API’s methods to manipulate WhatsApp 
+Once you care connected you can start using FUNNELCHAT’s methods to manipulate WhatsApp 
 :::
 
 :::important

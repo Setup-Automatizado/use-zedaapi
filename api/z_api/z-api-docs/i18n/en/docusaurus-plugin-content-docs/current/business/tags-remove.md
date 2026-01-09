@@ -7,7 +7,7 @@ title: Removing labels from a chat.
 
 #### /chats/{phone}/tags/{tag}/remove
 
-`PUT` https://api.z-api.io/instances/{{instanceId}}/token/{{instanceToken}}/chats/{phone}/tags/{tag}/remove
+`PUT` https://api.funnelchat/instances/{{instanceId}}/token/{{instanceToken}}/chats/{phone}/tags/{tag}/remove
 
 ### Header
 

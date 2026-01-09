@@ -90,7 +90,7 @@ func NewMessageHandler(
 // RegisterRoutes registers message routes within an existing route group
 // This is called by InstanceHandler.Register() to avoid path conflicts
 func (h *MessageHandler) RegisterRoutes(r chi.Router) {
-	// Message sending endpoints (Z-API compatible)
+	// Message sending endpoints
 	r.Post("/send-text", h.sendText)
 	r.Post("/send-image", h.sendImage)
 	r.Post("/send-sticker", h.sendSticker)
@@ -103,7 +103,7 @@ func (h *MessageHandler) RegisterRoutes(r chi.Router) {
 	r.Post("/send-contact", h.sendContact)
 	r.Post("/send-contacts", h.sendContacts)
 
-	// Interactive message endpoints (Z-API compatible)
+	// Interactive message endpoints
 	r.Post("/send-button-list", h.sendButtonList)       // Simple reply buttons
 	r.Post("/send-button-actions", h.sendButtonActions) // Action buttons (URL, call, copy)
 	r.Post("/send-option-list", h.sendOptionList)       // List/menu selection
@@ -111,40 +111,40 @@ func (h *MessageHandler) RegisterRoutes(r chi.Router) {
 	r.Post("/send-button-otp", h.sendButtonOTP)         // OTP copy code button
 	r.Post("/send-carousel", h.sendCarousel)            // Carousel with multiple cards
 
-	// Poll and Event endpoints (Z-API compatible)
+	// Poll and Event endpoints
 	r.Post("/send-poll", h.sendPoll)   // Send poll message
 	r.Post("/send-event", h.sendEvent) // Send calendar event
 
-	// Link preview endpoint (Z-API compatible)
+	// Link preview endpoint
 	r.Post("/send-link", h.sendLink) // Send link with custom preview
 
-	// Message management endpoints (Z-API compatible)
+	// Message management endpoints
 	r.Delete("/messages", h.deleteMessage) // Delete message from everyone
 
-	// Chat modification endpoints (Z-API compatible)
+	// Chat modification endpoints
 	r.Post("/modify-chat", h.modifyChat) // read, archive, pin, mute, clear, delete
 
-	// Queue management endpoints (Z-API compatible)
+	// Queue management endpoints
 	r.Get("/queue", h.listQueue)                      // GET /queue?page=1&pageSize=100
 	r.Get("/queue/count", h.getQueueCount)            // GET /queue/count
 	r.Delete("/queue", h.clearQueue)                  // DELETE /queue (clear all)
 	r.Delete("/queue/{zaapId}", h.cancelQueueMessage) // DELETE /queue/{zaapId}
 
-	// Data retrieval endpoints (Z-API compatible)
+	// Data retrieval endpoints
 	r.Get("/contacts", h.getContacts)                 // GET /contacts?page=1&pageSize=100
 	r.Get("/chats", h.getChats)                       // GET /chats?page=1&pageSize=100
 	r.Get("/phone-exists/{phone}", h.phoneExists)     // GET /phone-exists/{phone}
 	r.Post("/phone-exists-batch", h.phoneExistsBatch) // POST /phone-exists-batch
 }
 
-// GroupMention represents a group mention in a community (Z-API compatible format)
+// GroupMention represents a group mention in a community
 type GroupMention struct {
 	Phone   string `json:"phone"`   // Group JID (e.g., "120363xyz@g.us")
 	Subject string `json:"subject"` // Group name/subject
 }
 
 // SendTextRequest represents the request body for POST /instances/{instanceId}/token/{token}/send-text
-// Z-API Compatible format
+// format
 type SendTextRequest struct {
 	Phone         string `json:"phone"`                   // Phone number (e.g., "5511999999999")
 	Message       string `json:"message"`                 // Text message content
@@ -157,7 +157,7 @@ type SendTextRequest struct {
 }
 
 // SendImageRequest represents the request body for POST /instances/{instanceId}/token/{token}/send-image
-// Z-API Compatible format
+// format
 type SendImageRequest struct {
 	Phone          string         `json:"phone"`                    // Phone number (e.g., "5511999999999")
 	Image          string         `json:"image"`                    // Image URL or base64 data (data:image/png;base64,...)
@@ -174,7 +174,7 @@ type SendImageRequest struct {
 }
 
 // SendStickerRequest represents the request body for POST /instances/{instanceId}/token/{token}/send-sticker
-// Z-API Compatible format
+// format
 type SendStickerRequest struct {
 	Phone          string         `json:"phone"`                    // Phone number (e.g., "5511999999999")
 	Sticker        string         `json:"sticker"`                  // Sticker URL or base64 data (data:image/webp;base64,...)
@@ -189,7 +189,7 @@ type SendStickerRequest struct {
 }
 
 // SendAudioRequest represents the request body for POST /instances/{instanceId}/token/{token}/send-audio
-// Z-API Compatible format
+// format
 type SendAudioRequest struct {
 	Phone          string         `json:"phone"`                    // Phone number (e.g., "5511999999999")
 	Audio          string         `json:"audio"`                    // Audio URL or base64 data (data:audio/ogg;base64,...)
@@ -205,7 +205,7 @@ type SendAudioRequest struct {
 }
 
 // SendVideoRequest represents the request body for POST /instances/{instanceId}/token/{token}/send-video
-// Z-API Compatible format
+// format
 type SendVideoRequest struct {
 	Phone          string         `json:"phone"`                    // Phone number (e.g., "5511999999999")
 	Video          string         `json:"video"`                    // Video URL or base64 data (data:video/mp4;base64,...)
@@ -222,7 +222,7 @@ type SendVideoRequest struct {
 }
 
 // SendPTVRequest represents the request body for POST /instances/{instanceId}/token/{token}/send-ptv
-// Z-API Compatible format for circular video messages (Push-To-Talk Video)
+// format for circular video messages (Push-To-Talk Video)
 type SendPTVRequest struct {
 	Phone          string         `json:"phone"`                    // Phone number (e.g., "5511999999999")
 	Video          string         `json:"video"`                    // Video URL or base64 data (data:video/mp4;base64,...)
@@ -239,7 +239,7 @@ type SendPTVRequest struct {
 }
 
 // SendGifRequest represents the request body for POST /instances/{instanceId}/token/{token}/send-gif
-// Z-API Compatible format
+// format
 type SendGifRequest struct {
 	Phone          string         `json:"phone"`                    // Phone number (e.g., "5511999999999")
 	Gif            string         `json:"gif"`                      // GIF URL or base64 data (data:image/gif;base64,...)
@@ -256,7 +256,7 @@ type SendGifRequest struct {
 }
 
 // SendDocumentRequest represents the request body for POST /instances/{instanceId}/token/{token}/send-document
-// Z-API Compatible format
+// format
 type SendDocumentRequest struct {
 	Phone          string         `json:"phone"`                    // Phone number (e.g., "5511999999999")
 	Document       string         `json:"document"`                 // Document URL or base64 data (data:application/pdf;base64,...)
@@ -273,7 +273,7 @@ type SendDocumentRequest struct {
 }
 
 // SendLocationRequest represents the request body for POST /instances/{instanceId}/token/{token}/send-location
-// Z-API Compatible format
+// format
 type SendLocationRequest struct {
 	Phone          string         `json:"phone"`                    // Phone number (e.g., "5511999999999")
 	Latitude       float64        `json:"latitude"`                 // Location latitude
@@ -291,12 +291,12 @@ type SendLocationRequest struct {
 }
 
 // SendContactRequest represents the request body for POST /instances/{instanceId}/token/{token}/send-contact
-// Z-API Compatible format with extended fields
+// format with extended fields
 type SendContactRequest struct {
 	Phone                      string `json:"phone"`                                // Phone number (e.g., "5511999999999")
-	ContactName                string `json:"contactName"`                          // Full name of the contact (Z-API compatible)
-	ContactPhone               string `json:"contactPhone"`                         // Phone number of the contact in international format (Z-API compatible)
-	ContactBusinessDescription string `json:"contactBusinessDescription,omitempty"` // Optional business description (Z-API compatible)
+	ContactName                string `json:"contactName"`                          // Full name of the contact
+	ContactPhone               string `json:"contactPhone"`                         // Phone number of the contact in international format
+	ContactBusinessDescription string `json:"contactBusinessDescription,omitempty"` // Optional business description
 
 	// Extended optional fields for complete vCard
 	FirstName  *string `json:"firstName,omitempty"`  // Given name
@@ -336,7 +336,7 @@ type ContactAddress struct {
 	Country    *string `json:"country,omitempty"`    // Country name
 }
 
-// ContactInfo represents a contact for multiple contacts (Z-API compatible with extended fields)
+// ContactInfo represents a contact for multiple contacts
 type ContactInfo struct {
 	ContactName                string `json:"contactName"`                          // Full name of the contact
 	ContactPhone               string `json:"contactPhone"`                         // Phone number in international format
@@ -360,7 +360,7 @@ type ContactInfo struct {
 }
 
 // SendContactsRequest represents the request body for POST /instances/{instanceId}/token/{token}/send-contacts
-// Z-API Compatible format for sending multiple contacts
+// format for sending multiple contacts
 type SendContactsRequest struct {
 	Phone          string         `json:"phone"`                    // Phone number (e.g., "5511999999999")
 	Contacts       []ContactInfo  `json:"contacts"`                 // Array of contacts (1-10)
@@ -413,7 +413,7 @@ type Section struct {
 }
 
 // SendButtonActionsRequest represents the request body for POST /instances/{instanceId}/token/{token}/send-button-actions
-// Z-API Compatible format for sending interactive button messages with action types (URL, call, copy)
+// format for sending interactive button messages with action types (URL, call, copy)
 type SendButtonActionsRequest struct {
 	Phone        string         `json:"phone"`        // Required: recipient phone number
 	Message      string         `json:"message"`      // Required: body text
@@ -426,7 +426,7 @@ type SendButtonActionsRequest struct {
 }
 
 // SendButtonListRequest represents the request body for POST /instances/{instanceId}/token/{token}/send-button-list
-// Z-API Compatible format for sending simple reply button messages
+// format for sending simple reply button messages
 type SendButtonListRequest struct {
 	Phone        string   `json:"phone"`        // Required: recipient phone number
 	Message      string   `json:"message"`      // Required: body text
@@ -441,7 +441,7 @@ type SendButtonListRequest struct {
 }
 
 // SendOptionListRequest represents the request body for POST /instances/{instanceId}/token/{token}/send-option-list
-// Z-API Compatible format for sending interactive list/menu messages
+// format for sending interactive list/menu messages
 type SendOptionListRequest struct {
 	Phone        string    `json:"phone"`        // Required: recipient phone number
 	Message      string    `json:"message"`      // Required: body text (max 4096 chars)
@@ -455,7 +455,7 @@ type SendOptionListRequest struct {
 }
 
 // SendButtonPIXRequest represents the request body for POST /instances/{instanceId}/token/{token}/send-button-pix
-// Z-API Compatible format for sending PIX payment button messages (Brazilian instant payment)
+// format for sending PIX payment button messages (Brazilian instant payment)
 type SendButtonPIXRequest struct {
 	Phone         string   `json:"phone"`                   // Required: recipient phone number
 	Message       string   `json:"message"`                 // Optional: body text (default: "Pagamento via PIX")
@@ -470,7 +470,7 @@ type SendButtonPIXRequest struct {
 }
 
 // SendButtonOTPRequest represents the request body for POST /instances/{instanceId}/token/{token}/send-button-otp
-// Z-API Compatible format for sending OTP (one-time password) copy button messages
+// format for sending OTP (one-time password) copy button messages
 type SendButtonOTPRequest struct {
 	Phone        string `json:"phone"`        // Required: recipient phone number
 	Message      string `json:"message"`      // Required: body text containing OTP context
@@ -483,7 +483,7 @@ type SendButtonOTPRequest struct {
 }
 
 // SendCarouselRequest represents the request body for POST /instances/{instanceId}/token/{token}/send-carousel
-// Z-API Compatible format for sending carousel messages with multiple cards
+// format for sending carousel messages with multiple cards
 type SendCarouselRequest struct {
 	Phone        string             `json:"phone"`                  // Required: recipient phone number
 	Cards        []SendCarouselCard `json:"cards"`                  // Required: 1-10 carousel cards
@@ -502,17 +502,17 @@ type SendCarouselCard struct {
 	MediaURL string         `json:"mediaUrl"`         // Required: URL for card image/video
 }
 
-// PollOption represents a single poll option in Z-API format
+// PollOption represents a single poll option
 type PollOption struct {
 	Name string `json:"name"` // Option text
 }
 
 // SendPollRequest represents the request body for POST /instances/{instanceId}/token/{token}/send-poll
-// Z-API Compatible format for sending poll messages
+// format for sending poll messages
 // Example: {"phone": "554499999999", "message": "Outra enquete", "poll": [{"name": "Option1"}, {"name": "Option2"}], "pollMaxOptions": 1}
 type SendPollRequest struct {
 	Phone          string       `json:"phone"`                    // Required: recipient phone number
-	Message        string       `json:"message"`                  // Required: poll question text (Z-API uses "message")
+	Message        string       `json:"message"`                  // Required: poll question text (FUNNELCHAT uses "message")
 	Poll           []PollOption `json:"poll"`                     // Required: poll options array with name field (2-12 options)
 	PollMaxOptions *int         `json:"pollMaxOptions,omitempty"` // Optional: 0 for single choice, 1+ for multiple choice (default: 0)
 	MessageID      string       `json:"messageId,omitempty"`      // Optional: reply to message ID
@@ -520,14 +520,14 @@ type SendPollRequest struct {
 	DelayTyping    *int         `json:"delayTyping,omitempty"`    // Optional: typing delay in seconds (1-15)
 }
 
-// EventLocation represents the location for an event (Z-API compatible)
+// EventLocation represents the location for an event
 type EventLocation struct {
 	Name             string   `json:"name,omitempty"`             // Location name
 	DegreesLatitude  *float64 `json:"degreesLatitude,omitempty"`  // Optional: latitude
 	DegreesLongitude *float64 `json:"degreesLongitude,omitempty"` // Optional: longitude
 }
 
-// EventPayload represents the nested event object in Z-API format
+// EventPayload represents the nested event object
 type EventPayload struct {
 	Name         string         `json:"name"`                   // Required: event name/title
 	Description  string         `json:"description,omitempty"`  // Optional: event description
@@ -538,7 +538,7 @@ type EventPayload struct {
 }
 
 // SendEventRequest represents the request body for POST /instances/{instanceId}/token/{token}/send-event
-// Z-API Compatible format for sending calendar event messages
+// format for sending calendar event messages
 // Example: {"phone": "120363356737170752-group", "event": {"name": "Event Name", "dateTime": "2024-04-29T09:30:53.309Z"}}
 type SendEventRequest struct {
 	Phone        string       `json:"phone"`                  // Required: recipient phone number
@@ -549,7 +549,7 @@ type SendEventRequest struct {
 }
 
 // SendLinkRequest represents the request body for POST /instances/{instanceId}/token/{token}/send-link
-// Z-API Compatible format for sending link with custom preview
+// format for sending link with custom preview
 // Example: {"phone": "5544999999999", "message": "Check this out", "linkUrl": "https://example.com", "title": "Title"}
 type SendLinkRequest struct {
 	Phone           string `json:"phone"`                     // Required: recipient phone number
@@ -564,7 +564,7 @@ type SendLinkRequest struct {
 }
 
 // ModifyChatRequest represents the request body for POST /instances/{instanceId}/token/{token}/modify-chat
-// Z-API Compatible format for modifying chat state
+// format for modifying chat state
 // Example: {"phone": "554499999999", "action": "archive"}
 type ModifyChatRequest struct {
 	Phone  string `json:"phone"`  // Required: phone number or group ID
@@ -588,7 +588,7 @@ type DeleteMessageResponse struct {
 }
 
 // SendMessageResponse represents the response after enqueuing a message
-// Z-API Compatible format
+// format
 type SendMessageResponse struct {
 	ZaapID         string          `json:"zaapId"`                   // Unique message ID in our system
 	MessageID      string          `json:"messageId"`                // WhatsApp message ID (initially same as zaapId, updated after send)
@@ -700,10 +700,10 @@ func (h *MessageHandler) toWhatsAppStatus(status *instances.Status) *WhatsAppSta
 	return whatsAppStatus
 }
 
-// QueueMessageResponse represents a message in the queue (Z-API compatible format)
+// QueueMessageResponse represents a message in the queue
 type QueueMessageResponse struct {
-	ID           string `json:"_id"`               // Message ID (same as ZaapId for Z-API compat)
-	ZaapId       string `json:"zaapId"`            // Z-API message ID
+	ID           string `json:"_id"`               // Message ID (same as ZaapId for FUNNELCHAT compat)
+	ZaapId       string `json:"zaapId"`            // FUNNELCHAT message ID
 	MessageId    string `json:"messageId"`         // WhatsApp message ID
 	InstanceId   string `json:"instanceId"`        // Instance ID
 	Phone        string `json:"phone"`             // Recipient phone
@@ -712,7 +712,7 @@ type QueueMessageResponse struct {
 	DelayTyping  int64  `json:"delayTyping"`       // Typing indicator duration in seconds
 	Created      int64  `json:"created"`           // Unix timestamp in milliseconds
 
-	// Additional fields (not in Z-API but useful)
+	// Additional fields (not in FUNNELCHAT but useful)
 	MessageType    string   `json:"messageType,omitempty"`    // Message type (text, image, etc)
 	Status         string   `json:"status,omitempty"`         // Job status
 	SequenceNumber int64    `json:"sequenceNumber,omitempty"` // FIFO sequence
@@ -721,7 +721,7 @@ type QueueMessageResponse struct {
 	Errors         []string `json:"errors,omitempty"`         // Error messages
 }
 
-// QueueListResponse represents the response for GET /queue (Z-API compatible)
+// QueueListResponse represents the response for GET /queue
 type QueueListResponse []QueueMessageResponse
 
 // QueueCountResponse represents the response for GET /queue/count
@@ -731,14 +731,14 @@ type QueueCountResponse struct {
 
 // sendText handles POST /instances/{instanceId}/token/{token}/send-text
 //
-// Z-API Compatible endpoint that:
+// endpoint that:
 // 1. Validates instanceId and token from URL
 // 2. Validates Client-Token header
 // 3. Enqueues message with FIFO ordering
 // 4. Returns immediately with zaapId as messageId (non-blocking)
 // 5. Worker updates with real WhatsApp messageId after sending
 //
-// Compatible with Z-API specification
+
 func (h *MessageHandler) sendText(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -777,9 +777,9 @@ func (h *MessageHandler) sendText(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Convert delays from seconds to milliseconds with Z-API defaults
-	// Z-API: delayMessage range 1-15 seconds, default 1-3 seconds random
-	// Z-API: delayTyping range 1-15 seconds, default 0
+	// Convert delays from seconds to milliseconds with FUNNELCHAT defaults
+	// FUNNELCHAT: delayMessage range 1-15 seconds, default 1-3 seconds random
+	// FUNNELCHAT: delayTyping range 1-15 seconds, default 0
 	delayMessage := int64(0)
 	if req.DelayMessage != nil {
 		seconds := *req.DelayMessage
@@ -837,17 +837,17 @@ func (h *MessageHandler) sendText(w http.ResponseWriter, r *http.Request) {
 		slog.String("phone", phone),
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
-	// Return Z-API compatible response
+	// Return response
 	// Initially, messageId = zaapId (will be updated with real WhatsApp ID after send)
 	response := h.newSendMessageResponse(zaapID, instStatus)
 
-	// Return 200 OK (Z-API standard)
+	// Return 200 OK
 	respondJSON(w, http.StatusOK, response)
 }
 
 // sendImage handles POST /instances/{instanceId}/token/{token}/send-image
 //
-// Z-API Compatible endpoint that:
+// endpoint that:
 // 1. Validates instanceId and token from URL
 // 2. Validates Client-Token header
 // 3. Supports image URL or base64 data
@@ -856,7 +856,7 @@ func (h *MessageHandler) sendText(w http.ResponseWriter, r *http.Request) {
 // 6. Returns immediately with zaapId as messageId (non-blocking)
 // 7. Worker updates with real WhatsApp messageId after sending
 //
-// Compatible with Z-API specification
+
 func (h *MessageHandler) sendImage(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -905,8 +905,8 @@ func (h *MessageHandler) sendImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Convert delays from seconds to milliseconds with Z-API defaults
-	// Z-API: delayMessage range 1-15 seconds, default 1-3 seconds random
+	// Convert delays from seconds to milliseconds with FUNNELCHAT defaults
+	// FUNNELCHAT: delayMessage range 1-15 seconds, default 1-3 seconds random
 	delayMessage := int64(0)
 	if req.DelayMessage != nil {
 		seconds := *req.DelayMessage
@@ -979,17 +979,17 @@ func (h *MessageHandler) sendImage(w http.ResponseWriter, r *http.Request) {
 		slog.Bool("is_reply", req.MessageID != ""),
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
-	// Return Z-API compatible response
+	// Return response
 	// Initially, messageId = zaapId (will be updated with real WhatsApp ID after send)
 	response := h.newSendMessageResponse(zaapID, instStatus)
 
-	// Return 200 OK (Z-API standard)
+	// Return 200 OK
 	respondJSON(w, http.StatusOK, response)
 }
 
 // sendSticker handles POST /instances/{instanceId}/token/{token}/send-sticker
 //
-// Z-API Compatible endpoint that:
+// endpoint that:
 // 1. Validates instanceId and token from URL
 // 2. Validates Client-Token header
 // 3. Supports sticker URL or base64 data (WebP format)
@@ -997,7 +997,7 @@ func (h *MessageHandler) sendImage(w http.ResponseWriter, r *http.Request) {
 // 5. Enqueues message with FIFO ordering
 // 6. Returns immediately with zaapId as messageId (non-blocking)
 //
-// Compatible with Z-API specification
+
 func (h *MessageHandler) sendSticker(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -1046,7 +1046,7 @@ func (h *MessageHandler) sendSticker(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Convert delays from seconds to milliseconds with Z-API defaults
+	// Convert delays from seconds to milliseconds with FUNNELCHAT defaults
 	delayMessage := int64(0)
 	if req.DelayMessage != nil {
 		seconds := *req.DelayMessage
@@ -1104,16 +1104,16 @@ func (h *MessageHandler) sendSticker(w http.ResponseWriter, r *http.Request) {
 		slog.Bool("is_reply", req.MessageID != ""),
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
-	// Return Z-API compatible response
+	// Return response
 	response := h.newSendMessageResponse(zaapID, instStatus)
 
-	// Return 200 OK (Z-API standard)
+	// Return 200 OK
 	respondJSON(w, http.StatusOK, response)
 }
 
 // sendAudio handles POST /instances/{instanceId}/token/{token}/send-audio
 //
-// Z-API Compatible endpoint that:
+// endpoint that:
 // 1. Validates instanceId and token from URL
 // 2. Validates Client-Token header
 // 3. Supports audio URL or base64 data
@@ -1122,7 +1122,7 @@ func (h *MessageHandler) sendSticker(w http.ResponseWriter, r *http.Request) {
 // 6. Enqueues message with FIFO ordering
 // 7. Returns immediately with zaapId as messageId (non-blocking)
 //
-// Compatible with Z-API specification
+
 func (h *MessageHandler) sendAudio(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -1232,7 +1232,7 @@ func (h *MessageHandler) sendAudio(w http.ResponseWriter, r *http.Request) {
 		slog.Bool("is_reply", req.MessageID != ""),
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
-	// Return Z-API compatible response
+	// Return response
 	response := h.newSendMessageResponse(zaapID, instStatus)
 
 	respondJSON(w, http.StatusOK, response)
@@ -1240,7 +1240,7 @@ func (h *MessageHandler) sendAudio(w http.ResponseWriter, r *http.Request) {
 
 // sendVideo handles POST /instances/{instanceId}/token/{token}/send-video
 //
-// Z-API Compatible endpoint for sending video messages
+// endpoint for sending video messages
 func (h *MessageHandler) sendVideo(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -1358,7 +1358,7 @@ func (h *MessageHandler) sendVideo(w http.ResponseWriter, r *http.Request) {
 		slog.Bool("is_reply", req.MessageID != ""),
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
-	// Return Z-API compatible response
+	// Return response
 	response := h.newSendMessageResponse(zaapID, instStatus)
 
 	respondJSON(w, http.StatusOK, response)
@@ -1366,7 +1366,7 @@ func (h *MessageHandler) sendVideo(w http.ResponseWriter, r *http.Request) {
 
 // sendPTV handles POST /instances/{instanceId}/token/{token}/send-ptv
 //
-// Z-API Compatible endpoint for sending circular video messages (Push-To-Talk Video).
+// endpoint for sending circular video messages (Push-To-Talk Video).
 // PTV messages are displayed as circular video notes in WhatsApp, similar to voice notes
 // but with video content.
 //
@@ -1377,7 +1377,7 @@ func (h *MessageHandler) sendVideo(w http.ResponseWriter, r *http.Request) {
 // 5. Enqueues message with FIFO ordering
 // 6. Returns immediately with zaapId as messageId (non-blocking)
 //
-// Compatible with Z-API specification
+
 func (h *MessageHandler) sendPTV(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -1426,7 +1426,7 @@ func (h *MessageHandler) sendPTV(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Convert delays from seconds to milliseconds with Z-API defaults
+	// Convert delays from seconds to milliseconds with FUNNELCHAT defaults
 	delayMessage := int64(0)
 	if req.DelayMessage != nil {
 		seconds := *req.DelayMessage
@@ -1495,7 +1495,7 @@ func (h *MessageHandler) sendPTV(w http.ResponseWriter, r *http.Request) {
 		slog.Bool("is_reply", req.MessageID != ""),
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
-	// Return Z-API compatible response
+	// Return response
 	response := h.newSendMessageResponse(zaapID, instStatus)
 
 	respondJSON(w, http.StatusOK, response)
@@ -1503,7 +1503,7 @@ func (h *MessageHandler) sendPTV(w http.ResponseWriter, r *http.Request) {
 
 // sendGif handles POST /instances/{instanceId}/token/{token}/send-gif
 //
-// Z-API Compatible endpoint that:
+// endpoint that:
 // 1. Validates instanceId and token from URL
 // 2. Validates Client-Token header
 // 3. Supports GIF URL or base64 data
@@ -1511,7 +1511,7 @@ func (h *MessageHandler) sendPTV(w http.ResponseWriter, r *http.Request) {
 // 5. Enqueues message with FIFO ordering
 // 6. Returns immediately with zaapId as messageId (non-blocking)
 //
-// Compatible with Z-API specification
+
 func (h *MessageHandler) sendGif(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -1561,7 +1561,7 @@ func (h *MessageHandler) sendGif(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Convert delays from seconds to milliseconds with Z-API defaults
+	// Convert delays from seconds to milliseconds with FUNNELCHAT defaults
 	delayMessage := int64(0)
 	if req.DelayMessage != nil {
 		seconds := *req.DelayMessage
@@ -1635,16 +1635,16 @@ func (h *MessageHandler) sendGif(w http.ResponseWriter, r *http.Request) {
 		slog.Bool("is_reply", req.MessageID != ""),
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
-	// Return Z-API compatible response
+	// Return response
 	response := h.newSendMessageResponse(zaapID, instStatus)
 
-	// Return 200 OK (Z-API standard)
+	// Return 200 OK
 	respondJSON(w, http.StatusOK, response)
 }
 
 // sendDocument handles POST /instances/{instanceId}/token/{token}/send-document
 //
-// Z-API Compatible endpoint for sending document messages
+// endpoint for sending document messages
 func (h *MessageHandler) sendDocument(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -1770,7 +1770,7 @@ func (h *MessageHandler) sendDocument(w http.ResponseWriter, r *http.Request) {
 		slog.Bool("is_reply", req.MessageID != ""),
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
-	// Return Z-API compatible response
+	// Return response
 	response := h.newSendMessageResponse(zaapID, instStatus)
 
 	respondJSON(w, http.StatusOK, response)
@@ -1888,7 +1888,7 @@ func (h *MessageHandler) sendLocation(w http.ResponseWriter, r *http.Request) {
 		slog.Bool("is_reply", req.MessageID != ""),
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
-	// Return Z-API compatible response
+	// Return response
 	response := h.newSendMessageResponse(zaapID, instStatus)
 
 	respondJSON(w, http.StatusOK, response)
@@ -1925,7 +1925,7 @@ func (h *MessageHandler) sendContact(w http.ResponseWriter, r *http.Request) {
 	// Normalize phone number
 	phone = normalizePhoneNumber(phone)
 
-	// Validate Z-API required contact fields
+	// Validate FUNNELCHAT required contact fields
 	contactName := strings.TrimSpace(req.ContactName)
 	if contactName == "" {
 		h.log.WarnContext(ctx, "missing contact name")
@@ -1967,9 +1967,10 @@ func (h *MessageHandler) sendContact(w http.ResponseWriter, r *http.Request) {
 		delayTyping = int64(seconds) * 1000
 	}
 
-	// Build ContactMessage with ALL fields (Z-API + extended optional fields)
+	// Build ContactMessage with ALL fields (FUNNELCHAT + extended optional fields)
 	contactMsg := &queue.ContactMessage{
-		// Required Z-API fields
+		// Required
+
 		FullName:    contactName,
 		PhoneNumber: contactPhone,
 
@@ -2030,7 +2031,7 @@ func (h *MessageHandler) sendContact(w http.ResponseWriter, r *http.Request) {
 		slog.Bool("is_reply", req.MessageID != ""),
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
-	// Return Z-API compatible response
+	// Return response
 	response := h.newSendMessageResponse(zaapID, instStatus)
 
 	respondJSON(w, http.StatusOK, response)
@@ -2038,7 +2039,7 @@ func (h *MessageHandler) sendContact(w http.ResponseWriter, r *http.Request) {
 
 // listQueue handles GET /instances/{instanceId}/token/{token}/queue
 //
-// Z-API Compatible endpoint
+// endpoint
 // Query parameters:
 // - page: Page number (default: 1)
 // - pageSize: Number of messages per page (default: 100)
@@ -2075,7 +2076,7 @@ func (h *MessageHandler) listQueue(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Parse query parameters (Z-API format: page, pageSize)
+	// Parse query parameters (format: page, pageSize)
 	page := 1
 	if pageStr := r.URL.Query().Get("page"); pageStr != "" {
 		if parsedPage, err := strconv.Atoi(pageStr); err == nil && parsedPage > 0 {
@@ -2102,7 +2103,6 @@ func (h *MessageHandler) listQueue(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Convert to Z-API format
 	messages := make(QueueListResponse, 0, len(queueList.Jobs))
 	for _, job := range queueList.Jobs {
 		messages = append(messages, convertJobToQueueMessage(job))
@@ -2113,7 +2113,7 @@ func (h *MessageHandler) listQueue(w http.ResponseWriter, r *http.Request) {
 
 // getQueueCount handles GET /instances/{instanceId}/token/{token}/queue/count
 //
-// Z-API Compatible endpoint
+// endpoint
 func (h *MessageHandler) getQueueCount(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -2162,7 +2162,7 @@ func (h *MessageHandler) getQueueCount(w http.ResponseWriter, r *http.Request) {
 
 // clearQueue handles DELETE /instances/{instanceId}/token/{token}/queue
 //
-// Z-API Compatible endpoint - deletes ALL messages in queue
+// endpoint - deletes ALL messages in queue
 func (h *MessageHandler) clearQueue(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -2204,7 +2204,7 @@ func (h *MessageHandler) clearQueue(w http.ResponseWriter, r *http.Request) {
 
 	h.log.InfoContext(ctx, "queue cleared successfully")
 
-	// Z-API returns 200 OK with empty body
+	// FUNNELCHAT returns 200 OK with empty body
 	respondJSON(w, http.StatusOK, map[string]string{
 		"message": "Queue cleared successfully",
 	})
@@ -2212,7 +2212,7 @@ func (h *MessageHandler) clearQueue(w http.ResponseWriter, r *http.Request) {
 
 // cancelQueueMessage handles DELETE /instances/{instanceId}/token/{token}/queue/{zaapId}
 //
-// Z-API Compatible endpoint - deletes a specific message from queue
+// endpoint - deletes a specific message from queue
 func (h *MessageHandler) cancelQueueMessage(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -2266,7 +2266,7 @@ func (h *MessageHandler) cancelQueueMessage(w http.ResponseWriter, r *http.Reque
 
 	h.log.InfoContext(ctx, "message cancelled successfully")
 
-	// Z-API returns 200 OK with empty body
+	// FUNNELCHAT returns 200 OK with empty body
 	respondJSON(w, http.StatusOK, map[string]string{
 		"message": "Message cancelled successfully",
 	})
@@ -2274,18 +2274,18 @@ func (h *MessageHandler) cancelQueueMessage(w http.ResponseWriter, r *http.Reque
 
 // getContacts handles GET /instances/{instanceId}/token/{token}/contacts
 //
-// Z-API Compatible endpoint that:
+// endpoint that:
 // 1. Validates instanceId and token from URL
 // 2. Validates Client-Token header
 // 3. Retrieves all contacts from WhatsApp instance
 // 4. Applies pagination to results
-// 5. Returns Z-API compatible contact array
+// 5. Returns contact array
 //
 // Query parameters:
 // - page: Page number (required, minimum: 1)
 // - pageSize: Number of contacts per page (required, minimum: 1)
 //
-// Compatible with Z-API specification
+
 func (h *MessageHandler) getContacts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -2293,9 +2293,6 @@ func (h *MessageHandler) getContacts(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-
-	// Parse query parameters (Z-API format: page, pageSize)
-	// Both are REQUIRED in Z-API specification
 	pageStr := r.URL.Query().Get("page")
 	if pageStr == "" {
 		h.log.WarnContext(ctx, "missing required query parameter: page")
@@ -2352,24 +2349,24 @@ func (h *MessageHandler) getContacts(w http.ResponseWriter, r *http.Request) {
 		slog.Int("total_contacts", result.Total),
 		slog.Int("page_items", len(result.Items)))
 
-	// Z-API returns array of contacts (not wrapped in object)
+	// FUNNELCHAT returns array of contacts (not wrapped in object)
 	respondJSON(w, http.StatusOK, result.Items)
 }
 
 // getChats handles GET /instances/{instanceId}/token/{token}/chats
 //
-// Z-API Compatible endpoint that:
+// endpoint that:
 // 1. Validates instanceId and token from URL
 // 2. Validates Client-Token header
 // 3. Retrieves all chats from WhatsApp instance
 // 4. Applies pagination to results
-// 5. Returns Z-API compatible chat array
+// 5. Returns chat array
 //
 // Query parameters:
 // - page: Page number (required, minimum: 1)
 // - pageSize: Number of chats per page (required, minimum: 1)
 //
-// Compatible with Z-API specification
+
 func (h *MessageHandler) getChats(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -2378,7 +2375,7 @@ func (h *MessageHandler) getChats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Parse query parameters (Z-API format: page, pageSize)
+	// Parse query parameters (format: page, pageSize)
 	pageStr := r.URL.Query().Get("page")
 	if pageStr == "" {
 		h.log.WarnContext(ctx, "missing required query parameter: page")
@@ -2435,22 +2432,22 @@ func (h *MessageHandler) getChats(w http.ResponseWriter, r *http.Request) {
 		slog.Int("total_chats", result.TotalCount),
 		slog.Int("page_items", len(result.Chats)))
 
-	// Z-API returns array of chats (not wrapped in object)
+	// FUNNELCHAT returns array of chats (not wrapped in object)
 	respondJSON(w, http.StatusOK, result.Chats)
 }
 
 // phoneExists handles GET /instances/{instanceId}/token/{token}/phone-exists/{phone}
 //
-// Z-API Compatible endpoint that:
+// endpoint that:
 // 1. Validates instanceId and token from URL
 // 2. Validates Client-Token header
 // 3. Checks if phone number is registered on WhatsApp
-// 4. Returns Z-API compatible response array
+// 4. Returns response array
 //
 // Path parameters:
 // - phone: Phone number in format DDI DDD NUMBER (e.g., 551199999999)
 //
-// Compatible with Z-API specification
+
 func (h *MessageHandler) phoneExists(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -2496,25 +2493,25 @@ func (h *MessageHandler) phoneExists(w http.ResponseWriter, r *http.Request) {
 	h.log.InfoContext(ctx, "phone check completed",
 		slog.Bool("exists", result.Exists))
 
-	// Z-API returns the response object directly
+	// FUNNELCHAT returns the response object directly
 	respondJSON(w, http.StatusOK, result)
 }
 
 // phoneExistsBatch handles POST /instances/{instanceId}/token/{token}/phone-exists-batch
 //
-// Z-API Compatible endpoint that:
+// endpoint that:
 // 1. Validates instanceId and token from URL
 // 2. Validates Client-Token header
 // 3. Accepts a JSON body with array of phone numbers
 // 4. Checks if each phone number is registered on WhatsApp
-// 5. Returns Z-API compatible response array with validation results
+// 5. Returns response array with validation results
 //
 // Request body:
 // - phones: Array of phone numbers in format DDI DDD NUMBER (e.g., ["551199999999", "551188888888"])
 //
-// Maximum batch size: 50,000 numbers per request (Z-API limit)
+// Maximum batch size: 50,000 numbers per request (FUNNELCHAT limit)
 //
-// Compatible with Z-API specification
+
 func (h *MessageHandler) phoneExistsBatch(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -2539,7 +2536,7 @@ func (h *MessageHandler) phoneExistsBatch(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	// Z-API limit: 50,000 numbers per request
+	// FUNNELCHAT limit: 50,000 numbers per request
 	const maxBatchSize = 50000
 	if len(req.Phones) > maxBatchSize {
 		h.log.WarnContext(ctx, "batch size exceeds limit",
@@ -2588,7 +2585,7 @@ func (h *MessageHandler) phoneExistsBatch(w http.ResponseWriter, r *http.Request
 	h.log.InfoContext(ctx, "batch phone check completed",
 		slog.Int("results_count", len(results)))
 
-	// Z-API returns array of results
+	// FUNNELCHAT returns array of results
 	respondJSON(w, http.StatusOK, results)
 }
 
@@ -2616,7 +2613,7 @@ func normalizePhoneNumber(phone string) string {
 		return phone
 	}
 
-	// Z-API style suffixes for groups/channels/broadcast lists
+	// FUNNELCHAT style suffixes for groups/channels/broadcast lists
 	if strings.HasSuffix(phone, "-group") {
 		base := strings.TrimSuffix(phone, "-group")
 		return base + "@g.us"
@@ -2682,7 +2679,7 @@ func convertContactAddress(apiAddr *ContactAddress) *queue.ContactAddress {
 	}
 }
 
-// convertJobToQueueMessage converts queue.QueueJobInfo to QueueMessageResponse (Z-API format)
+// convertJobToQueueMessage converts queue.QueueJobInfo to QueueMessageResponse
 func convertJobToQueueMessage(job queue.QueueJobInfo) QueueMessageResponse {
 	// Extract message text if it's a text message
 	message := ""
@@ -2690,7 +2687,7 @@ func convertJobToQueueMessage(job queue.QueueJobInfo) QueueMessageResponse {
 		message = job.TextContent.Message
 	}
 
-	// Convert delays from milliseconds to seconds (Z-API format)
+	// Convert delays from milliseconds to seconds
 	delayMessageSec := job.DelayMessage / 1000
 	delayTypingSec := job.DelayTyping / 1000
 
@@ -2698,10 +2695,10 @@ func convertJobToQueueMessage(job queue.QueueJobInfo) QueueMessageResponse {
 	createdMs := job.CreatedAt.UnixMilli()
 
 	response := QueueMessageResponse{
-		ID:             job.ZaapID,              // _id field
-		ZaapId:         job.ZaapID,              // Z-API format
-		MessageId:      job.WhatsAppMessageID,   // WhatsApp message ID (if sent)
-		InstanceId:     job.InstanceID.String(), // Z-API format
+		ID:             job.ZaapID, // _id field
+		ZaapId:         job.ZaapID,
+		MessageId:      job.WhatsAppMessageID, // WhatsApp message ID (if sent)
+		InstanceId:     job.InstanceID.String(),
 		Phone:          job.Phone,               // Recipient phone
 		Message:        message,                 // Text message content
 		DelayMessage:   delayMessageSec,         // In seconds
@@ -2756,7 +2753,7 @@ func (h *MessageHandler) handleEnqueueError(ctx context.Context, w http.Response
 }
 
 // sendContacts handles POST /instances/{instanceId}/token/{token}/send-contacts
-// Z-API Compatible endpoint for sending multiple contact cards
+// endpoint for sending multiple contact cards
 func (h *MessageHandler) sendContacts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
@@ -2850,7 +2847,7 @@ func (h *MessageHandler) sendContacts(w http.ResponseWriter, r *http.Request) {
 
 		// Build ContactMessage with ALL fields (same as sendContact)
 		contactMsg := &queue.ContactMessage{
-			// Required Z-API fields
+			// Required
 			FullName:    contactName,
 			PhoneNumber: contactPhone,
 
@@ -2925,13 +2922,13 @@ func (h *MessageHandler) sendContacts(w http.ResponseWriter, r *http.Request) {
 		slog.Int("contact_count", len(req.Contacts)),
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
-	// Return Z-API compatible response
+	// Return response
 	response := h.newSendMessageResponse(zaapID, instStatus)
 
 	respondJSON(w, http.StatusOK, response)
 }
 
-// sendButtonList handles POST /send-button-list (Z-API compatible)
+// sendButtonList handles POST /send-button-list
 // Sends a message with quick reply buttons using NativeFlowMessage
 func (h *MessageHandler) sendButtonList(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -3037,7 +3034,7 @@ func (h *MessageHandler) sendButtonList(w http.ResponseWriter, r *http.Request) 
 	respondJSON(w, http.StatusOK, response)
 }
 
-// sendButtonActions handles POST /send-button-actions (Z-API compatible)
+// sendButtonActions handles POST /send-button-actions
 // Sends a message with action buttons (URL, call, copy, quick_reply)
 func (h *MessageHandler) sendButtonActions(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -3170,7 +3167,7 @@ func (h *MessageHandler) sendButtonActions(w http.ResponseWriter, r *http.Reques
 	respondJSON(w, http.StatusOK, response)
 }
 
-// sendOptionList handles POST /send-option-list (Z-API compatible)
+// sendOptionList handles POST /send-option-list
 // Sends a list/menu message with sections and selectable rows
 func (h *MessageHandler) sendOptionList(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -3294,7 +3291,7 @@ func (h *MessageHandler) sendOptionList(w http.ResponseWriter, r *http.Request) 
 	respondJSON(w, http.StatusOK, response)
 }
 
-// sendButtonPIX handles POST /send-button-pix (Z-API compatible)
+// sendButtonPIX handles POST /send-button-pix
 // Sends a message with a PIX payment button (Brazil)
 func (h *MessageHandler) sendButtonPIX(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -3398,7 +3395,7 @@ func (h *MessageHandler) sendButtonPIX(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, response)
 }
 
-// sendButtonOTP handles POST /send-button-otp (Z-API compatible)
+// sendButtonOTP handles POST /send-button-otp
 // Sends a message with a copy code button for OTP verification
 func (h *MessageHandler) sendButtonOTP(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -3489,7 +3486,7 @@ func (h *MessageHandler) sendButtonOTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // sendCarousel handles POST /instances/{instanceId}/token/{token}/send-carousel
-// Z-API compatible endpoint for sending carousel messages with multiple cards
+// endpoint for sending carousel messages with multiple cards
 func (h *MessageHandler) sendCarousel(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	ctx, instanceID, instStatus, ok := h.resolveInstance(ctx, w, r)
@@ -3640,14 +3637,14 @@ func (h *MessageHandler) sendCarousel(w http.ResponseWriter, r *http.Request) {
 
 // sendPoll handles POST /instances/{instanceId}/token/{token}/send-poll
 //
-// Z-API Compatible endpoint that:
+// endpoint that:
 // 1. Validates instanceId and token from URL
 // 2. Validates Client-Token header
 // 3. Creates poll with 2-12 options
 // 4. Enqueues message with FIFO ordering
 // 5. Returns immediately with zaapId as messageId (non-blocking)
 //
-// Z-API Request format:
+// FUNNELCHAT Request format:
 // {"phone": "554499999999", "message": "Poll question", "poll": [{"name": "Option1"}, {"name": "Option2"}], "pollMaxOptions": 1}
 func (h *MessageHandler) sendPoll(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -3679,7 +3676,7 @@ func (h *MessageHandler) sendPoll(w http.ResponseWriter, r *http.Request) {
 	// Normalize phone number to WhatsApp format
 	phone = normalizePhoneNumber(phone)
 
-	// Validate poll question (Z-API uses "message" field)
+	// Validate poll question (FUNNELCHAT uses "message" field)
 	question := strings.TrimSpace(req.Message)
 	if question == "" {
 		h.log.WarnContext(ctx, "missing poll question")
@@ -3714,7 +3711,7 @@ func (h *MessageHandler) sendPoll(w http.ResponseWriter, r *http.Request) {
 		options[i] = optName
 	}
 
-	// Set max selections (Z-API: 0 = single choice, 1+ = multi-choice)
+	// Set max selections (FUNNELCHAT: 0 = single choice, 1+ = multi-choice)
 	maxSelections := 0
 	if req.PollMaxOptions != nil {
 		maxSelections = *req.PollMaxOptions
@@ -3726,7 +3723,7 @@ func (h *MessageHandler) sendPoll(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Convert delays from seconds to milliseconds with Z-API defaults
+	// Convert delays from seconds to milliseconds with FUNNELCHAT defaults
 	delayMessage := int64(0)
 	if req.DelayMessage != nil {
 		seconds := *req.DelayMessage
@@ -3790,14 +3787,14 @@ func (h *MessageHandler) sendPoll(w http.ResponseWriter, r *http.Request) {
 
 // sendEvent handles POST /instances/{instanceId}/token/{token}/send-event
 //
-// Z-API Compatible endpoint that:
+// endpoint that:
 // 1. Validates instanceId and token from URL
 // 2. Validates Client-Token header
 // 3. Creates calendar event message
 // 4. Enqueues message with FIFO ordering
 // 5. Returns immediately with zaapId as messageId (non-blocking)
 //
-// Z-API Request format:
+// FUNNELCHAT Request format:
 // {"phone": "120363356737170752-group", "event": {"name": "Event Name", "dateTime": "2024-04-29T09:30:53.309Z", "description": "...", "location": {...}}}
 func (h *MessageHandler) sendEvent(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -3876,7 +3873,7 @@ func (h *MessageHandler) sendEvent(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Convert delays from seconds to milliseconds with Z-API defaults
+	// Convert delays from seconds to milliseconds with FUNNELCHAT defaults
 	delayMessage := int64(0)
 	if req.DelayMessage != nil {
 		seconds := *req.DelayMessage
@@ -3943,14 +3940,14 @@ func (h *MessageHandler) sendEvent(w http.ResponseWriter, r *http.Request) {
 
 // sendLink handles POST /instances/{instanceId}/token/{token}/send-link
 //
-// Z-API Compatible endpoint that:
+// endpoint that:
 // 1. Validates instanceId and token from URL
 // 2. Validates Client-Token header
 // 3. Creates text message with custom link preview override
 // 4. Enqueues message with FIFO ordering
 // 5. Returns immediately with zaapId as messageId (non-blocking)
 //
-// Z-API Request format:
+// FUNNELCHAT Request format:
 // {"phone": "5544999999999", "message": "Check this out", "linkUrl": "https://example.com", "title": "Title", "linkDescription": "Description", "image": "https://..."}
 func (h *MessageHandler) sendLink(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -4007,7 +4004,7 @@ func (h *MessageHandler) sendLink(w http.ResponseWriter, r *http.Request) {
 		messageText = messageText + "\n\n" + linkUrl
 	}
 
-	// Convert delays from seconds to milliseconds with Z-API defaults
+	// Convert delays from seconds to milliseconds with FUNNELCHAT defaults
 	delayMessage := int64(0)
 	if req.DelayMessage != nil {
 		seconds := *req.DelayMessage
@@ -4077,7 +4074,7 @@ func (h *MessageHandler) sendLink(w http.ResponseWriter, r *http.Request) {
 }
 
 // deleteMessage handles DELETE /instances/{instanceId}/token/{token}/messages
-// Z-API Compatible format for deleting messages
+// format for deleting messages
 // Query params: phone, messageId, owner (true for own message, false for admin delete)
 func (h *MessageHandler) deleteMessage(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -4177,7 +4174,7 @@ func (h *MessageHandler) deleteMessage(w http.ResponseWriter, r *http.Request) {
 }
 
 // modifyChat handles POST /instances/{instanceId}/token/{token}/modify-chat
-// Z-API Compatible format for modifying chat state
+// format for modifying chat state
 // Actions: read, archive, unarchive, pin, unpin, mute, unmute, clear, delete
 func (h *MessageHandler) modifyChat(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()

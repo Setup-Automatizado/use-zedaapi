@@ -5,11 +5,11 @@ title: ID and Token
 
 ## What Is It and What Is It For?
 
-It's not hard to imagine that for communication between APIs, we need to establish a security protocol between the parties, i.e., between Z-API and your application. All interactions with our API need to be authenticated by an ID and a token.
+It's not hard to imagine that for communication between APIs, we need to establish a security protocol between the parties, i.e., between FUNNELCHAT and your application. All interactions with our API need to be authenticated by an ID and a token.
 
 Once you obtain your ID and Token, you can start sending messages. To do this, you need to compose the URL with your information.
 
-For example: https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-text
+For example: https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-text
 
 Notice that the ID and Token information make up the integration URL.
 
@@ -17,7 +17,7 @@ Notice that the ID and Token information make up the integration URL.
 
 ## How Do I Obtain My ID and Token?
 
-Right after you create your account on Z-API, you will need to create an instance, and this instance has an ID and a token to identify it. These two pieces of information together will ensure the security of communication between your application and ours. To view the ID and token of your instance, simply access the instance in the admin panel and click on "edit." There, you will find all the data related to the instance. Remember that you can have multiple instances, but each one has its own ID and token.
+Right after you create your account on FUNNELCHAT, you will need to create an instance, and this instance has an ID and a token to identify it. These two pieces of information together will ensure the security of communication between your application and ours. To view the ID and token of your instance, simply access the instance in the admin panel and click on "edit." There, you will find all the data related to the instance. Remember that you can have multiple instances, but each one has its own ID and token.
 
 ---
 

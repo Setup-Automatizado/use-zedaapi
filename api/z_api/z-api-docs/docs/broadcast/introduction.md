@@ -4,7 +4,7 @@ title: Introdução
 ---
 
 :::warning Limitação do WhatsApp Web
-Devido a esse recurso **não estar disponível no WhatsApp Web**, a **Z-API atualmente não oferece suporte ao envio de mensagens via listas de transmissão**. Essa é uma limitação da própria plataforma do WhatsApp Web.
+Devido a esse recurso **não estar disponível no WhatsApp Web**, a **FUNNELCHAT atualmente não oferece suporte ao envio de mensagens via listas de transmissão**. Essa é uma limitação da própria plataforma do WhatsApp Web.
 :::
 
 ## Lista de transmissão

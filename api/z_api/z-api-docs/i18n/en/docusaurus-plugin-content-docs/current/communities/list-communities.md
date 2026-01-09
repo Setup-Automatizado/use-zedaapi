@@ -7,7 +7,7 @@ title: List communities
 
 #### /create-group
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/communities
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/communities
 
 ### Header
 
@@ -45,7 +45,7 @@ This method is responsible for returning all the communities you are a part of.
 
 Method
 
-`GET` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/communities
+`GET` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/communities
 
 ---
 
@@ -81,4 +81,4 @@ In case you receive 415 error, make sure to add the “Content-Type” of the ob
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/list-communities.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/list-communities.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

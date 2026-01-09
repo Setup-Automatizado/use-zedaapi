@@ -7,7 +7,7 @@ title: Send link
 
 #### /send-link
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-link
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-link
 
 ### Header
 
@@ -58,10 +58,10 @@ It is important for you to know that the link is only clickable if the recipient
 ```json
 {
   "phone": "5511999998888",
-  "message": "Aqui você coloca um texto sobre o site, atenção esse texto preciso ter o link que será enviado no final da mensagem! Assim: https://z-api.io",
+  "message": "Aqui você coloca um texto sobre o site, atenção esse texto preciso ter o link que será enviado no final da mensagem! Assim: https://funnelchat",
   "image": "https://firebasestorage.googleapis.com/v0/b/zaap-messenger-web.appspot.com/o/logo.png?alt=media",
-  "linkUrl": "https://z-api.io",
-  "title": "Z-API",
+  "linkUrl": "https://funnelchat",
+  "title": "FUNNELCHAT",
   "linkDescription": "Integração com o whatsapp"
 }
 ```
@@ -74,7 +74,7 @@ It is important for you to know that the link is only clickable if the recipient
 
 | Attributes | Type   | Description      |
 | :-------- | :----- | :------------- |
-| zaapId    | string | id on z-api    |
+| zaapId    | string | id on funnelchat    |
 | messageId | string | id on whatsapp |
 
 Example
@@ -106,4 +106,4 @@ Link for webhooks response (upon receiving)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/send-link.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/send-link.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

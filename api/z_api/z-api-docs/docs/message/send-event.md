@@ -7,7 +7,7 @@ title: Enviar evento
 
 #### /send-event
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/send-event
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/send-event
 
 ### Header
 
@@ -73,7 +73,7 @@ Neste método você poderá enviar mensagens do tipo Evento. Só é possível en
 
 | Atributos | Tipo | Descrição |
 | :-- | :-- | :-- |
-| zaapId | string | id no z-api |
+| zaapId | string | id no funnelchat |
 | messageId | string | id no whatsapp |
 | id | string | Adicionado para compatibilidade com zapier, ele tem o mesmo valor do messageId |
 
@@ -107,4 +107,4 @@ Link para a response do webhook (ao receber)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/send-event.json&targets=all" frameBorder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/send-event.json&targets=all" frameBorder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

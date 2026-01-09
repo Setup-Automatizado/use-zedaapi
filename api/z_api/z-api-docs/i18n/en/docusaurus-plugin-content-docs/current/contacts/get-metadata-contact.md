@@ -7,7 +7,7 @@ title: Get contact metadata
 
 #### /contacts/{phone}
 
-`GET` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/contacts/{phone}
+`GET` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/contacts/{phone}
 
 ### Header
 
@@ -51,7 +51,7 @@ If you intend to store your contact's image, please note that we always return i
 
 Method
 
-`GET` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/contacts/5511999999999
+`GET` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/contacts/5511999999999
 
 ---
 
@@ -91,4 +91,4 @@ In case you receive 415 error, make sure to add the “Content-Type” of the ob
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/get-metadata-contact.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/get-metadata-contact.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

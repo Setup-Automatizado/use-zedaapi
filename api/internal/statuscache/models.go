@@ -190,7 +190,7 @@ type PendingWebhook struct {
 	Status      string `json:"status"`
 	Timestamp   int64  `json:"timestamp"`
 	Device      int    `json:"device,omitempty"`
-	Payload     []byte `json:"payload"` // Original Z-API payload for flush
+	Payload     []byte `json:"payload"` // Original FUNNELCHAT payload for flush
 }
 
 // CacheStats contains statistics about the status cache
@@ -202,12 +202,12 @@ type CacheStats struct {
 	NewestEntry       int64            `json:"newestEntry,omitempty"` // Unix timestamp
 }
 
-// RawStatusPayload matches the Z-API webhook payload format exactly
+// RawStatusPayload matches the FUNNELCHAT webhook payload format exactly
 // This allows systems to process cached data identically to webhooks
 type RawStatusPayload struct {
 	Status         string   `json:"status"`
 	Ids            []string `json:"ids"`
-	Momment        int64    `json:"momment"` // Z-API uses "momment" (typo preserved for compatibility)
+	Momment        int64    `json:"momment"` // FUNNELCHAT uses "momment" (typo preserved for compatibility)
 	Phone          string   `json:"phone"`
 	ChatLid        string   `json:"chatLid,omitempty"`
 	ChatPN         string   `json:"chat_pn,omitempty"`
@@ -227,7 +227,7 @@ type RawQueryResult struct {
 	Meta QueryMeta           `json:"meta"`
 }
 
-// ToRawPayloads converts a StatusCacheEntry to raw Z-API format payloads
+// ToRawPayloads converts a StatusCacheEntry to raw payloads
 func (e *StatusCacheEntry) ToRawPayloads() []*RawStatusPayload {
 	payloads := make([]*RawStatusPayload, 0, len(e.Participants))
 

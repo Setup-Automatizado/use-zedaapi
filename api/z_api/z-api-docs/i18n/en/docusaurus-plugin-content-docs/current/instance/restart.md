@@ -7,7 +7,7 @@ title: Restarting instance
 
 #### /restart
 
-`GET` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/restart
+`GET` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/restart
 
 ### Header
 

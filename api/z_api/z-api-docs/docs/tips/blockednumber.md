@@ -32,8 +32,8 @@ Quantidade é algo importante sim, mas não é só sobre a quantidade enviada, o
 
 Sempre em nossas conversas utilizamos o case de um dos nossos clientes mais antigos, que hoje envia mensagens promocionais pelo WhatsApp para mais de 80 mil pessoas diariamente e nunca teve seu número bloqueado. Quando o procuramos e indagamos sobre como ele conseguia tal façanha, ele gentilmente compartilhou a seguinte técnica:
 
-1.	Fazer maturação do chip: Isso significa usar o número de telefone no WhatsApp de maneira normal antes de começar a enviar muitas mensagens através do Z-API.
-2.	Interagir pelo celular ou WhatsApp Web antes de conectar na Z-API: Isso ajuda a mostrar para o WhatsApp que você é um usuário real e não um bot.
+1.	Fazer maturação do chip: Isso significa usar o número de telefone no WhatsApp de maneira normal antes de começar a enviar muitas mensagens através do FUNNELCHAT.
+2.	Interagir pelo celular ou WhatsApp Web antes de conectar na FUNNELCHAT: Isso ajuda a mostrar para o WhatsApp que você é um usuário real e não um bot.
 3.	Ter um texto que induza o usuário a responder as mensagens: Isso ajuda a mostrar para o WhatsApp que você está tendo conversas reais com as pessoas.
 4.	Oferecer uma opção para o usuário não receber mais as mensagens caso não queira: Isso é importante para respeitar a privacidade dos usuários e evitar denúncias.
 5.	Ter os dados do perfil preenchidos no WhatsApp: Isso ajuda a mostrar para o WhatsApp que você é um usuário legítimo.

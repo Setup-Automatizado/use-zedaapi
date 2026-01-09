@@ -7,7 +7,7 @@ title: Dados do celular
 
 #### /device
 
-`GET` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/device
+`GET` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/device
 
 ### Header
 
@@ -31,8 +31,8 @@ Este método é responsável por retornar informações sobre o device/celular c
     "imgUrl": "",
     "name": "",
     "device": {
-        "sessionName": "Z-API",
-        "device_model": "Z-API"
+        "sessionName": "FUNNELCHAT",
+        "device_model": "FUNNELCHAT"
     },
     "originalDevice": "iphone", "smbi", "android", "smba", 
     "sessionId": 175,
@@ -44,4 +44,4 @@ Este método é responsável por retornar informações sobre o device/celular c
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/device.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/device.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

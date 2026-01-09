@@ -7,7 +7,7 @@ title: Send texts with buttons
 
 #### /send-button-list
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-button-list
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-button-list
 
 ### Header
 
@@ -18,7 +18,7 @@ title: Send texts with buttons
 ---
 
 :::caution Warning
-Button sending is currently available, but there are some decisive factors for operation. For more details visit the [Button Status](https://developer.z-api.io/en/tips/button-status) topic.
+Button sending is currently available, but there are some decisive factors for operation. For more details visit the [Button Status](https://developer.funnelchat/en/tips/button-status) topic.
 :::
 
 
@@ -71,7 +71,7 @@ In this method you will be able to send text messages with action buttons. Butto
 ```json
 {
   "phone": "5511999999999",
-  "message": "Z-API é Bom ?",
+  "message": "FUNNELCHAT é Bom ?",
   "buttonList": {
     "buttons": [
       {
@@ -95,7 +95,7 @@ In this method you will be able to send text messages with action buttons. Butto
 
 | Attributes | Type   | Description       |
 | :-------- | :----- | :------------- |
-| zaapId    | string | id no z-api    |
+| zaapId    | string | id no funnelchat    |
 | messageId | string | id no whatsapp |
 
 Example 
@@ -127,4 +127,4 @@ Link for webhooks response (upon receiving)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/send-button-list.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/send-button-list.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

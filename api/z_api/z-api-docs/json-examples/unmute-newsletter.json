@@ -1,6 +1,6 @@
 {
     "method": "PUT",
-    "url": "https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/unmute-newsletter",
+    "url": "https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/unmute-newsletter",
     "httpVersion": "HTTP/1.1",
     "queryString": [],
     "headers": [

@@ -17,7 +17,7 @@
       "headers.origin",
       "headers.server",
       "headers.user-agent",
-      "headers.z-api-token",
+      "headers.funnelchat-token",
       "body",
       "body.type",
       "body.phone",
@@ -42,10 +42,10 @@
           "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
           "upgrade": "h2c",
           "content-type": "application/json",
-          "origin": "https://api.z-api.io",
-          "server": "Z-API",
+          "origin": "https://api.funnelchat",
+          "server": "FUNNELCHAT",
           "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_2_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.54",
-          "z-api-token": "0B039DE5C908EDAF88346CED"
+          "funnelchat-token": "0B039DE5C908EDAF88346CED"
         },
         "body": {
           "type": "PresenceChatCallback",
@@ -69,10 +69,10 @@
             "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
             "upgrade": "h2c",
             "content-type": "application/json",
-            "origin": "https://api.z-api.io",
-            "server": "Z-API",
+            "origin": "https://api.funnelchat",
+            "server": "FUNNELCHAT",
             "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_2_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.54",
-            "z-api-token": "0B039DE5C908EDAF88346CED"
+            "funnelchat-token": "0B039DE5C908EDAF88346CED"
           }
         ],
         "children": {
@@ -129,7 +129,7 @@
             "type": "string",
             "optional": false,
             "examples": [
-              "https://api.z-api.io"
+              "https://api.funnelchat"
             ]
           },
           "server": {
@@ -137,7 +137,7 @@
             "type": "string",
             "optional": false,
             "examples": [
-              "Z-API"
+              "FUNNELCHAT"
             ]
           },
           "user-agent": {
@@ -148,8 +148,8 @@
               "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_2_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.54"
             ]
           },
-          "z-api-token": {
-            "path": "headers.z-api-token",
+          "funnelchat-token": {
+            "path": "headers.funnelchat-token",
             "type": "string",
             "optional": false,
             "examples": [

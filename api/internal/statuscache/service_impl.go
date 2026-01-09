@@ -288,7 +288,7 @@ func (s *ServiceImpl) QueryByPhone(ctx context.Context, instanceID, phone string
 	}, nil
 }
 
-// GetRawStatus retrieves raw Z-API format payloads for a specific message
+// GetRawStatus retrieves raw payloads for a specific message
 func (s *ServiceImpl) GetRawStatus(ctx context.Context, instanceID, messageID string) (*RawQueryResult, error) {
 	// Apply operation timeout
 	ctx, cancel := s.withTimeout(ctx)
@@ -316,7 +316,7 @@ func (s *ServiceImpl) GetRawStatus(ctx context.Context, instanceID, messageID st
 	}, nil
 }
 
-// QueryRawByGroup retrieves raw Z-API format payloads for messages in a group
+// QueryRawByGroup retrieves raw payloads for messages in a group
 func (s *ServiceImpl) QueryRawByGroup(ctx context.Context, instanceID, groupID string, params QueryParams) (*RawQueryResult, error) {
 	// Apply operation timeout
 	ctx, cancel := s.withTimeout(ctx)
@@ -342,7 +342,7 @@ func (s *ServiceImpl) QueryRawByGroup(ctx context.Context, instanceID, groupID s
 	}, nil
 }
 
-// QueryRawByPhone retrieves raw Z-API format payloads for messages to/from a phone
+// QueryRawByPhone retrieves raw payloads for messages to/from a phone
 func (s *ServiceImpl) QueryRawByPhone(ctx context.Context, instanceID, phone string, params QueryParams) (*RawQueryResult, error) {
 	// Apply operation timeout
 	ctx, cancel := s.withTimeout(ctx)

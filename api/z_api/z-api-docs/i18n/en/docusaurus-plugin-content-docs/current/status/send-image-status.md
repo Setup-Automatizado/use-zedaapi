@@ -7,7 +7,7 @@ title: Sending image status
 
 #### /send-image-status
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-image-status
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-image-status
 
 ### Header
 
@@ -45,17 +45,17 @@ Method responsible for sending an image to your status, remember that statuses d
 
 Method
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-image-status
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-image-status
 
 #### Body
 
 ```json
 {
-  "image": "https://www.z-api.io/wp-content/themes/z-api/dist/images/logo.svg"
+  "image": "https://www.funnelchat/wp-content/themes/funnelchat/dist/images/logo.svg"
 }
 
 {
-  "image": "https://www.z-api.io/wp-content/themes/z-api/dist/images/logo.svg",
+  "image": "https://www.funnelchat/wp-content/themes/funnelchat/dist/images/logo.svg",
   "caption": "Caption text"
 }
 ```
@@ -74,7 +74,7 @@ If you have doubts about how to send a Base64 image, access the "Send Image" mes
 
 | Attributos| Type   | Description      |
 | :-------- | :----- | :------------- |
-| zaapId    | string | id on z-api    |
+| zaapId    | string | id on funnelchat    |
 | messageId | string | id on whatsapp |
 
 Exemplo
@@ -96,4 +96,4 @@ In this case certify that you are sending the correct specification of the metho
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/send-image-status.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/send-image-status.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

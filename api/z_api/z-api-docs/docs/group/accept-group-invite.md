@@ -7,7 +7,7 @@ title: Aceitar convite do grupo
 
 #### /accept-invite-group?url={{URL_DE_CONVITE}}
 
-`GET` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/accept-invite-group?url={{URL_DE_CONVITE}}
+`GET` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/accept-invite-group?url={{URL_DE_CONVITE}}
 
 ### Header
 
@@ -34,7 +34,7 @@ Este método é reponsável por aceitar um convite que você recebeu para partic
 
 #### URL
 
-`GET` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/accept-invite-group?url=https://chat.whatsapp.com/bh8XyNrIUj84YZoy5xcaa112
+`GET` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/accept-invite-group?url=https://chat.whatsapp.com/bh8XyNrIUj84YZoy5xcaa112
 
 ---
 
@@ -74,4 +74,4 @@ Link para a response do webhook (ao receber) mensagem de convite
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/accept-group-invite.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/accept-group-invite.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

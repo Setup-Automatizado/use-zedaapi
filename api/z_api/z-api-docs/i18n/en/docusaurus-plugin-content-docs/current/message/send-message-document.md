@@ -7,7 +7,7 @@ title: Send documents
 
 #### /send-document/{extension}
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-document/ **{extension}**
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-document/ **{extension}**
 
 
 > **Don’t forget!** You need to inform the **{extension}** parameter with the extension of the file you want to send! Theoretically this method should support all types of documents, as long as they are within WhatsApp's own file size policies (to know more about these limits [click here]).
@@ -85,7 +85,7 @@ Method responsible for sending documents to your contacts. It is simple and obje
 
 | Attributes | Type   | Description      |
 | :-------- | :----- | :------------- |
-| zaapId    | string | id on z-api    |
+| zaapId    | string | id on funnelchat    |
 | messageId | string | id on whatsapp |
 
 Example 
@@ -116,4 +116,4 @@ Link for webhooks response (upon receiving)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/send-document.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/send-document.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

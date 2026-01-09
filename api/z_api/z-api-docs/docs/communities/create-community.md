@@ -7,7 +7,7 @@ title: Criar comunidade
 
 #### /create-group
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities
 
 ### Header
 
@@ -38,7 +38,7 @@ Antes de utilizar esse recurso, é importante verificar se o aplicativo do Whats
 
 **Método**
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities
 
 **Exemplo**
 
@@ -84,4 +84,4 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/create-community.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/create-community.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

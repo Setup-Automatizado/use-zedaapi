@@ -7,7 +7,7 @@ title: Deactivate Community
 
 #### /queue
 
-`DELETE` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/communities/{communityId}
+`DELETE` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/communities/{communityId}
 
 ### Header
 
@@ -47,7 +47,7 @@ When a community is deactivated, it will result in the disconnection of all grou
 
 Method
 
-`DELETE` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/communities/{CommunityID}
+`DELETE` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/communities/{CommunityID}
 
 ---
 
@@ -75,4 +75,4 @@ Link para a response do webhook (ao receber)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/deactivate-community.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/deactivate-community.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

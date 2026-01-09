@@ -12,7 +12,7 @@ Este método é responsável por alterar a sua imagem de perfil no WhatsApp
 
 #### /profile-picture
 
-`PUT` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/profile-picture
+`PUT` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/profile-picture
 
 ### Header
 

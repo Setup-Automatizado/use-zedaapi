@@ -25,7 +25,7 @@ In order for it to work you will need to have [Auto reading](./auto-read.md) ena
 
 #### /update-auto-read-status
 
-`PUT` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/update-auto-read-status
+`PUT` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/update-auto-read-status
 
 #### Request Body
 

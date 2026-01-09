@@ -11,7 +11,7 @@ Technically speaking an instance is nothing more than a virtual machine (or cont
 
 Each instance has a number, in case you need more numbers it will be necessary to create more instances. An instance is not chained to a unique number, that means you can disconnect your number and connect another one in the same instance.
 
-To help you understand the functionality of Z-API, our service runs with a model that is based on WhatsApp Web and we abstract the methods allowing you to manipulate them through RestFul API.
+To help you understand the functionality of FUNNELCHAT, our service runs with a model that is based on WhatsApp Web and we abstract the methods allowing you to manipulate them through RestFul API.
 
 To make it more concrete, in the next sections we will help you take your first steps.
 
@@ -19,4 +19,4 @@ To make it more concrete, in the next sections we will help you take your first 
 
 :::tip Curiosity
 
-It is neat to know that each time you create an instance our FlyBots that are responsible for orchestrating all of our devops, starts the creation process with a Stack Z-API in AWS Brasil. YEAH! All of our services are nacional a run on AWS Brasil.
+It is neat to know that each time you create an instance our FlyBots that are responsible for orchestrating all of our devops, starts the creation process with a Stack FUNNELCHAT in AWS Brasil. YEAH! All of our services are nacional a run on AWS Brasil.

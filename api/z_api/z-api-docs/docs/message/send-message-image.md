@@ -7,7 +7,7 @@ title: Enviar imagem
 
 #### /send-image
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/send-image
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/send-image
 
 ### Header
 
@@ -75,7 +75,7 @@ Neste [link] você encontra tudo que precisa saber sobre formatos e tamanhos de 
 ```json
 {
   "phone": "5511999999999",
-  "image": "https://www.z-api.io/wp-content/themes/z-api/dist/images/logo.svg",
+  "image": "https://www.funnelchat/wp-content/themes/funnelchat/dist/images/logo.svg",
   "caption": "Logo",
   "viewOnce": false
 }
@@ -99,7 +99,7 @@ Neste [link] você encontra tudo que precisa saber sobre formatos e tamanhos de 
 
 | Atributos | Tipo   | Descrição      |
 | :-------- | :----- | :------------- |
-| zaapId    | string | id no z-api    |
+| zaapId    | string | id no funnelchat    |
 | messageId | string | id no whatsapp |
 | id | string | Adicionado para compatibilidade com zapier, ele tem o mesmo valor do messageId |
 
@@ -133,4 +133,4 @@ Link para a response do webhook (ao receber)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/send-image.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/send-image.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

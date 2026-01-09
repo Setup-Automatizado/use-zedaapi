@@ -7,7 +7,7 @@ title: Newsletter Metadata
 
 #### /newsletter/metadata
 
-`GET` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/newsletter/metadata/{newsletterId}
+`GET` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/newsletter/metadata/{newsletterId}
 
 ### Header
 
@@ -37,7 +37,7 @@ This method returns the metadata of a newsletter, including all newsletter infor
 
 #### URL
 
-`GET` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/newsletter/metadata/{newsletterId}
+`GET` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/newsletter/metadata/{newsletterId}
 
 :::warning
 
@@ -79,8 +79,8 @@ Object (viewMetadata)
     "id": "999999999999999999@newsletter",
     "creationTime": "1695643504",
     "state": "ACTIVE",
-    "name": "Z-API",
-    "description": "Official Z-API Newsletter",
+    "name": "FUNNELCHAT",
+    "description": "Official FUNNELCHAT Newsletter",
     "subscribersCount": "123",
     "inviteLink": "https://www.whatsapp.com/channel/0029Va5Xk71a",
     "verification": "VERIFIED",
@@ -112,4 +112,4 @@ Link to the response of the webhook (upon receiving)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/get-newsletter-metadata.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/get-newsletter-metadata.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

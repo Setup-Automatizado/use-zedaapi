@@ -7,7 +7,7 @@ title: Last Seen
 
 #### /privacy/last-seen
 
-`POST` https://api.z-api.io/instances/{{instanceId}}/token/{{instanceToken}}/privacy/last-seen
+`POST` https://api.funnelchat/instances/{{instanceId}}/token/{{instanceToken}}/privacy/last-seen
 
 ### Header
 
@@ -56,7 +56,7 @@ Array Object (contactsBlacklist)
 
 **Method**
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/privacy/last-seen
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/privacy/last-seen
 
 **Example**
 
@@ -114,4 +114,4 @@ If you receive a 415 error, make sure to add the "Content-Type" of the object yo
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/privacy-last-seen.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/privacy-last-seen.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

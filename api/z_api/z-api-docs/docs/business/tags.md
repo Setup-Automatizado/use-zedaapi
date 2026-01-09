@@ -7,7 +7,7 @@ title: Buscar etiquetas
 
 #### /tags
 
-`GET` https://api.z-api.io/instances/{{instanceId}}/token/{{instanceToken}}/tags
+`GET` https://api.funnelchat/instances/{{instanceId}}/token/{{instanceToken}}/tags
 
 ### Header
 

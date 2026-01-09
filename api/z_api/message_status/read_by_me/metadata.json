@@ -14,7 +14,7 @@
       "headers.origin",
       "headers.server",
       "headers.user-agent",
-      "headers.z-api-token",
+      "headers.funnelchat-token",
       "body",
       "body.instanceId",
       "body.status",
@@ -43,10 +43,10 @@
           "content-length": "269",
           "host": "185.245.182.69:3000",
           "content-type": "application/json",
-          "origin": "https://api.z-api.io",
-          "server": "Z-API",
+          "origin": "https://api.funnelchat",
+          "server": "FUNNELCHAT",
           "user-agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
-          "z-api-token": "0B039DE5C908EDAF88346CED"
+          "funnelchat-token": "0B039DE5C908EDAF88346CED"
         },
         "body": {
           "instanceId": "3E6D06A438D501A5CD70265FDA264287",
@@ -68,10 +68,10 @@
           "content-length": "212",
           "host": "185.245.182.69:3000",
           "content-type": "application/json",
-          "origin": "https://api.z-api.io",
-          "server": "Z-API",
+          "origin": "https://api.funnelchat",
+          "server": "FUNNELCHAT",
           "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.4 Mobile/15E148 Safari/604.1",
-          "z-api-token": "0B039DE5C908EDAF88346CED"
+          "funnelchat-token": "0B039DE5C908EDAF88346CED"
         },
         "body": {
           "instanceId": "3E6D06A438D501A5CD70265FDA264287",
@@ -91,10 +91,10 @@
           "content-length": "213",
           "host": "185.245.182.69:3000",
           "content-type": "application/json",
-          "origin": "https://api.z-api.io",
-          "server": "Z-API",
+          "origin": "https://api.funnelchat",
+          "server": "FUNNELCHAT",
           "user-agent": "Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
-          "z-api-token": "0B039DE5C908EDAF88346CED"
+          "funnelchat-token": "0B039DE5C908EDAF88346CED"
         },
         "body": {
           "instanceId": "3E6D06A438D501A5CD70265FDA264287",
@@ -114,10 +114,10 @@
           "content-length": "214",
           "host": "185.245.182.69:3000",
           "content-type": "application/json",
-          "origin": "https://api.z-api.io",
-          "server": "Z-API",
+          "origin": "https://api.funnelchat",
+          "server": "FUNNELCHAT",
           "user-agent": "Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:111.0) Gecko/20100101 Firefox/111.0",
-          "z-api-token": "0B039DE5C908EDAF88346CED"
+          "funnelchat-token": "0B039DE5C908EDAF88346CED"
         },
         "body": {
           "instanceId": "3E6D06A438D501A5CD70265FDA264287",
@@ -137,10 +137,10 @@
           "content-length": "259",
           "host": "185.245.182.69:3000",
           "content-type": "application/json",
-          "origin": "https://api.z-api.io",
-          "server": "Z-API",
+          "origin": "https://api.funnelchat",
+          "server": "FUNNELCHAT",
           "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.54",
-          "z-api-token": "0B039DE5C908EDAF88346CED"
+          "funnelchat-token": "0B039DE5C908EDAF88346CED"
         },
         "body": {
           "instanceId": "3E6D06A438D501A5CD70265FDA264287",
@@ -167,46 +167,46 @@
             "content-length": "269",
             "host": "185.245.182.69:3000",
             "content-type": "application/json",
-            "origin": "https://api.z-api.io",
-            "server": "Z-API",
+            "origin": "https://api.funnelchat",
+            "server": "FUNNELCHAT",
             "user-agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
-            "z-api-token": "0B039DE5C908EDAF88346CED"
+            "funnelchat-token": "0B039DE5C908EDAF88346CED"
           },
           {
             "content-length": "212",
             "host": "185.245.182.69:3000",
             "content-type": "application/json",
-            "origin": "https://api.z-api.io",
-            "server": "Z-API",
+            "origin": "https://api.funnelchat",
+            "server": "FUNNELCHAT",
             "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.4 Mobile/15E148 Safari/604.1",
-            "z-api-token": "0B039DE5C908EDAF88346CED"
+            "funnelchat-token": "0B039DE5C908EDAF88346CED"
           },
           {
             "content-length": "213",
             "host": "185.245.182.69:3000",
             "content-type": "application/json",
-            "origin": "https://api.z-api.io",
-            "server": "Z-API",
+            "origin": "https://api.funnelchat",
+            "server": "FUNNELCHAT",
             "user-agent": "Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36",
-            "z-api-token": "0B039DE5C908EDAF88346CED"
+            "funnelchat-token": "0B039DE5C908EDAF88346CED"
           },
           {
             "content-length": "214",
             "host": "185.245.182.69:3000",
             "content-type": "application/json",
-            "origin": "https://api.z-api.io",
-            "server": "Z-API",
+            "origin": "https://api.funnelchat",
+            "server": "FUNNELCHAT",
             "user-agent": "Mozilla/5.0 (X11; Ubuntu; Linux i686; rv:111.0) Gecko/20100101 Firefox/111.0",
-            "z-api-token": "0B039DE5C908EDAF88346CED"
+            "funnelchat-token": "0B039DE5C908EDAF88346CED"
           },
           {
             "content-length": "259",
             "host": "185.245.182.69:3000",
             "content-type": "application/json",
-            "origin": "https://api.z-api.io",
-            "server": "Z-API",
+            "origin": "https://api.funnelchat",
+            "server": "FUNNELCHAT",
             "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.54",
-            "z-api-token": "0B039DE5C908EDAF88346CED"
+            "funnelchat-token": "0B039DE5C908EDAF88346CED"
           }
         ],
         "children": {
@@ -243,7 +243,7 @@
             "type": "string",
             "optional": false,
             "examples": [
-              "https://api.z-api.io"
+              "https://api.funnelchat"
             ]
           },
           "server": {
@@ -251,7 +251,7 @@
             "type": "string",
             "optional": false,
             "examples": [
-              "Z-API"
+              "FUNNELCHAT"
             ]
           },
           "user-agent": {
@@ -266,8 +266,8 @@
               "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.54"
             ]
           },
-          "z-api-token": {
-            "path": "headers.z-api-token",
+          "funnelchat-token": {
+            "path": "headers.funnelchat-token",
             "type": "string",
             "optional": false,
             "examples": [

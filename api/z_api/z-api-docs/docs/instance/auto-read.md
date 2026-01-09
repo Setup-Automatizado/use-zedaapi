@@ -13,7 +13,7 @@ Esse método ativa a leitura automática de todas as mensagens recebidas pela AP
 
 #### /update-auto-read-message
 
-`PUT` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-auto-read-message
+`PUT` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-auto-read-message
 
 ### Header
 

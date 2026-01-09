@@ -7,7 +7,7 @@ title: Clear Chat
 
 #### /modify-chat
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/modify-chat
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/modify-chat
 
 ### Header
 
@@ -74,4 +74,4 @@ If you receive a 415 error, make sure to add the "Content-Type" header to the re
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/clear-chat.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/clear-chat.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

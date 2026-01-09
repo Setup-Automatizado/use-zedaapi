@@ -7,7 +7,7 @@ title: Validar números em lote
 
 #### /phone-exists-batch
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/phone-exists-batch
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/phone-exists-batch
 
 ### Header
 
@@ -25,7 +25,7 @@ Limite por Requisição: O número máximo de validações em lote por requisiç
 :::
 
 :::important Importante
-Este método continua a ser a escolha ideal quando você precisa verificar se um número possui WhatsApp, especialmente útil para a validação de formulários. No entanto, é crucial observar que não é recomendado utilizar esta API para verificar a existência do número antes de enviar uma mensagem. O Z-API já realiza essa validação automaticamente a cada mensagem enviada, e o uso duplicado deste método pode resultar em problemas. 
+Este método continua a ser a escolha ideal quando você precisa verificar se um número possui WhatsApp, especialmente útil para a validação de formulários. No entanto, é crucial observar que não é recomendado utilizar esta API para verificar a existência do número antes de enviar uma mensagem. O FUNNELCHAT já realiza essa validação automaticamente a cada mensagem enviada, e o uso duplicado deste método pode resultar em problemas. 
 :::
 
 ---
@@ -46,7 +46,7 @@ Este método continua a ser a escolha ideal quando você precisa verificar se um
 
 Método
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/phone-exists-batch
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/phone-exists-batch
 
 
 ```json
@@ -96,4 +96,4 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/get-iswhatsapp-batch.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/get-iswhatsapp-batch.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

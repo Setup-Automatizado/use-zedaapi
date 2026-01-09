@@ -1,7 +1,7 @@
 /**
  * Message Test Form Component
  *
- * Complete form to test sending text messages with all Z-API parameters:
+ * Complete form to test sending text messages with all FUNNELCHAT parameters:
  * - phone (required)
  * - message (required)
  * - delayMessage (optional, 1-15 seconds)

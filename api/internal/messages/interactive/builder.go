@@ -14,7 +14,7 @@ import (
 	"go.mau.fi/whatsmeow/proto/waE2E"
 )
 
-// ProtoBuilder creates whatsmeow proto messages from Z-API requests
+// ProtoBuilder creates whatsmeow proto messages from FUNNELCHAT requests
 type ProtoBuilder struct{}
 
 // NewProtoBuilder creates a new proto builder instance
@@ -321,7 +321,7 @@ func (b *ProtoBuilder) BuildButtonActionsMessage(req *SendButtonActionsRequest) 
 		var buttonName string
 		var err error
 
-		// Use normalized type to accept both Z-API uppercase (CALL, URL) and lowercase (cta_call)
+		// Use normalized type to accept both FUNNELCHAT uppercase (CALL, URL) and lowercase (cta_call)
 		normalizedType := btn.GetNormalizedType()
 
 		switch normalizedType {

@@ -1,28 +1,28 @@
 ---
 id: stability
-title: Stability with Z-API
+title: Stability with FUNNELCHAT
 ---
 
 ## Introduction 
 
-For quality of service we have a few tips that could help out a lot with stability and the quality of your connection with Z-API.
+For quality of service we have a few tips that could help out a lot with stability and the quality of your connection with FUNNELCHAT.
 
 
 ## Dedicated device 
 
-We know that it’s not always possible however, try to avoid using the device for other activities to ensure stability and quality of Z-API services. A good tip is to use Android emulators. For more information on this topic search for emulators in this same section.
+We know that it’s not always possible however, try to avoid using the device for other activities to ensure stability and quality of FUNNELCHAT services. A good tip is to use Android emulators. For more information on this topic search for emulators in this same section.
 
 
 ## Device always connected 
 
 
 
-For proper functioning of Z-API it needs to have the device always connected to the internet. Just like on WhatsApp web if the device loses connection, our service will also stop working. Hence why it is very important for the device to always be connected.
+For proper functioning of FUNNELCHAT it needs to have the device always connected to the internet. Just like on WhatsApp web if the device loses connection, our service will also stop working. Hence why it is very important for the device to always be connected.
 
 
 ## Good internet connection  
 
-Keep your phone connected to a wifi with good connection speeds and avoid using your cellphone data. The speed of your internet directly impacts the quality of exchange of information between your phone and Z-API.
+Keep your phone connected to a wifi with good connection speeds and avoid using your cellphone data. The speed of your internet directly impacts the quality of exchange of information between your phone and FUNNELCHAT.
 
 ## WhatsApp always open
 

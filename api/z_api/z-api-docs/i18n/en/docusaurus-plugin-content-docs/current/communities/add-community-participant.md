@@ -7,7 +7,7 @@ title: Add participants
 
 #### /add-participant
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/add-participant
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/add-participant
 
 ### Header
 
@@ -22,7 +22,7 @@ This method is responsible for adding new participants to the community.
 
 :::tip New Attribute
 
-Recently, WhatsApp implemented a validation to check if the phone number connected to the API has the client's contact saved. However, Z-API has developed a solution to bypass this validation by introducing a new feature called **"autoInvite"**. Now, when a request is sent to add 10 clients to a group and only 5 of them are successfully added, the API sends private invites to the five clients who were not added. These invites allow them to join the community, even if their phone numbers are not saved as contacts.
+Recently, WhatsApp implemented a validation to check if the phone number connected to the API has the client's contact saved. However, FUNNELCHAT has developed a solution to bypass this validation by introducing a new feature called **"autoInvite"**. Now, when a request is sent to add 10 clients to a group and only 5 of them are successfully added, the API sends private invites to the five clients who were not added. These invites allow them to join the community, even if their phone numbers are not saved as contacts.
 
 :::
 
@@ -44,7 +44,7 @@ Recently, WhatsApp implemented a validation to check if the phone number connect
 
 #### URL
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/add-participant
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/add-participant
 
 #### Body
 
@@ -94,4 +94,4 @@ Link to the webhook response (upon receiving)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/add-community-participant.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/add-community-participant.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

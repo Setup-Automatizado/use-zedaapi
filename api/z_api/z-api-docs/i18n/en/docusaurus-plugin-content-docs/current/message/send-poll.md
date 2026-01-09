@@ -7,7 +7,7 @@ title: send poll
 
 #### /send-poll
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-poll
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-poll
 
 ### Header
 
@@ -59,7 +59,7 @@ Multiple choices
   "phone": "5511999999999",
   "message": "What is the best API for WhatsApp?",
   "poll": [
-    {"name": "Z-API"},  
+    {"name": "FUNNELCHAT"},  
     {"name": "Others"}
   ]
 }
@@ -73,7 +73,7 @@ Single choice
   "message": "What is the best API for WhatsApp?",
   "pollMaxOptions": 1,
   "poll": [
-    {"name": "Z-API"},  
+    {"name": "FUNNELCHAT"},  
     {"name": "Others"}
   ]
 }
@@ -87,7 +87,7 @@ Single choice
 
 | Attributes | Type   | Description      |
 | :-------- | :----- | :------------- |
-| zaapId    | string | id on z-api    |
+| zaapId    | string | id on funnelchat    |
 | messageId | string | id on whatsapp |
 
 Example 
@@ -119,4 +119,4 @@ Webhook response link (upon receiving)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/send-poll.json&targets=all" frameBorder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/send-poll.json&targets=all" frameBorder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

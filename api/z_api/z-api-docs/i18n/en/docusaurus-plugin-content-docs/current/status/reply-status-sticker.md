@@ -7,7 +7,7 @@ title: Respond to Status with Sticker
 
 #### /reply-status-sticker
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/reply-status-sticker
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/reply-status-sticker
 
 ### Header
 
@@ -41,14 +41,14 @@ Method responsible for sending a sticker response to a status.
 
 Method
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/reply-status-sticker
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/reply-status-sticker
 
 #### Body
 
 ```json
 {
   "phone": "5544999999999",
-  "sticker": "https://www.z-api.io/wp-content/themes/z-api/dist/images/logo.svg",
+  "sticker": "https://www.funnelchat/wp-content/themes/funnelchat/dist/images/logo.svg",
   "statusMessageId": "1F606398F2ECAA4846269F659B6003A9"
 }
 ```
@@ -61,7 +61,7 @@ Method
 
 | Attribute  |  Type   | Description                     |
 | :--------- | :-----  | :------------------------------ |
-| zaapId     | string  | id in z-api                      |
+| zaapId     | string  | id in funnelchat                      |
 | messageId  | string  | id in WhatsApp                   |
 | id         | string  | Added for compatibility with Zapier, it has the same value as messageId |
 
@@ -85,4 +85,4 @@ In this case, ensure you are sending the method specification correctly. Check i
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/reply-status-sticker.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/reply-status-sticker.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

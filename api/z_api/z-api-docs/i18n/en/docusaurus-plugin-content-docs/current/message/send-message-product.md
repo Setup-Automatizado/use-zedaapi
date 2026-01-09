@@ -7,7 +7,7 @@ title: Send product
 
 #### /send-product
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-product
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-product
 
 ### Header
 
@@ -52,7 +52,7 @@ In this method, you can send messages of your products. The product feature is o
 
 | Atributos | Tipo   | Descrição      |
 | :-------- | :----- | :------------- |
-| zaapId    | string | id in z-api    |
+| zaapId    | string | id in funnelchat    |
 | messageId | string | id in WhatsApp |
 | id        | string | Added for compatibility with Zapier, it has the same value as messageId |
 
@@ -87,4 +87,4 @@ Link to the webhook response (upon receipt)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/send-product.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/send-product.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

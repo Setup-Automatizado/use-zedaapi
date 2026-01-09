@@ -5,7 +5,7 @@ title: Introduction
 
 ## Multi-Devices
 
-Let's talk about Multi-Devices ? 
+Let's talk about Multi-Devices ?
 
 What is it? Where does it live? What does it feed off of?
 
@@ -25,7 +25,7 @@ It comes with a number of new features, but I will highlight 2 that we consider 
 
 You can have up to four devices connected at once, but it is only possible to connect one mobile phone to your WhatsApp account. This means that you can have a mobile device and up to 3 whatsapp web or desktop open simultaneously.
 
-- **Send and receive messages without needing a cell phone to be on** 
+- **Send and receive messages without needing a cell phone to be on**
 
 You no longer need to have your cell phone connected to send and receive messages via WhatsApp web or desktop. However, your additional devices will be disconnected if you do not use WhatsApp on your mobile for more than 14 days.
 
@@ -47,9 +47,9 @@ Ok maybe it's not really about limitations however it is about features not yet 
 
 ---
 
-## Z-API compatibility 
+## FUNNELCHAT compatibility
 
-Is Z-API compatible with this new version ?  
+Is with this new version ?
 
 Yes ! We are proud to share that we managed to make all the methods compatible and abstract all the complexity of the new version in order to deliver all features of this new version to our customers in a simple and transparent way.
 

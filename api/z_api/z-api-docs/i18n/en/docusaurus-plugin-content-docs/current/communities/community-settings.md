@@ -7,7 +7,7 @@ title: Community settings
 
 #### /communities/settings
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/communities/settings
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/communities/settings
 
 ### Header
 
@@ -34,7 +34,7 @@ With this API, you can change the settings of a community.
 
 #### URL
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/communities/settings
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/communities/settings
 
 #### Body
 
@@ -75,4 +75,4 @@ If you receive a 415 error, ensure to add the "Content-Type" header to the reque
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/community-settings.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/community-settings.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

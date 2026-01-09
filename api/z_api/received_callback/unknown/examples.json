@@ -8,10 +8,10 @@
         "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
         "upgrade": "h2c",
         "content-type": "application/json",
-        "origin": "https://api.z-api.io",
-        "server": "Z-API",
+        "origin": "https://api.funnelchat",
+        "server": "FUNNELCHAT",
         "user-agent": "Mozilla/5.0 (Android 13; Mobile; rv:68.0) Gecko/68.0 Firefox/111.0",
-        "z-api-token": "0B039DE5C908EDAF88346CED"
+        "funnelchat-token": "0B039DE5C908EDAF88346CED"
       },
       "body": {
         "chatLid": "260846399807547@lid",
@@ -48,10 +48,10 @@
         "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
         "upgrade": "h2c",
         "content-type": "application/json",
-        "origin": "https://api.z-api.io",
-        "server": "Z-API",
+        "origin": "https://api.funnelchat",
+        "server": "FUNNELCHAT",
         "user-agent": "Mozilla/5.0 (Linux; Android 10; LM-Q720) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.5563.115 Mobile Safari/537.36",
-        "z-api-token": "0B039DE5C908EDAF88346CED"
+        "funnelchat-token": "0B039DE5C908EDAF88346CED"
       },
       "body": {
         "chatLid": "195601601937433@lid",
@@ -88,10 +88,10 @@
         "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
         "upgrade": "h2c",
         "content-type": "application/json",
-        "origin": "https://api.z-api.io",
-        "server": "Z-API",
+        "origin": "https://api.funnelchat",
+        "server": "FUNNELCHAT",
         "user-agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:111.0) Gecko/20100101 Firefox/111.0",
-        "z-api-token": "0B039DE5C908EDAF88346CED"
+        "funnelchat-token": "0B039DE5C908EDAF88346CED"
       },
       "body": {
         "chatLid": "195601601937433@lid",
@@ -128,10 +128,10 @@
         "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
         "upgrade": "h2c",
         "content-type": "application/json",
-        "origin": "https://api.z-api.io",
-        "server": "Z-API",
+        "origin": "https://api.funnelchat",
+        "server": "FUNNELCHAT",
         "user-agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:111.0) Gecko/20100101 Firefox/111.0",
-        "z-api-token": "0B039DE5C908EDAF88346CED"
+        "funnelchat-token": "0B039DE5C908EDAF88346CED"
       },
       "body": {
         "isStatusReply": false,
@@ -187,10 +187,10 @@
         "http2-settings": "AAEAAEAAAAIAAAAAAAMAAAAAAAQBAAAAAAUAAEAAAAYABgAA",
         "upgrade": "h2c",
         "content-type": "application/json",
-        "origin": "https://api.z-api.io",
-        "server": "Z-API",
+        "origin": "https://api.funnelchat",
+        "server": "FUNNELCHAT",
         "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/111.0.5563.101 Mobile/15E148 Safari/604.1",
-        "z-api-token": "0B039DE5C908EDAF88346CED"
+        "funnelchat-token": "0B039DE5C908EDAF88346CED"
       },
       "body": {
         "chatLid": "14590104596553@lid",

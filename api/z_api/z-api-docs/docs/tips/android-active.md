@@ -7,7 +7,7 @@ title: Android sempre ativo
 
 Como todo bom dev você sabe o quanto a Apple dificulta nossa vida não é mesmo ? Logo não temos um tutorial como manter o IOS sempre ativo infelizmente, se você descobrir como fazer isso no IOS não esqueça de nos avisar, teremos prazer em retificar este tópico :)
 
-Voltando para o tópico Android, abaixo listamos em 3 passos como você manter seu Android sempre ativo e manter sua conexão com o Z-API "tinindo".
+Voltando para o tópico Android, abaixo listamos em 3 passos como você manter seu Android sempre ativo e manter sua conexão com o FUNNELCHAT "tinindo".
 
 ### Primeiro passo
 

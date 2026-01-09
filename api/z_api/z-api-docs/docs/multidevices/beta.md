@@ -1,9 +1,9 @@
 ---
 id: beta
-title: Programa Beta Z-API
+title: Programa Beta FUNNELCHAT
 ---
 
-## Sobre o beta Z-API multi-device
+## Sobre o beta FUNNELCHAT multi-device
 
 Estamos aqui **"deitando o cabelo"** para conseguir entregar da forma mais transparente possivel todas as novidades desta nova versão para você :)
 
@@ -19,7 +19,7 @@ Durante este processo nosso time se empenhou para entregar a mesma experiência 
 
 2 - Ter um número com a versão que permite habilitar mult-devices
 
-3 - Estar disposto a contribuir com a evolução do Z-API.
+3 - Estar disposto a contribuir com a evolução do FUNNELCHAT.
 
 ---
 

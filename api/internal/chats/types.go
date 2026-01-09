@@ -7,7 +7,7 @@ import (
 )
 
 // Chat represents a WhatsApp conversation (can be a contact or a group).
-// This follows the Z-API principle that "everything is a chat".
+// This follows the FUNNELCHAT principle that "everything is a chat".
 type Chat struct {
 	Phone           string    `json:"phone"`           // WhatsApp JID (e.g., "5511999999999@s.whatsapp.net" or group JID)
 	Name            string    `json:"name"`            // Contact name or group subject
@@ -18,7 +18,7 @@ type Chat struct {
 	IsMarkedSpam    bool      `json:"isMarkedSpam"`    // Whether chat is marked as spam (not available from whatsmeow store)
 	Archived        bool      `json:"archived"`        // Whether chat is archived
 	Pinned          bool      `json:"pinned"`          // Whether chat is pinned
-	MessagesUnread  int       `json:"messagesUnread"`  // Alternative field for unread count (Z-API compatibility)
+	MessagesUnread  int       `json:"messagesUnread"`  // Alternative field for unread count
 	IsGroup         bool      `json:"isGroup"`         // Whether this is a group chat
 }
 

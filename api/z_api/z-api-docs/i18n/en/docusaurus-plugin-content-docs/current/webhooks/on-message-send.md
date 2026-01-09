@@ -9,7 +9,7 @@ This is the sent messages return webhook
 
 :::caution Attention 
 
-Z-API does not accept webhooks that aren’t HTTPS
+FUNNELCHAT does not accept webhooks that aren’t HTTPS
 
 :::
 
@@ -29,7 +29,7 @@ You can change all webhooks at once to the same value using [this endpoint](./up
 
 #### /update-webhook-delivery
 
-`PUT` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/update-webhook-delivery
+`PUT` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/update-webhook-delivery
 
 ### Header
 
@@ -92,4 +92,4 @@ In case you receive 415 error, make sure to add the “Content-Type” of the ob
 
 <!-- ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/on-message-send.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe> -->
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/on-message-send.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe> -->

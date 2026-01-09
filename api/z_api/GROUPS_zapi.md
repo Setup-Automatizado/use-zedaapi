@@ -2,7 +2,7 @@ GROUPS_zapi.md
 Buscar grupos
 Método#
 /groups#
-GET https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/groups
+GET https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/groups
 
 Header#
 Key	Value
@@ -21,7 +21,7 @@ Request Params#
 URL exemplo#
 Método
 
-GET https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/groups?page=1&pageSize=10
+GET https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/groups?page=1&pageSize=10
 
 Response#
 200#
@@ -63,7 +63,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Criando grupos
 Método#
 /create-group#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/create-group
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/create-group
 
 Header#
 Key	Value
@@ -75,10 +75,10 @@ Dica
 Assim como no WhatsApp Web você vai precisar adicionar ao menos um contato para conseguir criar um grupo.
 
 warning
-Você não deve passar o número conectado ao Z-API que é responsável pela criação do grupo no array de números que vão compor o grupo.
+Você não deve passar o número conectado ao FUNNELCHAT que é responsável pela criação do grupo no array de números que vão compor o grupo.
 
 Novo atributo
-Recentemente, o WhatsApp implementou uma validação para verificar se o número de telefone conectado à API possui o contato do cliente salvo. No entanto, a Z-API desenvolveu uma solução para contornar essa validação, introduzindo um novo recurso chamado "autoInvite". Agora, quando uma solicitação é enviada para adicionar 10 clientes a um grupo e apenas 5 deles são adicionados com sucesso, a API envia convites privados para os cinco clientes que não foram adicionados. Esses convites permitem que eles entrem no grupo, mesmo que seus números de telefone não estejam salvos como contatos.
+Recentemente, o WhatsApp implementou uma validação para verificar se o número de telefone conectado à API possui o contato do cliente salvo. No entanto, a FUNNELCHAT desenvolveu uma solução para contornar essa validação, introduzindo um novo recurso chamado "autoInvite". Agora, quando uma solicitação é enviada para adicionar 10 clientes a um grupo e apenas 5 deles são adicionados com sucesso, a API envia convites privados para os cinco clientes que não foram adicionados. Esses convites permitem que eles entrem no grupo, mesmo que seus números de telefone não estejam salvos como contatos.
 
 Atributos#
 Obrigatórios#
@@ -91,13 +91,13 @@ Atributos	Tipo	Descrição
 Request Body#
 Método
 
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/create-group
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/create-group
 
 Exemplo
 
 {
   "autoInvite": true,
-  "groupName": "Grupo Z-API",
+  "groupName": "Grupo FUNNELCHAT",
   "phones": ["5544999999999", "5544888888888"]
 }
 Response#
@@ -121,7 +121,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Atualizar nome do grupo
 Método#
 /update-group-name#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-group-name
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-group-name
 
 Header#
 Key	Value
@@ -138,13 +138,13 @@ Opcionais#
 Atributos	Tipo	Descrição
 Request Body#
 URL#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-group-name
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-group-name
 
 Body#
 
   {
     "groupId": "120363019502650977-group",
-    "groupName": "Mudou o nome Meu grupo no Z-API"
+    "groupName": "Mudou o nome Meu grupo no FUNNELCHAT"
   }
 
 Response#
@@ -165,7 +165,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Atualizar imagem do grupo
 Método#
 /update-group-photo#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-group-photo
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-group-photo
 
 Header#
 Key	Value
@@ -184,12 +184,12 @@ Request Body#
 URL#
 Método
 
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-group-photo
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-group-photo
 
 Body#
 {
   "groupId": "string",
-  "groupPhoto": "https://www.z-api.io/wp-content/themes/z-api/dist/images/logo.svg"
+  "groupPhoto": "https://www.funnelchat/wp-content/themes/funnelchat/dist/images/logo.svg"
 }
 Enviar imagem Base64
 Se você tem duvidas em como enviar uma imagem Base64 acesse o tópico mensagens "Enviar Imagem", lá você vai encontrar tudo que precisa saber sobre envio neste formato.
@@ -212,7 +212,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Adicionar Participantes
 Método#
 /add-participant#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/add-participant
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/add-participant
 
 Header#
 Key	Value
@@ -221,7 +221,7 @@ Conceituação#
 Este método é reponsável por adicionar novos participantes ao grupo.
 
 Novo atributo
-Recentemente, o WhatsApp implementou uma validação para verificar se o número de telefone conectado à API possui o contato do cliente salvo. No entanto, a Z-API desenvolveu uma solução para contornar essa validação, introduzindo um novo recurso chamado "autoInvite". Agora, quando uma solicitação é enviada para adicionar 10 clientes a um grupo e apenas 5 deles são adicionados com sucesso, a API envia convites privados para os cinco clientes que não foram adicionados. Esses convites permitem que eles entrem no grupo, mesmo que seus números de telefone não estejam salvos como contatos.
+Recentemente, o WhatsApp implementou uma validação para verificar se o número de telefone conectado à API possui o contato do cliente salvo. No entanto, a FUNNELCHAT desenvolveu uma solução para contornar essa validação, introduzindo um novo recurso chamado "autoInvite". Agora, quando uma solicitação é enviada para adicionar 10 clientes a um grupo e apenas 5 deles são adicionados com sucesso, a API envia convites privados para os cinco clientes que não foram adicionados. Esses convites permitem que eles entrem no grupo, mesmo que seus números de telefone não estejam salvos como contatos.
 
 Atributos#
 Obrigatórios#
@@ -233,7 +233,7 @@ Opcionais#
 Atributos	Tipo	Descrição
 Request Body#
 URL#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/add-participant
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/add-participant
 
 Body#
 
@@ -261,7 +261,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Remover Participantes
 Método#
 /remove-participant#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/remove-participant
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/remove-participant
 
 Header#
 Key	Value
@@ -277,7 +277,7 @@ Opcionais#
 Atributos	Tipo	Descrição
 Request Body#
 URL#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/remove-participant
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/remove-participant
 
 Body#
 
@@ -304,7 +304,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Aprovar Participantes
 Método#
 /approve-participant#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/approve-participant
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/approve-participant
 
 Header#
 Key	Value
@@ -320,7 +320,7 @@ Opcionais#
 Atributos	Tipo	Descrição
 Request Body#
 URL#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/approve-participant
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/approve-participant
 
 Body#
 
@@ -347,7 +347,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Rejeitar Participantes
 Método#
 /reject-participant#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/reject-participant
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/reject-participant
 
 Header#
 Key	Value
@@ -364,7 +364,7 @@ Opcionais#
 Atributos	Tipo	Descrição
 Request Body#
 URL#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/reject-participant
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/reject-participant
 
 Body#
   {
@@ -390,7 +390,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Promover admin do grupo
 Método#
 /add-admin#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/add-admin
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/add-admin
 
 Header#
 Key	Value
@@ -406,7 +406,7 @@ Opcionais#
 Atributos	Tipo	Descrição
 Request Body#
 URL#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/add-admin
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/add-admin
 
 Body#
 
@@ -433,7 +433,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Remover admin do grupo
 Método#
 /remove-admin#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/remove-admin
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/remove-admin
 
 Header#
 Key	Value
@@ -450,7 +450,7 @@ Opcionais#
 Atributos	Tipo	Descrição
 Request Body#
 URL#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/remove-admin
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/remove-admin
 
 Body#
 
@@ -481,7 +481,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Sair do grupo
 Método#
 /leave-group#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/leave-group
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/leave-group
 
 Header#
 Key	Value
@@ -496,7 +496,7 @@ Opcionais#
 Atributos	Tipo	Descrição
 Request Body#
 URL#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/leave-group
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/leave-group
 
 Body#
 
@@ -522,7 +522,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Metadata do Grupo
 Método#
 /group-metadata#
-GET https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/group-metadata/{phone}
+GET https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/group-metadata/{phone}
 
 Header#
 Key	Value
@@ -538,7 +538,7 @@ Opcionais#
 Atributos	Tipo	Descrição
 Request Params#
 URL#
-GET https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/group-metadata/{phone}
+GET https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/group-metadata/{phone}
 
 Response#
 200#
@@ -566,9 +566,9 @@ Exemplo
 
   {
   "phone": "120363019502650977-group",
-  "description": "Grupo Z-API",
+  "description": "Grupo FUNNELCHAT",
   "owner": "5511999999999",
-  "subject": "Meu grupo no Z-API",
+  "subject": "Meu grupo no FUNNELCHAT",
   "creation": 1588721491000,
   "invitationLink": "https://chat.whatsapp.com/40Aasd6af1",
   "invitationLinkError": null,
@@ -606,7 +606,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Metadata do Grupo (leve)
 Método#
 /light-group-metadata#
-GET https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/light-group-metadata/{phone}
+GET https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/light-group-metadata/{phone}
 
 Header#
 Key	Value
@@ -626,7 +626,7 @@ Opcionais#
 Atributos	Tipo	Descrição
 Request Params#
 URL#
-GET https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/light-group-metadata/{phone}
+GET https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/light-group-metadata/{phone}
 
 Response#
 200#
@@ -652,9 +652,9 @@ Exemplo
 
   {
   "phone": "120363019502650977-group",
-  "description": "Grupo Z-API",
+  "description": "Grupo FUNNELCHAT",
   "owner": "5511999999999",
-  "subject": "Meu grupo no Z-API",
+  "subject": "Meu grupo no FUNNELCHAT",
   "creation": 1588721491000,
   "invitationLink": null,
   "invitationLinkError": null,
@@ -692,7 +692,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Metadata do Grupo por Convite
 Método#
 /group-invitation-metadata#
-GET https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/group-invitation-metadata?url=url-do-grupo
+GET https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/group-invitation-metadata?url=url-do-grupo
 
 Header#
 Key	Value
@@ -726,7 +726,7 @@ Exemplo
   {
     "phone": "120363019502650977-group",
     "owner": "5511888888888",
-    "subject": "Meu grupo no Z-API",
+    "subject": "Meu grupo no FUNNELCHAT",
     "description": "descrição do grupo",
     "creation": 1588721491000,
     "invitationLink": "https://chat.whatsapp.com/KNmcL17DqVA0sqkQ5LLA5",
@@ -759,7 +759,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Configurações do grupo
 Método#
 /update-group-settings#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-group-settings
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-group-settings
 
 Header#
 Key	Value
@@ -806,7 +806,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Alterar descrição
 Método#
 /update-group-description#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-group-description
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-group-description
 
 Header#
 Key	Value
@@ -847,7 +847,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Redefinir link de convite do grupo
 Método#
 /redefine-invitation-link/{groupId}#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/redefine-invitation-link/{groupId}
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/redefine-invitation-link/{groupId}
 
 Header#
 Key	Value
@@ -860,7 +860,7 @@ Atributos	Tipo	Descrição
 groupId	string	ID/Fone do grupo
 Request url#
 URL#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/redefine-invitation-link/120363019502650977-group
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/redefine-invitation-link/120363019502650977-group
 
 Response#
 200#
@@ -880,7 +880,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Obter link de convite do grupo
 Método#
 /group-invitation-link/{groupId}#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/group-invitation-link/{groupId}
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/group-invitation-link/{groupId}
 
 Header#
 Key	Value
@@ -893,7 +893,7 @@ Atributos	Tipo	Descrição
 groupId	string	ID/Fone do grupo
 Request url#
 URL#
-POST https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/group-invitation-link/120363019502650977-group
+POST https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/group-invitation-link/120363019502650977-group
 
 Response#
 200#
@@ -914,7 +914,7 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 Aceitar convite do grupo
 Método#
 /accept-invite-group?url={{URL_DE_CONVITE}}#
-GET https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/accept-invite-group?url={{URL_DE_CONVITE}}
+GET https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/accept-invite-group?url={{URL_DE_CONVITE}}
 
 Header#
 Key	Value
@@ -927,7 +927,7 @@ Obrigatórios#
 Atributos	Tipo	Descrição
 url	string	Url recebida de convite do grupo. Pode ser obtida nesse webhook
 URL#
-GET https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/accept-invite-group?url=https://chat.whatsapp.com/bh8XyNrIUj84YZoy5xcaa112
+GET https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/accept-invite-group?url=https://chat.whatsapp.com/bh8XyNrIUj84YZoy5xcaa112
 
 Response#
 200#

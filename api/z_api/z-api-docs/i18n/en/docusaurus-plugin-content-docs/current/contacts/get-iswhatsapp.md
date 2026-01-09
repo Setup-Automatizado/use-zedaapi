@@ -7,7 +7,7 @@ title: Number with WhatsApp ?
 
 #### /phone-exists
 
-`GET` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/phone-exists
+`GET` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/phone-exists
 
 ### Header
 
@@ -23,7 +23,7 @@ This method returns whether or not the number has WhatsApp.
 
 :::important Important
 
- Z-API is not designed to spread spam to contacts you don't know, however we recommend that if you are not sure whether the number you are going to send messages to has WhatsApp you can and should use this method to make sure.
+ FUNNELCHAT is not designed to spread spam to contacts you don't know, however we recommend that if you are not sure whether the number you are going to send messages to has WhatsApp you can and should use this method to make sure.
 
 :::
 
@@ -51,7 +51,7 @@ This method returns whether or not the number has WhatsApp.
 
 Method
 
-`GET` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/phone-exists/5511999999999
+`GET` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/phone-exists/5511999999999
 
 ---
 
@@ -86,4 +86,4 @@ In case you receive 415 error, make sure to add the “Content-Type” of the ob
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/get-iswhatsapp.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/get-iswhatsapp.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

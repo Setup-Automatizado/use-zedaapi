@@ -5,7 +5,7 @@ title: Desconectar
 
 ## Conceituação
 
-Este método desconecta seu número do Z-API.
+Este método desconecta seu número do FUNNELCHAT.
 
 Mas não se preocupe, para conectar novamente bastar ler o QRCode :)
 
@@ -15,7 +15,7 @@ Mas não se preocupe, para conectar novamente bastar ler o QRCode :)
 
 #### /disconnect
 
-`GET` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/disconnect
+`GET` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/disconnect
 
 ### Header
 

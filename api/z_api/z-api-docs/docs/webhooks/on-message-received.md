@@ -7,15 +7,15 @@ title: Ao receber
 
 Esse é o webhook de retorno de mensagens recebidas, também é executada quando a sua instância está configurada para notificar também mensagens enviadas por você mesmo.
 
-:::caution Qual o prazo de validade dos arquivos do z-api?
+:::caution Qual o prazo de validade dos arquivos do funnelchat?
 
-Todos os arquivos de midia recebidos do z-api através do seu webhook tem o prazo de expiração de **30 dias**. Após esse período todos os arquivos, seja audio, pdf, imagem, etc, serão excluídos do storage.
+Todos os arquivos de midia recebidos do funnelchat através do seu webhook tem o prazo de expiração de **30 dias**. Após esse período todos os arquivos, seja audio, pdf, imagem, etc, serão excluídos do storage.
 
 :::
 
 :::caution Atenção
 
-O Z-API não aceita webhooks que não sejam HTTPS
+O FUNNELCHAT não aceita webhooks que não sejam HTTPS
 
 :::
 
@@ -35,7 +35,7 @@ Para atualizar a rota do webhook é possível fazer isso pela API ou pelo painel
 
 #### /update-webhook-received
 
-`PUT` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-webhook-received
+`PUT` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-webhook-received
 
 #### Ou
 
@@ -43,7 +43,7 @@ Também é possível atualizar a rota com a opção "enviadas por mim" habilitad
 
 #### /update-webhook-received-delivery
 
-`PUT` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-webhook-received-delivery
+`PUT` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-webhook-received-delivery
 
 ![img](../../img/SendFromMe.jpeg)
 
@@ -483,8 +483,8 @@ Os possíveis retornos do webhook **on-message-received** estão cadastrado logo
   "forwarded": false,
   "type": "ReceivedCallback",
   "listResponseMessage": {
-    "message": "Z-API Asas para sua imaginação",
-    "title": "Z-API",
+    "message": "FUNNELCHAT Asas para sua imaginação",
+    "title": "FUNNELCHAT",
     "selectedRowId": "1"
   }
 }
@@ -1583,7 +1583,7 @@ Os possíveis retornos do webhook **on-message-received** estão cadastrado logo
     "pollMaxOptions": 0,
     "options": [
       {
-        "name": "Z-API"
+        "name": "FUNNELCHAT"
       },
       {
         "name": "Outras"
@@ -1621,7 +1621,7 @@ Os possíveis retornos do webhook **on-message-received** estão cadastrado logo
     "pollMessageId": "ID da mensagem de enquete que foi respondida",
     "options": [
       {
-        "name": "Z-API"
+        "name": "FUNNELCHAT"
       }
     ]
   }
@@ -2153,4 +2153,4 @@ break;
 
 <!-- ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/on-message-received.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe> -->
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/on-message-received.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe> -->

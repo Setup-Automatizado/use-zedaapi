@@ -7,7 +7,7 @@ title: Conversar com a Meta AI
 
 `/send-text`
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/send-text
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/send-text
 
 #### Header
 |      Key       |            Value            |
@@ -16,15 +16,15 @@ title: Conversar com a Meta AI
 
 ## Conceituação
 
-Este método permite a interação direta com a Meta AI no WhatsApp através da Z-API, facilitando o envio de mensagens de texto para obter respostas automatizadas e contextuais.
+Este método permite a interação direta com a Meta AI no WhatsApp através da FUNNELCHAT, facilitando o envio de mensagens de texto para obter respostas automatizadas e contextuais.
 Com ele, é possível enviar perguntas e comandos à Meta AI em conversas privadas, direcionando as mensagens ao número exclusivo 13135550002, ou incluir a IA em grupos utilizando o ID do grupo como destinatário.
 
 ## Como Usar
 
-Para começar a usar a Meta AI com a Z-API basta enviar uma mensagem de texto ao número da Meta AI *`13135550002`* utilizando o endpoint [`/send-text`](../message/send-message-text)
+Para começar a usar a Meta AI com a FUNNELCHAT basta enviar uma mensagem de texto ao número da Meta AI *`13135550002`* utilizando o endpoint [`/send-text`](../message/send-message-text)
 
 :::warning Atenção
-Atualmente, a Meta AI na Z-API suporta apenas mensagens em texto. Isso significa que áudio, documentos, imagens e outros arquivos multimídia não são compatíveis nesta integração. Portanto, é necessário que apenas mensagens de texto sejam enviadas para garantir o funcionamento correto.
+Atualmente, a Meta AI na FUNNELCHAT suporta apenas mensagens em texto. Isso significa que áudio, documentos, imagens e outros arquivos multimídia não são compatíveis nesta integração. Portanto, é necessário que apenas mensagens de texto sejam enviadas para garantir o funcionamento correto.
 
 Além disso, esse recurso está disponível apenas para contas pessoais do WhatsApp, ou seja, não é acessível para contas business.
 :::
@@ -75,7 +75,7 @@ Além disso, esse recurso está disponível apenas para contas pessoais do Whats
 
 | Atributos | Tipo   | Descrição      |
 | :-------- | :----- | :------------- |
-| zaapId    | string | id no z-api    |
+| zaapId    | string | id no funnelchat    |
 | messageId | string | id no whatsapp |
 | id | string | Adicionado para compatibilidade com zapier, ele tem o mesmo valor do messageId |
 
@@ -108,4 +108,4 @@ Link para a response do webhook (ao receber)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/send-text.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/send-text.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

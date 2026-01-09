@@ -9,7 +9,7 @@ WhatsApp now offers the Communities feature, which allows users to group chats a
 
 To illustrate how the community structure works, see the image below:
 
-<img src="https://raw.githubusercontent.com/Z-API/z-api-docs/main/img/communities.png" />
+<img src="https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/img/communities.png" />
 
 
 **Notes:**
@@ -31,11 +31,11 @@ First, it's important to check if the WhatsApp application on your mobile phone 
 
 #### 2. Can I list the communities I am part of?
 
-Yes, Z-API provides methods for you to find out which communities you are a part of. Check the documentation on how to [list your communities](/communities/list-communities).
+Yes, FUNNELCHAT provides methods for you to find out which communities you are a part of. Check the documentation on how to [list your communities](/communities/list-communities).
 
 #### 3. Can I link and unlink groups to a community?
 
-Absolutely! Z-API provides two additional APIs for you to manage the groups within a community. Learn how to [link groups](/communities/link-groups) or [unlink groups](/communities/unlink-groups) from a community.
+Absolutely! FUNNELCHAT provides two additional APIs for you to manage the groups within a community. Learn how to [link groups](/communities/link-groups) or [unlink groups](/communities/unlink-groups) from a community.
 
 #### 4. How do I send a message to the entire community?
 

@@ -1,23 +1,23 @@
 ---
 id: stability
-title: Estabilidade com Z-API
+title: Estabilidade com FUNNELCHAT
 ---
 
 ## Introdução
 
-Para uma qualidade do serviço temos algumas dicas que podem ajudar e muito na estabilidade e qualidade da sua conexão com Z-API abaixo vamos pontuar em tópicos.
+Para uma qualidade do serviço temos algumas dicas que podem ajudar e muito na estabilidade e qualidade da sua conexão com FUNNELCHAT abaixo vamos pontuar em tópicos.
 
 ## Aparelho dedicado
 
-Sabemos que nem sempre é possível, mas se conseguir evitar a utilização do aparelho para outras atividades pode contribuir para uma boa estabilidade e qualidade dos serviços Z-API. Uma boa dica é utilizar emuladores Android. Para maiores informações procure o tópico Emuladores nesta mesma sessão.
+Sabemos que nem sempre é possível, mas se conseguir evitar a utilização do aparelho para outras atividades pode contribuir para uma boa estabilidade e qualidade dos serviços FUNNELCHAT. Uma boa dica é utilizar emuladores Android. Para maiores informações procure o tópico Emuladores nesta mesma sessão.
 
 ## Aparelho sempre conectado
 
-Para o funcionamento do Z-API ele precisa o aparelho esteja ligado e conectado na internet o tempo todo, assim como no versão do WhatsWeb se o aparelho perder a conexão, nosso serviço para de funcionar. Por isso é muito importante que ele esteja sempre conectado a internet.
+Para o funcionamento do FUNNELCHAT ele precisa o aparelho esteja ligado e conectado na internet o tempo todo, assim como no versão do WhatsWeb se o aparelho perder a conexão, nosso serviço para de funcionar. Por isso é muito importante que ele esteja sempre conectado a internet.
 
 ## Boa conexão de internet
 
-Mantenha seu celular conectado a um wi-fi com boa velocidade de conexão e evite utilizar apenas o plano de dados do celular.a velocidade de sua internet impacta diretamente na qualidade da troca de informações entre seu celular e o Z-API.
+Mantenha seu celular conectado a um wi-fi com boa velocidade de conexão e evite utilizar apenas o plano de dados do celular.a velocidade de sua internet impacta diretamente na qualidade da troca de informações entre seu celular e o FUNNELCHAT.
 
 ## WhatsApp sempre aberto
 

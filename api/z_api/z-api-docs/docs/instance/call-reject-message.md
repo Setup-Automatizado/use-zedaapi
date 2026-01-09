@@ -15,7 +15,7 @@ Para a mensagem ser enviada o método anterior (Rejeitar chamadas) precisa estar
 
 #### /update-call-reject-message
 
-`PUT` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-call-reject-message
+`PUT` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-call-reject-message
 
 ### Header
 

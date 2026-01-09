@@ -7,7 +7,7 @@ title: Request registration code
 
 #### /mobile/request-registration-code
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/mobile/request-registration-code
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/mobile/request-registration-code
 
 ### Header
 
@@ -105,4 +105,4 @@ If you receive a 415 error, make sure to add the "Content-Type" of the object yo
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/request-code.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/request-code.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

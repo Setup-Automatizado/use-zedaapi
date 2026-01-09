@@ -7,7 +7,7 @@ title: Enviar voto para enquete
 
 #### /send-poll
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/send-poll-vote
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/send-poll-vote
 
 ### Header
 
@@ -50,7 +50,7 @@ Neste método você poderá votar em uma determinada enquete.
   "phone": "5511999999999",
   "pollMessageId": "id da mensagem de enquete",
   "pollVote": [
-    {"name": "Z-API"}
+    {"name": "FUNNELCHAT"}
   ]
 }
 ```
@@ -63,7 +63,7 @@ Neste método você poderá votar em uma determinada enquete.
 
 | Atributos | Tipo | Descrição |
 | :-- | :-- | :-- |
-| zaapId | string | id no z-api |
+| zaapId | string | id no funnelchat |
 | messageId | string | id no whatsapp |
 | id | string | Adicionado para compatibilidade com zapier, ele tem o mesmo valor do messageId |
 
@@ -97,4 +97,4 @@ Link para a response do webhook (ao receber)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/send-poll-vote.json&targets=all" frameBorder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/send-poll-vote.json&targets=all" frameBorder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

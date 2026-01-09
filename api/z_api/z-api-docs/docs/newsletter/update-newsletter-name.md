@@ -7,7 +7,7 @@ title: Atualizar nome do canal
 
 #### /update-newsletter-name
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-newsletter-name
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-newsletter-name
 
 ### Header
 
@@ -40,7 +40,7 @@ Este método é responsável por alterar o nome de um canal já existente.
 
 Método
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-newsletter-name
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/update-newsletter-name
 
 #### Body
 
@@ -95,4 +95,4 @@ Link para a response do webhook (ao receber)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/update-newsletter-name.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/update-newsletter-name.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

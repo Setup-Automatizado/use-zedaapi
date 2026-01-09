@@ -1,6 +1,6 @@
 {
     "method": "POST",
-    "url": "https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/search-newsletter",
+    "url": "https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/search-newsletter",
     "httpVersion": "HTTP/1.1",
     "queryString": [],
     "headers": [
@@ -16,6 +16,6 @@
     "cookies": [],
     "postData": {
         "mimeType": "application/json",
-        "text": "{\"limit\": \"50\", \"view\": \"TRENDING\", \"filters\": { \"countryCodes\": [\"BR\", \"CA\"] }, \"searchText\": \"Z-API\" }"
+        "text": "{\"limit\": \"50\", \"view\": \"TRENDING\", \"filters\": { \"countryCodes\": [\"BR\", \"CA\"] }, \"searchText\": \"FUNNELCHAT\" }"
     }
 }

@@ -7,7 +7,7 @@ title: Message Duration
 
 #### /privacy/messages-duration
 
-`POST` https://api.z-api.io/instances/{{instanceId}}/token/{{instanceToken}}/privacy/messages-duration?value=DURATION_VALUE
+`POST` https://api.funnelchat/instances/{{instanceId}}/token/{{instanceToken}}/privacy/messages-duration?value=DURATION_VALUE
 
 ### Header
 
@@ -44,7 +44,7 @@ String (value) accepted values:
 
 **Method**
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/privacy/messages-duration?value=days90
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/privacy/messages-duration?value=days90
 
 ---
 
@@ -76,4 +76,4 @@ If you receive a 415 error, make sure to add the "Content-Type" of the object yo
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/privacy-set-messages-duration.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/privacy-set-messages-duration.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

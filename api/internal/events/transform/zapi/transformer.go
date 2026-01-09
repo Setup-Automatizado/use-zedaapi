@@ -97,7 +97,7 @@ func (t *Transformer) Transform(ctx context.Context, event *types.InternalEvent)
 	case "push_name", "business_name", "user_about":
 		result, err = t.transformProfileEvent(ctx, logger, event)
 	default:
-		logger.Debug("unsupported event type for Z-API transformation")
+		logger.Debug("unsupported event type for FUNNELCHAT transformation")
 		return nil, transform.ErrUnsupportedEvent
 	}
 
@@ -118,7 +118,7 @@ func (t *Transformer) Transform(ctx context.Context, event *types.InternalEvent)
 
 	t.dumpPayload(logger, event, payload)
 
-	logger.InfoContext(ctx, "transformed to Z-API webhook",
+	logger.InfoContext(ctx, "transformed to FUNNELCHAT webhook",
 		slog.Int("payload_size", len(payload)),
 	)
 

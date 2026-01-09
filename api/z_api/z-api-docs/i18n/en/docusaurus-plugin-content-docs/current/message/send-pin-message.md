@@ -7,7 +7,7 @@ title: Pin / Unpin messages
 
 #### /pin-message
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/pin-message
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/pin-message
 
 ### Header
 
@@ -57,7 +57,7 @@ In this method you will be able to pin chat messages, whether private chats or g
 
 | Attributes| Type   | Description   |
 | :-------- | :----- | :------------- |
-| zaapId    | string | id on z-api    |
+| zaapId    | string | id on funnelchat    |
 | messageId | string | id on whatsapp |
 
 Example
@@ -89,4 +89,4 @@ Link to webhook response (on receipt)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/send-text.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/send-text.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

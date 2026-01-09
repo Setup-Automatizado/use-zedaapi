@@ -7,7 +7,7 @@ title: Send buttons with images
 
 #### /send-button-list
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-button-list
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-button-list
 
 ### Header
 
@@ -18,7 +18,7 @@ title: Send buttons with images
 ---
 
 :::caution Warning
-Button sending is currently available, but there are some decisive factors for operation. For more details visit the [Button Status](https://developer.z-api.io/en/tips/button-status) topic.
+Button sending is currently available, but there are some decisive factors for operation. For more details visit the [Button Status](https://developer.funnelchat/en/tips/button-status) topic.
 :::
 
 
@@ -79,7 +79,7 @@ The 'message' attribute cannot be sent empty!
 ```json
 {
   "phone": "5511999999999",
-  "message": "Z-API is good?",
+  "message": "FUNNELCHAT is good?",
   "buttonList": {
     "image": "https://avatars.githubusercontent.com/u/60630101?s=280&v=4",
     "buttons": [
@@ -104,7 +104,7 @@ The 'message' attribute cannot be sent empty!
 
 | Attributes   | Type   | Description |
 | :-------- | :----- | :------------- |
-| zaapId    | string | id on z-api    |
+| zaapId    | string | id on funnelchat    |
 | messageId | string | id on whatsapp |
 | id        | string | Added for compatibility with Zapier, it has the same value as the messageId |
 
@@ -138,4 +138,4 @@ Link for webhooks response (upon receiving)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/send-button-list-image.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/send-button-list-image.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

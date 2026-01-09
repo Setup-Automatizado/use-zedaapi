@@ -7,7 +7,7 @@ title: Update profile description
 
 #### /profile-description
 
-`PUT` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/profile-description
+`PUT` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/profile-description
 
 ---
 

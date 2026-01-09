@@ -8,7 +8,7 @@ title: Group Metadata (light)
 
 #### /light-group-metadata  
 
-`GET` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/light-group-metadata/{phone}  
+`GET` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/light-group-metadata/{phone}  
 
 ### Header  
 
@@ -47,7 +47,7 @@ If you want to use this method and later need the group invite link, you can get
 
 #### URL  
 
-`GET` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/light-group-metadata/{phone}  
+`GET` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/light-group-metadata/{phone}  
 
 ---
 
@@ -85,9 +85,9 @@ Array String (participants)
 ```json  
 {
   "phone": "120363019502650977-group",
-  "description": "Z-API Group",
+  "description": "FUNNELCHAT Group",
   "owner": "5511999999999",
-  "subject": "My group on Z-API",
+  "subject": "My group on FUNNELCHAT",
   "creation": 1588721491000,
   "invitationLink": null,
   "invitationLinkError": null,
@@ -127,4 +127,4 @@ If you receive a 415 error, make sure to add the correct "Content-Type" header i
 
 ## Code  
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/get-light-group-metadata.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/get-light-group-metadata.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

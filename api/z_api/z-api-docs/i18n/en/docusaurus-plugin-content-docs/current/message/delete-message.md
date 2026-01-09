@@ -7,7 +7,7 @@ title: Deleting messages
 
 #### /messages
 
-`DELETE` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/messages
+`DELETE` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/messages
 
 ### Header
 
@@ -51,7 +51,7 @@ Method
 
 `DELETE`
 
-https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/messages?messageId=123&phone=5511999998888&owner=true
+https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/messages?messageId=123&phone=5511999998888&owner=true
 
 ---
 
@@ -91,4 +91,4 @@ Link for webhooks response (upon receiving)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/delete-message.json" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/delete-message.json" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

@@ -7,7 +7,7 @@ title: Listar comunidades
 
 #### /communities
 
-`GET` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities
+`GET` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities
 
 ### Header
 
@@ -44,7 +44,7 @@ Este método é responsável por retornar todas as comunidades que você faz par
 
 Método
 
-`GET` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities
+`GET` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities
 
 ---
 
@@ -80,4 +80,4 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/list-communities.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/list-communities.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

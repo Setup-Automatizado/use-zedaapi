@@ -6,7 +6,7 @@ title: Disconnect
 
 #### /disconnect
 
-`GET` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/disconnect
+`GET` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/disconnect
 
 ### Header
 
@@ -18,7 +18,7 @@ title: Disconnect
 
 ## Concept
 
-This method disconnects your Z-API number 
+This method disconnects your FUNNELCHAT number 
 
 However, you don't need to worry. To reconnect again all you need to do is read the QRCode :)
 

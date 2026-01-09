@@ -7,7 +7,7 @@ title: Atualizar nome do perfil
 
 #### /profile-name
 
-`PUT` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/profile-name
+`PUT` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/profile-name
 
 ---
 

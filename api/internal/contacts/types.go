@@ -6,8 +6,8 @@ type ListParams struct {
 	PageSize int
 }
 
-// Contact represents the Z-API compatible payload for a single contact.
-// Maps whatsmeow's types.ContactInfo to Z-API expected format.
+// Contact represents the payload for a single contact.
+// Maps whatsmeow's types.ContactInfo to FUNNELCHAT expected format.
 type Contact struct {
 	Phone  string  `json:"phone"`  // Phone number
 	Name   *string `json:"name"`   // Full name (only if in contacts)
@@ -22,7 +22,7 @@ type ListResult struct {
 	Total int
 }
 
-// PhoneExistsResponse represents the Z-API compatible response for phone validation.
+// PhoneExistsResponse represents the response for phone validation.
 // Returns whether a phone number is registered on WhatsApp along with phone and LID.
 type PhoneExistsResponse struct {
 	Exists bool    `json:"exists"` // Whether the phone is registered on WhatsApp
@@ -30,12 +30,12 @@ type PhoneExistsResponse struct {
 	LID    *string `json:"lid"`    // LID (Linked ID) if available, null otherwise
 }
 
-// PhoneExistsBatchRequest represents the Z-API compatible request for batch phone validation.
+// PhoneExistsBatchRequest represents the request for batch phone validation.
 type PhoneExistsBatchRequest struct {
 	Phones []string `json:"phones"`
 }
 
-// PhoneExistsBatchResponse represents the Z-API compatible response for batch phone validation.
+// PhoneExistsBatchResponse represents the response for batch phone validation.
 // Contains the validation result for each phone number in the batch.
 type PhoneExistsBatchResponse struct {
 	Exists      bool   `json:"exists"`      // true if the phone has WhatsApp

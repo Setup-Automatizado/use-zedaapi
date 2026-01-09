@@ -7,7 +7,7 @@ title: Responder status com gif
 
 #### /reply-status-gif
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/reply-status-gif
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/reply-status-gif
 
 ### Header
 
@@ -40,7 +40,7 @@ Método responsavel por enviar uma resposta com gif a um status.
 
 Método
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/reply-status-gif
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/reply-status-gif
 
 #### Body
 
@@ -60,7 +60,7 @@ Método
 
 | Atributos | Tipo   | Descrição      |
 | :-------- | :----- | :------------- |
-| zaapId | string | id no z-api |
+| zaapId | string | id no funnelchat |
 | messageId | string | id no whatsapp |
 | id | string | Adicionado para compatibilidade com zapier, ele tem o mesmo valor do messageId |
 
@@ -84,4 +84,4 @@ Neste caso certifique que esteja enviando o corretamente a especificação do m�
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/reply-status-gif.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/reply-status-gif.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

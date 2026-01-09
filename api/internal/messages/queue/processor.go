@@ -95,7 +95,7 @@ func (p *WhatsAppMessageProcessor) Process(ctx context.Context, client *wameow.C
 	case MessageTypeEvent:
 		return p.eventProcessor.Process(ctx, client, &args)
 
-	// Z-API compatible interactive message types
+	// interactive message types
 	case MessageTypeButtonList:
 		return p.interactiveZAPIProcessor.ProcessButtonList(ctx, client, &args)
 	case MessageTypeButtonActions:

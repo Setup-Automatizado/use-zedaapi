@@ -7,7 +7,7 @@ title: Android always active
 
 Every good dev knows how much apple can make our lives difficult, am i right? Which brings me to the point that we unfortunately don´t have a tutorial on how to keep IOS devices always active. If you happen to find out or already know how to do that on IOS please be sure to let us know and we'll be more than happy to rectify this topic :)
 
-Going back to Android, below we've listed 3 steps on how to keep your Android always active and how to keep your connection with Z-API running clean.
+Going back to Android, below we've listed 3 steps on how to keep your Android always active and how to keep your connection with FUNNELCHAT running clean.
 
 ### First step 
 

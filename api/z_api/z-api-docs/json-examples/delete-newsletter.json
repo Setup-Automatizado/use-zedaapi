@@ -1,6 +1,6 @@
 {
     "method": "DELETE",
-    "url": "https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/delete-newsletter",
+    "url": "https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/delete-newsletter",
     "httpVersion": "HTTP/1.1",
     "queryString": [],
     "headers": [

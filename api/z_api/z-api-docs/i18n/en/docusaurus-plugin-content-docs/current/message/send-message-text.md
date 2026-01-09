@@ -7,7 +7,7 @@ title: Sending plain text
 
 #### /send-text
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-text
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/send-text
 
 ### Header
 
@@ -76,7 +76,7 @@ To test this, just copy an emoji and paste into your text! You can use this one 
 ```json
 {
   "phone": "5511999999999",
-  "message": "Welcome to *Z-API*"
+  "message": "Welcome to *FUNNELCHAT*"
 }
 ```
 
@@ -88,7 +88,7 @@ To test this, just copy an emoji and paste into your text! You can use this one 
 
 | Attributes| Type   | Description   |
 | :-------- | :----- | :------------- |
-| zaapId    | string | id on z-api    |
+| zaapId    | string | id on funnelchat    |
 | messageId | string | id on whatsapp |
 
 Example
@@ -120,4 +120,4 @@ Link to webhook response (on receipt)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/send-text.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/send-text.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

@@ -7,7 +7,7 @@ title: Vincular grupos
 
 #### /communities/link
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities/link
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities/link
 
 ### Header
 
@@ -44,7 +44,7 @@ Com essa API você consegue adicionar outros grupos a uma comunidade, para isso 
 
 #### URL
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities/link
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/communities/link
 
 #### Body
 
@@ -85,4 +85,4 @@ Caso você receba um erro 415, certifique de adicionar na headers da requisiçã
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/link-groups.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/link-groups.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

@@ -7,7 +7,7 @@ title: Enviando video status
 
 #### /send-video-status
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/send-video-status
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/send-video-status
 
 ### Header
 
@@ -48,7 +48,7 @@ O tamanho máximo para videos nos status é de 10mb
 
 Método
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/send-video-status
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/send-video-status
 
 #### Body
 
@@ -71,7 +71,7 @@ Método
 
 | Atributos | Tipo   | Descrição      |
 | :-------- | :----- | :------------- |
-| zaapId    | string | id no z-api    |
+| zaapId    | string | id no funnelchat    |
 | messageId | string | id no whatsapp |
 
 Exemplo
@@ -93,4 +93,4 @@ Neste caso certifique que esteja enviando o corretamente a especificação do m�
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/send-video-status.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/send-video-status.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

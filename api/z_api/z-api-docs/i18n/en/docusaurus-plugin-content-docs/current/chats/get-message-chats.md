@@ -7,7 +7,7 @@ title: Get messages from chat
 
 #### /chat-messages/{phone}
 
-`GET` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/chat-messages/{phone}
+`GET` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/chat-messages/{phone}
 
 ### Header
 
@@ -47,7 +47,7 @@ This method is responsible for returning all conversations in a chat.
 
 Method
 
-`GET` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/chat-messages/{phone}
+`GET` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/chat-messages/{phone}
 
 ---
 
@@ -81,7 +81,7 @@ JSON follows the sequence as shown below.
     "fromMe": false,
     "momment": 1623008318000,
     "status": "RECEIVED",
-    "chatName": "Z-API Suporte",
+    "chatName": "FUNNELCHAT Suporte",
     "senderPhoto": "https://pps.whatsapp.net/v/t61.24694-24/170931400_212202650511993_3423338295209291992_n.jpg?ccb=11-4&oh=4b96b3bf7114122667f80d021b194f2c&oe=60C179E2",
     "senderName": "5511999999999",
     "participantPhone": null,
@@ -99,17 +99,17 @@ JSON follows the sequence as shown below.
     "fromMe": false,
     "momment": 1623008355000,
     "status": "RECEIVED",
-    "chatName": "Z-API Suporte",
+    "chatName": "FUNNELCHAT Suporte",
     "senderPhoto": "https://pps.whatsapp.net/v/t61.24694-24/170931400_212202650511993_3423338295209291992_n.jpg?ccb=11-4&oh=4b96b3bf7114122667f80d021b194f2c&oe=60C179E2",
-    "senderName": "Z-API Suporte",
+    "senderName": "FUNNELCHAT Suporte",
     "participantPhone": null,
     "participantLid": null,
     "photo": "https://pps.whatsapp.net/v/t61.24694-24/170931400_212202650511993_3423338295209291992_n.jpg?ccb=11-4&oh=4b96b3bf7114122667f80d021b194f2c&oe=60C179E2",
     "broadcast": false,
     "image": {
       "mimeType": "image/jpeg",
-      "imageUrl": "https://storage.z-api.io/instances/399793F5C962B0F227576EA28507E212/3EB09E1F42DCBF393D27.jpeg",
-      "thumbnailUrl": "https://storage.z-api.io/instances/399793F5C962B0F227576EA28507E212/3EB09E1F42DCBF393D27.jpeg",
+      "imageUrl": "https://storage.funnelchat/instances/399793F5C962B0F227576EA28507E212/3EB09E1F42DCBF393D27.jpeg",
+      "thumbnailUrl": "https://storage.funnelchat/instances/399793F5C962B0F227576EA28507E212/3EB09E1F42DCBF393D27.jpeg",
       "caption": "Uma imagem com texto"
     }
   },
@@ -120,15 +120,15 @@ JSON follows the sequence as shown below.
     "fromMe": false,
     "momment": 1623008445000,
     "status": "RECEIVED",
-    "chatName": "Z-API Suporte",
+    "chatName": "FUNNELCHAT Suporte",
     "senderPhoto": "https://pps.whatsapp.net/v/t61.24694-24/170931400_212202650511993_3423338295209291992_n.jpg?ccb=11-4&oh=4b96b3bf7114122667f80d021b194f2c&oe=60C179E2",
-    "senderName": "Z-API Suporte",
+    "senderName": "FUNNELCHAT Suporte",
     "participantPhone": null,
     "participantLid": null,
     "photo": "https://pps.whatsapp.net/v/t61.24694-24/170931400_212202650511993_3423338295209291992_n.jpg?ccb=11-4&oh=4b96b3bf7114122667f80d021b194f2c&oe=60C179E2",
     "broadcast": false,
     "document": {
-      "documentUrl": "https://storage.z-api.io/instances/399793F5C962B0F227576EA28507E212/3EB0282CF7A8FE6E3404.pdf",
+      "documentUrl": "https://storage.funnelchat/instances/399793F5C962B0F227576EA28507E212/3EB0282CF7A8FE6E3404.pdf",
       "mimeType": "application/pdf",
       "title": "Personalidade “Virtuoso” (ISTP-A _ ISTP-T) _ 16Personalities.pdf",
       "pageCount": 5,
@@ -142,9 +142,9 @@ JSON follows the sequence as shown below.
     "fromMe": false,
     "momment": 1623008464000,
     "status": "RECEIVED",
-    "chatName": "Z-API Suporte",
+    "chatName": "FUNNELCHAT Suporte",
     "senderPhoto": "https://pps.whatsapp.net/v/t61.24694-24/170931400_212202650511993_3423338295209291992_n.jpg?ccb=11-4&oh=4b96b3bf7114122667f80d021b194f2c&oe=60C179E2",
-    "senderName": "Z-API Suporte",
+    "senderName": "FUNNELCHAT Suporte",
     "participantPhone": null,
     "participantLid": null,
     "photo": "https://pps.whatsapp.net/v/t61.24694-24/170931400_212202650511993_3423338295209291992_n.jpg?ccb=11-4&oh=4b96b3bf7114122667f80d021b194f2c&oe=60C179E2",
@@ -162,9 +162,9 @@ JSON follows the sequence as shown below.
     "fromMe": false,
     "momment": 1623008479000,
     "status": "RECEIVED",
-    "chatName": "Z-API Suporte",
+    "chatName": "FUNNELCHAT Suporte",
     "senderPhoto": "https://pps.whatsapp.net/v/t61.24694-24/170931400_212202650511993_3423338295209291992_n.jpg?ccb=11-4&oh=4b96b3bf7114122667f80d021b194f2c&oe=60C179E2",
-    "senderName": "Z-API Suporte",
+    "senderName": "FUNNELCHAT Suporte",
     "participantPhone": null,
     "participantLid": null,
     "photo": "https://pps.whatsapp.net/v/t61.24694-24/170931400_212202650511993_3423338295209291992_n.jpg?ccb=11-4&oh=4b96b3bf7114122667f80d021b194f2c&oe=60C179E2",
@@ -180,18 +180,18 @@ JSON follows the sequence as shown below.
     "fromMe": false,
     "momment": 1623008501000,
     "status": "RECEIVED",
-    "chatName": "Z-API Suporte",
+    "chatName": "FUNNELCHAT Suporte",
     "senderPhoto": "https://pps.whatsapp.net/v/t61.24694-24/170931400_212202650511993_3423338295209291992_n.jpg?ccb=11-4&oh=4b96b3bf7114122667f80d021b194f2c&oe=60C179E2",
-    "senderName": "Z-API Suporte",
+    "senderName": "FUNNELCHAT Suporte",
     "participantPhone": null,
     "participantLid": null,
     "photo": "https://pps.whatsapp.net/v/t61.24694-24/170931400_212202650511993_3423338295209291992_n.jpg?ccb=11-4&oh=4b96b3bf7114122667f80d021b194f2c&oe=60C179E2",
     "broadcast": false,
     "text": {
-      "message": "https://www.z-api.io/",
-      "url": "https://www.z-api.io/",
+      "message": "https://www.funnelchat/",
+      "url": "https://www.funnelchat/",
       "urlDescription": null,
-      "urlTitle": "WhatsApp API: Integre sua empresa | Z-API",
+      "urlTitle": "WhatsApp API: Integre sua empresa | FUNNELCHAT",
       "isCatalog": false
     }
   }
@@ -210,4 +210,4 @@ In case you receive 415 error, make sure to add the “Content-Type” of the ob
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/get-message-chat.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/get-message-chat.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

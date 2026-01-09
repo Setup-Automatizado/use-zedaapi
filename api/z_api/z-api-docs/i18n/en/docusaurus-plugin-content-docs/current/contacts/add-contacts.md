@@ -7,7 +7,7 @@ title: Add Contacts
 
 #### /contacts/add
 
-`POST` https://api.z-api.io/instances/SUA_INSTANCIA/token/SEU_TOKEN/contacts/add
+`POST` https://api.funnelchat/instances/SUA_INSTANCIA/token/SEU_TOKEN/contacts/add
 
 ### Header
 
@@ -102,4 +102,4 @@ If you receive a 415 error, ensure you add the "Content-Type" of the object you 
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/add-contacts.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/add-contacts.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

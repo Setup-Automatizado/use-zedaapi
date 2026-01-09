@@ -14,8 +14,8 @@ const (
 	ButtonTypeReviewAndPay ButtonType = "review_and_pay"
 )
 
-// NormalizeButtonType converts Z-API uppercase format to internal format
-// Accepts both Z-API style (CALL, URL, COPY) and internal style (cta_call, cta_url)
+// NormalizeButtonType converts FUNNELCHAT uppercase format to internal format
+// Accepts both FUNNELCHAT style (CALL, URL, COPY) and internal style (cta_call, cta_url)
 func NormalizeButtonType(t string) ButtonType {
 	switch strings.ToUpper(t) {
 	case "CALL", "CTA_CALL":
@@ -46,7 +46,7 @@ const (
 	PIXKeyTypeEVP   PIXKeyType = "EVP" // Random key
 )
 
-// SendButtonListRequest - Z-API /send-button-list format
+// SendButtonListRequest - FUNNELCHAT /send-button-list format
 type SendButtonListRequest struct {
 	Phone        string            `json:"phone" validate:"required"`
 	Message      string            `json:"message" validate:"required,max=4096"`
@@ -70,7 +70,7 @@ type ButtonListItem struct {
 	Label string `json:"label" validate:"required,max=20"`
 }
 
-// SendButtonActionsRequest - Z-API /send-button-actions format
+// SendButtonActionsRequest - FUNNELCHAT /send-button-actions format
 type SendButtonActionsRequest struct {
 	Phone         string               `json:"phone" validate:"required"`
 	Message       string               `json:"message" validate:"required,max=4096"`
@@ -109,7 +109,7 @@ type ActionButton struct {
 }
 
 // GetNormalizedType returns the normalized button type
-// Accepts both Z-API uppercase (CALL, URL) and internal lowercase (cta_call, cta_url)
+// Accepts both FUNNELCHAT uppercase (CALL, URL) and internal lowercase (cta_call, cta_url)
 func (b *ActionButton) GetNormalizedType() ButtonType {
 	return NormalizeButtonType(string(b.Type))
 }
@@ -127,7 +127,7 @@ type PaymentItem struct {
 	Price    int64  `json:"price"` // Price in cents
 }
 
-// SendOptionListRequest - Z-API /send-option-list format
+// SendOptionListRequest - FUNNELCHAT /send-option-list format
 type SendOptionListRequest struct {
 	Phone        string            `json:"phone" validate:"required"`
 	Message      string            `json:"message" validate:"required,max=4096"`
@@ -157,7 +157,7 @@ type OptionRow struct {
 	Description *string `json:"description,omitempty" validate:"omitempty,max=72"`
 }
 
-// SendButtonPIXRequest - Z-API /send-button-pix format
+// SendButtonPIXRequest - FUNNELCHAT /send-button-pix format
 type SendButtonPIXRequest struct {
 	Phone         string     `json:"phone" validate:"required"`
 	Message       *string    `json:"message,omitempty" validate:"omitempty,max=4096"`
@@ -172,7 +172,7 @@ type SendButtonPIXRequest struct {
 	MessageId     *string    `json:"messageId,omitempty"`
 }
 
-// SendButtonOTPRequest - Z-API /send-button-otp format
+// SendButtonOTPRequest - FUNNELCHAT /send-button-otp format
 type SendButtonOTPRequest struct {
 	Phone        string  `json:"phone" validate:"required"`
 	Message      string  `json:"message" validate:"required,max=4096"`
@@ -193,7 +193,7 @@ const (
 	CarouselCardTypeAlbum   CarouselCardType = "ALBUM_IMAGE"
 )
 
-// SendCarouselRequest - Z-API /send-carousel format
+// SendCarouselRequest - FUNNELCHAT /send-carousel format
 type SendCarouselRequest struct {
 	Phone        string           `json:"phone" validate:"required"`
 	Cards        []CarouselCard   `json:"cards" validate:"required,min=1,max=10,dive"`
@@ -314,12 +314,10 @@ type ReviewAndPayParamsJSON struct {
 	Referral             string               `json:"referral"` // "chat_attachment"
 }
 
-// Response types for Z-API compatibility
-
 // InteractiveMessageResponse is the standard response for queued interactive messages
 type InteractiveMessageResponse struct {
 	Status    string  `json:"status"`              // QUEUED, SENT, FAILED
-	ZapiID    string  `json:"zapiId,omitempty"`    // Z-API compatible ID
+	ZapiID    string  `json:"zapiId,omitempty"`    // ID
 	QueueID   string  `json:"queueId,omitempty"`   // Internal queue ID (deprecated, use zapiId)
 	MessageID *string `json:"messageId,omitempty"` // Custom message ID if provided
 }

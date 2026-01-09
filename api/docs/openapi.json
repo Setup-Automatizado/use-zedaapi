@@ -3,7 +3,7 @@
   "info": {
     "title": "FunnelChat API (Whatsmeow Bridge)",
     "version": "0.1.0",
-    "description": "REST API compatible with Z-API schemas, backed by Whatsmeow.\nThe specification currently covers the instance management surface implemented in this phase.\n"
+    "description": "REST API, backed by Whatsmeow.\nThe specification currently covers the instance management surface implemented in this phase.\n"
   },
   "servers": [
     {
@@ -196,22 +196,22 @@
       },
       "InstanceStatusResponse": {
         "type": "object",
-        "description": "Z-API compatible payload returned by `/instances/{instanceId}/token/{instanceToken}/status`.",
+        "description": "payload returned by `/instances/{instanceId}/token/{instanceToken}/status`.",
         "properties": {
           "connected": {
             "type": "boolean",
-            "description": "Mirrors Z-API `connected`, indicating if the instance is linked to WhatsApp."
+            "description": "Mirrors `connected`, indicating if the instance is linked to WhatsApp."
           },
           "error": {
             "type": [
               "string",
               "null"
             ],
-            "description": "Same semantics as Z-API, detailing why the instance is not connected (empty string when everything is ok)."
+            "description": "Same semantics, detailing why the instance is not connected (empty string when everything is ok)."
           },
           "smartphoneConnected": {
             "type": "boolean",
-            "description": "Matches Z-API `smartphoneConnected`, signalling if the paired device has internet access."
+            "description": "Matches `smartphoneConnected`, signalling if the paired device has internet access."
           }
         },
         "required": [
@@ -564,16 +564,16 @@
           "id": {
             "type": "string",
             "format": "uuid",
-            "description": "Z-API compatible identifier (duplicate of instanceId)."
+            "description": "identifier (duplicate of instanceId)."
           },
           "token": {
             "type": "string",
-            "description": "Z-API compatible instance token."
+            "description": "instance token."
           },
           "due": {
             "type": "integer",
             "format": "int64",
-            "description": "Millisecond timestamp returned for Z-API compatibility."
+            "description": "Millisecond timestamp returned."
           },
           "instanceId": {
             "type": "string",
@@ -633,21 +633,21 @@
       },
       "InstanceListItem": {
         "type": "object",
-        "description": "Z-API compatible instance summary enriched with internal credentials.",
+        "description": "instance summary enriched with internal credentials.",
         "properties": {
           "id": {
             "type": "string",
             "format": "uuid",
-            "description": "Instance identifier (Z-API field)."
+            "description": "Instance identifier."
           },
           "token": {
             "type": "string",
-            "description": "Instance token used by Z-API clients."
+            "description": "Instance token used by clients."
           },
           "due": {
             "type": "integer",
             "format": "int64",
-            "description": "Millisecond timestamp used by Z-API tooling."
+            "description": "Millisecond timestamp used by tooling."
           },
           "name": {
             "type": "string",
@@ -668,7 +668,7 @@
           },
           "middleware": {
             "type": "string",
-            "description": "Middleware flag returned for Z-API compatibility.",
+            "description": "Middleware flag returned.",
             "enum": [
               "web",
               "mobile"
@@ -777,7 +777,7 @@
       },
       "InstanceListResponse": {
         "type": "object",
-        "description": "Z-API compatible pagination envelope for partner instances.",
+        "description": "pagination envelope for partner instances.",
         "properties": {
           "total": {
             "type": "integer",
@@ -813,16 +813,16 @@
       },
       "QueueMessageResponse": {
         "type": "object",
-        "description": "Represents a message in the queue with Z-API compatible format",
+        "description": "Represents a message in the queue with format",
         "properties": {
           "_id": {
             "type": "string",
-            "description": "Message ID (same as zaapId for Z-API compatibility)",
+            "description": "Message ID (same as zaapId)",
             "example": "39BB1684570F00E91090F6BBC7EE7646"
           },
           "zaapId": {
             "type": "string",
-            "description": "Z-API message tracking ID",
+            "description": "message tracking ID",
             "example": "39BB1684570F00E91090F6BBC7EE7646"
           },
           "messageId": {
@@ -847,7 +847,7 @@
               "null"
             ],
             "description": "Message text content (only for text messages)",
-            "example": "Hello from Z-API"
+            "example": "Hello from"
           },
           "delayMessage": {
             "type": "integer",
@@ -934,7 +934,7 @@
       },
       "QueueListResponse": {
         "type": "array",
-        "description": "Array of queue messages (Z-API compatible - direct array, not wrapped)",
+        "description": "Array of queue messages",
         "items": {
           "$ref": "#/components/schemas/QueueMessageResponse"
         }
@@ -996,7 +996,7 @@
           "subject": {
             "type": "string",
             "description": "Group name",
-            "example": "Z-API Community"
+            "example": "Community"
           }
         },
         "required": [
@@ -1006,7 +1006,7 @@
       },
       "SendTextRequest": {
         "type": "object",
-        "description": "Request body for sending text messages (Z-API compatible)",
+        "description": "Request body for sending text messages",
         "properties": {
           "phone": {
             "type": "string",
@@ -1016,7 +1016,7 @@
           "message": {
             "type": "string",
             "description": "Text message content",
-            "example": "Hello from Z-API!"
+            "example": "Hello from!"
           },
           "messageId": {
             "type": [
@@ -1106,7 +1106,7 @@
       },
       "SendImageRequest": {
         "type": "object",
-        "description": "Request body for sending image messages (Z-API compatible)",
+        "description": "Request body for sending image messages",
         "properties": {
           "phone": {
             "type": "string",
@@ -1206,7 +1206,7 @@
       },
       "SendAudioRequest": {
         "type": "object",
-        "description": "Request body for sending audio/voice messages (Z-API compatible)",
+        "description": "Request body for sending audio/voice messages",
         "properties": {
           "phone": {
             "type": "string",
@@ -1298,7 +1298,7 @@
       },
       "SendVideoRequest": {
         "type": "object",
-        "description": "Request body for sending video messages (Z-API compatible)",
+        "description": "Request body for sending video messages",
         "properties": {
           "phone": {
             "type": "string",
@@ -1397,7 +1397,7 @@
       },
       "SendPTVRequest": {
         "type": "object",
-        "description": "Request body for sending PTV (Push-To-Talk Video) messages (Z-API compatible).\n\n**PTV Format**: Circular video notes displayed similarly to voice notes but with video content.\n\n**Key Features**:\n- Circular video notes (like voice notes with video)\n- Video URL or base64 data URI support\n- Optional caption/text\n- Reply to messages via messageId\n- Schedule delivery with delayMessage (1-15s)\n- Show typing indicator with delayTyping (1-15s)\n- Ephemeral messages with duration (0, 86400, 604800, 7776000)\n- Mention users (@mentions)\n- Mention groups/communities\n- Mention all participants (@everyone)\n- Private reply in groups\n\n**Message Queue**: Messages are queued per recipient with FIFO ordering.\n\n**WhatsApp Compatibility**: Uses whatsmeow library with full WhatsApp Web protocol support.\n",
+        "description": "Request body for sending PTV (Push-To-Talk Video) messages .\n\n**PTV Format**: Circular video notes displayed similarly to voice notes but with video content.\n\n**Key Features**:\n- Circular video notes (like voice notes with video)\n- Video URL or base64 data URI support\n- Optional caption/text\n- Reply to messages via messageId\n- Schedule delivery with delayMessage (1-15s)\n- Show typing indicator with delayTyping (1-15s)\n- Ephemeral messages with duration (0, 86400, 604800, 7776000)\n- Mention users (@mentions)\n- Mention groups/communities\n- Mention all participants (@everyone)\n- Private reply in groups\n\n**Message Queue**: Messages are queued per recipient with FIFO ordering.\n\n**WhatsApp Compatibility**: Uses whatsmeow library with full WhatsApp Web protocol support.\n",
         "properties": {
           "phone": {
             "type": "string",
@@ -1505,7 +1505,7 @@
       },
       "SendDocumentRequest": {
         "type": "object",
-        "description": "Request body for sending document messages (Z-API compatible)",
+        "description": "Request body for sending document messages",
         "properties": {
           "phone": {
             "type": "string",
@@ -1607,7 +1607,7 @@
       },
       "SendStickerRequest": {
         "type": "object",
-        "description": "Request body for sending sticker messages (Z-API compatible).\n\n**Sticker Format**: Accepts URL (http/https) or base64 data URI (data:image/webp;base64,...).\n\n**Key Features**:\n- Animated stickers supported (WebP format)\n- No caption support (stickers are sent without text)\n- Reply to messages via messageId\n- Schedule delivery with delayMessage (1-15s)\n- Show typing indicator with delayTyping (1-15s)\n- Ephemeral messages with duration (0, 86400, 604800, 7776000)\n- Mention users (@mentions)\n- Mention groups/communities\n- Mention all participants (@everyone)\n- Private reply in groups\n\n**Message Queue**: Messages are queued per recipient with FIFO ordering.\n\n**WhatsApp Compatibility**: Uses whatsmeow library with full WhatsApp Web protocol support.\n",
+        "description": "Request body for sending sticker messages .\n\n**Sticker Format**: Accepts URL (http/https) or base64 data URI (data:image/webp;base64,...).\n\n**Key Features**:\n- Animated stickers supported (WebP format)\n- No caption support (stickers are sent without text)\n- Reply to messages via messageId\n- Schedule delivery with delayMessage (1-15s)\n- Show typing indicator with delayTyping (1-15s)\n- Ephemeral messages with duration (0, 86400, 604800, 7776000)\n- Mention users (@mentions)\n- Mention groups/communities\n- Mention all participants (@everyone)\n- Private reply in groups\n\n**Message Queue**: Messages are queued per recipient with FIFO ordering.\n\n**WhatsApp Compatibility**: Uses whatsmeow library with full WhatsApp Web protocol support.\n",
         "properties": {
           "phone": {
             "type": "string",
@@ -1701,7 +1701,7 @@
       },
       "SendGifRequest": {
         "type": "object",
-        "description": "Request body for sending GIF messages (Z-API compatible).\n\n**GIF Format**: Accepts URL (http/https) or base64 data URI (data:image/gif;base64,...).\n\n**Key Features**:\n- Animated GIFs supported\n- Optional caption/text\n- Reply to messages via messageId\n- Schedule delivery with delayMessage (1-15s)\n- Show typing indicator with delayTyping (1-15s)\n- View-once messages with viewOnce flag\n- Ephemeral messages with duration (0, 86400, 604800, 7776000)\n- Mention users (@mentions)\n- Mention groups/communities\n- Mention all participants (@everyone)\n- Private reply in groups\n\n**Message Queue**: Messages are queued per recipient with FIFO ordering.\n\n**WhatsApp Compatibility**: Uses whatsmeow library with full WhatsApp Web protocol support.\n",
+        "description": "Request body for sending GIF messages .\n\n**GIF Format**: Accepts URL (http/https) or base64 data URI (data:image/gif;base64,...).\n\n**Key Features**:\n- Animated GIFs supported\n- Optional caption/text\n- Reply to messages via messageId\n- Schedule delivery with delayMessage (1-15s)\n- Show typing indicator with delayTyping (1-15s)\n- View-once messages with viewOnce flag\n- Ephemeral messages with duration (0, 86400, 604800, 7776000)\n- Mention users (@mentions)\n- Mention groups/communities\n- Mention all participants (@everyone)\n- Private reply in groups\n\n**Message Queue**: Messages are queued per recipient with FIFO ordering.\n\n**WhatsApp Compatibility**: Uses whatsmeow library with full WhatsApp Web protocol support.\n",
         "properties": {
           "phone": {
             "type": "string",
@@ -1808,7 +1808,7 @@
       },
       "Contact": {
         "type": "object",
-        "description": "WhatsApp contact information (Z-API compatible).\n\n**Data Sources**:\n- Device contacts (if contact is in user's address book)\n- WhatsApp profile data (notify field from push name)\n- VCard information (if contact shared via vcard)\n\n**Field Availability**:\n- `phone`: Always present\n- `name`, `short`, `vname`: Only if contact is in address book\n- `notify`: Only if user has interacted with contact\n\n**Privacy Notes**: Contact data respects WhatsApp privacy settings.\nUsers who hide their profile will only show notify field.\n",
+        "description": "WhatsApp contact information .\n\n**Data Sources**:\n- Device contacts (if contact is in user's address book)\n- WhatsApp profile data (notify field from push name)\n- VCard information (if contact shared via vcard)\n\n**Field Availability**:\n- `phone`: Always present\n- `name`, `short`, `vname`: Only if contact is in address book\n- `notify`: Only if user has interacted with contact\n\n**Privacy Notes**: Contact data respects WhatsApp privacy settings.\nUsers who hide their profile will only show notify field.\n",
         "properties": {
           "phone": {
             "type": "string",
@@ -1855,7 +1855,7 @@
       },
       "Chat": {
         "type": "object",
-        "description": "WhatsApp chat information (Z-API compatible).\n\n**Chat Types**:\n- Individual chats (person-to-person)\n- Group chats (multiple participants)\n- Community announcement channels\n\n**Data Sources**:\n- WhatsApp chat metadata (from store)\n- Message history (last message timestamp)\n- Chat settings (mute, archive, pin, spam status)\n\n**Ordering**: By default, chats are ordered by lastMessageTime descending (most recent first).\n\n**Unread Counts**: Both `unread` and `messagesUnread` represent the same count (Z-API compatibility).\n",
+        "description": "WhatsApp chat information .\n\n**Chat Types**:\n- Individual chats (person-to-person)\n- Group chats (multiple participants)\n- Community announcement channels\n\n**Data Sources**:\n- WhatsApp chat metadata (from store)\n- Message history (last message timestamp)\n- Chat settings (mute, archive, pin, spam status)\n\n**Ordering**: By default, chats are ordered by lastMessageTime descending (most recent first).\n\n**Unread Counts**: Both `unread` and `messagesUnread` represent the same count.\n",
         "properties": {
           "phone": {
             "type": "string",
@@ -1907,7 +1907,7 @@
           },
           "messagesUnread": {
             "type": "integer",
-            "description": "Alternative unread count field for Z-API compatibility.\nContains the same value as `unread`.\n",
+            "description": "Alternative unread count field.\nContains the same value as `unread`.\n",
             "minimum": 0,
             "example": 5
           },
@@ -1934,11 +1934,11 @@
       },
       "SendMessageResponse": {
         "type": "object",
-        "description": "Response after enqueuing a message (Z-API compatible)",
+        "description": "Response after enqueuing a message",
         "properties": {
           "zaapId": {
             "type": "string",
-            "description": "Unique message ID in our system (Z-API format)",
+            "description": "Unique message ID in our system",
             "example": "39BB1684570F00E91090F6BBC7EE7646"
           },
           "messageId": {
@@ -2102,7 +2102,7 @@
       },
       "SendContactRequest": {
         "type": "object",
-        "description": "Request body for sending a single contact card (Z-API compatible)",
+        "description": "Request body for sending a single contact card",
         "properties": {
           "phone": {
             "type": "string",
@@ -2111,12 +2111,12 @@
           },
           "contactName": {
             "type": "string",
-            "description": "Full name of the contact (Z-API compatible field)",
+            "description": "Full name of the contact",
             "example": "John Doe"
           },
           "contactPhone": {
             "type": "string",
-            "description": "Phone number of the contact in international format (Z-API compatible field)",
+            "description": "Phone number of the contact in international format",
             "example": "5511999999999"
           },
           "contactBusinessDescription": {
@@ -2124,7 +2124,7 @@
               "string",
               "null"
             ],
-            "description": "Optional business or organization description of the contact (Z-API compatible field)",
+            "description": "Optional business or organization description of the contact",
             "example": "Sales Manager at Example Corp"
           },
           "firstName": {
@@ -2377,7 +2377,7 @@
       },
       "ContactInfo": {
         "type": "object",
-        "description": "Contact information for multiple contacts (Z-API compatible)",
+        "description": "Contact information for multiple contacts",
         "properties": {
           "contactName": {
             "type": "string",
@@ -2501,7 +2501,7 @@
       },
       "SendContactsRequest": {
         "type": "object",
-        "description": "Request body for sending multiple contact cards (Z-API compatible)",
+        "description": "Request body for sending multiple contact cards",
         "properties": {
           "phone": {
             "type": "string",
@@ -2588,7 +2588,7 @@
       },
       "BooleanStatusResponse": {
         "type": "object",
-        "description": "Z-API compatible acknowledgement payload using a boolean `value`.",
+        "description": "acknowledgement payload using a boolean `value`.",
         "properties": {
           "value": {
             "type": "boolean",
@@ -2602,7 +2602,7 @@
       },
       "BooleanSuccessResponse": {
         "type": "object",
-        "description": "Z-API compatible acknowledgement payload using a boolean `success`.",
+        "description": "acknowledgement payload using a boolean `success`.",
         "properties": {
           "success": {
             "type": "boolean",
@@ -2651,7 +2651,7 @@
       },
       "GroupListItem": {
         "type": "object",
-        "description": "Z-API compatible summary entry returned by `/groups`.",
+        "description": "summary entry returned by `/groups`.",
         "properties": {
           "archived": {
             "type": "boolean",
@@ -2667,7 +2667,7 @@
           },
           "unread": {
             "type": "string",
-            "description": "Number of unread messages represented as string for Z-API parity."
+            "description": "Number of unread messages represented as string for parity."
           },
           "name": {
             "type": "string",
@@ -3809,7 +3809,7 @@
       },
       "PhoneExistsResponse": {
         "type": "object",
-        "description": "Z-API compatible response for phone number validation.\nReturns whether a phone number is registered on WhatsApp along with phone and LID.\n",
+        "description": "response for phone number validation.\nReturns whether a phone number is registered on WhatsApp along with phone and LID.\n",
         "properties": {
           "exists": {
             "type": "boolean",
@@ -3840,7 +3840,7 @@
       },
       "PhoneExistsBatchRequest": {
         "type": "object",
-        "description": "Z-API compatible request for batch phone number validation.\nAllows validating up to 50,000 phone numbers in a single request.\n",
+        "description": "request for batch phone number validation.\nAllows validating up to 50,000 phone numbers in a single request.\n",
         "properties": {
           "phones": {
             "type": "array",
@@ -3864,7 +3864,7 @@
       },
       "PhoneExistsBatchResponse": {
         "type": "object",
-        "description": "Z-API compatible response for batch phone number validation.\nContains the validation result for each phone number in the batch.\n",
+        "description": "response for batch phone number validation.\nContains the validation result for each phone number in the batch.\n",
         "properties": {
           "exists": {
             "type": "boolean",
@@ -4074,7 +4074,7 @@
           },
           "payload": {
             "type": "object",
-            "description": "Original Z-API format webhook payload",
+            "description": "Original webhook payload",
             "additionalProperties": true
           },
           "cachedAt": {
@@ -4509,7 +4509,7 @@
       },
       "SendButtonListRequest": {
         "type": "object",
-        "description": "Request body for sending simple reply button messages (Z-API compatible).\n\n**Features:**\n- Simple reply buttons (1-3 buttons)\n- Optional header image/video\n- Quick selection callbacks\n\n**Limits:**\n- Max 3 buttons\n- Title: max 60 chars\n- Message: max 1024 chars\n- Footer: max 60 chars\n- Button title: max 20 chars\n\n**Message Queue:** Messages are queued per recipient with FIFO ordering.\n",
+        "description": "Request body for sending simple reply button messages .\n\n**Features:**\n- Simple reply buttons (1-3 buttons)\n- Optional header image/video\n- Quick selection callbacks\n\n**Limits:**\n- Max 3 buttons\n- Title: max 60 chars\n- Message: max 1024 chars\n- Footer: max 60 chars\n- Button title: max 20 chars\n\n**Message Queue:** Messages are queued per recipient with FIFO ordering.\n",
         "properties": {
           "phone": {
             "type": "string",
@@ -4581,7 +4581,7 @@
       },
       "SendButtonActionsRequest": {
         "type": "object",
-        "description": "Request body for sending button actions messages (Z-API compatible).\n\n**Features:**\n- CTA buttons (URL, Call, Copy)\n- Optional image header\n- Quick reply buttons\n\n**Button Types:**\n- `quick_reply` - Simple reply button\n- `cta_url` - Opens a URL\n- `cta_call` - Initiates a phone call\n- `cta_copy` - Copies text to clipboard\n\n**Limits:**\n- Max 3 buttons\n- Label: max 25 chars (20 for quick_reply)\n- Title: max 60 chars\n- Message: max 1024 chars\n- Footer: max 60 chars\n\n**Message Queue:** Messages are queued per recipient with FIFO ordering.\n",
+        "description": "Request body for sending button actions messages .\n\n**Features:**\n- CTA buttons (URL, Call, Copy)\n- Optional image header\n- Quick reply buttons\n\n**Button Types:**\n- `quick_reply` - Simple reply button\n- `cta_url` - Opens a URL\n- `cta_call` - Initiates a phone call\n- `cta_copy` - Copies text to clipboard\n\n**Limits:**\n- Max 3 buttons\n- Label: max 25 chars (20 for quick_reply)\n- Title: max 60 chars\n- Message: max 1024 chars\n- Footer: max 60 chars\n\n**Message Queue:** Messages are queued per recipient with FIFO ordering.\n",
         "properties": {
           "phone": {
             "type": "string",
@@ -4641,7 +4641,7 @@
       },
       "SendOptionListRequest": {
         "type": "object",
-        "description": "Request body for sending interactive list/menu messages (Z-API compatible).\n\n**Features:**\n- Multiple sections with rows\n- Expandable list menu\n- Selection callbacks\n\n**Limits:**\n- Max 10 sections\n- Max 10 rows per section\n- Title: max 60 chars\n- Message: max 4096 chars\n- Footer: max 60 chars\n- Button label: max 20 chars\n- Section title: max 24 chars\n- Row title: max 24 chars\n- Row description: max 72 chars\n\n**Message Queue:** Messages are queued per recipient with FIFO ordering.\n",
+        "description": "Request body for sending interactive list/menu messages .\n\n**Features:**\n- Multiple sections with rows\n- Expandable list menu\n- Selection callbacks\n\n**Limits:**\n- Max 10 sections\n- Max 10 rows per section\n- Title: max 60 chars\n- Message: max 4096 chars\n- Footer: max 60 chars\n- Button label: max 20 chars\n- Section title: max 24 chars\n- Row title: max 24 chars\n- Row description: max 72 chars\n\n**Message Queue:** Messages are queued per recipient with FIFO ordering.\n",
         "properties": {
           "phone": {
             "type": "string",
@@ -4710,7 +4710,7 @@
       },
       "SendButtonPIXRequest": {
         "type": "object",
-        "description": "Request body for sending PIX payment messages (Z-API compatible).\n\n**Features:**\n- PIX QR code generation\n- Copy-paste PIX code\n- Multiple PIX key types\n\n**PIX Key Types:**\n- `CPF` - Brazilian individual taxpayer ID\n- `CNPJ` - Brazilian company taxpayer ID\n- `EMAIL` - Email address\n- `PHONE` - Phone number\n- `EVP` - Random PIX key (UUID format)\n\n**Message Queue:** Messages are queued per recipient with FIFO ordering.\n",
+        "description": "Request body for sending PIX payment messages .\n\n**Features:**\n- PIX QR code generation\n- Copy-paste PIX code\n- Multiple PIX key types\n\n**PIX Key Types:**\n- `CPF` - Brazilian individual taxpayer ID\n- `CNPJ` - Brazilian company taxpayer ID\n- `EMAIL` - Email address\n- `PHONE` - Phone number\n- `EVP` - Random PIX key (UUID format)\n\n**Message Queue:** Messages are queued per recipient with FIFO ordering.\n",
         "properties": {
           "phone": {
             "type": "string",
@@ -4776,7 +4776,7 @@
       },
       "SendButtonOTPRequest": {
         "type": "object",
-        "description": "Request body for sending OTP (One-Time Password) messages (Z-API compatible).\n\n**Features:**\n- One-tap copy button\n- Verification code display\n- 2FA/Authentication flows\n\n**Use Cases:**\n- Login verification\n- Password reset\n- Two-factor authentication\n- Account verification\n\n**Message Queue:** Messages are queued per recipient with FIFO ordering.\n",
+        "description": "Request body for sending OTP (One-Time Password) messages .\n\n**Features:**\n- One-tap copy button\n- Verification code display\n- 2FA/Authentication flows\n\n**Use Cases:**\n- Login verification\n- Password reset\n- Two-factor authentication\n- Account verification\n\n**Message Queue:** Messages are queued per recipient with FIFO ordering.\n",
         "properties": {
           "phone": {
             "type": "string",
@@ -4836,7 +4836,7 @@
       },
       "SendCarouselRequest": {
         "type": "object",
-        "description": "Request body for sending carousel messages (Z-API compatible).\n\n**Features:**\n- Multiple swipeable cards with media\n- Action buttons per card (1-3)\n- Optional card type selection\n\n**Limits:**\n- Cards: 1-10 per carousel\n- Buttons per card: 1-3\n- Body text: max 1024 chars per card\n\n**Card Types:**\n- HSCROLL_CARDS: Horizontal scrolling cards (default)\n- ALBUM_IMAGE: Image album format\n\n**Use Cases:**\n- Product catalogs\n- Image galleries\n- Multi-option presentations\n- Tutorial sequences\n\n**Message Queue:** Messages are queued per recipient with FIFO ordering.\n",
+        "description": "Request body for sending carousel messages .\n\n**Features:**\n- Multiple swipeable cards with media\n- Action buttons per card (1-3)\n- Optional card type selection\n\n**Limits:**\n- Cards: 1-10 per carousel\n- Buttons per card: 1-3\n- Body text: max 1024 chars per card\n\n**Card Types:**\n- HSCROLL_CARDS: Horizontal scrolling cards (default)\n- ALBUM_IMAGE: Image album format\n\n**Use Cases:**\n- Product catalogs\n- Image galleries\n- Multi-option presentations\n- Tutorial sequences\n\n**Message Queue:** Messages are queued per recipient with FIFO ordering.\n",
         "properties": {
           "phone": {
             "type": "string",
@@ -4943,7 +4943,7 @@
       },
       "PollOption": {
         "type": "object",
-        "description": "A single poll option (Z-API compatible format)",
+        "description": "A single poll option",
         "properties": {
           "name": {
             "type": "string",
@@ -4958,7 +4958,7 @@
       },
       "SendPollRequest": {
         "type": "object",
-        "description": "Request body for sending poll messages (Z-API compatible).\n\n**Features:**\n- Create polls with 2-12 options\n- Single or multiple choice selection\n- Optional reply-to support\n- Typing indicator and delay support\n\n**Z-API Compatible:** Matches Z-API request format exactly.\n",
+        "description": "Request body for sending poll messages .\n\n**Features:**\n- Create polls with 2-12 options\n- Single or multiple choice selection\n- Optional reply-to support\n- Typing indicator and delay support\n\n\n",
         "properties": {
           "phone": {
             "type": "string",
@@ -4967,7 +4967,7 @@
           },
           "message": {
             "type": "string",
-            "description": "Poll question text (Z-API uses \"message\" field for the question)",
+            "description": "Poll question text (uses \"message\" field for the question)",
             "example": "Outra enquete"
           },
           "poll": {
@@ -5031,7 +5031,7 @@
       },
       "EventLocation": {
         "type": "object",
-        "description": "Event location information (Z-API compatible)",
+        "description": "Event location information",
         "properties": {
           "name": {
             "type": "string",
@@ -5059,7 +5059,7 @@
       },
       "EventPayload": {
         "type": "object",
-        "description": "Nested event object (Z-API compatible format)",
+        "description": "Nested event object",
         "properties": {
           "name": {
             "type": "string",
@@ -5104,7 +5104,7 @@
       },
       "SendEventRequest": {
         "type": "object",
-        "description": "Request body for sending calendar event messages (Z-API compatible).\n\n**Features:**\n- Send calendar events to groups\n- Support for location and call links\n- Event cancellation support\n\n**Z-API Compatible:** Matches Z-API request format exactly.\n",
+        "description": "Request body for sending calendar event messages .\n\n**Features:**\n- Send calendar events to groups\n- Support for location and call links\n- Event cancellation support\n\n\n",
         "properties": {
           "phone": {
             "type": "string",
@@ -5148,7 +5148,7 @@
       },
       "SendLinkRequest": {
         "type": "object",
-        "description": "Request body for sending link messages with custom preview (Z-API compatible).\n\n**Features:**\n- Custom link preview title and description\n- Custom preview image\n- Optional message text before the link\n- Reply-to support\n\n**Z-API Compatible:** Matches Z-API request format exactly.\n",
+        "description": "Request body for sending link messages with custom preview .\n\n**Features:**\n- Custom link preview title and description\n- Custom preview image\n- Optional message text before the link\n- Reply-to support\n\n\n",
         "properties": {
           "phone": {
             "type": "string",
@@ -5216,7 +5216,7 @@
       },
       "ModifyChatRequest": {
         "type": "object",
-        "description": "Request body for modifying chat state (Z-API compatible).\n\n**Supported Actions:**\n- read: Mark chat as read\n- archive: Archive the chat\n- unarchive: Unarchive the chat\n- pin: Pin the chat\n- unpin: Unpin the chat\n- mute: Mute notifications (8 hours default)\n- unmute: Unmute notifications\n- clear: Clear chat messages (not supported by whatsmeow)\n- delete: Delete the chat\n\n**Z-API Compatible:** Matches Z-API request format exactly.\n",
+        "description": "Request body for modifying chat state .\n\n**Supported Actions:**\n- read: Mark chat as read\n- archive: Archive the chat\n- unarchive: Unarchive the chat\n- pin: Pin the chat\n- unpin: Unpin the chat\n- mute: Mute notifications (8 hours default)\n- unmute: Unmute notifications\n- clear: Clear chat messages (not supported by whatsmeow)\n- delete: Delete the chat\n\n\n",
         "properties": {
           "phone": {
             "type": "string",
@@ -5280,7 +5280,7 @@
       },
       "DeleteMessageResponse": {
         "type": "object",
-        "description": "Response for delete message operations (Z-API compatible)",
+        "description": "Response for delete message operations",
         "properties": {
           "success": {
             "type": "boolean",
@@ -5505,7 +5505,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "Informational middleware flag (matches Z-API contract)."
+            "description": "Informational middleware flag (matches contract)."
           },
           {
             "in": "query",
@@ -5527,7 +5527,7 @@
               "minimum": 1,
               "maximum": 200
             },
-            "description": "Page size (defaults to 15 as in Z-API examples).",
+            "description": "Page size (defaults to 15 as in examples).",
             "example": 15
           }
         ],
@@ -5561,7 +5561,7 @@
           "Partner"
         ],
         "summary": "Partner creates an instance on demand",
-        "description": "Mirrors Z-API partner endpoint for provisioning instances via integrator credentials.",
+        "description": "Mirrors partner endpoint for provisioning instances via integrator credentials.",
         "operationId": "partnerCreateInstance",
         "security": [
           {
@@ -5726,7 +5726,7 @@
           "Instances"
         ],
         "summary": "Retrieve instance status",
-        "description": "Mirrors Z-API `/status`, returning live connectivity information for a provisioned instance.",
+        "description": "Mirrors `/status`, returning live connectivity information for a provisioned instance.",
         "operationId": "getInstanceStatus",
         "security": [
           {
@@ -5781,7 +5781,7 @@
           "Instances"
         ],
         "summary": "Fetch QR code for pairing",
-        "description": "Mirrors Z-API `/qr-code`, returning the current QR string required to link a phone.",
+        "description": "Mirrors `/qr-code`, returning the current QR string required to link a phone.",
         "operationId": "getInstanceQRCode",
         "security": [
           {
@@ -5826,7 +5826,7 @@
           "Instances"
         ],
         "summary": "Fetch QR code as base64 image",
-        "description": "Mirrors Z-API `/qr-code/image`, returning a PNG image encoded in base64 for rendering in clients.",
+        "description": "Mirrors `/qr-code/image`, returning a PNG image encoded in base64 for rendering in clients.",
         "operationId": "getInstanceQRCodeImage",
         "security": [
           {
@@ -5871,7 +5871,7 @@
           "Instances"
         ],
         "summary": "Retrieve device metadata",
-        "description": "Mirrors Z-API `/device`, returning information about the currently linked phone.",
+        "description": "Mirrors `/device`, returning information about the currently linked phone.",
         "operationId": "getInstanceDevice",
         "security": [
           {
@@ -5926,7 +5926,7 @@
           "Instances"
         ],
         "summary": "Fetch phone pairing code",
-        "description": "Mirrors Z-API `/phone-code/{phone}`, returning a code that can be typed into WhatsApp instead of scanning the QR code.",
+        "description": "Mirrors `/phone-code/{phone}`, returning a code that can be typed into WhatsApp instead of scanning the QR code.",
         "operationId": "getInstancePhoneCode",
         "security": [
           {
@@ -5990,7 +5990,7 @@
           "Instances"
         ],
         "summary": "Restart an instance connection",
-        "description": "Equivalent to Z-API `/restart`, forcing the client to reconnect to WhatsApp.",
+        "description": "Equivalent to `/restart`, forcing the client to reconnect to WhatsApp.",
         "operationId": "restartInstanceGet",
         "security": [
           {
@@ -6036,7 +6036,7 @@
           "Instances"
         ],
         "summary": "Restart an instance connection",
-        "description": "Equivalent to Z-API `/restart`, forcing the client to reconnect to WhatsApp.",
+        "description": "Equivalent to `/restart`, forcing the client to reconnect to WhatsApp.",
         "operationId": "restartInstance",
         "security": [
           {
@@ -6198,7 +6198,7 @@
           "Instances"
         ],
         "summary": "Update delivery webhook",
-        "description": "Mirrors Z-API `/update-webhook-delivery`, configuring the sent-message webhook endpoint.",
+        "description": "Mirrors `/update-webhook-delivery`, configuring the sent-message webhook endpoint.",
         "operationId": "updateWebhookDelivery",
         "security": [
           {
@@ -6263,7 +6263,7 @@
           "Instances"
         ],
         "summary": "Update received webhook",
-        "description": "Mirrors Z-API `/update-webhook-received`, configuring the incoming message webhook endpoint.",
+        "description": "Mirrors `/update-webhook-received`, configuring the incoming message webhook endpoint.",
         "operationId": "updateWebhookReceived",
         "security": [
           {
@@ -6328,7 +6328,7 @@
           "Instances"
         ],
         "summary": "Update received+delivery webhook",
-        "description": "Mirrors Z-API `/update-webhook-received-delivery`, configuring the webhook used when `notifySentByMe` is enabled.",
+        "description": "Mirrors `/update-webhook-received-delivery`, configuring the webhook used when `notifySentByMe` is enabled.",
         "operationId": "updateWebhookReceivedDelivery",
         "security": [
           {
@@ -6393,7 +6393,7 @@
           "Instances"
         ],
         "summary": "Update message status webhook",
-        "description": "Mirrors Z-API `/update-webhook-message-status`, configuring delivery-read status updates.",
+        "description": "Mirrors `/update-webhook-message-status`, configuring delivery-read status updates.",
         "operationId": "updateWebhookMessageStatus",
         "security": [
           {
@@ -6458,7 +6458,7 @@
           "Instances"
         ],
         "summary": "Update disconnected webhook",
-        "description": "Mirrors Z-API `/update-webhook-disconnected`, configuring the disconnect notification endpoint.",
+        "description": "Mirrors `/update-webhook-disconnected`, configuring the disconnect notification endpoint.",
         "operationId": "updateWebhookDisconnected",
         "security": [
           {
@@ -6523,7 +6523,7 @@
           "Instances"
         ],
         "summary": "Update connected webhook",
-        "description": "Mirrors Z-API `/update-webhook-connected`, configuring the connection notification endpoint.",
+        "description": "Mirrors `/update-webhook-connected`, configuring the connection notification endpoint.",
         "operationId": "updateWebhookConnected",
         "security": [
           {
@@ -6588,7 +6588,7 @@
           "Instances"
         ],
         "summary": "Update chat presence webhook",
-        "description": "Mirrors Z-API `/update-webhook-chat-presence`, configuring the typing/presence webhook endpoint.",
+        "description": "Mirrors `/update-webhook-chat-presence`, configuring the typing/presence webhook endpoint.",
         "operationId": "updateWebhookChatPresence",
         "security": [
           {
@@ -6653,7 +6653,7 @@
           "Instances"
         ],
         "summary": "Toggle notify-sent-by-me",
-        "description": "Mirrors Z-API `/update-notify-sent-by-me`, enabling or disabling callbacks for messages sent by the instance.",
+        "description": "Mirrors `/update-notify-sent-by-me`, enabling or disabling callbacks for messages sent by the instance.",
         "operationId": "updateNotifySentByMe",
         "security": [
           {
@@ -6718,7 +6718,7 @@
           "Instances"
         ],
         "summary": "Update all webhooks at once",
-        "description": "Mirrors Z-API `/update-every-webhooks`, applying the same HTTPS endpoint to every webhook type.",
+        "description": "Mirrors `/update-every-webhooks`, applying the same HTTPS endpoint to every webhook type.",
         "operationId": "updateEveryWebhooks",
         "security": [
           {
@@ -6783,7 +6783,7 @@
           "Instances"
         ],
         "summary": "Toggle automatic call rejection",
-        "description": "Mirrors Z-API `/update-call-reject-auto`, enabling or disabling automatic rejection of incoming calls.",
+        "description": "Mirrors `/update-call-reject-auto`, enabling or disabling automatic rejection of incoming calls.",
         "operationId": "updateCallRejectAuto",
         "security": [
           {
@@ -6858,7 +6858,7 @@
           "Instances"
         ],
         "summary": "Update call rejection message",
-        "description": "Mirrors Z-API `/update-call-reject-message`, setting the message sent when rejecting calls.",
+        "description": "Mirrors `/update-call-reject-message`, setting the message sent when rejecting calls.",
         "operationId": "updateCallRejectMessage",
         "security": [
           {
@@ -6933,7 +6933,7 @@
           "Instances"
         ],
         "summary": "Toggle automatic message reading",
-        "description": "Mirrors Z-API `/update-auto-read-message`, enabling or disabling automatic marking of messages as read.",
+        "description": "Mirrors `/update-auto-read-message`, enabling or disabling automatic marking of messages as read.",
         "operationId": "updateAutoReadMessage",
         "security": [
           {
@@ -7008,7 +7008,7 @@
           "Partner"
         ],
         "summary": "Activate partner subscription",
-        "description": "Enables on-demand billing/usage for the specified instance (Z-API parity).",
+        "description": "Enables on-demand billing/usage for the specified instance (parity).",
         "operationId": "partnerSubscribeInstance",
         "security": [
           {
@@ -7063,7 +7063,7 @@
           "Partner"
         ],
         "summary": "Cancel partner subscription",
-        "description": "Cancels the on-demand subscription for the instance, matching Z-API behaviour.",
+        "description": "Cancels the on-demand subscription for the instance, matching behaviour.",
         "operationId": "partnerCancelInstance",
         "security": [
           {
@@ -7118,7 +7118,7 @@
           "Messages"
         ],
         "summary": "Send text message",
-        "description": "Sends a text message via WhatsApp with Z-API compatible format.\n\n**Features:**\n- ✅ Text message with optional reply-to\n- ✅ Typing indicator simulation (delayTyping)\n- ✅ Delayed sending (delayMessage)\n- ✅ Ephemeral/disappearing messages support\n- ✅ Private reply in groups (privateAnswer)\n- ✅ Mentions support (mentioned, groupMentioned, mentionedAll)\n- ✅ FIFO queue with per-recipient ordering\n- ✅ Non-blocking (returns immediately with zaapId)\n\n**Z-API Compatible:** Matches Z-API request/response format exactly.\n",
+        "description": "Sends a text message via WhatsApp with format.\n\n**Features:**\n- ✅ Text message with optional reply-to\n- ✅ Typing indicator simulation (delayTyping)\n- ✅ Delayed sending (delayMessage)\n- ✅ Ephemeral/disappearing messages support\n- ✅ Private reply in groups (privateAnswer)\n- ✅ Mentions support (mentioned, groupMentioned, mentionedAll)\n- ✅ FIFO queue with per-recipient ordering\n- ✅ Non-blocking (returns immediately with zaapId)\n\n\n",
         "operationId": "sendTextMessage",
         "security": [
           {
@@ -7142,7 +7142,7 @@
               },
               "example": {
                 "phone": "5511999999999",
-                "message": "Hello from Z-API!",
+                "message": "Hello from!",
                 "delayMessage": 5,
                 "delayTyping": 3
               }
@@ -7214,7 +7214,7 @@
           "Messages"
         ],
         "summary": "Send image message",
-        "description": "Sends an image message via WhatsApp with optional caption.\n\n**Features:**\n- ✅ Image URL or base64 data URI support\n- ✅ Optional caption/title\n- ✅ View once support (disappears after viewing)\n- ✅ Reply-to message support\n- ✅ Typing indicator and delayed sending\n- ✅ Mentions support (mentioned, groupMentioned, mentionedAll)\n- ✅ FIFO queue with per-recipient ordering\n\n**Supported Formats:**\n- Image URL: `https://picsum.photos/600/400.jpg`\n- Base64: `data:image/png;base64,iVBORw0KG...`\n\n**Z-API Compatible:** Matches Z-API request/response format exactly.\n",
+        "description": "Sends an image message via WhatsApp with optional caption.\n\n**Features:**\n- ✅ Image URL or base64 data URI support\n- ✅ Optional caption/title\n- ✅ View once support (disappears after viewing)\n- ✅ Reply-to message support\n- ✅ Typing indicator and delayed sending\n- ✅ Mentions support (mentioned, groupMentioned, mentionedAll)\n- ✅ FIFO queue with per-recipient ordering\n\n**Supported Formats:**\n- Image URL: `https://picsum.photos/600/400.jpg`\n- Base64: `data:image/png;base64,iVBORw0KG...`\n\n\n",
         "operationId": "sendImageMessage",
         "security": [
           {
@@ -7305,7 +7305,7 @@
           "Messages"
         ],
         "summary": "Send sticker message",
-        "description": "Sends a sticker message via WhatsApp with Z-API compatible format.\n\n**Features:**\n- ✅ Sticker URL or base64 data URI support\n- ✅ Animated stickers (WebP format)\n- ✅ Reply-to message support\n- ✅ Typing indicator and delayed sending\n- ✅ Ephemeral/disappearing messages support\n- ✅ Mentions support (mentioned, groupMentioned, mentionedAll)\n- ✅ Private reply in groups (privateAnswer)\n- ✅ FIFO queue with per-recipient ordering\n- ✅ Non-blocking (returns immediately with zaapId)\n\n**Sticker Format:**\n- WebP format (animated or static)\n- 512x512 pixels recommended\n- Max 100KB for animated, 500KB for static\n- No caption support (stickers don't have text)\n\n**Supported Formats:**\n- URL: `https://www.gstatic.com/webp/gallery/1.webp`\n- Base64: `data:image/webp;base64,UklGRiQAAABXRUJQ...`\n\n**Z-API Compatible:** Matches Z-API request/response format exactly.\n",
+        "description": "Sends a sticker message via WhatsApp with format.\n\n**Features:**\n- ✅ Sticker URL or base64 data URI support\n- ✅ Animated stickers (WebP format)\n- ✅ Reply-to message support\n- ✅ Typing indicator and delayed sending\n- ✅ Ephemeral/disappearing messages support\n- ✅ Mentions support (mentioned, groupMentioned, mentionedAll)\n- ✅ Private reply in groups (privateAnswer)\n- ✅ FIFO queue with per-recipient ordering\n- ✅ Non-blocking (returns immediately with zaapId)\n\n**Sticker Format:**\n- WebP format (animated or static)\n- 512x512 pixels recommended\n- Max 100KB for animated, 500KB for static\n- No caption support (stickers don't have text)\n\n**Supported Formats:**\n- URL: `https://www.gstatic.com/webp/gallery/1.webp`\n- Base64: `data:image/webp;base64,UklGRiQAAABXRUJQ...`\n\n\n",
         "operationId": "sendStickerMessage",
         "security": [
           {
@@ -7414,7 +7414,7 @@
           "Messages"
         ],
         "summary": "Send GIF message",
-        "description": "Sends a GIF message via WhatsApp with optional caption.\n\n**Features:**\n- ✅ GIF URL or base64 data URI support\n- ✅ Animated GIFs\n- ✅ Optional caption/text\n- ✅ View once support (disappears after viewing)\n- ✅ Reply-to message support\n- ✅ Typing indicator and delayed sending\n- ✅ Ephemeral/disappearing messages support\n- ✅ Mentions support (mentioned, groupMentioned, mentionedAll)\n- ✅ Private reply in groups (privateAnswer)\n- ✅ FIFO queue with per-recipient ordering\n- ✅ Non-blocking (returns immediately with zaapId)\n\n**GIF Format:**\n- GIF format (animated or static)\n- Any aspect ratio (auto-adjusted by WhatsApp)\n- Max 16MB recommended\n- Supports caption with @mentions\n\n**Supported Formats:**\n- URL: `https://media.giphy.com/media/3o7abKhOpu0NwenH3O/giphy.gif`\n- Base64: `data:image/gif;base64,R0lGODlhAQABAIAAAP...`\n\n**Z-API Compatible:** Matches Z-API request/response format exactly.\n",
+        "description": "Sends a GIF message via WhatsApp with optional caption.\n\n**Features:**\n- ✅ GIF URL or base64 data URI support\n- ✅ Animated GIFs\n- ✅ Optional caption/text\n- ✅ View once support (disappears after viewing)\n- ✅ Reply-to message support\n- ✅ Typing indicator and delayed sending\n- ✅ Ephemeral/disappearing messages support\n- ✅ Mentions support (mentioned, groupMentioned, mentionedAll)\n- ✅ Private reply in groups (privateAnswer)\n- ✅ FIFO queue with per-recipient ordering\n- ✅ Non-blocking (returns immediately with zaapId)\n\n**GIF Format:**\n- GIF format (animated or static)\n- Any aspect ratio (auto-adjusted by WhatsApp)\n- Max 16MB recommended\n- Supports caption with @mentions\n\n**Supported Formats:**\n- URL: `https://media.giphy.com/media/3o7abKhOpu0NwenH3O/giphy.gif`\n- Base64: `data:image/gif;base64,R0lGODlhAQABAIAAAP...`\n\n\n",
         "operationId": "sendGifMessage",
         "security": [
           {
@@ -7525,7 +7525,7 @@
           "Messages"
         ],
         "summary": "Send audio/voice message",
-        "description": "Sends an audio or voice note via WhatsApp.\n\n**Features:**\n- ✅ Audio URL or base64 data URI support\n- ✅ Voice note (PTT) detection\n- ✅ \"Recording audio\" indicator (delayTyping)\n- ✅ View once support\n- ✅ Reply-to message support\n- ✅ Mentions support (mentioned, groupMentioned, mentionedAll)\n\n**Supported Formats:** OGG, MP3, WAV\n\n**Z-API Compatible:** Matches Z-API request/response format exactly.\n",
+        "description": "Sends an audio or voice note via WhatsApp.\n\n**Features:**\n- ✅ Audio URL or base64 data URI support\n- ✅ Voice note (PTT) detection\n- ✅ \"Recording audio\" indicator (delayTyping)\n- ✅ View once support\n- ✅ Reply-to message support\n- ✅ Mentions support (mentioned, groupMentioned, mentionedAll)\n\n**Supported Formats:** OGG, MP3, WAV\n\n\n",
         "operationId": "sendAudioMessage",
         "security": [
           {
@@ -7615,7 +7615,7 @@
           "Messages"
         ],
         "summary": "Send video message",
-        "description": "Sends a video message via WhatsApp with optional caption.\n\n**Features:**\n- ✅ Video URL or base64 data URI support\n- ✅ Optional caption/title\n- ✅ View once support\n- ✅ Reply-to message support\n- ✅ Typing indicator and delayed sending\n- ✅ Mentions support (mentioned, groupMentioned, mentionedAll)\n\n**Supported Formats:** MP4, 3GP, AVI, MOV\n\n**Z-API Compatible:** Matches Z-API request/response format exactly.\n",
+        "description": "Sends a video message via WhatsApp with optional caption.\n\n**Features:**\n- ✅ Video URL or base64 data URI support\n- ✅ Optional caption/title\n- ✅ View once support\n- ✅ Reply-to message support\n- ✅ Typing indicator and delayed sending\n- ✅ Mentions support (mentioned, groupMentioned, mentionedAll)\n\n**Supported Formats:** MP4, 3GP, AVI, MOV\n\n\n",
         "operationId": "sendVideoMessage",
         "security": [
           {
@@ -7705,7 +7705,7 @@
           "Messages"
         ],
         "summary": "Send PTV (circular video) message",
-        "description": "Sends a PTV (Push-To-Talk Video) message via WhatsApp with Z-API compatible format.\n\n**What is PTV?**\nPTV messages are circular video notes, displayed similarly to voice notes but with video content.\nThey appear as circular thumbnails in the chat and play inline when tapped.\n\n**Features:**\n- ✅ Circular video notes (like voice notes with video)\n- ✅ Video URL or base64 data URI support\n- ✅ Optional caption/text\n- ✅ Reply-to message support\n- ✅ Typing indicator and delayed sending\n- ✅ Ephemeral/disappearing messages support\n- ✅ Mentions support (mentioned, groupMentioned, mentionedAll)\n- ✅ Private reply in groups (privateAnswer)\n- ✅ FIFO queue with per-recipient ordering\n- ✅ Non-blocking (returns immediately with zaapId)\n\n**Video Format:**\n- MP4, 3GP, MOV (auto-converted if needed)\n- Max duration: 60 seconds recommended\n- Displayed as circular video in WhatsApp\n\n**Supported Formats:**\n- URL: `https://example.com/video.mp4`\n- Base64: `data:video/mp4;base64,AAAAIGZ0eXBpc29t...`\n\n**Z-API Compatible:** Matches Z-API request/response format exactly.\n",
+        "description": "Sends a PTV (Push-To-Talk Video) message via WhatsApp with format.\n\n**What is PTV?**\nPTV messages are circular video notes, displayed similarly to voice notes but with video content.\nThey appear as circular thumbnails in the chat and play inline when tapped.\n\n**Features:**\n- ✅ Circular video notes (like voice notes with video)\n- ✅ Video URL or base64 data URI support\n- ✅ Optional caption/text\n- ✅ Reply-to message support\n- ✅ Typing indicator and delayed sending\n- ✅ Ephemeral/disappearing messages support\n- ✅ Mentions support (mentioned, groupMentioned, mentionedAll)\n- ✅ Private reply in groups (privateAnswer)\n- ✅ FIFO queue with per-recipient ordering\n- ✅ Non-blocking (returns immediately with zaapId)\n\n**Video Format:**\n- MP4, 3GP, MOV (auto-converted if needed)\n- Max duration: 60 seconds recommended\n- Displayed as circular video in WhatsApp\n\n**Supported Formats:**\n- URL: `https://example.com/video.mp4`\n- Base64: `data:video/mp4;base64,AAAAIGZ0eXBpc29t...`\n\n\n",
         "operationId": "sendPTVMessage",
         "security": [
           {
@@ -7844,7 +7844,7 @@
           "Messages"
         ],
         "summary": "Send document message",
-        "description": "Sends a document file via WhatsApp with optional caption and filename.\n\n**Features:**\n- ✅ Document URL or base64 data URI support\n- ✅ Custom filename support\n- ✅ Optional caption/description\n- ✅ Reply-to message support\n- ✅ Typing indicator and delayed sending\n- ✅ Mentions support (mentioned, groupMentioned, mentionedAll)\n\n**Supported Formats:** PDF, DOC, DOCX, XLS, XLSX, TXT, CSV, ZIP, RAR\n\n**Z-API Compatible:** Matches Z-API request/response format exactly.\n",
+        "description": "Sends a document file via WhatsApp with optional caption and filename.\n\n**Features:**\n- ✅ Document URL or base64 data URI support\n- ✅ Custom filename support\n- ✅ Optional caption/description\n- ✅ Reply-to message support\n- ✅ Typing indicator and delayed sending\n- ✅ Mentions support (mentioned, groupMentioned, mentionedAll)\n\n**Supported Formats:** PDF, DOC, DOCX, XLS, XLSX, TXT, CSV, ZIP, RAR\n\n\n",
         "operationId": "sendDocumentMessage",
         "security": [
           {
@@ -7935,7 +7935,7 @@
           "Queue"
         ],
         "summary": "List messages in queue with pagination",
-        "description": "Lists all messages in the queue for a specific instance with Z-API compatible pagination.\n\n**Z-API Compatibility:**\n- Uses `page` and `pageSize` parameters (Z-API standard)\n- Returns direct array of messages (not wrapped in object)\n- Field names in camelCase (Z-API format)\n- Delays in seconds (not milliseconds)\n- Created timestamp in milliseconds\n\n**Response Format:**\n- Direct array: `[{message1}, {message2}, ...]`\n- NOT wrapped: `{data: [{message1}]}` ❌\n\n**Pagination:**\n- `page`: Page number starting from 1\n- `pageSize`: Messages per page (default 100, max 1000)\n",
+        "description": "Lists all messages in the queue for a specific instance with pagination.\n\n- Uses `page` and `pageSize` parameters\n- Returns direct array of messages (not wrapped in object)\n- Field names in camelCase\n- Delays in seconds (not milliseconds)\n- Created timestamp in milliseconds\n\n**Response Format:**\n- Direct array: `[{message1}, {message2}, ...]`\n- NOT wrapped: `{data: [{message1}]}` ❌\n\n**Pagination:**\n- `page`: Page number starting from 1\n- `pageSize`: Messages per page (default 100, max 1000)\n",
         "operationId": "listQueueMessages",
         "security": [
           {
@@ -7990,7 +7990,7 @@
                     "messageId": "7AD29EAA5EF34C301F0B",
                     "instanceId": "550e8400-e29b-41d4-a716-446655440000",
                     "phone": "5511999999999",
-                    "message": "Hello from Z-API",
+                    "message": "Hello from",
                     "delayMessage": 5,
                     "delayTyping": 3,
                     "created": 1624977905648,
@@ -8047,7 +8047,7 @@
           "Queue"
         ],
         "summary": "Clear all pending messages in queue",
-        "description": "Clears all pending messages from the queue for a specific instance.\n\n**Behavior:**\n- ✅ Removes messages in state: `available`, `scheduled`\n- ❌ Does NOT affect messages: `running`, `completed`, `failed`, `discarded`\n\n**Use Cases:**\n- Emergency stop of all pending messages\n- Queue cleanup during maintenance\n- Cancel all scheduled messages at once\n\n**Z-API Compatible:** Matches Z-API endpoint structure and behavior.\n",
+        "description": "Clears all pending messages from the queue for a specific instance.\n\n**Behavior:**\n- ✅ Removes messages in state: `available`, `scheduled`\n- ❌ Does NOT affect messages: `running`, `completed`, `failed`, `discarded`\n\n**Use Cases:**\n- Emergency stop of all pending messages\n- Queue cleanup during maintenance\n- Cancel all scheduled messages at once\n\n\n",
         "operationId": "clearQueue",
         "security": [
           {
@@ -8105,7 +8105,7 @@
           "Queue"
         ],
         "summary": "Get queue message count",
-        "description": "Returns the total number of messages in the queue for a specific instance.\n\n**Z-API Compatible:** Matches Z-API response format exactly.\n",
+        "description": "Returns the total number of messages in the queue for a specific instance.\n\n\n",
         "operationId": "getQueueCount",
         "security": [
           {
@@ -8163,7 +8163,7 @@
           "Queue"
         ],
         "summary": "Cancel a specific message in queue",
-        "description": "Cancels a pending message by its zaapId (returned when message was enqueued).\n\n**Behavior:**\n- ✅ Cancels messages in state: `available`, `scheduled`, `retryable`\n- ❌ Returns error if message already processed or doesn't exist\n\n**Z-API Compatible:** Matches Z-API endpoint structure and behavior.\n",
+        "description": "Cancels a pending message by its zaapId (returned when message was enqueued).\n\n**Behavior:**\n- ✅ Cancels messages in state: `available`, `scheduled`, `retryable`\n- ❌ Returns error if message already processed or doesn't exist\n\n\n",
         "operationId": "cancelQueueMessage",
         "security": [
           {
@@ -8244,7 +8244,7 @@
           "Messages"
         ],
         "summary": "Send location message",
-        "description": "Sends a location pin via WhatsApp with GPS coordinates, optional name/address, replies, mentions, and ephemeral support. Z-API compatible.",
+        "description": "Sends a location pin via WhatsApp with GPS coordinates, optional name/address, replies, mentions, and ephemeral support..",
         "operationId": "sendLocationMessage",
         "security": [
           {
@@ -8336,7 +8336,7 @@
           "Messages"
         ],
         "summary": "Send single contact card",
-        "description": "Sends a single contact card via WhatsApp. Fully compatible with Z-API format using contactName, contactPhone, and optional contactBusinessDescription fields.",
+        "description": "Sends a single contact card via WhatsApp.Using contactName, contactPhone, and optional contactBusinessDescription fields.",
         "operationId": "sendContactMessage",
         "security": [
           {
@@ -8447,7 +8447,7 @@
           "Messages"
         ],
         "summary": "Send multiple contact cards",
-        "description": "Sends multiple contact cards via WhatsApp in a single message. Fully compatible with Z-API format. Maximum 10 contacts per request.",
+        "description": "Sends multiple contact cards via WhatsApp in a single message. Maximum 10 contacts per request.",
         "operationId": "sendContactsMessage",
         "security": [
           {
@@ -8558,7 +8558,7 @@
           "Messages"
         ],
         "summary": "Send interactive button list message",
-        "description": "Sends an interactive button list message with quick reply buttons.\nThe recipient can tap a button to respond.\n\n**Features:**\n- ✅ Up to 3 quick reply buttons\n- ✅ Header title and message body\n- ✅ Footer text\n- ✅ Optional image or video header\n- ✅ Custom message ID for tracking\n- ✅ Delay message support\n- ✅ FIFO queue with per-recipient ordering\n- ✅ Non-blocking (returns immediately with zaapId)\n\n**Limits:**\n- Max 3 buttons\n- Title: max 60 characters\n- Message: max 1024 characters\n- Footer: max 60 characters\n- Button title: max 20 characters\n\n**Use Cases:**\n- Quick response options (Yes/No/Maybe)\n- Survey responses\n- Confirmation dialogs\n- Simple navigation\n\n**Z-API Compatible:** Matches Z-API request/response format exactly.\n",
+        "description": "Sends an interactive button list message with quick reply buttons.\nThe recipient can tap a button to respond.\n\n**Features:**\n- ✅ Up to 3 quick reply buttons\n- ✅ Header title and message body\n- ✅ Footer text\n- ✅ Optional image or video header\n- ✅ Custom message ID for tracking\n- ✅ Delay message support\n- ✅ FIFO queue with per-recipient ordering\n- ✅ Non-blocking (returns immediately with zaapId)\n\n**Limits:**\n- Max 3 buttons\n- Title: max 60 characters\n- Message: max 1024 characters\n- Footer: max 60 characters\n- Button title: max 20 characters\n\n**Use Cases:**\n- Quick response options (Yes/No/Maybe)\n- Survey responses\n- Confirmation dialogs\n- Simple navigation\n\n\n",
         "operationId": "sendButtonListMessage",
         "security": [
           {
@@ -8785,7 +8785,7 @@
           "Messages"
         ],
         "summary": "Send interactive action buttons message",
-        "description": "Sends an interactive message with action buttons (CTA buttons).\nSupports URL, call, copy, and quick reply buttons.\n\n**Button Types:**\n- `quick_reply` - Simple reply button (max 20 chars label)\n- `cta_url` - Opens a URL in browser\n- `cta_call` - Initiates a phone call\n- `cta_copy` - Copies text to clipboard\n- `payment_info` - Payment information button\n- `review_and_pay` - Review and pay action\n\n**Features:**\n- ✅ Up to 3 action buttons\n- ✅ Optional header image\n- ✅ Title, message body, and footer\n- ✅ Custom message ID for tracking\n- ✅ Delay message support\n- ✅ FIFO queue with per-recipient ordering\n\n**Limits:**\n- Max 3 buttons per message\n- Label: max 25 characters (20 for quick_reply)\n- Title: max 60 characters\n- Message: max 1024 characters\n- Footer: max 60 characters\n\n**Z-API Compatible:** Matches Z-API request/response format exactly.\n",
+        "description": "Sends an interactive message with action buttons (CTA buttons).\nSupports URL, call, copy, and quick reply buttons.\n\n**Button Types:**\n- `quick_reply` - Simple reply button (max 20 chars label)\n- `cta_url` - Opens a URL in browser\n- `cta_call` - Initiates a phone call\n- `cta_copy` - Copies text to clipboard\n- `payment_info` - Payment information button\n- `review_and_pay` - Review and pay action\n\n**Features:**\n- ✅ Up to 3 action buttons\n- ✅ Optional header image\n- ✅ Title, message body, and footer\n- ✅ Custom message ID for tracking\n- ✅ Delay message support\n- ✅ FIFO queue with per-recipient ordering\n\n**Limits:**\n- Max 3 buttons per message\n- Label: max 25 characters (20 for quick_reply)\n- Title: max 60 characters\n- Message: max 1024 characters\n- Footer: max 60 characters\n\n\n",
         "operationId": "sendButtonActionsMessage",
         "security": [
           {
@@ -9053,7 +9053,7 @@
           "Messages"
         ],
         "summary": "Send simple option list message",
-        "description": "Sends an interactive message with a simple list of options.\nSimilar to button list but without sections (flat list).\n\n**Features:**\n- ✅ Simple flat list of options\n- ✅ Up to 10 options\n- ✅ Title and description for each option\n- ✅ Button to open options\n- ✅ Custom message ID for tracking\n- ✅ Delay message support\n- ✅ FIFO queue with per-recipient ordering\n\n**Limits:**\n- Max 10 options\n- Title: max 60 characters\n- Option title: max 24 characters\n- Option description: max 72 characters\n- Button text: max 20 characters\n\n**Use Cases:**\n- Simple surveys\n- Quick polls\n- Rating selection\n- Single-level menus\n\n**Z-API Compatible:** Matches Z-API request/response format exactly.\n",
+        "description": "Sends an interactive message with a simple list of options.\nSimilar to button list but without sections (flat list).\n\n**Features:**\n- ✅ Simple flat list of options\n- ✅ Up to 10 options\n- ✅ Title and description for each option\n- ✅ Button to open options\n- ✅ Custom message ID for tracking\n- ✅ Delay message support\n- ✅ FIFO queue with per-recipient ordering\n\n**Limits:**\n- Max 10 options\n- Title: max 60 characters\n- Option title: max 24 characters\n- Option description: max 72 characters\n- Button text: max 20 characters\n\n**Use Cases:**\n- Simple surveys\n- Quick polls\n- Rating selection\n- Single-level menus\n\n\n",
         "operationId": "sendOptionListMessage",
         "security": [
           {
@@ -9346,7 +9346,7 @@
           "Messages"
         ],
         "summary": "Send PIX payment message (Brazil)",
-        "description": "Sends an interactive message with PIX payment information (Brazilian instant payment system).\nIncludes QR code generation and copy-paste PIX code button.\n\n**PIX Key Types:**\n- `CPF` - Brazilian individual taxpayer ID (11 digits)\n- `CNPJ` - Brazilian company taxpayer ID (14 digits)\n- `EMAIL` - Email address\n- `PHONE` - Phone number with country code\n- `EVP` - Random PIX key (UUID format)\n\n**Features:**\n- ✅ Automatic PIX QR code generation\n- ✅ Copy PIX code button\n- ✅ Payment amount and description\n- ✅ Beneficiary name display\n- ✅ Transaction ID for reconciliation\n- ✅ Additional action buttons\n- ✅ Custom message ID for tracking\n- ✅ FIFO queue with per-recipient ordering\n\n**Required Fields:**\n- `phone` - Recipient WhatsApp number\n- `payment.keyType` - Type of PIX key\n- `payment.key` - The PIX key value\n- `payment.name` - Beneficiary name\n- `payment.amount` - Payment amount in BRL\n\n**Z-API Compatible:** Matches Z-API request/response format exactly.\n",
+        "description": "Sends an interactive message with PIX payment information (Brazilian instant payment system).\nIncludes QR code generation and copy-paste PIX code button.\n\n**PIX Key Types:**\n- `CPF` - Brazilian individual taxpayer ID (11 digits)\n- `CNPJ` - Brazilian company taxpayer ID (14 digits)\n- `EMAIL` - Email address\n- `PHONE` - Phone number with country code\n- `EVP` - Random PIX key (UUID format)\n\n**Features:**\n- ✅ Automatic PIX QR code generation\n- ✅ Copy PIX code button\n- ✅ Payment amount and description\n- ✅ Beneficiary name display\n- ✅ Transaction ID for reconciliation\n- ✅ Additional action buttons\n- ✅ Custom message ID for tracking\n- ✅ FIFO queue with per-recipient ordering\n\n**Required Fields:**\n- `phone` - Recipient WhatsApp number\n- `payment.keyType` - Type of PIX key\n- `payment.key` - The PIX key value\n- `payment.name` - Beneficiary name\n- `payment.amount` - Payment amount in BRL\n\n\n",
         "operationId": "sendButtonPixMessage",
         "security": [
           {
@@ -9576,7 +9576,7 @@
           "Messages"
         ],
         "summary": "Send OTP (One-Time Password) message",
-        "description": "Sends a one-time password (OTP) message with a copy button.\nThe recipient can easily copy the code with one tap.\n\n**Use Cases:**\n- Account verification\n- Two-factor authentication (2FA)\n- Password reset codes\n- Login verification\n- Transaction confirmation\n\n**Features:**\n- ✅ Prominent OTP code display\n- ✅ One-tap copy button\n- ✅ Custom button text\n- ✅ Expiration message support\n- ✅ Custom message ID for tracking\n- ✅ Delay message support\n- ✅ FIFO queue with per-recipient ordering\n\n**Security Notes:**\n- OTP codes should have limited validity (typically 5-10 minutes)\n- Messages automatically include security warnings\n- Never log or store OTP codes in plain text\n\n**Z-API Compatible:** Matches Z-API request/response format exactly.\n",
+        "description": "Sends a one-time password (OTP) message with a copy button.\nThe recipient can easily copy the code with one tap.\n\n**Use Cases:**\n- Account verification\n- Two-factor authentication (2FA)\n- Password reset codes\n- Login verification\n- Transaction confirmation\n\n**Features:**\n- ✅ Prominent OTP code display\n- ✅ One-tap copy button\n- ✅ Custom button text\n- ✅ Expiration message support\n- ✅ Custom message ID for tracking\n- ✅ Delay message support\n- ✅ FIFO queue with per-recipient ordering\n\n**Security Notes:**\n- OTP codes should have limited validity (typically 5-10 minutes)\n- Messages automatically include security warnings\n- Never log or store OTP codes in plain text\n\n\n",
         "operationId": "sendButtonOtpMessage",
         "security": [
           {
@@ -9775,7 +9775,7 @@
           "Messages"
         ],
         "summary": "Send carousel message",
-        "description": "Sends an interactive carousel message with multiple cards.\nEach card can have an image/video header, body text, and action buttons.\n\n**Features:**\n- ✅ 1-10 cards per carousel\n- ✅ Image or video header per card\n- ✅ Body text per card\n- ✅ Up to 2 action buttons per card\n- ✅ Horizontal swipe navigation\n- ✅ Introduction message before carousel\n- ✅ Custom message ID for tracking\n- ✅ Delay message support\n- ✅ FIFO queue with per-recipient ordering\n\n**Limits:**\n- Min 1 card, max 10 cards\n- Max 2 buttons per card\n- Body text: max 1024 characters per card\n- Header media: image or video URL\n\n**Use Cases:**\n- Product catalogs\n- Image galleries\n- Service showcases\n- Portfolio presentations\n- Tutorial sequences\n\n**Media Formats:**\n- Images: JPEG, PNG, WebP\n- Videos: MP4 (recommended), 3GP\n\n**Z-API Compatible:** Matches Z-API request/response format exactly.\n",
+        "description": "Sends an interactive carousel message with multiple cards.\nEach card can have an image/video header, body text, and action buttons.\n\n**Features:**\n- ✅ 1-10 cards per carousel\n- ✅ Image or video header per card\n- ✅ Body text per card\n- ✅ Up to 2 action buttons per card\n- ✅ Horizontal swipe navigation\n- ✅ Introduction message before carousel\n- ✅ Custom message ID for tracking\n- ✅ Delay message support\n- ✅ FIFO queue with per-recipient ordering\n\n**Limits:**\n- Min 1 card, max 10 cards\n- Max 2 buttons per card\n- Body text: max 1024 characters per card\n- Header media: image or video URL\n\n**Use Cases:**\n- Product catalogs\n- Image galleries\n- Service showcases\n- Portfolio presentations\n- Tutorial sequences\n\n**Media Formats:**\n- Images: JPEG, PNG, WebP\n- Videos: MP4 (recommended), 3GP\n\n\n",
         "operationId": "sendCarouselMessage",
         "security": [
           {
@@ -10219,8 +10219,8 @@
         "tags": [
           "Messages"
         ],
-        "summary": "Send poll message (Z-API compatible)",
-        "description": "Sends a poll (voting/survey) message to a WhatsApp user or group.\n\n**Features:**\n- ✅ 2-12 poll options\n- ✅ Single or multiple choice voting\n- ✅ Custom message ID for tracking\n- ✅ Delay message support\n- ✅ FIFO queue with per-recipient ordering\n\n**Z-API Format:**\n- `message` field contains the poll question\n- `poll` array contains options with `name` field\n- `pollMaxOptions` controls voting: 0 or 1 = single choice, >1 = multiple choice\n\n**Limits:**\n- Min 2 options, max 12 options\n- Option text: max 100 characters each\n- Question text: max 256 characters\n\n**Z-API Compatible:** Matches Z-API request/response format exactly.\n",
+        "summary": "Send poll message ",
+        "description": "Sends a poll (voting/survey) message to a WhatsApp user or group.\n\n**Features:**\n- ✅ 2-12 poll options\n- ✅ Single or multiple choice voting\n- ✅ Custom message ID for tracking\n- ✅ Delay message support\n- ✅ FIFO queue with per-recipient ordering\n\n- `message` field contains the poll question\n- `poll` array contains options with `name` field\n- `pollMaxOptions` controls voting: 0 or 1 = single choice, >1 = multiple choice\n\n**Limits:**\n- Min 2 options, max 12 options\n- Option text: max 100 characters each\n- Question text: max 256 characters\n\n\n",
         "operationId": "sendPollMessage",
         "security": [
           {
@@ -10472,8 +10472,8 @@
         "tags": [
           "Messages"
         ],
-        "summary": "Send event message (Z-API compatible)",
-        "description": "Sends a scheduled event message to a WhatsApp group.\n\n**Features:**\n- ✅ Event name and description\n- ✅ Date and time scheduling (ISO 8601)\n- ✅ Location support (name and coordinates)\n- ✅ Call link type (voice/video)\n- ✅ Event cancellation support\n- ✅ Custom message ID for tracking\n- ✅ FIFO queue with per-recipient ordering\n\n**Z-API Format:**\n- Nested `event` object with all event details\n- `dateTime` in ISO 8601 format (e.g., \"2024-04-29T09:30:53.309Z\")\n- `location` object with name and optional coordinates\n- `callLinkType` can be \"voice\" or \"video\"\n\n**Restrictions:**\n- Events can only be sent to groups\n- Sender must be group admin for some event features\n\n**Z-API Compatible:** Matches Z-API request/response format exactly.\n",
+        "summary": "Send event message ",
+        "description": "Sends a scheduled event message to a WhatsApp group.\n\n**Features:**\n- ✅ Event name and description\n- ✅ Date and time scheduling (ISO 8601)\n- ✅ Location support (name and coordinates)\n- ✅ Call link type (voice/video)\n- ✅ Event cancellation support\n- ✅ Custom message ID for tracking\n- ✅ FIFO queue with per-recipient ordering\n\n- Nested `event` object with all event details\n- `dateTime` in ISO 8601 format (e.g., \"2024-04-29T09:30:53.309Z\")\n- `location` object with name and optional coordinates\n- `callLinkType` can be \"voice\" or \"video\"\n\n**Restrictions:**\n- Events can only be sent to groups\n- Sender must be group admin for some event features\n\n\n",
         "operationId": "sendEventMessage",
         "security": [
           {
@@ -10734,8 +10734,8 @@
         "tags": [
           "Messages"
         ],
-        "summary": "Send link with preview (Z-API compatible)",
-        "description": "Sends a text message with a customized link preview.\n\n**Features:**\n- ✅ Custom link preview title\n- ✅ Custom link preview description\n- ✅ Custom preview image\n- ✅ Message text before the link\n- ✅ Automatic URL validation\n- ✅ Custom message ID for tracking\n- ✅ Delay message support\n- ✅ FIFO queue with per-recipient ordering\n\n**Z-API Format:**\n- `linkUrl` is the URL to preview (required)\n- `title` overrides the default link title\n- `linkDescription` overrides the default description\n- `image` provides a custom preview thumbnail\n- `message` adds text before the link preview\n\n**Preview Image:**\n- Must be a valid image URL (JPEG, PNG, WebP)\n- Will be downloaded and used as thumbnail\n- Falls back to default Open Graph image if download fails\n\n**Z-API Compatible:** Matches Z-API request/response format exactly.\n",
+        "summary": "Send link with preview ",
+        "description": "Sends a text message with a customized link preview.\n\n**Features:**\n- ✅ Custom link preview title\n- ✅ Custom link preview description\n- ✅ Custom preview image\n- ✅ Message text before the link\n- ✅ Automatic URL validation\n- ✅ Custom message ID for tracking\n- ✅ Delay message support\n- ✅ FIFO queue with per-recipient ordering\n\n- `linkUrl` is the URL to preview (required)\n- `title` overrides the default link title\n- `linkDescription` overrides the default description\n- `image` provides a custom preview thumbnail\n- `message` adds text before the link preview\n\n**Preview Image:**\n- Must be a valid image URL (JPEG, PNG, WebP)\n- Will be downloaded and used as thumbnail\n- Falls back to default Open Graph image if download fails\n\n\n",
         "operationId": "sendLinkMessage",
         "security": [
           {
@@ -10937,8 +10937,8 @@
         "tags": [
           "Messages"
         ],
-        "summary": "Delete message (Z-API compatible)",
-        "description": "Deletes (revokes) a previously sent message from a chat.\n\n**Features:**\n- ✅ Delete own messages (sender = you)\n- ✅ Delete others' messages (group admin only)\n- ✅ Works in private chats and groups\n- ✅ Z-API compatible query parameters\n\n**Z-API Format:**\nUses query parameters instead of request body:\n- `phone` - The chat phone number (recipient)\n- `messageId` - The WhatsApp message ID to delete\n- `owner` - \"true\" for own messages, \"false\" for others (admin delete)\n\n**Behavior:**\n- For `owner=true`: Message is deleted for everyone (\"Delete for Everyone\")\n- For `owner=false`: Admin delete in groups (removes message sent by others)\n- Deleted messages show \"This message was deleted\" placeholder\n\n**Restrictions:**\n- Own messages: Can be deleted within ~1 hour of sending\n- Admin delete: Requires group admin privileges\n- Once deleted, the message cannot be recovered\n\n**Z-API Compatible:** Matches Z-API request/response format exactly.\n",
+        "summary": "Delete message ",
+        "description": "Deletes (revokes) a previously sent message from a chat.\n\n**Features:**\n- ✅ Delete own messages (sender = you)\n- ✅ Delete others' messages (group admin only)\n- ✅ Works in private chats and groups\n- ✅ query parameters\n\nUses query parameters instead of request body:\n- `phone` - The chat phone number (recipient)\n- `messageId` - The WhatsApp message ID to delete\n- `owner` - \"true\" for own messages, \"false\" for others (admin delete)\n\n**Behavior:**\n- For `owner=true`: Message is deleted for everyone (\"Delete for Everyone\")\n- For `owner=false`: Admin delete in groups (removes message sent by others)\n- Deleted messages show \"This message was deleted\" placeholder\n\n**Restrictions:**\n- Own messages: Can be deleted within ~1 hour of sending\n- Admin delete: Requires group admin privileges\n- Once deleted, the message cannot be recovered\n\n\n",
         "operationId": "deleteMessage",
         "security": [
           {
@@ -11108,8 +11108,8 @@
         "tags": [
           "Messages"
         ],
-        "summary": "Modify chat (Z-API compatible)",
-        "description": "Performs various chat modification actions like read, archive, pin, mute, clear, or delete.\n\n**Supported Actions:**\n- `read` - Mark chat as read\n- `archive` - Archive the chat\n- `unarchive` - Unarchive the chat\n- `pin` - Pin the chat to top\n- `unpin` - Unpin the chat\n- `mute` - Mute chat notifications\n- `unmute` - Unmute chat notifications\n- `clear` - Clear all messages in chat\n- `delete` - Delete the entire chat\n\n**Z-API Format:**\nRequest body with `phone` and `action` fields.\n\n**Behavior:**\n- `read`: Marks all messages in chat as read (blue checkmarks)\n- `archive/unarchive`: Moves chat to/from archive\n- `pin/unpin`: Pins/unpins chat to top of chat list\n- `mute/unmute`: Enables/disables notifications\n- `clear`: Removes all messages but keeps chat\n- `delete`: Completely removes the chat\n\n**Z-API Compatible:** Matches Z-API request/response format exactly.\n",
+        "summary": "Modify chat ",
+        "description": "Performs various chat modification actions like read, archive, pin, mute, clear, or delete.\n\n**Supported Actions:**\n- `read` - Mark chat as read\n- `archive` - Archive the chat\n- `unarchive` - Unarchive the chat\n- `pin` - Pin the chat to top\n- `unpin` - Unpin the chat\n- `mute` - Mute chat notifications\n- `unmute` - Unmute chat notifications\n- `clear` - Clear all messages in chat\n- `delete` - Delete the entire chat\n\nRequest body with `phone` and `action` fields.\n\n**Behavior:**\n- `read`: Marks all messages in chat as read (blue checkmarks)\n- `archive/unarchive`: Moves chat to/from archive\n- `pin/unpin`: Pins/unpins chat to top of chat list\n- `mute/unmute`: Enables/disables notifications\n- `clear`: Removes all messages but keeps chat\n- `delete`: Completely removes the chat\n\n\n",
         "operationId": "modifyChat",
         "security": [
           {
@@ -11348,7 +11348,7 @@
           "Contacts"
         ],
         "summary": "List WhatsApp contacts",
-        "description": "Returns a paginated list of WhatsApp contacts from the instance's device.\n\n**Features:**\n- ✅ Pagination support (page, pageSize)\n- ✅ Device contacts integration (name, short name)\n- ✅ WhatsApp profile data (notify/push name)\n- ✅ VCard information (if shared)\n- ✅ Privacy-aware (respects WhatsApp privacy settings)\n- ✅ X-Total-Count header for total count\n\n**Data Sources:**\n- Device address book (name, short, vname fields)\n- WhatsApp profile (notify field from push name)\n- VCard sharing (vname field)\n\n**Field Availability:**\n- `phone`: Always present (WhatsApp JID)\n- `name`, `short`, `vname`: Only if in address book\n- `notify`: Only if user has interacted with contact\n\n**Privacy Notes:** Contact data respects WhatsApp privacy settings.\nUsers who hide their profile will only show notify field.\n\n**Z-API Compatible:** Matches Z-API request/response format exactly.\n",
+        "description": "Returns a paginated list of WhatsApp contacts from the instance's device.\n\n**Features:**\n- ✅ Pagination support (page, pageSize)\n- ✅ Device contacts integration (name, short name)\n- ✅ WhatsApp profile data (notify/push name)\n- ✅ VCard information (if shared)\n- ✅ Privacy-aware (respects WhatsApp privacy settings)\n- ✅ X-Total-Count header for total count\n\n**Data Sources:**\n- Device address book (name, short, vname fields)\n- WhatsApp profile (notify field from push name)\n- VCard sharing (vname field)\n\n**Field Availability:**\n- `phone`: Always present (WhatsApp JID)\n- `name`, `short`, `vname`: Only if in address book\n- `notify`: Only if user has interacted with contact\n\n**Privacy Notes:** Contact data respects WhatsApp privacy settings.\nUsers who hide their profile will only show notify field.\n\n\n",
         "operationId": "getContacts",
         "security": [
           {
@@ -11493,7 +11493,7 @@
           "Contacts"
         ],
         "summary": "Check if phone number has WhatsApp",
-        "description": "Verifies if a phone number is registered on WhatsApp.\n\n**Use Cases:**\n- Form validation (verify phone before saving)\n- Contact verification before sending messages\n- Lead qualification in CRM systems\n\n**Important Notes:**\n- Use this API for form validation purposes\n- Do NOT use before sending messages (Z-API validates automatically)\n- Using for message validation creates duplicate checks\n- Not designed for spam - use responsibly\n\n**Phone Format:**\n- International format: DDI + DDD + NUMBER\n- Numbers only (no formatting, spaces, or masks)\n- Example: `551199999999` (Brazil mobile)\n\n**Z-API Compatible:** Matches Z-API request/response format exactly.\n",
+        "description": "Verifies if a phone number is registered on WhatsApp.\n\n**Use Cases:**\n- Form validation (verify phone before saving)\n- Contact verification before sending messages\n- Lead qualification in CRM systems\n\n**Important Notes:**\n- Use this API for form validation purposes\n- Do NOT use before sending messages (validates automatically)\n- Using for message validation creates duplicate checks\n- Not designed for spam - use responsibly\n\n**Phone Format:**\n- International format: DDI + DDD + NUMBER\n- Numbers only (no formatting, spaces, or masks)\n- Example: `551199999999` (Brazil mobile)\n\n\n",
         "operationId": "phoneExists",
         "security": [
           {
@@ -11633,7 +11633,7 @@
           "Contacts"
         ],
         "summary": "Batch validate phone numbers on WhatsApp",
-        "description": "Validates multiple phone numbers to check if they are registered on WhatsApp.\n\n**Use Cases:**\n- Bulk contact validation before marketing campaigns\n- CRM data cleansing and enrichment\n- Lead qualification at scale\n- Form validation with multiple numbers\n\n**Important Notes:**\n- Maximum batch size: 50,000 numbers per request\n- Use for validation purposes, not before sending messages\n- Not designed for spam - use responsibly\n\n**Phone Format:**\n- International format: DDI + DDD + NUMBER\n- Numbers only (no formatting, spaces, or masks)\n- Example: `551199999999` (Brazil mobile)\n\n**Response Fields:**\n- `exists`: Whether the phone has WhatsApp\n- `inputPhone`: The number as you sent it\n- `outputPhone`: The number formatted by WhatsApp (may include 9th digit)\n\n**Z-API Compatible:** Matches Z-API request/response format exactly.\n",
+        "description": "Validates multiple phone numbers to check if they are registered on WhatsApp.\n\n**Use Cases:**\n- Bulk contact validation before marketing campaigns\n- CRM data cleansing and enrichment\n- Lead qualification at scale\n- Form validation with multiple numbers\n\n**Important Notes:**\n- Maximum batch size: 50,000 numbers per request\n- Use for validation purposes, not before sending messages\n- Not designed for spam - use responsibly\n\n**Phone Format:**\n- International format: DDI + DDD + NUMBER\n- Numbers only (no formatting, spaces, or masks)\n- Example: `551199999999` (Brazil mobile)\n\n**Response Fields:**\n- `exists`: Whether the phone has WhatsApp\n- `inputPhone`: The number as you sent it\n- `outputPhone`: The number formatted by WhatsApp (may include 9th digit)\n\n\n",
         "operationId": "phoneExistsBatch",
         "security": [
           {
@@ -11778,7 +11778,7 @@
           "Chats"
         ],
         "summary": "List WhatsApp chats",
-        "description": "Returns a paginated list of WhatsApp chats (conversations) for the instance.\n\n**Features:**\n- ✅ Pagination support (page, pageSize)\n- ✅ Individual, group, and community chats\n- ✅ Unread message counts\n- ✅ Last message timestamp\n- ✅ Mute status and expiry\n- ✅ Archive, pin, and spam status\n- ✅ X-Total-Count header for total count\n- ✅ Ordered by lastMessageTime (most recent first)\n\n**Chat Types:**\n- Individual chats (person-to-person)\n- Group chats (multiple participants)\n- Community announcement channels\n\n**Data Sources:**\n- WhatsApp chat metadata (from store)\n- Message history (last message timestamp)\n- Chat settings (mute, archive, pin, spam status)\n\n**Ordering:** Chats are ordered by lastMessageTime descending (most recent first).\n\n**Unread Counts:** Both `unread` and `messagesUnread` fields represent the same count (Z-API compatibility).\n\n**Z-API Compatible:** Matches Z-API request/response format exactly.\n",
+        "description": "Returns a paginated list of WhatsApp chats (conversations) for the instance.\n\n**Features:**\n- ✅ Pagination support (page, pageSize)\n- ✅ Individual, group, and community chats\n- ✅ Unread message counts\n- ✅ Last message timestamp\n- ✅ Mute status and expiry\n- ✅ Archive, pin, and spam status\n- ✅ X-Total-Count header for total count\n- ✅ Ordered by lastMessageTime (most recent first)\n\n**Chat Types:**\n- Individual chats (person-to-person)\n- Group chats (multiple participants)\n- Community announcement channels\n\n**Data Sources:**\n- WhatsApp chat metadata (from store)\n- Message history (last message timestamp)\n- Chat settings (mute, archive, pin, spam status)\n\n**Ordering:** Chats are ordered by lastMessageTime descending (most recent first).\n\n**Unread Counts:** Both `unread` and `messagesUnread` fields represent the same count.\n\n\n",
         "operationId": "getChats",
         "security": [
           {
@@ -11941,7 +11941,7 @@
           "Groups"
         ],
         "summary": "List groups",
-        "description": "Returns a paginated list of WhatsApp groups the instance participates in (Z-API compatible).",
+        "description": "Returns a paginated list of WhatsApp groups the instance participates in .",
         "operationId": "listGroups",
         "security": [
           {
@@ -11980,7 +11980,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Array of groups (unwrapped, matching Z-API behaviour).",
+            "description": "Array of groups (unwrapped, matching behaviour).",
             "content": {
               "application/json": {
                 "schema": {
@@ -12041,7 +12041,7 @@
           "Groups"
         ],
         "summary": "Create group",
-        "description": "Creates a WhatsApp group with the provided participants (Z-API compatible).",
+        "description": "Creates a WhatsApp group with the provided participants.",
         "operationId": "createGroup",
         "security": [
           {
@@ -12065,7 +12065,7 @@
               },
               "example": {
                 "autoInvite": true,
-                "groupName": "Grupo Z-API",
+                "groupName": "Grupo",
                 "phones": [
                   "5544999999999",
                   "5544888888888"
@@ -12247,7 +12247,7 @@
               },
               "example": {
                 "groupId": "120363019502650977-group",
-                "groupPhoto": "https://www.z-api.io/wp-content/themes/z-api/dist/images/logo.svg"
+                "groupPhoto": "https://www.funnelchat/wp-content/themes/funnelchat/dist/images/logo.svg"
               }
             }
           }
@@ -13734,7 +13734,7 @@
           "Communities"
         ],
         "summary": "Create community",
-        "description": "Creates a new WhatsApp community (Z-API compatible).",
+        "description": "Creates a new WhatsApp community.",
         "operationId": "createCommunity",
         "security": [
           {
@@ -13858,7 +13858,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Array of communities (unwrapped, matching Z-API behaviour).",
+            "description": "Array of communities.",
             "content": {
               "application/json": {
                 "schema": {
@@ -14364,7 +14364,7 @@
           "Communities"
         ],
         "summary": "Delete community",
-        "description": "Mirrors Z-API `DELETE /communities/{communityId}`, permanently deleting a community.\n\n**Important**: This action is irreversible. All linked groups will be unlinked but not deleted.\n",
+        "description": "Mirrors FUNNELCHAT `DELETE /communities/{communityId}`, permanently deleting a community.\n\n**Important**: This action is irreversible. All linked groups will be unlinked but not deleted.\n",
         "operationId": "deleteCommunity",
         "security": [
           {
@@ -15265,7 +15265,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Array of channels (unwrapped, matching Z-API behaviour).",
+            "description": "Array of channels (unwrapped, matching FUNNELCHAT behaviour).",
             "content": {
               "application/json": {
                 "schema": {
@@ -15441,7 +15441,7 @@
                     "CA"
                   ]
                 },
-                "searchText": "Z-API"
+                "searchText": "FUNNELCHAT"
               }
             }
           }
@@ -16079,7 +16079,7 @@
           "Status Cache"
         ],
         "summary": "Query message delivery status",
-        "description": "Query the cached status of message deliveries. Status Cache stores delivery receipts\n(sent, delivered, read, played) for messages, especially useful for group messages\nwhere tracking individual participant statuses is important.\n\n**Query Types:**\n- By `messageId`: Get status for a specific message\n- By `groupId`: Get all message statuses for a group\n- By `phone`: Get all message statuses for a phone number\n\n**Response Formats:**\n- `aggregated` (default): Returns aggregated counts and optionally participant details\n- `raw`: Returns data in Z-API webhook format for compatibility\n\n**Use Cases:**\n- Check if a message was read by all group participants\n- Get delivery statistics for messages to a specific contact\n- Retrieve batch status updates for UI dashboards\n\n**Note:** Status data is cached with a configurable TTL (default 24h).\n",
+        "description": "Query the cached status of message deliveries. Status Cache stores delivery receipts\n(sent, delivered, read, played) for messages, especially useful for group messages\nwhere tracking individual participant statuses is important.\n\n**Query Types:**\n- By `messageId`: Get status for a specific message\n- By `groupId`: Get all message statuses for a group\n- By `phone`: Get all message statuses for a phone number\n\n**Response Formats:**\n- `aggregated` (default): Returns aggregated counts and optionally participant details\n- `raw`: Returns data in FUNNELCHAT webhook format for compatibility\n\n**Use Cases:**\n- Check if a message was read by all group participants\n- Get delivery statistics for messages to a specific contact\n- Retrieve batch status updates for UI dashboards\n\n**Note:** Status data is cached with a configurable TTL (default 24h).\n",
         "operationId": "getMessagesStatus",
         "security": [
           {
@@ -16135,7 +16135,7 @@
               ],
               "default": "aggregated"
             },
-            "description": "Response format:\n- `aggregated`: Returns aggregated counts with optional participant details\n- `raw`: Returns data in Z-API MessageStatusCallback webhook format\n"
+            "description": "Response format:\n- `aggregated`: Returns aggregated counts with optional participant details\n- `raw`: Returns data in FUNNELCHAT MessageStatusCallback webhook format\n"
           },
           {
             "name": "limit",
@@ -16251,7 +16251,7 @@
                     }
                   },
                   "rawFormat": {
-                    "summary": "Raw Z-API format",
+                    "summary": "Raw",
                     "value": {
                       "data": [
                         {

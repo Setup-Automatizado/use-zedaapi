@@ -5,7 +5,7 @@ title: Introduction
 
 ### Conceituação
 
-Now with Z-API you can make calls to any number, at the moment it is not possible to send an audio during the call. This feature we call "draw attention", you know, remember the poke on facebook?
+Now with FUNNELCHAT you can make calls to any number, at the moment it is not possible to send an audio during the call. This feature we call "draw attention", you know, remember the poke on facebook?
 
 With this API you can tap and wait up to 15 seconds and hang up.
 

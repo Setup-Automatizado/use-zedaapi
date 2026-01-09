@@ -19,7 +19,7 @@ This method activates the automatic reading of all messages received through the
 
 #### /update-auto-read-message
 
-`PUT` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/update-auto-read-message
+`PUT` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/update-auto-read-message
 
 #### Request Body
 

@@ -7,7 +7,7 @@ title: Create/edit product
 
 #### /products
 
-`POST` https://api.z-api.io/instances/{{instanceId}}/token/{{instanceToken}}/products
+`POST` https://api.funnelchat/instances/{{instanceId}}/token/{{instanceToken}}/products
 
 ### Header
 
@@ -37,7 +37,7 @@ In this method you will be able to register and update a product in your catalog
 | price       | integer | Product price                                  |
 | salePrice   | integer | Sale price                                     |
 | retailerId  | string  | Product ID                                     |
-| url         | string  | Z-APIs Url route                               |
+| url         | string  | FUNNELCHATs Url route                               |
 
 ## Request Body
 
@@ -51,7 +51,7 @@ In this method you will be able to register and update a product in your catalog
   "price": 20,
   "salePrice":18,
   "retailerId": "002",
-  "url": "https://z-api.io"
+  "url": "https://funnelchat"
 }
 ```
 
@@ -93,4 +93,4 @@ Link to webhook response (on receipt)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/edit-product.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/edit-product.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>

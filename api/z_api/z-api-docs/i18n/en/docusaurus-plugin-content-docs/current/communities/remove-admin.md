@@ -7,7 +7,7 @@ title: Remove Community Admin
 
 #### /remove-admin
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/remove-admin
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/remove-admin
 
 ### Header
 
@@ -37,7 +37,7 @@ This method is responsible for removing one or more administrators from a commun
 
 #### URL
 
-`POST` https://api.z-api.io/instances/YOUR_INSTANCE/token/YOUR_TOKEN/remove-admin
+`POST` https://api.funnelchat/instances/YOUR_INSTANCE/token/YOUR_TOKEN/remove-admin
 
 #### Body
 
@@ -86,4 +86,4 @@ Link to the webhook response (upon receiving)
 
 ## Code
 
-<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/Z-API/z-api-docs/main/json-examples/remove-community-admin.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
+<iframe src="//api.apiembed.com/?source=https://raw.githubusercontent.com/FUNNELCHAT/funnelchat-docs/main/json-examples/remove-community-admin.json&targets=all" frameborder="0" scrolling="no" width="100%" height="500px" seamless></iframe>
