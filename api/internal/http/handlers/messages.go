@@ -415,14 +415,18 @@ type Section struct {
 // SendButtonActionsRequest represents the request body for POST /instances/{instanceId}/token/{token}/send-button-actions
 // format for sending interactive button messages with action types (URL, call, copy)
 type SendButtonActionsRequest struct {
-	Phone        string         `json:"phone"`        // Required: recipient phone number
-	Message      string         `json:"message"`      // Required: body text
-	Buttons      []ActionButton `json:"buttons"`      // Required: 1-3 action buttons
-	Title        string         `json:"title"`        // Optional: header text (max 60 chars)
-	Footer       string         `json:"footer"`       // Optional: footer text (max 60 chars)
-	MessageID    string         `json:"messageId"`    // Optional: reply to message ID
-	DelayMessage *int           `json:"delayMessage"` // Optional: delay in seconds (1-15)
-	DelayTyping  *int           `json:"delayTyping"`  // Optional: typing delay in seconds (1-15)
+	Phone            string         `json:"phone"`            // Required: recipient phone number
+	Message          string         `json:"message"`          // Required: body text
+	Buttons          []ActionButton `json:"buttons"`          // Required: 1-3 action buttons
+	Title            string         `json:"title"`            // Optional: header text (max 60 chars)
+	Footer           string         `json:"footer"`           // Optional: footer text (max 60 chars)
+	Image            string         `json:"image"`            // Optional: image URL or base64
+	Video            string         `json:"video"`            // Optional: video URL or base64
+	Document         string         `json:"document"`         // Optional: document URL or base64
+	DocumentFilename string         `json:"documentFilename"` // Optional: filename for document
+	MessageID        string         `json:"messageId"`        // Optional: reply to message ID
+	DelayMessage     *int           `json:"delayMessage"`     // Optional: delay in seconds (1-15)
+	DelayTyping      *int           `json:"delayTyping"`      // Optional: typing delay in seconds (1-15)
 }
 
 // SendButtonListRequest represents the request body for POST /instances/{instanceId}/token/{token}/send-button-list
@@ -3134,6 +3138,21 @@ func (h *MessageHandler) sendButtonActions(w http.ResponseWriter, r *http.Reques
 		footer = &req.Footer
 	}
 
+	// Build media pointers
+	var image, video, document, documentFilename *string
+	if req.Image != "" {
+		image = &req.Image
+	}
+	if req.Video != "" {
+		video = &req.Video
+	}
+	if req.Document != "" {
+		document = &req.Document
+	}
+	if req.DocumentFilename != "" {
+		documentFilename = &req.DocumentFilename
+	}
+
 	args := queue.SendMessageArgs{
 		InstanceID:       instanceID,
 		Phone:            phone,
@@ -3142,11 +3161,15 @@ func (h *MessageHandler) sendButtonActions(w http.ResponseWriter, r *http.Reques
 		DelayTyping:      delayTyping,
 		ReplyToMessageID: req.MessageID,
 		InteractiveContent: &queue.InteractiveMessage{
-			Type:    queue.InteractiveTypeButton,
-			Header:  header,
-			Body:    req.Message,
-			Footer:  footer,
-			Buttons: queueButtons,
+			Type:             queue.InteractiveTypeButton,
+			Header:           header,
+			Body:             req.Message,
+			Footer:           footer,
+			Buttons:          queueButtons,
+			Image:            image,
+			Video:            video,
+			Document:         document,
+			DocumentFilename: documentFilename,
 		},
 	}
 
