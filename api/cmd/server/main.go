@@ -91,6 +91,10 @@ func (a *repositoryAdapter) GetConnectionState(ctx context.Context, id uuid.UUID
 	}, nil
 }
 
+func (a *repositoryAdapter) GetCallRejectConfig(ctx context.Context, id uuid.UUID) (bool, *string, error) {
+	return a.repo.GetCallRejectConfig(ctx, id)
+}
+
 type instanceLookupAdapter struct {
 	repo *instances.Repository
 }

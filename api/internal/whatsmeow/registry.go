@@ -56,6 +56,7 @@ type InstanceRepository interface {
 	ListInstancesWithStoreJID(ctx context.Context) ([]StoreLink, error)
 	UpdateConnectionStatus(ctx context.Context, id uuid.UUID, connected bool, status string, workerID *string, desiredWorkerID *string) error
 	GetConnectionState(ctx context.Context, id uuid.UUID) (*ConnectionState, error)
+	GetCallRejectConfig(ctx context.Context, id uuid.UUID) (bool, *string, error)
 }
 
 type InstanceInfo struct {
@@ -1700,6 +1701,46 @@ func (r *ClientRegistry) wrapEventHandler(instanceID uuid.UUID) func(evt interfa
 					slog.String("instanceId", instanceID.String()),
 					slog.String("error", e.Error.Error()))
 				r.ResetClient(instanceID, reason)
+			}
+
+		case *events.CallOffer:
+			// Handle automatic call rejection if configured
+			r.mu.RLock()
+			state, ok := r.clients[instanceID]
+			var client *whatsmeow.Client
+			if ok && state != nil {
+				client = state.client
+			}
+			r.mu.RUnlock()
+
+			if client != nil && r.repo != nil {
+				handler := newCallRejectHandler(
+					client,
+					instanceID,
+					r.repo,
+					r.log,
+				)
+				go handler.HandleCallOffer(ctx, e)
+			}
+
+		case *events.CallOfferNotice:
+			// Handle automatic call rejection for group calls if configured
+			r.mu.RLock()
+			state, ok := r.clients[instanceID]
+			var client *whatsmeow.Client
+			if ok && state != nil {
+				client = state.client
+			}
+			r.mu.RUnlock()
+
+			if client != nil && r.repo != nil {
+				handler := newCallRejectHandler(
+					client,
+					instanceID,
+					r.repo,
+					r.log,
+				)
+				go handler.HandleCallOfferNotice(ctx, e)
 			}
 		}
 	}

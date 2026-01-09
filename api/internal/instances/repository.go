@@ -392,6 +392,22 @@ func (r *Repository) UpdateCallRejectMessage(ctx context.Context, id uuid.UUID, 
 	return nil
 }
 
+// GetCallRejectConfig retrieves the call rejection configuration for an instance.
+// Returns enabled status and optional rejection message.
+func (r *Repository) GetCallRejectConfig(ctx context.Context, id uuid.UUID) (bool, *string, error) {
+	query := `SELECT call_reject_auto, call_reject_message FROM instances WHERE id=$1`
+	var enabled bool
+	var message *string
+	err := r.pool.QueryRow(ctx, query, id).Scan(&enabled, &message)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return false, nil, ErrInstanceNotFound
+		}
+		return false, nil, fmt.Errorf("get call_reject_config: %w", err)
+	}
+	return enabled, message, nil
+}
+
 func (r *Repository) UpdateAutoReadMessage(ctx context.Context, id uuid.UUID, value bool) error {
 	query := `UPDATE instances SET auto_read_message=$2, updated_at=NOW() WHERE id=$1`
 	res, err := r.pool.Exec(ctx, query, id, value)
