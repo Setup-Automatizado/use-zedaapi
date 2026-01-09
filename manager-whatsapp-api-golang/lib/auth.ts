@@ -154,11 +154,19 @@ export const auth = betterAuth({
 	emailAndPassword: {
 		enabled: true,
 		requireEmailVerification: false,
-		sendResetPassword: async ({ user, url }) => {
+		sendResetPassword: async ({ user, token }) => {
+			// Build frontend URL directly with token instead of using Better Auth's API URL
+			// This bypasses the intermediate redirect step that fails in AWS ALB
+			const baseUrl =
+				process.env.NEXT_PUBLIC_APP_URL ||
+				process.env.BETTER_AUTH_URL ||
+				"http://localhost:3000";
+			const resetUrl = `${baseUrl}/reset-password?token=${token}`;
+
 			await sendPasswordReset(user.email, {
 				userName: user.name || "",
 				userEmail: user.email,
-				resetUrl: url,
+				resetUrl,
 				expiresIn: 60,
 			});
 		},

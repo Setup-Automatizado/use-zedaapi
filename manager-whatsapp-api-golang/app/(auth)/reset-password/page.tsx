@@ -28,6 +28,7 @@ function ResetPasswordForm() {
 	const searchParams = useSearchParams();
 	const router = useRouter();
 	const token = searchParams.get("token");
+	const errorParam = searchParams.get("error");
 
 	const [isLoading, setIsLoading] = useState(false);
 	const [isSuccess, setIsSuccess] = useState(false);
@@ -82,7 +83,45 @@ function ResetPasswordForm() {
 		}
 	};
 
-	// Invalid token
+	// Expired or invalid token from URL error param
+	if (errorParam === "INVALID_TOKEN" || errorParam === "TOKEN_EXPIRED") {
+		return (
+			<div className="space-y-6">
+				<div className="flex items-center justify-center gap-3 lg:hidden">
+					<Image
+						src="/android-chrome-96x96.png"
+						alt="WhatsApp Manager"
+						width={48}
+						height={48}
+						className="rounded-xl"
+						priority
+					/>
+					<span className="text-xl font-bold text-foreground">
+						WhatsApp Manager
+					</span>
+				</div>
+
+				<Card className="border-0 shadow-none lg:border lg:shadow-sm">
+					<CardHeader className="space-y-1 pb-6 text-center">
+						<CardTitle className="text-2xl font-bold tracking-tight">
+							Link expired
+						</CardTitle>
+						<CardDescription className="text-muted-foreground">
+							This password reset link has expired or is invalid. Please request
+							a new one.
+						</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<Link href="/forgot-password" className="block">
+							<Button className="w-full h-11">Request new link</Button>
+						</Link>
+					</CardContent>
+				</Card>
+			</div>
+		);
+	}
+
+	// Invalid or missing token
 	if (!token) {
 		return (
 			<div className="space-y-6">
