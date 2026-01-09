@@ -29,19 +29,21 @@ type SendMessageArgs struct {
 	Phone string `json:"phone"` // Phone number in format: 5511999999999@s.whatsapp.net, @g.us, @newsletter, @broadcast, @lid
 
 	// Message content (only one should be set)
-	MessageType        MessageType         `json:"message_type"` // text, image, audio, video, document, location, contact, interactive
-	TextContent        *TextMessage        `json:"text_content,omitempty"`
-	ImageContent       *MediaMessage       `json:"image_content,omitempty"`
-	AudioContent       *MediaMessage       `json:"audio_content,omitempty"`
-	VideoContent       *MediaMessage       `json:"video_content,omitempty"`
-	DocumentContent    *MediaMessage       `json:"document_content,omitempty"`
-	LocationContent    *LocationMessage    `json:"location_content,omitempty"`
-	ContactContent     *ContactMessage     `json:"contact_content,omitempty"`
-	ContactsContent    []*ContactMessage   `json:"contacts_content,omitempty"`  // Multiple contacts sent in ONE message (ContactsArrayMessage)
-	InteractiveContent *InteractiveMessage `json:"interactive_content,omitempty"`
+	MessageType         MessageType          `json:"message_type"` // text, image, audio, video, document, location, contact, interactive, sticker, ptv
+	TextContent         *TextMessage         `json:"text_content,omitempty"`
+	ImageContent        *MediaMessage        `json:"image_content,omitempty"`
+	AudioContent        *MediaMessage        `json:"audio_content,omitempty"`
+	VideoContent        *MediaMessage        `json:"video_content,omitempty"`
+	DocumentContent     *MediaMessage        `json:"document_content,omitempty"`
+	StickerContent      *MediaMessage        `json:"sticker_content,omitempty"` // WebP sticker (converted from image if needed)
+	PTVContent          *MediaMessage        `json:"ptv_content,omitempty"`     // Circular video (Push-To-Talk Video)
+	LocationContent     *LocationMessage     `json:"location_content,omitempty"`
+	ContactContent      *ContactMessage      `json:"contact_content,omitempty"`
+	ContactsContent     []*ContactMessage    `json:"contacts_content,omitempty"` // Multiple contacts sent in ONE message (ContactsArrayMessage)
+	InteractiveContent  *InteractiveMessage  `json:"interactive_content,omitempty"`
 	LinkPreviewOverride *LinkPreviewOverride `json:"link_preview_override,omitempty"`
-	PollContent         *PollMessage        `json:"poll_content,omitempty"`
-	EventContent        *EventMessage       `json:"event_content,omitempty"`
+	PollContent         *PollMessage         `json:"poll_content,omitempty"`
+	EventContent        *EventMessage        `json:"event_content,omitempty"`
 
 	// Timing configuration
 	DelayMessage int64 `json:"delay_message"` // Delay in milliseconds BEFORE enqueue (affects scheduled_at)
@@ -91,6 +93,16 @@ const (
 	MessageTypeInteractive MessageType = "interactive"
 	MessageTypePoll        MessageType = "poll"
 	MessageTypeEvent       MessageType = "event"
+	MessageTypeSticker     MessageType = "sticker" // WebP sticker message
+	MessageTypePTV         MessageType = "ptv"     // Circular video (Push-To-Talk Video)
+
+	// Z-API compatible interactive message types
+	MessageTypeButtonList    MessageType = "button_list"
+	MessageTypeButtonActions MessageType = "button_actions"
+	MessageTypeOptionList    MessageType = "option_list"
+	MessageTypeButtonPIX     MessageType = "button_pix"
+	MessageTypeButtonOTP     MessageType = "button_otp"
+	MessageTypeCarousel      MessageType = "carousel"
 )
 
 // TextMessage represents a text message
@@ -132,18 +144,18 @@ type ContactMessage struct {
 	// Option 2: Individual fields (will be converted to vCard if VCard is nil)
 
 	// Name fields (RFC 6350)
-	FullName   string  `json:"full_name"`              // FN: Full formatted name (required)
-	FirstName  *string `json:"first_name,omitempty"`   // N: Given name
-	LastName   *string `json:"last_name,omitempty"`    // N: Family name
-	MiddleName *string `json:"middle_name,omitempty"`  // N: Additional names
-	NamePrefix *string `json:"name_prefix,omitempty"`  // N: Honorific prefix (Dr., Mr., Ms.)
-	NameSuffix *string `json:"name_suffix,omitempty"`  // N: Honorific suffix (Jr., Sr., III)
-	Nickname   *string `json:"nickname,omitempty"`     // NICKNAME: Nickname or alias
+	FullName   string  `json:"full_name"`             // FN: Full formatted name (required)
+	FirstName  *string `json:"first_name,omitempty"`  // N: Given name
+	LastName   *string `json:"last_name,omitempty"`   // N: Family name
+	MiddleName *string `json:"middle_name,omitempty"` // N: Additional names
+	NamePrefix *string `json:"name_prefix,omitempty"` // N: Honorific prefix (Dr., Mr., Ms.)
+	NameSuffix *string `json:"name_suffix,omitempty"` // N: Honorific suffix (Jr., Sr., III)
+	Nickname   *string `json:"nickname,omitempty"`    // NICKNAME: Nickname or alias
 
 	// Contact fields
-	PhoneNumber string  `json:"phone_number"`      // TEL: Phone number in international format (required)
-	Email       *string `json:"email,omitempty"`   // EMAIL: Email address
-	URL         *string `json:"url,omitempty"`     // URL: Website or social media URL
+	PhoneNumber string  `json:"phone_number"`    // TEL: Phone number in international format (required)
+	Email       *string `json:"email,omitempty"` // EMAIL: Email address
+	URL         *string `json:"url,omitempty"`   // URL: Website or social media URL
 
 	// Professional fields
 	Organization *string `json:"organization,omitempty"` // ORG: Organization/company name
@@ -178,6 +190,32 @@ type InteractiveMessage struct {
 	Footer   *string         `json:"footer,omitempty"`
 	Buttons  []Button        `json:"buttons,omitempty"`  // For button type
 	Sections []Section       `json:"sections,omitempty"` // For list type
+
+	// Z-API compatible fields
+	ButtonLabel      *string `json:"button_label,omitempty"`      // For list messages - button text
+	Image            *string `json:"image,omitempty"`             // URL or base64 for header image
+	Video            *string `json:"video,omitempty"`             // URL or base64 for header video
+	Document         *string `json:"document,omitempty"`          // URL or base64 for header document (PDF, etc.)
+	DocumentFilename *string `json:"document_filename,omitempty"` // Filename for document
+
+	// PIX-specific fields
+	PIXPayment *PIXPayment `json:"pix_payment,omitempty"` // For button_pix type
+
+	// OTP-specific fields
+	OTPCode *string `json:"otp_code,omitempty"` // For button_otp type
+
+	// Carousel-specific fields
+	CarouselCards    []CarouselCard `json:"carousel_cards,omitempty"`     // For carousel type - array of cards
+	CarouselCardType string         `json:"carousel_card_type,omitempty"` // HSCROLL_CARDS or ALBUM_IMAGE
+}
+
+// CarouselCard represents a single card in a carousel message
+type CarouselCard struct {
+	Header   string   `json:"header,omitempty"`    // Card header text (max 60 chars)
+	Body     string   `json:"body"`                // Card body text (required, max 1024 chars)
+	Footer   string   `json:"footer,omitempty"`    // Card footer text (max 60 chars)
+	Buttons  []Button `json:"buttons"`             // Card buttons (1-3 buttons)
+	MediaURL string   `json:"media_url,omitempty"` // URL for card image/video
 }
 
 // InteractiveType defines the type of interactive message
@@ -211,6 +249,16 @@ type Row struct {
 	ID          string  `json:"id"`                    // Row identifier
 	Title       string  `json:"title"`                 // Row title (max 24 chars)
 	Description *string `json:"description,omitempty"` // Row description (max 72 chars)
+}
+
+// PIXPayment represents PIX payment data for Brazilian payment messages
+// Used with button_pix message type (Z-API compatible)
+type PIXPayment struct {
+	Key           string   `json:"key"`                      // PIX key (CPF, CNPJ, email, phone, or EVP)
+	KeyType       string   `json:"key_type"`                 // Key type: CPF, CNPJ, EMAIL, PHONE, EVP
+	Name          *string  `json:"name,omitempty"`           // Beneficiary name
+	Amount        *float64 `json:"amount,omitempty"`         // Amount in BRL
+	TransactionID *string  `json:"transaction_id,omitempty"` // PIX transaction ID
 }
 
 // LinkPreviewOverride mirrors the explicit metadata provided by /send-link
@@ -419,6 +467,12 @@ func (s *SendMessageArgs) Validate() error {
 	if s.DocumentContent != nil {
 		contentCount++
 	}
+	if s.StickerContent != nil {
+		contentCount++
+	}
+	if s.PTVContent != nil {
+		contentCount++
+	}
 	if s.LocationContent != nil {
 		contentCount++
 	}
@@ -467,6 +521,10 @@ func (s *SendMessageArgs) GetContentPreview() string {
 		return "[Video]"
 	case MessageTypeDocument:
 		return "[Document]"
+	case MessageTypeSticker:
+		return "[Sticker]"
+	case MessageTypePTV:
+		return "[PTV Video]"
 	case MessageTypeLocation:
 		return "[Location]"
 	case MessageTypeContact:
@@ -476,6 +534,21 @@ func (s *SendMessageArgs) GetContentPreview() string {
 		return "[Contact]"
 	case MessageTypeInteractive:
 		return "[Interactive]"
+	case MessageTypeButtonList:
+		return "[Button List]"
+	case MessageTypeButtonActions:
+		return "[Button Actions]"
+	case MessageTypeOptionList:
+		return "[Option List]"
+	case MessageTypeButtonPIX:
+		return "[Button PIX]"
+	case MessageTypeButtonOTP:
+		return "[Button OTP]"
+	case MessageTypeCarousel:
+		if s.InteractiveContent != nil {
+			return fmt.Sprintf("[Carousel] %d cards", len(s.InteractiveContent.CarouselCards))
+		}
+		return "[Carousel]"
 	case MessageTypePoll:
 		if s.PollContent != nil {
 			return fmt.Sprintf("[Poll] %s", s.PollContent.Question)
