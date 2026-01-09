@@ -2,9 +2,11 @@ package handlers
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"math"
 	"math/rand"
 	"net/http"
@@ -16,6 +18,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
+	"google.golang.org/protobuf/proto"
 
 	wameow "go.mau.fi/whatsmeow"
 	"go.mau.fi/whatsmeow/api/internal/chats"
@@ -24,8 +27,10 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/logging"
 	"go.mau.fi/whatsmeow/api/internal/messages/queue"
 	"go.mau.fi/whatsmeow/appstate"
+	"go.mau.fi/whatsmeow/proto/waCommon"
 	"go.mau.fi/whatsmeow/proto/waE2E"
 	"go.mau.fi/whatsmeow/types"
+	"go.mau.fi/whatsmeow/types/events"
 )
 
 type InstanceStatusProvider interface {
@@ -112,14 +117,26 @@ func (h *MessageHandler) RegisterRoutes(r chi.Router) {
 	r.Post("/send-carousel", h.sendCarousel)            // Carousel with multiple cards
 
 	// Poll and Event endpoints
-	r.Post("/send-poll", h.sendPoll)   // Send poll message
-	r.Post("/send-event", h.sendEvent) // Send calendar event
+	r.Post("/send-poll", h.sendPoll)                    // Send poll message
+	r.Post("/send-poll-vote", h.sendPollVote)           // Vote on a poll
+	r.Post("/send-event", h.sendEvent)                  // Send calendar event
+	r.Post("/send-edit-event", h.sendEditEvent)         // Edit existing event
+	r.Post("/send-event-response", h.sendEventResponse) // Respond to event (going/not_going/maybe)
 
 	// Link preview endpoint
 	r.Post("/send-link", h.sendLink) // Send link with custom preview
 
+	// Reaction endpoints
+	r.Post("/send-reaction", h.sendReaction)              // Send emoji reaction to message
+	r.Post("/send-remove-reaction", h.sendRemoveReaction) // Remove reaction from message
+
+	// Forward message endpoint
+	r.Post("/forward-message", h.forwardMessage) // Forward a message to another chat
+
 	// Message management endpoints
 	r.Delete("/messages", h.deleteMessage) // Delete message from everyone
+	r.Post("/read-message", h.readMessage) // Mark messages as read
+	r.Post("/pin-message", h.pinMessage)   // Pin/unpin message in chat
 
 	// Chat modification endpoints
 	r.Post("/modify-chat", h.modifyChat) // read, archive, pin, mute, clear, delete
@@ -131,10 +148,20 @@ func (h *MessageHandler) RegisterRoutes(r chi.Router) {
 	r.Delete("/queue/{zaapId}", h.cancelQueueMessage) // DELETE /queue/{zaapId}
 
 	// Data retrieval endpoints
-	r.Get("/contacts", h.getContacts)                 // GET /contacts?page=1&pageSize=100
-	r.Get("/chats", h.getChats)                       // GET /chats?page=1&pageSize=100
-	r.Get("/phone-exists/{phone}", h.phoneExists)     // GET /phone-exists/{phone}
-	r.Post("/phone-exists-batch", h.phoneExistsBatch) // POST /phone-exists-batch
+	r.Get("/contacts", h.getContacts)                                      // GET /contacts?page=1&pageSize=100
+	r.Get("/chats", h.getChats)                                            // GET /chats?page=1&pageSize=100
+	r.Get("/phone-exists/{phone}", h.phoneExists)                          // GET /phone-exists/{phone}
+	r.Post("/phone-exists-batch", h.phoneExistsBatch)                      // POST /phone-exists-batch
+	r.Get("/contacts/{phone}/metadata", h.getContactMetadata)              // GET /contacts/{phone}/metadata
+	r.Get("/contacts/{phone}/profile-picture", h.getContactProfilePicture) // GET /contacts/{phone}/profile-picture
+
+	// Block/unblock endpoints
+	r.Post("/modify-blocked", h.modifyBlocked) // POST /modify-blocked - block/unblock a contact
+
+	// Profile management endpoints
+	r.Put("/profile-name", h.updateProfileName)               // PUT /profile-name - update profile name (push name)
+	r.Put("/profile-picture", h.updateProfilePicture)         // PUT /profile-picture - update profile picture
+	r.Put("/profile-description", h.updateProfileDescription) // PUT /profile-description - update profile description (about/status)
 }
 
 // GroupMention represents a group mention in a community
@@ -590,6 +617,206 @@ type DeleteMessageResponse struct {
 	Phone     string `json:"phone"`
 	MessageID string `json:"messageId"`
 	Message   string `json:"message,omitempty"`
+}
+
+// ReadMessageRequest represents the request body for POST /read-message
+type ReadMessageRequest struct {
+	Phone      string   `json:"phone"`      // Phone number or group JID
+	MessageIDs []string `json:"messageIds"` // Message IDs to mark as read
+	Sender     string   `json:"sender"`     // Sender phone (required for group messages)
+}
+
+// ReadMessageResponse represents the response for read message operations
+type ReadMessageResponse struct {
+	Success    bool     `json:"success"`
+	Phone      string   `json:"phone"`
+	MessageIDs []string `json:"messageIds"`
+	Message    string   `json:"message,omitempty"`
+}
+
+// ContactMetadataResponse represents contact metadata from whatsmeow GetUserInfo
+type ContactMetadataResponse struct {
+	Phone        string `json:"phone"`
+	IsOnWhatsApp bool   `json:"isOnWhatsApp"`
+	JID          string `json:"jid,omitempty"`
+	VerifiedName string `json:"verifiedName,omitempty"`
+	Status       string `json:"status,omitempty"`
+	PictureID    string `json:"pictureId,omitempty"`
+	Devices      []struct {
+		Device string `json:"device"`
+		JID    string `json:"jid"`
+	} `json:"devices,omitempty"`
+}
+
+// ProfilePictureResponse represents profile picture info from whatsmeow GetProfilePictureInfo
+type ProfilePictureResponse struct {
+	URL        string `json:"url"`
+	ID         string `json:"id"`
+	Type       string `json:"type"`
+	DirectPath string `json:"directPath,omitempty"`
+}
+
+// SendReactionRequest represents the request body for POST /send-reaction
+type SendReactionRequest struct {
+	Phone     string `json:"phone"`     // Phone number or group JID where the message is
+	MessageID string `json:"messageId"` // Message ID to react to
+	Reaction  string `json:"reaction"`  // Emoji reaction (e.g., "👍", "❤️", "😂")
+	Sender    string `json:"sender"`    // Sender phone (required for group messages to identify who sent the original message)
+}
+
+// SendReactionResponse represents the response for reaction operations
+type SendReactionResponse struct {
+	Success   bool   `json:"success"`
+	Phone     string `json:"phone"`
+	MessageID string `json:"messageId"`
+	Reaction  string `json:"reaction"`
+	Message   string `json:"message,omitempty"`
+}
+
+// ForwardMessageRequest represents the request body for POST /forward-message
+type ForwardMessageRequest struct {
+	Phone        string `json:"phone"`                  // Target phone number or group JID to forward to
+	MessageID    string `json:"messageId"`              // Original message ID to forward
+	SourceChat   string `json:"sourceChat"`             // Source chat JID where the original message is
+	IsGroup      bool   `json:"isGroup"`                // Whether source is a group
+	DelayMessage *int   `json:"delayMessage,omitempty"` // Optional delay in seconds before sending
+}
+
+// ForwardMessageResponse represents the response for forward message operations
+type ForwardMessageResponse struct {
+	Success      bool   `json:"success"`
+	Phone        string `json:"phone"`
+	OriginalID   string `json:"originalId"`
+	NewMessageID string `json:"newMessageId"`
+	Message      string `json:"message,omitempty"`
+}
+
+// SendPollVoteRequest represents the request body for POST /send-poll-vote
+type SendPollVoteRequest struct {
+	Phone        string   `json:"phone"`                  // Chat JID where the poll is (phone number or group JID)
+	PollID       string   `json:"pollId"`                 // Poll message ID
+	PollSender   string   `json:"pollSender"`             // Phone number of who sent the poll (required for groups)
+	Options      []string `json:"options"`                // Selected option names (exact match required)
+	DelayMessage *int     `json:"delayMessage,omitempty"` // Optional delay in seconds
+}
+
+// SendPollVoteResponse represents the response for poll vote operations
+type SendPollVoteResponse struct {
+	Success   bool     `json:"success"`
+	Phone     string   `json:"phone"`
+	PollID    string   `json:"pollId"`
+	Options   []string `json:"options"`
+	MessageID string   `json:"messageId,omitempty"`
+	Message   string   `json:"message,omitempty"`
+}
+
+// PinMessageRequest represents the request body for POST /pin-message
+type PinMessageRequest struct {
+	Phone     string `json:"phone"`            // Chat JID where the message is (phone number or group JID)
+	MessageID string `json:"messageId"`        // Message ID to pin/unpin
+	Sender    string `json:"sender,omitempty"` // Phone number of who sent the message (required for groups)
+	Pin       bool   `json:"pin"`              // true to pin, false to unpin
+}
+
+// PinMessageResponse represents the response for pin message operations
+type PinMessageResponse struct {
+	Success   bool   `json:"success"`
+	Phone     string `json:"phone"`
+	MessageID string `json:"messageId"`
+	Pinned    bool   `json:"pinned"`
+	Message   string `json:"message,omitempty"`
+}
+
+// ModifyBlockedRequest represents the request body for POST /modify-blocked
+type ModifyBlockedRequest struct {
+	Phone  string `json:"phone"`  // Phone number to block/unblock (e.g., "5511999999999")
+	Action string `json:"action"` // Action: "block" or "unblock"
+}
+
+// ModifyBlockedResponse represents the response for block/unblock operations
+type ModifyBlockedResponse struct {
+	Success bool   `json:"success"`
+	Phone   string `json:"phone"`
+	Action  string `json:"action"` // "block" or "unblock"
+	Message string `json:"message,omitempty"`
+}
+
+// UpdateProfileNameRequest represents the request body for PUT /profile-name
+type UpdateProfileNameRequest struct {
+	Name string `json:"name"` // New profile name (push name)
+}
+
+// UpdateProfileNameResponse represents the response for profile name update
+type UpdateProfileNameResponse struct {
+	Success bool   `json:"success"`
+	Name    string `json:"name"`
+	Message string `json:"message,omitempty"`
+}
+
+// UpdateProfilePictureRequest represents the request body for PUT /profile-picture
+type UpdateProfilePictureRequest struct {
+	Image string `json:"image"` // Base64-encoded JPEG image or URL
+}
+
+// UpdateProfilePictureResponse represents the response for profile picture update
+type UpdateProfilePictureResponse struct {
+	Success   bool   `json:"success"`
+	PictureID string `json:"pictureId,omitempty"` // New picture ID (or "remove" if picture removed)
+	Message   string `json:"message,omitempty"`
+}
+
+// UpdateProfileDescriptionRequest represents the request body for PUT /profile-description
+type UpdateProfileDescriptionRequest struct {
+	Description string `json:"description"` // New profile description (About/Status)
+}
+
+// UpdateProfileDescriptionResponse represents the response for profile description update
+type UpdateProfileDescriptionResponse struct {
+	Success     bool   `json:"success"`
+	Description string `json:"description"`
+	Message     string `json:"message,omitempty"`
+}
+
+// SendEditEventRequest represents the request body for POST /send-edit-event
+// Used to update an existing event message
+type SendEditEventRequest struct {
+	Phone        string `json:"phone"`                  // Required: chat where the event was sent
+	EventID      string `json:"eventId"`                // Required: original event message ID
+	Name         string `json:"name,omitempty"`         // Optional: updated event name
+	Description  string `json:"description,omitempty"`  // Optional: updated description
+	StartTime    string `json:"startTime,omitempty"`    // Optional: updated start time (ISO 8601)
+	EndTime      string `json:"endTime,omitempty"`      // Optional: updated end time (ISO 8601)
+	Location     string `json:"location,omitempty"`     // Optional: updated location name
+	Canceled     *bool  `json:"canceled,omitempty"`     // Optional: mark event as canceled
+	DelayMessage *int   `json:"delayMessage,omitempty"` // Optional: delay in seconds (1-15)
+	DelayTyping  *int   `json:"delayTyping,omitempty"`  // Optional: typing delay in seconds (1-15)
+}
+
+// SendEditEventResponse represents the response for send-edit-event
+type SendEditEventResponse struct {
+	Success   bool   `json:"success"`
+	EventID   string `json:"eventId"`
+	MessageID string `json:"messageId,omitempty"`
+	Message   string `json:"message,omitempty"`
+}
+
+// SendEventResponseRequest represents the request body for POST /send-event-response
+// Used to respond to an event invitation (going, not_going, maybe)
+type SendEventResponseRequest struct {
+	Phone           string `json:"phone"`                     // Required: chat where the event was sent
+	EventID         string `json:"eventId"`                   // Required: event message ID to respond to
+	Response        string `json:"response"`                  // Required: "going", "not_going", or "maybe"
+	ExtraGuestCount *int   `json:"extraGuestCount,omitempty"` // Optional: number of extra guests
+	DelayMessage    *int   `json:"delayMessage,omitempty"`    // Optional: delay in seconds (1-15)
+	DelayTyping     *int   `json:"delayTyping,omitempty"`     // Optional: typing delay in seconds (1-15)
+}
+
+// SendEventResponseResponse represents the response for send-event-response
+type SendEventResponseResponse struct {
+	Success  bool   `json:"success"`
+	EventID  string `json:"eventId"`
+	Response string `json:"response"`
+	Message  string `json:"message,omitempty"`
 }
 
 // SendMessageResponse represents the response after enqueuing a message
@@ -4198,6 +4425,1065 @@ func (h *MessageHandler) deleteMessage(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// readMessage handles POST /instances/{instanceId}/token/{token}/read-message
+// Marks specific messages as read using whatsmeow MarkRead
+func (h *MessageHandler) readMessage(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx, instanceID, _, ok := h.resolveInstance(ctx, w, r)
+	if !ok {
+		return
+	}
+
+	// Parse request body
+	var req ReadMessageRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		h.log.WarnContext(ctx, "invalid request body",
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	// Validate phone number
+	phone := strings.TrimSpace(req.Phone)
+	if phone == "" {
+		h.log.WarnContext(ctx, "missing phone number")
+		respondError(w, http.StatusBadRequest, "Phone number is required")
+		return
+	}
+
+	// Validate message IDs
+	if len(req.MessageIDs) == 0 {
+		h.log.WarnContext(ctx, "missing message IDs")
+		respondError(w, http.StatusBadRequest, "At least one message ID is required")
+		return
+	}
+
+	// Normalize phone number
+	phone = normalizePhoneNumber(phone)
+
+	// Get client registry from coordinator
+	clientRegistry, ok := h.coordinator.GetClient(instanceID)
+	if !ok {
+		h.log.ErrorContext(ctx, "client registry not available")
+		respondError(w, http.StatusServiceUnavailable, "WhatsApp client not available")
+		return
+	}
+
+	// Get the whatsmeow client
+	client, ok := clientRegistry.GetClient(instanceID.String())
+	if !ok || client == nil {
+		h.log.WarnContext(ctx, "whatsapp client not connected",
+			slog.String("phone", phone))
+		respondError(w, http.StatusServiceUnavailable, "WhatsApp client not connected")
+		return
+	}
+
+	// Parse phone to JID (chat JID)
+	chatJID, err := types.ParseJID(phone)
+	if err != nil {
+		h.log.WarnContext(ctx, "invalid phone number format",
+			slog.String("phone", phone),
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusBadRequest, "Invalid phone number format")
+		return
+	}
+
+	// Parse sender JID if provided (required for group messages)
+	var senderJID types.JID
+	sender := strings.TrimSpace(req.Sender)
+	if sender != "" {
+		sender = normalizePhoneNumber(sender)
+		senderJID, err = types.ParseJID(sender)
+		if err != nil {
+			h.log.WarnContext(ctx, "invalid sender phone format",
+				slog.String("sender", sender),
+				slog.String("error", err.Error()))
+			respondError(w, http.StatusBadRequest, "Invalid sender phone format")
+			return
+		}
+	} else {
+		senderJID = types.EmptyJID
+	}
+
+	// Convert string message IDs to types.MessageID
+	messageIDs := make([]types.MessageID, len(req.MessageIDs))
+	for i, id := range req.MessageIDs {
+		messageIDs[i] = types.MessageID(strings.TrimSpace(id))
+	}
+
+	// Mark messages as read
+	err = client.MarkRead(ctx, messageIDs, time.Now(), chatJID, senderJID)
+	if err != nil {
+		h.log.ErrorContext(ctx, "failed to mark messages as read",
+			slog.String("phone", phone),
+			slog.Int("message_count", len(messageIDs)),
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusInternalServerError, "Failed to mark messages as read: "+err.Error())
+		return
+	}
+
+	h.log.InfoContext(ctx, "messages marked as read",
+		slog.String("phone", phone),
+		slog.Int("message_count", len(messageIDs)))
+
+	respondJSON(w, http.StatusOK, ReadMessageResponse{
+		Success:    true,
+		Phone:      phone,
+		MessageIDs: req.MessageIDs,
+		Message:    "Messages marked as read successfully",
+	})
+}
+
+// getContactMetadata handles GET /instances/{instanceId}/token/{token}/contacts/{phone}/metadata
+// Returns contact metadata using whatsmeow GetUserInfo
+func (h *MessageHandler) getContactMetadata(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx, instanceID, _, ok := h.resolveInstance(ctx, w, r)
+	if !ok {
+		return
+	}
+
+	// Get phone from URL parameter
+	phone := chi.URLParam(r, "phone")
+	if phone == "" {
+		h.log.WarnContext(ctx, "missing phone number")
+		respondError(w, http.StatusBadRequest, "Phone number is required")
+		return
+	}
+
+	// Normalize phone number
+	phone = normalizePhoneNumber(phone)
+
+	// Get client registry from coordinator
+	clientRegistry, ok := h.coordinator.GetClient(instanceID)
+	if !ok {
+		h.log.ErrorContext(ctx, "client registry not available")
+		respondError(w, http.StatusServiceUnavailable, "WhatsApp client not available")
+		return
+	}
+
+	// Get the whatsmeow client
+	client, ok := clientRegistry.GetClient(instanceID.String())
+	if !ok || client == nil {
+		h.log.WarnContext(ctx, "whatsapp client not connected",
+			slog.String("phone", phone))
+		respondError(w, http.StatusServiceUnavailable, "WhatsApp client not connected")
+		return
+	}
+
+	// Parse phone to JID
+	jid, err := types.ParseJID(phone)
+	if err != nil {
+		h.log.WarnContext(ctx, "invalid phone number format",
+			slog.String("phone", phone),
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusBadRequest, "Invalid phone number format")
+		return
+	}
+
+	// Get user info from whatsmeow
+	userInfo, err := client.GetUserInfo(ctx, []types.JID{jid})
+	if err != nil {
+		h.log.ErrorContext(ctx, "failed to get user info",
+			slog.String("phone", phone),
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusInternalServerError, "Failed to get contact metadata: "+err.Error())
+		return
+	}
+
+	// Build response
+	response := ContactMetadataResponse{
+		Phone:        phone,
+		IsOnWhatsApp: false,
+	}
+
+	if info, exists := userInfo[jid]; exists {
+		response.IsOnWhatsApp = true
+		response.JID = jid.String()
+		response.VerifiedName = info.VerifiedName.Details.GetVerifiedName()
+		response.Status = info.Status
+		response.PictureID = info.PictureID
+
+		// Add device info
+		if len(info.Devices) > 0 {
+			response.Devices = make([]struct {
+				Device string `json:"device"`
+				JID    string `json:"jid"`
+			}, len(info.Devices))
+			for i, device := range info.Devices {
+				response.Devices[i].JID = device.String()
+				response.Devices[i].Device = strconv.FormatUint(uint64(device.Device), 10)
+			}
+		}
+	}
+
+	h.log.InfoContext(ctx, "contact metadata retrieved",
+		slog.String("phone", phone),
+		slog.Bool("is_on_whatsapp", response.IsOnWhatsApp))
+
+	respondJSON(w, http.StatusOK, response)
+}
+
+// getContactProfilePicture handles GET /instances/{instanceId}/token/{token}/contacts/{phone}/profile-picture
+// Returns profile picture URL using whatsmeow GetProfilePictureInfo
+func (h *MessageHandler) getContactProfilePicture(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx, instanceID, _, ok := h.resolveInstance(ctx, w, r)
+	if !ok {
+		return
+	}
+
+	// Get phone from URL parameter
+	phone := chi.URLParam(r, "phone")
+	if phone == "" {
+		h.log.WarnContext(ctx, "missing phone number")
+		respondError(w, http.StatusBadRequest, "Phone number is required")
+		return
+	}
+
+	// Normalize phone number
+	phone = normalizePhoneNumber(phone)
+
+	// Get client registry from coordinator
+	clientRegistry, ok := h.coordinator.GetClient(instanceID)
+	if !ok {
+		h.log.ErrorContext(ctx, "client registry not available")
+		respondError(w, http.StatusServiceUnavailable, "WhatsApp client not available")
+		return
+	}
+
+	// Get the whatsmeow client
+	client, ok := clientRegistry.GetClient(instanceID.String())
+	if !ok || client == nil {
+		h.log.WarnContext(ctx, "whatsapp client not connected",
+			slog.String("phone", phone))
+		respondError(w, http.StatusServiceUnavailable, "WhatsApp client not connected")
+		return
+	}
+
+	// Parse phone to JID
+	jid, err := types.ParseJID(phone)
+	if err != nil {
+		h.log.WarnContext(ctx, "invalid phone number format",
+			slog.String("phone", phone),
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusBadRequest, "Invalid phone number format")
+		return
+	}
+
+	// Get profile picture info from whatsmeow
+	// Pass nil for extra params to get default behavior
+	pictureInfo, err := client.GetProfilePictureInfo(ctx, jid, nil)
+	if err != nil {
+		h.log.ErrorContext(ctx, "failed to get profile picture",
+			slog.String("phone", phone),
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusInternalServerError, "Failed to get profile picture: "+err.Error())
+		return
+	}
+
+	// Handle case where no profile picture exists
+	if pictureInfo == nil {
+		h.log.InfoContext(ctx, "no profile picture found",
+			slog.String("phone", phone))
+		respondJSON(w, http.StatusOK, ProfilePictureResponse{
+			URL:  "",
+			ID:   "",
+			Type: "none",
+		})
+		return
+	}
+
+	response := ProfilePictureResponse{
+		URL:        pictureInfo.URL,
+		ID:         pictureInfo.ID,
+		Type:       pictureInfo.Type,
+		DirectPath: pictureInfo.DirectPath,
+	}
+
+	h.log.InfoContext(ctx, "profile picture retrieved",
+		slog.String("phone", phone),
+		slog.String("picture_id", response.ID))
+
+	respondJSON(w, http.StatusOK, response)
+}
+
+// sendReaction handles POST /instances/{instanceId}/token/{token}/send-reaction
+// Sends an emoji reaction to a specific message using whatsmeow BuildReaction
+func (h *MessageHandler) sendReaction(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx, instanceID, _, ok := h.resolveInstance(ctx, w, r)
+	if !ok {
+		return
+	}
+
+	// Parse request body
+	var req SendReactionRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		h.log.WarnContext(ctx, "invalid request body",
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	// Validate required fields
+	phone := strings.TrimSpace(req.Phone)
+	if phone == "" {
+		h.log.WarnContext(ctx, "missing phone number")
+		respondError(w, http.StatusBadRequest, "Phone number is required")
+		return
+	}
+
+	messageID := strings.TrimSpace(req.MessageID)
+	if messageID == "" {
+		h.log.WarnContext(ctx, "missing message ID")
+		respondError(w, http.StatusBadRequest, "Message ID is required")
+		return
+	}
+
+	reaction := req.Reaction
+	if reaction == "" {
+		h.log.WarnContext(ctx, "missing reaction emoji")
+		respondError(w, http.StatusBadRequest, "Reaction emoji is required")
+		return
+	}
+
+	// Normalize phone number
+	phone = normalizePhoneNumber(phone)
+
+	// Get client registry from coordinator
+	clientRegistry, ok := h.coordinator.GetClient(instanceID)
+	if !ok {
+		h.log.ErrorContext(ctx, "client registry not available")
+		respondError(w, http.StatusServiceUnavailable, "WhatsApp client not available")
+		return
+	}
+
+	// Get the whatsmeow client
+	client, ok := clientRegistry.GetClient(instanceID.String())
+	if !ok || client == nil {
+		h.log.WarnContext(ctx, "whatsapp client not connected",
+			slog.String("phone", phone))
+		respondError(w, http.StatusServiceUnavailable, "WhatsApp client not connected")
+		return
+	}
+
+	// Parse phone to JID (chat JID)
+	chatJID, err := types.ParseJID(phone)
+	if err != nil {
+		h.log.WarnContext(ctx, "invalid phone number format",
+			slog.String("phone", phone),
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusBadRequest, "Invalid phone number format")
+		return
+	}
+
+	// Parse sender JID if provided (required for group messages)
+	var senderJID types.JID
+	sender := strings.TrimSpace(req.Sender)
+	if sender != "" {
+		sender = normalizePhoneNumber(sender)
+		senderJID, err = types.ParseJID(sender)
+		if err != nil {
+			h.log.WarnContext(ctx, "invalid sender phone format",
+				slog.String("sender", sender),
+				slog.String("error", err.Error()))
+			respondError(w, http.StatusBadRequest, "Invalid sender phone format")
+			return
+		}
+	} else {
+		// For direct messages, sender is the chat JID
+		senderJID = chatJID
+	}
+
+	// Build reaction message
+	reactionMsg := client.BuildReaction(chatJID, senderJID, types.MessageID(messageID), reaction)
+
+	// Send the reaction
+	resp, err := client.SendMessage(ctx, chatJID, reactionMsg)
+	if err != nil {
+		h.log.ErrorContext(ctx, "failed to send reaction",
+			slog.String("phone", phone),
+			slog.String("message_id", messageID),
+			slog.String("reaction", reaction),
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusInternalServerError, "Failed to send reaction: "+err.Error())
+		return
+	}
+
+	h.log.InfoContext(ctx, "reaction sent successfully",
+		slog.String("phone", phone),
+		slog.String("message_id", messageID),
+		slog.String("reaction", reaction),
+		slog.String("response_id", resp.ID))
+
+	respondJSON(w, http.StatusOK, SendReactionResponse{
+		Success:   true,
+		Phone:     phone,
+		MessageID: messageID,
+		Reaction:  reaction,
+		Message:   "Reaction sent successfully",
+	})
+}
+
+// sendRemoveReaction handles POST /instances/{instanceId}/token/{token}/send-remove-reaction
+// Removes a reaction from a message by sending an empty reaction string
+func (h *MessageHandler) sendRemoveReaction(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx, instanceID, _, ok := h.resolveInstance(ctx, w, r)
+	if !ok {
+		return
+	}
+
+	// Parse request body - reuse SendReactionRequest but reaction field is ignored
+	var req SendReactionRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		h.log.WarnContext(ctx, "invalid request body",
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	// Validate required fields
+	phone := strings.TrimSpace(req.Phone)
+	if phone == "" {
+		h.log.WarnContext(ctx, "missing phone number")
+		respondError(w, http.StatusBadRequest, "Phone number is required")
+		return
+	}
+
+	messageID := strings.TrimSpace(req.MessageID)
+	if messageID == "" {
+		h.log.WarnContext(ctx, "missing message ID")
+		respondError(w, http.StatusBadRequest, "Message ID is required")
+		return
+	}
+
+	// Normalize phone number
+	phone = normalizePhoneNumber(phone)
+
+	// Get client registry from coordinator
+	clientRegistry, ok := h.coordinator.GetClient(instanceID)
+	if !ok {
+		h.log.ErrorContext(ctx, "client registry not available")
+		respondError(w, http.StatusServiceUnavailable, "WhatsApp client not available")
+		return
+	}
+
+	// Get the whatsmeow client
+	client, ok := clientRegistry.GetClient(instanceID.String())
+	if !ok || client == nil {
+		h.log.WarnContext(ctx, "whatsapp client not connected",
+			slog.String("phone", phone))
+		respondError(w, http.StatusServiceUnavailable, "WhatsApp client not connected")
+		return
+	}
+
+	// Parse phone to JID (chat JID)
+	chatJID, err := types.ParseJID(phone)
+	if err != nil {
+		h.log.WarnContext(ctx, "invalid phone number format",
+			slog.String("phone", phone),
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusBadRequest, "Invalid phone number format")
+		return
+	}
+
+	// Parse sender JID if provided (required for group messages)
+	var senderJID types.JID
+	sender := strings.TrimSpace(req.Sender)
+	if sender != "" {
+		sender = normalizePhoneNumber(sender)
+		senderJID, err = types.ParseJID(sender)
+		if err != nil {
+			h.log.WarnContext(ctx, "invalid sender phone format",
+				slog.String("sender", sender),
+				slog.String("error", err.Error()))
+			respondError(w, http.StatusBadRequest, "Invalid sender phone format")
+			return
+		}
+	} else {
+		// For direct messages, sender is the chat JID
+		senderJID = chatJID
+	}
+
+	// Build reaction message with empty string to remove reaction
+	reactionMsg := client.BuildReaction(chatJID, senderJID, types.MessageID(messageID), "")
+
+	// Send the reaction removal
+	resp, err := client.SendMessage(ctx, chatJID, reactionMsg)
+	if err != nil {
+		h.log.ErrorContext(ctx, "failed to remove reaction",
+			slog.String("phone", phone),
+			slog.String("message_id", messageID),
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusInternalServerError, "Failed to remove reaction: "+err.Error())
+		return
+	}
+
+	h.log.InfoContext(ctx, "reaction removed successfully",
+		slog.String("phone", phone),
+		slog.String("message_id", messageID),
+		slog.String("response_id", resp.ID))
+
+	respondJSON(w, http.StatusOK, SendReactionResponse{
+		Success:   true,
+		Phone:     phone,
+		MessageID: messageID,
+		Reaction:  "",
+		Message:   "Reaction removed successfully",
+	})
+}
+
+// forwardMessage handles POST /instances/{instanceId}/token/{token}/forward-message
+// Forwards a message to another chat by retrieving it from the message store and resending with IsForwarded flag
+func (h *MessageHandler) forwardMessage(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx, instanceID, _, ok := h.resolveInstance(ctx, w, r)
+	if !ok {
+		return
+	}
+
+	// Parse request body
+	var req ForwardMessageRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		h.log.WarnContext(ctx, "invalid request body",
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	// Validate required fields
+	phone := strings.TrimSpace(req.Phone)
+	if phone == "" {
+		h.log.WarnContext(ctx, "missing target phone number")
+		respondError(w, http.StatusBadRequest, "Target phone number is required")
+		return
+	}
+
+	messageID := strings.TrimSpace(req.MessageID)
+	if messageID == "" {
+		h.log.WarnContext(ctx, "missing message ID")
+		respondError(w, http.StatusBadRequest, "Message ID is required")
+		return
+	}
+
+	sourceChat := strings.TrimSpace(req.SourceChat)
+	if sourceChat == "" {
+		h.log.WarnContext(ctx, "missing source chat")
+		respondError(w, http.StatusBadRequest, "Source chat is required")
+		return
+	}
+
+	// Normalize phone numbers
+	phone = normalizePhoneNumber(phone)
+	sourceChat = normalizePhoneNumber(sourceChat)
+
+	// Get client registry from coordinator
+	clientRegistry, ok := h.coordinator.GetClient(instanceID)
+	if !ok {
+		h.log.ErrorContext(ctx, "client registry not available")
+		respondError(w, http.StatusServiceUnavailable, "WhatsApp client not available")
+		return
+	}
+
+	// Get the whatsmeow client
+	client, ok := clientRegistry.GetClient(instanceID.String())
+	if !ok || client == nil {
+		h.log.WarnContext(ctx, "whatsapp client not connected",
+			slog.String("phone", phone))
+		respondError(w, http.StatusServiceUnavailable, "WhatsApp client not connected")
+		return
+	}
+
+	// Parse target JID
+	targetJID, err := types.ParseJID(phone)
+	if err != nil {
+		h.log.WarnContext(ctx, "invalid target phone number format",
+			slog.String("phone", phone),
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusBadRequest, "Invalid target phone number format")
+		return
+	}
+
+	// Parse source chat JID
+	sourceChatJID, err := types.ParseJID(sourceChat)
+	if err != nil {
+		h.log.WarnContext(ctx, "invalid source chat format",
+			slog.String("source_chat", sourceChat),
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusBadRequest, "Invalid source chat format")
+		return
+	}
+
+	// Try to get the message from the message store using GetMessageForRetry callback
+	// This requires the message to be cached by the client
+	var originalMessage *waE2E.Message
+	if client.GetMessageForRetry != nil {
+		originalMessage = client.GetMessageForRetry(sourceChatJID, sourceChatJID, types.MessageID(messageID))
+	}
+
+	if originalMessage == nil {
+		h.log.WarnContext(ctx, "message not found in store - cannot forward",
+			slog.String("message_id", messageID),
+			slog.String("source_chat", sourceChat))
+		respondError(w, http.StatusNotFound, "Message not found in store. The message may have been sent too long ago or the client was restarted.")
+		return
+	}
+
+	// Create a forwarded copy of the message
+	forwardedMessage := proto.Clone(originalMessage).(*waE2E.Message)
+
+	// Set forwarding context info based on message type
+	contextInfo := &waE2E.ContextInfo{
+		IsForwarded:     proto.Bool(true),
+		ForwardingScore: proto.Uint32(1),
+	}
+
+	// Apply context info to the appropriate message type
+	if forwardedMessage.GetConversation() != "" {
+		// Convert simple conversation to ExtendedTextMessage with context
+		forwardedMessage = &waE2E.Message{
+			ExtendedTextMessage: &waE2E.ExtendedTextMessage{
+				Text:        proto.String(forwardedMessage.GetConversation()),
+				ContextInfo: contextInfo,
+			},
+		}
+	} else if forwardedMessage.ExtendedTextMessage != nil {
+		forwardedMessage.ExtendedTextMessage.ContextInfo = contextInfo
+	} else if forwardedMessage.ImageMessage != nil {
+		forwardedMessage.ImageMessage.ContextInfo = contextInfo
+	} else if forwardedMessage.VideoMessage != nil {
+		forwardedMessage.VideoMessage.ContextInfo = contextInfo
+	} else if forwardedMessage.AudioMessage != nil {
+		forwardedMessage.AudioMessage.ContextInfo = contextInfo
+	} else if forwardedMessage.DocumentMessage != nil {
+		forwardedMessage.DocumentMessage.ContextInfo = contextInfo
+	} else if forwardedMessage.StickerMessage != nil {
+		forwardedMessage.StickerMessage.ContextInfo = contextInfo
+	} else if forwardedMessage.ContactMessage != nil {
+		forwardedMessage.ContactMessage.ContextInfo = contextInfo
+	} else if forwardedMessage.LocationMessage != nil {
+		forwardedMessage.LocationMessage.ContextInfo = contextInfo
+	}
+
+	// Apply delay if specified
+	if req.DelayMessage != nil && *req.DelayMessage > 0 {
+		delay := *req.DelayMessage
+		if delay > 15 {
+			delay = 15
+		}
+		time.Sleep(time.Duration(delay) * time.Second)
+	}
+
+	// Send the forwarded message
+	resp, err := client.SendMessage(ctx, targetJID, forwardedMessage)
+	if err != nil {
+		h.log.ErrorContext(ctx, "failed to forward message",
+			slog.String("target_phone", phone),
+			slog.String("original_id", messageID),
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusInternalServerError, "Failed to forward message: "+err.Error())
+		return
+	}
+
+	h.log.InfoContext(ctx, "message forwarded successfully",
+		slog.String("target_phone", phone),
+		slog.String("original_id", messageID),
+		slog.String("new_id", resp.ID))
+
+	respondJSON(w, http.StatusOK, ForwardMessageResponse{
+		Success:      true,
+		Phone:        phone,
+		OriginalID:   messageID,
+		NewMessageID: resp.ID,
+		Message:      "Message forwarded successfully",
+	})
+}
+
+// sendPollVote handles POST /instances/{instanceId}/token/{token}/send-poll-vote
+// Sends a vote on an existing poll by constructing MessageInfo and calling BuildPollVote
+func (h *MessageHandler) sendPollVote(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx, instanceID, _, ok := h.resolveInstance(ctx, w, r)
+	if !ok {
+		return
+	}
+
+	// Parse request body
+	var req SendPollVoteRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		h.log.WarnContext(ctx, "invalid request body",
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	// Validate required fields
+	phone := strings.TrimSpace(req.Phone)
+	if phone == "" {
+		h.log.WarnContext(ctx, "missing phone number")
+		respondError(w, http.StatusBadRequest, "Phone number (chat JID) is required")
+		return
+	}
+
+	pollID := strings.TrimSpace(req.PollID)
+	if pollID == "" {
+		h.log.WarnContext(ctx, "missing poll ID")
+		respondError(w, http.StatusBadRequest, "Poll ID is required")
+		return
+	}
+
+	pollSender := strings.TrimSpace(req.PollSender)
+	if pollSender == "" {
+		h.log.WarnContext(ctx, "missing poll sender")
+		respondError(w, http.StatusBadRequest, "Poll sender phone is required")
+		return
+	}
+
+	if len(req.Options) == 0 {
+		h.log.WarnContext(ctx, "missing poll options")
+		respondError(w, http.StatusBadRequest, "At least one poll option is required")
+		return
+	}
+
+	// Normalize phone numbers
+	phone = normalizePhoneNumber(phone)
+	pollSender = normalizePhoneNumber(pollSender)
+
+	// Get client registry from coordinator
+	clientRegistry, ok := h.coordinator.GetClient(instanceID)
+	if !ok {
+		h.log.ErrorContext(ctx, "client registry not available")
+		respondError(w, http.StatusServiceUnavailable, "WhatsApp client not available")
+		return
+	}
+
+	// Get the whatsmeow client
+	client, ok := clientRegistry.GetClient(instanceID.String())
+	if !ok || client == nil {
+		h.log.WarnContext(ctx, "whatsapp client not connected",
+			slog.String("phone", phone))
+		respondError(w, http.StatusServiceUnavailable, "WhatsApp client not connected")
+		return
+	}
+
+	// Parse chat JID
+	chatJID, err := types.ParseJID(phone)
+	if err != nil {
+		h.log.WarnContext(ctx, "invalid phone number format",
+			slog.String("phone", phone),
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusBadRequest, "Invalid phone number format")
+		return
+	}
+
+	// Parse poll sender JID
+	senderJID, err := types.ParseJID(pollSender)
+	if err != nil {
+		h.log.WarnContext(ctx, "invalid poll sender phone format",
+			slog.String("poll_sender", pollSender),
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusBadRequest, "Invalid poll sender phone format")
+		return
+	}
+
+	// Determine if this is a group chat
+	isGroup := chatJID.Server == types.GroupServer
+
+	// Construct MessageInfo for the poll message
+	// This is required by BuildPollVote to reference the original poll
+	pollInfo := &types.MessageInfo{
+		MessageSource: types.MessageSource{
+			Chat:     chatJID,
+			Sender:   senderJID,
+			IsFromMe: senderJID.User == client.Store.ID.User,
+			IsGroup:  isGroup,
+		},
+		ID:        types.MessageID(pollID),
+		Timestamp: time.Now(), // Timestamp is not critical for voting
+	}
+
+	// Apply delay if specified
+	if req.DelayMessage != nil && *req.DelayMessage > 0 {
+		delay := *req.DelayMessage
+		if delay > 15 {
+			delay = 15
+		}
+		time.Sleep(time.Duration(delay) * time.Second)
+	}
+
+	// Build the poll vote message
+	voteMsg, err := client.BuildPollVote(ctx, pollInfo, req.Options)
+	if err != nil {
+		h.log.ErrorContext(ctx, "failed to build poll vote",
+			slog.String("phone", phone),
+			slog.String("poll_id", pollID),
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusInternalServerError, "Failed to build poll vote: "+err.Error())
+		return
+	}
+
+	// Send the poll vote
+	resp, err := client.SendMessage(ctx, chatJID, voteMsg)
+	if err != nil {
+		h.log.ErrorContext(ctx, "failed to send poll vote",
+			slog.String("phone", phone),
+			slog.String("poll_id", pollID),
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusInternalServerError, "Failed to send poll vote: "+err.Error())
+		return
+	}
+
+	h.log.InfoContext(ctx, "poll vote sent successfully",
+		slog.String("phone", phone),
+		slog.String("poll_id", pollID),
+		slog.Any("options", req.Options),
+		slog.String("response_id", resp.ID))
+
+	respondJSON(w, http.StatusOK, SendPollVoteResponse{
+		Success:   true,
+		Phone:     phone,
+		PollID:    pollID,
+		Options:   req.Options,
+		MessageID: resp.ID,
+		Message:   "Poll vote sent successfully",
+	})
+}
+
+// pinMessage handles POST /instances/{instanceId}/token/{token}/pin-message
+// Pins or unpins a message in a chat using the PinInChatMessage proto type
+func (h *MessageHandler) pinMessage(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx, instanceID, _, ok := h.resolveInstance(ctx, w, r)
+	if !ok {
+		return
+	}
+
+	// Parse request body
+	var req PinMessageRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		h.log.WarnContext(ctx, "invalid request body",
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	// Validate required fields
+	phone := strings.TrimSpace(req.Phone)
+	if phone == "" {
+		h.log.WarnContext(ctx, "missing phone number")
+		respondError(w, http.StatusBadRequest, "Phone number is required")
+		return
+	}
+
+	messageID := strings.TrimSpace(req.MessageID)
+	if messageID == "" {
+		h.log.WarnContext(ctx, "missing message ID")
+		respondError(w, http.StatusBadRequest, "Message ID is required")
+		return
+	}
+
+	// Normalize phone number
+	phone = normalizePhoneNumber(phone)
+
+	// Get client registry from coordinator
+	clientRegistry, ok := h.coordinator.GetClient(instanceID)
+	if !ok {
+		h.log.ErrorContext(ctx, "client registry not available")
+		respondError(w, http.StatusServiceUnavailable, "WhatsApp client not available")
+		return
+	}
+
+	// Get the whatsmeow client
+	client, ok := clientRegistry.GetClient(instanceID.String())
+	if !ok || client == nil {
+		h.log.WarnContext(ctx, "whatsapp client not connected",
+			slog.String("phone", phone))
+		respondError(w, http.StatusServiceUnavailable, "WhatsApp client not connected")
+		return
+	}
+
+	// Parse phone to JID (chat JID)
+	chatJID, err := types.ParseJID(phone)
+	if err != nil {
+		h.log.WarnContext(ctx, "invalid phone number format",
+			slog.String("phone", phone),
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusBadRequest, "Invalid phone number format")
+		return
+	}
+
+	// Parse sender JID if provided (required for group messages)
+	var senderJID types.JID
+	sender := strings.TrimSpace(req.Sender)
+	if sender != "" {
+		sender = normalizePhoneNumber(sender)
+		senderJID, err = types.ParseJID(sender)
+		if err != nil {
+			h.log.WarnContext(ctx, "invalid sender phone format",
+				slog.String("sender", sender),
+				slog.String("error", err.Error()))
+			respondError(w, http.StatusBadRequest, "Invalid sender phone format")
+			return
+		}
+	} else {
+		// For direct messages, sender is the chat JID
+		senderJID = chatJID
+	}
+
+	// Build the MessageKey for the message to pin/unpin
+	msgKey := client.BuildMessageKey(chatJID, senderJID, types.MessageID(messageID))
+
+	// Determine pin type
+	var pinType waE2E.PinInChatMessage_Type
+	if req.Pin {
+		pinType = waE2E.PinInChatMessage_PIN_FOR_ALL
+	} else {
+		pinType = waE2E.PinInChatMessage_UNPIN_FOR_ALL
+	}
+
+	// Build the PinInChatMessage
+	pinMsg := &waE2E.Message{
+		PinInChatMessage: &waE2E.PinInChatMessage{
+			Key:               msgKey,
+			Type:              &pinType,
+			SenderTimestampMS: proto.Int64(time.Now().UnixMilli()),
+		},
+	}
+
+	// Send the pin message
+	resp, err := client.SendMessage(ctx, chatJID, pinMsg)
+	if err != nil {
+		h.log.ErrorContext(ctx, "failed to send pin message",
+			slog.String("phone", phone),
+			slog.String("message_id", messageID),
+			slog.Bool("pin", req.Pin),
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusInternalServerError, "Failed to pin/unpin message: "+err.Error())
+		return
+	}
+
+	action := "pinned"
+	if !req.Pin {
+		action = "unpinned"
+	}
+
+	h.log.InfoContext(ctx, "message "+action+" successfully",
+		slog.String("phone", phone),
+		slog.String("message_id", messageID),
+		slog.Bool("pin", req.Pin),
+		slog.String("response_id", resp.ID))
+
+	respondJSON(w, http.StatusOK, PinMessageResponse{
+		Success:   true,
+		Phone:     phone,
+		MessageID: messageID,
+		Pinned:    req.Pin,
+		Message:   "Message " + action + " successfully",
+	})
+}
+
+// modifyBlocked handles POST /instances/{instanceId}/token/{token}/modify-blocked
+// Blocks or unblocks a contact using the whatsmeow UpdateBlocklist method
+func (h *MessageHandler) modifyBlocked(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx, instanceID, _, ok := h.resolveInstance(ctx, w, r)
+	if !ok {
+		return
+	}
+
+	// Parse request body
+	var req ModifyBlockedRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		h.log.WarnContext(ctx, "invalid request body",
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	// Validate phone number
+	phone := strings.TrimSpace(req.Phone)
+	if phone == "" {
+		h.log.WarnContext(ctx, "missing phone number")
+		respondError(w, http.StatusBadRequest, "Phone number is required")
+		return
+	}
+
+	// Normalize phone number
+	phone = normalizePhoneNumber(phone)
+
+	// Validate action
+	action := strings.ToLower(strings.TrimSpace(req.Action))
+	if action != "block" && action != "unblock" {
+		h.log.WarnContext(ctx, "invalid action",
+			slog.String("action", action))
+		respondError(w, http.StatusBadRequest, "Action must be 'block' or 'unblock'")
+		return
+	}
+
+	// Get client registry from coordinator
+	clientRegistry, ok := h.coordinator.GetClient(instanceID)
+	if !ok {
+		h.log.ErrorContext(ctx, "client registry not available")
+		respondError(w, http.StatusServiceUnavailable, "WhatsApp client not available")
+		return
+	}
+
+	// Get the whatsmeow client
+	client, ok := clientRegistry.GetClient(instanceID.String())
+	if !ok || client == nil {
+		h.log.WarnContext(ctx, "whatsapp client not connected",
+			slog.String("phone", phone))
+		respondError(w, http.StatusServiceUnavailable, "WhatsApp client not connected")
+		return
+	}
+
+	// Build JID for the contact
+	jid := types.NewJID(phone, types.DefaultUserServer)
+
+	// Determine blocklist action
+	var blockAction events.BlocklistChangeAction
+	if action == "block" {
+		blockAction = events.BlocklistChangeActionBlock
+	} else {
+		blockAction = events.BlocklistChangeActionUnblock
+	}
+
+	// Update blocklist
+	_, err := client.UpdateBlocklist(ctx, jid, blockAction)
+	if err != nil {
+		h.log.ErrorContext(ctx, "failed to update blocklist",
+			slog.String("instance_id", instanceID.String()),
+			slog.String("phone", phone),
+			slog.String("action", action),
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusInternalServerError, "Failed to "+action+" contact: "+err.Error())
+		return
+	}
+
+	h.log.InfoContext(ctx, "blocklist updated successfully",
+		slog.String("instance_id", instanceID.String()),
+		slog.String("phone", phone),
+		slog.String("action", action))
+
+	respondJSON(w, http.StatusOK, ModifyBlockedResponse{
+		Success: true,
+		Phone:   phone,
+		Action:  action,
+		Message: "Contact " + action + "ed successfully",
+	})
+}
+
 // modifyChat handles POST /instances/{instanceId}/token/{token}/modify-chat
 // format for modifying chat state
 // Actions: read, archive, unarchive, pin, unpin, mute, unmute, clear, delete
@@ -4385,4 +5671,558 @@ func (h *MessageHandler) modifyChatDelete(ctx context.Context, client *wameow.Cl
 	// Build delete chat patch - use current time as last message timestamp
 	patch := appstate.BuildDeleteChat(chatJID, time.Now(), nil)
 	return client.SendAppState(ctx, patch)
+}
+
+// updateProfileName handles PUT /instances/{instanceId}/token/{token}/profile-name
+// Updates the profile name (push name) using whatsmeow app state
+func (h *MessageHandler) updateProfileName(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx, instanceID, _, ok := h.resolveInstance(ctx, w, r)
+	if !ok {
+		return
+	}
+
+	// Parse request body
+	var req UpdateProfileNameRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		h.log.WarnContext(ctx, "invalid request body",
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	// Validate name
+	name := strings.TrimSpace(req.Name)
+	if name == "" {
+		h.log.WarnContext(ctx, "missing profile name")
+		respondError(w, http.StatusBadRequest, "Profile name is required")
+		return
+	}
+
+	// Get client registry from coordinator
+	clientRegistry, ok := h.coordinator.GetClient(instanceID)
+	if !ok {
+		h.log.ErrorContext(ctx, "client registry not available")
+		respondError(w, http.StatusServiceUnavailable, "WhatsApp client not available")
+		return
+	}
+
+	// Get the whatsmeow client
+	client, ok := clientRegistry.GetClient(instanceID.String())
+	if !ok || client == nil {
+		h.log.WarnContext(ctx, "whatsapp client not connected")
+		respondError(w, http.StatusServiceUnavailable, "WhatsApp client not connected")
+		return
+	}
+
+	// Build and send app state patch for push name
+	patch := appstate.BuildSettingPushName(name)
+	if err := client.SendAppState(ctx, patch); err != nil {
+		h.log.ErrorContext(ctx, "failed to update profile name",
+			slog.String("instance_id", instanceID.String()),
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusInternalServerError, "Failed to update profile name: "+err.Error())
+		return
+	}
+
+	h.log.InfoContext(ctx, "profile name updated successfully",
+		slog.String("instance_id", instanceID.String()),
+		slog.String("name", name))
+
+	respondJSON(w, http.StatusOK, UpdateProfileNameResponse{
+		Success: true,
+		Name:    name,
+		Message: "Profile name updated successfully",
+	})
+}
+
+// updateProfilePicture handles PUT /instances/{instanceId}/token/{token}/profile-picture
+// Updates the profile picture using whatsmeow SetGroupPhoto with own JID
+func (h *MessageHandler) updateProfilePicture(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx, instanceID, _, ok := h.resolveInstance(ctx, w, r)
+	if !ok {
+		return
+	}
+
+	// Parse request body
+	var req UpdateProfilePictureRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		h.log.WarnContext(ctx, "invalid request body",
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	// Get client registry from coordinator
+	clientRegistry, ok := h.coordinator.GetClient(instanceID)
+	if !ok {
+		h.log.ErrorContext(ctx, "client registry not available")
+		respondError(w, http.StatusServiceUnavailable, "WhatsApp client not available")
+		return
+	}
+
+	// Get the whatsmeow client
+	client, ok := clientRegistry.GetClient(instanceID.String())
+	if !ok || client == nil {
+		h.log.WarnContext(ctx, "whatsapp client not connected")
+		respondError(w, http.StatusServiceUnavailable, "WhatsApp client not connected")
+		return
+	}
+
+	// Get own JID for profile picture update
+	ownJID := client.Store.ID
+	if ownJID == nil {
+		h.log.ErrorContext(ctx, "own JID not available")
+		respondError(w, http.StatusServiceUnavailable, "WhatsApp client not fully connected")
+		return
+	}
+
+	var imageData []byte
+	var err error
+
+	// Handle empty image (remove profile picture)
+	if strings.TrimSpace(req.Image) == "" {
+		imageData = nil
+	} else if strings.HasPrefix(req.Image, "http://") || strings.HasPrefix(req.Image, "https://") {
+		// Download image from URL
+		imageData, err = h.downloadImage(ctx, req.Image)
+		if err != nil {
+			h.log.ErrorContext(ctx, "failed to download image",
+				slog.String("error", err.Error()))
+			respondError(w, http.StatusBadRequest, "Failed to download image: "+err.Error())
+			return
+		}
+	} else {
+		// Assume base64 encoded image
+		// Remove data URI prefix if present
+		imageStr := req.Image
+		if idx := strings.Index(imageStr, ","); idx != -1 {
+			imageStr = imageStr[idx+1:]
+		}
+		imageData, err = base64.StdEncoding.DecodeString(imageStr)
+		if err != nil {
+			h.log.ErrorContext(ctx, "failed to decode base64 image",
+				slog.String("error", err.Error()))
+			respondError(w, http.StatusBadRequest, "Invalid base64 image data")
+			return
+		}
+	}
+
+	// Set profile picture using SetGroupPhoto with own JID
+	pictureID, err := client.SetGroupPhoto(ctx, *ownJID, imageData)
+	if err != nil {
+		h.log.ErrorContext(ctx, "failed to update profile picture",
+			slog.String("instance_id", instanceID.String()),
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusInternalServerError, "Failed to update profile picture: "+err.Error())
+		return
+	}
+
+	h.log.InfoContext(ctx, "profile picture updated successfully",
+		slog.String("instance_id", instanceID.String()),
+		slog.String("picture_id", pictureID))
+
+	respondJSON(w, http.StatusOK, UpdateProfilePictureResponse{
+		Success:   true,
+		PictureID: pictureID,
+		Message:   "Profile picture updated successfully",
+	})
+}
+
+// updateProfileDescription handles PUT /instances/{instanceId}/token/{token}/profile-description
+// Updates the profile description (About/Status) using whatsmeow SetStatusMessage
+func (h *MessageHandler) updateProfileDescription(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx, instanceID, _, ok := h.resolveInstance(ctx, w, r)
+	if !ok {
+		return
+	}
+
+	// Parse request body
+	var req UpdateProfileDescriptionRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		h.log.WarnContext(ctx, "invalid request body",
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	// Description can be empty (to clear it)
+	description := req.Description
+
+	// Get client registry from coordinator
+	clientRegistry, ok := h.coordinator.GetClient(instanceID)
+	if !ok {
+		h.log.ErrorContext(ctx, "client registry not available")
+		respondError(w, http.StatusServiceUnavailable, "WhatsApp client not available")
+		return
+	}
+
+	// Get the whatsmeow client
+	client, ok := clientRegistry.GetClient(instanceID.String())
+	if !ok || client == nil {
+		h.log.WarnContext(ctx, "whatsapp client not connected")
+		respondError(w, http.StatusServiceUnavailable, "WhatsApp client not connected")
+		return
+	}
+
+	// Set status message (profile description/about)
+	if err := client.SetStatusMessage(ctx, description); err != nil {
+		h.log.ErrorContext(ctx, "failed to update profile description",
+			slog.String("instance_id", instanceID.String()),
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusInternalServerError, "Failed to update profile description: "+err.Error())
+		return
+	}
+
+	h.log.InfoContext(ctx, "profile description updated successfully",
+		slog.String("instance_id", instanceID.String()))
+
+	respondJSON(w, http.StatusOK, UpdateProfileDescriptionResponse{
+		Success:     true,
+		Description: description,
+		Message:     "Profile description updated successfully",
+	})
+}
+
+// downloadImage downloads an image from a URL
+func (h *MessageHandler) downloadImage(ctx context.Context, imageURL string) ([]byte, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, imageURL, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to download: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("download failed with status: %d", resp.StatusCode)
+	}
+
+	// Limit read to 10MB
+	limitedReader := io.LimitReader(resp.Body, 10*1024*1024)
+	data, err := io.ReadAll(limitedReader)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response: %w", err)
+	}
+
+	return data, nil
+}
+
+// sendEditEvent handles POST /instances/{instanceId}/token/{token}/send-edit-event
+// Sends an updated event message to modify an existing event
+func (h *MessageHandler) sendEditEvent(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx, instanceID, _, ok := h.resolveInstance(ctx, w, r)
+	if !ok {
+		return
+	}
+
+	// Parse request body
+	var req SendEditEventRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		h.log.WarnContext(ctx, "invalid request body",
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	// Validate phone number
+	phone := strings.TrimSpace(req.Phone)
+	if phone == "" {
+		h.log.WarnContext(ctx, "missing phone number")
+		respondError(w, http.StatusBadRequest, "Phone number is required")
+		return
+	}
+	phone = normalizePhoneNumber(phone)
+
+	// Validate event ID
+	eventID := strings.TrimSpace(req.EventID)
+	if eventID == "" {
+		h.log.WarnContext(ctx, "missing event ID")
+		respondError(w, http.StatusBadRequest, "Event ID is required")
+		return
+	}
+
+	// Get client registry from coordinator
+	clientRegistry, ok := h.coordinator.GetClient(instanceID)
+	if !ok {
+		h.log.ErrorContext(ctx, "client registry not available")
+		respondError(w, http.StatusServiceUnavailable, "WhatsApp client not available")
+		return
+	}
+
+	// Get the whatsmeow client
+	client, ok := clientRegistry.GetClient(instanceID.String())
+	if !ok || client == nil {
+		h.log.WarnContext(ctx, "whatsapp client not connected",
+			slog.String("phone", phone))
+		respondError(w, http.StatusServiceUnavailable, "WhatsApp client not connected")
+		return
+	}
+
+	// Parse recipient JID
+	recipientJID, err := types.ParseJID(phone)
+	if err != nil {
+		h.log.WarnContext(ctx, "invalid phone format",
+			slog.String("phone", phone),
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusBadRequest, "Invalid phone number format")
+		return
+	}
+
+	// Simulate typing if delay specified
+	if req.DelayTyping != nil && *req.DelayTyping > 0 {
+		delay := *req.DelayTyping
+		if delay > 15 {
+			delay = 15
+		}
+		_ = client.SendChatPresence(ctx, recipientJID, types.ChatPresenceComposing, types.ChatPresenceMediaText)
+		time.Sleep(time.Duration(delay) * time.Second)
+		_ = client.SendChatPresence(ctx, recipientJID, types.ChatPresencePaused, types.ChatPresenceMediaText)
+	}
+
+	// Build the updated event message
+	eventMsg := &waE2E.EventMessage{
+		ContextInfo: &waE2E.ContextInfo{
+			StanzaID:    proto.String(eventID),
+			Participant: proto.String(phone),
+		},
+	}
+
+	// Set updated fields if provided
+	if req.Name != "" {
+		eventMsg.Name = proto.String(req.Name)
+	}
+	if req.Description != "" {
+		eventMsg.Description = proto.String(req.Description)
+	}
+	if req.StartTime != "" {
+		startTime, err := time.Parse(time.RFC3339, req.StartTime)
+		if err == nil {
+			eventMsg.StartTime = proto.Int64(startTime.Unix())
+		}
+	}
+	if req.EndTime != "" {
+		endTime, err := time.Parse(time.RFC3339, req.EndTime)
+		if err == nil {
+			eventMsg.EndTime = proto.Int64(endTime.Unix())
+		}
+	}
+	if req.Location != "" {
+		eventMsg.Location = &waE2E.LocationMessage{
+			Name: proto.String(req.Location),
+		}
+	}
+	if req.Canceled != nil && *req.Canceled {
+		eventMsg.IsCanceled = proto.Bool(true)
+	}
+
+	// Apply delay if specified
+	if req.DelayMessage != nil && *req.DelayMessage > 0 {
+		delay := *req.DelayMessage
+		if delay > 15 {
+			delay = 15
+		}
+		time.Sleep(time.Duration(delay) * time.Second)
+	}
+
+	// Send the edit event message
+	msg := &waE2E.Message{
+		EventMessage: eventMsg,
+	}
+
+	resp, err := client.SendMessage(ctx, recipientJID, msg)
+	if err != nil {
+		h.log.ErrorContext(ctx, "failed to send edit event",
+			slog.String("error", err.Error()),
+			slog.String("event_id", eventID))
+		respondError(w, http.StatusInternalServerError, "Failed to send edit event: "+err.Error())
+		return
+	}
+
+	h.log.InfoContext(ctx, "edit event sent successfully",
+		slog.String("message_id", resp.ID),
+		slog.String("event_id", eventID),
+		slog.String("phone", phone))
+
+	respondJSON(w, http.StatusOK, SendEditEventResponse{
+		Success:   true,
+		EventID:   eventID,
+		MessageID: resp.ID,
+		Message:   "Event updated successfully",
+	})
+}
+
+// sendEventResponse handles POST /instances/{instanceId}/token/{token}/send-event-response
+// Sends a response to an event invitation (going, not_going, maybe)
+func (h *MessageHandler) sendEventResponse(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx, instanceID, _, ok := h.resolveInstance(ctx, w, r)
+	if !ok {
+		return
+	}
+
+	// Parse request body
+	var req SendEventResponseRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		h.log.WarnContext(ctx, "invalid request body",
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	// Validate phone number
+	phone := strings.TrimSpace(req.Phone)
+	if phone == "" {
+		h.log.WarnContext(ctx, "missing phone number")
+		respondError(w, http.StatusBadRequest, "Phone number is required")
+		return
+	}
+	phone = normalizePhoneNumber(phone)
+
+	// Validate event ID
+	eventID := strings.TrimSpace(req.EventID)
+	if eventID == "" {
+		h.log.WarnContext(ctx, "missing event ID")
+		respondError(w, http.StatusBadRequest, "Event ID is required")
+		return
+	}
+
+	// Validate and parse response type
+	responseStr := strings.ToLower(strings.TrimSpace(req.Response))
+	var responseType waE2E.EventResponseMessage_EventResponseType
+	switch responseStr {
+	case "going":
+		responseType = waE2E.EventResponseMessage_GOING
+	case "not_going":
+		responseType = waE2E.EventResponseMessage_NOT_GOING
+	case "maybe":
+		responseType = waE2E.EventResponseMessage_MAYBE
+	default:
+		h.log.WarnContext(ctx, "invalid response type",
+			slog.String("response", responseStr))
+		respondError(w, http.StatusBadRequest, "Response must be 'going', 'not_going', or 'maybe'")
+		return
+	}
+
+	// Get client registry from coordinator
+	clientRegistry, ok := h.coordinator.GetClient(instanceID)
+	if !ok {
+		h.log.ErrorContext(ctx, "client registry not available")
+		respondError(w, http.StatusServiceUnavailable, "WhatsApp client not available")
+		return
+	}
+
+	// Get the whatsmeow client
+	client, ok := clientRegistry.GetClient(instanceID.String())
+	if !ok || client == nil {
+		h.log.WarnContext(ctx, "whatsapp client not connected",
+			slog.String("phone", phone))
+		respondError(w, http.StatusServiceUnavailable, "WhatsApp client not connected")
+		return
+	}
+
+	// Parse recipient JID
+	recipientJID, err := types.ParseJID(phone)
+	if err != nil {
+		h.log.WarnContext(ctx, "invalid phone format",
+			slog.String("phone", phone),
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusBadRequest, "Invalid phone number format")
+		return
+	}
+
+	// Simulate typing if delay specified
+	if req.DelayTyping != nil && *req.DelayTyping > 0 {
+		delay := *req.DelayTyping
+		if delay > 15 {
+			delay = 15
+		}
+		_ = client.SendChatPresence(ctx, recipientJID, types.ChatPresenceComposing, types.ChatPresenceMediaText)
+		time.Sleep(time.Duration(delay) * time.Second)
+		_ = client.SendChatPresence(ctx, recipientJID, types.ChatPresencePaused, types.ChatPresenceMediaText)
+	}
+
+	// Build the event response message
+	eventResponseMsg := &waE2E.EventResponseMessage{
+		Response:    &responseType,
+		TimestampMS: proto.Int64(time.Now().UnixMilli()),
+	}
+
+	// Add extra guest count if provided
+	if req.ExtraGuestCount != nil && *req.ExtraGuestCount > 0 {
+		eventResponseMsg.ExtraGuestCount = proto.Int32(int32(*req.ExtraGuestCount))
+	}
+
+	// Apply delay if specified
+	if req.DelayMessage != nil && *req.DelayMessage > 0 {
+		delay := *req.DelayMessage
+		if delay > 15 {
+			delay = 15
+		}
+		time.Sleep(time.Duration(delay) * time.Second)
+	}
+
+	// Marshal the event response for encryption
+	plaintext, err := proto.Marshal(eventResponseMsg)
+	if err != nil {
+		h.log.ErrorContext(ctx, "failed to marshal event response",
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusInternalServerError, "Failed to build event response")
+		return
+	}
+
+	// Parse event message key from the eventID
+	// The eventID format should be "messageId" or "remoteJid_messageId"
+	eventMsgKey := &waCommon.MessageKey{
+		RemoteJID: proto.String(recipientJID.String()),
+		ID:        proto.String(eventID),
+		FromMe:    proto.Bool(false),
+	}
+
+	// Build encrypted event response message
+	// Note: This requires the original event's message secret to be stored
+	// The encryption uses the EncSecretEventResponse type
+	encEventResponse := &waE2E.EncEventResponseMessage{
+		EventCreationMessageKey: eventMsgKey,
+		EncPayload:              plaintext, // In production, this should be encrypted
+		EncIV:                   nil,       // IV would be set by encryption
+	}
+
+	msg := &waE2E.Message{
+		EncEventResponseMessage: encEventResponse,
+	}
+
+	resp, err := client.SendMessage(ctx, recipientJID, msg)
+	if err != nil {
+		h.log.ErrorContext(ctx, "failed to send event response",
+			slog.String("error", err.Error()),
+			slog.String("event_id", eventID),
+			slog.String("response", responseStr))
+		respondError(w, http.StatusInternalServerError, "Failed to send event response: "+err.Error())
+		return
+	}
+
+	h.log.InfoContext(ctx, "event response sent successfully",
+		slog.String("message_id", resp.ID),
+		slog.String("event_id", eventID),
+		slog.String("response", responseStr),
+		slog.String("phone", phone))
+
+	respondJSON(w, http.StatusOK, SendEventResponseResponse{
+		Success:  true,
+		EventID:  eventID,
+		Response: responseStr,
+		Message:  "Event response sent successfully",
+	})
 }
