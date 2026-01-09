@@ -47,7 +47,9 @@ export function useMetrics(options: UseMetricsOptions = {}): UseMetricsResult {
 		instanceId = null,
 	} = options;
 
-	const [lastUpdated, setLastUpdated] = React.useState<Date | undefined>(undefined);
+	const [lastUpdated, setLastUpdated] = React.useState<Date | undefined>(
+		undefined,
+	);
 
 	// Build API URL with optional instance filter
 	const apiUrl = React.useMemo(() => {
@@ -60,27 +62,31 @@ export function useMetrics(options: UseMetricsOptions = {}): UseMetricsResult {
 	}, [instanceId]);
 
 	// Custom fetcher that extracts data from response
-	const fetcher = React.useCallback(async (url: string): Promise<DashboardMetrics | undefined> => {
-		const response = await fetch(url, {
-			method: "GET",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			cache: "no-store",
-		});
+	const fetcher = React.useCallback(
+		async (url: string): Promise<DashboardMetrics | undefined> => {
+			const response = await fetch(url, {
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				cache: "no-store",
+			});
 
-		if (!response.ok) {
-			throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-		}
+			if (!response.ok) {
+				throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+			}
 
-		const json: MetricsResponse = await response.json();
+			const json: MetricsResponse = await response.json();
 
-		if (!json.success) {
-			throw new Error(json.error || "Failed to fetch metrics");
-		}
+			if (!json.success) {
+				throw new Error(json.error || "Failed to fetch metrics");
+			}
 
-		return json.data;
-	}, []);
+			// This endpoint always returns DashboardMetrics format
+			return json.data as DashboardMetrics | undefined;
+		},
+		[],
+	);
 
 	// Use polling hook
 	const {
