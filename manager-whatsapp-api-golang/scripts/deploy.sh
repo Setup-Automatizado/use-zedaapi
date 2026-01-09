@@ -118,10 +118,11 @@ build_image() {
     VERSION="$ENVIRONMENT"
     COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 
-    log_cmd "docker build --platform linux/amd64 --build-arg NEXT_PUBLIC_APP_URL=$APP_URL --build-arg BUILD_TIME=$BUILD_TIME --build-arg VERSION=$VERSION --build-arg COMMIT=$COMMIT -t $ECR_REPOSITORY:$ENVIRONMENT ."
+    log_cmd "docker build --platform linux/amd64 --load --build-arg NEXT_PUBLIC_APP_URL=$APP_URL --build-arg BUILD_TIME=$BUILD_TIME --build-arg VERSION=$VERSION --build-arg COMMIT=$COMMIT -t $ECR_REPOSITORY:$ENVIRONMENT ."
 
     docker build \
         --platform linux/amd64 \
+        --load \
         --build-arg NEXT_PUBLIC_APP_URL="$APP_URL" \
         --build-arg BUILD_TIME="$BUILD_TIME" \
         --build-arg VERSION="$VERSION" \
