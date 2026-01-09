@@ -110,11 +110,45 @@ async function markInvitationAccepted(
 	});
 }
 
+/**
+ * Build trusted origins list from environment variables
+ * Supports multiple origins separated by comma in TRUSTED_ORIGINS
+ */
+function getTrustedOrigins(): string[] {
+	const origins: string[] = [];
+
+	// Primary auth URL
+	if (process.env.BETTER_AUTH_URL) {
+		origins.push(process.env.BETTER_AUTH_URL);
+	}
+
+	// Public app URL (may be different in some deployments)
+	if (process.env.NEXT_PUBLIC_APP_URL) {
+		origins.push(process.env.NEXT_PUBLIC_APP_URL);
+	}
+
+	// Additional trusted origins (comma-separated)
+	if (process.env.TRUSTED_ORIGINS) {
+		const additionalOrigins = process.env.TRUSTED_ORIGINS.split(",").map((o) =>
+			o.trim(),
+		);
+		origins.push(...additionalOrigins);
+	}
+
+	// Fallback to localhost if no origins configured
+	if (origins.length === 0) {
+		origins.push("http://localhost:3000");
+	}
+
+	// Remove duplicates
+	return [...new Set(origins)];
+}
+
 export const auth = betterAuth({
 	database: prismaAdapter(prisma, {
 		provider: "postgresql",
 	}),
-	trustedOrigins: [process.env.BETTER_AUTH_URL || "http://localhost:3000"],
+	trustedOrigins: getTrustedOrigins(),
 
 	// Email and password authentication
 	emailAndPassword: {
