@@ -63,6 +63,14 @@
     {
       "name": "Media",
       "description": "Media file storage and serving system.\n\n**Key Features:**\n- Serve media files with HMAC signature validation\n- Time-limited signed URLs for secure access\n- Statistics endpoint for storage monitoring\n- Instance-scoped media organization\n"
+    },
+    {
+      "name": "Privacy",
+      "description": "WhatsApp privacy settings management.\n\n**Key Features:**\n- Get and update privacy settings for the connected account\n- Control who can see last seen, profile photo, about, status\n- Manage read receipts and online status visibility\n- Configure group add and call permissions\n"
+    },
+    {
+      "name": "Profile",
+      "description": "WhatsApp profile management for the connected account.\n\n**Key Features:**\n- Update profile name (push name)\n- Update profile picture\n- Update profile description (About/Status)\n"
     }
   ],
   "components": {
@@ -200,18 +208,18 @@
         "properties": {
           "connected": {
             "type": "boolean",
-            "description": "Mirrors `connected`, indicating if the instance is linked to WhatsApp."
+            "description": "Mirrors FUNNELCHAT `connected`, indicating if the instance is linked to WhatsApp."
           },
           "error": {
             "type": [
               "string",
               "null"
             ],
-            "description": "Same semantics, detailing why the instance is not connected (empty string when everything is ok)."
+            "description": "Same semantics as FUNNELCHAT, detailing why the instance is not connected (empty string when everything is ok)."
           },
           "smartphoneConnected": {
             "type": "boolean",
-            "description": "Matches `smartphoneConnected`, signalling if the paired device has internet access."
+            "description": "Matches FUNNELCHAT `smartphoneConnected`, signalling if the paired device has internet access."
           }
         },
         "required": [
@@ -638,16 +646,16 @@
           "id": {
             "type": "string",
             "format": "uuid",
-            "description": "Instance identifier."
+            "description": "Instance identifier (FUNNELCHAT field)."
           },
           "token": {
             "type": "string",
-            "description": "Instance token used by clients."
+            "description": "Instance token used by FUNNELCHAT clients."
           },
           "due": {
             "type": "integer",
             "format": "int64",
-            "description": "Millisecond timestamp used by tooling."
+            "description": "Millisecond timestamp used by FUNNELCHAT tooling."
           },
           "name": {
             "type": "string",
@@ -822,7 +830,7 @@
           },
           "zaapId": {
             "type": "string",
-            "description": "message tracking ID",
+            "description": "FUNNELCHAT message tracking ID",
             "example": "39BB1684570F00E91090F6BBC7EE7646"
           },
           "messageId": {
@@ -847,7 +855,7 @@
               "null"
             ],
             "description": "Message text content (only for text messages)",
-            "example": "Hello from"
+            "example": "Hello from FUNNELCHAT"
           },
           "delayMessage": {
             "type": "integer",
@@ -996,7 +1004,7 @@
           "subject": {
             "type": "string",
             "description": "Group name",
-            "example": "Community"
+            "example": "FUNNELCHAT Community"
           }
         },
         "required": [
@@ -1016,7 +1024,7 @@
           "message": {
             "type": "string",
             "description": "Text message content",
-            "example": "Hello from!"
+            "example": "Hello from FUNNELCHAT!"
           },
           "messageId": {
             "type": [
@@ -1397,7 +1405,7 @@
       },
       "SendPTVRequest": {
         "type": "object",
-        "description": "Request body for sending PTV (Push-To-Talk Video) messages .\n\n**PTV Format**: Circular video notes displayed similarly to voice notes but with video content.\n\n**Key Features**:\n- Circular video notes (like voice notes with video)\n- Video URL or base64 data URI support\n- Optional caption/text\n- Reply to messages via messageId\n- Schedule delivery with delayMessage (1-15s)\n- Show typing indicator with delayTyping (1-15s)\n- Ephemeral messages with duration (0, 86400, 604800, 7776000)\n- Mention users (@mentions)\n- Mention groups/communities\n- Mention all participants (@everyone)\n- Private reply in groups\n\n**Message Queue**: Messages are queued per recipient with FIFO ordering.\n\n**WhatsApp Compatibility**: Uses whatsmeow library with full WhatsApp Web protocol support.\n",
+        "description": "Request body for sending PTV (Push-To-Talk Video) messages.\n\n**PTV Format**: Circular video notes displayed similarly to voice notes but with video content.\n\n**Key Features**:\n- Circular video notes (like voice notes with video)\n- Video URL or base64 data URI support\n- Optional caption/text\n- Reply to messages via messageId\n- Schedule delivery with delayMessage (1-15s)\n- Show typing indicator with delayTyping (1-15s)\n- Ephemeral messages with duration (0, 86400, 604800, 7776000)\n- Mention users (@mentions)\n- Mention groups/communities\n- Mention all participants (@everyone)\n- Private reply in groups\n\n**Message Queue**: Messages are queued per recipient with FIFO ordering.\n\n**WhatsApp Compatibility**: Uses whatsmeow library with full WhatsApp Web protocol support.\n",
         "properties": {
           "phone": {
             "type": "string",
@@ -1607,7 +1615,7 @@
       },
       "SendStickerRequest": {
         "type": "object",
-        "description": "Request body for sending sticker messages .\n\n**Sticker Format**: Accepts URL (http/https) or base64 data URI (data:image/webp;base64,...).\n\n**Key Features**:\n- Animated stickers supported (WebP format)\n- No caption support (stickers are sent without text)\n- Reply to messages via messageId\n- Schedule delivery with delayMessage (1-15s)\n- Show typing indicator with delayTyping (1-15s)\n- Ephemeral messages with duration (0, 86400, 604800, 7776000)\n- Mention users (@mentions)\n- Mention groups/communities\n- Mention all participants (@everyone)\n- Private reply in groups\n\n**Message Queue**: Messages are queued per recipient with FIFO ordering.\n\n**WhatsApp Compatibility**: Uses whatsmeow library with full WhatsApp Web protocol support.\n",
+        "description": "Request body for sending sticker messages.\n\n**Sticker Format**: Accepts URL (http/https) or base64 data URI (data:image/webp;base64,...).\n\n**Key Features**:\n- Animated stickers supported (WebP format)\n- No caption support (stickers are sent without text)\n- Reply to messages via messageId\n- Schedule delivery with delayMessage (1-15s)\n- Show typing indicator with delayTyping (1-15s)\n- Ephemeral messages with duration (0, 86400, 604800, 7776000)\n- Mention users (@mentions)\n- Mention groups/communities\n- Mention all participants (@everyone)\n- Private reply in groups\n\n**Message Queue**: Messages are queued per recipient with FIFO ordering.\n\n**WhatsApp Compatibility**: Uses whatsmeow library with full WhatsApp Web protocol support.\n",
         "properties": {
           "phone": {
             "type": "string",
@@ -1701,7 +1709,7 @@
       },
       "SendGifRequest": {
         "type": "object",
-        "description": "Request body for sending GIF messages .\n\n**GIF Format**: Accepts URL (http/https) or base64 data URI (data:image/gif;base64,...).\n\n**Key Features**:\n- Animated GIFs supported\n- Optional caption/text\n- Reply to messages via messageId\n- Schedule delivery with delayMessage (1-15s)\n- Show typing indicator with delayTyping (1-15s)\n- View-once messages with viewOnce flag\n- Ephemeral messages with duration (0, 86400, 604800, 7776000)\n- Mention users (@mentions)\n- Mention groups/communities\n- Mention all participants (@everyone)\n- Private reply in groups\n\n**Message Queue**: Messages are queued per recipient with FIFO ordering.\n\n**WhatsApp Compatibility**: Uses whatsmeow library with full WhatsApp Web protocol support.\n",
+        "description": "Request body for sending GIF messages.\n\n**GIF Format**: Accepts URL (http/https) or base64 data URI (data:image/gif;base64,...).\n\n**Key Features**:\n- Animated GIFs supported\n- Optional caption/text\n- Reply to messages via messageId\n- Schedule delivery with delayMessage (1-15s)\n- Show typing indicator with delayTyping (1-15s)\n- View-once messages with viewOnce flag\n- Ephemeral messages with duration (0, 86400, 604800, 7776000)\n- Mention users (@mentions)\n- Mention groups/communities\n- Mention all participants (@everyone)\n- Private reply in groups\n\n**Message Queue**: Messages are queued per recipient with FIFO ordering.\n\n**WhatsApp Compatibility**: Uses whatsmeow library with full WhatsApp Web protocol support.\n",
         "properties": {
           "phone": {
             "type": "string",
@@ -1719,7 +1727,7 @@
               "null"
             ],
             "description": "Optional text caption for the GIF.\nSupports @mentions via mentioned/groupMentioned arrays.\n",
-            "example": "Check this out! 🎉"
+            "example": "Check this out! \ud83c\udf89"
           },
           "messageId": {
             "type": [
@@ -1808,7 +1816,7 @@
       },
       "Contact": {
         "type": "object",
-        "description": "WhatsApp contact information .\n\n**Data Sources**:\n- Device contacts (if contact is in user's address book)\n- WhatsApp profile data (notify field from push name)\n- VCard information (if contact shared via vcard)\n\n**Field Availability**:\n- `phone`: Always present\n- `name`, `short`, `vname`: Only if contact is in address book\n- `notify`: Only if user has interacted with contact\n\n**Privacy Notes**: Contact data respects WhatsApp privacy settings.\nUsers who hide their profile will only show notify field.\n",
+        "description": "WhatsApp contact information.\n\n**Data Sources**:\n- Device contacts (if contact is in user's address book)\n- WhatsApp profile data (notify field from push name)\n- VCard information (if contact shared via vcard)\n\n**Field Availability**:\n- `phone`: Always present\n- `name`, `short`, `vname`: Only if contact is in address book\n- `notify`: Only if user has interacted with contact\n\n**Privacy Notes**: Contact data respects WhatsApp privacy settings.\nUsers who hide their profile will only show notify field.\n",
         "properties": {
           "phone": {
             "type": "string",
@@ -1821,7 +1829,7 @@
               "null"
             ],
             "description": "Full contact name from device address book.\nOnly present if contact exists in user's phone contacts.\n",
-            "example": "João Silva Santos"
+            "example": "Jo\u00e3o Silva Santos"
           },
           "short": {
             "type": [
@@ -1829,7 +1837,7 @@
               "null"
             ],
             "description": "First name or nickname from device address book.\nOnly present if contact exists in user's phone contacts.\n",
-            "example": "João"
+            "example": "Jo\u00e3o"
           },
           "notify": {
             "type": [
@@ -1837,7 +1845,7 @@
               "null"
             ],
             "description": "Name from WhatsApp settings (push name).\nThis is how the user identifies themselves on WhatsApp.\nPresent if user has ever interacted with the contact.\n",
-            "example": "João S."
+            "example": "Jo\u00e3o S."
           },
           "vname": {
             "type": [
@@ -1845,7 +1853,7 @@
               "null"
             ],
             "description": "Full name from VCard if contact was shared via contact card.\nOnly present if contact was received through VCard sharing.\n",
-            "example": "João Silva Santos"
+            "example": "Jo\u00e3o Silva Santos"
           }
         },
         "required": [
@@ -1855,7 +1863,7 @@
       },
       "Chat": {
         "type": "object",
-        "description": "WhatsApp chat information .\n\n**Chat Types**:\n- Individual chats (person-to-person)\n- Group chats (multiple participants)\n- Community announcement channels\n\n**Data Sources**:\n- WhatsApp chat metadata (from store)\n- Message history (last message timestamp)\n- Chat settings (mute, archive, pin, spam status)\n\n**Ordering**: By default, chats are ordered by lastMessageTime descending (most recent first).\n\n**Unread Counts**: Both `unread` and `messagesUnread` represent the same count.\n",
+        "description": "WhatsApp chat information.\n\n**Chat Types**:\n- Individual chats (person-to-person)\n- Group chats (multiple participants)\n- Community announcement channels\n\n**Data Sources**:\n- WhatsApp chat metadata (from store)\n- Message history (last message timestamp)\n- Chat settings (mute, archive, pin, spam status)\n\n**Ordering**: By default, chats are ordered by lastMessageTime descending (most recent first).\n\n**Unread Counts**: Both `unread` and `messagesUnread` represent the same count.\n",
         "properties": {
           "phone": {
             "type": "string",
@@ -1865,7 +1873,7 @@
           "name": {
             "type": "string",
             "description": "Chat display name.\n\n**For Individuals**: Contact name (from address book) or WhatsApp push name\n**For Groups**: Group subject/title\n**For Communities**: Community name\n",
-            "example": "João Silva"
+            "example": "Jo\u00e3o Silva"
           },
           "unread": {
             "type": "integer",
@@ -2033,7 +2041,7 @@
               "null"
             ],
             "description": "Optional location address",
-            "example": "Av. Paulista, 1578 - São Paulo, SP"
+            "example": "Av. Paulista, 1578 - S\u00e3o Paulo, SP"
           },
           "messageId": {
             "type": [
@@ -2346,7 +2354,7 @@
               "null"
             ],
             "description": "City or locality",
-            "example": "São Paulo"
+            "example": "S\u00e3o Paulo"
           },
           "region": {
             "type": [
@@ -2614,6 +2622,862 @@
         ],
         "additionalProperties": false
       },
+      "PrivacySettingsResponse": {
+        "type": "object",
+        "description": "Current privacy settings for the connected account.",
+        "properties": {
+          "groupAdd": {
+            "type": "string",
+            "description": "Who can add you to groups.",
+            "enum": [
+              "all",
+              "contacts",
+              "contact_blacklist",
+              "none"
+            ],
+            "example": "contacts"
+          },
+          "lastSeen": {
+            "type": "string",
+            "description": "Who can see your last seen.",
+            "enum": [
+              "all",
+              "contacts",
+              "contact_blacklist",
+              "none"
+            ],
+            "example": "contacts"
+          },
+          "status": {
+            "type": "string",
+            "description": "Who can see your status.",
+            "enum": [
+              "all",
+              "contacts",
+              "contact_blacklist",
+              "none"
+            ],
+            "example": "contacts"
+          },
+          "profile": {
+            "type": "string",
+            "description": "Who can see your profile photo.",
+            "enum": [
+              "all",
+              "contacts",
+              "contact_blacklist",
+              "none"
+            ],
+            "example": "contacts"
+          },
+          "readReceipts": {
+            "type": "string",
+            "description": "Read receipts setting.",
+            "enum": [
+              "all",
+              "none"
+            ],
+            "example": "all"
+          },
+          "online": {
+            "type": "string",
+            "description": "Online presence visibility.",
+            "enum": [
+              "all",
+              "match_last_seen"
+            ],
+            "example": "all"
+          },
+          "callAdd": {
+            "type": "string",
+            "description": "Who can call you.",
+            "enum": [
+              "all",
+              "known"
+            ],
+            "example": "all"
+          }
+        },
+        "additionalProperties": false
+      },
+      "UpdatePrivacyRequest": {
+        "type": "object",
+        "description": "Request body for updating a privacy setting.",
+        "properties": {
+          "value": {
+            "type": "string",
+            "description": "New privacy value.",
+            "example": "contacts"
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "additionalProperties": false
+      },
+      "UpdatePrivacyResponse": {
+        "type": "object",
+        "description": "Response after updating a privacy setting.",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the operation succeeded."
+          },
+          "setting": {
+            "type": "string",
+            "description": "The setting that was updated."
+          },
+          "value": {
+            "type": "string",
+            "description": "The new value."
+          },
+          "message": {
+            "type": "string",
+            "description": "Optional message."
+          }
+        },
+        "required": [
+          "success",
+          "setting",
+          "value"
+        ],
+        "additionalProperties": false
+      },
+      "ReadMessageRequest": {
+        "type": "object",
+        "description": "Request to mark messages as read.",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "description": "Phone number or JID of the chat.",
+            "example": "5511999999999"
+          },
+          "messageIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of message IDs to mark as read.",
+            "example": [
+              "3EB0796DC18B7F954D54",
+              "3EB0796DC18B7F954D55"
+            ]
+          }
+        },
+        "required": [
+          "phone",
+          "messageIds"
+        ],
+        "additionalProperties": false
+      },
+      "ReadMessageResponse": {
+        "type": "object",
+        "description": "Response after marking messages as read.",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the operation succeeded."
+          },
+          "markedCount": {
+            "type": "integer",
+            "description": "Number of messages marked as read."
+          },
+          "message": {
+            "type": "string",
+            "description": "Optional message."
+          }
+        },
+        "required": [
+          "success",
+          "markedCount"
+        ],
+        "additionalProperties": false
+      },
+      "SendReactionRequest": {
+        "type": "object",
+        "description": "Request to send a reaction to a message.",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "description": "Phone number or JID of the chat containing the message.",
+            "example": "5511999999999"
+          },
+          "messageId": {
+            "type": "string",
+            "description": "ID of the message to react to.",
+            "example": "3EB0796DC18B7F954D54"
+          },
+          "reaction": {
+            "type": "string",
+            "description": "Emoji reaction to send.",
+            "example": "\ud83d\udc4d"
+          }
+        },
+        "required": [
+          "phone",
+          "messageId",
+          "reaction"
+        ],
+        "additionalProperties": false
+      },
+      "SendRemoveReactionRequest": {
+        "type": "object",
+        "description": "Request to remove a reaction from a message.",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "description": "Phone number or JID of the chat containing the message.",
+            "example": "5511999999999"
+          },
+          "messageId": {
+            "type": "string",
+            "description": "ID of the message to remove reaction from.",
+            "example": "3EB0796DC18B7F954D54"
+          }
+        },
+        "required": [
+          "phone",
+          "messageId"
+        ],
+        "additionalProperties": false
+      },
+      "ReactionResponse": {
+        "type": "object",
+        "description": "Response after sending or removing a reaction.",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the operation succeeded."
+          },
+          "messageId": {
+            "type": "string",
+            "description": "The message ID that was reacted to."
+          },
+          "reaction": {
+            "type": "string",
+            "description": "The reaction that was sent (empty if removed)."
+          },
+          "message": {
+            "type": "string",
+            "description": "Optional message."
+          }
+        },
+        "required": [
+          "success",
+          "messageId"
+        ],
+        "additionalProperties": false
+      },
+      "ForwardMessageRequest": {
+        "type": "object",
+        "description": "Request to forward a message.",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "description": "Destination phone number or JID.",
+            "example": "5511999999999"
+          },
+          "messageId": {
+            "type": "string",
+            "description": "ID of the message to forward.",
+            "example": "3EB0796DC18B7F954D54"
+          },
+          "fromPhone": {
+            "type": "string",
+            "description": "Source chat phone number or JID.",
+            "example": "5511888888888"
+          },
+          "isGroup": {
+            "type": "boolean",
+            "description": "Whether the source chat is a group.",
+            "default": false
+          },
+          "delayMessage": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 15,
+            "description": "Optional delay in seconds before sending."
+          },
+          "delayTyping": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 15,
+            "description": "Optional typing indicator duration."
+          }
+        },
+        "required": [
+          "phone",
+          "messageId",
+          "fromPhone"
+        ],
+        "additionalProperties": false
+      },
+      "ForwardMessageResponse": {
+        "type": "object",
+        "description": "Response after forwarding a message.",
+        "properties": {
+          "zapiId": {
+            "type": "string",
+            "description": "Queue tracking ID."
+          },
+          "messageId": {
+            "type": "string",
+            "description": "New message ID."
+          },
+          "phone": {
+            "type": "string",
+            "description": "Destination phone."
+          },
+          "status": {
+            "type": "string",
+            "description": "Queue status.",
+            "enum": [
+              "QUEUE",
+              "QUEUED"
+            ]
+          }
+        },
+        "required": [
+          "zapiId",
+          "messageId",
+          "phone",
+          "status"
+        ],
+        "additionalProperties": false
+      },
+      "SendPollVoteRequest": {
+        "type": "object",
+        "description": "Request to vote on a poll.",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "description": "Phone number or JID of the chat containing the poll.",
+            "example": "5511999999999"
+          },
+          "pollMessageId": {
+            "type": "string",
+            "description": "ID of the poll message.",
+            "example": "3EB0796DC18B7F954D54"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Selected option names.",
+            "example": [
+              "Option A",
+              "Option B"
+            ]
+          },
+          "delayMessage": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 15,
+            "description": "Optional delay in seconds before sending."
+          }
+        },
+        "required": [
+          "phone",
+          "pollMessageId",
+          "options"
+        ],
+        "additionalProperties": false
+      },
+      "SendPollVoteResponse": {
+        "type": "object",
+        "description": "Response after voting on a poll.",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the operation succeeded."
+          },
+          "pollMessageId": {
+            "type": "string",
+            "description": "The poll message ID."
+          },
+          "votedOptions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Options that were voted for."
+          },
+          "message": {
+            "type": "string",
+            "description": "Optional message."
+          }
+        },
+        "required": [
+          "success",
+          "pollMessageId",
+          "votedOptions"
+        ],
+        "additionalProperties": false
+      },
+      "PinMessageRequest": {
+        "type": "object",
+        "description": "Request to pin or unpin a chat.",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "description": "Phone number or JID of the chat to pin.",
+            "example": "5511999999999"
+          },
+          "pin": {
+            "type": "boolean",
+            "description": "True to pin, false to unpin.",
+            "default": true
+          }
+        },
+        "required": [
+          "phone"
+        ],
+        "additionalProperties": false
+      },
+      "PinMessageResponse": {
+        "type": "object",
+        "description": "Response after pinning or unpinning a chat.",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the operation succeeded."
+          },
+          "phone": {
+            "type": "string",
+            "description": "The chat that was pinned/unpinned."
+          },
+          "pinned": {
+            "type": "boolean",
+            "description": "Current pin status."
+          },
+          "message": {
+            "type": "string",
+            "description": "Optional message."
+          }
+        },
+        "required": [
+          "success",
+          "phone",
+          "pinned"
+        ],
+        "additionalProperties": false
+      },
+      "SendEditEventRequest": {
+        "type": "object",
+        "description": "Request to edit an existing event.",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "description": "Phone number or JID of the chat containing the event.",
+            "example": "5511999999999"
+          },
+          "eventId": {
+            "type": "string",
+            "description": "ID of the event message to edit.",
+            "example": "3EB047ED70306656281B34"
+          },
+          "name": {
+            "type": "string",
+            "description": "Updated event name.",
+            "example": "Team Meeting - Updated"
+          },
+          "description": {
+            "type": "string",
+            "description": "Updated event description.",
+            "example": "Weekly sync moved to new time"
+          },
+          "startTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Updated start time in RFC3339 format.",
+            "example": "2024-01-15T14:00:00Z"
+          },
+          "endTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Updated end time in RFC3339 format.",
+            "example": "2024-01-15T15:00:00Z"
+          },
+          "location": {
+            "type": "string",
+            "description": "Updated event location.",
+            "example": "Conference Room B"
+          },
+          "canceled": {
+            "type": "boolean",
+            "description": "Set to true to cancel the event.",
+            "default": false
+          },
+          "delayMessage": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 15,
+            "description": "Optional delay in seconds before sending."
+          },
+          "delayTyping": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 15,
+            "description": "Optional typing simulation duration in seconds."
+          }
+        },
+        "required": [
+          "phone",
+          "eventId"
+        ],
+        "additionalProperties": false
+      },
+      "SendEditEventResponse": {
+        "type": "object",
+        "description": "Response after editing an event.",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the operation succeeded."
+          },
+          "eventId": {
+            "type": "string",
+            "description": "The event message ID."
+          },
+          "messageId": {
+            "type": "string",
+            "description": "The sent message ID."
+          },
+          "message": {
+            "type": "string",
+            "description": "Optional status message."
+          }
+        },
+        "required": [
+          "success",
+          "eventId"
+        ],
+        "additionalProperties": false
+      },
+      "SendEventResponseRequest": {
+        "type": "object",
+        "description": "Request to respond to an event invitation (RSVP).",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "description": "Phone number or JID of the chat containing the event.",
+            "example": "5511999999999"
+          },
+          "eventId": {
+            "type": "string",
+            "description": "ID of the event message to respond to.",
+            "example": "3EB047ED70306656281B34"
+          },
+          "response": {
+            "type": "string",
+            "enum": [
+              "going",
+              "not_going",
+              "maybe"
+            ],
+            "description": "Response type:\n- `going` - Confirm attendance\n- `not_going` - Decline invitation\n- `maybe` - Tentative response\n",
+            "example": "going"
+          },
+          "extraGuestCount": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of additional guests attending.",
+            "example": 2
+          },
+          "delayMessage": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 15,
+            "description": "Optional delay in seconds before sending."
+          },
+          "delayTyping": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 15,
+            "description": "Optional typing simulation duration in seconds."
+          }
+        },
+        "required": [
+          "phone",
+          "eventId",
+          "response"
+        ],
+        "additionalProperties": false
+      },
+      "SendEventResponseResponse": {
+        "type": "object",
+        "description": "Response after sending an event RSVP.",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the operation succeeded."
+          },
+          "eventId": {
+            "type": "string",
+            "description": "The event message ID."
+          },
+          "response": {
+            "type": "string",
+            "description": "The response that was sent.",
+            "enum": [
+              "going",
+              "not_going",
+              "maybe"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "Optional status message."
+          }
+        },
+        "required": [
+          "success",
+          "eventId",
+          "response"
+        ],
+        "additionalProperties": false
+      },
+      "ContactMetadataResponse": {
+        "type": "object",
+        "description": "Metadata about a contact.",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "description": "Phone number.",
+            "example": "5511999999999"
+          },
+          "name": {
+            "type": "string",
+            "description": "Contact name (push name).",
+            "example": "John Doe"
+          },
+          "status": {
+            "type": "string",
+            "description": "Contact status/about.",
+            "example": "Hey there! I am using WhatsApp."
+          },
+          "pictureUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "Profile picture URL."
+          },
+          "isOnWhatsApp": {
+            "type": "boolean",
+            "description": "Whether the number is on WhatsApp."
+          },
+          "verifiedName": {
+            "type": "string",
+            "description": "Verified business name (if applicable)."
+          },
+          "isBusiness": {
+            "type": "boolean",
+            "description": "Whether this is a business account."
+          }
+        },
+        "required": [
+          "phone",
+          "isOnWhatsApp"
+        ],
+        "additionalProperties": false
+      },
+      "ProfilePictureResponse": {
+        "type": "object",
+        "description": "Profile picture information.",
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Direct URL to the profile picture.",
+            "example": "https://pps.whatsapp.net/v/t61..."
+          },
+          "id": {
+            "type": "string",
+            "description": "Picture ID."
+          },
+          "type": {
+            "type": "string",
+            "description": "Picture type (image, preview).",
+            "enum": [
+              "image",
+              "preview"
+            ]
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "additionalProperties": false
+      },
+      "ModifyBlockedRequest": {
+        "type": "object",
+        "description": "Request to block or unblock a contact.",
+        "properties": {
+          "phone": {
+            "type": "string",
+            "description": "Phone number to block/unblock.",
+            "example": "5511999999999"
+          },
+          "action": {
+            "type": "string",
+            "description": "Action to perform.",
+            "enum": [
+              "block",
+              "unblock"
+            ],
+            "example": "block"
+          }
+        },
+        "required": [
+          "phone",
+          "action"
+        ],
+        "additionalProperties": false
+      },
+      "ModifyBlockedResponse": {
+        "type": "object",
+        "description": "Response after blocking or unblocking a contact.",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the operation succeeded."
+          },
+          "phone": {
+            "type": "string",
+            "description": "The phone number affected."
+          },
+          "blocked": {
+            "type": "boolean",
+            "description": "Current block status."
+          },
+          "message": {
+            "type": "string",
+            "description": "Optional message."
+          }
+        },
+        "required": [
+          "success",
+          "phone",
+          "blocked"
+        ],
+        "additionalProperties": false
+      },
+      "UpdateProfileNameRequest": {
+        "type": "object",
+        "description": "Request to update profile name (push name).",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "New profile name.",
+            "example": "John Doe",
+            "minLength": 1,
+            "maxLength": 25
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "UpdateProfileNameResponse": {
+        "type": "object",
+        "description": "Response after updating profile name.",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the operation succeeded."
+          },
+          "name": {
+            "type": "string",
+            "description": "The new profile name."
+          },
+          "message": {
+            "type": "string",
+            "description": "Optional message."
+          }
+        },
+        "required": [
+          "success",
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "UpdateProfilePictureRequest": {
+        "type": "object",
+        "description": "Request to update profile picture.",
+        "properties": {
+          "image": {
+            "type": "string",
+            "description": "Base64-encoded JPEG image or URL.",
+            "example": "data:image/jpeg;base64,/9j/4AAQ..."
+          }
+        },
+        "required": [
+          "image"
+        ],
+        "additionalProperties": false
+      },
+      "UpdateProfilePictureResponse": {
+        "type": "object",
+        "description": "Response after updating profile picture.",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the operation succeeded."
+          },
+          "pictureId": {
+            "type": "string",
+            "description": "New picture ID assigned by WhatsApp."
+          },
+          "message": {
+            "type": "string",
+            "description": "Optional message."
+          }
+        },
+        "required": [
+          "success"
+        ],
+        "additionalProperties": false
+      },
+      "UpdateProfileDescriptionRequest": {
+        "type": "object",
+        "description": "Request to update profile description (About/Status).",
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "New profile description.",
+            "example": "Hey there! I am using WhatsApp.",
+            "maxLength": 139
+          }
+        },
+        "required": [
+          "description"
+        ],
+        "additionalProperties": false
+      },
+      "UpdateProfileDescriptionResponse": {
+        "type": "object",
+        "description": "Response after updating profile description.",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the operation succeeded."
+          },
+          "description": {
+            "type": "string",
+            "description": "The new profile description."
+          },
+          "message": {
+            "type": "string",
+            "description": "Optional message."
+          }
+        },
+        "required": [
+          "success",
+          "description"
+        ],
+        "additionalProperties": false
+      },
       "InvitationLinkResponse": {
         "type": "object",
         "description": "Response containing a regenerated invitation link.",
@@ -2667,7 +3531,7 @@
           },
           "unread": {
             "type": "string",
-            "description": "Number of unread messages represented as string for parity."
+            "description": "Number of unread messages represented as string for FUNNELCHAT parity."
           },
           "name": {
             "type": "string",
@@ -4509,7 +5373,7 @@
       },
       "SendButtonListRequest": {
         "type": "object",
-        "description": "Request body for sending simple reply button messages .\n\n**Features:**\n- Simple reply buttons (1-3 buttons)\n- Optional header image/video\n- Quick selection callbacks\n\n**Limits:**\n- Max 3 buttons\n- Title: max 60 chars\n- Message: max 1024 chars\n- Footer: max 60 chars\n- Button title: max 20 chars\n\n**Message Queue:** Messages are queued per recipient with FIFO ordering.\n",
+        "description": "Request body for sending simple reply button messages.\n\n**Features:**\n- Simple reply buttons (1-3 buttons)\n- Optional header image/video\n- Quick selection callbacks\n\n**Limits:**\n- Max 3 buttons\n- Title: max 60 chars\n- Message: max 1024 chars\n- Footer: max 60 chars\n- Button title: max 20 chars\n\n**Message Queue:** Messages are queued per recipient with FIFO ordering.\n",
         "properties": {
           "phone": {
             "type": "string",
@@ -4581,7 +5445,7 @@
       },
       "SendButtonActionsRequest": {
         "type": "object",
-        "description": "Request body for sending button actions messages .\n\n**Features:**\n- CTA buttons (URL, Call, Copy)\n- Optional image header\n- Quick reply buttons\n\n**Button Types:**\n- `quick_reply` - Simple reply button\n- `cta_url` - Opens a URL\n- `cta_call` - Initiates a phone call\n- `cta_copy` - Copies text to clipboard\n\n**Limits:**\n- Max 3 buttons\n- Label: max 25 chars (20 for quick_reply)\n- Title: max 60 chars\n- Message: max 1024 chars\n- Footer: max 60 chars\n\n**Message Queue:** Messages are queued per recipient with FIFO ordering.\n",
+        "description": "Request body for sending button actions messages.\n\n**Features:**\n- CTA buttons (URL, Call, Copy)\n- Optional image header\n- Quick reply buttons\n\n**Button Types:**\n- `quick_reply` - Simple reply button\n- `cta_url` - Opens a URL\n- `cta_call` - Initiates a phone call\n- `cta_copy` - Copies text to clipboard\n\n**Limits:**\n- Max 3 buttons\n- Label: max 25 chars (20 for quick_reply)\n- Title: max 60 chars\n- Message: max 1024 chars\n- Footer: max 60 chars\n\n**Message Queue:** Messages are queued per recipient with FIFO ordering.\n",
         "properties": {
           "phone": {
             "type": "string",
@@ -4641,7 +5505,7 @@
       },
       "SendOptionListRequest": {
         "type": "object",
-        "description": "Request body for sending interactive list/menu messages .\n\n**Features:**\n- Multiple sections with rows\n- Expandable list menu\n- Selection callbacks\n\n**Limits:**\n- Max 10 sections\n- Max 10 rows per section\n- Title: max 60 chars\n- Message: max 4096 chars\n- Footer: max 60 chars\n- Button label: max 20 chars\n- Section title: max 24 chars\n- Row title: max 24 chars\n- Row description: max 72 chars\n\n**Message Queue:** Messages are queued per recipient with FIFO ordering.\n",
+        "description": "Request body for sending interactive list/menu messages.\n\n**Features:**\n- Multiple sections with rows\n- Expandable list menu\n- Selection callbacks\n\n**Limits:**\n- Max 10 sections\n- Max 10 rows per section\n- Title: max 60 chars\n- Message: max 4096 chars\n- Footer: max 60 chars\n- Button label: max 20 chars\n- Section title: max 24 chars\n- Row title: max 24 chars\n- Row description: max 72 chars\n\n**Message Queue:** Messages are queued per recipient with FIFO ordering.\n",
         "properties": {
           "phone": {
             "type": "string",
@@ -4710,7 +5574,7 @@
       },
       "SendButtonPIXRequest": {
         "type": "object",
-        "description": "Request body for sending PIX payment messages .\n\n**Features:**\n- PIX QR code generation\n- Copy-paste PIX code\n- Multiple PIX key types\n\n**PIX Key Types:**\n- `CPF` - Brazilian individual taxpayer ID\n- `CNPJ` - Brazilian company taxpayer ID\n- `EMAIL` - Email address\n- `PHONE` - Phone number\n- `EVP` - Random PIX key (UUID format)\n\n**Message Queue:** Messages are queued per recipient with FIFO ordering.\n",
+        "description": "Request body for sending PIX payment messages.\n\n**Features:**\n- PIX QR code generation\n- Copy-paste PIX code\n- Multiple PIX key types\n\n**PIX Key Types:**\n- `CPF` - Brazilian individual taxpayer ID\n- `CNPJ` - Brazilian company taxpayer ID\n- `EMAIL` - Email address\n- `PHONE` - Phone number\n- `EVP` - Random PIX key (UUID format)\n\n**Message Queue:** Messages are queued per recipient with FIFO ordering.\n",
         "properties": {
           "phone": {
             "type": "string",
@@ -4776,7 +5640,7 @@
       },
       "SendButtonOTPRequest": {
         "type": "object",
-        "description": "Request body for sending OTP (One-Time Password) messages .\n\n**Features:**\n- One-tap copy button\n- Verification code display\n- 2FA/Authentication flows\n\n**Use Cases:**\n- Login verification\n- Password reset\n- Two-factor authentication\n- Account verification\n\n**Message Queue:** Messages are queued per recipient with FIFO ordering.\n",
+        "description": "Request body for sending OTP (One-Time Password) messages.\n\n**Features:**\n- One-tap copy button\n- Verification code display\n- 2FA/Authentication flows\n\n**Use Cases:**\n- Login verification\n- Password reset\n- Two-factor authentication\n- Account verification\n\n**Message Queue:** Messages are queued per recipient with FIFO ordering.\n",
         "properties": {
           "phone": {
             "type": "string",
@@ -4836,12 +5700,18 @@
       },
       "SendCarouselRequest": {
         "type": "object",
-        "description": "Request body for sending carousel messages .\n\n**Features:**\n- Multiple swipeable cards with media\n- Action buttons per card (1-3)\n- Optional card type selection\n\n**Limits:**\n- Cards: 1-10 per carousel\n- Buttons per card: 1-3\n- Body text: max 1024 chars per card\n\n**Card Types:**\n- HSCROLL_CARDS: Horizontal scrolling cards (default)\n- ALBUM_IMAGE: Image album format\n\n**Use Cases:**\n- Product catalogs\n- Image galleries\n- Multi-option presentations\n- Tutorial sequences\n\n**Message Queue:** Messages are queued per recipient with FIFO ordering.\n",
+        "description": "Request body for sending carousel messages.\n\n**Features:**\n- Multiple swipeable cards with media\n- Action buttons per card (1-3)\n- Optional card type selection\n\n**Limits:**\n- Cards: 1-10 per carousel\n- Buttons per card: 1-3\n- Body text: max 1024 chars per card\n\n**Card Types:**\n- HSCROLL_CARDS: Horizontal scrolling cards (default)\n- ALBUM_IMAGE: Image album format\n\n**Use Cases:**\n- Product catalogs\n- Image galleries\n- Multi-option presentations\n- Tutorial sequences\n\n**Message Queue:** Messages are queued per recipient with FIFO ordering.\n",
         "properties": {
           "phone": {
             "type": "string",
             "description": "Recipient phone number in international format",
             "example": "5511999999999"
+          },
+          "message": {
+            "type": "string",
+            "description": "Carousel body text displayed above the cards.\nThis is the main message that appears before the carousel cards.\n",
+            "maxLength": 1024,
+            "example": "Check out our latest products!"
           },
           "cards": {
             "type": "array",
@@ -4958,7 +5828,7 @@
       },
       "SendPollRequest": {
         "type": "object",
-        "description": "Request body for sending poll messages .\n\n**Features:**\n- Create polls with 2-12 options\n- Single or multiple choice selection\n- Optional reply-to support\n- Typing indicator and delay support\n\n\n",
+        "description": "Request body for sending poll messages.\n\n**Features:**\n- Create polls with 2-12 options\n- Single or multiple choice selection\n- Optional reply-to support\n- Typing indicator and delay support\n",
         "properties": {
           "phone": {
             "type": "string",
@@ -4967,7 +5837,7 @@
           },
           "message": {
             "type": "string",
-            "description": "Poll question text (uses \"message\" field for the question)",
+            "description": "Poll question text (FUNNELCHAT uses \"message\" field for the question)",
             "example": "Outra enquete"
           },
           "poll": {
@@ -5104,7 +5974,7 @@
       },
       "SendEventRequest": {
         "type": "object",
-        "description": "Request body for sending calendar event messages .\n\n**Features:**\n- Send calendar events to groups\n- Support for location and call links\n- Event cancellation support\n\n\n",
+        "description": "Request body for sending calendar event messages.\n\n**Features:**\n- Send calendar events to groups\n- Support for location and call links\n- Event cancellation support\n",
         "properties": {
           "phone": {
             "type": "string",
@@ -5148,7 +6018,7 @@
       },
       "SendLinkRequest": {
         "type": "object",
-        "description": "Request body for sending link messages with custom preview .\n\n**Features:**\n- Custom link preview title and description\n- Custom preview image\n- Optional message text before the link\n- Reply-to support\n\n\n",
+        "description": "Request body for sending link messages with custom preview.\n\n**Features:**\n- Custom link preview title and description\n- Custom preview image\n- Optional message text before the link\n- Reply-to support\n",
         "properties": {
           "phone": {
             "type": "string",
@@ -5216,7 +6086,7 @@
       },
       "ModifyChatRequest": {
         "type": "object",
-        "description": "Request body for modifying chat state .\n\n**Supported Actions:**\n- read: Mark chat as read\n- archive: Archive the chat\n- unarchive: Unarchive the chat\n- pin: Pin the chat\n- unpin: Unpin the chat\n- mute: Mute notifications (8 hours default)\n- unmute: Unmute notifications\n- clear: Clear chat messages (not supported by whatsmeow)\n- delete: Delete the chat\n\n\n",
+        "description": "Request body for modifying chat state.\n\n**Supported Actions:**\n- read: Mark chat as read\n- archive: Archive the chat\n- unarchive: Unarchive the chat\n- pin: Pin the chat\n- unpin: Unpin the chat\n- mute: Mute notifications (8 hours default)\n- unmute: Unmute notifications\n- clear: Clear chat messages (not supported by whatsmeow)\n- delete: Delete the chat\n",
         "properties": {
           "phone": {
             "type": "string",
@@ -5505,7 +6375,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "Informational middleware flag (matches contract)."
+            "description": "Informational middleware flag (matches FUNNELCHAT contract)."
           },
           {
             "in": "query",
@@ -5527,7 +6397,7 @@
               "minimum": 1,
               "maximum": 200
             },
-            "description": "Page size (defaults to 15 as in examples).",
+            "description": "Page size (defaults to 15 as in FUNNELCHAT examples).",
             "example": 15
           }
         ],
@@ -5561,7 +6431,7 @@
           "Partner"
         ],
         "summary": "Partner creates an instance on demand",
-        "description": "Mirrors partner endpoint for provisioning instances via integrator credentials.",
+        "description": "Mirrors FUNNELCHAT partner endpoint for provisioning instances via integrator credentials.",
         "operationId": "partnerCreateInstance",
         "security": [
           {
@@ -5618,7 +6488,7 @@
           "Partner"
         ],
         "summary": "Permanently delete instance (Partner API)",
-        "description": "**⚠️ IRREVERSIBLE OPERATION ⚠️**\n\nPermanently deletes a WhatsApp instance including all associated data from both databases.\n\n**Complete Cleanup Operations:**\n- ✅ Disconnects the WhatsApp client immediately\n- ✅ Disables auto-reconnect to prevent reconnection\n- ✅ **Deletes device store from whatsmeow_store database**\n- ✅ Stops lock refresh goroutine\n- ✅ Releases Redis distributed lock\n- ✅ Removes client from in-memory registry\n- ✅ **Deletes instance record from api_core database**\n- ✅ **Deletes all webhook configurations (CASCADE)**\n- ✅ **Deletes all webhook outbox entries (CASCADE)**\n- ✅ **Deletes all webhook DLQ entries (manual deletion)**\n- ✅ **Deletes all instance event logs (manual deletion)**\n\n**Database Deletion Strategy:**\n- Uses transaction to ensure ACID compliance\n- Manually deletes tables without CASCADE constraints (webhook_dlq, instance_events_log)\n- Relies on CASCADE for webhook_configs and webhook_outbox\n- Deletes device credentials from separate whatsmeow_store database\n\n**Authentication:**\n- Requires Partner Bearer token only (no instance token needed)\n- This is a Partner-level administrative operation\n\n**Use Cases:**\n- Cleanup of test/development instances\n- Customer offboarding and data removal\n- GDPR/data deletion compliance requests\n- Freeing resources from inactive instances\n\n**Important Notes:**\n- **This operation cannot be undone or reversed**\n- All data associated with the instance is permanently lost\n- The instance cannot be recovered or reconnected after deletion\n- Consider using `/disconnect` if you need to preserve the instance record\n",
+        "description": "**\u26a0\ufe0f IRREVERSIBLE OPERATION \u26a0\ufe0f**\n\nPermanently deletes a WhatsApp instance including all associated data from both databases.\n\n**Complete Cleanup Operations:**\n- \u2705 Disconnects the WhatsApp client immediately\n- \u2705 Disables auto-reconnect to prevent reconnection\n- \u2705 **Deletes device store from whatsmeow_store database**\n- \u2705 Stops lock refresh goroutine\n- \u2705 Releases Redis distributed lock\n- \u2705 Removes client from in-memory registry\n- \u2705 **Deletes instance record from api_core database**\n- \u2705 **Deletes all webhook configurations (CASCADE)**\n- \u2705 **Deletes all webhook outbox entries (CASCADE)**\n- \u2705 **Deletes all webhook DLQ entries (manual deletion)**\n- \u2705 **Deletes all instance event logs (manual deletion)**\n\n**Database Deletion Strategy:**\n- Uses transaction to ensure ACID compliance\n- Manually deletes tables without CASCADE constraints (webhook_dlq, instance_events_log)\n- Relies on CASCADE for webhook_configs and webhook_outbox\n- Deletes device credentials from separate whatsmeow_store database\n\n**Authentication:**\n- Requires Partner Bearer token only (no instance token needed)\n- This is a Partner-level administrative operation\n\n**Use Cases:**\n- Cleanup of test/development instances\n- Customer offboarding and data removal\n- GDPR/data deletion compliance requests\n- Freeing resources from inactive instances\n\n**Important Notes:**\n- **This operation cannot be undone or reversed**\n- All data associated with the instance is permanently lost\n- The instance cannot be recovered or reconnected after deletion\n- Consider using `/disconnect` if you need to preserve the instance record\n",
         "operationId": "partnerDeleteInstance",
         "security": [
           {
@@ -5726,7 +6596,7 @@
           "Instances"
         ],
         "summary": "Retrieve instance status",
-        "description": "Mirrors `/status`, returning live connectivity information for a provisioned instance.",
+        "description": "Mirrors FUNNELCHAT `/status`, returning live connectivity information for a provisioned instance.",
         "operationId": "getInstanceStatus",
         "security": [
           {
@@ -5781,7 +6651,7 @@
           "Instances"
         ],
         "summary": "Fetch QR code for pairing",
-        "description": "Mirrors `/qr-code`, returning the current QR string required to link a phone.",
+        "description": "Mirrors FUNNELCHAT `/qr-code`, returning the current QR string required to link a phone.",
         "operationId": "getInstanceQRCode",
         "security": [
           {
@@ -5826,7 +6696,7 @@
           "Instances"
         ],
         "summary": "Fetch QR code as base64 image",
-        "description": "Mirrors `/qr-code/image`, returning a PNG image encoded in base64 for rendering in clients.",
+        "description": "Mirrors FUNNELCHAT `/qr-code/image`, returning a PNG image encoded in base64 for rendering in clients.",
         "operationId": "getInstanceQRCodeImage",
         "security": [
           {
@@ -5871,7 +6741,7 @@
           "Instances"
         ],
         "summary": "Retrieve device metadata",
-        "description": "Mirrors `/device`, returning information about the currently linked phone.",
+        "description": "Mirrors FUNNELCHAT `/device`, returning information about the currently linked phone.",
         "operationId": "getInstanceDevice",
         "security": [
           {
@@ -5926,7 +6796,7 @@
           "Instances"
         ],
         "summary": "Fetch phone pairing code",
-        "description": "Mirrors `/phone-code/{phone}`, returning a code that can be typed into WhatsApp instead of scanning the QR code.",
+        "description": "Mirrors FUNNELCHAT `/phone-code/{phone}`, returning a code that can be typed into WhatsApp instead of scanning the QR code.",
         "operationId": "getInstancePhoneCode",
         "security": [
           {
@@ -5990,7 +6860,7 @@
           "Instances"
         ],
         "summary": "Restart an instance connection",
-        "description": "Equivalent to `/restart`, forcing the client to reconnect to WhatsApp.",
+        "description": "Equivalent to FUNNELCHAT `/restart`, forcing the client to reconnect to WhatsApp.",
         "operationId": "restartInstanceGet",
         "security": [
           {
@@ -6036,7 +6906,7 @@
           "Instances"
         ],
         "summary": "Restart an instance connection",
-        "description": "Equivalent to `/restart`, forcing the client to reconnect to WhatsApp.",
+        "description": "Equivalent to FUNNELCHAT `/restart`, forcing the client to reconnect to WhatsApp.",
         "operationId": "restartInstance",
         "security": [
           {
@@ -6084,7 +6954,7 @@
           "Instances"
         ],
         "summary": "Complete disconnect with cleanup (Logout)",
-        "description": "Performs a complete disconnect with full cleanup, equivalent to logout/reset.\n\n**This operation performs the following actions:**\n\n- ✅ Disables auto-reconnect to prevent automatic reconnection\n- ✅ Disconnects WebSocket connection immediately\n- ✅ **Deletes device store from whatsmeow_store database**\n- ✅ Stops lock refresh goroutine\n- ✅ Releases Redis distributed lock\n- ✅ Removes client from in-memory registry\n- ✅ Clears store_jid in api_core database (sets to NULL)\n\n**Important Notes:**\n\n- The instance record remains in the database (status becomes \"disconnected\")\n- To permanently delete the instance, use `DELETE /partner/instances/{instanceId}`\n- After disconnect, you can reconnect by calling `/qrcode` or `/pairphone`\n- All webhook configurations are preserved\n\n**Use Cases:**\n\n- User logout from WhatsApp\n- Switching to a different phone number\n- Temporary disconnection for maintenance\n- Resetting a stuck connection\n\n**Comparison with DELETE endpoint:**\n\n- Disconnect: Keeps instance record, allows reconnection\n- Delete: Permanent removal, cannot be recovered\n",
+        "description": "Performs a complete disconnect with full cleanup, equivalent to logout/reset.\n\n**This operation performs the following actions:**\n\n- \u2705 Disables auto-reconnect to prevent automatic reconnection\n- \u2705 Disconnects WebSocket connection immediately\n- \u2705 **Deletes device store from whatsmeow_store database**\n- \u2705 Stops lock refresh goroutine\n- \u2705 Releases Redis distributed lock\n- \u2705 Removes client from in-memory registry\n- \u2705 Clears store_jid in api_core database (sets to NULL)\n\n**Important Notes:**\n\n- The instance record remains in the database (status becomes \"disconnected\")\n- To permanently delete the instance, use `DELETE /partner/instances/{instanceId}`\n- After disconnect, you can reconnect by calling `/qrcode` or `/pairphone`\n- All webhook configurations are preserved\n\n**Use Cases:**\n\n- User logout from WhatsApp\n- Switching to a different phone number\n- Temporary disconnection for maintenance\n- Resetting a stuck connection\n\n**Comparison with DELETE endpoint:**\n\n- Disconnect: Keeps instance record, allows reconnection\n- Delete: Permanent removal, cannot be recovered\n",
         "operationId": "disconnectInstanceGet",
         "security": [
           {
@@ -6140,7 +7010,7 @@
           "Instances"
         ],
         "summary": "Complete disconnect with cleanup (Logout)",
-        "description": "Performs a complete disconnect with full cleanup, equivalent to logout/reset.\n\n**This operation performs the following actions:**\n- ✅ Disables auto-reconnect to prevent automatic reconnection\n- ✅ Disconnects WebSocket connection immediately\n- ✅ **Deletes device store from whatsmeow_store database**\n- ✅ Stops lock refresh goroutine\n- ✅ Releases Redis distributed lock\n- ✅ Removes client from in-memory registry\n- ✅ Clears store_jid in api_core database (sets to NULL)\n\n**Important Notes:**\n- The instance record remains in the database (status becomes \"disconnected\")\n- To permanently delete the instance, use `DELETE /partner/instances/{instanceId}`\n- After disconnect, you can reconnect by calling `/qrcode` or `/pairphone`\n- All webhook configurations are preserved\n\n**Use Cases:**\n- User logout from WhatsApp\n- Switching to a different phone number\n- Temporary disconnection for maintenance\n- Resetting a stuck connection\n\n**Comparison with DELETE endpoint:**\n- Disconnect: Keeps instance record, allows reconnection\n- Delete: Permanent removal, cannot be recovered\n",
+        "description": "Performs a complete disconnect with full cleanup, equivalent to logout/reset.\n\n**This operation performs the following actions:**\n- \u2705 Disables auto-reconnect to prevent automatic reconnection\n- \u2705 Disconnects WebSocket connection immediately\n- \u2705 **Deletes device store from whatsmeow_store database**\n- \u2705 Stops lock refresh goroutine\n- \u2705 Releases Redis distributed lock\n- \u2705 Removes client from in-memory registry\n- \u2705 Clears store_jid in api_core database (sets to NULL)\n\n**Important Notes:**\n- The instance record remains in the database (status becomes \"disconnected\")\n- To permanently delete the instance, use `DELETE /partner/instances/{instanceId}`\n- After disconnect, you can reconnect by calling `/qrcode` or `/pairphone`\n- All webhook configurations are preserved\n\n**Use Cases:**\n- User logout from WhatsApp\n- Switching to a different phone number\n- Temporary disconnection for maintenance\n- Resetting a stuck connection\n\n**Comparison with DELETE endpoint:**\n- Disconnect: Keeps instance record, allows reconnection\n- Delete: Permanent removal, cannot be recovered\n",
         "operationId": "disconnectInstance",
         "security": [
           {
@@ -6198,7 +7068,7 @@
           "Instances"
         ],
         "summary": "Update delivery webhook",
-        "description": "Mirrors `/update-webhook-delivery`, configuring the sent-message webhook endpoint.",
+        "description": "Mirrors FUNNELCHAT `/update-webhook-delivery`, configuring the sent-message webhook endpoint.",
         "operationId": "updateWebhookDelivery",
         "security": [
           {
@@ -6263,7 +7133,7 @@
           "Instances"
         ],
         "summary": "Update received webhook",
-        "description": "Mirrors `/update-webhook-received`, configuring the incoming message webhook endpoint.",
+        "description": "Mirrors FUNNELCHAT `/update-webhook-received`, configuring the incoming message webhook endpoint.",
         "operationId": "updateWebhookReceived",
         "security": [
           {
@@ -6328,7 +7198,7 @@
           "Instances"
         ],
         "summary": "Update received+delivery webhook",
-        "description": "Mirrors `/update-webhook-received-delivery`, configuring the webhook used when `notifySentByMe` is enabled.",
+        "description": "Mirrors FUNNELCHAT `/update-webhook-received-delivery`, configuring the webhook used when `notifySentByMe` is enabled.",
         "operationId": "updateWebhookReceivedDelivery",
         "security": [
           {
@@ -6393,7 +7263,7 @@
           "Instances"
         ],
         "summary": "Update message status webhook",
-        "description": "Mirrors `/update-webhook-message-status`, configuring delivery-read status updates.",
+        "description": "Mirrors FUNNELCHAT `/update-webhook-message-status`, configuring delivery-read status updates.",
         "operationId": "updateWebhookMessageStatus",
         "security": [
           {
@@ -6458,7 +7328,7 @@
           "Instances"
         ],
         "summary": "Update disconnected webhook",
-        "description": "Mirrors `/update-webhook-disconnected`, configuring the disconnect notification endpoint.",
+        "description": "Mirrors FUNNELCHAT `/update-webhook-disconnected`, configuring the disconnect notification endpoint.",
         "operationId": "updateWebhookDisconnected",
         "security": [
           {
@@ -6523,7 +7393,7 @@
           "Instances"
         ],
         "summary": "Update connected webhook",
-        "description": "Mirrors `/update-webhook-connected`, configuring the connection notification endpoint.",
+        "description": "Mirrors FUNNELCHAT `/update-webhook-connected`, configuring the connection notification endpoint.",
         "operationId": "updateWebhookConnected",
         "security": [
           {
@@ -6588,7 +7458,7 @@
           "Instances"
         ],
         "summary": "Update chat presence webhook",
-        "description": "Mirrors `/update-webhook-chat-presence`, configuring the typing/presence webhook endpoint.",
+        "description": "Mirrors FUNNELCHAT `/update-webhook-chat-presence`, configuring the typing/presence webhook endpoint.",
         "operationId": "updateWebhookChatPresence",
         "security": [
           {
@@ -6653,7 +7523,7 @@
           "Instances"
         ],
         "summary": "Toggle notify-sent-by-me",
-        "description": "Mirrors `/update-notify-sent-by-me`, enabling or disabling callbacks for messages sent by the instance.",
+        "description": "Mirrors FUNNELCHAT `/update-notify-sent-by-me`, enabling or disabling callbacks for messages sent by the instance.",
         "operationId": "updateNotifySentByMe",
         "security": [
           {
@@ -6718,7 +7588,7 @@
           "Instances"
         ],
         "summary": "Update all webhooks at once",
-        "description": "Mirrors `/update-every-webhooks`, applying the same HTTPS endpoint to every webhook type.",
+        "description": "Mirrors FUNNELCHAT `/update-every-webhooks`, applying the same HTTPS endpoint to every webhook type.",
         "operationId": "updateEveryWebhooks",
         "security": [
           {
@@ -6783,7 +7653,7 @@
           "Instances"
         ],
         "summary": "Toggle automatic call rejection",
-        "description": "Mirrors `/update-call-reject-auto`, enabling or disabling automatic rejection of incoming calls.",
+        "description": "Mirrors FUNNELCHAT `/update-call-reject-auto`, enabling or disabling automatic rejection of incoming calls.",
         "operationId": "updateCallRejectAuto",
         "security": [
           {
@@ -6858,7 +7728,7 @@
           "Instances"
         ],
         "summary": "Update call rejection message",
-        "description": "Mirrors `/update-call-reject-message`, setting the message sent when rejecting calls.",
+        "description": "Mirrors FUNNELCHAT `/update-call-reject-message`, setting the message sent when rejecting calls.",
         "operationId": "updateCallRejectMessage",
         "security": [
           {
@@ -6933,7 +7803,7 @@
           "Instances"
         ],
         "summary": "Toggle automatic message reading",
-        "description": "Mirrors `/update-auto-read-message`, enabling or disabling automatic marking of messages as read.",
+        "description": "Mirrors FUNNELCHAT `/update-auto-read-message`, enabling or disabling automatic marking of messages as read.",
         "operationId": "updateAutoReadMessage",
         "security": [
           {
@@ -7008,7 +7878,7 @@
           "Partner"
         ],
         "summary": "Activate partner subscription",
-        "description": "Enables on-demand billing/usage for the specified instance (parity).",
+        "description": "Enables on-demand billing/usage for the specified instance (FUNNELCHAT parity).",
         "operationId": "partnerSubscribeInstance",
         "security": [
           {
@@ -7063,7 +7933,7 @@
           "Partner"
         ],
         "summary": "Cancel partner subscription",
-        "description": "Cancels the on-demand subscription for the instance, matching behaviour.",
+        "description": "Cancels the on-demand subscription for the instance, matching FUNNELCHAT behaviour.",
         "operationId": "partnerCancelInstance",
         "security": [
           {
@@ -7118,7 +7988,7 @@
           "Messages"
         ],
         "summary": "Send text message",
-        "description": "Sends a text message via WhatsApp with format.\n\n**Features:**\n- ✅ Text message with optional reply-to\n- ✅ Typing indicator simulation (delayTyping)\n- ✅ Delayed sending (delayMessage)\n- ✅ Ephemeral/disappearing messages support\n- ✅ Private reply in groups (privateAnswer)\n- ✅ Mentions support (mentioned, groupMentioned, mentionedAll)\n- ✅ FIFO queue with per-recipient ordering\n- ✅ Non-blocking (returns immediately with zaapId)\n\n\n",
+        "description": "Sends a text message via WhatsApp with format.\n\n**Features:**\n- \u2705 Text message with optional reply-to\n- \u2705 Typing indicator simulation (delayTyping)\n- \u2705 Delayed sending (delayMessage)\n- \u2705 Ephemeral/disappearing messages support\n- \u2705 Private reply in groups (privateAnswer)\n- \u2705 Mentions support (mentioned, groupMentioned, mentionedAll)\n- \u2705 FIFO queue with per-recipient ordering\n- \u2705 Non-blocking (returns immediately with zaapId)\n\n\n\n",
         "operationId": "sendTextMessage",
         "security": [
           {
@@ -7142,7 +8012,7 @@
               },
               "example": {
                 "phone": "5511999999999",
-                "message": "Hello from!",
+                "message": "Hello from FUNNELCHAT!",
                 "delayMessage": 5,
                 "delayTyping": 3
               }
@@ -7214,7 +8084,7 @@
           "Messages"
         ],
         "summary": "Send image message",
-        "description": "Sends an image message via WhatsApp with optional caption.\n\n**Features:**\n- ✅ Image URL or base64 data URI support\n- ✅ Optional caption/title\n- ✅ View once support (disappears after viewing)\n- ✅ Reply-to message support\n- ✅ Typing indicator and delayed sending\n- ✅ Mentions support (mentioned, groupMentioned, mentionedAll)\n- ✅ FIFO queue with per-recipient ordering\n\n**Supported Formats:**\n- Image URL: `https://picsum.photos/600/400.jpg`\n- Base64: `data:image/png;base64,iVBORw0KG...`\n\n\n",
+        "description": "Sends an image message via WhatsApp with optional caption.\n\n**Features:**\n- \u2705 Image URL or base64 data URI support\n- \u2705 Optional caption/title\n- \u2705 View once support (disappears after viewing)\n- \u2705 Reply-to message support\n- \u2705 Typing indicator and delayed sending\n- \u2705 Mentions support (mentioned, groupMentioned, mentionedAll)\n- \u2705 FIFO queue with per-recipient ordering\n\n**Supported Formats:**\n- Image URL: `https://picsum.photos/600/400.jpg`\n- Base64: `data:image/png;base64,iVBORw0KG...`\n\n\n\n",
         "operationId": "sendImageMessage",
         "security": [
           {
@@ -7305,7 +8175,7 @@
           "Messages"
         ],
         "summary": "Send sticker message",
-        "description": "Sends a sticker message via WhatsApp with format.\n\n**Features:**\n- ✅ Sticker URL or base64 data URI support\n- ✅ Animated stickers (WebP format)\n- ✅ Reply-to message support\n- ✅ Typing indicator and delayed sending\n- ✅ Ephemeral/disappearing messages support\n- ✅ Mentions support (mentioned, groupMentioned, mentionedAll)\n- ✅ Private reply in groups (privateAnswer)\n- ✅ FIFO queue with per-recipient ordering\n- ✅ Non-blocking (returns immediately with zaapId)\n\n**Sticker Format:**\n- WebP format (animated or static)\n- 512x512 pixels recommended\n- Max 100KB for animated, 500KB for static\n- No caption support (stickers don't have text)\n\n**Supported Formats:**\n- URL: `https://www.gstatic.com/webp/gallery/1.webp`\n- Base64: `data:image/webp;base64,UklGRiQAAABXRUJQ...`\n\n\n",
+        "description": "Sends a sticker message via WhatsApp with format.\n\n**Features:**\n- \u2705 Sticker URL or base64 data URI support\n- \u2705 Animated stickers (WebP format)\n- \u2705 Reply-to message support\n- \u2705 Typing indicator and delayed sending\n- \u2705 Ephemeral/disappearing messages support\n- \u2705 Mentions support (mentioned, groupMentioned, mentionedAll)\n- \u2705 Private reply in groups (privateAnswer)\n- \u2705 FIFO queue with per-recipient ordering\n- \u2705 Non-blocking (returns immediately with zaapId)\n\n**Sticker Format:**\n- WebP format (animated or static)\n- 512x512 pixels recommended\n- Max 100KB for animated, 500KB for static\n- No caption support (stickers don't have text)\n\n**Supported Formats:**\n- URL: `https://www.gstatic.com/webp/gallery/1.webp`\n- Base64: `data:image/webp;base64,UklGRiQAAABXRUJQ...`\n",
         "operationId": "sendStickerMessage",
         "security": [
           {
@@ -7414,7 +8284,7 @@
           "Messages"
         ],
         "summary": "Send GIF message",
-        "description": "Sends a GIF message via WhatsApp with optional caption.\n\n**Features:**\n- ✅ GIF URL or base64 data URI support\n- ✅ Animated GIFs\n- ✅ Optional caption/text\n- ✅ View once support (disappears after viewing)\n- ✅ Reply-to message support\n- ✅ Typing indicator and delayed sending\n- ✅ Ephemeral/disappearing messages support\n- ✅ Mentions support (mentioned, groupMentioned, mentionedAll)\n- ✅ Private reply in groups (privateAnswer)\n- ✅ FIFO queue with per-recipient ordering\n- ✅ Non-blocking (returns immediately with zaapId)\n\n**GIF Format:**\n- GIF format (animated or static)\n- Any aspect ratio (auto-adjusted by WhatsApp)\n- Max 16MB recommended\n- Supports caption with @mentions\n\n**Supported Formats:**\n- URL: `https://media.giphy.com/media/3o7abKhOpu0NwenH3O/giphy.gif`\n- Base64: `data:image/gif;base64,R0lGODlhAQABAIAAAP...`\n\n\n",
+        "description": "Sends a GIF message via WhatsApp with optional caption.\n\n**Features:**\n- \u2705 GIF URL or base64 data URI support\n- \u2705 Animated GIFs\n- \u2705 Optional caption/text\n- \u2705 View once support (disappears after viewing)\n- \u2705 Reply-to message support\n- \u2705 Typing indicator and delayed sending\n- \u2705 Ephemeral/disappearing messages support\n- \u2705 Mentions support (mentioned, groupMentioned, mentionedAll)\n- \u2705 Private reply in groups (privateAnswer)\n- \u2705 FIFO queue with per-recipient ordering\n- \u2705 Non-blocking (returns immediately with zaapId)\n\n**GIF Format:**\n- GIF format (animated or static)\n- Any aspect ratio (auto-adjusted by WhatsApp)\n- Max 16MB recommended\n- Supports caption with @mentions\n\n**Supported Formats:**\n- URL: `https://media.giphy.com/media/3o7abKhOpu0NwenH3O/giphy.gif`\n- Base64: `data:image/gif;base64,R0lGODlhAQABAIAAAP...`\n",
         "operationId": "sendGifMessage",
         "security": [
           {
@@ -7439,7 +8309,7 @@
               "example": {
                 "phone": "5511999999999",
                 "gif": "https://media.giphy.com/media/3o7abKhOpu0NwenH3O/giphy.gif",
-                "caption": "Check this out! 🎉",
+                "caption": "Check this out! \ud83c\udf89",
                 "viewOnce": false,
                 "delayMessage": 3,
                 "delayTyping": 2
@@ -7525,7 +8395,7 @@
           "Messages"
         ],
         "summary": "Send audio/voice message",
-        "description": "Sends an audio or voice note via WhatsApp.\n\n**Features:**\n- ✅ Audio URL or base64 data URI support\n- ✅ Voice note (PTT) detection\n- ✅ \"Recording audio\" indicator (delayTyping)\n- ✅ View once support\n- ✅ Reply-to message support\n- ✅ Mentions support (mentioned, groupMentioned, mentionedAll)\n\n**Supported Formats:** OGG, MP3, WAV\n\n\n",
+        "description": "Sends an audio or voice note via WhatsApp.\n\n**Features:**\n- \u2705 Audio URL or base64 data URI support\n- \u2705 Voice note (PTT) detection\n- \u2705 \"Recording audio\" indicator (delayTyping)\n- \u2705 View once support\n- \u2705 Reply-to message support\n- \u2705 Mentions support (mentioned, groupMentioned, mentionedAll)\n\n**Supported Formats:** OGG, MP3, WAV\n\n\n\n",
         "operationId": "sendAudioMessage",
         "security": [
           {
@@ -7615,7 +8485,7 @@
           "Messages"
         ],
         "summary": "Send video message",
-        "description": "Sends a video message via WhatsApp with optional caption.\n\n**Features:**\n- ✅ Video URL or base64 data URI support\n- ✅ Optional caption/title\n- ✅ View once support\n- ✅ Reply-to message support\n- ✅ Typing indicator and delayed sending\n- ✅ Mentions support (mentioned, groupMentioned, mentionedAll)\n\n**Supported Formats:** MP4, 3GP, AVI, MOV\n\n\n",
+        "description": "Sends a video message via WhatsApp with optional caption.\n\n**Features:**\n- \u2705 Video URL or base64 data URI support\n- \u2705 Optional caption/title\n- \u2705 View once support\n- \u2705 Reply-to message support\n- \u2705 Typing indicator and delayed sending\n- \u2705 Mentions support (mentioned, groupMentioned, mentionedAll)\n\n**Supported Formats:** MP4, 3GP, AVI, MOV\n\n\n\n",
         "operationId": "sendVideoMessage",
         "security": [
           {
@@ -7705,7 +8575,7 @@
           "Messages"
         ],
         "summary": "Send PTV (circular video) message",
-        "description": "Sends a PTV (Push-To-Talk Video) message via WhatsApp with format.\n\n**What is PTV?**\nPTV messages are circular video notes, displayed similarly to voice notes but with video content.\nThey appear as circular thumbnails in the chat and play inline when tapped.\n\n**Features:**\n- ✅ Circular video notes (like voice notes with video)\n- ✅ Video URL or base64 data URI support\n- ✅ Optional caption/text\n- ✅ Reply-to message support\n- ✅ Typing indicator and delayed sending\n- ✅ Ephemeral/disappearing messages support\n- ✅ Mentions support (mentioned, groupMentioned, mentionedAll)\n- ✅ Private reply in groups (privateAnswer)\n- ✅ FIFO queue with per-recipient ordering\n- ✅ Non-blocking (returns immediately with zaapId)\n\n**Video Format:**\n- MP4, 3GP, MOV (auto-converted if needed)\n- Max duration: 60 seconds recommended\n- Displayed as circular video in WhatsApp\n\n**Supported Formats:**\n- URL: `https://example.com/video.mp4`\n- Base64: `data:video/mp4;base64,AAAAIGZ0eXBpc29t...`\n\n\n",
+        "description": "Sends a PTV (Push-To-Talk Video) message via WhatsApp with format.\n\n**What is PTV?**\nPTV messages are circular video notes, displayed similarly to voice notes but with video content.\nThey appear as circular thumbnails in the chat and play inline when tapped.\n\n**Features:**\n- \u2705 Circular video notes (like voice notes with video)\n- \u2705 Video URL or base64 data URI support\n- \u2705 Optional caption/text\n- \u2705 Reply-to message support\n- \u2705 Typing indicator and delayed sending\n- \u2705 Ephemeral/disappearing messages support\n- \u2705 Mentions support (mentioned, groupMentioned, mentionedAll)\n- \u2705 Private reply in groups (privateAnswer)\n- \u2705 FIFO queue with per-recipient ordering\n- \u2705 Non-blocking (returns immediately with zaapId)\n\n**Video Format:**\n- MP4, 3GP, MOV (auto-converted if needed)\n- Max duration: 60 seconds recommended\n- Displayed as circular video in WhatsApp\n\n**Supported Formats:**\n- URL: `https://example.com/video.mp4`\n- Base64: `data:video/mp4;base64,AAAAIGZ0eXBpc29t...`\n",
         "operationId": "sendPTVMessage",
         "security": [
           {
@@ -7844,7 +8714,7 @@
           "Messages"
         ],
         "summary": "Send document message",
-        "description": "Sends a document file via WhatsApp with optional caption and filename.\n\n**Features:**\n- ✅ Document URL or base64 data URI support\n- ✅ Custom filename support\n- ✅ Optional caption/description\n- ✅ Reply-to message support\n- ✅ Typing indicator and delayed sending\n- ✅ Mentions support (mentioned, groupMentioned, mentionedAll)\n\n**Supported Formats:** PDF, DOC, DOCX, XLS, XLSX, TXT, CSV, ZIP, RAR\n\n\n",
+        "description": "Sends a document file via WhatsApp with optional caption and filename.\n\n**Features:**\n- \u2705 Document URL or base64 data URI support\n- \u2705 Custom filename support\n- \u2705 Optional caption/description\n- \u2705 Reply-to message support\n- \u2705 Typing indicator and delayed sending\n- \u2705 Mentions support (mentioned, groupMentioned, mentionedAll)\n\n**Supported Formats:** PDF, DOC, DOCX, XLS, XLSX, TXT, CSV, ZIP, RAR\n\n\n\n",
         "operationId": "sendDocumentMessage",
         "security": [
           {
@@ -7935,7 +8805,7 @@
           "Queue"
         ],
         "summary": "List messages in queue with pagination",
-        "description": "Lists all messages in the queue for a specific instance with pagination.\n\n- Uses `page` and `pageSize` parameters\n- Returns direct array of messages (not wrapped in object)\n- Field names in camelCase\n- Delays in seconds (not milliseconds)\n- Created timestamp in milliseconds\n\n**Response Format:**\n- Direct array: `[{message1}, {message2}, ...]`\n- NOT wrapped: `{data: [{message1}]}` ❌\n\n**Pagination:**\n- `page`: Page number starting from 1\n- `pageSize`: Messages per page (default 100, max 1000)\n",
+        "description": "Lists all messages in the queue for a specific instance with pagination.\n\n\n\n- Uses `page` and `pageSize` parameters\n- Returns direct array of messages (not wrapped in object)\n- Field names in camelCase\n- Delays in seconds (not milliseconds)\n- Created timestamp in milliseconds\n\n**Response Format:**\n- Direct array: `[{message1}, {message2}, ...]`\n- NOT wrapped: `{data: [{message1}]}` \u274c\n\n**Pagination:**\n- `page`: Page number starting from 1\n- `pageSize`: Messages per page (default 100, max 1000)\n",
         "operationId": "listQueueMessages",
         "security": [
           {
@@ -7990,7 +8860,7 @@
                     "messageId": "7AD29EAA5EF34C301F0B",
                     "instanceId": "550e8400-e29b-41d4-a716-446655440000",
                     "phone": "5511999999999",
-                    "message": "Hello from",
+                    "message": "Hello from FUNNELCHAT",
                     "delayMessage": 5,
                     "delayTyping": 3,
                     "created": 1624977905648,
@@ -8047,7 +8917,7 @@
           "Queue"
         ],
         "summary": "Clear all pending messages in queue",
-        "description": "Clears all pending messages from the queue for a specific instance.\n\n**Behavior:**\n- ✅ Removes messages in state: `available`, `scheduled`\n- ❌ Does NOT affect messages: `running`, `completed`, `failed`, `discarded`\n\n**Use Cases:**\n- Emergency stop of all pending messages\n- Queue cleanup during maintenance\n- Cancel all scheduled messages at once\n\n\n",
+        "description": "Clears all pending messages from the queue for a specific instance.\n\n**Behavior:**\n- \u2705 Removes messages in state: `available`, `scheduled`\n- \u274c Does NOT affect messages: `running`, `completed`, `failed`, `discarded`\n\n**Use Cases:**\n- Emergency stop of all pending messages\n- Queue cleanup during maintenance\n- Cancel all scheduled messages at once\n\n\n\n",
         "operationId": "clearQueue",
         "security": [
           {
@@ -8105,7 +8975,7 @@
           "Queue"
         ],
         "summary": "Get queue message count",
-        "description": "Returns the total number of messages in the queue for a specific instance.\n\n\n",
+        "description": "Returns the total number of messages in the queue for a specific instance.\n\n\n\n",
         "operationId": "getQueueCount",
         "security": [
           {
@@ -8163,7 +9033,7 @@
           "Queue"
         ],
         "summary": "Cancel a specific message in queue",
-        "description": "Cancels a pending message by its zaapId (returned when message was enqueued).\n\n**Behavior:**\n- ✅ Cancels messages in state: `available`, `scheduled`, `retryable`\n- ❌ Returns error if message already processed or doesn't exist\n\n\n",
+        "description": "Cancels a pending message by its zaapId (returned when message was enqueued).\n\n**Behavior:**\n- \u2705 Cancels messages in state: `available`, `scheduled`, `retryable`\n- \u274c Returns error if message already processed or doesn't exist\n\n\n\n",
         "operationId": "cancelQueueMessage",
         "security": [
           {
@@ -8271,7 +9141,7 @@
                 "latitude": -23.55052,
                 "longitude": -46.633308,
                 "name": "Paulista Avenue",
-                "address": "Av. Paulista, 1578 - São Paulo, SP"
+                "address": "Av. Paulista, 1578 - S\u00e3o Paulo, SP"
               }
             }
           }
@@ -8369,7 +9239,7 @@
                 "address": {
                   "type": "WORK",
                   "street": "Av. Paulista, 1578",
-                  "city": "São Paulo",
+                  "city": "S\u00e3o Paulo",
                   "region": "SP",
                   "country": "Brasil"
                 },
@@ -8480,7 +9350,7 @@
                     "address": {
                       "type": "WORK",
                       "street": "Av. Paulista, 1578",
-                      "city": "São Paulo",
+                      "city": "S\u00e3o Paulo",
                       "region": "SP",
                       "country": "Brasil"
                     }
@@ -8558,7 +9428,7 @@
           "Messages"
         ],
         "summary": "Send interactive button list message",
-        "description": "Sends an interactive button list message with quick reply buttons.\nThe recipient can tap a button to respond.\n\n**Features:**\n- ✅ Up to 3 quick reply buttons\n- ✅ Header title and message body\n- ✅ Footer text\n- ✅ Optional image or video header\n- ✅ Custom message ID for tracking\n- ✅ Delay message support\n- ✅ FIFO queue with per-recipient ordering\n- ✅ Non-blocking (returns immediately with zaapId)\n\n**Limits:**\n- Max 3 buttons\n- Title: max 60 characters\n- Message: max 1024 characters\n- Footer: max 60 characters\n- Button title: max 20 characters\n\n**Use Cases:**\n- Quick response options (Yes/No/Maybe)\n- Survey responses\n- Confirmation dialogs\n- Simple navigation\n\n\n",
+        "description": "Sends an interactive button list message with quick reply buttons.\nThe recipient can tap a button to respond.\n\n**Features:**\n- \u2705 Up to 3 quick reply buttons\n- \u2705 Header title and message body\n- \u2705 Footer text\n- \u2705 Optional image or video header\n- \u2705 Custom message ID for tracking\n- \u2705 Delay message support\n- \u2705 FIFO queue with per-recipient ordering\n- \u2705 Non-blocking (returns immediately with zaapId)\n\n**Limits:**\n- Max 3 buttons\n- Title: max 60 characters\n- Message: max 1024 characters\n- Footer: max 60 characters\n- Button title: max 20 characters\n\n**Use Cases:**\n- Quick response options (Yes/No/Maybe)\n- Survey responses\n- Confirmation dialogs\n- Simple navigation\n",
         "operationId": "sendButtonListMessage",
         "security": [
           {
@@ -8785,7 +9655,7 @@
           "Messages"
         ],
         "summary": "Send interactive action buttons message",
-        "description": "Sends an interactive message with action buttons (CTA buttons).\nSupports URL, call, copy, and quick reply buttons.\n\n**Button Types:**\n- `quick_reply` - Simple reply button (max 20 chars label)\n- `cta_url` - Opens a URL in browser\n- `cta_call` - Initiates a phone call\n- `cta_copy` - Copies text to clipboard\n- `payment_info` - Payment information button\n- `review_and_pay` - Review and pay action\n\n**Features:**\n- ✅ Up to 3 action buttons\n- ✅ Optional header image\n- ✅ Title, message body, and footer\n- ✅ Custom message ID for tracking\n- ✅ Delay message support\n- ✅ FIFO queue with per-recipient ordering\n\n**Limits:**\n- Max 3 buttons per message\n- Label: max 25 characters (20 for quick_reply)\n- Title: max 60 characters\n- Message: max 1024 characters\n- Footer: max 60 characters\n\n\n",
+        "description": "Sends an interactive message with action buttons (CTA buttons).\nSupports URL, call, copy, and quick reply buttons.\n\n**Button Types:**\n- `quick_reply` - Simple reply button (max 20 chars label)\n- `cta_url` - Opens a URL in browser\n- `cta_call` - Initiates a phone call\n- `cta_copy` - Copies text to clipboard\n- `payment_info` - Payment information button\n- `review_and_pay` - Review and pay action\n\n**Features:**\n- \u2705 Up to 3 action buttons\n- \u2705 Optional header image\n- \u2705 Title, message body, and footer\n- \u2705 Custom message ID for tracking\n- \u2705 Delay message support\n- \u2705 FIFO queue with per-recipient ordering\n\n**Limits:**\n- Max 3 buttons per message\n- Label: max 25 characters (20 for quick_reply)\n- Title: max 60 characters\n- Message: max 1024 characters\n- Footer: max 60 characters\n",
         "operationId": "sendButtonActionsMessage",
         "security": [
           {
@@ -9053,7 +9923,7 @@
           "Messages"
         ],
         "summary": "Send simple option list message",
-        "description": "Sends an interactive message with a simple list of options.\nSimilar to button list but without sections (flat list).\n\n**Features:**\n- ✅ Simple flat list of options\n- ✅ Up to 10 options\n- ✅ Title and description for each option\n- ✅ Button to open options\n- ✅ Custom message ID for tracking\n- ✅ Delay message support\n- ✅ FIFO queue with per-recipient ordering\n\n**Limits:**\n- Max 10 options\n- Title: max 60 characters\n- Option title: max 24 characters\n- Option description: max 72 characters\n- Button text: max 20 characters\n\n**Use Cases:**\n- Simple surveys\n- Quick polls\n- Rating selection\n- Single-level menus\n\n\n",
+        "description": "Sends an interactive message with a simple list of options.\nSimilar to button list but without sections (flat list).\n\n**Features:**\n- \u2705 Simple flat list of options\n- \u2705 Up to 10 options\n- \u2705 Title and description for each option\n- \u2705 Button to open options\n- \u2705 Custom message ID for tracking\n- \u2705 Delay message support\n- \u2705 FIFO queue with per-recipient ordering\n\n**Limits:**\n- Max 10 options\n- Title: max 60 characters\n- Option title: max 24 characters\n- Option description: max 72 characters\n- Button text: max 20 characters\n\n**Use Cases:**\n- Simple surveys\n- Quick polls\n- Rating selection\n- Single-level menus\n",
         "operationId": "sendOptionListMessage",
         "security": [
           {
@@ -9346,7 +10216,7 @@
           "Messages"
         ],
         "summary": "Send PIX payment message (Brazil)",
-        "description": "Sends an interactive message with PIX payment information (Brazilian instant payment system).\nIncludes QR code generation and copy-paste PIX code button.\n\n**PIX Key Types:**\n- `CPF` - Brazilian individual taxpayer ID (11 digits)\n- `CNPJ` - Brazilian company taxpayer ID (14 digits)\n- `EMAIL` - Email address\n- `PHONE` - Phone number with country code\n- `EVP` - Random PIX key (UUID format)\n\n**Features:**\n- ✅ Automatic PIX QR code generation\n- ✅ Copy PIX code button\n- ✅ Payment amount and description\n- ✅ Beneficiary name display\n- ✅ Transaction ID for reconciliation\n- ✅ Additional action buttons\n- ✅ Custom message ID for tracking\n- ✅ FIFO queue with per-recipient ordering\n\n**Required Fields:**\n- `phone` - Recipient WhatsApp number\n- `payment.keyType` - Type of PIX key\n- `payment.key` - The PIX key value\n- `payment.name` - Beneficiary name\n- `payment.amount` - Payment amount in BRL\n\n\n",
+        "description": "Sends an interactive message with PIX payment information (Brazilian instant payment system).\nIncludes QR code generation and copy-paste PIX code button.\n\n**PIX Key Types:**\n- `CPF` - Brazilian individual taxpayer ID (11 digits)\n- `CNPJ` - Brazilian company taxpayer ID (14 digits)\n- `EMAIL` - Email address\n- `PHONE` - Phone number with country code\n- `EVP` - Random PIX key (UUID format)\n\n**Features:**\n- \u2705 Automatic PIX QR code generation\n- \u2705 Copy PIX code button\n- \u2705 Payment amount and description\n- \u2705 Beneficiary name display\n- \u2705 Transaction ID for reconciliation\n- \u2705 Additional action buttons\n- \u2705 Custom message ID for tracking\n- \u2705 FIFO queue with per-recipient ordering\n\n**Required Fields:**\n- `phone` - Recipient WhatsApp number\n- `payment.keyType` - Type of PIX key\n- `payment.key` - The PIX key value\n- `payment.name` - Beneficiary name\n- `payment.amount` - Payment amount in BRL\n",
         "operationId": "sendButtonPixMessage",
         "security": [
           {
@@ -9576,7 +10446,7 @@
           "Messages"
         ],
         "summary": "Send OTP (One-Time Password) message",
-        "description": "Sends a one-time password (OTP) message with a copy button.\nThe recipient can easily copy the code with one tap.\n\n**Use Cases:**\n- Account verification\n- Two-factor authentication (2FA)\n- Password reset codes\n- Login verification\n- Transaction confirmation\n\n**Features:**\n- ✅ Prominent OTP code display\n- ✅ One-tap copy button\n- ✅ Custom button text\n- ✅ Expiration message support\n- ✅ Custom message ID for tracking\n- ✅ Delay message support\n- ✅ FIFO queue with per-recipient ordering\n\n**Security Notes:**\n- OTP codes should have limited validity (typically 5-10 minutes)\n- Messages automatically include security warnings\n- Never log or store OTP codes in plain text\n\n\n",
+        "description": "Sends a one-time password (OTP) message with a copy button.\nThe recipient can easily copy the code with one tap.\n\n**Use Cases:**\n- Account verification\n- Two-factor authentication (2FA)\n- Password reset codes\n- Login verification\n- Transaction confirmation\n\n**Features:**\n- \u2705 Prominent OTP code display\n- \u2705 One-tap copy button\n- \u2705 Custom button text\n- \u2705 Expiration message support\n- \u2705 Custom message ID for tracking\n- \u2705 Delay message support\n- \u2705 FIFO queue with per-recipient ordering\n\n**Security Notes:**\n- OTP codes should have limited validity (typically 5-10 minutes)\n- Messages automatically include security warnings\n- Never log or store OTP codes in plain text\n",
         "operationId": "sendButtonOtpMessage",
         "security": [
           {
@@ -9775,7 +10645,7 @@
           "Messages"
         ],
         "summary": "Send carousel message",
-        "description": "Sends an interactive carousel message with multiple cards.\nEach card can have an image/video header, body text, and action buttons.\n\n**Features:**\n- ✅ 1-10 cards per carousel\n- ✅ Image or video header per card\n- ✅ Body text per card\n- ✅ Up to 2 action buttons per card\n- ✅ Horizontal swipe navigation\n- ✅ Introduction message before carousel\n- ✅ Custom message ID for tracking\n- ✅ Delay message support\n- ✅ FIFO queue with per-recipient ordering\n\n**Limits:**\n- Min 1 card, max 10 cards\n- Max 2 buttons per card\n- Body text: max 1024 characters per card\n- Header media: image or video URL\n\n**Use Cases:**\n- Product catalogs\n- Image galleries\n- Service showcases\n- Portfolio presentations\n- Tutorial sequences\n\n**Media Formats:**\n- Images: JPEG, PNG, WebP\n- Videos: MP4 (recommended), 3GP\n\n\n",
+        "description": "Sends an interactive carousel message with multiple cards.\nEach card can have an image/video header, body text, and action buttons.\n\n**Features:**\n- \u2705 1-10 cards per carousel\n- \u2705 Image or video header per card\n- \u2705 Body text per card\n- \u2705 Up to 2 action buttons per card\n- \u2705 Horizontal swipe navigation\n- \u2705 Introduction message before carousel\n- \u2705 Custom message ID for tracking\n- \u2705 Delay message support\n- \u2705 FIFO queue with per-recipient ordering\n\n**Limits:**\n- Min 1 card, max 10 cards\n- Max 2 buttons per card\n- Body text: max 1024 characters per card\n- Header media: image or video URL\n\n**Use Cases:**\n- Product catalogs\n- Image galleries\n- Service showcases\n- Portfolio presentations\n- Tutorial sequences\n\n**Media Formats:**\n- Images: JPEG, PNG, WebP\n- Videos: MP4 (recommended), 3GP\n",
         "operationId": "sendCarouselMessage",
         "security": [
           {
@@ -9803,6 +10673,7 @@
                   "description": "E-commerce product showcase",
                   "value": {
                     "phone": "5511999999999",
+                    "message": "Check out our amazing products! Swipe to explore our catalog.",
                     "cardType": "HSCROLL_CARDS",
                     "cards": [
                       {
@@ -9864,6 +10735,7 @@
                   "description": "Photo gallery showcase",
                   "value": {
                     "phone": "5511999999999",
+                    "message": "Our photo gallery - swipe through our favorite moments!",
                     "cardType": "ALBUM_IMAGE",
                     "cards": [
                       {
@@ -9929,6 +10801,7 @@
                   "description": "Tutorial series with videos",
                   "value": {
                     "phone": "5511999999999",
+                    "message": "Welcome to our tutorial series! Learn everything from basics to advanced techniques.",
                     "cardType": "HSCROLL_CARDS",
                     "cards": [
                       {
@@ -9975,6 +10848,7 @@
                   "description": "Property listings carousel",
                   "value": {
                     "phone": "5511999999999",
+                    "message": "Featured properties in your area - find your dream home today!",
                     "cardType": "HSCROLL_CARDS",
                     "cards": [
                       {
@@ -10039,6 +10913,7 @@
                   "description": "Visual menu with images",
                   "value": {
                     "phone": "5511999999999",
+                    "message": "Today's specials - fresh ingredients, exceptional taste!",
                     "cardType": "HSCROLL_CARDS",
                     "messageId": "menu-daily-specials",
                     "cards": [
@@ -10083,6 +10958,7 @@
                   "description": "Carousel with just one card",
                   "value": {
                     "phone": "5511999999999",
+                    "message": "Don't miss this exclusive offer!",
                     "cardType": "HSCROLL_CARDS",
                     "cards": [
                       {
@@ -10219,8 +11095,8 @@
         "tags": [
           "Messages"
         ],
-        "summary": "Send poll message ",
-        "description": "Sends a poll (voting/survey) message to a WhatsApp user or group.\n\n**Features:**\n- ✅ 2-12 poll options\n- ✅ Single or multiple choice voting\n- ✅ Custom message ID for tracking\n- ✅ Delay message support\n- ✅ FIFO queue with per-recipient ordering\n\n- `message` field contains the poll question\n- `poll` array contains options with `name` field\n- `pollMaxOptions` controls voting: 0 or 1 = single choice, >1 = multiple choice\n\n**Limits:**\n- Min 2 options, max 12 options\n- Option text: max 100 characters each\n- Question text: max 256 characters\n\n\n",
+        "summary": "Send poll message",
+        "description": "Sends a poll (voting/survey) message to a WhatsApp user or group.\n\n**Features:**\n- \u2705 2-12 poll options\n- \u2705 Single or multiple choice voting\n- \u2705 Custom message ID for tracking\n- \u2705 Delay message support\n- \u2705 FIFO queue with per-recipient ordering\n\n\n- `message` field contains the poll question\n- `poll` array contains options with `name` field\n- `pollMaxOptions` controls voting: 0 or 1 = single choice, >1 = multiple choice\n\n**Limits:**\n- Min 2 options, max 12 options\n- Option text: max 100 characters each\n- Question text: max 256 characters\n",
         "operationId": "sendPollMessage",
         "security": [
           {
@@ -10472,8 +11348,8 @@
         "tags": [
           "Messages"
         ],
-        "summary": "Send event message ",
-        "description": "Sends a scheduled event message to a WhatsApp group.\n\n**Features:**\n- ✅ Event name and description\n- ✅ Date and time scheduling (ISO 8601)\n- ✅ Location support (name and coordinates)\n- ✅ Call link type (voice/video)\n- ✅ Event cancellation support\n- ✅ Custom message ID for tracking\n- ✅ FIFO queue with per-recipient ordering\n\n- Nested `event` object with all event details\n- `dateTime` in ISO 8601 format (e.g., \"2024-04-29T09:30:53.309Z\")\n- `location` object with name and optional coordinates\n- `callLinkType` can be \"voice\" or \"video\"\n\n**Restrictions:**\n- Events can only be sent to groups\n- Sender must be group admin for some event features\n\n\n",
+        "summary": "Send event message",
+        "description": "Sends a scheduled event message to a WhatsApp group.\n\n**Features:**\n- \u2705 Event name and description\n- \u2705 Date and time scheduling (ISO 8601)\n- \u2705 Location support (name and coordinates)\n- \u2705 Call link type (voice/video)\n- \u2705 Event cancellation support\n- \u2705 Custom message ID for tracking\n- \u2705 FIFO queue with per-recipient ordering\n\n\n- Nested `event` object with all event details\n- `dateTime` in ISO 8601 format (e.g., \"2024-04-29T09:30:53.309Z\")\n- `location` object with name and optional coordinates\n- `callLinkType` can be \"voice\" or \"video\"\n\n**Restrictions:**\n- Events can only be sent to groups\n- Sender must be group admin for some event features\n",
         "operationId": "sendEventMessage",
         "security": [
           {
@@ -10734,8 +11610,8 @@
         "tags": [
           "Messages"
         ],
-        "summary": "Send link with preview ",
-        "description": "Sends a text message with a customized link preview.\n\n**Features:**\n- ✅ Custom link preview title\n- ✅ Custom link preview description\n- ✅ Custom preview image\n- ✅ Message text before the link\n- ✅ Automatic URL validation\n- ✅ Custom message ID for tracking\n- ✅ Delay message support\n- ✅ FIFO queue with per-recipient ordering\n\n- `linkUrl` is the URL to preview (required)\n- `title` overrides the default link title\n- `linkDescription` overrides the default description\n- `image` provides a custom preview thumbnail\n- `message` adds text before the link preview\n\n**Preview Image:**\n- Must be a valid image URL (JPEG, PNG, WebP)\n- Will be downloaded and used as thumbnail\n- Falls back to default Open Graph image if download fails\n\n\n",
+        "summary": "Send link with preview",
+        "description": "Sends a text message with a customized link preview.\n\n**Features:**\n- \u2705 Custom link preview title\n- \u2705 Custom link preview description\n- \u2705 Custom preview image\n- \u2705 Message text before the link\n- \u2705 Automatic URL validation\n- \u2705 Custom message ID for tracking\n- \u2705 Delay message support\n- \u2705 FIFO queue with per-recipient ordering\n\n\n- `linkUrl` is the URL to preview (required)\n- `title` overrides the default link title\n- `linkDescription` overrides the default description\n- `image` provides a custom preview thumbnail\n- `message` adds text before the link preview\n\n**Preview Image:**\n- Must be a valid image URL (JPEG, PNG, WebP)\n- Will be downloaded and used as thumbnail\n- Falls back to default Open Graph image if download fails\n",
         "operationId": "sendLinkMessage",
         "security": [
           {
@@ -10937,8 +11813,8 @@
         "tags": [
           "Messages"
         ],
-        "summary": "Delete message ",
-        "description": "Deletes (revokes) a previously sent message from a chat.\n\n**Features:**\n- ✅ Delete own messages (sender = you)\n- ✅ Delete others' messages (group admin only)\n- ✅ Works in private chats and groups\n- ✅ query parameters\n\nUses query parameters instead of request body:\n- `phone` - The chat phone number (recipient)\n- `messageId` - The WhatsApp message ID to delete\n- `owner` - \"true\" for own messages, \"false\" for others (admin delete)\n\n**Behavior:**\n- For `owner=true`: Message is deleted for everyone (\"Delete for Everyone\")\n- For `owner=false`: Admin delete in groups (removes message sent by others)\n- Deleted messages show \"This message was deleted\" placeholder\n\n**Restrictions:**\n- Own messages: Can be deleted within ~1 hour of sending\n- Admin delete: Requires group admin privileges\n- Once deleted, the message cannot be recovered\n\n\n",
+        "summary": "Delete message",
+        "description": "Deletes (revokes) a previously sent message from a chat.\n\n**Features:**\n- \u2705 Delete own messages (sender = you)\n- \u2705 Delete others' messages (group admin only)\n- \u2705 Works in private chats and groups\n- \u2705 query parameters\n\n\nUses query parameters instead of request body:\n- `phone` - The chat phone number (recipient)\n- `messageId` - The WhatsApp message ID to delete\n- `owner` - \"true\" for own messages, \"false\" for others (admin delete)\n\n**Behavior:**\n- For `owner=true`: Message is deleted for everyone (\"Delete for Everyone\")\n- For `owner=false`: Admin delete in groups (removes message sent by others)\n- Deleted messages show \"This message was deleted\" placeholder\n\n**Restrictions:**\n- Own messages: Can be deleted within ~1 hour of sending\n- Admin delete: Requires group admin privileges\n- Once deleted, the message cannot be recovered\n",
         "operationId": "deleteMessage",
         "security": [
           {
@@ -11108,8 +11984,8 @@
         "tags": [
           "Messages"
         ],
-        "summary": "Modify chat ",
-        "description": "Performs various chat modification actions like read, archive, pin, mute, clear, or delete.\n\n**Supported Actions:**\n- `read` - Mark chat as read\n- `archive` - Archive the chat\n- `unarchive` - Unarchive the chat\n- `pin` - Pin the chat to top\n- `unpin` - Unpin the chat\n- `mute` - Mute chat notifications\n- `unmute` - Unmute chat notifications\n- `clear` - Clear all messages in chat\n- `delete` - Delete the entire chat\n\nRequest body with `phone` and `action` fields.\n\n**Behavior:**\n- `read`: Marks all messages in chat as read (blue checkmarks)\n- `archive/unarchive`: Moves chat to/from archive\n- `pin/unpin`: Pins/unpins chat to top of chat list\n- `mute/unmute`: Enables/disables notifications\n- `clear`: Removes all messages but keeps chat\n- `delete`: Completely removes the chat\n\n\n",
+        "summary": "Modify chat",
+        "description": "Performs various chat modification actions like read, archive, pin, mute, clear, or delete.\n\n**Supported Actions:**\n- `read` - Mark chat as read\n- `archive` - Archive the chat\n- `unarchive` - Unarchive the chat\n- `pin` - Pin the chat to top\n- `unpin` - Unpin the chat\n- `mute` - Mute chat notifications\n- `unmute` - Unmute chat notifications\n- `clear` - Clear all messages in chat\n- `delete` - Delete the entire chat\n\n\nRequest body with `phone` and `action` fields.\n\n**Behavior:**\n- `read`: Marks all messages in chat as read (blue checkmarks)\n- `archive/unarchive`: Moves chat to/from archive\n- `pin/unpin`: Pins/unpins chat to top of chat list\n- `mute/unmute`: Enables/disables notifications\n- `clear`: Removes all messages but keeps chat\n- `delete`: Completely removes the chat\n",
         "operationId": "modifyChat",
         "security": [
           {
@@ -11348,7 +12224,7 @@
           "Contacts"
         ],
         "summary": "List WhatsApp contacts",
-        "description": "Returns a paginated list of WhatsApp contacts from the instance's device.\n\n**Features:**\n- ✅ Pagination support (page, pageSize)\n- ✅ Device contacts integration (name, short name)\n- ✅ WhatsApp profile data (notify/push name)\n- ✅ VCard information (if shared)\n- ✅ Privacy-aware (respects WhatsApp privacy settings)\n- ✅ X-Total-Count header for total count\n\n**Data Sources:**\n- Device address book (name, short, vname fields)\n- WhatsApp profile (notify field from push name)\n- VCard sharing (vname field)\n\n**Field Availability:**\n- `phone`: Always present (WhatsApp JID)\n- `name`, `short`, `vname`: Only if in address book\n- `notify`: Only if user has interacted with contact\n\n**Privacy Notes:** Contact data respects WhatsApp privacy settings.\nUsers who hide their profile will only show notify field.\n\n\n",
+        "description": "Returns a paginated list of WhatsApp contacts from the instance's device.\n\n**Features:**\n- \u2705 Pagination support (page, pageSize)\n- \u2705 Device contacts integration (name, short name)\n- \u2705 WhatsApp profile data (notify/push name)\n- \u2705 VCard information (if shared)\n- \u2705 Privacy-aware (respects WhatsApp privacy settings)\n- \u2705 X-Total-Count header for total count\n\n**Data Sources:**\n- Device address book (name, short, vname fields)\n- WhatsApp profile (notify field from push name)\n- VCard sharing (vname field)\n\n**Field Availability:**\n- `phone`: Always present (WhatsApp JID)\n- `name`, `short`, `vname`: Only if in address book\n- `notify`: Only if user has interacted with contact\n\n**Privacy Notes:** Contact data respects WhatsApp privacy settings.\nUsers who hide their profile will only show notify field.\n",
         "operationId": "getContacts",
         "security": [
           {
@@ -11409,9 +12285,9 @@
                 "example": [
                   {
                     "phone": "5511999999999",
-                    "name": "João Silva Santos",
-                    "short": "João",
-                    "notify": "João S.",
+                    "name": "Jo\u00e3o Silva Santos",
+                    "short": "Jo\u00e3o",
+                    "notify": "Jo\u00e3o S.",
                     "vname": null
                   },
                   {
@@ -11493,7 +12369,7 @@
           "Contacts"
         ],
         "summary": "Check if phone number has WhatsApp",
-        "description": "Verifies if a phone number is registered on WhatsApp.\n\n**Use Cases:**\n- Form validation (verify phone before saving)\n- Contact verification before sending messages\n- Lead qualification in CRM systems\n\n**Important Notes:**\n- Use this API for form validation purposes\n- Do NOT use before sending messages (validates automatically)\n- Using for message validation creates duplicate checks\n- Not designed for spam - use responsibly\n\n**Phone Format:**\n- International format: DDI + DDD + NUMBER\n- Numbers only (no formatting, spaces, or masks)\n- Example: `551199999999` (Brazil mobile)\n\n\n",
+        "description": "Verifies if a phone number is registered on WhatsApp.\n\n**Use Cases:**\n- Form validation (verify phone before saving)\n- Contact verification before sending messages\n- Lead qualification in CRM systems\n\n**Important Notes:**\n- Use this API for form validation purposes\n- Do NOT use before sending messages (FUNNELCHAT validates automatically)\n- Using for message validation creates duplicate checks\n- Not designed for spam - use responsibly\n\n**Phone Format:**\n- International format: DDI + DDD + NUMBER\n- Numbers only (no formatting, spaces, or masks)\n- Example: `551199999999` (Brazil mobile)\n",
         "operationId": "phoneExists",
         "security": [
           {
@@ -11633,7 +12509,7 @@
           "Contacts"
         ],
         "summary": "Batch validate phone numbers on WhatsApp",
-        "description": "Validates multiple phone numbers to check if they are registered on WhatsApp.\n\n**Use Cases:**\n- Bulk contact validation before marketing campaigns\n- CRM data cleansing and enrichment\n- Lead qualification at scale\n- Form validation with multiple numbers\n\n**Important Notes:**\n- Maximum batch size: 50,000 numbers per request\n- Use for validation purposes, not before sending messages\n- Not designed for spam - use responsibly\n\n**Phone Format:**\n- International format: DDI + DDD + NUMBER\n- Numbers only (no formatting, spaces, or masks)\n- Example: `551199999999` (Brazil mobile)\n\n**Response Fields:**\n- `exists`: Whether the phone has WhatsApp\n- `inputPhone`: The number as you sent it\n- `outputPhone`: The number formatted by WhatsApp (may include 9th digit)\n\n\n",
+        "description": "Validates multiple phone numbers to check if they are registered on WhatsApp.\n\n**Use Cases:**\n- Bulk contact validation before marketing campaigns\n- CRM data cleansing and enrichment\n- Lead qualification at scale\n- Form validation with multiple numbers\n\n**Important Notes:**\n- Maximum batch size: 50,000 numbers per request\n- Use for validation purposes, not before sending messages\n- Not designed for spam - use responsibly\n\n**Phone Format:**\n- International format: DDI + DDD + NUMBER\n- Numbers only (no formatting, spaces, or masks)\n- Example: `551199999999` (Brazil mobile)\n\n**Response Fields:**\n- `exists`: Whether the phone has WhatsApp\n- `inputPhone`: The number as you sent it\n- `outputPhone`: The number formatted by WhatsApp (may include 9th digit)\n",
         "operationId": "phoneExistsBatch",
         "security": [
           {
@@ -11778,7 +12654,7 @@
           "Chats"
         ],
         "summary": "List WhatsApp chats",
-        "description": "Returns a paginated list of WhatsApp chats (conversations) for the instance.\n\n**Features:**\n- ✅ Pagination support (page, pageSize)\n- ✅ Individual, group, and community chats\n- ✅ Unread message counts\n- ✅ Last message timestamp\n- ✅ Mute status and expiry\n- ✅ Archive, pin, and spam status\n- ✅ X-Total-Count header for total count\n- ✅ Ordered by lastMessageTime (most recent first)\n\n**Chat Types:**\n- Individual chats (person-to-person)\n- Group chats (multiple participants)\n- Community announcement channels\n\n**Data Sources:**\n- WhatsApp chat metadata (from store)\n- Message history (last message timestamp)\n- Chat settings (mute, archive, pin, spam status)\n\n**Ordering:** Chats are ordered by lastMessageTime descending (most recent first).\n\n**Unread Counts:** Both `unread` and `messagesUnread` fields represent the same count.\n\n\n",
+        "description": "Returns a paginated list of WhatsApp chats (conversations) for the instance.\n\n**Features:**\n- \u2705 Pagination support (page, pageSize)\n- \u2705 Individual, group, and community chats\n- \u2705 Unread message counts\n- \u2705 Last message timestamp\n- \u2705 Mute status and expiry\n- \u2705 Archive, pin, and spam status\n- \u2705 X-Total-Count header for total count\n- \u2705 Ordered by lastMessageTime (most recent first)\n\n**Chat Types:**\n- Individual chats (person-to-person)\n- Group chats (multiple participants)\n- Community announcement channels\n\n**Data Sources:**\n- WhatsApp chat metadata (from store)\n- Message history (last message timestamp)\n- Chat settings (mute, archive, pin, spam status)\n\n**Ordering:** Chats are ordered by lastMessageTime descending (most recent first).\n\n**Unread Counts:** Both `unread` and `messagesUnread` fields represent the same count.\n",
         "operationId": "getChats",
         "security": [
           {
@@ -11839,7 +12715,7 @@
                 "example": [
                   {
                     "phone": "5511999999999@s.whatsapp.net",
-                    "name": "João Silva",
+                    "name": "Jo\u00e3o Silva",
                     "unread": 5,
                     "lastMessageTime": "2025-01-11T14:30:00Z",
                     "isMuted": false,
@@ -11852,7 +12728,7 @@
                   },
                   {
                     "phone": "120363047204807488@g.us",
-                    "name": "Família Silva",
+                    "name": "Fam\u00edlia Silva",
                     "unread": 12,
                     "lastMessageTime": "2025-01-11T13:45:00Z",
                     "isMuted": true,
@@ -11941,7 +12817,7 @@
           "Groups"
         ],
         "summary": "List groups",
-        "description": "Returns a paginated list of WhatsApp groups the instance participates in .",
+        "description": "Returns a paginated list of WhatsApp groups the instance participates in.",
         "operationId": "listGroups",
         "security": [
           {
@@ -11980,7 +12856,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Array of groups (unwrapped, matching behaviour).",
+            "description": "Array of groups (unwrapped, matching FUNNELCHAT behaviour).",
             "content": {
               "application/json": {
                 "schema": {
@@ -12065,7 +12941,7 @@
               },
               "example": {
                 "autoInvite": true,
-                "groupName": "Grupo",
+                "groupName": "Grupo FUNNELCHAT",
                 "phones": [
                   "5544999999999",
                   "5544888888888"
@@ -13415,7 +14291,7 @@
               },
               "example": {
                 "groupId": "120363019502650977-group",
-                "groupDescription": "Descrição do grupo"
+                "groupDescription": "Descri\u00e7\u00e3o do grupo"
               }
             }
           }
@@ -13858,7 +14734,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Array of communities.",
+            "description": "Array of communities (unwrapped, matching FUNNELCHAT behaviour).",
             "content": {
               "application/json": {
                 "schema": {
@@ -14215,7 +15091,7 @@
               },
               "example": {
                 "communityId": "120363565656565656",
-                "communityDescription": "descrição da comunidade"
+                "communityDescription": "descri\u00e7\u00e3o da comunidade"
               }
             }
           }
@@ -14476,7 +15352,7 @@
               },
               "example": {
                 "name": "Nome do canal",
-                "description": "Descrição do canal"
+                "description": "Descri\u00e7\u00e3o do canal"
               }
             }
           }
@@ -14743,7 +15619,7 @@
               },
               "example": {
                 "id": "120363336258908380@newsletter",
-                "description": "Nova descrição do canal"
+                "description": "Nova descri\u00e7\u00e3o do canal"
               }
             }
           }
@@ -16747,6 +17623,1517 @@
                 },
                 "example": {
                   "error": "URL expired"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/privacy-settings": {
+      "get": {
+        "tags": [
+          "Privacy"
+        ],
+        "summary": "Get privacy settings",
+        "description": "Retrieves all privacy settings for the connected WhatsApp account.\n\n**Settings Returned:**\n- `groupAdd`: Who can add you to groups (all, contacts, contact_blacklist)\n- `lastSeen`: Who can see your last seen (all, contacts, contact_blacklist, none)\n- `status`: Who can see your status (all, contacts, contact_blacklist, none)\n- `profile`: Who can see your profile photo (all, contacts, contact_blacklist, none)\n- `readReceipts`: Read receipts setting (all, none)\n- `online`: Online status visibility (all, match_last_seen)\n- `callAdd`: Who can call you (all, known)\n",
+        "operationId": "getPrivacySettings",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Privacy settings retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrivacySettingsResponse"
+                },
+                "example": {
+                  "groupAdd": "contacts",
+                  "lastSeen": "contacts",
+                  "status": "all",
+                  "profile": "contacts",
+                  "readReceipts": "all",
+                  "online": "all",
+                  "callAdd": "all"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Instance not connected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/privacy-settings/group-add": {
+      "put": {
+        "tags": [
+          "Privacy"
+        ],
+        "summary": "Update group add privacy",
+        "description": "Updates who can add you to WhatsApp groups.\n\n**Values:**\n- `all`: Anyone can add you\n- `contacts`: Only contacts can add you\n- `contact_blacklist`: Contacts except blocked\n",
+        "operationId": "updatePrivacyGroupAdd",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePrivacyRequest"
+              },
+              "example": {
+                "value": "contacts"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Privacy setting updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdatePrivacyResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid value",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Instance not connected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/privacy-settings/last-seen": {
+      "put": {
+        "tags": [
+          "Privacy"
+        ],
+        "summary": "Update last seen privacy",
+        "description": "Updates who can see your last seen time.\n\n**Values:**\n- `all`: Everyone can see\n- `contacts`: Only contacts can see\n- `contact_blacklist`: Contacts except blocked\n- `none`: Nobody can see\n",
+        "operationId": "updatePrivacyLastSeen",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePrivacyRequest"
+              },
+              "example": {
+                "value": "contacts"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Privacy setting updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdatePrivacyResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid value",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Instance not connected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/privacy-settings/status": {
+      "put": {
+        "tags": [
+          "Privacy"
+        ],
+        "summary": "Update status privacy",
+        "description": "Updates who can see your status updates.\n\n**Values:**\n- `all`: Everyone can see\n- `contacts`: Only contacts can see\n- `contact_blacklist`: Contacts except blocked\n- `none`: Nobody can see\n",
+        "operationId": "updatePrivacyStatus",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePrivacyRequest"
+              },
+              "example": {
+                "value": "contacts"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Privacy setting updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdatePrivacyResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid value",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Instance not connected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/privacy-settings/profile-photo": {
+      "put": {
+        "tags": [
+          "Privacy"
+        ],
+        "summary": "Update profile photo privacy",
+        "description": "Updates who can see your profile photo.\n\n**Values:**\n- `all`: Everyone can see\n- `contacts`: Only contacts can see\n- `contact_blacklist`: Contacts except blocked\n- `none`: Nobody can see\n",
+        "operationId": "updatePrivacyProfilePhoto",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePrivacyRequest"
+              },
+              "example": {
+                "value": "contacts"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Privacy setting updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdatePrivacyResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid value",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Instance not connected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/privacy-settings/read-receipts": {
+      "put": {
+        "tags": [
+          "Privacy"
+        ],
+        "summary": "Update read receipts privacy",
+        "description": "Updates read receipts (blue ticks) setting.\n\n**Values:**\n- `all`: Send and receive read receipts\n- `none`: Disable read receipts (you won't see others' either)\n",
+        "operationId": "updatePrivacyReadReceipts",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePrivacyRequest"
+              },
+              "example": {
+                "value": "all"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Privacy setting updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdatePrivacyResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid value",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Instance not connected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/privacy-settings/online": {
+      "put": {
+        "tags": [
+          "Privacy"
+        ],
+        "summary": "Update online status privacy",
+        "description": "Updates online status visibility.\n\n**Values:**\n- `all`: Everyone can see when you're online\n- `match_last_seen`: Match your last seen setting\n",
+        "operationId": "updatePrivacyOnline",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePrivacyRequest"
+              },
+              "example": {
+                "value": "all"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Privacy setting updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdatePrivacyResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid value",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Instance not connected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/privacy-settings/call-add": {
+      "put": {
+        "tags": [
+          "Privacy"
+        ],
+        "summary": "Update call privacy",
+        "description": "Updates who can call you.\n\n**Values:**\n- `all`: Anyone can call you\n- `known`: Only known contacts can call you\n",
+        "operationId": "updatePrivacyCallAdd",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePrivacyRequest"
+              },
+              "example": {
+                "value": "all"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Privacy setting updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdatePrivacyResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid value",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Instance not connected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/read-message": {
+      "post": {
+        "tags": [
+          "Messages"
+        ],
+        "summary": "Mark messages as read",
+        "description": "Marks one or more messages as read (sends read receipts/blue ticks).\n\n**Features:**\n- Mark single or multiple messages as read\n- Works for both individual and group chats\n- Immediate execution (not queued)\n",
+        "operationId": "readMessage",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReadMessageRequest"
+              },
+              "example": {
+                "phone": "5511999999999",
+                "messageIds": [
+                  "3EB047ED70306656281B34",
+                  "3EB047ED70306656281B35"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Messages marked as read successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadMessageResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Instance not connected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/send-reaction": {
+      "post": {
+        "tags": [
+          "Messages"
+        ],
+        "summary": "Send reaction to message",
+        "description": "Sends an emoji reaction to a specific message.\n\n**Features:**\n- React with any emoji\n- Works on individual and group messages\n- FIFO queue with per-recipient ordering\n",
+        "operationId": "sendReaction",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendReactionRequest"
+              },
+              "example": {
+                "phone": "5511999999999",
+                "messageId": "3EB047ED70306656281B34",
+                "reaction": "\ud83d\udc4d"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Reaction sent successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendMessageResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Instance not connected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/send-remove-reaction": {
+      "post": {
+        "tags": [
+          "Messages"
+        ],
+        "summary": "Remove reaction from message",
+        "description": "Removes a previously sent reaction from a message.\n\n**Features:**\n- Remove your reaction from any message\n- Works on individual and group messages\n",
+        "operationId": "sendRemoveReaction",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendRemoveReactionRequest"
+              },
+              "example": {
+                "phone": "5511999999999",
+                "messageId": "3EB047ED70306656281B34"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Reaction removed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendMessageResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Instance not connected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/forward-message": {
+      "post": {
+        "tags": [
+          "Messages"
+        ],
+        "summary": "Forward a message",
+        "description": "Forwards an existing message to another chat.\n\n**Features:**\n- Forward any message type (text, media, etc.)\n- Preserves original message metadata\n- Shows \"Forwarded\" label on recipient's device\n- FIFO queue with per-recipient ordering\n",
+        "operationId": "forwardMessage",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForwardMessageRequest"
+              },
+              "example": {
+                "phone": "5511888888888",
+                "messageId": "3EB047ED70306656281B34",
+                "isGroup": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Message forwarded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendMessageResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Instance not connected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/send-poll-vote": {
+      "post": {
+        "tags": [
+          "Messages"
+        ],
+        "summary": "Vote on a poll",
+        "description": "Submits a vote on an existing poll message.\n\n**Features:**\n- Vote for one or multiple options (depending on poll settings)\n- Options are specified by name (exact match)\n- FIFO queue with per-recipient ordering\n",
+        "operationId": "sendPollVote",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendPollVoteRequest"
+              },
+              "example": {
+                "phone": "5511999999999",
+                "pollId": "3EB047ED70306656281B34",
+                "options": [
+                  "Option A",
+                  "Option B"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Poll vote sent successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendMessageResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Instance not connected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/pin-message": {
+      "post": {
+        "tags": [
+          "Messages"
+        ],
+        "summary": "Pin or unpin a chat",
+        "description": "Pins or unpins a chat in the chat list.\n\n**Note:** This pins/unpins the entire chat, not individual messages.\n\n**Features:**\n- Pin important conversations to top of chat list\n- Unpin to remove from pinned section\n",
+        "operationId": "pinMessage",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PinMessageRequest"
+              },
+              "example": {
+                "phone": "5511999999999",
+                "pin": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Chat pinned/unpinned successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PinMessageResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Instance not connected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/send-edit-event": {
+      "post": {
+        "tags": [
+          "Messages"
+        ],
+        "summary": "Edit an event",
+        "description": "Sends an update to an existing event message, modifying its details.\n\n**Features:**\n- Update event name, description, location\n- Change start and end times\n- Cancel the event\n- Optional typing simulation before sending\n\n**Note:** You must have created the original event or have permission to edit it.\n",
+        "operationId": "sendEditEvent",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendEditEventRequest"
+              },
+              "example": {
+                "phone": "5511999999999",
+                "eventId": "3EB047ED70306656281B34",
+                "name": "Team Meeting - Updated",
+                "description": "Weekly sync moved to new time",
+                "startTime": "2024-01-15T14:00:00Z",
+                "endTime": "2024-01-15T15:00:00Z",
+                "location": "Conference Room B"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Event updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendEditEventResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Instance not connected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/send-event-response": {
+      "post": {
+        "tags": [
+          "Messages"
+        ],
+        "summary": "Respond to an event invitation",
+        "description": "Sends a response to an event invitation (RSVP).\n\n**Response Types:**\n- `going` - Confirm attendance\n- `not_going` - Decline invitation\n- `maybe` - Tentative response\n\n**Features:**\n- Specify additional guests count\n- Optional typing simulation before sending\n\n**Note:** Event responses are encrypted and require the original event's message secret.\nThis endpoint sends an encrypted response referencing the original event.\n",
+        "operationId": "sendEventResponse",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendEventResponseRequest"
+              },
+              "example": {
+                "phone": "5511999999999",
+                "eventId": "3EB047ED70306656281B34",
+                "response": "going",
+                "extraGuestCount": 2
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Event response sent successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendEventResponseResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Instance not connected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/contacts/{phone}/metadata": {
+      "get": {
+        "tags": [
+          "Contacts"
+        ],
+        "summary": "Get contact metadata",
+        "description": "Retrieves detailed metadata for a specific contact.\n\n**Data Returned:**\n- Phone number\n- Display name\n- Status/About text\n- Profile picture URL\n- WhatsApp registration status\n",
+        "operationId": "getContactMetadata",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          },
+          {
+            "name": "phone",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Phone number in international format (numbers only)",
+            "example": "5511999999999"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Contact metadata retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContactMetadataResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid phone number",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Instance not connected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/contacts/{phone}/profile-picture": {
+      "get": {
+        "tags": [
+          "Contacts"
+        ],
+        "summary": "Get contact profile picture",
+        "description": "Retrieves the profile picture URL for a specific contact.\n\n**Note:** Returns empty or error if contact has privacy settings\nthat hide their profile picture from you.\n",
+        "operationId": "getContactProfilePicture",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          },
+          {
+            "name": "phone",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Phone number in international format (numbers only)",
+            "example": "5511999999999"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Profile picture retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProfilePictureResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid phone number",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Instance not connected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/modify-blocked": {
+      "post": {
+        "tags": [
+          "Contacts"
+        ],
+        "summary": "Block or unblock a contact",
+        "description": "Blocks or unblocks a WhatsApp contact.\n\n**Actions:**\n- `block`: Block the contact (they can't message you)\n- `unblock`: Unblock a previously blocked contact\n",
+        "operationId": "modifyBlocked",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModifyBlockedRequest"
+              },
+              "example": {
+                "phone": "5511999999999",
+                "action": "block"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Contact blocked/unblocked successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModifyBlockedResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Instance not connected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/profile-name": {
+      "put": {
+        "tags": [
+          "Profile"
+        ],
+        "summary": "Update profile name",
+        "description": "Updates the profile name (push name) for the connected WhatsApp account.\n\n**Note:** This is the name that appears to other users in their\nchat list and message notifications.\n",
+        "operationId": "updateProfileName",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProfileNameRequest"
+              },
+              "example": {
+                "name": "John Doe"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile name updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateProfileNameResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Instance not connected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/profile-picture": {
+      "put": {
+        "tags": [
+          "Profile"
+        ],
+        "summary": "Update profile picture",
+        "description": "Updates the profile picture for the connected WhatsApp account.\n\n**Image Format:**\n- Base64-encoded JPEG image\n- Image URL (http/https)\n- Empty string to remove profile picture\n\n**Requirements:**\n- JPEG format recommended\n- Other formats may be rejected\n",
+        "operationId": "updateProfilePicture",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProfilePictureRequest"
+              },
+              "example": {
+                "image": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD..."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile picture updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateProfilePictureResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or image format",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Instance not connected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/profile-description": {
+      "put": {
+        "tags": [
+          "Profile"
+        ],
+        "summary": "Update profile description",
+        "description": "Updates the profile description (About/Status) for the connected WhatsApp account.\n\n**Note:** This is the text that appears in your profile's \"About\" section.\nCan be empty to clear the description.\n",
+        "operationId": "updateProfileDescription",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProfileDescriptionRequest"
+              },
+              "example": {
+                "description": "Available for business inquiries"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile description updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateProfileDescriptionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Instance not connected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }

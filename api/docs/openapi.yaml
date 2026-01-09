@@ -53,6 +53,23 @@ tags:
       - Time-limited signed URLs for secure access
       - Statistics endpoint for storage monitoring
       - Instance-scoped media organization
+  - name: Privacy
+    description: |
+      WhatsApp privacy settings management.
+
+      **Key Features:**
+      - Get and update privacy settings for the connected account
+      - Control who can see last seen, profile photo, about, status
+      - Manage read receipts and online status visibility
+      - Configure group add and call permissions
+  - name: Profile
+    description: |
+      WhatsApp profile management for the connected account.
+
+      **Key Features:**
+      - Update profile name (push name)
+      - Update profile picture
+      - Update profile description (About/Status)
 components:
   securitySchemes:
     ClientTokenAuth:
@@ -1945,6 +1962,642 @@ components:
           description: "Indicates whether the operation succeeded (`true`) or failed (`false`)."
       required:
         - success
+      additionalProperties: false
+    # ==================== Privacy Settings Schemas ====================
+    PrivacySettingsResponse:
+      type: object
+      description: Current privacy settings for the connected account.
+      properties:
+        groupAdd:
+          type: string
+          description: Who can add you to groups.
+          enum: [all, contacts, contact_blacklist, none]
+          example: contacts
+        lastSeen:
+          type: string
+          description: Who can see your last seen.
+          enum: [all, contacts, contact_blacklist, none]
+          example: contacts
+        status:
+          type: string
+          description: Who can see your status.
+          enum: [all, contacts, contact_blacklist, none]
+          example: contacts
+        profile:
+          type: string
+          description: Who can see your profile photo.
+          enum: [all, contacts, contact_blacklist, none]
+          example: contacts
+        readReceipts:
+          type: string
+          description: Read receipts setting.
+          enum: [all, none]
+          example: all
+        online:
+          type: string
+          description: Online presence visibility.
+          enum: [all, match_last_seen]
+          example: all
+        callAdd:
+          type: string
+          description: Who can call you.
+          enum: [all, known]
+          example: all
+      additionalProperties: false
+    UpdatePrivacyRequest:
+      type: object
+      description: Request body for updating a privacy setting.
+      properties:
+        value:
+          type: string
+          description: New privacy value.
+          example: contacts
+      required:
+        - value
+      additionalProperties: false
+    UpdatePrivacyResponse:
+      type: object
+      description: Response after updating a privacy setting.
+      properties:
+        success:
+          type: boolean
+          description: Whether the operation succeeded.
+        setting:
+          type: string
+          description: The setting that was updated.
+        value:
+          type: string
+          description: The new value.
+        message:
+          type: string
+          description: Optional message.
+      required:
+        - success
+        - setting
+        - value
+      additionalProperties: false
+    # ==================== Read Message Schemas ====================
+    ReadMessageRequest:
+      type: object
+      description: Request to mark messages as read.
+      properties:
+        phone:
+          type: string
+          description: Phone number or JID of the chat.
+          example: "5511999999999"
+        messageIds:
+          type: array
+          items:
+            type: string
+          description: List of message IDs to mark as read.
+          example: ["3EB0796DC18B7F954D54", "3EB0796DC18B7F954D55"]
+      required:
+        - phone
+        - messageIds
+      additionalProperties: false
+    ReadMessageResponse:
+      type: object
+      description: Response after marking messages as read.
+      properties:
+        success:
+          type: boolean
+          description: Whether the operation succeeded.
+        markedCount:
+          type: integer
+          description: Number of messages marked as read.
+        message:
+          type: string
+          description: Optional message.
+      required:
+        - success
+        - markedCount
+      additionalProperties: false
+    # ==================== Reaction Schemas ====================
+    SendReactionRequest:
+      type: object
+      description: Request to send a reaction to a message.
+      properties:
+        phone:
+          type: string
+          description: Phone number or JID of the chat containing the message.
+          example: "5511999999999"
+        messageId:
+          type: string
+          description: ID of the message to react to.
+          example: "3EB0796DC18B7F954D54"
+        reaction:
+          type: string
+          description: Emoji reaction to send.
+          example: "👍"
+      required:
+        - phone
+        - messageId
+        - reaction
+      additionalProperties: false
+    SendRemoveReactionRequest:
+      type: object
+      description: Request to remove a reaction from a message.
+      properties:
+        phone:
+          type: string
+          description: Phone number or JID of the chat containing the message.
+          example: "5511999999999"
+        messageId:
+          type: string
+          description: ID of the message to remove reaction from.
+          example: "3EB0796DC18B7F954D54"
+      required:
+        - phone
+        - messageId
+      additionalProperties: false
+    ReactionResponse:
+      type: object
+      description: Response after sending or removing a reaction.
+      properties:
+        success:
+          type: boolean
+          description: Whether the operation succeeded.
+        messageId:
+          type: string
+          description: The message ID that was reacted to.
+        reaction:
+          type: string
+          description: The reaction that was sent (empty if removed).
+        message:
+          type: string
+          description: Optional message.
+      required:
+        - success
+        - messageId
+      additionalProperties: false
+    # ==================== Forward Message Schemas ====================
+    ForwardMessageRequest:
+      type: object
+      description: Request to forward a message.
+      properties:
+        phone:
+          type: string
+          description: Destination phone number or JID.
+          example: "5511999999999"
+        messageId:
+          type: string
+          description: ID of the message to forward.
+          example: "3EB0796DC18B7F954D54"
+        fromPhone:
+          type: string
+          description: Source chat phone number or JID.
+          example: "5511888888888"
+        isGroup:
+          type: boolean
+          description: Whether the source chat is a group.
+          default: false
+        delayMessage:
+          type: integer
+          minimum: 1
+          maximum: 15
+          description: Optional delay in seconds before sending.
+        delayTyping:
+          type: integer
+          minimum: 1
+          maximum: 15
+          description: Optional typing indicator duration.
+      required:
+        - phone
+        - messageId
+        - fromPhone
+      additionalProperties: false
+    ForwardMessageResponse:
+      type: object
+      description: Response after forwarding a message.
+      properties:
+        zapiId:
+          type: string
+          description: Queue tracking ID.
+        messageId:
+          type: string
+          description: New message ID.
+        phone:
+          type: string
+          description: Destination phone.
+        status:
+          type: string
+          description: Queue status.
+          enum: [QUEUE, QUEUED]
+      required:
+        - zapiId
+        - messageId
+        - phone
+        - status
+      additionalProperties: false
+    # ==================== Poll Vote Schemas ====================
+    SendPollVoteRequest:
+      type: object
+      description: Request to vote on a poll.
+      properties:
+        phone:
+          type: string
+          description: Phone number or JID of the chat containing the poll.
+          example: "5511999999999"
+        pollMessageId:
+          type: string
+          description: ID of the poll message.
+          example: "3EB0796DC18B7F954D54"
+        options:
+          type: array
+          items:
+            type: string
+          description: Selected option names.
+          example: ["Option A", "Option B"]
+        delayMessage:
+          type: integer
+          minimum: 1
+          maximum: 15
+          description: Optional delay in seconds before sending.
+      required:
+        - phone
+        - pollMessageId
+        - options
+      additionalProperties: false
+    SendPollVoteResponse:
+      type: object
+      description: Response after voting on a poll.
+      properties:
+        success:
+          type: boolean
+          description: Whether the operation succeeded.
+        pollMessageId:
+          type: string
+          description: The poll message ID.
+        votedOptions:
+          type: array
+          items:
+            type: string
+          description: Options that were voted for.
+        message:
+          type: string
+          description: Optional message.
+      required:
+        - success
+        - pollMessageId
+        - votedOptions
+      additionalProperties: false
+    # ==================== Pin Message Schemas ====================
+    PinMessageRequest:
+      type: object
+      description: Request to pin or unpin a chat.
+      properties:
+        phone:
+          type: string
+          description: Phone number or JID of the chat to pin.
+          example: "5511999999999"
+        pin:
+          type: boolean
+          description: True to pin, false to unpin.
+          default: true
+      required:
+        - phone
+      additionalProperties: false
+    PinMessageResponse:
+      type: object
+      description: Response after pinning or unpinning a chat.
+      properties:
+        success:
+          type: boolean
+          description: Whether the operation succeeded.
+        phone:
+          type: string
+          description: The chat that was pinned/unpinned.
+        pinned:
+          type: boolean
+          description: Current pin status.
+        message:
+          type: string
+          description: Optional message.
+      required:
+        - success
+        - phone
+        - pinned
+      additionalProperties: false
+    # ==================== Event Schemas ====================
+    SendEditEventRequest:
+      type: object
+      description: Request to edit an existing event.
+      properties:
+        phone:
+          type: string
+          description: Phone number or JID of the chat containing the event.
+          example: "5511999999999"
+        eventId:
+          type: string
+          description: ID of the event message to edit.
+          example: "3EB047ED70306656281B34"
+        name:
+          type: string
+          description: Updated event name.
+          example: "Team Meeting - Updated"
+        description:
+          type: string
+          description: Updated event description.
+          example: "Weekly sync moved to new time"
+        startTime:
+          type: string
+          format: date-time
+          description: Updated start time in RFC3339 format.
+          example: "2024-01-15T14:00:00Z"
+        endTime:
+          type: string
+          format: date-time
+          description: Updated end time in RFC3339 format.
+          example: "2024-01-15T15:00:00Z"
+        location:
+          type: string
+          description: Updated event location.
+          example: "Conference Room B"
+        canceled:
+          type: boolean
+          description: Set to true to cancel the event.
+          default: false
+        delayMessage:
+          type: integer
+          minimum: 1
+          maximum: 15
+          description: Optional delay in seconds before sending.
+        delayTyping:
+          type: integer
+          minimum: 1
+          maximum: 15
+          description: Optional typing simulation duration in seconds.
+      required:
+        - phone
+        - eventId
+      additionalProperties: false
+    SendEditEventResponse:
+      type: object
+      description: Response after editing an event.
+      properties:
+        success:
+          type: boolean
+          description: Whether the operation succeeded.
+        eventId:
+          type: string
+          description: The event message ID.
+        messageId:
+          type: string
+          description: The sent message ID.
+        message:
+          type: string
+          description: Optional status message.
+      required:
+        - success
+        - eventId
+      additionalProperties: false
+    SendEventResponseRequest:
+      type: object
+      description: Request to respond to an event invitation (RSVP).
+      properties:
+        phone:
+          type: string
+          description: Phone number or JID of the chat containing the event.
+          example: "5511999999999"
+        eventId:
+          type: string
+          description: ID of the event message to respond to.
+          example: "3EB047ED70306656281B34"
+        response:
+          type: string
+          enum:
+            - going
+            - not_going
+            - maybe
+          description: |
+            Response type:
+            - `going` - Confirm attendance
+            - `not_going` - Decline invitation
+            - `maybe` - Tentative response
+          example: "going"
+        extraGuestCount:
+          type: integer
+          minimum: 0
+          description: Number of additional guests attending.
+          example: 2
+        delayMessage:
+          type: integer
+          minimum: 1
+          maximum: 15
+          description: Optional delay in seconds before sending.
+        delayTyping:
+          type: integer
+          minimum: 1
+          maximum: 15
+          description: Optional typing simulation duration in seconds.
+      required:
+        - phone
+        - eventId
+        - response
+      additionalProperties: false
+    SendEventResponseResponse:
+      type: object
+      description: Response after sending an event RSVP.
+      properties:
+        success:
+          type: boolean
+          description: Whether the operation succeeded.
+        eventId:
+          type: string
+          description: The event message ID.
+        response:
+          type: string
+          description: The response that was sent.
+          enum:
+            - going
+            - not_going
+            - maybe
+        message:
+          type: string
+          description: Optional status message.
+      required:
+        - success
+        - eventId
+        - response
+      additionalProperties: false
+    # ==================== Contact Schemas ====================
+    ContactMetadataResponse:
+      type: object
+      description: Metadata about a contact.
+      properties:
+        phone:
+          type: string
+          description: Phone number.
+          example: "5511999999999"
+        name:
+          type: string
+          description: Contact name (push name).
+          example: "John Doe"
+        status:
+          type: string
+          description: Contact status/about.
+          example: "Hey there! I am using WhatsApp."
+        pictureUrl:
+          type: string
+          format: uri
+          description: Profile picture URL.
+        isOnWhatsApp:
+          type: boolean
+          description: Whether the number is on WhatsApp.
+        verifiedName:
+          type: string
+          description: Verified business name (if applicable).
+        isBusiness:
+          type: boolean
+          description: Whether this is a business account.
+      required:
+        - phone
+        - isOnWhatsApp
+      additionalProperties: false
+    ProfilePictureResponse:
+      type: object
+      description: Profile picture information.
+      properties:
+        url:
+          type: string
+          format: uri
+          description: Direct URL to the profile picture.
+          example: "https://pps.whatsapp.net/v/t61..."
+        id:
+          type: string
+          description: Picture ID.
+        type:
+          type: string
+          description: Picture type (image, preview).
+          enum: [image, preview]
+      required:
+        - url
+      additionalProperties: false
+    # ==================== Block/Unblock Schemas ====================
+    ModifyBlockedRequest:
+      type: object
+      description: Request to block or unblock a contact.
+      properties:
+        phone:
+          type: string
+          description: Phone number to block/unblock.
+          example: "5511999999999"
+        action:
+          type: string
+          description: Action to perform.
+          enum: [block, unblock]
+          example: block
+      required:
+        - phone
+        - action
+      additionalProperties: false
+    ModifyBlockedResponse:
+      type: object
+      description: Response after blocking or unblocking a contact.
+      properties:
+        success:
+          type: boolean
+          description: Whether the operation succeeded.
+        phone:
+          type: string
+          description: The phone number affected.
+        blocked:
+          type: boolean
+          description: Current block status.
+        message:
+          type: string
+          description: Optional message.
+      required:
+        - success
+        - phone
+        - blocked
+      additionalProperties: false
+    # ==================== Profile Schemas ====================
+    UpdateProfileNameRequest:
+      type: object
+      description: Request to update profile name (push name).
+      properties:
+        name:
+          type: string
+          description: New profile name.
+          example: "John Doe"
+          minLength: 1
+          maxLength: 25
+      required:
+        - name
+      additionalProperties: false
+    UpdateProfileNameResponse:
+      type: object
+      description: Response after updating profile name.
+      properties:
+        success:
+          type: boolean
+          description: Whether the operation succeeded.
+        name:
+          type: string
+          description: The new profile name.
+        message:
+          type: string
+          description: Optional message.
+      required:
+        - success
+        - name
+      additionalProperties: false
+    UpdateProfilePictureRequest:
+      type: object
+      description: Request to update profile picture.
+      properties:
+        image:
+          type: string
+          description: Base64-encoded JPEG image or URL.
+          example: "data:image/jpeg;base64,/9j/4AAQ..."
+      required:
+        - image
+      additionalProperties: false
+    UpdateProfilePictureResponse:
+      type: object
+      description: Response after updating profile picture.
+      properties:
+        success:
+          type: boolean
+          description: Whether the operation succeeded.
+        pictureId:
+          type: string
+          description: New picture ID assigned by WhatsApp.
+        message:
+          type: string
+          description: Optional message.
+      required:
+        - success
+      additionalProperties: false
+    UpdateProfileDescriptionRequest:
+      type: object
+      description: Request to update profile description (About/Status).
+      properties:
+        description:
+          type: string
+          description: New profile description.
+          example: "Hey there! I am using WhatsApp."
+          maxLength: 139
+      required:
+        - description
+      additionalProperties: false
+    UpdateProfileDescriptionResponse:
+      type: object
+      description: Response after updating profile description.
+      properties:
+        success:
+          type: boolean
+          description: Whether the operation succeeded.
+        description:
+          type: string
+          description: The new profile description.
+        message:
+          type: string
+          description: Optional message.
+      required:
+        - success
+        - description
       additionalProperties: false
     InvitationLinkResponse:
       type: object
@@ -12176,6 +12829,1091 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
                 error: "URL expired"
+
+  # ============================================================================
+  # Privacy Settings Endpoints
+  # ============================================================================
+
+  /instances/{instanceId}/token/{instanceToken}/privacy-settings:
+    get:
+      tags:
+        - Privacy
+      summary: Get privacy settings
+      description: |
+        Retrieves all privacy settings for the connected WhatsApp account.
+
+        **Settings Returned:**
+        - `groupAdd`: Who can add you to groups (all, contacts, contact_blacklist)
+        - `lastSeen`: Who can see your last seen (all, contacts, contact_blacklist, none)
+        - `status`: Who can see your status (all, contacts, contact_blacklist, none)
+        - `profile`: Who can see your profile photo (all, contacts, contact_blacklist, none)
+        - `readReceipts`: Read receipts setting (all, none)
+        - `online`: Online status visibility (all, match_last_seen)
+        - `callAdd`: Who can call you (all, known)
+
+      operationId: getPrivacySettings
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      responses:
+        "200":
+          description: Privacy settings retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PrivacySettingsResponse"
+              example:
+                groupAdd: "contacts"
+                lastSeen: "contacts"
+                status: "all"
+                profile: "contacts"
+                readReceipts: "all"
+                online: "all"
+                callAdd: "all"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Instance not connected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /instances/{instanceId}/token/{instanceToken}/privacy-settings/group-add:
+    put:
+      tags:
+        - Privacy
+      summary: Update group add privacy
+      description: |
+        Updates who can add you to WhatsApp groups.
+
+        **Values:**
+        - `all`: Anyone can add you
+        - `contacts`: Only contacts can add you
+        - `contact_blacklist`: Contacts except blocked
+
+      operationId: updatePrivacyGroupAdd
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePrivacyRequest"
+            example:
+              value: "contacts"
+      responses:
+        "200":
+          description: Privacy setting updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdatePrivacyResponse"
+        "400":
+          description: Invalid value
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Instance not connected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /instances/{instanceId}/token/{instanceToken}/privacy-settings/last-seen:
+    put:
+      tags:
+        - Privacy
+      summary: Update last seen privacy
+      description: |
+        Updates who can see your last seen time.
+
+        **Values:**
+        - `all`: Everyone can see
+        - `contacts`: Only contacts can see
+        - `contact_blacklist`: Contacts except blocked
+        - `none`: Nobody can see
+
+      operationId: updatePrivacyLastSeen
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePrivacyRequest"
+            example:
+              value: "contacts"
+      responses:
+        "200":
+          description: Privacy setting updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdatePrivacyResponse"
+        "400":
+          description: Invalid value
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Instance not connected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /instances/{instanceId}/token/{instanceToken}/privacy-settings/status:
+    put:
+      tags:
+        - Privacy
+      summary: Update status privacy
+      description: |
+        Updates who can see your status updates.
+
+        **Values:**
+        - `all`: Everyone can see
+        - `contacts`: Only contacts can see
+        - `contact_blacklist`: Contacts except blocked
+        - `none`: Nobody can see
+
+      operationId: updatePrivacyStatus
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePrivacyRequest"
+            example:
+              value: "contacts"
+      responses:
+        "200":
+          description: Privacy setting updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdatePrivacyResponse"
+        "400":
+          description: Invalid value
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Instance not connected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /instances/{instanceId}/token/{instanceToken}/privacy-settings/profile-photo:
+    put:
+      tags:
+        - Privacy
+      summary: Update profile photo privacy
+      description: |
+        Updates who can see your profile photo.
+
+        **Values:**
+        - `all`: Everyone can see
+        - `contacts`: Only contacts can see
+        - `contact_blacklist`: Contacts except blocked
+        - `none`: Nobody can see
+
+      operationId: updatePrivacyProfilePhoto
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePrivacyRequest"
+            example:
+              value: "contacts"
+      responses:
+        "200":
+          description: Privacy setting updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdatePrivacyResponse"
+        "400":
+          description: Invalid value
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Instance not connected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /instances/{instanceId}/token/{instanceToken}/privacy-settings/read-receipts:
+    put:
+      tags:
+        - Privacy
+      summary: Update read receipts privacy
+      description: |
+        Updates read receipts (blue ticks) setting.
+
+        **Values:**
+        - `all`: Send and receive read receipts
+        - `none`: Disable read receipts (you won't see others' either)
+
+      operationId: updatePrivacyReadReceipts
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePrivacyRequest"
+            example:
+              value: "all"
+      responses:
+        "200":
+          description: Privacy setting updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdatePrivacyResponse"
+        "400":
+          description: Invalid value
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Instance not connected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /instances/{instanceId}/token/{instanceToken}/privacy-settings/online:
+    put:
+      tags:
+        - Privacy
+      summary: Update online status privacy
+      description: |
+        Updates online status visibility.
+
+        **Values:**
+        - `all`: Everyone can see when you're online
+        - `match_last_seen`: Match your last seen setting
+
+      operationId: updatePrivacyOnline
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePrivacyRequest"
+            example:
+              value: "all"
+      responses:
+        "200":
+          description: Privacy setting updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdatePrivacyResponse"
+        "400":
+          description: Invalid value
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Instance not connected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /instances/{instanceId}/token/{instanceToken}/privacy-settings/call-add:
+    put:
+      tags:
+        - Privacy
+      summary: Update call privacy
+      description: |
+        Updates who can call you.
+
+        **Values:**
+        - `all`: Anyone can call you
+        - `known`: Only known contacts can call you
+
+      operationId: updatePrivacyCallAdd
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePrivacyRequest"
+            example:
+              value: "all"
+      responses:
+        "200":
+          description: Privacy setting updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdatePrivacyResponse"
+        "400":
+          description: Invalid value
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Instance not connected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # ============================================================================
+  # Message Interaction Endpoints
+  # ============================================================================
+
+  /instances/{instanceId}/token/{instanceToken}/read-message:
+    post:
+      tags:
+        - Messages
+      summary: Mark messages as read
+      description: |
+        Marks one or more messages as read (sends read receipts/blue ticks).
+
+        **Features:**
+        - Mark single or multiple messages as read
+        - Works for both individual and group chats
+        - Immediate execution (not queued)
+
+      operationId: readMessage
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReadMessageRequest"
+            example:
+              phone: "5511999999999"
+              messageIds:
+                - "3EB047ED70306656281B34"
+                - "3EB047ED70306656281B35"
+      responses:
+        "200":
+          description: Messages marked as read successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReadMessageResponse"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Instance not connected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /instances/{instanceId}/token/{instanceToken}/send-reaction:
+    post:
+      tags:
+        - Messages
+      summary: Send reaction to message
+      description: |
+        Sends an emoji reaction to a specific message.
+
+        **Features:**
+        - React with any emoji
+        - Works on individual and group messages
+        - FIFO queue with per-recipient ordering
+
+      operationId: sendReaction
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendReactionRequest"
+            example:
+              phone: "5511999999999"
+              messageId: "3EB047ED70306656281B34"
+              reaction: "👍"
+      responses:
+        "200":
+          description: Reaction sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SendMessageResponse"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Instance not connected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /instances/{instanceId}/token/{instanceToken}/send-remove-reaction:
+    post:
+      tags:
+        - Messages
+      summary: Remove reaction from message
+      description: |
+        Removes a previously sent reaction from a message.
+
+        **Features:**
+        - Remove your reaction from any message
+        - Works on individual and group messages
+
+      operationId: sendRemoveReaction
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendRemoveReactionRequest"
+            example:
+              phone: "5511999999999"
+              messageId: "3EB047ED70306656281B34"
+      responses:
+        "200":
+          description: Reaction removed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SendMessageResponse"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Instance not connected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /instances/{instanceId}/token/{instanceToken}/forward-message:
+    post:
+      tags:
+        - Messages
+      summary: Forward a message
+      description: |
+        Forwards an existing message to another chat.
+
+        **Features:**
+        - Forward any message type (text, media, etc.)
+        - Preserves original message metadata
+        - Shows "Forwarded" label on recipient's device
+        - FIFO queue with per-recipient ordering
+
+      operationId: forwardMessage
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ForwardMessageRequest"
+            example:
+              phone: "5511888888888"
+              messageId: "3EB047ED70306656281B34"
+              isGroup: false
+      responses:
+        "200":
+          description: Message forwarded successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SendMessageResponse"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Instance not connected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /instances/{instanceId}/token/{instanceToken}/send-poll-vote:
+    post:
+      tags:
+        - Messages
+      summary: Vote on a poll
+      description: |
+        Submits a vote on an existing poll message.
+
+        **Features:**
+        - Vote for one or multiple options (depending on poll settings)
+        - Options are specified by name (exact match)
+        - FIFO queue with per-recipient ordering
+
+      operationId: sendPollVote
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendPollVoteRequest"
+            example:
+              phone: "5511999999999"
+              pollId: "3EB047ED70306656281B34"
+              options:
+                - "Option A"
+                - "Option B"
+      responses:
+        "200":
+          description: Poll vote sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SendMessageResponse"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Instance not connected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /instances/{instanceId}/token/{instanceToken}/pin-message:
+    post:
+      tags:
+        - Messages
+      summary: Pin or unpin a chat
+      description: |
+        Pins or unpins a chat in the chat list.
+
+        **Note:** This pins/unpins the entire chat, not individual messages.
+
+        **Features:**
+        - Pin important conversations to top of chat list
+        - Unpin to remove from pinned section
+
+      operationId: pinMessage
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PinMessageRequest"
+            example:
+              phone: "5511999999999"
+              pin: true
+      responses:
+        "200":
+          description: Chat pinned/unpinned successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PinMessageResponse"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Instance not connected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /instances/{instanceId}/token/{instanceToken}/send-edit-event:
+    post:
+      tags:
+        - Messages
+      summary: Edit an event
+      description: |
+        Sends an update to an existing event message, modifying its details.
+
+        **Features:**
+        - Update event name, description, location
+        - Change start and end times
+        - Cancel the event
+        - Optional typing simulation before sending
+
+        **Note:** You must have created the original event or have permission to edit it.
+
+      operationId: sendEditEvent
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendEditEventRequest"
+            example:
+              phone: "5511999999999"
+              eventId: "3EB047ED70306656281B34"
+              name: "Team Meeting - Updated"
+              description: "Weekly sync moved to new time"
+              startTime: "2024-01-15T14:00:00Z"
+              endTime: "2024-01-15T15:00:00Z"
+              location: "Conference Room B"
+      responses:
+        "200":
+          description: Event updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SendEditEventResponse"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Instance not connected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /instances/{instanceId}/token/{instanceToken}/send-event-response:
+    post:
+      tags:
+        - Messages
+      summary: Respond to an event invitation
+      description: |
+        Sends a response to an event invitation (RSVP).
+
+        **Response Types:**
+        - `going` - Confirm attendance
+        - `not_going` - Decline invitation
+        - `maybe` - Tentative response
+
+        **Features:**
+        - Specify additional guests count
+        - Optional typing simulation before sending
+
+        **Note:** Event responses are encrypted and require the original event's message secret.
+        This endpoint sends an encrypted response referencing the original event.
+
+      operationId: sendEventResponse
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendEventResponseRequest"
+            example:
+              phone: "5511999999999"
+              eventId: "3EB047ED70306656281B34"
+              response: "going"
+              extraGuestCount: 2
+      responses:
+        "200":
+          description: Event response sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SendEventResponseResponse"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Instance not connected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # ============================================================================
+  # Contact Management Endpoints
+  # ============================================================================
+
+  /instances/{instanceId}/token/{instanceToken}/contacts/{phone}/metadata:
+    get:
+      tags:
+        - Contacts
+      summary: Get contact metadata
+      description: |
+        Retrieves detailed metadata for a specific contact.
+
+        **Data Returned:**
+        - Phone number
+        - Display name
+        - Status/About text
+        - Profile picture URL
+        - WhatsApp registration status
+
+      operationId: getContactMetadata
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+        - name: phone
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Phone number in international format (numbers only)
+          example: "5511999999999"
+      responses:
+        "200":
+          description: Contact metadata retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactMetadataResponse"
+        "400":
+          description: Invalid phone number
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Instance not connected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /instances/{instanceId}/token/{instanceToken}/contacts/{phone}/profile-picture:
+    get:
+      tags:
+        - Contacts
+      summary: Get contact profile picture
+      description: |
+        Retrieves the profile picture URL for a specific contact.
+
+        **Note:** Returns empty or error if contact has privacy settings
+        that hide their profile picture from you.
+
+      operationId: getContactProfilePicture
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+        - name: phone
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Phone number in international format (numbers only)
+          example: "5511999999999"
+      responses:
+        "200":
+          description: Profile picture retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfilePictureResponse"
+        "400":
+          description: Invalid phone number
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Instance not connected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /instances/{instanceId}/token/{instanceToken}/modify-blocked:
+    post:
+      tags:
+        - Contacts
+      summary: Block or unblock a contact
+      description: |
+        Blocks or unblocks a WhatsApp contact.
+
+        **Actions:**
+        - `block`: Block the contact (they can't message you)
+        - `unblock`: Unblock a previously blocked contact
+
+      operationId: modifyBlocked
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ModifyBlockedRequest"
+            example:
+              phone: "5511999999999"
+              action: "block"
+      responses:
+        "200":
+          description: Contact blocked/unblocked successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModifyBlockedResponse"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Instance not connected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # ============================================================================
+  # Profile Management Endpoints
+  # ============================================================================
+
+  /instances/{instanceId}/token/{instanceToken}/profile-name:
+    put:
+      tags:
+        - Profile
+      summary: Update profile name
+      description: |
+        Updates the profile name (push name) for the connected WhatsApp account.
+
+        **Note:** This is the name that appears to other users in their
+        chat list and message notifications.
+
+      operationId: updateProfileName
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProfileNameRequest"
+            example:
+              name: "John Doe"
+      responses:
+        "200":
+          description: Profile name updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateProfileNameResponse"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Instance not connected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /instances/{instanceId}/token/{instanceToken}/profile-picture:
+    put:
+      tags:
+        - Profile
+      summary: Update profile picture
+      description: |
+        Updates the profile picture for the connected WhatsApp account.
+
+        **Image Format:**
+        - Base64-encoded JPEG image
+        - Image URL (http/https)
+        - Empty string to remove profile picture
+
+        **Requirements:**
+        - JPEG format recommended
+        - Other formats may be rejected
+
+      operationId: updateProfilePicture
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProfilePictureRequest"
+            example:
+              image: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD..."
+      responses:
+        "200":
+          description: Profile picture updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateProfilePictureResponse"
+        "400":
+          description: Invalid request or image format
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Instance not connected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /instances/{instanceId}/token/{instanceToken}/profile-description:
+    put:
+      tags:
+        - Profile
+      summary: Update profile description
+      description: |
+        Updates the profile description (About/Status) for the connected WhatsApp account.
+
+        **Note:** This is the text that appears in your profile's "About" section.
+        Can be empty to clear the description.
+
+      operationId: updateProfileDescription
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProfileDescriptionRequest"
+            example:
+              description: "Available for business inquiries"
+      responses:
+        "200":
+          description: Profile description updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UpdateProfileDescriptionResponse"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Instance not connected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /media/stats:
     get:
