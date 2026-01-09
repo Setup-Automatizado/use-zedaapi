@@ -1,6 +1,3 @@
-//go:build ignore
-// +build ignore
-
 package main
 
 import (
@@ -32,7 +29,6 @@ const (
 	ButtonPhone        ButtonType = "cta_call"
 )
 
-// ReviewAndPay configuration inputs
 type ReviewAndPayItemInput struct {
 	Name         string
 	Quantity     int
@@ -138,15 +134,12 @@ func (ButtonFactory) NewReviewPayBtn(key, name, instructions, Pixkind string) (*
 	}, nil
 }
 
-// NewReviewPayBtnCustom builds a review_and_pay button with fully dynamic order and totals
 func (ButtonFactory) NewReviewPayBtnCustom(cfg ReviewAndPayConfig) (*waE2E.InteractiveMessage_NativeFlowMessage_NativeFlowButton, error) {
-	// Payment settings (PIX static code)
 	payment, err := PixPaymentSettings{}.new(cfg.PixKey, cfg.MerchantName, cfg.PixKind)
 	if err != nil {
 		return nil, err
 	}
 
-	// Build items
 	var items []PixItem
 	subtotalValue := 0
 	subtotalOffset := 100
@@ -158,7 +151,6 @@ func (ButtonFactory) NewReviewPayBtnCustom(cfg ReviewAndPayConfig) (*waE2E.Inter
 				RetailerID: fmt.Sprintf("custom-item-%d", time.Now().UnixNano()),
 				Quantity:   it.Quantity,
 			})
-			// best-effort subtotal
 			subtotalValue += it.AmountValue * max(1, it.Quantity)
 			if it.AmountOffset > 0 {
 				subtotalOffset = it.AmountOffset
@@ -166,7 +158,6 @@ func (ButtonFactory) NewReviewPayBtnCustom(cfg ReviewAndPayConfig) (*waE2E.Inter
 		}
 	}
 
-	// Totals
 	totalValue := cfg.TotalValue
 	totalOffset := cfg.TotalOffset
 	if totalValue == 0 {
@@ -176,7 +167,6 @@ func (ButtonFactory) NewReviewPayBtnCustom(cfg ReviewAndPayConfig) (*waE2E.Inter
 		totalOffset = subtotalOffset
 	}
 
-	// Reference id
 	ref := cfg.ReferenceID
 	if ref == "" {
 		b := make([]byte, 10)
@@ -194,11 +184,14 @@ func (ButtonFactory) NewReviewPayBtnCustom(cfg ReviewAndPayConfig) (*waE2E.Inter
 	review := ButtonReviewAndPayParamsJSON{
 		ReferenceID:          ref,
 		Type:                 "physical-goods",
+		PaymentType:          "br",
 		PaymentConfiguration: "merchant_categorization_code",
 		PaymentSettings:      []PixPaymentSettings{payment},
 		Currency:             firstNonEmpty(cfg.Currency, "BRL"),
 		TotalAmount:          TotalAmount{Value: totalValue, Offset: totalOffset},
 		Order:                order,
+		SharePaymentStatus:   false,
+		Referral:             "chat_attachment",
 	}
 
 	buttonParamsJSON, err := json.Marshal(review)
@@ -222,19 +215,22 @@ type ButtonMessageParams struct {
 }
 
 type HeaderMedia struct {
-	Type          MediaType `json:"type"`
-	URL           string    `json:"url"`
-	Caption       string    `json:"caption,omitempty"`
-	MimeType      string    `json:"mimetype,omitempty"`
-	FileSHA256    string    `json:"file_sha256,omitempty"`
-	FileEncSHA256 string    `json:"file_enc_sha256,omitempty"`
-	FileLength    uint64    `json:"file_length,omitempty"`
-	DirectPath    string    `json:"direct_path,omitempty"`
-	MediaKey      string    `json:"media_key,omitempty"`
-	FileName      string    `json:"file_name,omitempty"`
-	JPEGThumbnail []byte    `json:"jpeg_thumbnail,omitempty"`
-	Width         int       `json:"width,omitempty"`
-	Height        int       `json:"height,omitempty"`
+	Type            MediaType `json:"type"`
+	URL             string    `json:"url"`
+	Caption         string    `json:"caption,omitempty"`
+	MimeType        string    `json:"mimetype,omitempty"`
+	FileSHA256      string    `json:"file_sha256,omitempty"`
+	FileEncSHA256   string    `json:"file_enc_sha256,omitempty"`
+	FileLength      uint64    `json:"file_length,omitempty"`
+	DirectPath      string    `json:"direct_path,omitempty"`
+	MediaKey        string    `json:"media_key,omitempty"`
+	FileName        string    `json:"file_name,omitempty"`
+	JPEGThumbnail   []byte    `json:"jpeg_thumbnail,omitempty"`
+	Width           int       `json:"width,omitempty"`
+	Height          int       `json:"height,omitempty"`
+	ThumbnailWidth  uint32    `json:"thumbnail_width,omitempty"`
+	ThumbnailHeight uint32    `json:"thumbnail_height,omitempty"`
+	PageCount       uint32    `json:"page_count,omitempty"`
 }
 
 type MediaType string
@@ -243,7 +239,6 @@ const (
 	MediaImage    MediaType = "image"
 	MediaVideo    MediaType = "video"
 	MediaDocument MediaType = "document"
-	// Adicione outros tipos de mídia conforme necessário
 )
 
 func (ButtonMessageFactory) NewMessageButtons(params ButtonMessageParams) (*waE2E.Message, error) {
@@ -263,8 +258,6 @@ func (ButtonMessageFactory) NewMessageButtons(params ButtonMessageParams) (*waE2
 	}
 
 	if len(body) == 0 {
-		/*fmt.Println("body", body)
-		return nil, ErrTextCantBeNull*/
 		body = ""
 	}
 
@@ -313,7 +306,6 @@ func (ButtonMessageFactory) NewMessageButtons(params ButtonMessageParams) (*waE2
 		return nil, errors.New("if a ButtonReply is present, other button types are not allowed")
 	}
 
-	// MessageVersion é obrigatório para InteractiveMessage funcionar corretamente
 	msgVersion := int32(1)
 
 	header := &waE2E.InteractiveMessage_Header{
@@ -321,7 +313,6 @@ func (ButtonMessageFactory) NewMessageButtons(params ButtonMessageParams) (*waE2
 		HasMediaAttachment: proto.Bool(false),
 	}
 
-	// Se houver mídia no header, processa de acordo com o tipo
 	if headerMedia != nil {
 
 		switch headerMedia.Type {
@@ -373,15 +364,25 @@ func (ButtonMessageFactory) NewMessageButtons(params ButtonMessageParams) (*waE2
 			if headerMedia.FileName != "" {
 				doc.FileName = proto.String(headerMedia.FileName)
 			}
+			if len(headerMedia.JPEGThumbnail) > 0 {
+				doc.JPEGThumbnail = headerMedia.JPEGThumbnail
+			}
+			if headerMedia.ThumbnailWidth > 0 {
+				doc.ThumbnailWidth = proto.Uint32(headerMedia.ThumbnailWidth)
+			}
+			if headerMedia.ThumbnailHeight > 0 {
+				doc.ThumbnailHeight = proto.Uint32(headerMedia.ThumbnailHeight)
+			}
+			if headerMedia.PageCount > 0 {
+				doc.PageCount = proto.Uint32(headerMedia.PageCount)
+			}
 			header.Media = &waE2E.InteractiveMessage_Header_DocumentMessage{DocumentMessage: doc}
-		// Adicione outros casos de mídia conforme necessário
 		default:
 			return nil, fmt.Errorf("unsupported media type: %s", headerMedia.Type)
 		}
 		header.HasMediaAttachment = proto.Bool(true)
 	}
 
-	// Se houver review_and_pay entre os botões, definir MessageParamsJSON (alguns clientes exigem)
 	var messageParams *string
 	for _, b := range buttons {
 		if b != nil && b.Name != nil && *b.Name == string(ButtonReviewAndPay) {
@@ -710,11 +711,14 @@ func max(a, b int) int {
 type ButtonReviewAndPayParamsJSON struct {
 	ReferenceID          string               `json:"reference_id"`
 	Type                 string               `json:"type"`
+	PaymentType          string               `json:"payment_type,omitempty"`
 	PaymentConfiguration string               `json:"payment_configuration"`
 	PaymentSettings      []PixPaymentSettings `json:"payment_settings"`
 	Currency             string               `json:"currency"`
 	TotalAmount          TotalAmount          `json:"total_amount"`
 	Order                Order                `json:"order"`
+	SharePaymentStatus   bool                 `json:"share_payment_status"`
+	Referral             string               `json:"referral,omitempty"`
 }
 
 func (ButtonReviewAndPayParamsJSON) New(key, name, instructions string, kind string) (ButtonReviewAndPayParamsJSON, error) {
@@ -732,10 +736,13 @@ func (ButtonReviewAndPayParamsJSON) New(key, name, instructions string, kind str
 	return ButtonReviewAndPayParamsJSON{
 		ReferenceID:          strings.ToUpper(hex.EncodeToString(b)),
 		Type:                 "physical-goods",
+		PaymentType:          "br",
 		PaymentConfiguration: "merchant_categorization_code",
 		PaymentSettings:      []PixPaymentSettings{payment},
 		Currency:             "BRL",
 		TotalAmount:          TotalAmount{}.new(100000, 1000),
 		Order:                Order{}.newReviewAndPayOrder(100000, 1000),
+		SharePaymentStatus:   false,
+		Referral:             "chat_attachment",
 	}, nil
 }

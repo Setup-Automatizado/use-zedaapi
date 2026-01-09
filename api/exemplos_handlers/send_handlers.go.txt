@@ -1,6 +1,3 @@
-//go:build ignore
-// +build ignore
-
 package main
 
 import (
@@ -26,23 +23,6 @@ import (
 
 	"google.golang.org/protobuf/proto"
 )
-
-const enterpriseLicenseMarker = "-ENT-"
-
-func (s *server) ensureEnterpriseLicense(w http.ResponseWriter, r *http.Request) bool {
-	licenseKey := os.Getenv("LICENSE_KEY")
-	if strings.Contains(licenseKey, enterpriseLicenseMarker) {
-		return true
-	}
-
-	s.Respond(
-		w,
-		r,
-		http.StatusForbidden,
-		errors.New("este recurso requer licença Enterprise; entre em contato com o suporte para adquirir acesso"),
-	)
-	return false
-}
 
 // SendDocument sends a document/attachment message to a recipient
 //
@@ -207,7 +187,7 @@ func (s *server) SendDocument() http.HandlerFunc {
 				msg.DocumentMessage.ContextInfo = &waE2E.ContextInfo{
 					StanzaID:      proto.String(*t.ContextInfo.StanzaID),
 					Participant:   proto.String(*t.ContextInfo.Participant),
-					QuotedMessage: &waE2E.Message{Conversation: proto.String("")},
+					QuotedMessage: getQuotedMessage(&t.ContextInfo),
 				}
 			}
 		}
@@ -446,7 +426,7 @@ func (s *server) SendAudio() http.HandlerFunc {
 			msg.AudioMessage.ContextInfo = &waE2E.ContextInfo{
 				StanzaID:      proto.String(*t.ContextInfo.StanzaID),
 				Participant:   proto.String(*t.ContextInfo.Participant),
-				QuotedMessage: &waE2E.Message{Conversation: proto.String("")},
+				QuotedMessage: getQuotedMessage(&t.ContextInfo),
 			}
 		}
 
@@ -760,7 +740,7 @@ func (s *server) SendImage() http.HandlerFunc {
 				msg.ImageMessage.ContextInfo = &waE2E.ContextInfo{
 					StanzaID:      proto.String(*t.ContextInfo.StanzaID),
 					Participant:   proto.String(*t.ContextInfo.Participant),
-					QuotedMessage: &waE2E.Message{Conversation: proto.String("")},
+					QuotedMessage: getQuotedMessage(&t.ContextInfo),
 				}
 			}
 		}
@@ -979,7 +959,7 @@ func (s *server) SendSticker() http.HandlerFunc {
 				msg.StickerMessage.ContextInfo = &waE2E.ContextInfo{
 					StanzaID:      proto.String(*t.ContextInfo.StanzaID),
 					Participant:   proto.String(*t.ContextInfo.Participant),
-					QuotedMessage: &waE2E.Message{Conversation: proto.String("")},
+					QuotedMessage: getQuotedMessage(&t.ContextInfo),
 				}
 			}
 		}
@@ -1249,7 +1229,7 @@ func (s *server) SendVideo() http.HandlerFunc {
 				msg.VideoMessage.ContextInfo = &waE2E.ContextInfo{
 					StanzaID:      proto.String(*t.ContextInfo.StanzaID),
 					Participant:   proto.String(*t.ContextInfo.Participant),
-					QuotedMessage: &waE2E.Message{Conversation: proto.String("")},
+					QuotedMessage: getQuotedMessage(&t.ContextInfo),
 				}
 			}
 		}
@@ -1528,7 +1508,7 @@ func (s *server) SendContact() http.HandlerFunc {
 			msg.ContactMessage.ContextInfo = &waE2E.ContextInfo{
 				StanzaID:      proto.String(*t.ContextInfo.StanzaID),
 				Participant:   proto.String(*t.ContextInfo.Participant),
-				QuotedMessage: &waE2E.Message{Conversation: proto.String("")},
+				QuotedMessage: getQuotedMessage(&t.ContextInfo),
 			}
 		}
 
@@ -1711,7 +1691,7 @@ func (s *server) SendLocation() http.HandlerFunc {
 			msg.LocationMessage.ContextInfo = &waE2E.ContextInfo{
 				StanzaID:      proto.String(*t.ContextInfo.StanzaID),
 				Participant:   proto.String(*t.ContextInfo.Participant),
-				QuotedMessage: &waE2E.Message{Conversation: proto.String("")},
+				QuotedMessage: getQuotedMessage(&t.ContextInfo),
 			}
 		}
 		if t.ContextInfo.MentionedJID != nil {
@@ -1885,7 +1865,7 @@ func (s *server) SendMessage() http.HandlerFunc {
 			msg.ExtendedTextMessage.ContextInfo = &waE2E.ContextInfo{
 				StanzaID:      proto.String(*t.ContextInfo.StanzaID),
 				Participant:   proto.String(*t.ContextInfo.Participant),
-				QuotedMessage: &waE2E.Message{Conversation: proto.String("")},
+				QuotedMessage: getQuotedMessage(&t.ContextInfo),
 			}
 		}
 		if t.ContextInfo.MentionedJID != nil {
@@ -2286,7 +2266,7 @@ func (s *server) SendEditMessage() http.HandlerFunc {
 			msg.ExtendedTextMessage.ContextInfo = &waE2E.ContextInfo{
 				StanzaID:      proto.String(*t.ContextInfo.StanzaID),
 				Participant:   proto.String(*t.ContextInfo.Participant),
-				QuotedMessage: &waE2E.Message{Conversation: proto.String("")},
+				QuotedMessage: getQuotedMessage(&t.ContextInfo),
 			}
 		}
 		if t.ContextInfo.MentionedJID != nil {
@@ -2623,9 +2603,6 @@ func (s *server) SendLink() http.HandlerFunc {
 //	@Router			/chat/send/buttons [post]
 func (s *server) SendButtonsMessage() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !s.ensureEnterpriseLicense(w, r) {
-			return
-		}
 		txtid := r.Context().Value("userinfo").(Values).Get("Id")
 		client := clientManager.GetWhatsmeowClient(txtid)
 		var resp whatsmeow.SendResponse
@@ -2647,7 +2624,8 @@ func (s *server) SendButtonsMessage() http.HandlerFunc {
 		r.Body = io.NopCloser(bytes.NewReader(bodyBytes))
 
 		type Media struct {
-			URL string `json:"url"`
+			URL      string `json:"url"`
+			Filename string `json:"filename,omitempty"`
 		}
 
 		type ButtonText struct {
@@ -3048,6 +3026,23 @@ func (s *server) SendButtonsMessage() http.HandlerFunc {
 				Caption:       buttonsMessage.Caption,
 			}
 
+			if headerMediaType == whatsmeow.MediaDocument && buttonsMessage.Document != nil {
+				if buttonsMessage.Document.Filename != "" {
+					headerMedia.FileName = buttonsMessage.Document.Filename
+				} else {
+					urlParts := strings.Split(buttonsMessage.Document.URL, "/")
+					if len(urlParts) > 0 {
+						filename := urlParts[len(urlParts)-1]
+						if idx := strings.Index(filename, "?"); idx != -1 {
+							filename = filename[:idx]
+						}
+						if filename != "" {
+							headerMedia.FileName = filename
+						}
+					}
+				}
+			}
+
 			switch headerMediaType {
 			case whatsmeow.MediaImage:
 				if thumb, width, height, err := GenerateJPEGThumbnailFromImage(headerMediaInfo.Data, 72, 72); err == nil {
@@ -3073,8 +3068,19 @@ func (s *server) SendButtonsMessage() http.HandlerFunc {
 				}
 			case whatsmeow.MediaDocument:
 				if strings.Contains(strings.ToLower(headerMediaMime), "pdf") {
-					if _, thumb, err := ProcessPDFDocument(headerMediaInfo.Data); err == nil && len(thumb) > 0 {
+					if pageCount, thumb, err := ProcessPDFDocument(headerMediaInfo.Data); err == nil && len(thumb) > 0 {
 						headerMedia.JPEGThumbnail = thumb
+						headerMedia.PageCount = pageCount
+						if img, _, decodeErr := image.Decode(bytes.NewReader(thumb)); decodeErr == nil {
+							bounds := img.Bounds()
+							headerMedia.ThumbnailWidth = uint32(bounds.Dx())
+							headerMedia.ThumbnailHeight = uint32(bounds.Dy())
+						}
+					} else {
+						if err != nil {
+							log.Warn().Err(err).Msg("Failed to generate header PDF thumbnail, using fallback")
+						}
+						headerMedia.JPEGThumbnail = generateDefaultDocumentThumbnail()
 					}
 				}
 			}
@@ -3172,7 +3178,9 @@ func (s *server) SendButtonsMessage() http.HandlerFunc {
 			log.Warn().Err(err).Msg("Failed to process button message enhancements")
 		}
 
-		resp, err = s.sendMessageWithEchoByID(context.Background(), txtid, recipient, messageToSend, whatsmeow.SendRequestExtra{ID: msgid}, forceEcho)
+		sendExtra := whatsmeow.SendRequestExtra{ID: msgid}
+
+		resp, err = s.sendMessageWithEchoByID(context.Background(), txtid, recipient, messageToSend, sendExtra, forceEcho)
 		if err != nil {
 			CaptureError(err, r.Context())
 			s.Respond(w, r, http.StatusInternalServerError, errors.New(fmt.Sprintf("Error sending message: %v", err)))
@@ -3274,9 +3282,6 @@ func (s *server) SendFlowMessage() http.HandlerFunc {
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !s.ensureEnterpriseLicense(w, r) {
-			return
-		}
 
 		txtid := r.Context().Value("userinfo").(Values).Get("Id")
 		var resp whatsmeow.SendResponse
@@ -4098,9 +4103,6 @@ func (s *server) SendCarouselMessage() http.HandlerFunc {
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		if !s.ensureEnterpriseLicense(w, r) {
-			return
-		}
 
 		txtid := r.Context().Value("userinfo").(Values).Get("Id")
 		var resp whatsmeow.SendResponse
