@@ -981,6 +981,227 @@ components:
         - phone
         - video
       additionalProperties: false
+
+    # ============================================================================
+    # Status/Stories Request Schemas
+    # ============================================================================
+
+    SendTextStatusRequest:
+      type: object
+      description: |
+        Request body for sending text to WhatsApp Status/Stories.
+
+        **Status Broadcasting**: Text is automatically broadcast to all contacts
+        who can view your status based on your privacy settings.
+
+        **Key Features**:
+        - Custom background color (hex or ARGB format)
+        - Multiple font styles (0-5)
+        - Optional custom message ID for tracking
+        - Delayed sending support
+
+        **Note**: Unlike regular messages, status messages don't require a phone number.
+        They broadcast to status@broadcast automatically.
+      properties:
+        text:
+          type: string
+          description: |
+            Text content for the status. Supports emoji and unicode characters.
+            Maximum length depends on WhatsApp limits (typically ~700 characters).
+          example: "Hello from my status! 🎉"
+        backgroundColor:
+          type: [string, "null"]
+          description: |
+            Background color for text status.
+
+            **Supported Formats**:
+            - Hex: `#FF5733` (RGB)
+            - ARGB: `0xFF5733FF` (with alpha)
+
+            **Default**: WhatsApp default gradient
+          example: "#FF5733"
+        font:
+          type: [integer, "null"]
+          minimum: 0
+          maximum: 5
+          description: |
+            Font style for text status.
+
+            **Font Options**:
+            - 0: Default (Sans-serif)
+            - 1: Serif
+            - 2: Norican Script
+            - 3: Bryndan Write
+            - 4: Bebasneue Regular
+            - 5: Oswald Heavy
+          example: 0
+        messageId:
+          type: [string, "null"]
+          description: |
+            Optional custom message ID for tracking.
+            If not provided, WhatsApp generates one automatically.
+          example: "custom-status-123"
+        delayMessage:
+          type: [integer, "null"]
+          minimum: 1
+          maximum: 15
+          description: |
+            Optional delay in seconds before sending (1-15 seconds).
+            Used to simulate human behavior.
+          example: 3
+      required:
+        - text
+      additionalProperties: false
+
+    SendImageStatusRequest:
+      type: object
+      description: |
+        Request body for sending an image to WhatsApp Status/Stories.
+
+        **Status Broadcasting**: Image is automatically broadcast to all contacts
+        who can view your status based on your privacy settings.
+
+        **Key Features**:
+        - Image URL or base64 data URI support
+        - Optional caption/text overlay
+        - Automatic thumbnail generation
+        - Optional custom message ID for tracking
+
+        **Supported Formats**: JPEG, PNG, WebP, GIF (static)
+      properties:
+        image:
+          type: string
+          description: |
+            Image URL (http/https) or base64 data URI.
+
+            **Examples**:
+            - URL: `https://example.com/image.jpg`
+            - Base64: `data:image/jpeg;base64,/9j/4AAQSkZ...`
+          example: "https://picsum.photos/600/400.jpg"
+        caption:
+          type: [string, "null"]
+          description: |
+            Optional caption/text to display with the image.
+            Supports emoji and unicode characters.
+          example: "Check out this view! 🌅"
+        messageId:
+          type: [string, "null"]
+          description: |
+            Optional custom message ID for tracking.
+            If not provided, WhatsApp generates one automatically.
+          example: "custom-image-status-123"
+        delayMessage:
+          type: [integer, "null"]
+          minimum: 1
+          maximum: 15
+          description: |
+            Optional delay in seconds before sending (1-15 seconds).
+            Used to simulate human behavior.
+          example: 3
+      required:
+        - image
+      additionalProperties: false
+
+    SendAudioStatusRequest:
+      type: object
+      description: |
+        Request body for sending audio/voice note to WhatsApp Status/Stories.
+
+        **Status Broadcasting**: Audio is automatically broadcast to all contacts
+        who can view your status based on your privacy settings.
+
+        **Key Features**:
+        - Audio URL or base64 data URI support
+        - Automatic waveform generation (64 samples) for visual bars
+        - Voice note (PTT) format with waveform visualization
+        - Automatic conversion to Opus/OGG if needed
+        - Optional custom message ID for tracking
+
+        **Waveform Visualization**: The audio is processed to generate
+        64 amplitude samples (0-100 range) that WhatsApp displays as
+        the classic "ondinhas" (wave bars) in the voice note player.
+
+        **Supported Formats**: OGG (Opus), MP3, WAV, M4A, AAC
+      properties:
+        audio:
+          type: string
+          description: |
+            Audio URL (http/https) or base64 data URI.
+
+            **Examples**:
+            - URL: `https://example.com/audio.mp3`
+            - Base64: `data:audio/ogg;base64,T2dnUwACAA...`
+
+            **Recommended**: OGG Opus format for best compatibility
+          example: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+        messageId:
+          type: [string, "null"]
+          description: |
+            Optional custom message ID for tracking.
+            If not provided, WhatsApp generates one automatically.
+          example: "custom-audio-status-123"
+        delayMessage:
+          type: [integer, "null"]
+          minimum: 1
+          maximum: 15
+          description: |
+            Optional delay in seconds before sending (1-15 seconds).
+            Used to simulate human behavior.
+          example: 3
+      required:
+        - audio
+      additionalProperties: false
+
+    SendVideoStatusRequest:
+      type: object
+      description: |
+        Request body for sending a video to WhatsApp Status/Stories.
+
+        **Status Broadcasting**: Video is automatically broadcast to all contacts
+        who can view your status based on your privacy settings.
+
+        **Key Features**:
+        - Video URL or base64 data URI support
+        - Optional caption/text overlay
+        - Automatic thumbnail generation
+        - Optional custom message ID for tracking
+
+        **Supported Formats**: MP4, 3GP, MOV, AVI
+        **Duration Limit**: WhatsApp status videos are typically limited to 30 seconds
+      properties:
+        video:
+          type: string
+          description: |
+            Video URL (http/https) or base64 data URI.
+
+            **Examples**:
+            - URL: `https://example.com/video.mp4`
+            - Base64: `data:video/mp4;base64,AAAAIGZ0eXBpc29t...`
+          example: "https://download.blender.org/durian/trailer/sintel_trailer-480p.mp4"
+        caption:
+          type: [string, "null"]
+          description: |
+            Optional caption/text to display with the video.
+            Supports emoji and unicode characters.
+          example: "Amazing video! 🎬"
+        messageId:
+          type: [string, "null"]
+          description: |
+            Optional custom message ID for tracking.
+            If not provided, WhatsApp generates one automatically.
+          example: "custom-video-status-123"
+        delayMessage:
+          type: [integer, "null"]
+          minimum: 1
+          maximum: 15
+          description: |
+            Optional delay in seconds before sending (1-15 seconds).
+            Used to simulate human behavior.
+          example: 3
+      required:
+        - video
+      additionalProperties: false
+
     SendPTVRequest:
       type: object
       description: |
@@ -13626,6 +13847,650 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+
+  # ============================================================================
+  # Status/Stories Endpoints
+  # ============================================================================
+
+  /instances/{instanceId}/token/{instanceToken}/send-text-status:
+    post:
+      tags:
+        - Messages
+      summary: Send text to WhatsApp Status
+      description: |
+        Sends a text message to WhatsApp Status/Stories.
+
+        **Status Broadcasting**: The text is automatically broadcast to all contacts
+        who can view your status based on your privacy settings. No phone number
+        is required - the message is sent to `status@broadcast`.
+
+        **Key Features**:
+        - Custom background color (hex #RRGGBB or ARGB 0xAARRGGBB)
+        - Multiple font styles (0-5)
+        - FIFO queue with non-blocking response
+        - Optional custom message ID for tracking
+        - Delayed sending support (1-15 seconds)
+
+        **Font Styles**:
+        | Value | Font Name | Description |
+        |-------|-----------|-------------|
+        | 0 | Sans-serif | Default clean font |
+        | 1 | Serif | Classic serif font |
+        | 2 | Norican Script | Elegant cursive script |
+        | 3 | Bryndan Write | Handwritten style |
+        | 4 | Bebasneue Regular | Bold condensed |
+        | 5 | Oswald Heavy | Strong impact font |
+
+        **Background Color Examples**:
+        | Color | Hex Code | Description |
+        |-------|----------|-------------|
+        | Red | #FF5733 | Vibrant red-orange |
+        | Blue | #3498DB | Sky blue |
+        | Green | #2ECC71 | Emerald green |
+        | Purple | #9B59B6 | Amethyst purple |
+        | Orange | #F39C12 | Warm orange |
+        | Pink | #E91E63 | Hot pink |
+        | Teal | #1ABC9C | Turquoise |
+        | Dark | #2C3E50 | Dark blue-gray |
+
+      operationId: sendTextStatus
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendTextStatusRequest"
+            examples:
+              simple_text:
+                summary: Simple text status
+                description: Basic text status with default styling
+                value:
+                  text: "Hello everyone! Having a great day!"
+              colored_background:
+                summary: Text with colored background
+                description: Text status with custom red-orange background
+                value:
+                  text: "Big announcement coming soon!"
+                  backgroundColor: "#FF5733"
+              custom_font:
+                summary: Text with custom font
+                description: Text status using Norican Script cursive font
+                value:
+                  text: "Love and peace to all"
+                  backgroundColor: "#E91E63"
+                  font: 2
+              full_options:
+                summary: Full options example
+                description: Text status with all options configured
+                value:
+                  text: "Check out our new product launch!"
+                  backgroundColor: "#3498DB"
+                  font: 4
+                  messageId: "custom-promo-status-001"
+                  delayMessage: 5
+              bold_announcement:
+                summary: Bold announcement style
+                description: Using Oswald Heavy font for impact
+                value:
+                  text: "SALE STARTS NOW - 50% OFF!"
+                  backgroundColor: "#F39C12"
+                  font: 5
+              elegant_quote:
+                summary: Elegant quote style
+                description: Using serif font for quotes
+                value:
+                  text: "The only way to do great work is to love what you do. - Steve Jobs"
+                  backgroundColor: "#2C3E50"
+                  font: 1
+      responses:
+        "200":
+          description: Status message enqueued successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SendMessageResponse"
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    zaapId: "BAE5F4326B5A8C91"
+                    messageId: "3EB0F4326B5A8C91D4E2"
+                    id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                    status: "QUEUED"
+        "400":
+          description: Invalid request (missing text or invalid parameters)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                missing_text:
+                  summary: Missing text field
+                  value:
+                    error: "text is required"
+                    code: "VALIDATION_ERROR"
+                invalid_font:
+                  summary: Invalid font value
+                  value:
+                    error: "font must be between 0 and 5"
+                    code: "VALIDATION_ERROR"
+        "401":
+          description: Unauthorized - Invalid or missing Client-Token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "invalid client token"
+                code: "UNAUTHORIZED"
+        "404":
+          description: Instance not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "instance not found"
+                code: "NOT_FOUND"
+        "503":
+          description: Instance not connected to WhatsApp
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "instance not connected"
+                code: "SERVICE_UNAVAILABLE"
+
+  /instances/{instanceId}/token/{instanceToken}/send-image-status:
+    post:
+      tags:
+        - Messages
+      summary: Send image to WhatsApp Status
+      description: |
+        Sends an image to WhatsApp Status/Stories with optional caption.
+
+        **Status Broadcasting**: The image is automatically broadcast to all contacts
+        who can view your status based on your privacy settings. No phone number
+        is required - the message is sent to `status@broadcast`.
+
+        **Key Features**:
+        - Image URL or base64 data URI support
+        - Optional caption/text overlay
+        - Automatic thumbnail generation
+        - FIFO queue with non-blocking response
+        - Optional custom message ID for tracking
+
+        **Supported Formats**: JPEG, PNG, WebP, GIF (static)
+
+        **Recommended Dimensions**: 1080x1920 pixels (9:16 aspect ratio for Stories)
+
+        **Working Image URLs for Testing**:
+        | Source | URL | Description |
+        |--------|-----|-------------|
+        | Picsum | https://picsum.photos/1080/1920 | Random HD image |
+        | Unsplash | https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1080 | Mountain landscape |
+        | Placeholder | https://placehold.co/1080x1920/3498DB/FFFFFF/png?text=Status | Custom placeholder |
+        | Lorem Flickr | https://loremflickr.com/1080/1920/nature | Random nature image |
+
+      operationId: sendImageStatus
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendImageStatusRequest"
+            examples:
+              random_image:
+                summary: Random HD image from Picsum
+                description: Uses Picsum Photos service for random high-quality images
+                value:
+                  image: "https://picsum.photos/1080/1920"
+                  caption: "Beautiful moment captured!"
+              landscape_photo:
+                summary: Unsplash landscape photo
+                description: High-quality mountain landscape from Unsplash
+                value:
+                  image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1080&q=80"
+                  caption: "Nature at its finest"
+              nature_image:
+                summary: Random nature image
+                description: Random nature photography from Lorem Flickr
+                value:
+                  image: "https://loremflickr.com/1080/1920/nature,landscape"
+                  caption: "Exploring the world"
+              placeholder_branded:
+                summary: Branded placeholder image
+                description: Custom branded placeholder for testing
+                value:
+                  image: "https://placehold.co/1080x1920/3498DB/FFFFFF/png?text=My+Status"
+              sunset_photo:
+                summary: Sunset photo from Unsplash
+                description: Beautiful sunset photography
+                value:
+                  image: "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?w=1080&q=80"
+                  caption: "Golden hour vibes"
+                  delayMessage: 3
+              city_skyline:
+                summary: City skyline
+                description: Urban photography from Unsplash
+                value:
+                  image: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=1080&q=80"
+                  caption: "City lights"
+                  messageId: "city-status-001"
+              no_caption:
+                summary: Image without caption
+                description: Simple image status without text overlay
+                value:
+                  image: "https://picsum.photos/seed/status/1080/1920"
+              food_photo:
+                summary: Food photography
+                description: Delicious food image
+                value:
+                  image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=1080&q=80"
+                  caption: "Bon appetit!"
+      responses:
+        "200":
+          description: Status message enqueued successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SendMessageResponse"
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    zaapId: "BAE5F4326B5A8C92"
+                    messageId: "3EB0F4326B5A8C92D4E3"
+                    id: "b2c3d4e5-f6a7-8901-bcde-f23456789012"
+                    status: "QUEUED"
+        "400":
+          description: Invalid request (missing image or invalid URL)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                missing_image:
+                  summary: Missing image field
+                  value:
+                    error: "image is required"
+                    code: "VALIDATION_ERROR"
+                invalid_url:
+                  summary: Invalid image URL
+                  value:
+                    error: "invalid image URL or base64 data"
+                    code: "VALIDATION_ERROR"
+        "401":
+          description: Unauthorized - Invalid or missing Client-Token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "invalid client token"
+                code: "UNAUTHORIZED"
+        "404":
+          description: Instance not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "instance not found"
+                code: "NOT_FOUND"
+        "503":
+          description: Instance not connected to WhatsApp
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "instance not connected"
+                code: "SERVICE_UNAVAILABLE"
+
+  /instances/{instanceId}/token/{instanceToken}/send-audio-status:
+    post:
+      tags:
+        - Messages
+      summary: Send audio/voice note to WhatsApp Status
+      description: |
+        Sends an audio message to WhatsApp Status/Stories as a voice note with waveform visualization.
+
+        **Status Broadcasting**: The audio is automatically broadcast to all contacts
+        who can view your status based on your privacy settings. No phone number
+        is required - the message is sent to `status@broadcast`.
+
+        **Key Features**:
+        - Audio URL or base64 data URI support
+        - **Automatic waveform generation** (64 samples for visual bars - "ondinhas")
+        - Voice note (PTT) format with waveform visualization
+        - Automatic conversion to Opus/OGG if needed
+        - FIFO queue with non-blocking response
+        - Optional custom message ID for tracking
+
+        **Waveform Visualization**: The audio is processed to generate
+        64 amplitude samples (0-100 range) that WhatsApp displays as
+        the classic wave bars in the voice note player. This creates the
+        familiar "ondinhas" (little waves) visualization.
+
+        **Supported Formats**: OGG (Opus), MP3, WAV, M4A, AAC, FLAC
+
+        **Working Audio URLs for Testing**:
+        | Source | URL | Description |
+        |--------|-----|-------------|
+        | SoundHelix | https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3 | Electronic music |
+        | SampleLib | https://samplelib.com/lib/preview/mp3/sample-3s.mp3 | 3-second sample |
+        | File Examples | https://filesamples.com/samples/audio/mp3/sample1.mp3 | MP3 sample |
+        | Internet Archive | https://archive.org/download/testmp3testfile/mpthreetest.mp3 | Test MP3 |
+
+        **Audio Processing Pipeline**:
+        1. Download audio from URL or decode base64
+        2. Detect format and convert to Opus/OGG if needed
+        3. Generate 64-sample waveform for visualization
+        4. Calculate duration for progress bar
+        5. Upload to WhatsApp servers
+        6. Send as PTT (Push-To-Talk) voice note
+
+      operationId: sendAudioStatus
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendAudioStatusRequest"
+            examples:
+              electronic_music:
+                summary: Electronic music track
+                description: Full electronic music track from SoundHelix
+                value:
+                  audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+              short_sample:
+                summary: Short 3-second sample
+                description: Brief audio clip for quick testing
+                value:
+                  audio: "https://samplelib.com/lib/preview/mp3/sample-3s.mp3"
+              medium_sample:
+                summary: 6-second sample
+                description: Medium length audio sample
+                value:
+                  audio: "https://samplelib.com/lib/preview/mp3/sample-6s.mp3"
+                  delayMessage: 2
+              mp3_test_file:
+                summary: Standard MP3 test file
+                description: Standard MP3 file for compatibility testing
+                value:
+                  audio: "https://filesamples.com/samples/audio/mp3/sample1.mp3"
+              with_custom_id:
+                summary: Audio with custom message ID
+                description: Audio status with tracking ID
+                value:
+                  audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
+                  messageId: "voice-status-promo-001"
+              archive_audio:
+                summary: Internet Archive test audio
+                description: Public domain test audio from Internet Archive
+                value:
+                  audio: "https://archive.org/download/testmp3testfile/mpthreetest.mp3"
+              delayed_send:
+                summary: Delayed audio send
+                description: Audio with 5-second delay before sending
+                value:
+                  audio: "https://samplelib.com/lib/preview/mp3/sample-9s.mp3"
+                  delayMessage: 5
+              song_track_3:
+                summary: Electronic track 3
+                description: Another electronic music option
+                value:
+                  audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"
+      responses:
+        "200":
+          description: Status message enqueued successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SendMessageResponse"
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    zaapId: "BAE5F4326B5A8C93"
+                    messageId: "3EB0F4326B5A8C93D4E4"
+                    id: "c3d4e5f6-a7b8-9012-cdef-345678901234"
+                    status: "QUEUED"
+        "400":
+          description: Invalid request (missing audio or invalid format)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                missing_audio:
+                  summary: Missing audio field
+                  value:
+                    error: "audio is required"
+                    code: "VALIDATION_ERROR"
+                invalid_format:
+                  summary: Unsupported audio format
+                  value:
+                    error: "unsupported audio format"
+                    code: "VALIDATION_ERROR"
+                download_failed:
+                  summary: Failed to download audio
+                  value:
+                    error: "failed to download audio from URL"
+                    code: "DOWNLOAD_ERROR"
+        "401":
+          description: Unauthorized - Invalid or missing Client-Token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "invalid client token"
+                code: "UNAUTHORIZED"
+        "404":
+          description: Instance not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "instance not found"
+                code: "NOT_FOUND"
+        "503":
+          description: Instance not connected to WhatsApp
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "instance not connected"
+                code: "SERVICE_UNAVAILABLE"
+
+  /instances/{instanceId}/token/{instanceToken}/send-video-status:
+    post:
+      tags:
+        - Messages
+      summary: Send video to WhatsApp Status
+      description: |
+        Sends a video to WhatsApp Status/Stories with optional caption.
+
+        **Status Broadcasting**: The video is automatically broadcast to all contacts
+        who can view your status based on your privacy settings. No phone number
+        is required - the message is sent to `status@broadcast`.
+
+        **Key Features**:
+        - Video URL or base64 data URI support
+        - Optional caption/text overlay
+        - Automatic thumbnail generation
+        - FIFO queue with non-blocking response
+        - Optional custom message ID for tracking
+
+        **Supported Formats**: MP4, 3GP, MOV, AVI, WebM
+        **Duration Limit**: WhatsApp status videos are limited to 30 seconds
+        **Recommended Resolution**: 720p or 1080p vertical (9:16 aspect ratio)
+
+        **Working Video URLs for Testing**:
+        | Source | URL | Description |
+        |--------|-----|-------------|
+        | Blender | https://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4 | Big Buck Bunny (small) |
+        | Sample Videos | https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4 | 720p 1MB sample |
+        | File Samples | https://filesamples.com/samples/video/mp4/sample_640x360.mp4 | 640x360 sample |
+        | Test Videos | https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/360/Big_Buck_Bunny_360_10s_1MB.mp4 | 10s test video |
+
+        **Video Processing Pipeline**:
+        1. Download video from URL or decode base64
+        2. Validate format and duration (max 30s for status)
+        3. Generate thumbnail frame
+        4. Upload to WhatsApp servers
+        5. Send to status@broadcast
+
+      operationId: sendVideoStatus
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendVideoStatusRequest"
+            examples:
+              big_buck_bunny_small:
+                summary: Big Buck Bunny (small file)
+                description: Classic open-source animated short, small file size
+                value:
+                  video: "https://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4"
+                  caption: "Check out this animation!"
+              sample_720p:
+                summary: 720p sample video (1MB)
+                description: Quick loading 720p sample video
+                value:
+                  video: "https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4"
+                  caption: "HD quality status"
+              test_10_seconds:
+                summary: 10-second test video
+                description: Short 10-second video perfect for status
+                value:
+                  video: "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/360/Big_Buck_Bunny_360_10s_1MB.mp4"
+                  caption: "Quick clip!"
+              file_sample:
+                summary: Standard MP4 sample
+                description: Standard file samples MP4
+                value:
+                  video: "https://filesamples.com/samples/video/mp4/sample_640x360.mp4"
+              no_caption:
+                summary: Video without caption
+                description: Simple video status without text
+                value:
+                  video: "https://sample-videos.com/video321/mp4/480/big_buck_bunny_480p_1mb.mp4"
+              with_tracking:
+                summary: Video with custom tracking ID
+                description: Video status with custom message ID for tracking
+                value:
+                  video: "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/720/Big_Buck_Bunny_720_10s_1MB.mp4"
+                  caption: "Promo video"
+                  messageId: "video-promo-campaign-001"
+              delayed_video:
+                summary: Delayed video send
+                description: Video with 5-second delay before sending
+                value:
+                  video: "https://sample-videos.com/video321/mp4/360/big_buck_bunny_360p_1mb.mp4"
+                  caption: "Coming soon..."
+                  delayMessage: 5
+              sintel_trailer:
+                summary: Sintel trailer (larger file)
+                description: Blender's Sintel animated short trailer
+                value:
+                  video: "https://download.blender.org/durian/trailer/sintel_trailer-480p.mp4"
+                  caption: "Epic adventure"
+      responses:
+        "200":
+          description: Status message enqueued successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SendMessageResponse"
+              examples:
+                success:
+                  summary: Successful response
+                  value:
+                    zaapId: "BAE5F4326B5A8C94"
+                    messageId: "3EB0F4326B5A8C94D4E5"
+                    id: "d4e5f6a7-b8c9-0123-def0-456789012345"
+                    status: "QUEUED"
+        "400":
+          description: Invalid request (missing video, invalid format, or duration exceeded)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                missing_video:
+                  summary: Missing video field
+                  value:
+                    error: "video is required"
+                    code: "VALIDATION_ERROR"
+                invalid_format:
+                  summary: Unsupported video format
+                  value:
+                    error: "unsupported video format"
+                    code: "VALIDATION_ERROR"
+                duration_exceeded:
+                  summary: Video too long for status
+                  value:
+                    error: "video duration exceeds 30 seconds limit for status"
+                    code: "VALIDATION_ERROR"
+                download_failed:
+                  summary: Failed to download video
+                  value:
+                    error: "failed to download video from URL"
+                    code: "DOWNLOAD_ERROR"
+        "401":
+          description: Unauthorized - Invalid or missing Client-Token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "invalid client token"
+                code: "UNAUTHORIZED"
+        "404":
+          description: Instance not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "instance not found"
+                code: "NOT_FOUND"
+        "503":
+          description: Instance not connected to WhatsApp
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "instance not connected"
+                code: "SERVICE_UNAVAILABLE"
 
   # ============================================================================
   # Contact Management Endpoints
