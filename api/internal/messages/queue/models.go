@@ -44,6 +44,7 @@ type SendMessageArgs struct {
 	LinkPreviewOverride *LinkPreviewOverride `json:"link_preview_override,omitempty"`
 	PollContent         *PollMessage         `json:"poll_content,omitempty"`
 	EventContent        *EventMessage        `json:"event_content,omitempty"`
+	TextStatusContent   *TextStatusMessage   `json:"text_status_content,omitempty"` // Text status with styling (for status@broadcast)
 
 	// Timing configuration
 	DelayMessage int64 `json:"delay_message"` // Delay in milliseconds BEFORE enqueue (affects scheduled_at)
@@ -103,11 +104,24 @@ const (
 	MessageTypeButtonPIX     MessageType = "button_pix"
 	MessageTypeButtonOTP     MessageType = "button_otp"
 	MessageTypeCarousel      MessageType = "carousel"
+
+	// Status/Stories message types (broadcast to status@broadcast)
+	MessageTypeTextStatus  MessageType = "text_status"
+	MessageTypeImageStatus MessageType = "image_status"
+	MessageTypeAudioStatus MessageType = "audio_status"
+	MessageTypeVideoStatus MessageType = "video_status"
 )
 
 // TextMessage represents a text message
 type TextMessage struct {
 	Message string `json:"message"` // Message text (supports WhatsApp formatting)
+}
+
+// TextStatusMessage represents a text status/story with optional styling
+type TextStatusMessage struct {
+	Text            string `json:"text"`                       // Status text content
+	BackgroundColor string `json:"background_color,omitempty"` // Background color in ARGB hex (e.g., "0xFF5733FF")
+	Font            *int32 `json:"font,omitempty"`             // Font style (0-5)
 }
 
 // GroupMention represents a group to be mentioned in a message (for communities)
@@ -491,6 +505,9 @@ func (s *SendMessageArgs) Validate() error {
 	if s.EventContent != nil {
 		contentCount++
 	}
+	if s.TextStatusContent != nil {
+		contentCount++
+	}
 
 	if contentCount == 0 {
 		return ErrNoMessageContent
@@ -557,6 +574,21 @@ func (s *SendMessageArgs) GetContentPreview() string {
 		if s.EventContent != nil {
 			return fmt.Sprintf("[Event] %s", s.EventContent.Name)
 		}
+	case MessageTypeTextStatus:
+		if s.TextStatusContent != nil {
+			text := s.TextStatusContent.Text
+			if len(text) > 50 {
+				return "[Status] " + text[:50] + "..."
+			}
+			return "[Status] " + text
+		}
+		return "[Text Status]"
+	case MessageTypeImageStatus:
+		return "[Image Status]"
+	case MessageTypeAudioStatus:
+		return "[Audio Status]"
+	case MessageTypeVideoStatus:
+		return "[Video Status]"
 	}
 	return "[Unknown]"
 }
