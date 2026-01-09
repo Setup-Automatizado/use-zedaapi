@@ -3862,6 +3862,13 @@ components:
           type: string
           description: Recipient phone number in international format
           example: "5511999999999"
+        message:
+          type: string
+          description: |
+            Carousel body text displayed above the cards.
+            This is the main message that appears before the carousel cards.
+          maxLength: 1024
+          example: "Check out our latest products!"
         cards:
           type: array
           description: Carousel cards (1-10 cards)
@@ -7635,6 +7642,7 @@ paths:
                 description: E-commerce product showcase
                 value:
                   phone: "5511999999999"
+                  message: "Check out our amazing products! Swipe to explore our catalog."
                   cardType: "HSCROLL_CARDS"
                   cards:
                     - mediaUrl: "https://picsum.photos/id/1/600/400.jpg"
@@ -7672,6 +7680,7 @@ paths:
                 description: Photo gallery showcase
                 value:
                   phone: "5511999999999"
+                  message: "Our photo gallery - swipe through our favorite moments!"
                   cardType: "ALBUM_IMAGE"
                   cards:
                     - mediaUrl: "https://picsum.photos/id/10/600/400.jpg"
@@ -7709,6 +7718,7 @@ paths:
                 description: Tutorial series with videos
                 value:
                   phone: "5511999999999"
+                  message: "Welcome to our tutorial series! Learn everything from basics to advanced techniques."
                   cardType: "HSCROLL_CARDS"
                   cards:
                     - mediaUrl: "https://download.blender.org/durian/trailer/sintel_trailer-480p.mp4"
@@ -7737,6 +7747,7 @@ paths:
                 description: Property listings carousel
                 value:
                   phone: "5511999999999"
+                  message: "Featured properties in your area - find your dream home today!"
                   cardType: "HSCROLL_CARDS"
                   cards:
                     - mediaUrl: "https://picsum.photos/id/49/600/400.jpg"
@@ -7777,6 +7788,7 @@ paths:
                 description: Visual menu with images
                 value:
                   phone: "5511999999999"
+                  message: "Today's specials - fresh ingredients, exceptional taste!"
                   cardType: "HSCROLL_CARDS"
                   messageId: "menu-daily-specials"
                   cards:
@@ -7803,6 +7815,7 @@ paths:
                 description: Carousel with just one card
                 value:
                   phone: "5511999999999"
+                  message: "Don't miss this exclusive offer!"
                   cardType: "HSCROLL_CARDS"
                   cards:
                     - mediaUrl: "https://picsum.photos/id/96/600/400.jpg"
