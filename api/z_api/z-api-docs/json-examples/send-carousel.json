@@ -16,6 +16,95 @@
   "cookies": [],
   "postData": {
     "mimeType": "application/json",
-    "text": "{\"phone\":\"551199999999\",\"message\":\"Texto da mensagem\",\"carousel\":[{\"text\":\"Texto do cartão\",\"image\":\"https://firebasestorage.googleapis.com/v0/b/zaap-messenger-web.appspot.com/o/logo.png?alt=media\",\"buttons\":[{\"id\":\"1\",\"label\":\"Nome do botão\",\"url\":\"https://funnelchat\",\"type\":\"URL\"},{\"id\":\"2\",\"label\":\"Nome do botão\",\"type\":\"REPLY\"}]},{\"text\":\"Texto do cartão\",\"image\":\"https://firebasestorage.googleapis.com/v0/b/zaap-messenger-web.appspot.com/o/logo.png?alt=media\",\"buttons\":[{\"id\":\"1\",\"label\":\"Nome do botão\",\"url\":\"https://funnelchat\",\"type\":\"URL\"},{\"id\":\"2\",\"label\":\"Nome do botão\",\"type\":\"REPLY\"}]}]}"
+    "text": "{\"phone\":\"551199999999\",\"cards\":[{\"header\":\"iPhone 15 Pro\",\"body\":\"The most powerful iPhone ever\",\"footer\":\"Starting at $999\",\"mediaUrl\":\"https://picsum.photos/400/400?random=1\",\"buttons\":[{\"id\":\"1\",\"label\":\"Buy Now\",\"url\":\"https://example.com/iphone\",\"type\":\"cta_url\"}]},{\"header\":\"MacBook Pro\",\"body\":\"M3 chip with incredible performance\",\"footer\":\"Starting at $1999\",\"mediaUrl\":\"https://picsum.photos/400/400?random=2\",\"buttons\":[{\"id\":\"2\",\"label\":\"Buy Now\",\"url\":\"https://example.com/macbook\",\"type\":\"cta_url\"}]}]}"
+  },
+  "examples": {
+    "with_images": {
+      "description": "Carousel with image cards",
+      "body": {
+        "phone": "551199999999",
+        "cards": [
+          {
+            "header": "iPhone 15 Pro",
+            "body": "The most powerful iPhone ever with A17 Pro chip",
+            "footer": "Starting at $999",
+            "mediaUrl": "https://picsum.photos/400/400?random=1",
+            "buttons": [
+              {"id": "btn_iphone", "label": "Buy iPhone", "type": "cta_url", "url": "https://example.com/iphone"}
+            ]
+          },
+          {
+            "header": "MacBook Pro",
+            "body": "M3 chip with incredible performance for professionals",
+            "footer": "Starting at $1999",
+            "mediaUrl": "https://picsum.photos/400/400?random=2",
+            "buttons": [
+              {"id": "btn_mac", "label": "Buy MacBook", "type": "cta_url", "url": "https://example.com/macbook"}
+            ]
+          },
+          {
+            "header": "AirPods Pro",
+            "body": "Active Noise Cancellation and Spatial Audio",
+            "footer": "Only $249",
+            "mediaUrl": "https://picsum.photos/400/400?random=3",
+            "buttons": [
+              {"id": "btn_airpods", "label": "Buy AirPods", "type": "cta_url", "url": "https://example.com/airpods"}
+            ]
+          }
+        ]
+      }
+    },
+    "with_videos": {
+      "description": "Carousel with video cards",
+      "body": {
+        "phone": "551199999999",
+        "cards": [
+          {
+            "header": "Product Demo 1",
+            "body": "See how easy it is to use our product",
+            "mediaUrl": "https://sample-videos.com/video321/mp4/240/big_buck_bunny_240p_1mb.mp4",
+            "buttons": [
+              {"id": "btn_demo1", "label": "Learn More", "type": "cta_url", "url": "https://example.com/demo1"}
+            ]
+          },
+          {
+            "header": "Product Demo 2",
+            "body": "Advanced features walkthrough",
+            "mediaUrl": "https://sample-videos.com/video321/mp4/240/big_buck_bunny_240p_2mb.mp4",
+            "buttons": [
+              {"id": "btn_demo2", "label": "Try Now", "type": "cta_url", "url": "https://example.com/demo2"}
+            ]
+          }
+        ]
+      }
+    },
+    "multiple_buttons": {
+      "description": "Carousel cards with multiple action buttons",
+      "body": {
+        "phone": "551199999999",
+        "cards": [
+          {
+            "header": "Premium Plan",
+            "body": "Get unlimited access to all features with 24/7 support",
+            "footer": "$99/month",
+            "mediaUrl": "https://picsum.photos/400/400?random=10",
+            "buttons": [
+              {"id": "btn_subscribe", "label": "Subscribe", "type": "cta_url", "url": "https://example.com/premium"},
+              {"id": "btn_call", "label": "Talk to Sales", "type": "cta_call", "phone": "+5521999999999"}
+            ]
+          },
+          {
+            "header": "Basic Plan",
+            "body": "Perfect for getting started with essential features",
+            "footer": "$29/month",
+            "mediaUrl": "https://picsum.photos/400/400?random=11",
+            "buttons": [
+              {"id": "btn_try", "label": "Start Free Trial", "type": "cta_url", "url": "https://example.com/trial"},
+              {"id": "btn_copy", "label": "Copy Promo Code", "type": "cta_copy", "copyCode": "SAVE50"}
+            ]
+          }
+        ]
+      }
+    }
   }
 }

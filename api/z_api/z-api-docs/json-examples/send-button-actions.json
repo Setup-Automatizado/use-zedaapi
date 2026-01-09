@@ -16,6 +16,48 @@
   "cookies": [],
   "postData": {
     "mimeType": "application/json",
-    "text": "{\"phone\": \"554499999999\",\"message\": \"uma mensagem\",\"title\": \"se quiser vincular um titulo\",\"footer\": \"se quiser vincular um rodape top\",\"buttonActions\": [{\"id\": \"1\",\"type\": \"CALL\",\"phone\": \"+554498398733\",\"label\": \"Fale conosco\"},{\"id\": \"2\",\"type\": \"URL\",\"url\": \"https://funnelchat\",\"label\": \"Visite nosso site\"}]}"
+    "text": "{\"phone\": \"554499999999\",\"message\": \"uma mensagem\",\"title\": \"se quiser vincular um titulo\",\"footer\": \"se quiser vincular um rodape top\",\"buttons\": [{\"id\": \"1\",\"type\": \"cta_call\",\"phone\": \"+554498398733\",\"label\": \"Fale conosco\"},{\"id\": \"2\",\"type\": \"cta_url\",\"url\": \"https://funnelchat\",\"label\": \"Visite nosso site\"}]}"
+  },
+  "examples": {
+    "with_image": {
+      "description": "Button actions with image header",
+      "body": {
+        "phone": "554499999999",
+        "message": "Discover our Spring 2024 collection with exclusive styles!",
+        "title": "New Collection",
+        "footer": "Limited time offer",
+        "image": "https://picsum.photos/600/400.jpg",
+        "buttons": [
+          {"id": "btn_shop", "label": "Shop Now", "type": "cta_url", "url": "https://example.com/shop"},
+          {"id": "btn_call", "label": "Call Us", "type": "cta_call", "phone": "+5521999999999"}
+        ]
+      }
+    },
+    "with_video": {
+      "description": "Button actions with video header",
+      "body": {
+        "phone": "554499999999",
+        "message": "Watch our product demo video!",
+        "title": "Product Demo",
+        "video": "https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4",
+        "buttons": [
+          {"id": "btn_buy", "label": "Buy Now", "type": "cta_url", "url": "https://example.com/buy"}
+        ]
+      }
+    },
+    "with_document": {
+      "description": "Button actions with PDF document",
+      "body": {
+        "phone": "554499999999",
+        "message": "Download our complete product catalog with pricing!",
+        "title": "Product Catalog",
+        "document": "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+        "documentFilename": "Product_Catalog_2024.pdf",
+        "buttons": [
+          {"id": "btn_view", "label": "View Online", "type": "cta_url", "url": "https://example.com/catalog"},
+          {"id": "btn_copy", "label": "Copy Code", "type": "cta_copy", "copyCode": "SAVE20"}
+        ]
+      }
+    }
   }
 }
