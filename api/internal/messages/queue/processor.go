@@ -25,6 +25,7 @@ type WhatsAppMessageProcessor struct {
 	interactiveZAPIProcessor *InteractiveZAPIProcessor
 	pollProcessor            *PollProcessor
 	eventProcessor           *EventProcessor
+	statusProcessor          *StatusProcessor
 	log                      *slog.Logger
 }
 
@@ -44,6 +45,7 @@ func NewWhatsAppMessageProcessor(log *slog.Logger) *WhatsAppMessageProcessor {
 		interactiveZAPIProcessor: NewInteractiveZAPIProcessor(log),
 		pollProcessor:            NewPollProcessor(log),
 		eventProcessor:           NewEventProcessor(log),
+		statusProcessor:          NewStatusProcessor(log),
 		log:                      log,
 	}
 }
@@ -108,6 +110,16 @@ func (p *WhatsAppMessageProcessor) Process(ctx context.Context, client *wameow.C
 		return p.interactiveZAPIProcessor.ProcessButtonOTP(ctx, client, &args)
 	case MessageTypeCarousel:
 		return p.interactiveZAPIProcessor.ProcessCarousel(ctx, client, &args)
+
+	// Status/Stories message types (sent to status@broadcast)
+	case MessageTypeTextStatus:
+		return p.statusProcessor.ProcessText(ctx, client, &args)
+	case MessageTypeImageStatus:
+		return p.statusProcessor.ProcessImage(ctx, client, &args)
+	case MessageTypeAudioStatus:
+		return p.statusProcessor.ProcessAudio(ctx, client, &args)
+	case MessageTypeVideoStatus:
+		return p.statusProcessor.ProcessVideo(ctx, client, &args)
 
 	default:
 		return fmt.Errorf("unsupported message type: %s", args.MessageType)
