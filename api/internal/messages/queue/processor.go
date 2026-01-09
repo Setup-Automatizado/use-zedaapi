@@ -106,6 +106,8 @@ func (p *WhatsAppMessageProcessor) Process(ctx context.Context, client *wameow.C
 		return p.interactiveZAPIProcessor.ProcessButtonPIX(ctx, client, &args)
 	case MessageTypeButtonOTP:
 		return p.interactiveZAPIProcessor.ProcessButtonOTP(ctx, client, &args)
+	case MessageTypeCarousel:
+		return p.interactiveZAPIProcessor.ProcessCarousel(ctx, client, &args)
 
 	default:
 		return fmt.Errorf("unsupported message type: %s", args.MessageType)
