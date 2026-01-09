@@ -56,7 +56,7 @@ export default function InstancePage({ params }: InstancePageProps) {
 	];
 	const defaultTab =
 		tabParam && validTabs.includes(tabParam) ? tabParam : "overview";
-	const { instance, isLoading, error, mutate } = useInstance(resolvedParams.id);
+	const { instance, isLoading, mutate } = useInstance(resolvedParams.id);
 	const { isConnected, smartphoneConnected } = useInstanceStatus(
 		resolvedParams.id,
 		{
@@ -93,7 +93,7 @@ export default function InstancePage({ params }: InstancePageProps) {
 				description: "The command has been copied to your clipboard.",
 			});
 			setTimeout(() => setIsCurlCopied(false), 2000);
-		} catch (error) {
+		} catch {
 			toast.error("Failed to copy", {
 				description: "Could not copy the cURL command.",
 			});
@@ -296,7 +296,6 @@ export default function InstancePage({ params }: InstancePageProps) {
 					<MessageTestForm
 						instanceId={instance.id}
 						instanceToken={instance.instanceToken}
-						clientToken={clientToken}
 					/>
 				</TabsContent>
 

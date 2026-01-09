@@ -24,7 +24,7 @@ import { cn } from "@/lib/utils";
 import type { TransportMetrics } from "@/types/metrics";
 import { HorizontalBarChart, MetricChart } from "../metric-chart";
 import { MetricGaugeGroup, ProgressBar } from "../metric-gauge";
-import { DurationCell, MetricTable, NumberCell } from "../metric-table";
+
 import { StatusIndicator } from "../status-indicator";
 
 export interface TransportMetricsTabProps {

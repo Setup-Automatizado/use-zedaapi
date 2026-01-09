@@ -39,11 +39,6 @@ interface DeviceInfo {
 	isBusiness?: boolean;
 }
 
-interface InstancesResponse {
-	content: Instance[];
-	total: number;
-}
-
 interface DeviceBatchResponse {
 	devices: Record<string, DeviceInfo | null>;
 }

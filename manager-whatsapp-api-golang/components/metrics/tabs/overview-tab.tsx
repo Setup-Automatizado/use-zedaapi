@@ -19,7 +19,7 @@ import {
 	formatNumber,
 	METRIC_THRESHOLDS,
 } from "@/lib/metrics/constants";
-import { formatPhoneNumber } from "@/lib/phone";
+
 import type { DashboardMetrics, HealthLevel } from "@/types/metrics";
 import { MetricGauge } from "../metric-gauge";
 import { MetricsOverview } from "../metrics-overview";

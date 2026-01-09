@@ -135,9 +135,10 @@ function collectInstanceIds(families: ParsedMetrics["families"]): string[] {
 /**
  * Transform HTTP-related metrics
  */
+
 function transformHTTPMetrics(
 	families: ParsedMetrics["families"],
-	_instanceId?: string | null,
+	_instanceId?: string | null, // eslint-disable-line @typescript-eslint/no-unused-vars
 ): HTTPMetrics {
 	const metrics: HTTPMetrics = {
 		totalRequests: 0,
@@ -948,9 +949,10 @@ function transformMediaMetrics(
 /**
  * Transform system health metrics
  */
+
 function transformSystemMetrics(
 	families: ParsedMetrics["families"],
-	_instanceId?: string | null,
+	_instanceId?: string | null, // eslint-disable-line @typescript-eslint/no-unused-vars
 ): SystemMetrics {
 	const metrics: SystemMetrics = {
 		circuitBreakerState: "unknown",
@@ -1603,13 +1605,8 @@ function transformStatusCacheMetrics(
 			metrics.p99DurationMs = (p99Sum / validHistograms) * 1000;
 		}
 
-		// Update per-operation avg durations
-		for (const [operation, durations] of Object.entries(
-			operationDurations,
-		)) {
-			// Note: avgDurationMs is not part of the byOperation interface
-			// It's calculated at the top level only
-		}
+		// Note: Per-operation avgDurationMs is not part of the byOperation interface
+		// It's calculated at the top level only
 	}
 
 	return metrics;

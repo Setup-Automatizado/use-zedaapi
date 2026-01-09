@@ -1,4 +1,4 @@
-import { type InstanceMetrics, PrometheusMetric } from "@/types/metrics";
+import type { InstanceMetrics } from "@/types/metrics";
 
 const API_BASE_URL =
 	process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3333";

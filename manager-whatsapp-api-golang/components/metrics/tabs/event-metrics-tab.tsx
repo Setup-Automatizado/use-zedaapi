@@ -22,7 +22,7 @@ import { cn } from "@/lib/utils";
 import type { EventMetrics, HealthLevel } from "@/types/metrics";
 import { HorizontalBarChart, MetricChart } from "../metric-chart";
 import { ProgressBar } from "../metric-gauge";
-import { MetricTable, NumberCell } from "../metric-table";
+
 import { StatusIndicator } from "../status-indicator";
 
 // Event type friendly names and colors (24 event types from backend)

@@ -50,7 +50,7 @@ export function TokenDisplay({ label, token, description }: TokenDisplayProps) {
 
 			// Reset icon after 2 seconds
 			setTimeout(() => setIsCopied(false), 2000);
-		} catch (error) {
+		} catch {
 			toast.error("Erro ao copiar", {
 				description: "Não foi possível copiar o token.",
 			});

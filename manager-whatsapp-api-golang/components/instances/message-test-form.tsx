@@ -74,7 +74,6 @@ type FormValues = z.infer<typeof formSchema>;
 export interface MessageTestFormProps {
 	instanceId: string;
 	instanceToken: string;
-	clientToken: string;
 }
 
 interface SendTextResponse {
@@ -88,7 +87,6 @@ interface SendTextResponse {
 export function MessageTestForm({
 	instanceId,
 	instanceToken,
-	clientToken,
 }: MessageTestFormProps) {
 	const [isSending, setIsSending] = useState(false);
 	const [lastResponse, setLastResponse] = useState<SendTextResponse | null>(
@@ -282,8 +280,8 @@ export function MessageTestForm({
 										/>
 									</FormControl>
 									<FormDescription>
-										Show "Typing..." status for this duration (0-15 seconds).
-										Default: 0
+										Show &quot;Typing...&quot; status for this duration (0-15
+										seconds). Default: 0
 									</FormDescription>
 									<FormMessage />
 								</FormItem>

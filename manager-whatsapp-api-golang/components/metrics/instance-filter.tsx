@@ -27,7 +27,6 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { useInstanceNames } from "@/hooks/use-instance-names";
-import { formatPhoneNumber } from "@/lib/phone";
 import { cn } from "@/lib/utils";
 
 export interface InstanceFilterProps {
