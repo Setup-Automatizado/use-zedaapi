@@ -22,6 +22,7 @@ type InstanceHandler struct {
 	communitiesHandler *CommunitiesHandler
 	newslettersHandler *NewslettersHandler
 	statusCacheHandler *StatusCacheHandler
+	privacyHandler     *PrivacyHandler
 	log                *slog.Logger
 }
 
@@ -52,6 +53,11 @@ func (h *InstanceHandler) SetNewslettersHandler(newslettersHandler *NewslettersH
 // SetStatusCacheHandler injects the StatusCacheHandler for route registration
 func (h *InstanceHandler) SetStatusCacheHandler(statusCacheHandler *StatusCacheHandler) {
 	h.statusCacheHandler = statusCacheHandler
+}
+
+// SetPrivacyHandler injects the PrivacyHandler for route registration
+func (h *InstanceHandler) SetPrivacyHandler(privacyHandler *PrivacyHandler) {
+	h.privacyHandler = privacyHandler
 }
 
 func (h *InstanceHandler) Register(r chi.Router) {
@@ -102,6 +108,11 @@ func (h *InstanceHandler) Register(r chi.Router) {
 		// Status cache routes
 		if h.statusCacheHandler != nil {
 			h.statusCacheHandler.RegisterRoutes(r)
+		}
+
+		// Privacy settings routes
+		if h.privacyHandler != nil {
+			h.privacyHandler.RegisterRoutes(r)
 		}
 	})
 }

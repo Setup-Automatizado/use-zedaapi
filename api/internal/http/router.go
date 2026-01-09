@@ -30,6 +30,7 @@ type RouterDeps struct {
 	CommunitiesHandler *handlers.CommunitiesHandler
 	NewslettersHandler *handlers.NewslettersHandler
 	StatusCacheHandler *handlers.StatusCacheHandler
+	PrivacyHandler     *handlers.PrivacyHandler
 	PartnerToken       string
 	DocsConfig         docs.Config
 }
@@ -89,6 +90,9 @@ func NewRouter(deps RouterDeps) http.Handler {
 		}
 		if deps.StatusCacheHandler != nil {
 			deps.InstanceHandler.SetStatusCacheHandler(deps.StatusCacheHandler)
+		}
+		if deps.PrivacyHandler != nil {
+			deps.InstanceHandler.SetPrivacyHandler(deps.PrivacyHandler)
 		}
 	}
 

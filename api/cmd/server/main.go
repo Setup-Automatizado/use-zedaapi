@@ -693,6 +693,12 @@ func main() {
 		statusCacheHTTPHandler = handlers.NewStatusCacheHandler(statusCacheService, logger)
 	}
 
+	// Create PrivacyHandler for privacy settings endpoints
+	var privacyHandler *handlers.PrivacyHandler
+	if messageCoordinator != nil {
+		privacyHandler = handlers.NewPrivacyHandler(messageCoordinator, instanceService, logger)
+	}
+
 	healthHandler.SetMetrics(func(component, status string) {
 		metrics.HealthChecks.WithLabelValues(component, status).Inc()
 	})
@@ -710,6 +716,7 @@ func main() {
 		CommunitiesHandler: communitiesHandler,
 		NewslettersHandler: newslettersHandler,
 		StatusCacheHandler: statusCacheHTTPHandler,
+		PrivacyHandler:     privacyHandler,
 		PartnerToken:       cfg.Partner.AuthToken,
 		DocsConfig:         docs.Config{BaseURL: cfg.HTTP.BaseURL},
 	})
