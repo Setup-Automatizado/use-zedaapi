@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	groupIDSuffix        = "-group"
+	groupIDSuffix = "-group"
 	// TODO: export defaultInviteMessage para .env
 	defaultInviteMessage = "Has sido invitado a unirte al grupo: %s"
 	maxGroupNameLength   = 25

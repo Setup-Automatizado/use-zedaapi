@@ -9,17 +9,17 @@ import (
 // Chat represents a WhatsApp conversation (can be a contact or a group).
 // This follows the Z-API principle that "everything is a chat".
 type Chat struct {
-	Phone            string    `json:"phone"`            // WhatsApp JID (e.g., "5511999999999@s.whatsapp.net" or group JID)
-	Name             string    `json:"name"`             // Contact name or group subject
-	Unread           int       `json:"unread"`           // Unread message count (not available from whatsmeow store)
-	LastMessageTime  time.Time `json:"lastMessageTime"`  // Timestamp of last message (not available from whatsmeow store)
-	IsMuted          bool      `json:"isMuted"`          // Whether chat is muted
-	MuteEndTime      time.Time `json:"muteEndTime"`      // When mute expires (zero if not muted or muted forever)
-	IsMarkedSpam     bool      `json:"isMarkedSpam"`     // Whether chat is marked as spam (not available from whatsmeow store)
-	Archived         bool      `json:"archived"`         // Whether chat is archived
-	Pinned           bool      `json:"pinned"`           // Whether chat is pinned
-	MessagesUnread   int       `json:"messagesUnread"`   // Alternative field for unread count (Z-API compatibility)
-	IsGroup          bool      `json:"isGroup"`          // Whether this is a group chat
+	Phone           string    `json:"phone"`           // WhatsApp JID (e.g., "5511999999999@s.whatsapp.net" or group JID)
+	Name            string    `json:"name"`            // Contact name or group subject
+	Unread          int       `json:"unread"`          // Unread message count (not available from whatsmeow store)
+	LastMessageTime time.Time `json:"lastMessageTime"` // Timestamp of last message (not available from whatsmeow store)
+	IsMuted         bool      `json:"isMuted"`         // Whether chat is muted
+	MuteEndTime     time.Time `json:"muteEndTime"`     // When mute expires (zero if not muted or muted forever)
+	IsMarkedSpam    bool      `json:"isMarkedSpam"`    // Whether chat is marked as spam (not available from whatsmeow store)
+	Archived        bool      `json:"archived"`        // Whether chat is archived
+	Pinned          bool      `json:"pinned"`          // Whether chat is pinned
+	MessagesUnread  int       `json:"messagesUnread"`  // Alternative field for unread count (Z-API compatibility)
+	IsGroup         bool      `json:"isGroup"`         // Whether this is a group chat
 }
 
 // ListParams defines parameters for listing chats with pagination.
@@ -54,17 +54,17 @@ func fromContactInfo(jid watypes.JID, info watypes.ContactInfo, settings watypes
 	}
 
 	return Chat{
-		Phone:            jid.String(),
-		Name:             name,
-		Unread:           0, // Not available from whatsmeow store
-		LastMessageTime:  time.Time{}, // Not available from whatsmeow store
-		IsMuted:          isMuted,
-		MuteEndTime:      muteEndTime,
-		IsMarkedSpam:     false, // Not available from whatsmeow store
-		Archived:         settings.Archived,
-		Pinned:           settings.Pinned,
-		MessagesUnread:   0, // Not available from whatsmeow store
-		IsGroup:          false,
+		Phone:           jid.String(),
+		Name:            name,
+		Unread:          0,           // Not available from whatsmeow store
+		LastMessageTime: time.Time{}, // Not available from whatsmeow store
+		IsMuted:         isMuted,
+		MuteEndTime:     muteEndTime,
+		IsMarkedSpam:    false, // Not available from whatsmeow store
+		Archived:        settings.Archived,
+		Pinned:          settings.Pinned,
+		MessagesUnread:  0, // Not available from whatsmeow store
+		IsGroup:         false,
 	}
 }
 
@@ -84,16 +84,16 @@ func fromGroupInfo(info *watypes.GroupInfo, settings watypes.LocalChatSettings) 
 	}
 
 	return Chat{
-		Phone:            info.JID.String(),
-		Name:             info.Name,
-		Unread:           0, // Not available from whatsmeow store
-		LastMessageTime:  lastMessageTime,
-		IsMuted:          isMuted,
-		MuteEndTime:      muteEndTime,
-		IsMarkedSpam:     false, // Not available from whatsmeow store
-		Archived:         settings.Archived,
-		Pinned:           settings.Pinned,
-		MessagesUnread:   0, // Not available from whatsmeow store
-		IsGroup:          true,
+		Phone:           info.JID.String(),
+		Name:            info.Name,
+		Unread:          0, // Not available from whatsmeow store
+		LastMessageTime: lastMessageTime,
+		IsMuted:         isMuted,
+		MuteEndTime:     muteEndTime,
+		IsMarkedSpam:    false, // Not available from whatsmeow store
+		Archived:        settings.Archived,
+		Pinned:          settings.Pinned,
+		MessagesUnread:  0, // Not available from whatsmeow store
+		IsGroup:         true,
 	}
 }
