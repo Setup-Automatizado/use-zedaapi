@@ -744,12 +744,22 @@ func (b *ProtoBuilder) BuildCarouselMessage(req *SendCarouselRequest) (*waE2E.Me
 	}
 
 	// Wrap in InteractiveMessage for proper delivery
-	msg := &waE2E.Message{
-		InteractiveMessage: &waE2E.InteractiveMessage{
-			InteractiveMessage: &waE2E.InteractiveMessage_CarouselMessage_{
-				CarouselMessage: carousel,
-			},
+	// Include Body at the root InteractiveMessage level for the carousel body text
+	interactiveMsg := &waE2E.InteractiveMessage{
+		InteractiveMessage: &waE2E.InteractiveMessage_CarouselMessage_{
+			CarouselMessage: carousel,
 		},
+	}
+
+	// Add body text if provided (displayed above carousel cards)
+	if req.Message != "" {
+		interactiveMsg.Body = &waE2E.InteractiveMessage_Body{
+			Text: proto.String(req.Message),
+		}
+	}
+
+	msg := &waE2E.Message{
+		InteractiveMessage: interactiveMsg,
 	}
 
 	return msg, nil
@@ -1306,12 +1316,22 @@ func (b *ProtoBuilder) BuildCarouselMessageWithMedia(req *SendCarouselRequest, c
 	}
 
 	// Wrap in InteractiveMessage for proper delivery
-	msg := &waE2E.Message{
-		InteractiveMessage: &waE2E.InteractiveMessage{
-			InteractiveMessage: &waE2E.InteractiveMessage_CarouselMessage_{
-				CarouselMessage: carousel,
-			},
+	// Include Body at the root InteractiveMessage level for the carousel body text
+	interactiveMsg := &waE2E.InteractiveMessage{
+		InteractiveMessage: &waE2E.InteractiveMessage_CarouselMessage_{
+			CarouselMessage: carousel,
 		},
+	}
+
+	// Add body text if provided (displayed above carousel cards)
+	if req.Message != "" {
+		interactiveMsg.Body = &waE2E.InteractiveMessage_Body{
+			Text: proto.String(req.Message),
+		}
+	}
+
+	msg := &waE2E.Message{
+		InteractiveMessage: interactiveMsg,
 	}
 
 	return msg, nil

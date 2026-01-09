@@ -653,6 +653,7 @@ func (p *InteractiveZAPIProcessor) convertToCarouselRequest(args *SendMessageArg
 
 	req := &interactive.SendCarouselRequest{
 		Phone:    args.Phone,
+		Message:  content.Body, // Carousel body text displayed above cards
 		Cards:    make([]interactive.CarouselCard, len(content.CarouselCards)),
 		CardType: interactive.CarouselCardType(content.CarouselCardType),
 	}

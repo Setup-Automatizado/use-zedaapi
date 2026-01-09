@@ -490,6 +490,7 @@ type SendButtonOTPRequest struct {
 // format for sending carousel messages with multiple cards
 type SendCarouselRequest struct {
 	Phone        string             `json:"phone"`                  // Required: recipient phone number
+	Message      string             `json:"message,omitempty"`      // Optional: carousel body text displayed above cards
 	Cards        []SendCarouselCard `json:"cards"`                  // Required: 1-10 carousel cards
 	CardType     string             `json:"cardType,omitempty"`     // Optional: HSCROLL_CARDS (default) or ALBUM_IMAGE
 	MessageID    string             `json:"messageId,omitempty"`    // Optional: reply to message ID
@@ -3636,6 +3637,7 @@ func (h *MessageHandler) sendCarousel(w http.ResponseWriter, r *http.Request) {
 		ReplyToMessageID: req.MessageID,
 		InteractiveContent: &queue.InteractiveMessage{
 			Type:             queue.InteractiveTypeCarousel,
+			Body:             req.Message, // Carousel body text displayed above cards
 			CarouselCards:    carouselCards,
 			CarouselCardType: cardType,
 		},

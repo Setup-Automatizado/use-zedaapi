@@ -196,6 +196,7 @@ const (
 // SendCarouselRequest - FUNNELCHAT /send-carousel format
 type SendCarouselRequest struct {
 	Phone        string           `json:"phone" validate:"required"`
+	Message      string           `json:"message,omitempty"` // Carousel body text displayed above cards
 	Cards        []CarouselCard   `json:"cards" validate:"required,min=1,max=10,dive"`
 	CardType     CarouselCardType `json:"cardType,omitempty"` // defaults to HSCROLL_CARDS
 	DelayMessage *int             `json:"delayMessage,omitempty"`
