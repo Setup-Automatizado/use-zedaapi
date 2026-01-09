@@ -46,7 +46,14 @@ export default function InstancePage({ params }: InstancePageProps) {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const tabParam = searchParams.get("tab");
-	const validTabs = ["overview", "statistics", "tokens", "webhooks", "settings"];
+	const validTabs = [
+		"overview",
+		"statistics",
+		"tokens",
+		"test",
+		"webhooks",
+		"settings",
+	];
 	const defaultTab =
 		tabParam && validTabs.includes(tabParam) ? tabParam : "overview";
 	const { instance, isLoading, error, mutate } = useInstance(resolvedParams.id);
@@ -61,6 +68,12 @@ export default function InstancePage({ params }: InstancePageProps) {
 
 	const [deviceInfo, setDeviceInfo] = useState<DeviceInfo | undefined>();
 	const [isCurlCopied, setIsCurlCopied] = useState(false);
+
+	// Mask token for display (show only last 4 chars)
+	const maskToken = (token: string | null | undefined) => {
+		if (!token || token.length < 8) return "********";
+		return `${"*".repeat(token.length - 4)}${token.slice(-4)}`;
+	};
 
 	// Copy cURL command to clipboard
 	const handleCopyCurl = async () => {
@@ -260,11 +273,15 @@ export default function InstancePage({ params }: InstancePageProps) {
 								</Button>
 							</CardHeader>
 							<CardContent>
+								<p className="text-xs text-muted-foreground mb-2">
+									Tokens are masked for security. Click copy to get the real
+									values.
+								</p>
 								<pre className="rounded-lg bg-muted p-4 text-sm overflow-x-auto">
 									<code>{`curl -X POST \\
-  ${process.env.NEXT_PUBLIC_WHATSAPP_API_URL}/instances/${instance.id}/token/${instance.instanceToken}/send-text \\
+  ${process.env.NEXT_PUBLIC_WHATSAPP_API_URL}/instances/${instance.id}/token/${maskToken(instance.instanceToken)}/send-text \\
   -H "Content-Type: application/json" \\
-  -H "Client-Token: ${clientToken}" \\
+  -H "Client-Token: ${maskToken(clientToken)}" \\
   -d '{
     "phone": "5511999999999",
     "message": "Hello from WhatsApp API!"
