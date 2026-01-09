@@ -675,3 +675,12 @@ func generateZaapID() string {
 	random := uuid.New().String()[:8]
 	return fmt.Sprintf("%d%s", timestamp, random)
 }
+
+// GetClient returns the whatsmeow client for an instance
+// This is used for direct WhatsApp operations (delete message, modify chat, etc.)
+func (c *Coordinator) GetClient(instanceID uuid.UUID) (ClientRegistry, bool) {
+	if c.clientRegistry == nil {
+		return nil, false
+	}
+	return c.clientRegistry, true
+}

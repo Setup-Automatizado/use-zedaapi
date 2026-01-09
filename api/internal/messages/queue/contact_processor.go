@@ -268,7 +268,7 @@ func (p *ContactProcessor) extractDisplayNameFromVCard(vcard string) string {
 		line = trimSpace(line)
 		if len(line) > 3 {
 			// Case-insensitive match for FN:
-			if (line[:3] == "FN:" || line[:3] == "fn:") {
+			if line[:3] == "FN:" || line[:3] == "fn:" {
 				name := line[3:]
 				// Unescape vCard value
 				name = unescapeVCardValue(name)
@@ -282,7 +282,7 @@ func (p *ContactProcessor) extractDisplayNameFromVCard(vcard string) string {
 	for _, line := range lines {
 		line = trimSpace(line)
 		if len(line) > 2 {
-			if (line[:2] == "N:" || line[:2] == "n:") {
+			if line[:2] == "N:" || line[:2] == "n:" {
 				parts := splitVCardField(line[2:])
 				// Build name from available parts: Prefix FirstName MiddleName LastName Suffix
 				var nameParts []string

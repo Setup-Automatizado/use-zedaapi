@@ -112,8 +112,8 @@ func (p *PollProcessor) buildPollMessage(content *PollMessage) (*waProto.Message
 	question := content.Question
 	msg := &waProto.Message{
 		PollCreationMessage: &waProto.PollCreationMessage{
-			Name:                    &question,
-			Options:                 options,
+			Name:                   &question,
+			Options:                options,
 			SelectableOptionsCount: &maxSelections,
 		},
 	}

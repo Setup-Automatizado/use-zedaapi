@@ -12,33 +12,39 @@ import (
 // WhatsAppMessageProcessor orchestrates message processing by delegating to type-specific processors
 // This follows the Strategy pattern for clean separation of concerns
 type WhatsAppMessageProcessor struct {
-	textProcessor        *TextProcessor
-	imageProcessor       *ImageProcessor
-	audioProcessor       *AudioProcessor
-	videoProcessor       *VideoProcessor
-	documentProcessor    *DocumentProcessor
-	locationProcessor    *LocationProcessor
-	contactProcessor     *ContactProcessor
-	interactiveProcessor *InteractiveProcessor
-	pollProcessor        *PollProcessor
-	eventProcessor       *EventProcessor
-	log                  *slog.Logger
+	textProcessor            *TextProcessor
+	imageProcessor           *ImageProcessor
+	audioProcessor           *AudioProcessor
+	videoProcessor           *VideoProcessor
+	documentProcessor        *DocumentProcessor
+	stickerProcessor         *StickerProcessor
+	ptvProcessor             *PTVProcessor
+	locationProcessor        *LocationProcessor
+	contactProcessor         *ContactProcessor
+	interactiveProcessor     *InteractiveProcessor
+	interactiveZAPIProcessor *InteractiveZAPIProcessor
+	pollProcessor            *PollProcessor
+	eventProcessor           *EventProcessor
+	log                      *slog.Logger
 }
 
 // NewWhatsAppMessageProcessor creates a new message processor with all type-specific processors
 func NewWhatsAppMessageProcessor(log *slog.Logger) *WhatsAppMessageProcessor {
 	return &WhatsAppMessageProcessor{
-		textProcessor:        NewTextProcessor(log),
-		imageProcessor:       NewImageProcessor(log),
-		audioProcessor:       NewAudioProcessor(log),
-		videoProcessor:       NewVideoProcessor(log),
-		documentProcessor:    NewDocumentProcessor(log),
-		locationProcessor:    NewLocationProcessor(log),
-		contactProcessor:     NewContactProcessor(log),
-		interactiveProcessor: NewInteractiveProcessor(log),
-		pollProcessor:        NewPollProcessor(log),
-		eventProcessor:       NewEventProcessor(log),
-		log:                  log,
+		textProcessor:            NewTextProcessor(log),
+		imageProcessor:           NewImageProcessor(log),
+		audioProcessor:           NewAudioProcessor(log),
+		videoProcessor:           NewVideoProcessor(log),
+		documentProcessor:        NewDocumentProcessor(log),
+		stickerProcessor:         NewStickerProcessor(log),
+		ptvProcessor:             NewPTVProcessor(log),
+		locationProcessor:        NewLocationProcessor(log),
+		contactProcessor:         NewContactProcessor(log),
+		interactiveProcessor:     NewInteractiveProcessor(log),
+		interactiveZAPIProcessor: NewInteractiveZAPIProcessor(log),
+		pollProcessor:            NewPollProcessor(log),
+		eventProcessor:           NewEventProcessor(log),
+		log:                      log,
 	}
 }
 
@@ -74,6 +80,10 @@ func (p *WhatsAppMessageProcessor) Process(ctx context.Context, client *wameow.C
 		return p.videoProcessor.Process(ctx, client, &args)
 	case MessageTypeDocument:
 		return p.documentProcessor.Process(ctx, client, &args)
+	case MessageTypeSticker:
+		return p.stickerProcessor.Process(ctx, client, &args)
+	case MessageTypePTV:
+		return p.ptvProcessor.Process(ctx, client, &args)
 	case MessageTypeLocation:
 		return p.locationProcessor.Process(ctx, client, &args)
 	case MessageTypeContact:
@@ -84,6 +94,19 @@ func (p *WhatsAppMessageProcessor) Process(ctx context.Context, client *wameow.C
 		return p.pollProcessor.Process(ctx, client, &args)
 	case MessageTypeEvent:
 		return p.eventProcessor.Process(ctx, client, &args)
+
+	// Z-API compatible interactive message types
+	case MessageTypeButtonList:
+		return p.interactiveZAPIProcessor.ProcessButtonList(ctx, client, &args)
+	case MessageTypeButtonActions:
+		return p.interactiveZAPIProcessor.ProcessButtonActions(ctx, client, &args)
+	case MessageTypeOptionList:
+		return p.interactiveZAPIProcessor.ProcessOptionList(ctx, client, &args)
+	case MessageTypeButtonPIX:
+		return p.interactiveZAPIProcessor.ProcessButtonPIX(ctx, client, &args)
+	case MessageTypeButtonOTP:
+		return p.interactiveZAPIProcessor.ProcessButtonOTP(ctx, client, &args)
+
 	default:
 		return fmt.Errorf("unsupported message type: %s", args.MessageType)
 	}
