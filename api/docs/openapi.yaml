@@ -44,6 +44,15 @@ tags:
       - Aggregate participant statistics for group messages
       - Optional webhook suppression to reduce serverless costs
       - Manual flush to trigger pending webhooks
+  - name: Media
+    description: |
+      Media file storage and serving system.
+
+      **Key Features:**
+      - Serve media files with HMAC signature validation
+      - Time-limited signed URLs for secure access
+      - Statistics endpoint for storage monitoring
+      - Instance-scoped media organization
 components:
   securitySchemes:
     ClientTokenAuth:
@@ -105,15 +114,13 @@ components:
             - degraded
             - unhealthy
         error:
-          type: string
-          nullable: true
+          type: [string, "null"]
         duration_ms:
           type: integer
           format: int64
           description: Time spent executing the check in milliseconds.
         circuit_state:
-          type: string
-          nullable: true
+          type: [string, "null"]
           description: Circuit breaker state reported by the lock manager (when available).
       required:
         - status
@@ -145,8 +152,7 @@ components:
           type: boolean
           description: Mirrors Z-API `connected`, indicating if the instance is linked to WhatsApp.
         error:
-          type: string
-          nullable: true
+          type: [string, "null"]
           description: Same semantics as Z-API, detailing why the instance is not connected (empty string when everything is ok).
         smartphoneConnected:
           type: boolean
@@ -203,8 +209,7 @@ components:
           type: string
           description: WhatsApp number linked to the instance.
         imgUrl:
-          type: string
-          nullable: true
+          type: [string, "null"]
           description: Direct URL to the current profile picture (null when unavailable).
         name:
           type: string
@@ -241,33 +246,26 @@ components:
       type: object
       properties:
         deliveryCallbackUrl:
-          type: string
+          type: [string, "null"]
           format: uri
-          nullable: true
         receivedCallbackUrl:
-          type: string
+          type: [string, "null"]
           format: uri
-          nullable: true
         receivedAndDeliveryCallbackUrl:
-          type: string
+          type: [string, "null"]
           format: uri
-          nullable: true
         messageStatusCallbackUrl:
-          type: string
+          type: [string, "null"]
           format: uri
-          nullable: true
         disconnectedCallbackUrl:
-          type: string
+          type: [string, "null"]
           format: uri
-          nullable: true
         presenceChatCallbackUrl:
-          type: string
+          type: [string, "null"]
           format: uri
-          nullable: true
         connectedCallbackUrl:
-          type: string
+          type: [string, "null"]
           format: uri
-          nullable: true
         notifySentByMe:
           type: boolean
       additionalProperties: false
@@ -415,8 +413,7 @@ components:
         callRejectAuto:
           type: boolean
         callRejectMessage:
-          type: string
-          nullable: true
+          type: [string, "null"]
         autoReadMessage:
           type: boolean
         middleware:
@@ -475,41 +472,33 @@ components:
             - web
             - mobile
         deliveryCallbackUrl:
-          type: string
+          type: [string, "null"]
           format: uri
-          nullable: true
         receivedCallbackUrl:
-          type: string
+          type: [string, "null"]
           format: uri
-          nullable: true
         receivedAndDeliveryCallbackUrl:
-          type: string
+          type: [string, "null"]
           format: uri
-          nullable: true
         disconnectedCallbackUrl:
-          type: string
+          type: [string, "null"]
           format: uri
-          nullable: true
         connectedCallbackUrl:
-          type: string
+          type: [string, "null"]
           format: uri
-          nullable: true
         messageStatusCallbackUrl:
-          type: string
+          type: [string, "null"]
           format: uri
-          nullable: true
         presenceChatCallbackUrl:
-          type: string
+          type: [string, "null"]
           format: uri
-          nullable: true
         sessionName:
           type: string
           description: Underlying WhatsApp session display name.
         callRejectAuto:
           type: boolean
         callRejectMessage:
-          type: string
-          nullable: true
+          type: [string, "null"]
         autoReadMessage:
           type: boolean
         subscriptionActive:
@@ -594,10 +583,9 @@ components:
           description: Recipient phone/group/newsletter
           example: "5511999999999"
         message:
-          type: string
+          type: [string, "null"]
           description: Message text content (only for text messages)
           example: Hello from Z-API
-          nullable: true
         delayMessage:
           type: integer
           format: int64
@@ -651,9 +639,8 @@ components:
         errors:
           type: array
           items:
-            type: string
+            type: [string, "null"]
           description: List of error messages (if any)
-          nullable: true
       required:
         - _id
         - zaapId
@@ -730,33 +717,29 @@ components:
           description: Text message content
           example: Hello from Z-API!
         messageId:
-          type: string
+          type: [string, "null"]
           description: Optional WhatsApp message ID to reply to
-          nullable: true
           example: 3EB0796DC18B7F954D54
         delayMessage:
-          type: integer
+          type: [integer, "null"]
           minimum: 1
           maximum: 15
           description: Optional delay in seconds before sending (1-15 seconds, default random 1-3)
-          nullable: true
           example: 5
         delayTyping:
-          type: integer
+          type: [integer, "null"]
           minimum: 1
           maximum: 15
           description: Optional typing indicator duration in seconds (1-15 seconds, default 0)
-          nullable: true
           example: 3
         duration:
-          type: integer
+          type: [integer, "null"]
           description: Ephemeral message duration in seconds (0, 86400, 604800, 7776000)
           enum:
             - 0
             - 86400
             - 604800
             - 7776000
-          nullable: true
           example: 86400
         privateAnswer:
           type: boolean
@@ -781,9 +764,8 @@ components:
           description: Mention all group members without listing them
           default: false
         linkPreview:
-          type: boolean
+          type: [boolean, "null"]
           description: If nil/omitted, auto-detect URLs and generate preview; if true, force preview; if false, disable preview
-          nullable: true
           example: true
       required:
         - phone
@@ -800,41 +782,36 @@ components:
         image:
           type: string
           description: Image URL (http/https) or base64 data URI (data:image/png;base64,...)
-          example: https://example.com/image.jpg
+          example: https://picsum.photos/600/400.jpg
         caption:
-          type: string
+          type: [string, "null"]
           description: Optional image caption/title
-          nullable: true
           example: Check out this image!
         messageId:
-          type: string
+          type: [string, "null"]
           description: Optional WhatsApp message ID to reply to
-          nullable: true
         delayMessage:
-          type: integer
+          type: [integer, "null"]
           minimum: 1
           maximum: 15
           description: Optional delay in seconds before sending (1-15 seconds)
-          nullable: true
         delayTyping:
-          type: integer
+          type: [integer, "null"]
           minimum: 1
           maximum: 15
           description: Optional typing indicator duration in seconds (1-15 seconds)
-          nullable: true
         viewOnce:
           type: boolean
           description: If true, image can only be viewed once
           default: false
         duration:
-          type: integer
+          type: [integer, "null"]
           description: Ephemeral message duration in seconds
           enum:
             - 0
             - 86400
             - 604800
             - 7776000
-          nullable: true
         mentioned:
           type: array
           items:
@@ -871,36 +848,32 @@ components:
         audio:
           type: string
           description: Audio URL (http/https) or base64 data URI (data:audio/ogg;base64,...)
-          example: https://example.com/audio.ogg
+          example: https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3
         messageId:
-          type: string
+          type: [string, "null"]
           description: Optional WhatsApp message ID to reply to
-          nullable: true
         delayMessage:
-          type: integer
+          type: [integer, "null"]
           minimum: 1
           maximum: 15
           description: Optional delay in seconds before sending (1-15 seconds)
-          nullable: true
         delayTyping:
-          type: integer
+          type: [integer, "null"]
           minimum: 1
           maximum: 15
           description: 'Optional "recording audio" indicator duration in seconds (1-15 seconds)'
-          nullable: true
         viewOnce:
           type: boolean
           description: If true, audio can only be played once
           default: false
         duration:
-          type: integer
+          type: [integer, "null"]
           description: Ephemeral message duration in seconds
           enum:
             - 0
             - 86400
             - 604800
             - 7776000
-          nullable: true
         mentioned:
           type: array
           items:
@@ -937,40 +910,35 @@ components:
         video:
           type: string
           description: Video URL (http/https) or base64 data URI (data:video/mp4;base64,...)
-          example: https://example.com/video.mp4
+          example: https://download.blender.org/durian/trailer/sintel_trailer-480p.mp4
         caption:
-          type: string
+          type: [string, "null"]
           description: Optional video caption/title
-          nullable: true
         messageId:
-          type: string
+          type: [string, "null"]
           description: Optional WhatsApp message ID to reply to
-          nullable: true
         delayMessage:
-          type: integer
+          type: [integer, "null"]
           minimum: 1
           maximum: 15
           description: Optional delay in seconds before sending (1-15 seconds)
-          nullable: true
         delayTyping:
-          type: integer
+          type: [integer, "null"]
           minimum: 1
           maximum: 15
           description: Optional typing indicator duration in seconds (1-15 seconds)
-          nullable: true
         viewOnce:
           type: boolean
           description: If true, video can only be viewed once
           default: false
         duration:
-          type: integer
+          type: [integer, "null"]
           description: Ephemeral message duration in seconds
           enum:
             - 0
             - 86400
             - 604800
             - 7776000
-          nullable: true
         mentioned:
           type: array
           items:
@@ -996,6 +964,130 @@ components:
         - phone
         - video
       additionalProperties: false
+    SendPTVRequest:
+      type: object
+      description: |
+        Request body for sending PTV (Push-To-Talk Video) messages (Z-API compatible).
+
+        **PTV Format**: Circular video notes displayed similarly to voice notes but with video content.
+
+        **Key Features**:
+        - Circular video notes (like voice notes with video)
+        - Video URL or base64 data URI support
+        - Optional caption/text
+        - Reply to messages via messageId
+        - Schedule delivery with delayMessage (1-15s)
+        - Show typing indicator with delayTyping (1-15s)
+        - Ephemeral messages with duration (0, 86400, 604800, 7776000)
+        - Mention users (@mentions)
+        - Mention groups/communities
+        - Mention all participants (@everyone)
+        - Private reply in groups
+
+        **Message Queue**: Messages are queued per recipient with FIFO ordering.
+
+        **WhatsApp Compatibility**: Uses whatsmeow library with full WhatsApp Web protocol support.
+      properties:
+        phone:
+          type: string
+          description: |
+            Recipient phone number in international format (without + prefix).
+
+            **Examples**:
+            - Individual: `5511999999999` (Brazil mobile)
+            - Group: `120363047204807488@g.us`
+            - Community: `123456789@newsletter`
+          example: "5511999999999"
+        video:
+          type: string
+          description: |
+            Video file URL or base64 data URI.
+
+            **Supported Formats**:
+            - URL: `https://example.com/video.mp4`
+            - Base64: `data:video/mp4;base64,AAAAIGZ0eXBpc29t...`
+
+            **Requirements**:
+            - Format: MP4, 3GP, MOV (auto-converted if needed)
+            - Max duration: 60 seconds recommended for PTV
+            - Circular display in WhatsApp
+          example: "https://download.blender.org/durian/trailer/sintel_trailer-480p.mp4"
+        caption:
+          type: [string, "null"]
+          description: |
+            Optional text caption for the PTV video.
+            Supports @mentions via mentioned/groupMentioned arrays.
+          example: "Check out this video note!"
+        messageId:
+          type: [string, "null"]
+          description: Optional WhatsApp message ID to reply to (quoted message)
+          example: "3EB0796DC1B61E519"
+        delayMessage:
+          type: [integer, "null"]
+          minimum: 1
+          maximum: 15
+          description: |
+            Optional delay in seconds before sending the message (1-15 seconds).
+            Used to simulate human behavior and avoid spam detection.
+          example: 3
+        delayTyping:
+          type: [integer, "null"]
+          minimum: 1
+          maximum: 15
+          description: |
+            Optional typing indicator duration in seconds (1-15 seconds).
+            Shows "recording..." to recipient before message is sent.
+          example: 2
+        viewOnce:
+          type: boolean
+          description: |
+            If true, the PTV video can only be viewed once by the recipient.
+            After viewing, the message disappears from the chat.
+          default: false
+          example: false
+        duration:
+          type: [integer, "null"]
+          enum: [0, 86400, 604800, 7776000]
+          description: |
+            Optional ephemeral message duration (view-once timer).
+
+            **Values**:
+            - `0`: Permanent (default)
+            - `86400`: 24 hours (1 day)
+            - `604800`: 7 days (1 week)
+            - `7776000`: 90 days (3 months)
+          example: 0
+        mentioned:
+          type: array
+          description: |
+            Optional array of phone numbers to mention (@mention).
+            Users will be notified and text will show @mentions.
+          items:
+            type: [string, "null"]
+            example: "5511888888888"
+        groupMentioned:
+          type: [array, "null"]
+          description: |
+            Optional array of groups/communities to mention.
+            Used for cross-community mentions and notifications.
+          items:
+            $ref: "#/components/schemas/GroupMention"
+        mentionedAll:
+          type: boolean
+          description: |
+            Mention all participants in group (@everyone).
+            Only works in groups where user has admin permissions.
+          default: false
+        privateAnswer:
+          type: boolean
+          description: |
+            Send message as private reply in group context.
+            Only recipient will see the message, others see "private reply".
+          default: false
+      required:
+        - phone
+        - video
+      additionalProperties: false
     SendDocumentRequest:
       type: object
       description: Request body for sending document messages (Z-API compatible)
@@ -1007,41 +1099,35 @@ components:
         document:
           type: string
           description: Document URL (http/https) or base64 data URI (data:application/pdf;base64,...)
-          example: https://example.com/document.pdf
+          example: https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf
         fileName:
-          type: string
+          type: [string, "null"]
           description: Optional document filename
-          nullable: true
           example: report.pdf
         caption:
-          type: string
+          type: [string, "null"]
           description: Optional document caption/description
-          nullable: true
         messageId:
-          type: string
+          type: [string, "null"]
           description: Optional WhatsApp message ID to reply to
-          nullable: true
         delayMessage:
-          type: integer
+          type: [integer, "null"]
           minimum: 1
           maximum: 15
           description: Optional delay in seconds before sending (1-15 seconds)
-          nullable: true
         delayTyping:
-          type: integer
+          type: [integer, "null"]
           minimum: 1
           maximum: 15
           description: Optional typing indicator duration in seconds (1-15 seconds)
-          nullable: true
         duration:
-          type: integer
+          type: [integer, "null"]
           description: Ephemeral message duration in seconds
           enum:
             - 0
             - 86400
             - 604800
             - 7776000
-          nullable: true
         mentioned:
           type: array
           items:
@@ -1106,39 +1192,36 @@ components:
             Sticker file URL or base64 data URI.
 
             **Supported Formats**:
-            - URL: `https://example.com/sticker.webp`
+            - URL: `https://www.gstatic.com/webp/gallery/1.webp`
             - Base64: `data:image/webp;base64,UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoBAAEAAwA0JaQAA3AA/vuUAAA=`
 
             **Requirements**:
             - Format: WebP (animated or static)
             - Max size: 100KB recommended for animated, 500KB for static
             - Dimensions: 512x512 pixels recommended
-          example: "https://example.com/sticker.webp"
+          example: "https://www.gstatic.com/webp/gallery/1.webp"
         messageId:
-          type: string
+          type: [string, "null"]
           description: Optional WhatsApp message ID to reply to (quoted message)
-          nullable: true
           example: "3EB0796DC1B61E519"
         delayMessage:
-          type: integer
+          type: [integer, "null"]
           minimum: 1
           maximum: 15
           description: |
             Optional delay in seconds before sending the message (1-15 seconds).
             Used to simulate human behavior and avoid spam detection.
-          nullable: true
           example: 3
         delayTyping:
-          type: integer
+          type: [integer, "null"]
           minimum: 1
           maximum: 15
           description: |
             Optional typing indicator duration in seconds (1-15 seconds).
             Shows "typing..." to recipient before message is sent.
-          nullable: true
           example: 2
         duration:
-          type: integer
+          type: [integer, "null"]
           enum: [0, 86400, 604800, 7776000]
           description: |
             Optional ephemeral message duration (view-once timer).
@@ -1148,7 +1231,6 @@ components:
             - `86400`: 24 hours (1 day)
             - `604800`: 7 days (1 week)
             - `7776000`: 90 days (3 months)
-          nullable: true
           example: 0
         mentioned:
           type: array
@@ -1156,17 +1238,15 @@ components:
             Optional array of phone numbers to mention (@mention).
             Users will be notified and text will show @mentions.
           items:
-            type: string
+            type: [string, "null"]
             example: "5511888888888"
-          nullable: true
         groupMentioned:
-          type: array
+          type: [array, "null"]
           description: |
             Optional array of groups/communities to mention.
             Used for cross-community mentions and notifications.
           items:
             $ref: "#/components/schemas/GroupMention"
-          nullable: true
         mentionedAll:
           type: boolean
           description: |
@@ -1223,43 +1303,39 @@ components:
             GIF file URL or base64 data URI.
 
             **Supported Formats**:
-            - URL: `https://example.com/animation.gif`
+            - URL: `https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcDd2MXRxbTN1NjN5cXBqYjZ0c2swY3EyNmRxaGJxODRnOGxqcjR2MyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7abKhOpu0NwenH3O/giphy.gif`
             - Base64: `data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==`
 
             **Requirements**:
             - Format: GIF (animated or static)
             - Max size: 16MB recommended
             - Aspect ratio: Any (auto-adjusted by WhatsApp)
-          example: "https://example.com/animation.gif"
+          example: "https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExcDd2MXRxbTN1NjN5cXBqYjZ0c2swY3EyNmRxaGJxODRnOGxqcjR2MyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3o7abKhOpu0NwenH3O/giphy.gif"
         caption:
-          type: string
+          type: [string, "null"]
           description: |
             Optional text caption for the GIF.
             Supports @mentions via mentioned/groupMentioned arrays.
-          nullable: true
           example: "Check this out! 🎉"
         messageId:
-          type: string
+          type: [string, "null"]
           description: Optional WhatsApp message ID to reply to (quoted message)
-          nullable: true
           example: "3EB0796DC1B61E519"
         delayMessage:
-          type: integer
+          type: [integer, "null"]
           minimum: 1
           maximum: 15
           description: |
             Optional delay in seconds before sending the message (1-15 seconds).
             Used to simulate human behavior and avoid spam detection.
-          nullable: true
           example: 3
         delayTyping:
-          type: integer
+          type: [integer, "null"]
           minimum: 1
           maximum: 15
           description: |
             Optional typing indicator duration in seconds (1-15 seconds).
             Shows "typing..." to recipient before message is sent.
-          nullable: true
           example: 2
         viewOnce:
           type: boolean
@@ -1268,7 +1344,7 @@ components:
             Recipient can only view the GIF once.
           default: false
         duration:
-          type: integer
+          type: [integer, "null"]
           enum: [0, 86400, 604800, 7776000]
           description: |
             Optional ephemeral message duration (view-once timer).
@@ -1278,7 +1354,6 @@ components:
             - `86400`: 24 hours (1 day)
             - `604800`: 7 days (1 week)
             - `7776000`: 90 days (3 months)
-          nullable: true
           example: 0
         mentioned:
           type: array
@@ -1286,17 +1361,15 @@ components:
             Optional array of phone numbers to mention (@mention).
             Users will be notified and text will show @mentions.
           items:
-            type: string
+            type: [string, "null"]
             example: "5511888888888"
-          nullable: true
         groupMentioned:
-          type: array
+          type: [array, "null"]
           description: |
             Optional array of groups/communities to mention.
             Used for cross-community mentions and notifications.
           items:
             $ref: "#/components/schemas/GroupMention"
-          nullable: true
         mentionedAll:
           type: boolean
           description: |
@@ -1338,33 +1411,29 @@ components:
             This is the WhatsApp JID user part.
           example: "5511999999999"
         name:
-          type: string
+          type: [string, "null"]
           description: |
             Full contact name from device address book.
             Only present if contact exists in user's phone contacts.
-          nullable: true
           example: "João Silva Santos"
         short:
-          type: string
+          type: [string, "null"]
           description: |
             First name or nickname from device address book.
             Only present if contact exists in user's phone contacts.
-          nullable: true
           example: "João"
         notify:
-          type: string
+          type: [string, "null"]
           description: |
             Name from WhatsApp settings (push name).
             This is how the user identifies themselves on WhatsApp.
             Present if user has ever interacted with the contact.
-          nullable: true
           example: "João S."
         vname:
-          type: string
+          type: [string, "null"]
           description: |
             Full name from VCard if contact was shared via contact card.
             Only present if contact was received through VCard sharing.
-          nullable: true
           example: "João Silva Santos"
       required:
         - phone
@@ -1504,17 +1573,15 @@ components:
           type: boolean
           description: Indicates if the WhatsApp client is connected at enqueue time
         lastSeen:
-          type: string
+          type: [string, "null"]
           format: date-time
-          nullable: true
           description: Timestamp of the last known successful connection (RFC3339)
         reason:
           type: string
           description: Reason for the current connectivity state (connected, reconnecting, logged_out, etc.)
           example: disconnected
         workerId:
-          type: string
-          nullable: true
+          type: [string, "null"]
           description: Identifier of the worker handling the instance, when available
     SendLocationRequest:
       type: object
@@ -1535,40 +1602,34 @@ components:
           description: Location longitude
           example: -46.633308
         name:
-          type: string
+          type: [string, "null"]
           description: Optional location name/title
-          nullable: true
           example: Paulista Avenue
         address:
-          type: string
+          type: [string, "null"]
           description: Optional location address
-          nullable: true
           example: Av. Paulista, 1578 - São Paulo, SP
         messageId:
-          type: string
+          type: [string, "null"]
           description: Optional WhatsApp message ID to reply to
-          nullable: true
         delayMessage:
-          type: integer
+          type: [integer, "null"]
           minimum: 1
           maximum: 15
           description: Optional delay in seconds before sending
-          nullable: true
         delayTyping:
-          type: integer
+          type: [integer, "null"]
           minimum: 1
           maximum: 15
           description: Optional typing indicator duration in seconds
-          nullable: true
         duration:
-          type: integer
+          type: [integer, "null"]
           description: Ephemeral message duration in seconds
           enum:
             - 0
             - 86400
             - 604800
             - 7776000
-          nullable: true
         mentioned:
           type: array
           items:
@@ -1605,103 +1666,85 @@ components:
           description: Phone number of the contact in international format (Z-API compatible field)
           example: "5511999999999"
         contactBusinessDescription:
-          type: string
+          type: [string, "null"]
           description: Optional business or organization description of the contact (Z-API compatible field)
-          nullable: true
           example: Sales Manager at Example Corp
         firstName:
-          type: string
+          type: [string, "null"]
           description: Given name component for the vCard
-          nullable: true
           example: John
         lastName:
-          type: string
+          type: [string, "null"]
           description: Family name component for the vCard
-          nullable: true
           example: Doe
         middleName:
-          type: string
+          type: [string, "null"]
           description: Middle name or additional names
-          nullable: true
           example: Michael
         namePrefix:
-          type: string
+          type: [string, "null"]
           description: Honorific prefix (e.g. Dr., Mr., Ms.)
-          nullable: true
           example: Dr.
         nameSuffix:
-          type: string
+          type: [string, "null"]
           description: Honorific suffix (e.g. Jr., Sr.)
-          nullable: true
           example: Jr.
         nickname:
-          type: string
+          type: [string, "null"]
           description: Nickname or alias for the contact
-          nullable: true
           example: Johnny
         email:
-          type: string
+          type: [string, "null"]
           format: email
           description: Email address associated with the contact
-          nullable: true
           example: john@example.com
         url:
-          type: string
+          type: [string, "null"]
           format: uri
           description: Website or social media URL for the contact
-          nullable: true
           example: https://example.com/john
         organization:
-          type: string
+          type: [string, "null"]
           description: Organization or company name (overrides contactBusinessDescription when provided)
-          nullable: true
           example: Example Corp
         jobTitle:
-          type: string
+          type: [string, "null"]
           description: Job title or position
-          nullable: true
           example: Sales Manager
         address:
           allOf:
             - $ref: "#/components/schemas/ContactAddress"
-          nullable: true
           description: Structured address details for the vCard
         birthday:
-          type: string
+          type: [string, "null"]
           format: date
           description: Birthday in YYYY-MM-DD format
-          nullable: true
           example: "1990-05-17"
         note:
-          type: string
+          type: [string, "null"]
           description: Additional notes or comments to include in the vCard
-          nullable: true
           example: Met at WhatsApp Summit 2024
         messageId:
-          type: string
+          type: [string, "null"]
           description: Optional WhatsApp message ID to reply to
-          nullable: true
         delayMessage:
-          type: integer
+          type: [integer, "null"]
           minimum: 1
           maximum: 15
           description: Optional delay in seconds before sending
-          nullable: true
         delayTyping:
-          type: integer
+          type: [integer, "null"]
           minimum: 1
           maximum: 15
           description: Optional typing indicator duration in seconds
-          nullable: true
         duration:
-          type: integer
+          type: [integer, "null"]
           description: Ephemeral message duration in seconds
           enum:
             - 0
             - 86400
             - 604800
             - 7776000
-          nullable: true
         mentioned:
           type: array
           items:
@@ -1730,44 +1773,36 @@ components:
       description: Structured address details included in contact vCards
       properties:
         type:
-          type: string
+          type: [string, "null"]
           description: Address type (e.g. HOME, WORK)
-          nullable: true
           example: WORK
         postBox:
-          type: string
+          type: [string, "null"]
           description: Post office box number
-          nullable: true
           example: "1234"
         extended:
-          type: string
+          type: [string, "null"]
           description: Extended address information such as apartment or suite
-          nullable: true
           example: Suite 1203
         street:
-          type: string
+          type: [string, "null"]
           description: Street address
-          nullable: true
           example: Av. Paulista, 1578
         city:
-          type: string
+          type: [string, "null"]
           description: City or locality
-          nullable: true
           example: São Paulo
         region:
-          type: string
+          type: [string, "null"]
           description: State, province or region
-          nullable: true
           example: SP
         postalCode:
-          type: string
+          type: [string, "null"]
           description: Postal or ZIP code
-          nullable: true
           example: "01310-200"
         country:
-          type: string
+          type: [string, "null"]
           description: Country name
-          nullable: true
           example: Brasil
       additionalProperties: false
     ContactInfo:
@@ -1783,66 +1818,52 @@ components:
           description: Phone number of the contact in international format
           example: "5511999999999"
         contactBusinessDescription:
-          type: string
+          type: [string, "null"]
           description: Optional business description of the contact
-          nullable: true
           example: Sales Manager
         firstName:
-          type: string
+          type: [string, "null"]
           description: Given name component for the vCard
-          nullable: true
         lastName:
-          type: string
+          type: [string, "null"]
           description: Family name component for the vCard
-          nullable: true
         middleName:
-          type: string
+          type: [string, "null"]
           description: Middle name or additional names
-          nullable: true
         namePrefix:
-          type: string
+          type: [string, "null"]
           description: Honorific prefix (e.g. Dr., Mr., Ms.)
-          nullable: true
         nameSuffix:
-          type: string
+          type: [string, "null"]
           description: Honorific suffix (e.g. Jr., Sr.)
-          nullable: true
         nickname:
-          type: string
+          type: [string, "null"]
           description: Nickname or alias for the contact
-          nullable: true
         email:
-          type: string
+          type: [string, "null"]
           format: email
           description: Email address associated with the contact
-          nullable: true
         url:
-          type: string
+          type: [string, "null"]
           format: uri
           description: Website or social media URL for the contact
-          nullable: true
         organization:
-          type: string
+          type: [string, "null"]
           description: Organization or company name
-          nullable: true
         jobTitle:
-          type: string
+          type: [string, "null"]
           description: Job title or position
-          nullable: true
         address:
           allOf:
             - $ref: "#/components/schemas/ContactAddress"
-          nullable: true
           description: Structured address details for the vCard
         birthday:
-          type: string
+          type: [string, "null"]
           format: date
           description: Birthday in YYYY-MM-DD format
-          nullable: true
         note:
-          type: string
+          type: [string, "null"]
           description: Additional notes or comments to include in the vCard
-          nullable: true
       required:
         - contactName
         - contactPhone
@@ -1863,30 +1884,26 @@ components:
           minItems: 1
           maxItems: 10
         messageId:
-          type: string
+          type: [string, "null"]
           description: Optional WhatsApp message ID to reply to
-          nullable: true
         delayMessage:
-          type: integer
+          type: [integer, "null"]
           minimum: 1
           maximum: 15
           description: Optional delay in seconds before sending
-          nullable: true
         delayTyping:
-          type: integer
+          type: [integer, "null"]
           minimum: 1
           maximum: 15
           description: Optional typing indicator duration in seconds
-          nullable: true
         duration:
-          type: integer
+          type: [integer, "null"]
           description: Ephemeral message duration in seconds
           enum:
             - 0
             - 86400
             - 604800
             - 7776000
-          nullable: true
         mentioned:
           type: array
           items:
@@ -1978,8 +1995,7 @@ components:
           type: string
           description: Millisecond timestamp of the last interaction represented as string.
         muteEndTime:
-          type: string
-          nullable: true
+          type: [string, "null"]
           description: "Millisecond timestamp when mute expires (`null` or `-1` for indefinitely muted)."
         isMuted:
           type: string
@@ -2013,8 +2029,7 @@ components:
           type: string
           description: Participant phone number or JID.
         lid:
-          type: string
-          nullable: true
+          type: [string, "null"]
           description: LID value returned by WhatsApp (when available).
         isAdmin:
           type: boolean
@@ -2023,12 +2038,10 @@ components:
           type: boolean
           description: Indicates whether the participant is the group owner.
         short:
-          type: string
-          nullable: true
+          type: [string, "null"]
           description: Short name provided by WhatsApp (when available).
         name:
-          type: string
-          nullable: true
+          type: [string, "null"]
           description: Display name for the participant (when available).
       required:
         - phone
@@ -2155,8 +2168,7 @@ components:
           type: string
           description: "Group JID (suffix `-group`)."
         description:
-          type: string
-          nullable: true
+          type: [string, "null"]
           description: Group description text.
         owner:
           type: string
@@ -2169,17 +2181,14 @@ components:
           format: int64
           description: Creation timestamp in milliseconds since epoch.
         invitationLink:
-          type: string
+          type: [string, "null"]
           format: uri
-          nullable: true
           description: Invitation link for the group (available to admins).
         invitationLinkError:
-          type: string
-          nullable: true
+          type: [string, "null"]
           description: Error returned when the invitation link cannot be retrieved.
         communityId:
-          type: string
-          nullable: true
+          type: [string, "null"]
           description: Community identifier when the group belongs to a community.
         adminOnlyMessage:
           type: boolean
@@ -2199,13 +2208,11 @@ components:
           items:
             $ref: "#/components/schemas/GroupParticipant"
         subjectTime:
-          type: integer
+          type: [integer, "null"]
           format: int64
-          nullable: true
           description: Timestamp of the last subject change.
         subjectOwner:
-          type: string
-          nullable: true
+          type: [string, "null"]
           description: Phone number of the participant who last changed the subject.
       required:
         - phone
@@ -2232,8 +2239,7 @@ components:
           type: string
           description: Group subject (name).
         description:
-          type: string
-          nullable: true
+          type: [string, "null"]
           description: Group description text.
         creation:
           type: integer
@@ -2255,13 +2261,11 @@ components:
           items:
             $ref: "#/components/schemas/GroupParticipant"
         subjectTime:
-          type: integer
+          type: [integer, "null"]
           format: int64
-          nullable: true
           description: Timestamp of the last subject change.
         subjectOwner:
-          type: string
-          nullable: true
+          type: [string, "null"]
           description: Phone number that owns the invitation subject.
       required:
         - phone
@@ -2321,8 +2325,7 @@ components:
           type: string
           description: Name of the community.
         description:
-          type: string
-          nullable: true
+          type: [string, "null"]
           description: Optional description for the community.
       required:
         - name
@@ -2435,8 +2438,7 @@ components:
           type: string
           description: Community identifier.
         description:
-          type: string
-          nullable: true
+          type: [string, "null"]
           description: Community description text.
         subGroups:
           type: array
@@ -2511,8 +2513,7 @@ components:
           type: string
           description: Channel display name.
         description:
-          type: string
-          nullable: true
+          type: [string, "null"]
           description: Optional channel description.
       required:
         - name
@@ -2596,29 +2597,25 @@ components:
           type: string
           description: Channel display name.
         description:
-          type: string
-          nullable: true
+          type: [string, "null"]
           description: Channel description text.
         subscribersCount:
           type: string
           description: Total subscriber count represented as string.
         inviteLink:
-          type: string
+          type: [string, "null"]
           format: uri
-          nullable: true
           description: Invitation link for the channel.
         verification:
           type: string
           description: "Channel verification status (`VERIFIED`, `UNVERIFIED`)."
         picture:
-          type: string
+          type: [string, "null"]
           format: uri
-          nullable: true
           description: URL for the channel avatar.
         preview:
-          type: string
+          type: [string, "null"]
           format: uri
-          nullable: true
           description: URL for the preview image.
         viewMetadata:
           type: object
@@ -2675,8 +2672,7 @@ components:
         filters:
           $ref: "#/components/schemas/NewsletterSearchFilters"
         searchText:
-          type: string
-          nullable: true
+          type: [string, "null"]
           description: Optional free text search term.
       required:
         - limit
@@ -2693,16 +2689,14 @@ components:
           type: string
           description: Channel display name.
         description:
-          type: string
-          nullable: true
+          type: [string, "null"]
           description: Channel description snippet.
         subscribersCount:
           type: string
           description: Total subscriber count represented as string.
         picture:
-          type: string
+          type: [string, "null"]
           format: uri
-          nullable: true
           description: Channel picture URL when available.
       required:
         - id
@@ -2714,8 +2708,7 @@ components:
       description: Response payload returned by the newsletter search endpoint.
       properties:
         cursor:
-          type: string
-          nullable: true
+          type: [string, "null"]
           description: Cursor returned by WhatsApp for subsequent pages (currently always null).
         data:
           type: array
@@ -2785,8 +2778,7 @@ components:
           type: boolean
           description: Indicates whether the transfer succeeded.
         message:
-          type: string
-          nullable: true
+          type: [string, "null"]
           description: Optional error message when the transfer fails.
       required:
         - value
@@ -2802,13 +2794,11 @@ components:
           description: true if the phone number has WhatsApp, false otherwise
           example: true
         phone:
-          type: string
-          nullable: true
+          type: [string, "null"]
           description: Phone number if exists on WhatsApp, null otherwise
           example: "5521979232690"
         lid:
-          type: string
-          nullable: true
+          type: [string, "null"]
           description: LID (Linked ID) if available, null otherwise
           example: "140712372899859@lid"
       required:
@@ -3149,6 +3139,1171 @@ components:
         - pendingWebhooks
       additionalProperties: false
 
+    # ==========================================
+    # Interactive Message Schemas
+    # ==========================================
+
+    ButtonType:
+      type: string
+      description: |
+        Type of button for interactive messages.
+
+        **Button Types:**
+        - `quick_reply` - Simple reply button (max 20 chars label)
+        - `cta_url` - Opens a URL in browser
+        - `cta_call` - Initiates a phone call
+        - `cta_copy` - Copies text to clipboard
+        - `payment_info` - Shows payment information
+        - `review_and_pay` - Review and pay action
+      enum:
+        - quick_reply
+        - cta_url
+        - cta_call
+        - cta_copy
+        - payment_info
+        - review_and_pay
+      example: cta_url
+
+    PIXKeyType:
+      type: string
+      description: |
+        Type of PIX key for Brazilian payment system.
+
+        **PIX Key Types:**
+        - `CPF` - Brazilian individual taxpayer ID (11 digits)
+        - `CNPJ` - Brazilian company taxpayer ID (14 digits)
+        - `EMAIL` - Email address
+        - `PHONE` - Phone number with country code
+        - `EVP` - Random PIX key (UUID format)
+      enum:
+        - CPF
+        - CNPJ
+        - EMAIL
+        - PHONE
+        - EVP
+      example: CPF
+
+    InteractiveButton:
+      type: object
+      description: |
+        Button definition for interactive messages.
+
+        **Usage:**
+        - For `quick_reply`: Only `id` and `label` required
+        - For `cta_url`: Requires `url` field
+        - For `cta_call`: Requires `phone` field
+        - For `cta_copy`: Requires `copyCode` field
+
+        **Label Limits:**
+        - `quick_reply`: max 20 characters
+        - Other types: max 25 characters
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the button (used in callbacks)
+          example: btn_1
+        type:
+          $ref: "#/components/schemas/ButtonType"
+        label:
+          type: string
+          description: Button display text
+          maxLength: 25
+          example: Click here
+        url:
+          type: string
+          format: uri
+          description: URL for cta_url button type
+          example: https://httpbin.org/get
+        phone:
+          type: string
+          description: Phone number for cta_call button type (international format)
+          example: "+5511999999999"
+        copyCode:
+          type: string
+          description: Text to copy for cta_copy button type
+          example: DISCOUNT10
+      required:
+        - type
+        - label
+      additionalProperties: false
+
+    ActionButton:
+      type: object
+      description: |
+        Action button for interactive messages (CTA buttons).
+
+        **Supported Actions:**
+        - Open URL (`cta_url`)
+        - Make call (`cta_call`)
+        - Copy text (`cta_copy`)
+        - Quick reply (`quick_reply`)
+      properties:
+        id:
+          type: string
+          description: Unique button identifier (max 256 chars)
+          maxLength: 256
+          example: "btn_1"
+        type:
+          $ref: "#/components/schemas/ButtonType"
+        label:
+          type: string
+          description: Button display text (max 25 chars, 20 for quick_reply)
+          maxLength: 25
+          example: View Details
+        url:
+          type: string
+          format: uri
+          description: URL to open (required for cta_url)
+          example: https://httpbin.org/anything/details
+        phone:
+          type: string
+          description: Phone number to call (required for cta_call)
+          example: "+5511999999999"
+        copyCode:
+          type: string
+          description: Text to copy (required for cta_copy)
+          example: CODE123
+      required:
+        - id
+        - type
+        - label
+      additionalProperties: false
+
+    Button:
+      type: object
+      description: |
+        Simple reply button for button-list messages.
+
+        **Limits:**
+        - ID: max 256 characters
+        - Title: max 20 characters
+      properties:
+        id:
+          type: string
+          description: Unique button identifier (returned in selection callback)
+          maxLength: 256
+          example: "btn_yes"
+        title:
+          type: string
+          description: Button display text
+          maxLength: 20
+          example: "Yes"
+      required:
+        - id
+        - title
+      additionalProperties: false
+
+    ListRow:
+      type: object
+      description: |
+        Row item in a list/option message.
+
+        **Limits:**
+        - Title: max 24 characters
+        - Description: max 72 characters
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the row (returned in selection callback)
+          example: row_1
+        title:
+          type: string
+          description: Row title displayed to user
+          maxLength: 24
+          example: Option 1
+        description:
+          type: string
+          description: Optional row description
+          maxLength: 72
+          example: This is the first option
+      required:
+        - id
+        - title
+      additionalProperties: false
+
+    ListSection:
+      type: object
+      description: |
+        Section containing rows in a button list message.
+
+        **Limits:**
+        - Title: max 24 characters
+        - Rows per section: max 10
+      properties:
+        title:
+          type: string
+          description: Section title displayed as header
+          maxLength: 24
+          example: Choose an option
+        rows:
+          type: array
+          description: List of rows in this section
+          items:
+            $ref: "#/components/schemas/ListRow"
+          minItems: 1
+          maxItems: 10
+      required:
+        - title
+        - rows
+      additionalProperties: false
+
+    PIXPayment:
+      type: object
+      description: |
+        PIX payment information for Brazilian payment messages.
+
+        **Required Fields:**
+        - `keyType`: Type of PIX key
+        - `key`: The PIX key value
+        - `name`: Beneficiary name
+        - `amount`: Payment amount in BRL
+
+        **Optional Fields:**
+        - `description`: Payment description
+        - `merchantCity`: Merchant city for PIX
+        - `merchantName`: Merchant name
+        - `txId`: Transaction identifier
+      properties:
+        keyType:
+          $ref: "#/components/schemas/PIXKeyType"
+        key:
+          type: string
+          description: PIX key value (format depends on keyType)
+          example: "12345678900"
+        name:
+          type: string
+          description: Beneficiary name (who receives the payment)
+          example: John Doe
+        amount:
+          type: number
+          format: float
+          description: Payment amount in BRL (Brazilian Real)
+          minimum: 0.01
+          example: 99.90
+        description:
+          type: string
+          description: Payment description/memo
+          example: Product purchase
+        merchantCity:
+          type: string
+          description: Merchant city for PIX QR code
+          example: SAO PAULO
+        merchantName:
+          type: string
+          description: Merchant name for PIX QR code
+          example: My Store
+        txId:
+          type: string
+          description: Transaction identifier for tracking
+          example: TX123456789
+      required:
+        - keyType
+        - key
+        - name
+        - amount
+      additionalProperties: false
+
+    CarouselCard:
+      type: object
+      description: |
+        Card in a carousel message.
+
+        **Structure:**
+        - mediaUrl: URL for card image/video (required)
+        - body: Text content (required, max 1024 chars)
+        - buttons: Action buttons (required, 1-3 per card)
+        - header: Optional header text (max 60 chars)
+        - footer: Optional footer text (max 60 chars)
+
+        **Limits:**
+        - Body text: max 1024 characters
+        - Buttons per card: 1-3
+        - Header text: max 60 characters
+        - Footer text: max 60 characters
+      properties:
+        mediaUrl:
+          type: string
+          format: uri
+          description: URL for card image or video (required)
+          example: "https://picsum.photos/600/400.jpg"
+        body:
+          type: string
+          description: Card body text content (required)
+          maxLength: 1024
+          example: "Product description here"
+        buttons:
+          type: array
+          description: Action buttons for this card (1-3 buttons required)
+          items:
+            $ref: "#/components/schemas/ActionButton"
+          minItems: 1
+          maxItems: 3
+        header:
+          type: string
+          description: Optional card header text
+          maxLength: 60
+          example: "Product Name"
+        footer:
+          type: string
+          description: Optional card footer text
+          maxLength: 60
+          example: "$99.99"
+      required:
+        - mediaUrl
+        - body
+        - buttons
+      additionalProperties: false
+
+    # ==========================================
+    # Interactive Message Request Schemas
+    # ==========================================
+
+    SendButtonListRequest:
+      type: object
+      description: |
+        Request body for sending simple reply button messages (Z-API compatible).
+
+        **Features:**
+        - Simple reply buttons (1-3 buttons)
+        - Optional header image/video
+        - Quick selection callbacks
+
+        **Limits:**
+        - Max 3 buttons
+        - Title: max 60 chars
+        - Message: max 1024 chars
+        - Footer: max 60 chars
+        - Button title: max 20 chars
+
+        **Message Queue:** Messages are queued per recipient with FIFO ordering.
+      properties:
+        phone:
+          type: string
+          description: |
+            Recipient phone number in international format (without + prefix).
+
+            **Examples:**
+            - Individual: `5511999999999` (Brazil mobile)
+            - Group: `120363047204807488@g.us`
+          example: "5511999999999"
+        message:
+          type: string
+          description: Message body text
+          maxLength: 1024
+          example: Please select one of the options below
+        buttons:
+          type: array
+          description: Simple reply buttons (1-3 buttons)
+          items:
+            $ref: "#/components/schemas/Button"
+          minItems: 1
+          maxItems: 3
+        title:
+          type: string
+          description: Message title displayed at the top (optional)
+          maxLength: 60
+          example: Choose an option
+        footer:
+          type: string
+          description: Footer text at the bottom of the message (optional)
+          maxLength: 60
+          example: Powered by our service
+        image:
+          type: string
+          description: |
+            Optional header image URL or base64.
+
+            **Formats:**
+            - URL: `https://picsum.photos/600/400.jpg`
+            - Base64: `data:image/png;base64,...`
+          example: https://picsum.photos/600/400.jpg
+        video:
+          type: string
+          description: |
+            Optional header video URL or base64.
+
+            **Formats:**
+            - URL: `https://download.blender.org/durian/trailer/sintel_trailer-480p.mp4`
+            - Base64: `data:video/mp4;base64,...`
+          example: https://download.blender.org/durian/trailer/sintel_trailer-480p.mp4
+        messageId:
+          type: string
+          description: Optional custom message ID for tracking/reply
+        delayMessage:
+          type: integer
+          minimum: 0
+          maximum: 15
+          description: Delay in seconds before sending (0-15)
+          example: 0
+        delayTyping:
+          type: integer
+          minimum: 0
+          maximum: 15
+          description: Typing indicator delay in seconds (0-15)
+          example: 0
+      required:
+        - phone
+        - message
+        - buttons
+      additionalProperties: false
+
+    SendButtonActionsRequest:
+      type: object
+      description: |
+        Request body for sending button actions messages (Z-API compatible).
+
+        **Features:**
+        - CTA buttons (URL, Call, Copy)
+        - Optional image header
+        - Quick reply buttons
+
+        **Button Types:**
+        - `quick_reply` - Simple reply button
+        - `cta_url` - Opens a URL
+        - `cta_call` - Initiates a phone call
+        - `cta_copy` - Copies text to clipboard
+
+        **Limits:**
+        - Max 3 buttons
+        - Label: max 25 chars (20 for quick_reply)
+        - Title: max 60 chars
+        - Message: max 1024 chars
+        - Footer: max 60 chars
+
+        **Message Queue:** Messages are queued per recipient with FIFO ordering.
+      properties:
+        phone:
+          type: string
+          description: Recipient phone number in international format
+          example: "5511999999999"
+        title:
+          type: string
+          description: Message title
+          maxLength: 60
+          example: Action Required
+        message:
+          type: string
+          description: Message body text
+          maxLength: 1024
+          example: Please take one of the following actions
+        footer:
+          type: string
+          description: Footer text
+          maxLength: 60
+          example: Thank you
+        buttons:
+          type: array
+          description: Action buttons (max 3)
+          items:
+            $ref: "#/components/schemas/ActionButton"
+          minItems: 1
+          maxItems: 3
+        image:
+          type: string
+          description: |
+            Optional header image URL or base64.
+
+            **Formats:**
+            - URL: `https://picsum.photos/600/400.jpg`
+            - Base64: `data:image/png;base64,...`
+          example: https://picsum.photos/600/400.jpg
+        messageId:
+          type: string
+          format: uuid
+          description: Optional custom message ID for tracking
+        delayMessage:
+          type: integer
+          minimum: 0
+          maximum: 15
+          description: Delay in seconds before sending (0-15)
+          example: 0
+      required:
+        - phone
+        - buttons
+      additionalProperties: false
+
+    SendOptionListRequest:
+      type: object
+      description: |
+        Request body for sending interactive list/menu messages (Z-API compatible).
+
+        **Features:**
+        - Multiple sections with rows
+        - Expandable list menu
+        - Selection callbacks
+
+        **Limits:**
+        - Max 10 sections
+        - Max 10 rows per section
+        - Title: max 60 chars
+        - Message: max 4096 chars
+        - Footer: max 60 chars
+        - Button label: max 20 chars
+        - Section title: max 24 chars
+        - Row title: max 24 chars
+        - Row description: max 72 chars
+
+        **Message Queue:** Messages are queued per recipient with FIFO ordering.
+      properties:
+        phone:
+          type: string
+          description: Recipient phone number in international format
+          example: "5511999999999"
+        message:
+          type: string
+          description: Message body text
+          maxLength: 4096
+          example: Please select one of the options below
+        buttonLabel:
+          type: string
+          description: Text on the button that opens the menu (max 20 chars)
+          maxLength: 20
+          example: View Menu
+        sections:
+          type: array
+          description: List of sections containing rows (1-10 sections)
+          items:
+            $ref: "#/components/schemas/ListSection"
+          minItems: 1
+          maxItems: 10
+        title:
+          type: string
+          description: Message title (optional)
+          maxLength: 60
+          example: Select an option
+        footer:
+          type: string
+          description: Footer text (optional)
+          maxLength: 60
+          example: Footer text
+        messageId:
+          type: string
+          description: Optional custom message ID for tracking/reply
+        delayMessage:
+          type: integer
+          minimum: 0
+          maximum: 15
+          description: Delay in seconds before sending (0-15)
+          example: 0
+        delayTyping:
+          type: integer
+          minimum: 0
+          maximum: 15
+          description: Typing indicator delay in seconds (0-15)
+          example: 0
+      required:
+        - phone
+        - message
+        - buttonLabel
+        - sections
+      additionalProperties: false
+
+    SendButtonPIXRequest:
+      type: object
+      description: |
+        Request body for sending PIX payment messages (Z-API compatible).
+
+        **Features:**
+        - PIX QR code generation
+        - Copy-paste PIX code
+        - Multiple PIX key types
+
+        **PIX Key Types:**
+        - `CPF` - Brazilian individual taxpayer ID
+        - `CNPJ` - Brazilian company taxpayer ID
+        - `EMAIL` - Email address
+        - `PHONE` - Phone number
+        - `EVP` - Random PIX key (UUID format)
+
+        **Message Queue:** Messages are queued per recipient with FIFO ordering.
+      properties:
+        phone:
+          type: string
+          description: Recipient phone number in international format
+          example: "5511999999999"
+        message:
+          type: string
+          description: Message body (optional, default "Pagamento via PIX")
+          maxLength: 1024
+          example: Please complete your payment
+        pixKey:
+          type: string
+          description: PIX key value (format depends on key type)
+          example: "12345678900"
+        type:
+          $ref: "#/components/schemas/PIXKeyType"
+        name:
+          type: string
+          description: Beneficiary name (optional)
+          example: John Doe
+        amount:
+          type: number
+          format: float
+          description: Payment amount in BRL (optional)
+          minimum: 0.01
+          example: 99.90
+        transactionId:
+          type: string
+          description: Transaction identifier for tracking (optional)
+          example: TX123456789
+        messageId:
+          type: string
+          description: Optional custom message ID for tracking/reply
+        delayMessage:
+          type: integer
+          minimum: 0
+          maximum: 15
+          description: Delay in seconds before sending (0-15)
+          example: 0
+        delayTyping:
+          type: integer
+          minimum: 0
+          maximum: 15
+          description: Typing indicator delay in seconds (0-15)
+          example: 0
+      required:
+        - phone
+        - pixKey
+        - type
+      additionalProperties: false
+
+    SendButtonOTPRequest:
+      type: object
+      description: |
+        Request body for sending OTP (One-Time Password) messages (Z-API compatible).
+
+        **Features:**
+        - One-tap copy button
+        - Verification code display
+        - 2FA/Authentication flows
+
+        **Use Cases:**
+        - Login verification
+        - Password reset
+        - Two-factor authentication
+        - Account verification
+
+        **Message Queue:** Messages are queued per recipient with FIFO ordering.
+      properties:
+        phone:
+          type: string
+          description: Recipient phone number in international format
+          example: "5511999999999"
+        message:
+          type: string
+          description: Message body containing OTP context (required)
+          maxLength: 1024
+          example: Your verification code is below. Do not share it with anyone.
+        code:
+          type: string
+          description: OTP code to copy (max 20 chars)
+          maxLength: 20
+          example: "123456"
+        title:
+          type: string
+          description: Optional header text
+          maxLength: 60
+          example: Verification Code
+        footer:
+          type: string
+          description: Optional footer text
+          maxLength: 60
+          example: Code expires in 5 minutes
+        messageId:
+          type: string
+          format: uuid
+          description: Optional custom message ID for tracking
+        delayMessage:
+          type: integer
+          minimum: 1
+          maximum: 15
+          description: Delay in seconds before sending (1-15)
+          example: 0
+        delayTyping:
+          type: integer
+          minimum: 1
+          maximum: 15
+          description: Typing indicator delay in seconds (1-15)
+          example: 0
+      required:
+        - phone
+        - message
+        - code
+      additionalProperties: false
+
+    SendCarouselRequest:
+      type: object
+      description: |
+        Request body for sending carousel messages (Z-API compatible).
+
+        **Features:**
+        - Multiple swipeable cards with media
+        - Action buttons per card (1-3)
+        - Optional card type selection
+
+        **Limits:**
+        - Cards: 1-10 per carousel
+        - Buttons per card: 1-3
+        - Body text: max 1024 chars per card
+
+        **Card Types:**
+        - HSCROLL_CARDS: Horizontal scrolling cards (default)
+        - ALBUM_IMAGE: Image album format
+
+        **Use Cases:**
+        - Product catalogs
+        - Image galleries
+        - Multi-option presentations
+        - Tutorial sequences
+
+        **Message Queue:** Messages are queued per recipient with FIFO ordering.
+      properties:
+        phone:
+          type: string
+          description: Recipient phone number in international format
+          example: "5511999999999"
+        cards:
+          type: array
+          description: Carousel cards (1-10 cards)
+          items:
+            $ref: "#/components/schemas/CarouselCard"
+          minItems: 1
+          maxItems: 10
+        cardType:
+          type: string
+          description: Card display type
+          enum:
+            - HSCROLL_CARDS
+            - ALBUM_IMAGE
+          default: HSCROLL_CARDS
+          example: HSCROLL_CARDS
+        messageId:
+          type: string
+          description: Optional custom message ID for tracking
+        delayMessage:
+          type: integer
+          minimum: 1
+          maximum: 15
+          description: Delay in seconds before sending (1-15)
+          example: 0
+        delayTyping:
+          type: integer
+          minimum: 1
+          maximum: 15
+          description: Typing indicator delay in seconds (1-15)
+          example: 0
+      required:
+        - phone
+        - cards
+      additionalProperties: false
+
+    MessageQueuedResponse:
+      type: object
+      description: Response after successfully queuing an interactive message.
+      properties:
+        success:
+          type: boolean
+          description: Whether the message was queued successfully
+          example: true
+        message:
+          type: string
+          description: Status message
+          example: Message queued successfully
+        data:
+          type: object
+          properties:
+            queueId:
+              type: string
+              format: uuid
+              description: Queue entry ID for tracking
+              example: 123e4567-e89b-12d3-a456-426614174000
+            messageId:
+              type: string
+              description: Message ID (same as queueId until sent)
+              example: 123e4567-e89b-12d3-a456-426614174001
+            status:
+              type: string
+              description: Queue status
+              enum:
+                - queued
+                - processing
+                - sent
+                - failed
+              example: queued
+          required:
+            - queueId
+            - messageId
+            - status
+      required:
+        - success
+        - message
+        - data
+      additionalProperties: false
+
+    # Poll message schemas (Z-API compatible)
+    PollOption:
+      type: object
+      description: A single poll option (Z-API compatible format)
+      properties:
+        name:
+          type: string
+          description: Option text
+          example: "FUNNELCHATAPI"
+      required:
+        - name
+      additionalProperties: false
+
+    SendPollRequest:
+      type: object
+      description: |
+        Request body for sending poll messages (Z-API compatible).
+
+        **Features:**
+        - Create polls with 2-12 options
+        - Single or multiple choice selection
+        - Optional reply-to support
+        - Typing indicator and delay support
+
+        **Z-API Compatible:** Matches Z-API request format exactly.
+      properties:
+        phone:
+          type: string
+          description: Recipient phone number in international format
+          example: "554499999999"
+        message:
+          type: string
+          description: Poll question text (Z-API uses "message" field for the question)
+          example: "Outra enquete"
+        poll:
+          type: array
+          description: Poll options array (2-12 options required)
+          items:
+            $ref: "#/components/schemas/PollOption"
+          minItems: 2
+          maxItems: 12
+          example:
+            - name: "FUNNELCHATAPI"
+            - name: "Testeee"
+        pollMaxOptions:
+          type: integer
+          description: "Maximum selections allowed: 0 for single choice, 1+ for multiple choice"
+          minimum: 0
+          maximum: 12
+          default: 0
+          example: 1
+        messageId:
+          type: [string, "null"]
+          description: Optional WhatsApp message ID to reply to
+        delayMessage:
+          type: [integer, "null"]
+          minimum: 1
+          maximum: 15
+          description: Delay in seconds before sending (1-15)
+          example: 5
+        delayTyping:
+          type: [integer, "null"]
+          minimum: 1
+          maximum: 15
+          description: Typing indicator duration in seconds (1-15)
+      required:
+        - phone
+        - message
+        - poll
+      additionalProperties: false
+
+    # Event message schemas (Z-API compatible)
+    EventLocation:
+      type: object
+      description: Event location information (Z-API compatible)
+      properties:
+        name:
+          type: string
+          description: Location name
+          example: "Nome do lugar"
+        degreesLatitude:
+          type: [number, "null"]
+          format: double
+          description: Latitude coordinate
+        degreesLongitude:
+          type: [number, "null"]
+          format: double
+          description: Longitude coordinate
+      additionalProperties: false
+
+    EventPayload:
+      type: object
+      description: Nested event object (Z-API compatible format)
+      properties:
+        name:
+          type: string
+          description: Event name/title
+          example: "Nome do evento"
+        description:
+          type: string
+          description: Event description
+          example: "Descricao do evento"
+        dateTime:
+          type: string
+          format: date-time
+          description: Event date and time in ISO 8601 format
+          example: "2024-04-29T09:30:53.309Z"
+        location:
+          $ref: "#/components/schemas/EventLocation"
+        callLinkType:
+          type: string
+          description: Type of call link for the event
+          enum:
+            - voice
+            - video
+          example: "voice"
+        canceled:
+          type: boolean
+          description: Whether the event is canceled
+          default: false
+          example: false
+      required:
+        - name
+        - dateTime
+      additionalProperties: false
+
+    SendEventRequest:
+      type: object
+      description: |
+        Request body for sending calendar event messages (Z-API compatible).
+
+        **Features:**
+        - Send calendar events to groups
+        - Support for location and call links
+        - Event cancellation support
+
+        **Z-API Compatible:** Matches Z-API request format exactly.
+      properties:
+        phone:
+          type: string
+          description: Recipient phone number or group JID (e.g., "120363356737170752-group")
+          example: "120363356737170752-group"
+        event:
+          $ref: "#/components/schemas/EventPayload"
+        messageId:
+          type: [string, "null"]
+          description: Optional WhatsApp message ID to reply to
+        delayMessage:
+          type: [integer, "null"]
+          minimum: 1
+          maximum: 15
+          description: Delay in seconds before sending (1-15)
+        delayTyping:
+          type: [integer, "null"]
+          minimum: 1
+          maximum: 15
+          description: Typing indicator duration in seconds (1-15)
+      required:
+        - phone
+        - event
+      additionalProperties: false
+
+    # Link preview message schemas (Z-API compatible)
+    SendLinkRequest:
+      type: object
+      description: |
+        Request body for sending link messages with custom preview (Z-API compatible).
+
+        **Features:**
+        - Custom link preview title and description
+        - Custom preview image
+        - Optional message text before the link
+        - Reply-to support
+
+        **Z-API Compatible:** Matches Z-API request format exactly.
+      properties:
+        phone:
+          type: string
+          description: Recipient phone number in international format
+          example: "5544999999999"
+        message:
+          type: string
+          description: Optional text message that appears before the link
+          example: "Mensagem que ira aparecer antes do link"
+        image:
+          type: string
+          description: Custom preview image URL
+          example: "https://app.funnelchatapi.io/logos/zapi-dark.png"
+        linkUrl:
+          type: string
+          format: uri
+          description: URL to share
+          example: "https://app.funnelchatapi.io"
+        title:
+          type: string
+          description: Custom link preview title
+          example: "Titulo da mensagem"
+        linkDescription:
+          type: string
+          description: Custom link preview description
+          example: "Descricao do link"
+        messageId:
+          type: [string, "null"]
+          description: Optional WhatsApp message ID to reply to
+        delayMessage:
+          type: [integer, "null"]
+          minimum: 1
+          maximum: 15
+          description: Delay in seconds before sending (1-15)
+          example: 5
+        delayTyping:
+          type: [integer, "null"]
+          minimum: 1
+          maximum: 15
+          description: Typing indicator duration in seconds (1-15)
+      required:
+        - phone
+        - linkUrl
+      additionalProperties: false
+
+    # Chat modification schemas (Z-API compatible)
+    ModifyChatRequest:
+      type: object
+      description: |
+        Request body for modifying chat state (Z-API compatible).
+
+        **Supported Actions:**
+        - read: Mark chat as read
+        - archive: Archive the chat
+        - unarchive: Unarchive the chat
+        - pin: Pin the chat
+        - unpin: Unpin the chat
+        - mute: Mute notifications (8 hours default)
+        - unmute: Unmute notifications
+        - clear: Clear chat messages (not supported by whatsmeow)
+        - delete: Delete the chat
+
+        **Z-API Compatible:** Matches Z-API request format exactly.
+      properties:
+        phone:
+          type: string
+          description: Phone number or group JID
+          example: "554499999999"
+        action:
+          type: string
+          description: Action to perform on the chat
+          enum:
+            - read
+            - archive
+            - unarchive
+            - pin
+            - unpin
+            - mute
+            - unmute
+            - clear
+            - delete
+          example: "delete"
+      required:
+        - phone
+        - action
+      additionalProperties: false
+
+    ModifyChatResponse:
+      type: object
+      description: Response for modify-chat operations
+      properties:
+        success:
+          type: boolean
+          description: Whether the operation was successful
+          example: true
+        phone:
+          type: string
+          description: Phone number that was modified
+          example: "554499999999"
+        action:
+          type: string
+          description: Action that was performed
+          example: "delete"
+        message:
+          type: string
+          description: Status message
+          example: "Chat delete successful"
+      required:
+        - success
+        - phone
+        - action
+      additionalProperties: false
+
+    # Delete message schemas (Z-API compatible)
+    DeleteMessageResponse:
+      type: object
+      description: Response for delete message operations (Z-API compatible)
+      properties:
+        success:
+          type: boolean
+          description: Whether the message was deleted successfully
+          example: true
+        phone:
+          type: string
+          description: Phone number/chat where message was deleted
+          example: "554499999999"
+        messageId:
+          type: string
+          description: ID of the deleted message
+          example: "3EB047ED70306656281B34"
+        message:
+          type: string
+          description: Status message
+          example: "Message deleted successfully"
+      required:
+        - success
+        - phone
+        - messageId
+      additionalProperties: false
+
+    # Media schemas
+    MediaStatsResponse:
+      type: object
+      description: Statistics about media storage system
+      properties:
+        total_files:
+          type: integer
+          description: Total number of media files stored
+          example: 1234
+        total_bytes:
+          type: integer
+          format: int64
+          description: Total size of all media files in bytes
+          example: 1073741824
+        base_path:
+          type: string
+          description: Base directory path for media storage
+          example: "/data/media"
+        url_expiry:
+          type: string
+          description: Default URL expiration duration
+          example: "24h0m0s"
+        public_base_url:
+          type: string
+          description: Public base URL for media access
+          example: "https://api.example.com/media"
+      required:
+        - total_files
+        - total_bytes
+        - base_path
+        - url_expiry
+        - public_base_url
+      additionalProperties: false
+
+    # Prometheus metrics (text/plain format)
+    PrometheusMetrics:
+      type: string
+      description: |
+        Prometheus exposition format metrics.
+        Contains application metrics including:
+        - HTTP request counts and latencies
+        - Message queue statistics
+        - WhatsApp connection status
+        - Event processing metrics
+      example: |
+        # HELP http_requests_total Total HTTP requests
+        # TYPE http_requests_total counter
+        http_requests_total{method="GET",path="/health"} 1234
+
 paths:
   /health:
     get:
@@ -3157,6 +4312,7 @@ paths:
       summary: Liveness probe
       description: Returns a JSON object indicating that the API process is running.
       operationId: healthLiveness
+      security: []
       responses:
         "200":
           description: Process is alive and capable of serving traffic.
@@ -3175,6 +4331,7 @@ paths:
 
         "
       operationId: healthReadiness
+      security: []
       responses:
         "200":
           description: Service is ready to receive traffic.
@@ -3216,6 +4373,30 @@ paths:
                         error: fallback lock in use
                         duration_ms: 7
                         circuit_state: OPEN
+  /metrics:
+    get:
+      tags:
+        - System
+      summary: Prometheus metrics endpoint
+      description: |
+        Exposes application metrics in Prometheus exposition format.
+        Includes HTTP request counts, message queue statistics, WhatsApp connection status,
+        and event processing metrics.
+
+        **Available Metric Categories:**
+        - `http_*`: HTTP request counts and latencies
+        - `message_queue_*`: Message queue depth and processing rates
+        - `whatsapp_*`: WhatsApp connection and message statistics
+        - `event_*`: Event processing metrics
+      operationId: prometheusMetrics
+      security: []
+      responses:
+        "200":
+          description: Prometheus metrics in text exposition format
+          content:
+            text/plain:
+              schema:
+                $ref: "#/components/schemas/PrometheusMetrics"
   /instances:
     get:
       tags:
@@ -4422,7 +5603,7 @@ paths:
 
         **Supported Formats:**
 
-        - Image URL: `https://example.com/image.jpg`
+        - Image URL: `https://picsum.photos/600/400.jpg`
 
         - Base64: `data:image/png;base64,iVBORw0KG...`
 
@@ -4444,7 +5625,7 @@ paths:
               $ref: "#/components/schemas/SendImageRequest"
             example:
               phone: "5511999999999"
-              image: https://example.com/image.jpg
+              image: https://picsum.photos/600/400.jpg
               caption: Check out this image!
               viewOnce: false
       responses:
@@ -4504,7 +5685,7 @@ paths:
         - No caption support (stickers don't have text)
 
         **Supported Formats:**
-        - URL: `https://example.com/sticker.webp`
+        - URL: `https://www.gstatic.com/webp/gallery/1.webp`
         - Base64: `data:image/webp;base64,UklGRiQAAABXRUJQ...`
 
         **Z-API Compatible:** Matches Z-API request/response format exactly.
@@ -4522,7 +5703,7 @@ paths:
               $ref: "#/components/schemas/SendStickerRequest"
             example:
               phone: "5511999999999"
-              sticker: "https://example.com/sticker.webp"
+              sticker: "https://www.gstatic.com/webp/gallery/1.webp"
               delayMessage: 3
               delayTyping: 2
       responses:
@@ -4597,7 +5778,7 @@ paths:
         - Supports caption with @mentions
 
         **Supported Formats:**
-        - URL: `https://example.com/animation.gif`
+        - URL: `https://media.giphy.com/media/3o7abKhOpu0NwenH3O/giphy.gif`
         - Base64: `data:image/gif;base64,R0lGODlhAQABAIAAAP...`
 
         **Z-API Compatible:** Matches Z-API request/response format exactly.
@@ -4615,7 +5796,7 @@ paths:
               $ref: "#/components/schemas/SendGifRequest"
             example:
               phone: "5511999999999"
-              gif: "https://example.com/animation.gif"
+              gif: "https://media.giphy.com/media/3o7abKhOpu0NwenH3O/giphy.gif"
               caption: "Check this out! 🎉"
               viewOnce: false
               delayMessage: 3
@@ -4707,7 +5888,7 @@ paths:
               $ref: "#/components/schemas/SendAudioRequest"
             example:
               phone: "5511999999999"
-              audio: https://example.com/audio.ogg
+              audio: https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3
               delayTyping: 5
       responses:
         "200":
@@ -4783,7 +5964,7 @@ paths:
               $ref: "#/components/schemas/SendVideoRequest"
             example:
               phone: "5511999999999"
-              video: https://example.com/video.mp4
+              video: https://download.blender.org/durian/trailer/sintel_trailer-480p.mp4
               caption: Check out this video!
       responses:
         "200":
@@ -4816,6 +5997,123 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /instances/{instanceId}/token/{instanceToken}/send-ptv:
+    post:
+      tags:
+        - Messages
+      summary: Send PTV (circular video) message
+      description: |
+        Sends a PTV (Push-To-Talk Video) message via WhatsApp with Z-API compatible format.
+
+        **What is PTV?**
+        PTV messages are circular video notes, displayed similarly to voice notes but with video content.
+        They appear as circular thumbnails in the chat and play inline when tapped.
+
+        **Features:**
+        - ✅ Circular video notes (like voice notes with video)
+        - ✅ Video URL or base64 data URI support
+        - ✅ Optional caption/text
+        - ✅ Reply-to message support
+        - ✅ Typing indicator and delayed sending
+        - ✅ Ephemeral/disappearing messages support
+        - ✅ Mentions support (mentioned, groupMentioned, mentionedAll)
+        - ✅ Private reply in groups (privateAnswer)
+        - ✅ FIFO queue with per-recipient ordering
+        - ✅ Non-blocking (returns immediately with zaapId)
+
+        **Video Format:**
+        - MP4, 3GP, MOV (auto-converted if needed)
+        - Max duration: 60 seconds recommended
+        - Displayed as circular video in WhatsApp
+
+        **Supported Formats:**
+        - URL: `https://example.com/video.mp4`
+        - Base64: `data:video/mp4;base64,AAAAIGZ0eXBpc29t...`
+
+        **Z-API Compatible:** Matches Z-API request/response format exactly.
+      operationId: sendPTVMessage
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendPTVRequest"
+            examples:
+              basic:
+                summary: Basic PTV message
+                value:
+                  phone: "5511999999999"
+                  video: "https://download.blender.org/durian/trailer/sintel_trailer-480p.mp4"
+              withCaption:
+                summary: PTV with caption
+                value:
+                  phone: "5511999999999"
+                  video: "https://download.blender.org/durian/trailer/sintel_trailer-480p.mp4"
+                  caption: "Check out this video note!"
+                  delayMessage: 3
+                  delayTyping: 2
+              replyTo:
+                summary: PTV as reply
+                value:
+                  phone: "5511999999999"
+                  video: "https://download.blender.org/durian/trailer/sintel_trailer-480p.mp4"
+                  caption: "Here's my response"
+                  messageId: "3EB0796DC1B61E519"
+              base64:
+                summary: Base64 encoded PTV
+                value:
+                  phone: "5511999999999"
+                  video: "data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAAIZnJlZQ..."
+                  caption: "Video note from base64"
+      responses:
+        "200":
+          description: Message enqueued successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SendMessageResponse"
+              example:
+                zaapId: 39BB1684570F00E91090F6BBC7EE7646
+                messageId: 39BB1684570F00E91090F6BBC7EE7646
+                id: 39BB1684570F00E91090F6BBC7EE7646
+                status: queued
+        "400":
+          description: Invalid request (missing phone or video, invalid format)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "video must be a valid URL or base64 data URI"
+        "401":
+          description: Unauthorized (invalid Client-Token or instance token)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "unauthorized"
+        "404":
+          description: Instance not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "instance not found"
+        "503":
+          description: Instance not connected to WhatsApp
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "instance not connected"
   /instances/{instanceId}/token/{instanceToken}/send-document:
     post:
       tags:
@@ -4860,7 +6158,7 @@ paths:
               $ref: "#/components/schemas/SendDocumentRequest"
             example:
               phone: "5511999999999"
-              document: https://example.com/report.pdf
+              document: https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf
               fileName: Monthly Report.pdf
               caption: Here is the monthly report
       responses:
@@ -5355,6 +6653,2111 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+
+  # ==========================================
+  # Interactive Message Endpoints
+  # ==========================================
+
+  /instances/{instanceId}/token/{instanceToken}/send-button-list:
+    post:
+      tags:
+        - Messages
+      summary: Send interactive button list message
+      description: |
+        Sends an interactive button list message with quick reply buttons.
+        The recipient can tap a button to respond.
+
+        **Features:**
+        - ✅ Up to 3 quick reply buttons
+        - ✅ Header title and message body
+        - ✅ Footer text
+        - ✅ Optional image or video header
+        - ✅ Custom message ID for tracking
+        - ✅ Delay message support
+        - ✅ FIFO queue with per-recipient ordering
+        - ✅ Non-blocking (returns immediately with zaapId)
+
+        **Limits:**
+        - Max 3 buttons
+        - Title: max 60 characters
+        - Message: max 1024 characters
+        - Footer: max 60 characters
+        - Button title: max 20 characters
+
+        **Use Cases:**
+        - Quick response options (Yes/No/Maybe)
+        - Survey responses
+        - Confirmation dialogs
+        - Simple navigation
+
+        **Z-API Compatible:** Matches Z-API request/response format exactly.
+      operationId: sendButtonListMessage
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendButtonListRequest"
+            examples:
+              simpleButtons:
+                summary: Simple reply buttons
+                description: Basic button list with quick reply options
+                value:
+                  phone: "5511999999999"
+                  title: "Choose an Option"
+                  message: "Please select one of the options below"
+                  footer: "Tap a button to continue"
+                  buttons:
+                    - id: "btn_yes"
+                      title: "Yes"
+                    - id: "btn_no"
+                      title: "No"
+                    - id: "btn_maybe"
+                      title: "Maybe Later"
+              serviceOptions:
+                summary: Customer service quick actions
+                description: Quick reply buttons for customer support
+                value:
+                  phone: "5511999999999"
+                  title: "Customer Support"
+                  message: "How can we help you today?"
+                  footer: "Select an option"
+                  buttons:
+                    - id: "support_tech"
+                      title: "Technical Help"
+                    - id: "support_billing"
+                      title: "Billing Question"
+                    - id: "support_other"
+                      title: "Other"
+              withImage:
+                summary: Buttons with image header
+                description: Button list with product image
+                value:
+                  phone: "5511999999999"
+                  title: "Special Offer!"
+                  message: "Get 20% off on this product today!"
+                  footer: "Limited time offer"
+                  image: "https://picsum.photos/600/400.jpg"
+                  buttons:
+                    - id: "buy_now"
+                      title: "Buy Now"
+                    - id: "more_info"
+                      title: "More Info"
+              withDelay:
+                summary: With message delay
+                description: Button message with custom delay before sending
+                value:
+                  phone: "5511999999999"
+                  title: "Quick Survey"
+                  message: "Please share your feedback"
+                  buttons:
+                    - id: "rate_good"
+                      title: "Good"
+                    - id: "rate_bad"
+                      title: "Bad"
+                  delayMessage: 5
+                  delayTyping: 3
+      responses:
+        "200":
+          description: Message enqueued successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageQueuedResponse"
+              example:
+                success: true
+                message: "Message queued successfully"
+                data:
+                  zaapId: "39BB1684570F00E91090F6BBC7EE7646"
+                  messageId: "39BB1684570F00E91090F6BBC7EE7646"
+                  status: "queued"
+        "400":
+          description: Invalid request (validation error)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                missingPhone:
+                  summary: Missing phone number
+                  value:
+                    error: "phone is required"
+                missingButtons:
+                  summary: Missing buttons
+                  value:
+                    error: "At least one button is required"
+                tooManyButtons:
+                  summary: Too many buttons
+                  value:
+                    error: "buttons cannot have more than 3 items"
+                missingMessage:
+                  summary: Missing message
+                  value:
+                    error: "message is required"
+                titleTooLong:
+                  summary: Title too long
+                  value:
+                    error: "title cannot exceed 60 characters"
+        "401":
+          description: Unauthorized (invalid Client-Token or instance token)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "unauthorized"
+        "404":
+          description: Instance not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "instance not found"
+        "503":
+          description: Instance not connected to WhatsApp
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "instance not connected"
+
+  /instances/{instanceId}/token/{instanceToken}/send-button-actions:
+    post:
+      tags:
+        - Messages
+      summary: Send interactive action buttons message
+      description: |
+        Sends an interactive message with action buttons (CTA buttons).
+        Supports URL, call, copy, and quick reply buttons.
+
+        **Button Types:**
+        - `quick_reply` - Simple reply button (max 20 chars label)
+        - `cta_url` - Opens a URL in browser
+        - `cta_call` - Initiates a phone call
+        - `cta_copy` - Copies text to clipboard
+        - `payment_info` - Payment information button
+        - `review_and_pay` - Review and pay action
+
+        **Features:**
+        - ✅ Up to 3 action buttons
+        - ✅ Optional header image
+        - ✅ Title, message body, and footer
+        - ✅ Custom message ID for tracking
+        - ✅ Delay message support
+        - ✅ FIFO queue with per-recipient ordering
+
+        **Limits:**
+        - Max 3 buttons per message
+        - Label: max 25 characters (20 for quick_reply)
+        - Title: max 60 characters
+        - Message: max 1024 characters
+        - Footer: max 60 characters
+
+        **Z-API Compatible:** Matches Z-API request/response format exactly.
+      operationId: sendButtonActionsMessage
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendButtonActionsRequest"
+            examples:
+              urlButton:
+                summary: Single URL button
+                description: Message with a button that opens a website
+                value:
+                  phone: "5511999999999"
+                  title: "Visit Our Website"
+                  message: "Check out our latest products and special offers!"
+                  footer: "Click the button below"
+                  buttons:
+                    - id: "btn_url"
+                      type: "cta_url"
+                      label: "Visit Website"
+                      url: "https://httpbin.org/anything/products"
+              callButton:
+                summary: Call button
+                description: Message with a button to initiate a phone call
+                value:
+                  phone: "5511999999999"
+                  title: "Need Help?"
+                  message: "Our support team is ready to assist you. Call us now!"
+                  footer: "Available 24/7"
+                  buttons:
+                    - id: "btn_call"
+                      type: "cta_call"
+                      label: "Call Support"
+                      phone: "+5511999999999"
+              copyButton:
+                summary: Copy code button
+                description: Message with a button to copy a discount code
+                value:
+                  phone: "5511999999999"
+                  title: "Special Discount!"
+                  message: "Use this exclusive code for 20% off your next purchase."
+                  footer: "Valid until end of month"
+                  buttons:
+                    - id: "btn_copy"
+                      type: "cta_copy"
+                      label: "Copy Code"
+                      copyCode: "SAVE20OFF"
+              multipleButtons:
+                summary: Multiple action buttons
+                description: Message with multiple different action buttons
+                value:
+                  phone: "5511999999999"
+                  title: "Contact Us"
+                  message: "Choose how you would like to get in touch with our team."
+                  footer: "We're here to help!"
+                  image: "https://picsum.photos/600/400.jpg"
+                  buttons:
+                    - id: "btn_web"
+                      type: "cta_url"
+                      label: "Visit Website"
+                      url: "https://httpbin.org/get"
+                    - id: "btn_call"
+                      type: "cta_call"
+                      label: "Call Us"
+                      phone: "+5511999999999"
+                    - id: "btn_email"
+                      type: "cta_copy"
+                      label: "Copy Email"
+                      copyCode: "support@httpbin.org"
+              quickReplyButtons:
+                summary: Quick reply buttons
+                description: Simple reply buttons for quick responses
+                value:
+                  phone: "5511999999999"
+                  title: "Quick Question"
+                  message: "Would you like to receive our newsletter?"
+                  buttons:
+                    - type: "quick_reply"
+                      id: "newsletter_yes"
+                      label: "Yes, subscribe me"
+                    - type: "quick_reply"
+                      id: "newsletter_no"
+                      label: "No, thanks"
+                    - type: "quick_reply"
+                      id: "newsletter_later"
+                      label: "Maybe later"
+              withImage:
+                summary: With header image
+                description: Action buttons with promotional image
+                value:
+                  phone: "5511999999999"
+                  title: "New Collection Available!"
+                  message: "Discover our Spring 2024 collection with exclusive designs."
+                  footer: "Limited stock available"
+                  image: "https://picsum.photos/600/400.jpg"
+                  buttons:
+                    - id: "btn_shop"
+                      type: "cta_url"
+                      label: "Shop Now"
+                      url: "https://httpbin.org/anything/spring-2024"
+                  delayMessage: 3
+      responses:
+        "200":
+          description: Message enqueued successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageQueuedResponse"
+              example:
+                success: true
+                message: "Message queued successfully"
+                data:
+                  zaapId: "39BB1684570F00E91090F6BBC7EE7646"
+                  messageId: "39BB1684570F00E91090F6BBC7EE7646"
+                  status: "queued"
+        "400":
+          description: Invalid request (validation error)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                missingButtons:
+                  summary: Missing buttons
+                  value:
+                    error: "buttons is required and must have at least 1 item"
+                tooManyButtons:
+                  summary: Too many buttons
+                  value:
+                    error: "buttons cannot have more than 3 items"
+                invalidButtonType:
+                  summary: Invalid button type
+                  value:
+                    error: "invalid button type: must be one of quick_reply, cta_url, cta_call, cta_copy, payment_info, review_and_pay"
+                missingUrl:
+                  summary: Missing URL for cta_url button
+                  value:
+                    error: "url is required for cta_url button type"
+                missingPhone:
+                  summary: Missing phone for cta_call button
+                  value:
+                    error: "phone is required for cta_call button type"
+        "401":
+          description: Unauthorized (invalid Client-Token or instance token)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "unauthorized"
+        "404":
+          description: Instance not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "instance not found"
+        "503":
+          description: Instance not connected to WhatsApp
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "instance not connected"
+
+  /instances/{instanceId}/token/{instanceToken}/send-option-list:
+    post:
+      tags:
+        - Messages
+      summary: Send simple option list message
+      description: |
+        Sends an interactive message with a simple list of options.
+        Similar to button list but without sections (flat list).
+
+        **Features:**
+        - ✅ Simple flat list of options
+        - ✅ Up to 10 options
+        - ✅ Title and description for each option
+        - ✅ Button to open options
+        - ✅ Custom message ID for tracking
+        - ✅ Delay message support
+        - ✅ FIFO queue with per-recipient ordering
+
+        **Limits:**
+        - Max 10 options
+        - Title: max 60 characters
+        - Option title: max 24 characters
+        - Option description: max 72 characters
+        - Button text: max 20 characters
+
+        **Use Cases:**
+        - Simple surveys
+        - Quick polls
+        - Rating selection
+        - Single-level menus
+
+        **Z-API Compatible:** Matches Z-API request/response format exactly.
+      operationId: sendOptionListMessage
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendOptionListRequest"
+            examples:
+              restaurantMenu:
+                summary: Restaurant menu with sections
+                description: Menu organized by food categories
+                value:
+                  phone: "5511999999999"
+                  title: "Our Menu"
+                  message: "Choose your meal from our delicious options"
+                  footer: "Tap to view options"
+                  buttonLabel: "View Menu"
+                  sections:
+                    - title: "Main Dishes"
+                      rows:
+                        - id: "dish_pizza"
+                          title: "Pizza Margherita"
+                          description: "Classic cheese pizza with basil"
+                        - id: "dish_burger"
+                          title: "Classic Burger"
+                          description: "Beef burger with cheese"
+                        - id: "dish_pasta"
+                          title: "Spaghetti Carbonara"
+                          description: "Creamy pasta with bacon"
+                    - title: "Drinks"
+                      rows:
+                        - id: "drink_soda"
+                          title: "Soda"
+                          description: "Coca-Cola, Sprite, Fanta"
+                        - id: "drink_juice"
+                          title: "Fresh Juice"
+                          description: "Orange, Apple, Mango"
+              customerSupport:
+                summary: Customer support options
+                description: Service selection with sections
+                value:
+                  phone: "5511999999999"
+                  title: "Customer Support"
+                  message: "How can we help you today?"
+                  buttonLabel: "Select Option"
+                  sections:
+                    - title: "Technical Support"
+                      rows:
+                        - id: "tech_install"
+                          title: "Installation Help"
+                          description: "Get help with installation"
+                        - id: "tech_bug"
+                          title: "Report a Bug"
+                          description: "Report technical issues"
+                    - title: "Billing"
+                      rows:
+                        - id: "bill_invoice"
+                          title: "Invoice Questions"
+                          description: "Questions about your bill"
+                        - id: "bill_payment"
+                          title: "Payment Methods"
+                          description: "Update payment info"
+              appointmentSlots:
+                summary: Appointment time slots
+                description: Select available appointment time
+                value:
+                  phone: "5511999999999"
+                  title: "Available Appointments"
+                  message: "Select your preferred time slot"
+                  footer: "All times in local timezone"
+                  buttonLabel: "Select Time"
+                  sections:
+                    - title: "Morning"
+                      rows:
+                        - id: "slot_9am"
+                          title: "9:00 AM"
+                          description: "Early morning"
+                        - id: "slot_11am"
+                          title: "11:00 AM"
+                          description: "Late morning"
+                    - title: "Afternoon"
+                      rows:
+                        - id: "slot_2pm"
+                          title: "2:00 PM"
+                          description: "Early afternoon"
+                        - id: "slot_4pm"
+                          title: "4:00 PM"
+                          description: "Late afternoon"
+                  messageId: "appointment-booking-12345"
+              withDelay:
+                summary: With message delay
+                description: Option list with typing delay
+                value:
+                  phone: "5511999999999"
+                  title: "Quick Survey"
+                  message: "Please share your feedback"
+                  buttonLabel: "Rate Us"
+                  sections:
+                    - title: "Rating"
+                      rows:
+                        - id: "rate_good"
+                          title: "Excellent"
+                          description: "Very satisfied"
+                        - id: "rate_ok"
+                          title: "Good"
+                          description: "Satisfied"
+                        - id: "rate_bad"
+                          title: "Poor"
+                          description: "Not satisfied"
+                  delayMessage: 5
+                  delayTyping: 3
+      responses:
+        "200":
+          description: Message enqueued successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageQueuedResponse"
+              example:
+                success: true
+                message: "Message queued successfully"
+                data:
+                  zaapId: "39BB1684570F00E91090F6BBC7EE7646"
+                  messageId: "39BB1684570F00E91090F6BBC7EE7646"
+                  status: "queued"
+        "400":
+          description: Invalid request (validation error)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                missingSections:
+                  summary: Missing sections
+                  value:
+                    error: "At least one section is required"
+                tooManySections:
+                  summary: Too many sections
+                  value:
+                    error: "sections cannot have more than 10 items"
+                missingButtonLabel:
+                  summary: Missing button label
+                  value:
+                    error: "buttonLabel is required"
+        "401":
+          description: Unauthorized (invalid Client-Token or instance token)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "unauthorized"
+        "404":
+          description: Instance not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "instance not found"
+        "503":
+          description: Instance not connected to WhatsApp
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "instance not connected"
+
+  /instances/{instanceId}/token/{instanceToken}/send-button-pix:
+    post:
+      tags:
+        - Messages
+      summary: Send PIX payment message (Brazil)
+      description: |
+        Sends an interactive message with PIX payment information (Brazilian instant payment system).
+        Includes QR code generation and copy-paste PIX code button.
+
+        **PIX Key Types:**
+        - `CPF` - Brazilian individual taxpayer ID (11 digits)
+        - `CNPJ` - Brazilian company taxpayer ID (14 digits)
+        - `EMAIL` - Email address
+        - `PHONE` - Phone number with country code
+        - `EVP` - Random PIX key (UUID format)
+
+        **Features:**
+        - ✅ Automatic PIX QR code generation
+        - ✅ Copy PIX code button
+        - ✅ Payment amount and description
+        - ✅ Beneficiary name display
+        - ✅ Transaction ID for reconciliation
+        - ✅ Additional action buttons
+        - ✅ Custom message ID for tracking
+        - ✅ FIFO queue with per-recipient ordering
+
+        **Required Fields:**
+        - `phone` - Recipient WhatsApp number
+        - `payment.keyType` - Type of PIX key
+        - `payment.key` - The PIX key value
+        - `payment.name` - Beneficiary name
+        - `payment.amount` - Payment amount in BRL
+
+        **Z-API Compatible:** Matches Z-API request/response format exactly.
+      operationId: sendButtonPixMessage
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendButtonPIXRequest"
+            examples:
+              cpfKey:
+                summary: PIX with CPF key
+                description: Payment request using individual taxpayer ID
+                value:
+                  phone: "5511999999999"
+                  title: "Payment Request"
+                  message: "Please complete your purchase payment via PIX"
+                  footer: "Secure instant payment"
+                  pixKey: "12345678900"
+                  type: "CPF"
+                  name: "John Doe"
+                  amount: 99.90
+                  transactionId: "ORDER12345"
+              cnpjKey:
+                summary: PIX with CNPJ key
+                description: Payment request using company taxpayer ID
+                value:
+                  phone: "5511999999999"
+                  title: "Invoice Payment"
+                  message: "Pay your invoice instantly via PIX"
+                  footer: "Company Name Ltd"
+                  pixKey: "12345678000199"
+                  type: "CNPJ"
+                  name: "Company Name Ltd"
+                  amount: 1500.00
+                  transactionId: "INV2024001"
+              emailKey:
+                summary: PIX with email key
+                description: Donation request using email as PIX key
+                value:
+                  phone: "5511999999999"
+                  title: "Support Our Cause"
+                  message: "Your donation helps us continue our work"
+                  footer: "Thank you for your support!"
+                  pixKey: "donations@charity.org"
+                  type: "EMAIL"
+                  name: "Charity Organization"
+                  amount: 50.00
+              phoneKey:
+                summary: PIX with phone key
+                description: Payment using phone number as PIX key
+                value:
+                  phone: "5511999999999"
+                  title: "Pay Freelancer"
+                  message: "Payment for design services"
+                  pixKey: "+5511988887777"
+                  type: "PHONE"
+                  name: "Jane Designer"
+                  amount: 750.00
+              evpKey:
+                summary: PIX with EVP (random) key
+                description: Payment using random PIX key (UUID)
+                value:
+                  phone: "5511999999999"
+                  title: "Split Bill Payment"
+                  message: "Your share of the dinner bill"
+                  pixKey: "123e4567-e89b-12d3-a456-426614174000"
+                  type: "EVP"
+                  name: "Restaurant Name"
+                  amount: 85.50
+                  transactionId: "DINNER-TABLE15-001"
+              withDelay:
+                summary: PIX with message delay
+                description: Payment request with typing delay
+                value:
+                  phone: "5511999999999"
+                  title: "Complete Your Order"
+                  message: "Pay via PIX to confirm your order"
+                  footer: "Questions? Contact us!"
+                  pixKey: "98765432100"
+                  type: "CPF"
+                  name: "Seller Name"
+                  amount: 299.99
+                  delayMessage: 5
+                  delayTyping: 3
+      responses:
+        "200":
+          description: Message enqueued successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageQueuedResponse"
+              example:
+                success: true
+                message: "Message queued successfully"
+                data:
+                  zaapId: "39BB1684570F00E91090F6BBC7EE7646"
+                  messageId: "39BB1684570F00E91090F6BBC7EE7646"
+                  status: "queued"
+        "400":
+          description: Invalid request (validation error)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                missingPayment:
+                  summary: Missing payment information
+                  value:
+                    error: "payment is required"
+                invalidKeyType:
+                  summary: Invalid PIX key type
+                  value:
+                    error: "payment.keyType must be one of: CPF, CNPJ, EMAIL, PHONE, EVP"
+                invalidCpf:
+                  summary: Invalid CPF format
+                  value:
+                    error: "invalid CPF format: must be 11 digits"
+                invalidCnpj:
+                  summary: Invalid CNPJ format
+                  value:
+                    error: "invalid CNPJ format: must be 14 digits"
+                invalidAmount:
+                  summary: Invalid amount
+                  value:
+                    error: "payment.amount must be greater than 0"
+                missingName:
+                  summary: Missing beneficiary name
+                  value:
+                    error: "payment.name is required"
+        "401":
+          description: Unauthorized (invalid Client-Token or instance token)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "unauthorized"
+        "404":
+          description: Instance not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "instance not found"
+        "503":
+          description: Instance not connected to WhatsApp
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "instance not connected"
+
+  /instances/{instanceId}/token/{instanceToken}/send-button-otp:
+    post:
+      tags:
+        - Messages
+      summary: Send OTP (One-Time Password) message
+      description: |
+        Sends a one-time password (OTP) message with a copy button.
+        The recipient can easily copy the code with one tap.
+
+        **Use Cases:**
+        - Account verification
+        - Two-factor authentication (2FA)
+        - Password reset codes
+        - Login verification
+        - Transaction confirmation
+
+        **Features:**
+        - ✅ Prominent OTP code display
+        - ✅ One-tap copy button
+        - ✅ Custom button text
+        - ✅ Expiration message support
+        - ✅ Custom message ID for tracking
+        - ✅ Delay message support
+        - ✅ FIFO queue with per-recipient ordering
+
+        **Security Notes:**
+        - OTP codes should have limited validity (typically 5-10 minutes)
+        - Messages automatically include security warnings
+        - Never log or store OTP codes in plain text
+
+        **Z-API Compatible:** Matches Z-API request/response format exactly.
+      operationId: sendButtonOtpMessage
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendButtonOTPRequest"
+            examples:
+              verification:
+                summary: Account verification code
+                description: Standard verification code message
+                value:
+                  phone: "5511999999999"
+                  title: "Verification Code"
+                  message: "Your verification code is below. This code expires in 5 minutes. Do not share it with anyone."
+                  code: "123456"
+                  footer: "Code expires in 5 minutes"
+              login2fa:
+                summary: Two-factor authentication
+                description: 2FA login code
+                value:
+                  phone: "5511999999999"
+                  title: "Login Verification"
+                  message: "Your login verification code for MyApp. If you didn't request this, please ignore this message."
+                  code: "789012"
+              passwordReset:
+                summary: Password reset code
+                description: Code for password reset flow
+                value:
+                  phone: "5511999999999"
+                  title: "Password Reset"
+                  message: "Use this code to reset your password. This code is valid for 10 minutes only."
+                  code: "RESET-ABC123"
+                  footer: "Valid for 10 minutes"
+              transactionConfirm:
+                summary: Transaction confirmation
+                description: Code to confirm a financial transaction
+                value:
+                  phone: "5511999999999"
+                  title: "Transaction Confirmation"
+                  message: "Confirm your transaction of $500.00 to Account ****1234. Enter this code in the app to proceed."
+                  code: "TXN-998877"
+              numericOnly:
+                summary: Simple numeric OTP
+                description: Short numeric code
+                value:
+                  phone: "5511999999999"
+                  message: "Your code:"
+                  code: "0000"
+              withDelay:
+                summary: OTP with delay
+                description: Delayed OTP message
+                value:
+                  phone: "5511999999999"
+                  title: "Security Code"
+                  message: "Security code for your account access. Valid for 5 minutes."
+                  code: "SEC-456789"
+                  footer: "Valid for 5 minutes"
+                  delayMessage: 2
+              withCustomId:
+                summary: OTP with tracking ID
+                description: OTP message with custom message ID for tracking
+                value:
+                  phone: "5511999999999"
+                  title: "Authentication"
+                  message: "Your authentication code for session verification."
+                  code: "AUTH-112233"
+                  messageId: "auth-session-abc123-otp"
+      responses:
+        "200":
+          description: Message enqueued successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageQueuedResponse"
+              example:
+                success: true
+                message: "Message queued successfully"
+                data:
+                  zaapId: "39BB1684570F00E91090F6BBC7EE7646"
+                  messageId: "39BB1684570F00E91090F6BBC7EE7646"
+                  status: "queued"
+        "400":
+          description: Invalid request (validation error)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                missingCode:
+                  summary: Missing OTP code
+                  value:
+                    error: "code is required"
+                emptyCode:
+                  summary: Empty OTP code
+                  value:
+                    error: "code cannot be empty"
+                missingPhone:
+                  summary: Missing phone number
+                  value:
+                    error: "phone is required"
+        "401":
+          description: Unauthorized (invalid Client-Token or instance token)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "unauthorized"
+        "404":
+          description: Instance not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "instance not found"
+        "503":
+          description: Instance not connected to WhatsApp
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "instance not connected"
+
+  /instances/{instanceId}/token/{instanceToken}/send-carousel:
+    post:
+      tags:
+        - Messages
+      summary: Send carousel message
+      description: |
+        Sends an interactive carousel message with multiple cards.
+        Each card can have an image/video header, body text, and action buttons.
+
+        **Features:**
+        - ✅ 1-10 cards per carousel
+        - ✅ Image or video header per card
+        - ✅ Body text per card
+        - ✅ Up to 2 action buttons per card
+        - ✅ Horizontal swipe navigation
+        - ✅ Introduction message before carousel
+        - ✅ Custom message ID for tracking
+        - ✅ Delay message support
+        - ✅ FIFO queue with per-recipient ordering
+
+        **Limits:**
+        - Min 1 card, max 10 cards
+        - Max 2 buttons per card
+        - Body text: max 1024 characters per card
+        - Header media: image or video URL
+
+        **Use Cases:**
+        - Product catalogs
+        - Image galleries
+        - Service showcases
+        - Portfolio presentations
+        - Tutorial sequences
+
+        **Media Formats:**
+        - Images: JPEG, PNG, WebP
+        - Videos: MP4 (recommended), 3GP
+
+        **Z-API Compatible:** Matches Z-API request/response format exactly.
+      operationId: sendCarouselMessage
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendCarouselRequest"
+            examples:
+              productCatalog:
+                summary: Product catalog
+                description: E-commerce product showcase
+                value:
+                  phone: "5511999999999"
+                  cardType: "HSCROLL_CARDS"
+                  cards:
+                    - mediaUrl: "https://picsum.photos/id/1/600/400.jpg"
+                      body: "Premium Widget Pro\n\nOur flagship product with advanced features.\n\n$199.99"
+                      buttons:
+                        - id: "btn_view_pro"
+                          type: "cta_url"
+                          label: "View Details"
+                          url: "https://httpbin.org/anything/products/widget-pro"
+                        - id: "add_widget_pro"
+                          type: "quick_reply"
+                          label: "Add to Cart"
+                    - mediaUrl: "https://picsum.photos/id/2/600/400.jpg"
+                      body: "Standard Widget\n\nPerfect for everyday use.\n\n$99.99"
+                      buttons:
+                        - id: "btn_view_basic"
+                          type: "cta_url"
+                          label: "View Details"
+                          url: "https://httpbin.org/anything/products/widget-basic"
+                        - id: "add_widget_basic"
+                          type: "quick_reply"
+                          label: "Add to Cart"
+                    - mediaUrl: "https://picsum.photos/id/3/600/400.jpg"
+                      body: "Mini Widget\n\nCompact and portable design.\n\n$49.99"
+                      buttons:
+                        - id: "btn_view_mini"
+                          type: "cta_url"
+                          label: "View Details"
+                          url: "https://httpbin.org/anything/products/widget-mini"
+                        - id: "add_widget_mini"
+                          type: "quick_reply"
+                          label: "Add to Cart"
+              imageGallery:
+                summary: Image gallery
+                description: Photo gallery showcase
+                value:
+                  phone: "5511999999999"
+                  cardType: "ALBUM_IMAGE"
+                  cards:
+                    - mediaUrl: "https://picsum.photos/id/10/600/400.jpg"
+                      body: "Golden Sunset\n\nCaptured at Pacific Beach, California"
+                      buttons:
+                        - id: "btn_sunset"
+                          type: "quick_reply"
+                          label: "Like"
+                    - mediaUrl: "https://picsum.photos/id/11/600/400.jpg"
+                      body: "Mountain Majesty\n\nSwiss Alps in winter"
+                      buttons:
+                        - id: "btn_mountains"
+                          type: "quick_reply"
+                          label: "Like"
+                    - mediaUrl: "https://picsum.photos/id/12/600/400.jpg"
+                      body: "Ocean Waves\n\nMaldives crystal clear waters"
+                      buttons:
+                        - id: "btn_ocean"
+                          type: "quick_reply"
+                          label: "Like"
+                    - mediaUrl: "https://picsum.photos/id/13/600/400.jpg"
+                      body: "Forest Path\n\nRedwood National Park"
+                      buttons:
+                        - id: "btn_forest"
+                          type: "quick_reply"
+                          label: "Like"
+                    - mediaUrl: "https://picsum.photos/id/14/600/400.jpg"
+                      body: "City Lights\n\nNew York City skyline at night"
+                      buttons:
+                        - id: "btn_city"
+                          type: "quick_reply"
+                          label: "Like"
+              videoTutorials:
+                summary: Video tutorials
+                description: Tutorial series with videos
+                value:
+                  phone: "5511999999999"
+                  cardType: "HSCROLL_CARDS"
+                  cards:
+                    - mediaUrl: "https://download.blender.org/durian/trailer/sintel_trailer-480p.mp4"
+                      body: "Getting Started Guide\n\nLearn the basics in 5 minutes"
+                      buttons:
+                        - id: "btn_tutorial_1"
+                          type: "cta_url"
+                          label: "Watch Full Video"
+                          url: "https://youtube.com/watch?v=eRsGyueVLvQ"
+                    - mediaUrl: "https://download.blender.org/peach/trailer/trailer_480p.mov"
+                      body: "Advanced Features\n\nUnlock the full potential"
+                      buttons:
+                        - id: "btn_tutorial_2"
+                          type: "cta_url"
+                          label: "Watch Full Video"
+                          url: "https://youtube.com/watch?v=YE7VzlLtp-4"
+                    - mediaUrl: "https://download.blender.org/demo/movies/ToS/ToS-4k-1920.mov"
+                      body: "Pro Tips & Tricks\n\nBoost your productivity"
+                      buttons:
+                        - id: "btn_tutorial_3"
+                          type: "cta_url"
+                          label: "Watch Full Video"
+                          url: "https://youtube.com/watch?v=aqz-KE-bpKQ"
+              realEstate:
+                summary: Real estate listings
+                description: Property listings carousel
+                value:
+                  phone: "5511999999999"
+                  cardType: "HSCROLL_CARDS"
+                  cards:
+                    - mediaUrl: "https://picsum.photos/id/49/600/400.jpg"
+                      body: "Modern Family Home\n\n4 bed | 3 bath | 2,500 sqft\nPacific Heights, SF\n\n$1,250,000"
+                      buttons:
+                        - id: "btn_view_house1"
+                          type: "cta_url"
+                          label: "View Listing"
+                          url: "https://httpbin.org/anything/property/house1"
+                        - id: "btn_call_house1"
+                          type: "cta_call"
+                          label: "Call Agent"
+                          phone: "+14155551234"
+                    - mediaUrl: "https://picsum.photos/id/164/600/400.jpg"
+                      body: "Luxury Condo\n\n2 bed | 2 bath | 1,200 sqft\nSoMa District\n\n$850,000"
+                      buttons:
+                        - id: "btn_view_condo1"
+                          type: "cta_url"
+                          label: "View Listing"
+                          url: "https://httpbin.org/anything/property/condo1"
+                        - id: "btn_call_condo1"
+                          type: "cta_call"
+                          label: "Call Agent"
+                          phone: "+14155551234"
+                    - mediaUrl: "https://picsum.photos/id/188/600/400.jpg"
+                      body: "Charming Townhouse\n\n3 bed | 2.5 bath | 1,800 sqft\nMission District\n\n$975,000"
+                      buttons:
+                        - id: "btn_view_townhouse1"
+                          type: "cta_url"
+                          label: "View Listing"
+                          url: "https://httpbin.org/anything/property/townhouse1"
+                        - id: "btn_call_townhouse1"
+                          type: "cta_call"
+                          label: "Call Agent"
+                          phone: "+14155551234"
+              restaurantMenu:
+                summary: Restaurant menu
+                description: Visual menu with images
+                value:
+                  phone: "5511999999999"
+                  cardType: "HSCROLL_CARDS"
+                  messageId: "menu-daily-specials"
+                  cards:
+                    - mediaUrl: "https://picsum.photos/id/292/600/400.jpg"
+                      body: "Prime Ribeye Steak\n\n12oz USDA Prime, grilled to perfection\nServed with seasonal vegetables\n\n$45.00"
+                      buttons:
+                        - id: "order_steak"
+                          type: "quick_reply"
+                          label: "Order Now"
+                    - mediaUrl: "https://picsum.photos/id/493/600/400.jpg"
+                      body: "Atlantic Salmon\n\nFresh salmon with lemon butter sauce\nAsparagus and rice pilaf\n\n$32.00"
+                      buttons:
+                        - id: "order_salmon"
+                          type: "quick_reply"
+                          label: "Order Now"
+                    - mediaUrl: "https://picsum.photos/id/312/600/400.jpg"
+                      body: "Truffle Pasta\n\nFresh fettuccine with black truffle\nParmesan and cream sauce\n\n$28.00"
+                      buttons:
+                        - id: "order_pasta"
+                          type: "quick_reply"
+                          label: "Order Now"
+              singleCard:
+                summary: Single card carousel
+                description: Carousel with just one card
+                value:
+                  phone: "5511999999999"
+                  cardType: "HSCROLL_CARDS"
+                  cards:
+                    - mediaUrl: "https://picsum.photos/id/96/600/400.jpg"
+                      body: "Limited Edition Product\n\nOnly 50 units available worldwide.\nGet yours before they're gone!"
+                      buttons:
+                        - id: "btn_shop_featured"
+                          type: "cta_url"
+                          label: "Shop Now"
+                          url: "https://httpbin.org/anything/featured"
+      responses:
+        "200":
+          description: Message enqueued successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageQueuedResponse"
+              example:
+                success: true
+                message: "Message queued successfully"
+                data:
+                  zaapId: "39BB1684570F00E91090F6BBC7EE7646"
+                  messageId: "39BB1684570F00E91090F6BBC7EE7646"
+                  status: "queued"
+        "400":
+          description: Invalid request (validation error)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                missingCards:
+                  summary: Missing cards
+                  value:
+                    error: "cards is required and must have at least 1 item"
+                tooManyCards:
+                  summary: Too many cards
+                  value:
+                    error: "cards cannot have more than 10 items"
+                missingHeader:
+                  summary: Missing card header
+                  value:
+                    error: "each card must have a header with type and url"
+                invalidHeaderType:
+                  summary: Invalid header type
+                  value:
+                    error: "header.type must be 'image' or 'video'"
+                tooManyButtons:
+                  summary: Too many buttons per card
+                  value:
+                    error: "each card can have maximum 2 buttons"
+                bodyTooLong:
+                  summary: Body text too long
+                  value:
+                    error: "card body cannot exceed 1024 characters"
+        "401":
+          description: Unauthorized (invalid Client-Token or instance token)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "unauthorized"
+        "404":
+          description: Instance not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "instance not found"
+        "503":
+          description: Instance not connected to WhatsApp
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "instance not connected"
+
+  /instances/{instanceId}/token/{instanceToken}/send-poll:
+    post:
+      tags:
+        - Messages
+      summary: Send poll message (Z-API compatible)
+      description: |
+        Sends a poll (voting/survey) message to a WhatsApp user or group.
+
+        **Features:**
+        - ✅ 2-12 poll options
+        - ✅ Single or multiple choice voting
+        - ✅ Custom message ID for tracking
+        - ✅ Delay message support
+        - ✅ FIFO queue with per-recipient ordering
+
+        **Z-API Format:**
+        - `message` field contains the poll question
+        - `poll` array contains options with `name` field
+        - `pollMaxOptions` controls voting: 0 or 1 = single choice, >1 = multiple choice
+
+        **Limits:**
+        - Min 2 options, max 12 options
+        - Option text: max 100 characters each
+        - Question text: max 256 characters
+
+        **Z-API Compatible:** Matches Z-API request/response format exactly.
+      operationId: sendPollMessage
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendPollRequest"
+            examples:
+              singleChoice:
+                summary: Single choice poll
+                description: Poll where user can select only one option
+                value:
+                  phone: "5511999999999"
+                  message: "Qual o melhor sabor de pizza?"
+                  poll:
+                    - name: "Calabresa"
+                    - name: "Marguerita"
+                    - name: "Portuguesa"
+                    - name: "Frango"
+                  pollMaxOptions: 1
+              multipleChoice:
+                summary: Multiple choice poll
+                description: Poll where user can select multiple options
+                value:
+                  phone: "5511999999999"
+                  message: "Quais redes sociais voce usa?"
+                  poll:
+                    - name: "WhatsApp"
+                    - name: "Instagram"
+                    - name: "Twitter"
+                    - name: "TikTok"
+                    - name: "Facebook"
+                  pollMaxOptions: 3
+              groupPoll:
+                summary: Poll to group
+                description: Send poll to a WhatsApp group
+                value:
+                  phone: "120363356737170752@g.us"
+                  message: "Qual dia fica melhor para a reuniao?"
+                  poll:
+                    - name: "Segunda-feira"
+                    - name: "Terca-feira"
+                    - name: "Quarta-feira"
+                    - name: "Quinta-feira"
+                    - name: "Sexta-feira"
+                  pollMaxOptions: 1
+              replyPoll:
+                summary: Poll as reply
+                description: Poll sent as reply to another message
+                value:
+                  phone: "5511999999999"
+                  message: "Respondendo sua pergunta, qual voce prefere?"
+                  poll:
+                    - name: "Opcao A"
+                    - name: "Opcao B"
+                    - name: "Opcao C"
+                  pollMaxOptions: 1
+                  messageId: "3EB047ED70306656281B34"
+              completeExample:
+                summary: Complete poll with all fields
+                description: Poll with all available options configured
+                value:
+                  phone: "5511999999999"
+                  message: "Como voce avalia nosso atendimento?"
+                  poll:
+                    - name: "Excelente"
+                    - name: "Bom"
+                    - name: "Regular"
+                    - name: "Ruim"
+                  pollMaxOptions: 1
+                  messageId: "3EB047ED70306656281B34"
+                  delayMessage: 3
+                  delayTyping: 2
+      responses:
+        "200":
+          description: Poll message enqueued successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageQueuedResponse"
+              example:
+                success: true
+                message: "Message queued successfully"
+                data:
+                  zaapId: "39BB1684570F00E91090F6BBC7EE7646"
+                  messageId: "39BB1684570F00E91090F6BBC7EE7646"
+                  status: "queued"
+        "400":
+          description: Invalid request (validation error)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                missingQuestion:
+                  summary: Missing poll question
+                  value:
+                    error: "message (poll question) is required"
+                missingOptions:
+                  summary: Missing poll options
+                  value:
+                    error: "poll options are required"
+                tooFewOptions:
+                  summary: Too few options
+                  value:
+                    error: "poll must have at least 2 options"
+                tooManyOptions:
+                  summary: Too many options
+                  value:
+                    error: "poll cannot have more than 12 options"
+        "401":
+          description: Unauthorized (invalid Client-Token or instance token)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "unauthorized"
+        "404":
+          description: Instance not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "instance not found"
+        "503":
+          description: Instance not connected to WhatsApp
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "instance not connected"
+
+  /instances/{instanceId}/token/{instanceToken}/send-event:
+    post:
+      tags:
+        - Messages
+      summary: Send event message (Z-API compatible)
+      description: |
+        Sends a scheduled event message to a WhatsApp group.
+
+        **Features:**
+        - ✅ Event name and description
+        - ✅ Date and time scheduling (ISO 8601)
+        - ✅ Location support (name and coordinates)
+        - ✅ Call link type (voice/video)
+        - ✅ Event cancellation support
+        - ✅ Custom message ID for tracking
+        - ✅ FIFO queue with per-recipient ordering
+
+        **Z-API Format:**
+        - Nested `event` object with all event details
+        - `dateTime` in ISO 8601 format (e.g., "2024-04-29T09:30:53.309Z")
+        - `location` object with name and optional coordinates
+        - `callLinkType` can be "voice" or "video"
+
+        **Restrictions:**
+        - Events can only be sent to groups
+        - Sender must be group admin for some event features
+
+        **Z-API Compatible:** Matches Z-API request/response format exactly.
+      operationId: sendEventMessage
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendEventRequest"
+            examples:
+              basicEvent:
+                summary: Basic event
+                description: Simple event with name, description and date
+                value:
+                  phone: "120363356737170752@g.us"
+                  event:
+                    name: "Reuniao de Equipe"
+                    description: "Reuniao semanal para alinhamento de projetos"
+                    dateTime: "2024-04-29T14:00:00.000Z"
+              eventWithLocationName:
+                summary: Event with location name only
+                description: Event with location name but no coordinates
+                value:
+                  phone: "120363356737170752@g.us"
+                  event:
+                    name: "Encontro Presencial"
+                    description: "Encontro do grupo no escritorio"
+                    dateTime: "2024-05-10T09:00:00.000Z"
+                    location:
+                      name: "Escritorio Central - Av. Paulista, 1000, Sao Paulo"
+              eventWithLocationCoordinates:
+                summary: Event with location and coordinates
+                description: Event with physical location and GPS coordinates
+                value:
+                  phone: "120363356737170752@g.us"
+                  event:
+                    name: "Happy Hour da Empresa"
+                    description: "Confraternizacao mensal"
+                    dateTime: "2024-05-15T18:30:00.000Z"
+                    location:
+                      name: "Bar do Ze - Rua das Flores, 123"
+                      degreesLatitude: -23.5505
+                      degreesLongitude: -46.6333
+              eventWithVideoCall:
+                summary: Event with video call
+                description: Online event with video call link
+                value:
+                  phone: "120363356737170752@g.us"
+                  event:
+                    name: "Workshop de Vendas"
+                    description: "Treinamento online de tecnicas de vendas"
+                    dateTime: "2024-05-20T10:00:00.000Z"
+                    callLinkType: "video"
+              eventWithVoiceCall:
+                summary: Event with voice call
+                description: Online event with voice call link
+                value:
+                  phone: "120363356737170752@g.us"
+                  event:
+                    name: "Call de Alinhamento"
+                    description: "Chamada rapida para alinhar pendencias"
+                    dateTime: "2024-05-22T15:00:00.000Z"
+                    callLinkType: "voice"
+              canceledEvent:
+                summary: Canceled event
+                description: Event marked as canceled
+                value:
+                  phone: "120363356737170752@g.us"
+                  event:
+                    name: "Evento Cancelado"
+                    description: "Este evento foi cancelado"
+                    dateTime: "2024-04-30T09:00:00.000Z"
+                    canceled: true
+              eventWithDelay:
+                summary: Event with delay
+                description: Event sent with delay for typing simulation
+                value:
+                  phone: "120363356737170752@g.us"
+                  event:
+                    name: "Reuniao Importante"
+                    description: "Discussao sobre novos projetos"
+                    dateTime: "2024-06-01T10:00:00.000Z"
+                  delayMessage: 3
+                  delayTyping: 2
+              eventReply:
+                summary: Event as reply
+                description: Event sent as reply to another message
+                value:
+                  phone: "120363356737170752@g.us"
+                  event:
+                    name: "Agenda Confirmada"
+                    description: "Conforme solicitado, agendamos o evento"
+                    dateTime: "2024-06-05T14:00:00.000Z"
+                  messageId: "3EB047ED70306656281B34"
+              completeEventExample:
+                summary: Complete event with all fields
+                description: Event with all available options configured
+                value:
+                  phone: "120363356737170752@g.us"
+                  event:
+                    name: "Evento Completo"
+                    description: "Evento de exemplo com todas as opcoes"
+                    dateTime: "2024-07-01T16:00:00.000Z"
+                    location:
+                      name: "Centro de Convencoes - Rua Principal, 500"
+                      degreesLatitude: -23.5489
+                      degreesLongitude: -46.6388
+                    callLinkType: "video"
+                  messageId: "3EB047ED70306656281B34"
+                  delayMessage: 5
+                  delayTyping: 3
+      responses:
+        "200":
+          description: Event message enqueued successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageQueuedResponse"
+              example:
+                success: true
+                message: "Message queued successfully"
+                data:
+                  zaapId: "39BB1684570F00E91090F6BBC7EE7646"
+                  messageId: "39BB1684570F00E91090F6BBC7EE7646"
+                  status: "queued"
+        "400":
+          description: Invalid request (validation error)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                missingEvent:
+                  summary: Missing event object
+                  value:
+                    error: "event object is required"
+                missingName:
+                  summary: Missing event name
+                  value:
+                    error: "event name is required"
+                missingDateTime:
+                  summary: Missing event date/time
+                  value:
+                    error: "event dateTime is required"
+                invalidDateTime:
+                  summary: Invalid date/time format
+                  value:
+                    error: "invalid dateTime format, expected ISO 8601"
+        "401":
+          description: Unauthorized (invalid Client-Token or instance token)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "unauthorized"
+        "404":
+          description: Instance not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "instance not found"
+        "503":
+          description: Instance not connected to WhatsApp
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "instance not connected"
+
+  /instances/{instanceId}/token/{instanceToken}/send-link:
+    post:
+      tags:
+        - Messages
+      summary: Send link with preview (Z-API compatible)
+      description: |
+        Sends a text message with a customized link preview.
+
+        **Features:**
+        - ✅ Custom link preview title
+        - ✅ Custom link preview description
+        - ✅ Custom preview image
+        - ✅ Message text before the link
+        - ✅ Automatic URL validation
+        - ✅ Custom message ID for tracking
+        - ✅ Delay message support
+        - ✅ FIFO queue with per-recipient ordering
+
+        **Z-API Format:**
+        - `linkUrl` is the URL to preview (required)
+        - `title` overrides the default link title
+        - `linkDescription` overrides the default description
+        - `image` provides a custom preview thumbnail
+        - `message` adds text before the link preview
+
+        **Preview Image:**
+        - Must be a valid image URL (JPEG, PNG, WebP)
+        - Will be downloaded and used as thumbnail
+        - Falls back to default Open Graph image if download fails
+
+        **Z-API Compatible:** Matches Z-API request/response format exactly.
+      operationId: sendLinkMessage
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendLinkRequest"
+            examples:
+              basicLink:
+                summary: Basic link with custom preview
+                description: Link with custom title and description
+                value:
+                  phone: "5511999999999"
+                  message: "Confira nosso novo produto!"
+                  linkUrl: "https://www.example.com/produto"
+                  title: "Produto Incrivel"
+                  linkDescription: "O melhor produto do mercado com desconto especial"
+              linkWithImage:
+                summary: Link with custom image
+                description: Link with custom preview image using real image URL
+                value:
+                  phone: "5511999999999"
+                  message: "Veja esta oferta especial"
+                  linkUrl: "https://www.example.com/oferta"
+                  title: "Super Oferta"
+                  linkDescription: "50% de desconto em todos os produtos"
+                  image: "https://picsum.photos/600/400.jpg"
+              linkWithDelay:
+                summary: Link with delay
+                description: Link with delay message and typing indicator
+                value:
+                  phone: "5511999999999"
+                  message: "Acesse nosso site"
+                  linkUrl: "https://www.example.com"
+                  title: "Nosso Site Oficial"
+                  linkDescription: "Visite-nos e conheca nossos servicos"
+                  delayMessage: 3
+                  delayTyping: 2
+              minimalLink:
+                summary: Minimal link
+                description: Just the URL with auto-fetched metadata
+                value:
+                  phone: "5511999999999"
+                  linkUrl: "https://github.com"
+              linkToGroup:
+                summary: Link to group
+                description: Send link with preview to a WhatsApp group
+                value:
+                  phone: "120363356737170752@g.us"
+                  message: "Material para estudo do grupo"
+                  linkUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
+                  title: "Documento PDF"
+                  linkDescription: "Baixe o documento em PDF para o proximo encontro"
+                  image: "https://picsum.photos/600/400.jpg"
+              linkAsReply:
+                summary: Link as reply
+                description: Send link as reply to another message
+                value:
+                  phone: "5511999999999"
+                  message: "Aqui esta o video que voce pediu"
+                  linkUrl: "https://download.blender.org/durian/trailer/sintel_trailer-480p.mp4"
+                  title: "Sintel Trailer"
+                  linkDescription: "Trailer do filme Sintel em 480p"
+                  image: "https://picsum.photos/600/400.jpg"
+                  messageId: "3EB047ED70306656281B34"
+              completeLinkExample:
+                summary: Complete link with all fields
+                description: Link with all available options configured
+                value:
+                  phone: "5511999999999"
+                  message: "Confira este conteudo incrivel que separei para voce!"
+                  linkUrl: "https://www.example.com/conteudo-especial"
+                  title: "Conteudo Especial"
+                  linkDescription: "Acesse agora e aproveite esta oportunidade unica"
+                  image: "https://picsum.photos/600/400.jpg"
+                  messageId: "3EB047ED70306656281B34"
+                  delayMessage: 5
+                  delayTyping: 3
+      responses:
+        "200":
+          description: Link message enqueued successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageQueuedResponse"
+              example:
+                success: true
+                message: "Message queued successfully"
+                data:
+                  zaapId: "39BB1684570F00E91090F6BBC7EE7646"
+                  messageId: "39BB1684570F00E91090F6BBC7EE7646"
+                  status: "queued"
+        "400":
+          description: Invalid request (validation error)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                missingUrl:
+                  summary: Missing link URL
+                  value:
+                    error: "linkUrl is required"
+                invalidUrl:
+                  summary: Invalid URL format
+                  value:
+                    error: "linkUrl must be a valid URL"
+        "401":
+          description: Unauthorized (invalid Client-Token or instance token)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "unauthorized"
+        "404":
+          description: Instance not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "instance not found"
+        "503":
+          description: Instance not connected to WhatsApp
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "instance not connected"
+
+  /instances/{instanceId}/token/{instanceToken}/messages:
+    delete:
+      tags:
+        - Messages
+      summary: Delete message (Z-API compatible)
+      description: |
+        Deletes (revokes) a previously sent message from a chat.
+
+        **Features:**
+        - ✅ Delete own messages (sender = you)
+        - ✅ Delete others' messages (group admin only)
+        - ✅ Works in private chats and groups
+        - ✅ Z-API compatible query parameters
+
+        **Z-API Format:**
+        Uses query parameters instead of request body:
+        - `phone` - The chat phone number (recipient)
+        - `messageId` - The WhatsApp message ID to delete
+        - `owner` - "true" for own messages, "false" for others (admin delete)
+
+        **Behavior:**
+        - For `owner=true`: Message is deleted for everyone ("Delete for Everyone")
+        - For `owner=false`: Admin delete in groups (removes message sent by others)
+        - Deleted messages show "This message was deleted" placeholder
+
+        **Restrictions:**
+        - Own messages: Can be deleted within ~1 hour of sending
+        - Admin delete: Requires group admin privileges
+        - Once deleted, the message cannot be recovered
+
+        **Z-API Compatible:** Matches Z-API request/response format exactly.
+      operationId: deleteMessage
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+        - in: query
+          name: phone
+          required: true
+          schema:
+            type: string
+          description: Phone number of the chat (recipient)
+          example: "5511999999999"
+        - in: query
+          name: messageId
+          required: true
+          schema:
+            type: string
+          description: WhatsApp message ID to delete
+          example: "3EB047ED70306656281B34"
+        - in: query
+          name: owner
+          required: true
+          schema:
+            type: string
+            enum:
+              - "true"
+              - "false"
+          description: |
+            Whether the message was sent by you:
+            - "true" = your own message (Delete for Everyone)
+            - "false" = someone else's message (admin delete in groups)
+          example: "true"
+      responses:
+        "200":
+          description: Message deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeleteMessageResponse"
+              examples:
+                ownMessage:
+                  summary: Own message deleted
+                  value:
+                    success: true
+                    phone: "5511999999999"
+                    messageId: "3EB047ED70306656281B34"
+                    message: "message deleted successfully"
+                adminDelete:
+                  summary: Admin deleted message
+                  value:
+                    success: true
+                    phone: "120363356737170752@g.us"
+                    messageId: "3EB047ED70306656281B34"
+                    message: "message deleted successfully"
+        "400":
+          description: Invalid request (missing parameters)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                missingPhone:
+                  summary: Missing phone
+                  value:
+                    error: "phone is required"
+                missingMessageId:
+                  summary: Missing message ID
+                  value:
+                    error: "messageId is required"
+                missingOwner:
+                  summary: Missing owner flag
+                  value:
+                    error: "owner is required"
+        "401":
+          description: Unauthorized (invalid Client-Token or instance token)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "unauthorized"
+        "404":
+          description: Instance not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "instance not found"
+        "500":
+          description: Failed to delete message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "failed to delete message: timeout"
+        "503":
+          description: Instance not connected to WhatsApp
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "instance not connected"
+
+  /instances/{instanceId}/token/{instanceToken}/modify-chat:
+    post:
+      tags:
+        - Messages
+      summary: Modify chat (Z-API compatible)
+      description: |
+        Performs various chat modification actions like read, archive, pin, mute, clear, or delete.
+
+        **Supported Actions:**
+        - `read` - Mark chat as read
+        - `archive` - Archive the chat
+        - `unarchive` - Unarchive the chat
+        - `pin` - Pin the chat to top
+        - `unpin` - Unpin the chat
+        - `mute` - Mute chat notifications
+        - `unmute` - Unmute chat notifications
+        - `clear` - Clear all messages in chat
+        - `delete` - Delete the entire chat
+
+        **Z-API Format:**
+        Request body with `phone` and `action` fields.
+
+        **Behavior:**
+        - `read`: Marks all messages in chat as read (blue checkmarks)
+        - `archive/unarchive`: Moves chat to/from archive
+        - `pin/unpin`: Pins/unpins chat to top of chat list
+        - `mute/unmute`: Enables/disables notifications
+        - `clear`: Removes all messages but keeps chat
+        - `delete`: Completely removes the chat
+
+        **Z-API Compatible:** Matches Z-API request/response format exactly.
+      operationId: modifyChat
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ModifyChatRequest"
+            examples:
+              markRead:
+                summary: Mark chat as read
+                description: Mark all messages in chat as read
+                value:
+                  phone: "5511999999999"
+                  action: "read"
+              archiveChat:
+                summary: Archive chat
+                description: Move chat to archive
+                value:
+                  phone: "5511999999999"
+                  action: "archive"
+              unarchiveChat:
+                summary: Unarchive chat
+                description: Remove chat from archive
+                value:
+                  phone: "5511999999999"
+                  action: "unarchive"
+              pinChat:
+                summary: Pin chat
+                description: Pin chat to top of list
+                value:
+                  phone: "5511999999999"
+                  action: "pin"
+              unpinChat:
+                summary: Unpin chat
+                description: Unpin chat from top
+                value:
+                  phone: "5511999999999"
+                  action: "unpin"
+              muteChat:
+                summary: Mute notifications
+                description: Disable notifications for chat
+                value:
+                  phone: "5511999999999"
+                  action: "mute"
+              unmuteChat:
+                summary: Unmute notifications
+                description: Enable notifications for chat
+                value:
+                  phone: "5511999999999"
+                  action: "unmute"
+              clearChat:
+                summary: Clear chat
+                description: Remove all messages from chat
+                value:
+                  phone: "5511999999999"
+                  action: "clear"
+              deleteChat:
+                summary: Delete chat
+                description: Completely remove the chat
+                value:
+                  phone: "5511999999999"
+                  action: "delete"
+      responses:
+        "200":
+          description: Chat modified successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModifyChatResponse"
+              examples:
+                readSuccess:
+                  summary: Marked as read
+                  value:
+                    success: true
+                    phone: "5511999999999"
+                    action: "read"
+                    message: "chat marked as read successfully"
+                archiveSuccess:
+                  summary: Archived
+                  value:
+                    success: true
+                    phone: "5511999999999"
+                    action: "archive"
+                    message: "chat archived successfully"
+                pinSuccess:
+                  summary: Pinned
+                  value:
+                    success: true
+                    phone: "5511999999999"
+                    action: "pin"
+                    message: "chat pinned successfully"
+                muteSuccess:
+                  summary: Muted
+                  value:
+                    success: true
+                    phone: "5511999999999"
+                    action: "mute"
+                    message: "chat muted successfully"
+        "400":
+          description: Invalid request (validation error)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                missingPhone:
+                  summary: Missing phone
+                  value:
+                    error: "phone is required"
+                missingAction:
+                  summary: Missing action
+                  value:
+                    error: "action is required"
+                invalidAction:
+                  summary: Invalid action
+                  value:
+                    error: "invalid action: must be one of read, archive, unarchive, pin, unpin, mute, unmute, clear, delete"
+        "401":
+          description: Unauthorized (invalid Client-Token or instance token)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "unauthorized"
+        "404":
+          description: Instance not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "instance not found"
+        "500":
+          description: Failed to modify chat
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "failed to modify chat: operation not supported"
+        "503":
+          description: Instance not connected to WhatsApp
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "instance not connected"
+
   /instances/{instanceId}/token/{instanceToken}/contacts:
     get:
       tags:
@@ -7251,6 +10654,61 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /instances/{instanceId}/token/{instanceToken}/communities/{communityId}:
+    delete:
+      tags:
+        - Communities
+      summary: Delete community
+      description: |
+        Mirrors Z-API `DELETE /communities/{communityId}`, permanently deleting a community.
+
+        **Important**: This action is irreversible. All linked groups will be unlinked but not deleted.
+      operationId: deleteCommunity
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+        - name: communityId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Community identifier (e.g., "120363019502650977")
+          example: "120363019502650977"
+      responses:
+        "200":
+          description: Community deleted successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BooleanStatusResponse"
+              example:
+                value: true
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Instance or community not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Instance not connected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /instances/{instanceId}/token/{instanceToken}/create-newsletter:
     post:
       tags:
@@ -8213,21 +11671,21 @@ paths:
         Query the cached status of message deliveries. Status Cache stores delivery receipts
         (sent, delivered, read, played) for messages, especially useful for group messages
         where tracking individual participant statuses is important.
-        
+
         **Query Types:**
         - By `messageId`: Get status for a specific message
         - By `groupId`: Get all message statuses for a group
         - By `phone`: Get all message statuses for a phone number
-        
+
         **Response Formats:**
         - `aggregated` (default): Returns aggregated counts and optionally participant details
         - `raw`: Returns data in Z-API webhook format for compatibility
-        
+
         **Use Cases:**
         - Check if a message was read by all group participants
         - Get delivery statistics for messages to a specific contact
         - Retrieve batch status updates for UI dashboards
-        
+
         **Note:** Status data is cached with a configurable TTL (default 24h).
       operationId: getMessagesStatus
       security:
@@ -8299,7 +11757,7 @@ paths:
             type: boolean
             default: false
           description: |
-            When true and format is `aggregated`, includes the full list of 
+            When true and format is `aggregated`, includes the full list of
             participant statuses in the response. Useful for detailed analysis
             but increases response size significantly for groups.
       responses:
@@ -8412,20 +11870,20 @@ paths:
       summary: Flush pending webhooks
       description: |
         Triggers delivery of suppressed webhooks for cached status events.
-        
+
         When `STATUS_CACHE_SUPPRESS_WEBHOOKS=true`, status webhooks are not immediately
         sent but stored for later delivery. This endpoint allows manual triggering
         of those pending webhooks.
-        
+
         **Use Cases:**
         - Force immediate delivery of status updates to webhook endpoints
         - Recover from webhook endpoint downtime
         - Batch process status updates at specific intervals
-        
+
         **Options:**
         - Flush by specific `messageId`: Delivers webhooks for one message
         - Flush all (`all: true`): Delivers all pending webhooks for the instance
-        
+
         **Note:** Flushing is idempotent - already-flushed webhooks won't be re-sent.
       operationId: flushMessagesStatus
       security:
@@ -8501,14 +11959,14 @@ paths:
       summary: Clear cached status entries
       description: |
         Removes cached status entries from the status cache.
-        
+
         **Options:**
         - Clear by `messageId`: Removes cache for a specific message
         - Clear all (`all=true`): Removes all cached entries for the instance
-        
+
         **Warning:** Clearing cache is irreversible. Cached status data and pending
         webhooks for cleared entries will be permanently deleted.
-        
+
         **Use Cases:**
         - Free up cache storage space
         - Remove obsolete message status data
@@ -8580,12 +12038,12 @@ paths:
       summary: Get cache statistics
       description: |
         Returns statistics about the status cache for this instance.
-        
+
         **Metrics included:**
         - Total cached entries
         - Entries breakdown by instance
         - Number of pending webhooks awaiting flush
-        
+
         **Use Cases:**
         - Monitor cache usage and storage
         - Determine if flush is needed
@@ -8608,6 +12066,162 @@ paths:
                 entriesByInstance:
                   "550e8400-e29b-41d4-a716-446655440000": 1500
                 pendingWebhooks: 45
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # Media endpoints
+  /media/{instanceId}/{filepath}:
+    get:
+      tags:
+        - Media
+      summary: Serve media file
+      description: |
+        Serves a media file with HMAC signature validation for secure access.
+        URLs are time-limited and must include valid signature parameters.
+
+        **URL Format:**
+        `/media/{instanceId}/{filepath}?sig={signature}&exp={expiration}`
+
+        **Security:**
+        - HMAC-SHA256 signature validation
+        - Time-limited URLs (configurable expiration)
+        - Instance-scoped access control
+
+        **Supported Media Types:**
+        - Images (JPEG, PNG, WebP, GIF)
+        - Audio (MP3, OGG, M4A)
+        - Video (MP4, MOV)
+        - Documents (PDF, DOC, etc.)
+      operationId: serveMedia
+      security: []
+      parameters:
+        - name: instanceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Instance identifier that owns the media
+        - name: filepath
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Path to the media file within instance storage
+          example: "images/photo_123.jpg"
+        - name: sig
+          in: query
+          required: true
+          schema:
+            type: string
+          description: HMAC-SHA256 signature for URL validation
+          example: "a1b2c3d4e5f6..."
+        - name: exp
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Unix timestamp when the URL expires
+          example: 1704067200
+      responses:
+        "200":
+          description: Media file served successfully
+          content:
+            image/*:
+              schema:
+                type: string
+                format: binary
+            audio/*:
+              schema:
+                type: string
+                format: binary
+            video/*:
+              schema:
+                type: string
+                format: binary
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        "400":
+          description: Missing or invalid signature parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "missing signature parameter"
+        "403":
+          description: Invalid signature or expired URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "invalid signature"
+        "404":
+          description: Media file not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "file not found"
+        "410":
+          description: URL has expired
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: "URL expired"
+
+  /media/stats:
+    get:
+      tags:
+        - Media
+      summary: Get media storage statistics
+      description: |
+        Returns statistics about the media storage system.
+
+        **Statistics Include:**
+        - Total number of stored files
+        - Total storage size in bytes
+        - Base storage path configuration
+        - URL expiration settings
+        - Public base URL for media access
+
+        **Use Cases:**
+        - Monitor storage usage
+        - Capacity planning
+        - Debug media configuration
+      operationId: getMediaStats
+      security:
+        - PartnerBearer: []
+      responses:
+        "200":
+          description: Media statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaStatsResponse"
+              example:
+                total_files: 1234
+                total_bytes: 1073741824
+                base_path: "/data/media"
+                url_expiry: "24h0m0s"
+                public_base_url: "https://api.example.com/media"
         "401":
           description: Unauthorized
           content:
