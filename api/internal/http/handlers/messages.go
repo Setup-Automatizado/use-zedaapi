@@ -162,6 +162,12 @@ func (h *MessageHandler) RegisterRoutes(r chi.Router) {
 	r.Put("/profile-name", h.updateProfileName)               // PUT /profile-name - update profile name (push name)
 	r.Put("/profile-picture", h.updateProfilePicture)         // PUT /profile-picture - update profile picture
 	r.Put("/profile-description", h.updateProfileDescription) // PUT /profile-description - update profile description (about/status)
+
+	// Status/Stories endpoints (broadcast to status@broadcast)
+	r.Post("/send-text-status", h.sendTextStatus)   // POST /send-text-status - send text to status/stories
+	r.Post("/send-image-status", h.sendImageStatus) // POST /send-image-status - send image to status/stories
+	r.Post("/send-audio-status", h.sendAudioStatus) // POST /send-audio-status - send audio with waveform to status/stories
+	r.Post("/send-video-status", h.sendVideoStatus) // POST /send-video-status - send video to status/stories
 }
 
 // GroupMention represents a group mention in a community
@@ -817,6 +823,46 @@ type SendEventResponseResponse struct {
 	EventID  string `json:"eventId"`
 	Response string `json:"response"`
 	Message  string `json:"message,omitempty"`
+}
+
+// =============================================================================
+// Status/Stories Request Types (broadcast to status@broadcast)
+// =============================================================================
+
+// SendTextStatusRequest represents the request body for POST /send-text-status
+// Sends a text message to WhatsApp Status/Stories (broadcasts to all viewers)
+type SendTextStatusRequest struct {
+	Text            string `json:"text"`                      // Required: text content for status
+	BackgroundColor string `json:"backgroundColor,omitempty"` // Optional: hex color #RRGGBB or ARGB 0xAARRGGBB
+	Font            *int   `json:"font,omitempty"`            // Optional: font style 0-5
+	MessageID       string `json:"messageId,omitempty"`       // Optional: custom message ID for tracking
+	DelayMessage    *int   `json:"delayMessage,omitempty"`    // Optional: delay in seconds (1-15) before sending
+}
+
+// SendImageStatusRequest represents the request body for POST /send-image-status
+// Sends an image to WhatsApp Status/Stories (broadcasts to all viewers)
+type SendImageStatusRequest struct {
+	Image        string `json:"image"`                  // Required: image URL or base64 data (data:image/png;base64,...)
+	Caption      string `json:"caption,omitempty"`      // Optional: image caption
+	MessageID    string `json:"messageId,omitempty"`    // Optional: custom message ID for tracking
+	DelayMessage *int   `json:"delayMessage,omitempty"` // Optional: delay in seconds (1-15) before sending
+}
+
+// SendAudioStatusRequest represents the request body for POST /send-audio-status
+// Sends an audio/voice note to WhatsApp Status/Stories with waveform visualization
+type SendAudioStatusRequest struct {
+	Audio        string `json:"audio"`                  // Required: audio URL or base64 data (data:audio/ogg;base64,...)
+	MessageID    string `json:"messageId,omitempty"`    // Optional: custom message ID for tracking
+	DelayMessage *int   `json:"delayMessage,omitempty"` // Optional: delay in seconds (1-15) before sending
+}
+
+// SendVideoStatusRequest represents the request body for POST /send-video-status
+// Sends a video to WhatsApp Status/Stories (broadcasts to all viewers)
+type SendVideoStatusRequest struct {
+	Video        string `json:"video"`                  // Required: video URL or base64 data (data:video/mp4;base64,...)
+	Caption      string `json:"caption,omitempty"`      // Optional: video caption
+	MessageID    string `json:"messageId,omitempty"`    // Optional: custom message ID for tracking
+	DelayMessage *int   `json:"delayMessage,omitempty"` // Optional: delay in seconds (1-15) before sending
 }
 
 // SendMessageResponse represents the response after enqueuing a message
@@ -6225,4 +6271,343 @@ func (h *MessageHandler) sendEventResponse(w http.ResponseWriter, r *http.Reques
 		Response: responseStr,
 		Message:  "Event response sent successfully",
 	})
+}
+
+// =============================================================================
+// Status/Stories Handlers (broadcast to status@broadcast)
+// =============================================================================
+
+// sendTextStatus handles POST /instances/{instanceId}/token/{token}/send-text-status
+// Sends a text message to WhatsApp Status/Stories (broadcasts to all viewers)
+func (h *MessageHandler) sendTextStatus(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx, instanceID, instStatus, ok := h.resolveInstance(ctx, w, r)
+	if !ok {
+		return
+	}
+
+	// Parse request body
+	var req SendTextStatusRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		h.log.WarnContext(ctx, "invalid request body",
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	// Validate text content
+	text := strings.TrimSpace(req.Text)
+	if text == "" {
+		h.log.WarnContext(ctx, "missing text content for status")
+		respondError(w, http.StatusBadRequest, "Text content is required")
+		return
+	}
+
+	// Convert delay from seconds to milliseconds
+	delayMessage := int64(0)
+	if req.DelayMessage != nil {
+		seconds := *req.DelayMessage
+		if seconds < 1 {
+			seconds = 1
+		}
+		if seconds > 15 {
+			seconds = 15
+		}
+		delayMessage = int64(seconds) * 1000
+	} else {
+		// Default: random 1-3 seconds
+		delayMessage = int64(1000 + (rand.Int63() % 2000))
+	}
+
+	// Parse font if provided
+	var font *int32
+	if req.Font != nil {
+		f := int32(*req.Font)
+		if f < 0 {
+			f = 0
+		}
+		if f > 5 {
+			f = 5
+		}
+		font = &f
+	}
+
+	// Create message args for status broadcast
+	// Phone is set to status@broadcast JID string
+	args := queue.SendMessageArgs{
+		InstanceID:  instanceID,
+		Phone:       types.StatusBroadcastJID.String(), // CRITICAL: Always use status@broadcast
+		MessageType: queue.MessageTypeTextStatus,
+		TextStatusContent: &queue.TextStatusMessage{
+			Text:            text,
+			BackgroundColor: strings.TrimSpace(req.BackgroundColor),
+			Font:            font,
+		},
+		DelayMessage: delayMessage,
+	}
+
+	// Set custom message ID if provided
+	if req.MessageID != "" {
+		args.ReplyToMessageID = "" // Status doesn't support replies
+	}
+
+	// Enqueue message
+	zaapID, err := h.enqueueMessage(ctx, instanceID, args)
+	if err != nil {
+		h.handleEnqueueError(ctx, w, err)
+		return
+	}
+
+	h.log.InfoContext(ctx, "text status enqueued successfully",
+		slog.String("zaap_id", zaapID),
+		slog.String("message_type", "text_status"))
+
+	response := h.newSendMessageResponse(zaapID, instStatus)
+	respondJSON(w, http.StatusOK, response)
+}
+
+// sendImageStatus handles POST /instances/{instanceId}/token/{token}/send-image-status
+// Sends an image to WhatsApp Status/Stories (broadcasts to all viewers)
+func (h *MessageHandler) sendImageStatus(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx, instanceID, instStatus, ok := h.resolveInstance(ctx, w, r)
+	if !ok {
+		return
+	}
+
+	// Parse request body
+	var req SendImageStatusRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		h.log.WarnContext(ctx, "invalid request body",
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	// Validate image
+	image := strings.TrimSpace(req.Image)
+	if image == "" {
+		h.log.WarnContext(ctx, "missing image for status")
+		respondError(w, http.StatusBadRequest, "Image is required (URL or base64)")
+		return
+	}
+
+	// Validate image format
+	if !strings.HasPrefix(image, "http://") &&
+		!strings.HasPrefix(image, "https://") &&
+		!strings.HasPrefix(image, "data:image/") {
+		h.log.WarnContext(ctx, "invalid image format for status")
+		respondError(w, http.StatusBadRequest, "Image must be a URL (http/https) or base64 data URI (data:image/...)")
+		return
+	}
+
+	// Convert delay from seconds to milliseconds
+	delayMessage := int64(0)
+	if req.DelayMessage != nil {
+		seconds := *req.DelayMessage
+		if seconds < 1 {
+			seconds = 1
+		}
+		if seconds > 15 {
+			seconds = 15
+		}
+		delayMessage = int64(seconds) * 1000
+	} else {
+		delayMessage = int64(1000 + (rand.Int63() % 2000))
+	}
+
+	// Create message args for status broadcast
+	caption := strings.TrimSpace(req.Caption)
+	var captionPtr *string
+	if caption != "" {
+		captionPtr = &caption
+	}
+	args := queue.SendMessageArgs{
+		InstanceID:  instanceID,
+		Phone:       types.StatusBroadcastJID.String(), // CRITICAL: Always use status@broadcast
+		MessageType: queue.MessageTypeImageStatus,
+		ImageContent: &queue.MediaMessage{
+			MediaURL: image,
+			Caption:  captionPtr,
+		},
+		DelayMessage: delayMessage,
+	}
+
+	// Enqueue message
+	zaapID, err := h.enqueueMessage(ctx, instanceID, args)
+	if err != nil {
+		h.handleEnqueueError(ctx, w, err)
+		return
+	}
+
+	h.log.InfoContext(ctx, "image status enqueued successfully",
+		slog.String("zaap_id", zaapID),
+		slog.String("message_type", "image_status"))
+
+	response := h.newSendMessageResponse(zaapID, instStatus)
+	respondJSON(w, http.StatusOK, response)
+}
+
+// sendAudioStatus handles POST /instances/{instanceId}/token/{token}/send-audio-status
+// Sends an audio/voice note to WhatsApp Status/Stories with waveform visualization
+func (h *MessageHandler) sendAudioStatus(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx, instanceID, instStatus, ok := h.resolveInstance(ctx, w, r)
+	if !ok {
+		return
+	}
+
+	// Parse request body
+	var req SendAudioStatusRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		h.log.WarnContext(ctx, "invalid request body",
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	// Validate audio
+	audio := strings.TrimSpace(req.Audio)
+	if audio == "" {
+		h.log.WarnContext(ctx, "missing audio for status")
+		respondError(w, http.StatusBadRequest, "Audio is required (URL or base64)")
+		return
+	}
+
+	// Validate audio format
+	if !strings.HasPrefix(audio, "http://") &&
+		!strings.HasPrefix(audio, "https://") &&
+		!strings.HasPrefix(audio, "data:audio/") {
+		h.log.WarnContext(ctx, "invalid audio format for status")
+		respondError(w, http.StatusBadRequest, "Audio must be a URL (http/https) or base64 data URI (data:audio/...)")
+		return
+	}
+
+	// Convert delay from seconds to milliseconds
+	delayMessage := int64(0)
+	if req.DelayMessage != nil {
+		seconds := *req.DelayMessage
+		if seconds < 1 {
+			seconds = 1
+		}
+		if seconds > 15 {
+			seconds = 15
+		}
+		delayMessage = int64(seconds) * 1000
+	} else {
+		delayMessage = int64(1000 + (rand.Int63() % 2000))
+	}
+
+	// Create message args for status broadcast
+	// Audio status will be processed with waveform generation in StatusProcessor
+	args := queue.SendMessageArgs{
+		InstanceID:  instanceID,
+		Phone:       types.StatusBroadcastJID.String(), // CRITICAL: Always use status@broadcast
+		MessageType: queue.MessageTypeAudioStatus,
+		AudioContent: &queue.MediaMessage{
+			MediaURL: audio,
+			// Note: IsPTT flag is handled in StatusProcessor.ProcessAudio
+		},
+		DelayMessage: delayMessage,
+	}
+
+	// Enqueue message
+	zaapID, err := h.enqueueMessage(ctx, instanceID, args)
+	if err != nil {
+		h.handleEnqueueError(ctx, w, err)
+		return
+	}
+
+	h.log.InfoContext(ctx, "audio status enqueued successfully",
+		slog.String("zaap_id", zaapID),
+		slog.String("message_type", "audio_status"))
+
+	response := h.newSendMessageResponse(zaapID, instStatus)
+	respondJSON(w, http.StatusOK, response)
+}
+
+// sendVideoStatus handles POST /instances/{instanceId}/token/{token}/send-video-status
+// Sends a video to WhatsApp Status/Stories (broadcasts to all viewers)
+func (h *MessageHandler) sendVideoStatus(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	ctx, instanceID, instStatus, ok := h.resolveInstance(ctx, w, r)
+	if !ok {
+		return
+	}
+
+	// Parse request body
+	var req SendVideoStatusRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		h.log.WarnContext(ctx, "invalid request body",
+			slog.String("error", err.Error()))
+		respondError(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	// Validate video
+	video := strings.TrimSpace(req.Video)
+	if video == "" {
+		h.log.WarnContext(ctx, "missing video for status")
+		respondError(w, http.StatusBadRequest, "Video is required (URL or base64)")
+		return
+	}
+
+	// Validate video format
+	if !strings.HasPrefix(video, "http://") &&
+		!strings.HasPrefix(video, "https://") &&
+		!strings.HasPrefix(video, "data:video/") {
+		h.log.WarnContext(ctx, "invalid video format for status")
+		respondError(w, http.StatusBadRequest, "Video must be a URL (http/https) or base64 data URI (data:video/...)")
+		return
+	}
+
+	// Convert delay from seconds to milliseconds
+	delayMessage := int64(0)
+	if req.DelayMessage != nil {
+		seconds := *req.DelayMessage
+		if seconds < 1 {
+			seconds = 1
+		}
+		if seconds > 15 {
+			seconds = 15
+		}
+		delayMessage = int64(seconds) * 1000
+	} else {
+		delayMessage = int64(1000 + (rand.Int63() % 2000))
+	}
+
+	// Create message args for status broadcast
+	caption := strings.TrimSpace(req.Caption)
+	var captionPtr *string
+	if caption != "" {
+		captionPtr = &caption
+	}
+	args := queue.SendMessageArgs{
+		InstanceID:  instanceID,
+		Phone:       types.StatusBroadcastJID.String(), // CRITICAL: Always use status@broadcast
+		MessageType: queue.MessageTypeVideoStatus,
+		VideoContent: &queue.MediaMessage{
+			MediaURL: video,
+			Caption:  captionPtr,
+		},
+		DelayMessage: delayMessage,
+	}
+
+	// Enqueue message
+	zaapID, err := h.enqueueMessage(ctx, instanceID, args)
+	if err != nil {
+		h.handleEnqueueError(ctx, w, err)
+		return
+	}
+
+	h.log.InfoContext(ctx, "video status enqueued successfully",
+		slog.String("zaap_id", zaapID),
+		slog.String("message_type", "video_status"))
+
+	response := h.newSendMessageResponse(zaapID, instStatus)
+	respondJSON(w, http.StatusOK, response)
 }
