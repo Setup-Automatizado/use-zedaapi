@@ -131,7 +131,7 @@ build_image() {
     VERSION="$ENVIRONMENT"
     COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 
-    log_cmd "docker build --platform linux/amd64 -f $DOCKERFILE --build-arg BUILD_TIME=$BUILD_TIME --build-arg VERSION=$VERSION --build-arg COMMIT=$COMMIT --target production -t $ECR_REPOSITORY:$ENVIRONMENT ."
+    log_cmd "docker build --platform linux/amd64 -f $DOCKERFILE --build-arg BUILD_TIME=$BUILD_TIME --build-arg VERSION=$VERSION --build-arg COMMIT=$COMMIT --target production -t $ECR_REPOSITORY:$ENVIRONMENT --load ."
 
     docker build \
         --platform linux/amd64 \
@@ -141,6 +141,7 @@ build_image() {
         --build-arg COMMIT="$COMMIT" \
         --target production \
         -t "$ECR_REPOSITORY:$ENVIRONMENT" \
+        --load \
         .
 
     log_info "Build concluido com sucesso"
@@ -176,7 +177,7 @@ push_image() {
 # --------------------------------------------------
 update_ecs_service() {
     ECS_CLUSTER="${ENVIRONMENT}-whatsmeow-cluster"
-    ECS_SERVICE="${ENVIRONMENT}-api-service"
+    ECS_SERVICE="${ENVIRONMENT}-whatsmeow-service"
 
     log_step "Verificando se servico ECS existe..."
 
