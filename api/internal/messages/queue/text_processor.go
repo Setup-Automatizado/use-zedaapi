@@ -63,7 +63,8 @@ func (p *TextProcessor) Process(ctx context.Context, client *wameow.Client, args
 			p.linkPreviewGen = NewLinkPreviewGenerator(client, p.log)
 		}
 
-		extendedText, err = p.linkPreviewGen.Generate(ctx, args.TextContent.Message, args.LinkPreview)
+		// Pass LinkPreviewOverride for custom metadata (e.g., from /send-link endpoint)
+		extendedText, err = p.linkPreviewGen.Generate(ctx, args.TextContent.Message, args.LinkPreview, args.LinkPreviewOverride)
 		if err != nil {
 			p.log.Warn("failed to generate link preview",
 				slog.String("error", err.Error()))

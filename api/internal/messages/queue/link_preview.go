@@ -60,14 +60,22 @@ func NewLinkPreviewGenerator(client *wameow.Client, log *slog.Logger) *LinkPrevi
 }
 
 // Generate generates complete link preview for text message
-func (l *LinkPreviewGenerator) Generate(ctx context.Context, messageText string, linkPreview *bool) (*waProto.ExtendedTextMessage, error) {
-	// Extract URLs from text
-	urls := extractLinksFromText(messageText)
-	if len(urls) == 0 {
-		return nil, nil
-	}
+// If override is provided, it uses the custom metadata instead of fetching from URL
+func (l *LinkPreviewGenerator) Generate(ctx context.Context, messageText string, linkPreview *bool, override *LinkPreviewOverride) (*waProto.ExtendedTextMessage, error) {
+	// Determine the link URL to use
+	var linkURL string
 
-	linkURL := urls[0] // Use first URL
+	// If override is provided with URL, use it
+	if override != nil && override.URL != "" {
+		linkURL = override.URL
+	} else {
+		// Extract URLs from text
+		urls := extractLinksFromText(messageText)
+		if len(urls) == 0 {
+			return nil, nil
+		}
+		linkURL = urls[0] // Use first URL
+	}
 
 	// Check if link preview is disabled
 	if linkPreview != nil && !*linkPreview {
@@ -80,13 +88,77 @@ func (l *LinkPreviewGenerator) Generate(ctx context.Context, messageText string,
 		}, nil
 	}
 
-	// Get metadata from URL
-	metadata, err := l.getMetadataFromURL(linkURL)
-	if err != nil {
-		l.log.Warn("failed to get metadata",
-			slog.String("url", linkURL),
-			slog.String("error", err.Error()))
-		return nil, nil
+	var metadata *LinkPreviewMetadata
+
+	// Check if we have custom override values
+	if override != nil && (override.Title != "" || override.Description != "" || override.Image != "") {
+		// Use custom override metadata
+		metadata = &LinkPreviewMetadata{
+			Title:       override.Title,
+			Description: override.Description,
+			Image:       override.Image,
+		}
+
+		// Download custom image if provided
+		if override.Image != "" {
+			l.log.Debug("downloading custom thumbnail",
+				slog.String("url", override.Image))
+
+			imgReq, err := http.NewRequestWithContext(ctx, "GET", override.Image, nil)
+			if err == nil {
+				imgReq.Header.Set("User-Agent", "WhatsApp/2.23.24.76")
+				imgResp, err := l.httpClient.Do(imgReq)
+				if err == nil && imgResp.StatusCode == http.StatusOK {
+					defer imgResp.Body.Close()
+
+					contentType := imgResp.Header.Get("Content-Type")
+					if strings.HasPrefix(contentType, "image/") {
+						imageData, err := io.ReadAll(io.LimitReader(imgResp.Body, 5*1024*1024))
+						if err == nil && len(imageData) > 0 {
+							metadata.ImageThumb = imageData
+
+							// Get dimensions
+							if img, _, err := image.Decode(bytes.NewReader(imageData)); err == nil {
+								bounds := img.Bounds()
+								width := uint32(bounds.Max.X - bounds.Min.X)
+								height := uint32(bounds.Max.Y - bounds.Min.Y)
+								metadata.Width = &width
+								metadata.Height = &height
+							}
+						}
+					}
+				}
+			}
+		}
+
+		// If no title was provided but we need to fetch it, get from URL
+		if metadata.Title == "" || metadata.Description == "" {
+			fetchedMeta, err := l.getMetadataFromURL(linkURL)
+			if err == nil {
+				if metadata.Title == "" {
+					metadata.Title = fetchedMeta.Title
+				}
+				if metadata.Description == "" {
+					metadata.Description = fetchedMeta.Description
+				}
+				// If no custom image was provided, use the fetched one
+				if len(metadata.ImageThumb) == 0 && len(fetchedMeta.ImageThumb) > 0 {
+					metadata.ImageThumb = fetchedMeta.ImageThumb
+					metadata.Width = fetchedMeta.Width
+					metadata.Height = fetchedMeta.Height
+				}
+			}
+		}
+	} else {
+		// Get metadata from URL (standard behavior)
+		var err error
+		metadata, err = l.getMetadataFromURL(linkURL)
+		if err != nil {
+			l.log.Warn("failed to get metadata",
+				slog.String("url", linkURL),
+				slog.String("error", err.Error()))
+			return nil, nil
+		}
 	}
 
 	// Build extended text message with link preview
