@@ -275,11 +275,16 @@ func (h *callRejectHandler) HandleCallOfferNotice(ctx context.Context, evt *even
 // 3. Fallback to From.User with DefaultUserServer
 func (h *callRejectHandler) resolveMessageJID(ctx context.Context, evt *events.CallOffer) types.JID {
 	// Strategy 1: Use CallCreatorAlt if available and on DefaultUserServer
+	// IMPORTANT: Always strip device part using ToNonAD() - desktop clients
+	// include device ID (e.g., :18) which causes SendMessage to fail with
+	// "message recipient must be a user JID with no device part"
 	if !evt.CallCreatorAlt.IsEmpty() {
 		if evt.CallCreatorAlt.Server == types.DefaultUserServer {
+			nonADJID := evt.CallCreatorAlt.ToNonAD()
 			h.log.Debug("using CallCreatorAlt for message JID",
-				slog.String("jid", evt.CallCreatorAlt.String()))
-			return evt.CallCreatorAlt
+				slog.String("original_jid", evt.CallCreatorAlt.String()),
+				slog.String("normalized_jid", nonADJID.String()))
+			return nonADJID
 		}
 	}
 
@@ -313,11 +318,16 @@ func (h *callRejectHandler) resolveMessageJID(ctx context.Context, evt *events.C
 // resolveMessageJIDFromNotice resolves the correct JID for CallOfferNotice events.
 func (h *callRejectHandler) resolveMessageJIDFromNotice(ctx context.Context, evt *events.CallOfferNotice) types.JID {
 	// Strategy 1: Use CallCreatorAlt if available and on DefaultUserServer
+	// IMPORTANT: Always strip device part using ToNonAD() - desktop clients
+	// include device ID (e.g., :18) which causes SendMessage to fail with
+	// "message recipient must be a user JID with no device part"
 	if !evt.CallCreatorAlt.IsEmpty() {
 		if evt.CallCreatorAlt.Server == types.DefaultUserServer {
+			nonADJID := evt.CallCreatorAlt.ToNonAD()
 			h.log.Debug("using CallCreatorAlt for message JID (notice)",
-				slog.String("jid", evt.CallCreatorAlt.String()))
-			return evt.CallCreatorAlt
+				slog.String("original_jid", evt.CallCreatorAlt.String()),
+				slog.String("normalized_jid", nonADJID.String()))
+			return nonADJID
 		}
 	}
 
