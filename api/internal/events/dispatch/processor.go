@@ -125,6 +125,14 @@ func (p *EventProcessor) Process(ctx context.Context, event *persistence.OutboxE
 		}
 	}
 
+	// Check if this event was persisted for status cache only (no webhook configured)
+	// If so, mark as completed since status cache already handled it
+	if p.isStatusCacheOnlyEvent(event) {
+		logger.Debug("status cache only event - no webhook delivery needed",
+			slog.String("event_id", event.EventID.String()))
+		return p.handleCachedStatusEvent(ctx, event, start)
+	}
+
 	deliveryResult, err := p.deliverWebhook(ctx, event, webhookPayload)
 	if err != nil {
 		return p.handleDeliveryError(ctx, event, err)
@@ -361,6 +369,22 @@ func (p *EventProcessor) isBusiness(ctx context.Context) bool {
 		return false
 	}
 	return isBusiness
+}
+
+// isStatusCacheOnlyEvent checks if this event was persisted for status cache only
+// (no webhook was configured at capture time, but status cache is enabled)
+func (p *EventProcessor) isStatusCacheOnlyEvent(event *persistence.OutboxEvent) bool {
+	if len(event.TransportConfig) == 0 {
+		return false
+	}
+	var cfg struct {
+		Type       string `json:"type"`
+		NoDelivery bool   `json:"no_delivery"`
+	}
+	if err := json.Unmarshal(event.TransportConfig, &cfg); err != nil {
+		return false
+	}
+	return cfg.Type == "status_cache_only" && cfg.NoDelivery
 }
 
 func (p *EventProcessor) handleTransformError(ctx context.Context, event *persistence.OutboxEvent, err error) error {
