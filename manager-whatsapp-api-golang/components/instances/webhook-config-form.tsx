@@ -141,7 +141,19 @@ export function WebhookConfigForm({
 		});
 	};
 
-	const handleClearAll = () => {
+	/**
+	 * Check if any webhook URL is configured (not empty)
+	 * Used to enable/disable Clear All button independently of dirty state
+	 */
+	const hasConfiguredWebhooks = webhookFields.some(
+		(field) => form.getValues(field.name),
+	);
+
+	/**
+	 * Clear all webhook URLs and persist to server
+	 * Unlike just resetting the form, this actually calls the API to clear webhooks
+	 */
+	const handleClearAll = async () => {
 		setIsClearing(true);
 
 		// Clear all webhook URLs but keep notifySentByMe
@@ -156,9 +168,26 @@ export function WebhookConfigForm({
 			notifySentByMe: notifySentByMe ?? false,
 		};
 
-		reset(clearedValues);
-		setIsClearing(false);
-		toast.info("All webhooks cleared");
+		try {
+			// Call API to persist the clearing
+			const result = await updateWebhookSettings(
+				instanceId,
+				instanceToken,
+				clearedValues,
+			);
+
+			if (result.success) {
+				reset(clearedValues);
+				toast.success("All webhooks cleared successfully");
+			} else {
+				toast.error(result.error || "Failed to clear webhooks");
+			}
+		} catch (error) {
+			console.error("Error clearing webhooks:", error);
+			toast.error("Error clearing webhooks");
+		} finally {
+			setIsClearing(false);
+		}
 	};
 
 	return (
@@ -226,9 +255,16 @@ export function WebhookConfigForm({
 						type="button"
 						variant="outline"
 						onClick={handleClearAll}
-						disabled={isPending || isClearing || !isDirty}
+						disabled={isPending || isClearing || !hasConfiguredWebhooks}
 					>
-						Clear All
+						{isClearing ? (
+							<>
+								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+								Clearing...
+							</>
+						) : (
+							"Clear All"
+						)}
 					</Button>
 
 					<div className="flex gap-3">
