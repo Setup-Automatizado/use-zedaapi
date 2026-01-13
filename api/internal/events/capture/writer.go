@@ -316,9 +316,16 @@ func resolveWebhookURL(event *types.InternalEvent, cfg *ResolvedWebhookConfig) (
 	switch event.EventType {
 	case "message":
 		fromMe := event.Metadata["from_me"] == "true"
+		// If fromMe and NotifySentByMe is disabled, filter out the message
 		if fromMe && !cfg.NotifySentByMe {
 			return "", ""
 		}
+		// When NotifySentByMe is enabled, use ReceivedDeliveryURL (receivedAndDeliveryCallbackUrl)
+		// This matches Z-API behavior: messages (received + sent by me) go to the combined endpoint
+		if cfg.NotifySentByMe && cfg.ReceivedDeliveryURL != "" {
+			return cfg.ReceivedDeliveryURL, "received"
+		}
+		// Default: use ReceivedURL for regular received messages
 		return cfg.ReceivedURL, "received"
 	case "receipt":
 		return cfg.ReceivedDeliveryURL, "receipt"
