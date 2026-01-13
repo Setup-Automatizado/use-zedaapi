@@ -194,7 +194,26 @@ export async function updateNotifySentByMe(
 }
 
 /**
+ * Webhook field to API type mapping
+ * Maps WebhookSettings fields to their corresponding API webhook types
+ */
+const WEBHOOK_FIELD_MAPPING: Array<{
+	field: keyof Omit<WebhookSettings, "notifySentByMe">;
+	type: WebhookType;
+}> = [
+	{ field: "deliveryCallbackUrl", type: "delivery" },
+	{ field: "receivedCallbackUrl", type: "received" },
+	{ field: "receivedAndDeliveryCallbackUrl", type: "received-delivery" },
+	{ field: "messageStatusCallbackUrl", type: "message-status" },
+	{ field: "connectedCallbackUrl", type: "connected" },
+	{ field: "disconnectedCallbackUrl", type: "disconnected" },
+	{ field: "presenceChatCallbackUrl", type: "chat-presence" },
+];
+
+/**
  * Updates multiple webhook settings at once
+ * Always sends all webhook fields to ensure clearing works correctly.
+ * Empty strings are sent to clear webhooks.
  *
  * @param instanceId - Instance identifier
  * @param instanceToken - Instance authentication token
@@ -212,85 +231,16 @@ export async function updateWebhookSettings(
 			return error("Instance ID and token are required");
 		}
 
-		// Update each webhook individually
-		const updates: Promise<WebhookUpdateResponse>[] = [];
-
-		if (settings.deliveryCallbackUrl !== undefined) {
-			updates.push(
-				apiUpdateWebhook(
-					instanceId,
-					instanceToken,
-					"delivery",
-					settings.deliveryCallbackUrl,
-				),
-			);
-		}
-
-		if (settings.receivedCallbackUrl !== undefined) {
-			updates.push(
-				apiUpdateWebhook(
-					instanceId,
-					instanceToken,
-					"received",
-					settings.receivedCallbackUrl,
-				),
-			);
-		}
-
-		if (settings.receivedAndDeliveryCallbackUrl !== undefined) {
-			updates.push(
-				apiUpdateWebhook(
-					instanceId,
-					instanceToken,
-					"received-delivery",
-					settings.receivedAndDeliveryCallbackUrl,
-				),
-			);
-		}
-
-		if (settings.messageStatusCallbackUrl !== undefined) {
-			updates.push(
-				apiUpdateWebhook(
-					instanceId,
-					instanceToken,
-					"message-status",
-					settings.messageStatusCallbackUrl,
-				),
-			);
-		}
-
-		if (settings.connectedCallbackUrl !== undefined) {
-			updates.push(
-				apiUpdateWebhook(
-					instanceId,
-					instanceToken,
-					"connected",
-					settings.connectedCallbackUrl,
-				),
-			);
-		}
-
-		if (settings.disconnectedCallbackUrl !== undefined) {
-			updates.push(
-				apiUpdateWebhook(
-					instanceId,
-					instanceToken,
-					"disconnected",
-					settings.disconnectedCallbackUrl,
-				),
-			);
-		}
-
-		if (settings.presenceChatCallbackUrl !== undefined) {
-			updates.push(
-				apiUpdateWebhook(
-					instanceId,
-					instanceToken,
-					"chat-presence",
-					settings.presenceChatCallbackUrl,
-				),
-			);
-		}
+		// Always update all webhook fields
+		// Use empty string for undefined values to ensure clearing works
+		const updates = WEBHOOK_FIELD_MAPPING.map(({ field, type }) =>
+			apiUpdateWebhook(
+				instanceId,
+				instanceToken,
+				type,
+				settings[field] ?? "", // undefined -> "" to clear webhook
+			),
+		);
 
 		// Wait for all updates to complete
 		await Promise.all(updates);
