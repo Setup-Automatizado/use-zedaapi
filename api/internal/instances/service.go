@@ -720,8 +720,9 @@ func toWebhookSettings(cfg *WebhookConfig) *WebhookSettings {
 
 func normalizeWebhookValue(value string) (string, error) {
 	trimmed := strings.TrimSpace(value)
+	// Allow empty value to clear the webhook
 	if trimmed == "" {
-		return "", ErrMissingWebhookValue
+		return "", nil
 	}
 	if !strings.HasPrefix(strings.ToLower(trimmed), "https://") && !strings.HasPrefix(strings.ToLower(trimmed), "http://") {
 		return "", ErrInvalidWebhookURL
@@ -745,6 +746,9 @@ func (s *Service) normalizeWebhookPointer(value *string) (*string, error) {
 }
 
 func strPtr(v string) *string {
+	if v == "" {
+		return nil
+	}
 	copyVal := v
 	return &copyVal
 }
