@@ -3,6 +3,7 @@ package statuscache
 import (
 	"context"
 	"log/slog"
+	"strings"
 	"sync"
 	"time"
 
@@ -58,13 +59,32 @@ func (s *ServiceImpl) CacheStatusEvent(ctx context.Context, event *StatusEvent, 
 		return false, nil
 	}
 
+	// DEBUG: Log values received for troubleshooting
+	s.log.Debug("service cache status check",
+		slog.String("instance_id", event.InstanceID),
+		slog.String("status", event.Status),
+		slog.Bool("is_group", event.IsGroup),
+		slog.Any("configured_types", s.cfg.StatusCache.Types),
+		slog.Any("configured_scope", s.cfg.StatusCache.Scope),
+	)
+
 	// Check if this status type should be cached
 	if !s.shouldCacheStatusType(event.Status) {
+		s.log.Debug("service cache skipped - status type not configured",
+			slog.String("instance_id", event.InstanceID),
+			slog.String("status", event.Status),
+			slog.Any("configured_types", s.cfg.StatusCache.Types),
+		)
 		return false, nil
 	}
 
 	// Check scope (groups vs direct)
 	if !s.shouldCacheScope(event.IsGroup) {
+		s.log.Debug("service cache skipped - scope mismatch",
+			slog.String("instance_id", event.InstanceID),
+			slog.Bool("is_group", event.IsGroup),
+			slog.Any("configured_scope", s.cfg.StatusCache.Scope),
+		)
 		return false, nil
 	}
 
@@ -157,9 +177,12 @@ func (s *ServiceImpl) CacheStatusEvent(ctx context.Context, event *StatusEvent, 
 }
 
 // shouldCacheStatusType checks if the status type is configured for caching
+// Uses case-insensitive comparison because config uses lowercase (read,delivered,played,sent)
+// but transformer returns UPPERCASE (READ,PLAYED,RECEIVED,SENT)
 func (s *ServiceImpl) shouldCacheStatusType(status string) bool {
+	statusLower := strings.ToLower(status)
 	for _, t := range s.cfg.StatusCache.Types {
-		if t == status {
+		if strings.ToLower(t) == statusLower {
 			return true
 		}
 	}
