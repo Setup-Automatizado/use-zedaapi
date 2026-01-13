@@ -7,6 +7,7 @@ import (
 	"time"
 
 	wameow "go.mau.fi/whatsmeow"
+	"go.mau.fi/whatsmeow/api/internal/events/echo"
 	"go.mau.fi/whatsmeow/api/internal/messages/interactive"
 	waProto "go.mau.fi/whatsmeow/binary/proto"
 	"go.mau.fi/whatsmeow/proto/waE2E"
@@ -21,26 +22,29 @@ type InteractiveZAPIProcessor struct {
 	presenceHelper *PresenceHelper
 	mediaProcessor *InteractiveMediaProcessor
 	log            *slog.Logger
+	echoEmitter    *echo.Emitter
 }
 
 // NewInteractiveZAPIProcessor creates a new FUNNELCHAT interactive message processor
-func NewInteractiveZAPIProcessor(log *slog.Logger) *InteractiveZAPIProcessor {
+func NewInteractiveZAPIProcessor(log *slog.Logger, echoEmitter *echo.Emitter) *InteractiveZAPIProcessor {
 	return &InteractiveZAPIProcessor{
 		protoBuilder:   interactive.NewProtoBuilder(),
 		presenceHelper: NewPresenceHelper(),
 		mediaProcessor: nil, // Will be initialized per-client
 		log:            log.With(slog.String("processor", "interactive_zapi")),
+		echoEmitter:    echoEmitter,
 	}
 }
 
 // NewInteractiveZAPIProcessorWithClient creates a new FUNNELCHAT interactive message processor with a WhatsApp client
 // for media processing capabilities (thumbnail generation, upload, etc.)
-func NewInteractiveZAPIProcessorWithClient(client *wameow.Client, log *slog.Logger) *InteractiveZAPIProcessor {
+func NewInteractiveZAPIProcessorWithClient(client *wameow.Client, log *slog.Logger, echoEmitter *echo.Emitter) *InteractiveZAPIProcessor {
 	return &InteractiveZAPIProcessor{
 		protoBuilder:   interactive.NewProtoBuilder(),
 		presenceHelper: NewPresenceHelper(),
 		mediaProcessor: NewInteractiveMediaProcessor(client, log),
 		log:            log.With(slog.String("processor", "interactive_zapi")),
+		echoEmitter:    echoEmitter,
 	}
 }
 
@@ -134,6 +138,26 @@ func (p *InteractiveZAPIProcessor) ProcessButtonList(ctx context.Context, client
 		slog.Time("timestamp", resp.Timestamp))
 
 	args.WhatsAppMessageID = resp.ID
+
+	// Emit API echo event for webhook notification
+	if p.echoEmitter != nil {
+		echoReq := &echo.EchoRequest{
+			InstanceID:        args.InstanceID,
+			WhatsAppMessageID: resp.ID,
+			RecipientJID:      recipientJID,
+			Message:           msg,
+			Timestamp:         resp.Timestamp,
+			MessageType:       "button_list",
+			ZaapID:            args.ZaapID,
+			HasMedia:          mediaHeader != nil,
+		}
+		if err := p.echoEmitter.EmitEcho(ctx, echoReq); err != nil {
+			p.log.Warn("failed to emit API echo",
+				slog.String("error", err.Error()),
+				slog.String("zaap_id", args.ZaapID))
+		}
+	}
+
 	return nil
 }
 
@@ -239,6 +263,26 @@ func (p *InteractiveZAPIProcessor) ProcessButtonActions(ctx context.Context, cli
 		slog.Time("timestamp", resp.Timestamp))
 
 	args.WhatsAppMessageID = resp.ID
+
+	// Emit API echo event for webhook notification
+	if p.echoEmitter != nil {
+		echoReq := &echo.EchoRequest{
+			InstanceID:        args.InstanceID,
+			WhatsAppMessageID: resp.ID,
+			RecipientJID:      recipientJID,
+			Message:           msg,
+			Timestamp:         resp.Timestamp,
+			MessageType:       "button_actions",
+			ZaapID:            args.ZaapID,
+			HasMedia:          mediaHeader != nil,
+		}
+		if err := p.echoEmitter.EmitEcho(ctx, echoReq); err != nil {
+			p.log.Warn("failed to emit API echo",
+				slog.String("error", err.Error()),
+				slog.String("zaap_id", args.ZaapID))
+		}
+	}
+
 	return nil
 }
 
@@ -307,6 +351,26 @@ func (p *InteractiveZAPIProcessor) ProcessOptionList(ctx context.Context, client
 		slog.Time("timestamp", resp.Timestamp))
 
 	args.WhatsAppMessageID = resp.ID
+
+	// Emit API echo event for webhook notification
+	if p.echoEmitter != nil {
+		echoReq := &echo.EchoRequest{
+			InstanceID:        args.InstanceID,
+			WhatsAppMessageID: resp.ID,
+			RecipientJID:      recipientJID,
+			Message:           msg,
+			Timestamp:         resp.Timestamp,
+			MessageType:       "option_list",
+			ZaapID:            args.ZaapID,
+			HasMedia:          false,
+		}
+		if err := p.echoEmitter.EmitEcho(ctx, echoReq); err != nil {
+			p.log.Warn("failed to emit API echo",
+				slog.String("error", err.Error()),
+				slog.String("zaap_id", args.ZaapID))
+		}
+	}
+
 	return nil
 }
 
@@ -358,6 +422,26 @@ func (p *InteractiveZAPIProcessor) ProcessButtonPIX(ctx context.Context, client 
 		slog.Time("timestamp", resp.Timestamp))
 
 	args.WhatsAppMessageID = resp.ID
+
+	// Emit API echo event for webhook notification
+	if p.echoEmitter != nil {
+		echoReq := &echo.EchoRequest{
+			InstanceID:        args.InstanceID,
+			WhatsAppMessageID: resp.ID,
+			RecipientJID:      recipientJID,
+			Message:           msg,
+			Timestamp:         resp.Timestamp,
+			MessageType:       "button_pix",
+			ZaapID:            args.ZaapID,
+			HasMedia:          false,
+		}
+		if err := p.echoEmitter.EmitEcho(ctx, echoReq); err != nil {
+			p.log.Warn("failed to emit API echo",
+				slog.String("error", err.Error()),
+				slog.String("zaap_id", args.ZaapID))
+		}
+	}
+
 	return nil
 }
 
@@ -408,6 +492,26 @@ func (p *InteractiveZAPIProcessor) ProcessButtonOTP(ctx context.Context, client 
 		slog.Time("timestamp", resp.Timestamp))
 
 	args.WhatsAppMessageID = resp.ID
+
+	// Emit API echo event for webhook notification
+	if p.echoEmitter != nil {
+		echoReq := &echo.EchoRequest{
+			InstanceID:        args.InstanceID,
+			WhatsAppMessageID: resp.ID,
+			RecipientJID:      recipientJID,
+			Message:           msg,
+			Timestamp:         resp.Timestamp,
+			MessageType:       "button_otp",
+			ZaapID:            args.ZaapID,
+			HasMedia:          false,
+		}
+		if err := p.echoEmitter.EmitEcho(ctx, echoReq); err != nil {
+			p.log.Warn("failed to emit API echo",
+				slog.String("error", err.Error()),
+				slog.String("zaap_id", args.ZaapID))
+		}
+	}
+
 	return nil
 }
 
@@ -506,6 +610,26 @@ func (p *InteractiveZAPIProcessor) ProcessCarousel(ctx context.Context, client *
 		slog.Time("timestamp", resp.Timestamp))
 
 	args.WhatsAppMessageID = resp.ID
+
+	// Emit API echo event for webhook notification
+	if p.echoEmitter != nil {
+		echoReq := &echo.EchoRequest{
+			InstanceID:        args.InstanceID,
+			WhatsAppMessageID: resp.ID,
+			RecipientJID:      recipientJID,
+			Message:           msg,
+			Timestamp:         resp.Timestamp,
+			MessageType:       "carousel",
+			ZaapID:            args.ZaapID,
+			HasMedia:          hasAnyMedia,
+		}
+		if err := p.echoEmitter.EmitEcho(ctx, echoReq); err != nil {
+			p.log.Warn("failed to emit API echo",
+				slog.String("error", err.Error()),
+				slog.String("zaap_id", args.ZaapID))
+		}
+	}
+
 	return nil
 }
 

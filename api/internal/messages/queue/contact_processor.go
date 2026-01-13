@@ -8,19 +8,23 @@ import (
 	wameow "go.mau.fi/whatsmeow"
 	waProto "go.mau.fi/whatsmeow/binary/proto"
 	"go.mau.fi/whatsmeow/types"
+
+	"go.mau.fi/whatsmeow/api/internal/events/echo"
 )
 
 // ContactProcessor handles contact message sending via WhatsApp
 type ContactProcessor struct {
 	log            *slog.Logger
 	presenceHelper *PresenceHelper
+	echoEmitter    *echo.Emitter
 }
 
 // NewContactProcessor creates a new contact message processor
-func NewContactProcessor(log *slog.Logger) *ContactProcessor {
+func NewContactProcessor(log *slog.Logger, echoEmitter *echo.Emitter) *ContactProcessor {
 	return &ContactProcessor{
 		log:            log.With(slog.String("processor", "contact")),
 		presenceHelper: NewPresenceHelper(),
+		echoEmitter:    echoEmitter,
 	}
 }
 
@@ -111,6 +115,25 @@ func (p *ContactProcessor) Process(ctx context.Context, client *wameow.Client, a
 		slog.Time("timestamp", resp.Timestamp))
 
 	args.WhatsAppMessageID = resp.ID
+
+	// Emit API echo event for webhook notification
+	if p.echoEmitter != nil {
+		echoReq := &echo.EchoRequest{
+			InstanceID:        args.InstanceID,
+			WhatsAppMessageID: resp.ID,
+			RecipientJID:      recipientJID,
+			Message:           msg,
+			Timestamp:         resp.Timestamp,
+			MessageType:       "contact",
+			ZaapID:            args.ZaapID,
+			HasMedia:          false,
+		}
+		if err := p.echoEmitter.EmitEcho(ctx, echoReq); err != nil {
+			p.log.Warn("failed to emit API echo",
+				slog.String("error", err.Error()),
+				slog.String("zaap_id", args.ZaapID))
+		}
+	}
 
 	return nil
 }
@@ -510,6 +533,25 @@ func (p *ContactProcessor) ProcessMultiple(ctx context.Context, client *wameow.C
 		slog.Time("timestamp", resp.Timestamp))
 
 	args.WhatsAppMessageID = resp.ID
+
+	// Emit API echo event for webhook notification
+	if p.echoEmitter != nil {
+		echoReq := &echo.EchoRequest{
+			InstanceID:        args.InstanceID,
+			WhatsAppMessageID: resp.ID,
+			RecipientJID:      recipientJID,
+			Message:           msg,
+			Timestamp:         resp.Timestamp,
+			MessageType:       "contacts",
+			ZaapID:            args.ZaapID,
+			HasMedia:          false,
+		}
+		if err := p.echoEmitter.EmitEcho(ctx, echoReq); err != nil {
+			p.log.Warn("failed to emit API echo",
+				slog.String("error", err.Error()),
+				slog.String("zaap_id", args.ZaapID))
+		}
+	}
 
 	return nil
 }

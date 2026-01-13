@@ -6,6 +6,7 @@ import (
 	"log/slog"
 
 	wameow "go.mau.fi/whatsmeow"
+	"go.mau.fi/whatsmeow/api/internal/events/echo"
 	waProto "go.mau.fi/whatsmeow/binary/proto"
 	"go.mau.fi/whatsmeow/types"
 	"google.golang.org/protobuf/proto"
@@ -19,14 +20,16 @@ type PTVProcessor struct {
 	mediaDownloader *MediaDownloader
 	thumbGenerator  *ThumbnailGenerator
 	presenceHelper  *PresenceHelper
+	echoEmitter     *echo.Emitter
 }
 
 // NewPTVProcessor creates a new PTV (circular video) message processor
-func NewPTVProcessor(log *slog.Logger) *PTVProcessor {
+func NewPTVProcessor(log *slog.Logger, echoEmitter *echo.Emitter) *PTVProcessor {
 	return &PTVProcessor{
 		log:             log.With(slog.String("processor", "ptv")),
 		mediaDownloader: NewMediaDownloader(16), // 16MB max for PTV (short clips)
 		presenceHelper:  NewPresenceHelper(),
+		echoEmitter:     echoEmitter,
 	}
 }
 
@@ -124,6 +127,26 @@ func (p *PTVProcessor) Process(ctx context.Context, client *wameow.Client, args 
 		slog.Time("timestamp", resp.Timestamp))
 
 	args.WhatsAppMessageID = resp.ID
+
+	// Emit API echo event for webhook notification
+	if p.echoEmitter != nil {
+		echoReq := &echo.EchoRequest{
+			InstanceID:        args.InstanceID,
+			WhatsAppMessageID: resp.ID,
+			RecipientJID:      recipientJID,
+			Message:           msg,
+			Timestamp:         resp.Timestamp,
+			MessageType:       "ptv",
+			MediaType:         "video",
+			ZaapID:            args.ZaapID,
+			HasMedia:          true,
+		}
+		if err := p.echoEmitter.EmitEcho(ctx, echoReq); err != nil {
+			p.log.Warn("failed to emit API echo",
+				slog.String("error", err.Error()),
+				slog.String("zaap_id", args.ZaapID))
+		}
+	}
 
 	return nil
 }

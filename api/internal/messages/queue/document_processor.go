@@ -11,6 +11,8 @@ import (
 	waProto "go.mau.fi/whatsmeow/binary/proto"
 	"go.mau.fi/whatsmeow/types"
 	"google.golang.org/protobuf/proto"
+
+	"go.mau.fi/whatsmeow/api/internal/events/echo"
 )
 
 // DocumentProcessor handles document message sending via WhatsApp
@@ -19,14 +21,16 @@ type DocumentProcessor struct {
 	mediaDownloader *MediaDownloader
 	thumbGenerator  *ThumbnailGenerator
 	presenceHelper  *PresenceHelper
+	echoEmitter     *echo.Emitter
 }
 
 // NewDocumentProcessor creates a new document message processor
-func NewDocumentProcessor(log *slog.Logger) *DocumentProcessor {
+func NewDocumentProcessor(log *slog.Logger, echoEmitter *echo.Emitter) *DocumentProcessor {
 	return &DocumentProcessor{
 		log:             log.With(slog.String("processor", "document")),
 		mediaDownloader: NewMediaDownloader(1000), // 1000MB max for documents
 		presenceHelper:  NewPresenceHelper(),
+		echoEmitter:     echoEmitter,
 	}
 }
 
@@ -112,6 +116,26 @@ func (p *DocumentProcessor) Process(ctx context.Context, client *wameow.Client, 
 		slog.Time("timestamp", resp.Timestamp))
 
 	args.WhatsAppMessageID = resp.ID
+
+	// Emit API echo event for webhook notification
+	if p.echoEmitter != nil {
+		echoReq := &echo.EchoRequest{
+			InstanceID:        args.InstanceID,
+			WhatsAppMessageID: resp.ID,
+			RecipientJID:      recipientJID,
+			Message:           msg,
+			Timestamp:         resp.Timestamp,
+			MessageType:       "document",
+			MediaType:         "document",
+			ZaapID:            args.ZaapID,
+			HasMedia:          true,
+		}
+		if err := p.echoEmitter.EmitEcho(ctx, echoReq); err != nil {
+			p.log.Warn("failed to emit API echo",
+				slog.String("error", err.Error()),
+				slog.String("zaap_id", args.ZaapID))
+		}
+	}
 
 	return nil
 }

@@ -7,6 +7,8 @@ import (
 	"log/slog"
 
 	wameow "go.mau.fi/whatsmeow"
+
+	"go.mau.fi/whatsmeow/api/internal/events/echo"
 )
 
 // WhatsAppMessageProcessor orchestrates message processing by delegating to type-specific processors
@@ -26,26 +28,29 @@ type WhatsAppMessageProcessor struct {
 	pollProcessor            *PollProcessor
 	eventProcessor           *EventProcessor
 	statusProcessor          *StatusProcessor
+	echoEmitter              *echo.Emitter
 	log                      *slog.Logger
 }
 
 // NewWhatsAppMessageProcessor creates a new message processor with all type-specific processors
-func NewWhatsAppMessageProcessor(log *slog.Logger) *WhatsAppMessageProcessor {
+// echoEmitter can be nil if API echo is disabled
+func NewWhatsAppMessageProcessor(log *slog.Logger, echoEmitter *echo.Emitter) *WhatsAppMessageProcessor {
 	return &WhatsAppMessageProcessor{
-		textProcessor:            NewTextProcessor(log),
-		imageProcessor:           NewImageProcessor(log),
-		audioProcessor:           NewAudioProcessor(log),
-		videoProcessor:           NewVideoProcessor(log),
-		documentProcessor:        NewDocumentProcessor(log),
-		stickerProcessor:         NewStickerProcessor(log),
-		ptvProcessor:             NewPTVProcessor(log),
-		locationProcessor:        NewLocationProcessor(log),
-		contactProcessor:         NewContactProcessor(log),
-		interactiveProcessor:     NewInteractiveProcessor(log),
-		interactiveZAPIProcessor: NewInteractiveZAPIProcessor(log),
-		pollProcessor:            NewPollProcessor(log),
-		eventProcessor:           NewEventProcessor(log),
-		statusProcessor:          NewStatusProcessor(log),
+		textProcessor:            NewTextProcessor(log, echoEmitter),
+		imageProcessor:           NewImageProcessor(log, echoEmitter),
+		audioProcessor:           NewAudioProcessor(log, echoEmitter),
+		videoProcessor:           NewVideoProcessor(log, echoEmitter),
+		documentProcessor:        NewDocumentProcessor(log, echoEmitter),
+		stickerProcessor:         NewStickerProcessor(log, echoEmitter),
+		ptvProcessor:             NewPTVProcessor(log, echoEmitter),
+		locationProcessor:        NewLocationProcessor(log, echoEmitter),
+		contactProcessor:         NewContactProcessor(log, echoEmitter),
+		interactiveProcessor:     NewInteractiveProcessor(log, echoEmitter),
+		interactiveZAPIProcessor: NewInteractiveZAPIProcessor(log, echoEmitter),
+		pollProcessor:            NewPollProcessor(log, echoEmitter),
+		eventProcessor:           NewEventProcessor(log, echoEmitter),
+		statusProcessor:          NewStatusProcessor(log, echoEmitter),
+		echoEmitter:              echoEmitter,
 		log:                      log,
 	}
 }

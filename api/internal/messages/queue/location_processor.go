@@ -8,19 +8,23 @@ import (
 	wameow "go.mau.fi/whatsmeow"
 	waProto "go.mau.fi/whatsmeow/binary/proto"
 	"go.mau.fi/whatsmeow/types"
+
+	"go.mau.fi/whatsmeow/api/internal/events/echo"
 )
 
 // LocationProcessor handles location message sending via WhatsApp
 type LocationProcessor struct {
 	log            *slog.Logger
 	presenceHelper *PresenceHelper
+	echoEmitter    *echo.Emitter
 }
 
 // NewLocationProcessor creates a new location message processor
-func NewLocationProcessor(log *slog.Logger) *LocationProcessor {
+func NewLocationProcessor(log *slog.Logger, echoEmitter *echo.Emitter) *LocationProcessor {
 	return &LocationProcessor{
 		log:            log.With(slog.String("processor", "location")),
 		presenceHelper: NewPresenceHelper(),
+		echoEmitter:    echoEmitter,
 	}
 }
 
@@ -95,6 +99,25 @@ func (p *LocationProcessor) Process(ctx context.Context, client *wameow.Client, 
 		slog.Time("timestamp", resp.Timestamp))
 
 	args.WhatsAppMessageID = resp.ID
+
+	// Emit API echo event for webhook notification
+	if p.echoEmitter != nil {
+		echoReq := &echo.EchoRequest{
+			InstanceID:        args.InstanceID,
+			WhatsAppMessageID: resp.ID,
+			RecipientJID:      recipientJID,
+			Message:           msg,
+			Timestamp:         resp.Timestamp,
+			MessageType:       "location",
+			ZaapID:            args.ZaapID,
+			HasMedia:          false,
+		}
+		if err := p.echoEmitter.EmitEcho(ctx, echoReq); err != nil {
+			p.log.Warn("failed to emit API echo",
+				slog.String("error", err.Error()),
+				slog.String("zaap_id", args.ZaapID))
+		}
+	}
 
 	return nil
 }

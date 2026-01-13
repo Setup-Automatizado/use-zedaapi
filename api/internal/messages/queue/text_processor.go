@@ -8,19 +8,23 @@ import (
 	wameow "go.mau.fi/whatsmeow"
 	waProto "go.mau.fi/whatsmeow/binary/proto"
 	"go.mau.fi/whatsmeow/types"
+
+	"go.mau.fi/whatsmeow/api/internal/events/echo"
 )
 
 // TextProcessor handles text message sending via WhatsApp
 type TextProcessor struct {
 	presenceHelper *PresenceHelper
 	linkPreviewGen *LinkPreviewGenerator
+	echoEmitter    *echo.Emitter
 	log            *slog.Logger
 }
 
 // NewTextProcessor creates a new text message processor
-func NewTextProcessor(log *slog.Logger) *TextProcessor {
+func NewTextProcessor(log *slog.Logger, echoEmitter *echo.Emitter) *TextProcessor {
 	return &TextProcessor{
 		presenceHelper: NewPresenceHelper(),
+		echoEmitter:    echoEmitter,
 		log:            log.With(slog.String("processor", "text")),
 	}
 }
@@ -88,6 +92,26 @@ func (p *TextProcessor) Process(ctx context.Context, client *wameow.Client, args
 		slog.Bool("has_link_preview", extendedText != nil))
 
 	args.WhatsAppMessageID = resp.ID
+
+	// Emit API echo event for webhook notification
+	if p.echoEmitter != nil {
+		echoReq := &echo.EchoRequest{
+			InstanceID:        args.InstanceID,
+			WhatsAppMessageID: resp.ID,
+			RecipientJID:      recipientJID,
+			Message:           msg,
+			Timestamp:         resp.Timestamp,
+			MessageType:       "text",
+			ZaapID:            args.ZaapID,
+			HasMedia:          false,
+		}
+		if err := p.echoEmitter.EmitEcho(ctx, echoReq); err != nil {
+			p.log.Warn("failed to emit API echo",
+				slog.String("error", err.Error()),
+				slog.String("zaap_id", args.ZaapID))
+		}
+	}
+
 	return nil
 }
 

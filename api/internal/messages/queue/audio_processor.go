@@ -9,6 +9,8 @@ import (
 	waProto "go.mau.fi/whatsmeow/binary/proto"
 	"go.mau.fi/whatsmeow/types"
 	"google.golang.org/protobuf/proto"
+
+	"go.mau.fi/whatsmeow/api/internal/events/echo"
 )
 
 // AudioProcessor handles audio message sending via WhatsApp
@@ -19,15 +21,17 @@ type AudioProcessor struct {
 	mediaDownloader *MediaDownloader
 	audioConverter  *AudioConverter
 	presenceHelper  *PresenceHelper
+	echoEmitter     *echo.Emitter
 }
 
 // NewAudioProcessor creates a new audio message processor
-func NewAudioProcessor(log *slog.Logger) *AudioProcessor {
+func NewAudioProcessor(log *slog.Logger, echoEmitter *echo.Emitter) *AudioProcessor {
 	return &AudioProcessor{
 		log:             log.With(slog.String("processor", "audio")),
 		mediaDownloader: NewMediaDownloader(100), // 100MB max for audio
 		audioConverter:  NewAudioConverter(log),
 		presenceHelper:  NewPresenceHelper(),
+		echoEmitter:     echoEmitter,
 	}
 }
 
@@ -155,6 +159,26 @@ func (p *AudioProcessor) Process(ctx context.Context, client *wameow.Client, arg
 		slog.Time("timestamp", resp.Timestamp))
 
 	args.WhatsAppMessageID = resp.ID
+
+	// Emit API echo event for webhook notification
+	if p.echoEmitter != nil {
+		echoReq := &echo.EchoRequest{
+			InstanceID:        args.InstanceID,
+			WhatsAppMessageID: resp.ID,
+			RecipientJID:      recipientJID,
+			Message:           msg,
+			Timestamp:         resp.Timestamp,
+			MessageType:       "audio",
+			MediaType:         "audio",
+			ZaapID:            args.ZaapID,
+			HasMedia:          true,
+		}
+		if err := p.echoEmitter.EmitEcho(ctx, echoReq); err != nil {
+			p.log.Warn("failed to emit API echo",
+				slog.String("error", err.Error()),
+				slog.String("zaap_id", args.ZaapID))
+		}
+	}
 
 	return nil
 }

@@ -9,6 +9,8 @@ import (
 	waProto "go.mau.fi/whatsmeow/binary/proto"
 	"go.mau.fi/whatsmeow/types"
 	"google.golang.org/protobuf/proto"
+
+	"go.mau.fi/whatsmeow/api/internal/events/echo"
 )
 
 // VideoProcessor handles video message sending via WhatsApp
@@ -17,14 +19,16 @@ type VideoProcessor struct {
 	mediaDownloader *MediaDownloader
 	thumbGenerator  *ThumbnailGenerator
 	presenceHelper  *PresenceHelper
+	echoEmitter     *echo.Emitter
 }
 
 // NewVideoProcessor creates a new video message processor
-func NewVideoProcessor(log *slog.Logger) *VideoProcessor {
+func NewVideoProcessor(log *slog.Logger, echoEmitter *echo.Emitter) *VideoProcessor {
 	return &VideoProcessor{
 		log:             log.With(slog.String("processor", "video")),
 		mediaDownloader: NewMediaDownloader(100), // 100MB max for videos
 		presenceHelper:  NewPresenceHelper(),
+		echoEmitter:     echoEmitter,
 	}
 }
 
@@ -121,6 +125,26 @@ func (p *VideoProcessor) Process(ctx context.Context, client *wameow.Client, arg
 		slog.Time("timestamp", resp.Timestamp))
 
 	args.WhatsAppMessageID = resp.ID
+
+	// Emit API echo event for webhook notification
+	if p.echoEmitter != nil {
+		echoReq := &echo.EchoRequest{
+			InstanceID:        args.InstanceID,
+			WhatsAppMessageID: resp.ID,
+			RecipientJID:      recipientJID,
+			Message:           msg,
+			Timestamp:         resp.Timestamp,
+			MessageType:       "video",
+			MediaType:         "video",
+			ZaapID:            args.ZaapID,
+			HasMedia:          true,
+		}
+		if err := p.echoEmitter.EmitEcho(ctx, echoReq); err != nil {
+			p.log.Warn("failed to emit API echo",
+				slog.String("error", err.Error()),
+				slog.String("zaap_id", args.ZaapID))
+		}
+	}
 
 	return nil
 }

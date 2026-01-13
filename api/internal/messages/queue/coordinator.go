@@ -10,6 +10,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"go.mau.fi/whatsmeow/api/internal/events/echo"
 	"go.mau.fi/whatsmeow/api/internal/observability"
 )
 
@@ -50,6 +51,7 @@ type CoordinatorConfig struct {
 	Config         *Config
 	Logger         *slog.Logger
 	Metrics        *observability.Metrics
+	EchoEmitter    *echo.Emitter // API echo emitter for webhook notifications
 
 	// Cleanup configuration
 	CleanupInterval time.Duration // How often to run cleanup (default: 1h)
@@ -84,7 +86,8 @@ func NewCoordinator(ctx context.Context, cfg *CoordinatorConfig) (*Coordinator, 
 	// Create processor if not provided
 	processor := cfg.Processor
 	if processor == nil {
-		processor = NewDefaultMessageProcessor(cfg.Logger)
+		// Use WhatsAppMessageProcessor with echo emitter for API webhook notifications
+		processor = NewWhatsAppMessageProcessor(cfg.Logger, cfg.EchoEmitter)
 	}
 
 	ctx, cancel := context.WithCancel(ctx)
