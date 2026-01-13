@@ -56,7 +56,7 @@ export default function InstancePage({ params }: InstancePageProps) {
 	];
 	const defaultTab =
 		tabParam && validTabs.includes(tabParam) ? tabParam : "overview";
-	const { instance, isLoading, mutate } = useInstance(resolvedParams.id);
+	const { instance, isLoading, error, mutate } = useInstance(resolvedParams.id);
 	const { isConnected, smartphoneConnected } = useInstanceStatus(
 		resolvedParams.id,
 		{
