@@ -55,6 +55,7 @@ type transportConfig struct {
 
 type InstanceLookup interface {
 	StoreJID(ctx context.Context, instanceID uuid.UUID) (string, error)
+	IsBusiness(ctx context.Context, instanceID uuid.UUID) (bool, error)
 }
 
 func NewEventProcessor(
@@ -173,13 +174,14 @@ func (p *EventProcessor) transformEvent(ctx context.Context, event *persistence.
 	}
 
 	connectedPhone := p.connectedPhone(ctx)
+	isBusiness := p.isBusiness(ctx)
 	debugRaw := false
 	dumpDir := ""
 	if p.cfg != nil {
 		debugRaw = p.cfg.Events.DebugRawPayload
 		dumpDir = p.cfg.Events.DebugDumpDir
 	}
-	zapiTransformer := transformzapi.NewTransformer(connectedPhone, debugRaw, dumpDir, p.pollStore)
+	zapiTransformer := transformzapi.NewTransformer(connectedPhone, isBusiness, debugRaw, dumpDir, p.pollStore)
 
 	payload, err := zapiTransformer.Transform(ctx, internalEvent)
 	if err != nil {
@@ -348,6 +350,17 @@ func (p *EventProcessor) connectedPhone(ctx context.Context) string {
 		jid = jid[:colon]
 	}
 	return jid
+}
+
+func (p *EventProcessor) isBusiness(ctx context.Context) bool {
+	if p.lookup == nil {
+		return false
+	}
+	isBusiness, err := p.lookup.IsBusiness(ctx, p.instanceID)
+	if err != nil {
+		return false
+	}
+	return isBusiness
 }
 
 func (p *EventProcessor) handleTransformError(ctx context.Context, event *persistence.OutboxEvent, err error) error {
