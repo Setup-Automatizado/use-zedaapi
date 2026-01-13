@@ -85,6 +85,7 @@ func (h *StatusCacheHandler) getMessagesStatus(w http.ResponseWriter, r *http.Re
 	)
 
 	// Determine query type based on parameters
+	// If no filter provided, return ALL entries (paginated)
 	switch {
 	case messageID != "":
 		h.handleMessageIDQuery(ctx, w, instanceID.String(), messageID, format, params.IncludeParticipants)
@@ -93,7 +94,8 @@ func (h *StatusCacheHandler) getMessagesStatus(w http.ResponseWriter, r *http.Re
 	case phone != "":
 		h.handlePhoneQuery(ctx, w, instanceID.String(), phone, format, params)
 	default:
-		respondError(w, http.StatusBadRequest, "missing required parameter: messageId, groupId, or phone")
+		// No filter = return ALL entries with pagination
+		h.handleAllQuery(ctx, w, instanceID.String(), format, params)
 	}
 }
 
@@ -174,6 +176,38 @@ func (h *StatusCacheHandler) handlePhoneQuery(ctx context.Context, w http.Respon
 	result, err := h.service.QueryByPhone(ctx, instanceID, phone, params)
 	if err != nil {
 		h.log.Error("failed to query by phone", slog.String("error", err.Error()))
+		respondError(w, http.StatusInternalServerError, "failed to query status cache")
+		return
+	}
+	respondJSON(w, http.StatusOK, result)
+}
+
+// handleAllQuery handles queries without filters - returns ALL cached entries with pagination
+// Use format=raw to get data in EXACT webhook payload format (RawStatusPayload)
+func (h *StatusCacheHandler) handleAllQuery(ctx context.Context, w http.ResponseWriter, instanceID, format string, params statuscache.QueryParams) {
+	h.log.Debug("querying all status cache entries",
+		slog.String("instance_id", instanceID),
+		slog.String("format", format),
+		slog.Int("limit", params.Limit),
+		slog.Int("offset", params.Offset),
+	)
+
+	if format == "raw" {
+		// Raw format = EXACT webhook payload structure (RawStatusPayload)
+		result, err := h.service.QueryRawAll(ctx, instanceID, params)
+		if err != nil {
+			h.log.Error("failed to query raw all", slog.String("error", err.Error()))
+			respondError(w, http.StatusInternalServerError, "failed to query status cache")
+			return
+		}
+		respondJSON(w, http.StatusOK, result)
+		return
+	}
+
+	// Aggregated format (default)
+	result, err := h.service.QueryAll(ctx, instanceID, params)
+	if err != nil {
+		h.log.Error("failed to query all", slog.String("error", err.Error()))
 		respondError(w, http.StatusInternalServerError, "failed to query status cache")
 		return
 	}

@@ -12569,6 +12569,7 @@ paths:
         You can use Status Cache in API-only mode (pull) without configuring any webhooks.
 
         **Query Types:**
+        - **No filter**: Get ALL cached statuses for the instance (paginated)
         - By `messageId`: Get status for a specific message
         - By `groupId`: Get all message statuses for a group
         - By `phone`: Get all message statuses for a phone number
@@ -12735,6 +12736,73 @@ paths:
                       total: 1
                       limit: 100
                       offset: 0
+                allStatuses:
+                  summary: All cached statuses (no filter)
+                  description: When no filter is provided, returns all cached statuses for the instance with pagination
+                  value:
+                    data:
+                      - messageId: "3EB0A1B2C3D4E5F6"
+                        instanceId: "550e8400-e29b-41d4-a716-446655440000"
+                        groupId: "120363182823169824"
+                        phone: "120363182823169824-group"
+                        isGroup: true
+                        totalParticipants: 50
+                        status:
+                          sent: 50
+                          delivered: 45
+                          read: 20
+                          played: 0
+                        createdAt: 1703548800000
+                        updatedAt: 1703552400000
+                      - messageId: "3EB0A1B2C3D4E5F7"
+                        instanceId: "550e8400-e29b-41d4-a716-446655440000"
+                        phone: "5511999999999"
+                        isGroup: false
+                        totalParticipants: 1
+                        status:
+                          sent: 1
+                          delivered: 1
+                          read: 1
+                          played: 0
+                        createdAt: 1703548900000
+                        updatedAt: 1703549000000
+                    meta:
+                      total: 150
+                      limit: 100
+                      offset: 0
+                allStatusesRaw:
+                  summary: All cached statuses in raw/webhook format
+                  description: Use format=raw to get data in EXACT webhook payload format
+                  value:
+                    data:
+                      - status: "read"
+                        ids:
+                          - "3EB0A1B2C3D4E5F6"
+                        momment: 1703548900000
+                        phone: "120363182823169824"
+                        chatLid: ""
+                        participantLid: ""
+                        isGroup: true
+                        instanceId: "550e8400-e29b-41d4-a716-446655440000"
+                        type: "MessageStatusCallback"
+                        fromMe: true
+                        senderDevice: 1
+                      - status: "delivered"
+                        ids:
+                          - "3EB0A1B2C3D4E5F7"
+                        momment: 1703549000000
+                        phone: "5511999999999"
+                        chatLid: ""
+                        participantLid: ""
+                        isGroup: false
+                        instanceId: "550e8400-e29b-41d4-a716-446655440000"
+                        type: "MessageStatusCallback"
+                        fromMe: true
+                        senderDevice: 1
+                    meta:
+                      total: 150
+                      limit: 100
+                      offset: 0
                 empty:
                   summary: No cached status found
                   value:
@@ -12744,13 +12812,13 @@ paths:
                       limit: 0
                       offset: 0
         "400":
-          description: Bad request - missing required parameter
+          description: Bad request - invalid parameters
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
-                error: "missing required parameter: messageId, groupId, or phone"
+                error: "invalid instance id"
         "401":
           description: Unauthorized - invalid or missing Client-Token
           content:

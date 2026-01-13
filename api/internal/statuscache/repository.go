@@ -14,6 +14,7 @@ type Repository interface {
 	GetByMessageID(ctx context.Context, instanceID, messageID string) (*StatusCacheEntry, error)
 	GetByGroupID(ctx context.Context, instanceID, groupID string, limit, offset int) ([]*StatusCacheEntry, int64, error)
 	GetByPhone(ctx context.Context, instanceID, phone string, limit, offset int) ([]*StatusCacheEntry, int64, error)
+	GetAll(ctx context.Context, instanceID string, limit, offset int) ([]*StatusCacheEntry, int64, error)
 
 	// Pending webhooks (for flush)
 	StorePendingWebhook(ctx context.Context, webhook *PendingWebhook) error

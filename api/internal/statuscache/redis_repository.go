@@ -220,6 +220,12 @@ func (r *RedisRepository) GetByPhone(ctx context.Context, instanceID, phone stri
 	return r.getByIndex(ctx, instanceID, phoneKey, limit, offset)
 }
 
+// GetAll retrieves all status entries for an instance with pagination
+func (r *RedisRepository) GetAll(ctx context.Context, instanceID string, limit, offset int) ([]*StatusCacheEntry, int64, error) {
+	entriesKey := r.entriesKey(instanceID)
+	return r.getByIndex(ctx, instanceID, entriesKey, limit, offset)
+}
+
 // getByIndex retrieves entries from an index set
 func (r *RedisRepository) getByIndex(ctx context.Context, instanceID, indexKey string, limit, offset int) ([]*StatusCacheEntry, int64, error) {
 	// Get total count

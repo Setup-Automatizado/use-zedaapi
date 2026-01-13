@@ -13,11 +13,13 @@ type Service interface {
 	GetStatus(ctx context.Context, instanceID, messageID string, includeParticipants bool) (*AggregatedStatus, error)
 	QueryByGroup(ctx context.Context, instanceID, groupID string, params QueryParams) (*QueryResult, error)
 	QueryByPhone(ctx context.Context, instanceID, phone string, params QueryParams) (*QueryResult, error)
+	QueryAll(ctx context.Context, instanceID string, params QueryParams) (*QueryResult, error)
 
-	// Raw queries (FUNNELCHAT webhook format)
+	// Raw queries (FUNNELCHAT webhook format - identical to webhook payload)
 	GetRawStatus(ctx context.Context, instanceID, messageID string) (*RawQueryResult, error)
 	QueryRawByGroup(ctx context.Context, instanceID, groupID string, params QueryParams) (*RawQueryResult, error)
 	QueryRawByPhone(ctx context.Context, instanceID, phone string, params QueryParams) (*RawQueryResult, error)
+	QueryRawAll(ctx context.Context, instanceID string, params QueryParams) (*RawQueryResult, error)
 
 	// Flush operations (trigger suppressed webhooks)
 	FlushMessage(ctx context.Context, instanceID, messageID string) (*FlushResult, error)

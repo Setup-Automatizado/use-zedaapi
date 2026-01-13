@@ -311,6 +311,51 @@ func (s *ServiceImpl) QueryByPhone(ctx context.Context, instanceID, phone string
 	}, nil
 }
 
+// QueryAll retrieves all aggregated statuses for an instance with pagination
+func (s *ServiceImpl) QueryAll(ctx context.Context, instanceID string, params QueryParams) (*QueryResult, error) {
+	start := time.Now()
+
+	// Apply operation timeout
+	ctx, cancel := s.withTimeout(ctx)
+	defer cancel()
+
+	entries, total, err := s.repo.GetAll(ctx, instanceID, params.Limit, params.Offset)
+	if err != nil {
+		if s.metrics != nil {
+			s.metrics.StatusCacheOperations.WithLabelValues(instanceID, "query_all", "error").Inc()
+		}
+		return nil, err
+	}
+
+	data := make([]*AggregatedStatus, 0, len(entries))
+	for _, entry := range entries {
+		data = append(data, entry.ToAggregated(params.IncludeParticipants))
+	}
+
+	// Record metrics
+	if s.metrics != nil {
+		s.metrics.StatusCacheDuration.WithLabelValues(instanceID, "query_all").Observe(time.Since(start).Seconds())
+		s.metrics.StatusCacheOperations.WithLabelValues(instanceID, "query_all", "success").Inc()
+	}
+
+	s.log.Debug("query all status cache",
+		slog.String("instance_id", instanceID),
+		slog.Int64("total", total),
+		slog.Int("returned", len(data)),
+		slog.Int("limit", params.Limit),
+		slog.Int("offset", params.Offset),
+	)
+
+	return &QueryResult{
+		Data: data,
+		Meta: QueryMeta{
+			Total:  total,
+			Limit:  params.Limit,
+			Offset: params.Offset,
+		},
+	}, nil
+}
+
 // GetRawStatus retrieves raw payloads for a specific message
 func (s *ServiceImpl) GetRawStatus(ctx context.Context, instanceID, messageID string) (*RawQueryResult, error) {
 	// Apply operation timeout
@@ -380,6 +425,52 @@ func (s *ServiceImpl) QueryRawByPhone(ctx context.Context, instanceID, phone str
 	for _, entry := range entries {
 		data = append(data, entry.ToRawPayloads()...)
 	}
+
+	return &RawQueryResult{
+		Data: data,
+		Meta: QueryMeta{
+			Total:  total,
+			Limit:  params.Limit,
+			Offset: params.Offset,
+		},
+	}, nil
+}
+
+// QueryRawAll retrieves all raw payloads for an instance with pagination
+// Returns data in the EXACT same format as webhook payload (RawStatusPayload)
+func (s *ServiceImpl) QueryRawAll(ctx context.Context, instanceID string, params QueryParams) (*RawQueryResult, error) {
+	start := time.Now()
+
+	// Apply operation timeout
+	ctx, cancel := s.withTimeout(ctx)
+	defer cancel()
+
+	entries, total, err := s.repo.GetAll(ctx, instanceID, params.Limit, params.Offset)
+	if err != nil {
+		if s.metrics != nil {
+			s.metrics.StatusCacheOperations.WithLabelValues(instanceID, "query_raw_all", "error").Inc()
+		}
+		return nil, err
+	}
+
+	data := make([]*RawStatusPayload, 0)
+	for _, entry := range entries {
+		data = append(data, entry.ToRawPayloads()...)
+	}
+
+	// Record metrics
+	if s.metrics != nil {
+		s.metrics.StatusCacheDuration.WithLabelValues(instanceID, "query_raw_all").Observe(time.Since(start).Seconds())
+		s.metrics.StatusCacheOperations.WithLabelValues(instanceID, "query_raw_all", "success").Inc()
+	}
+
+	s.log.Debug("query raw all status cache",
+		slog.String("instance_id", instanceID),
+		slog.Int64("total_entries", total),
+		slog.Int("total_payloads", len(data)),
+		slog.Int("limit", params.Limit),
+		slog.Int("offset", params.Offset),
+	)
 
 	return &RawQueryResult{
 		Data: data,
