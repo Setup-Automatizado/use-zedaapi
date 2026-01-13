@@ -199,6 +199,10 @@ type Config struct {
 		CleanupInterval  time.Duration
 		OperationTimeout time.Duration
 	}
+
+	APIEcho struct {
+		Enabled bool // Enable API echo webhooks for messages sent via API (fromMe=true, fromApi=true)
+	}
 }
 
 func Load() (Config, error) {
@@ -734,6 +738,15 @@ func Load() (Config, error) {
 		FlushBatchSize:   statusCacheFlushBatchSize,
 		CleanupInterval:  statusCacheCleanupInterval,
 		OperationTimeout: statusCacheOperationTimeout,
+	}
+
+	// API Echo Configuration
+	// Enables webhook dispatch for messages sent via API with fromMe=true and fromApi=true
+	apiEchoEnabled := parseBool(getEnv("API_ECHO_ENABLED", "true"))
+	cfg.APIEcho = struct {
+		Enabled bool
+	}{
+		Enabled: apiEchoEnabled,
 	}
 
 	cfg.Events = struct {
