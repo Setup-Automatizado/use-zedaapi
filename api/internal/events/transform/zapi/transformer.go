@@ -26,14 +26,16 @@ import (
 
 type Transformer struct {
 	connectedPhone string
+	isBusiness     bool
 	debugRaw       bool
 	dumpDir        string
 	pollStore      pollstore.Store
 }
 
-func NewTransformer(connectedPhone string, debug bool, dumpDir string, store pollstore.Store) *Transformer {
+func NewTransformer(connectedPhone string, isBusiness bool, debug bool, dumpDir string, store pollstore.Store) *Transformer {
 	return &Transformer{
 		connectedPhone: connectedPhone,
+		isBusiness:     isBusiness,
 		debugRaw:       debug,
 		dumpDir:        strings.TrimSpace(dumpDir),
 		pollStore:      store,
@@ -1920,6 +1922,7 @@ func (t *Transformer) transformConnected(ctx context.Context, logger *slog.Logge
 		Momment:    event.CapturedAt.UnixMilli(),
 		InstanceID: event.InstanceID.String(),
 		Phone:      t.connectedPhone,
+		IsBusiness: t.isBusiness,
 	}
 
 	return callback, nil
