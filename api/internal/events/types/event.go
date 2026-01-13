@@ -12,6 +12,7 @@ type SourceLib string
 const (
 	SourceLibWhatsmeow SourceLib = "whatsmeow"
 	SourceLibCloudAPI  SourceLib = "cloud_api"
+	SourceLibAPI       SourceLib = "api"
 )
 
 type InternalEvent struct {
