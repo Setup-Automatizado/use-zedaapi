@@ -29,6 +29,7 @@ type Client interface {
 	UpdateGroupRequestParticipants(jid types.JID, participantChanges []types.JID, action whatsmeow.ParticipantRequestChange) ([]types.GroupParticipant, error)
 	LeaveGroup(jid types.JID) error
 	GetGroupInfo(jid types.JID) (*types.GroupInfo, error)
+	GetGroupInfoWithContext(ctx context.Context, jid types.JID) (*types.GroupInfo, error)
 	GetGroupInviteLink(jid types.JID, reset bool) (string, error)
 	GetGroupInfoFromLink(code string) (*types.GroupInfo, error)
 	JoinGroupWithLink(code string) (types.JID, error)
@@ -36,7 +37,7 @@ type Client interface {
 	SetGroupLocked(jid types.JID, locked bool) error
 	SetGroupJoinApprovalMode(jid types.JID, mode bool) error
 	SetGroupMemberAddMode(jid types.JID, mode types.GroupMemberAddMode) error
-	SetGroupDescription(jid types.JID, description string) error
+	SetGroupTopic(ctx context.Context, jid types.JID, previousID, newID, topic string) error
 	SendMessage(ctx context.Context, to types.JID, message *waProto.Message, extra ...whatsmeow.SendRequestExtra) (whatsmeow.SendResponse, error)
 }
 
