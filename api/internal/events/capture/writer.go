@@ -174,7 +174,12 @@ func (w *TransactionalWriter) WriteEvents(ctx context.Context, events []*types.I
 		}
 
 		transportConfig, shouldDeliver := w.buildTransportConfig(internalEvent, resolvedConfig)
-		if !shouldDeliver {
+
+		// When StatusCache is enabled, receipt events should be persisted even without webhook
+		// The StatusCache interceptor in the processor will handle caching and suppress webhook delivery
+		statusCacheWillHandle := w.cfg != nil && w.cfg.StatusCache.Enabled && internalEvent.EventType == "receipt"
+
+		if !shouldDeliver && !statusCacheWillHandle {
 			skippedCount++
 			w.log.WarnContext(ctx, "skipping event without webhook destination",
 				slog.String("instance_id", instanceID.String()),
@@ -187,6 +192,31 @@ func (w *TransactionalWriter) WriteEvents(ctx context.Context, events []*types.I
 				"skipped",
 			).Inc()
 			continue
+		}
+
+		// For StatusCache-handled receipts without webhook, create a minimal transport config
+		if statusCacheWillHandle && !shouldDeliver {
+			w.log.DebugContext(ctx, "persisting receipt for status cache (no webhook configured)",
+				slog.String("instance_id", instanceID.String()),
+				slog.String("event_id", internalEvent.EventID.String()))
+			// Create transport config that marks this for status cache only
+			config := struct {
+				URL        string `json:"url"`
+				Type       string `json:"type"`
+				NoDelivery bool   `json:"no_delivery"`
+			}{
+				URL:        "",
+				Type:       "status_cache_only",
+				NoDelivery: true,
+			}
+			var err error
+			transportConfig, err = json.Marshal(config)
+			if err != nil {
+				w.log.Error("marshal status cache transport config",
+					slog.String("event_id", internalEvent.EventID.String()),
+					slog.String("error", err.Error()))
+				continue
+			}
 		}
 
 		outboxEvent := &persistence.OutboxEvent{
