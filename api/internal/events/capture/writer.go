@@ -346,7 +346,19 @@ func resolveWebhookURL(event *types.InternalEvent, cfg *ResolvedWebhookConfig) (
 	switch event.EventType {
 	case "message":
 		fromMe := event.Metadata["from_me"] == "true"
-		// If fromMe and NotifySentByMe is disabled, filter out the message
+		fromAPI := event.Metadata["from_api"] == "true"
+
+		// API echo events are ALWAYS routed regardless of NotifySentByMe setting
+		// This ensures the partner always receives confirmation of their API calls
+		if fromAPI {
+			// Prefer ReceivedDeliveryURL for API echo, fall back to ReceivedURL
+			if cfg.ReceivedDeliveryURL != "" {
+				return cfg.ReceivedDeliveryURL, "received"
+			}
+			return cfg.ReceivedURL, "received"
+		}
+
+		// For non-API fromMe messages, apply NotifySentByMe filter
 		if fromMe && !cfg.NotifySentByMe {
 			return "", ""
 		}

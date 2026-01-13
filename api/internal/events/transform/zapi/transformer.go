@@ -173,9 +173,20 @@ func (t *Transformer) dumpPayload(logger *slog.Logger, event *types.InternalEven
 }
 
 func (t *Transformer) transformMessage(ctx context.Context, logger *slog.Logger, event *types.InternalEvent) (*ReceivedCallback, error) {
-	msgEvent, ok := event.RawPayload.(*events.Message)
-	if !ok {
-		return nil, fmt.Errorf("invalid message payload type")
+	// Support both *events.Message (from whatsmeow) and *waE2E.Message (from API echo)
+	var msgEvent *events.Message
+	var msgProto *waE2E.Message
+
+	switch payload := event.RawPayload.(type) {
+	case *events.Message:
+		msgEvent = payload
+		msgProto = payload.Message
+	case *waE2E.Message:
+		// API echo: RawPayload is the proto directly
+		msgProto = payload
+		msgEvent = nil // No events.Message wrapper for API echo
+	default:
+		return nil, fmt.Errorf("invalid message payload type: %T", event.RawPayload)
 	}
 
 	chatJID, chatParseErr := parseJID(event.Metadata["chat"])
@@ -392,7 +403,8 @@ func (t *Transformer) transformMessage(ctx context.Context, logger *slog.Logger,
 		}
 	}
 
-	if msgEvent.SourceWebMsg != nil {
+	// SourceWebMsg is only available for whatsmeow events, not API echo
+	if msgEvent != nil && msgEvent.SourceWebMsg != nil {
 		if stub := msgEvent.SourceWebMsg.GetMessageStubType(); stub != waWeb.WebMessageInfo_UNKNOWN {
 			rawParams := msgEvent.SourceWebMsg.GetMessageStubParameters()
 			name, params, reqMethod := mapMessageStubToZAPINotification(stub, rawParams)
@@ -407,13 +419,13 @@ func (t *Transformer) transformMessage(ctx context.Context, logger *slog.Logger,
 		}
 	}
 
-	if call := msgEvent.Message.GetCall(); call != nil {
+	if call := msgProto.GetCall(); call != nil {
 		if key := call.GetCallKey(); len(key) > 0 {
 			callback.CallID = strings.ToUpper(hex.EncodeToString(key))
 		}
 	}
 
-	if invite := msgEvent.Message.GetGroupInviteMessage(); invite != nil {
+	if invite := msgProto.GetGroupInviteMessage(); invite != nil {
 		if code := invite.GetInviteCode(); code != "" {
 			callback.Code = code
 		}
@@ -440,8 +452,8 @@ func (t *Transformer) transformMessage(ctx context.Context, logger *slog.Logger,
 		callback.IsGroup = false
 	}
 
-	if err := t.extractMessageContent(ctx, logger, msgEvent.Message, callback, event); err != nil {
-		kinds := messagePayloadKinds(msgEvent.Message)
+	if err := t.extractMessageContent(ctx, logger, msgProto, callback, event); err != nil {
+		kinds := messagePayloadKinds(msgProto)
 		logger.WarnContext(ctx, "unsupported message content type",
 			slog.String("message_id", callback.MessageID),
 			slog.String("payload_kinds", strings.Join(kinds, ",")),
