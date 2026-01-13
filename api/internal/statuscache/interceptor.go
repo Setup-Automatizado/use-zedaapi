@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"log/slog"
+	"strings"
 	"time"
 
 	"go.mau.fi/whatsmeow/api/internal/config"
@@ -74,13 +75,32 @@ func (i *Interceptor) InterceptAndCache(ctx context.Context, instanceID string, 
 		return false, nil // Don't suppress on parse error, let webhook continue
 	}
 
+	// DEBUG: Log values received for troubleshooting
+	i.log.Debug("status cache intercept check",
+		slog.String("instance_id", instanceID),
+		slog.String("status", statusPayload.Status),
+		slog.Bool("is_group", statusPayload.IsGroup),
+		slog.Any("configured_types", i.cfg.StatusCache.Types),
+		slog.Any("configured_scope", i.cfg.StatusCache.Scope),
+	)
+
 	// Check if status type should be cached
 	if !i.shouldCacheStatusType(statusPayload.Status) {
+		i.log.Debug("status cache skipped - status type not configured",
+			slog.String("instance_id", instanceID),
+			slog.String("status", statusPayload.Status),
+			slog.Any("configured_types", i.cfg.StatusCache.Types),
+		)
 		return false, nil
 	}
 
 	// Check scope (groups vs direct)
 	if !i.shouldCacheScope(statusPayload.IsGroup) {
+		i.log.Debug("status cache skipped - scope mismatch",
+			slog.String("instance_id", instanceID),
+			slog.Bool("is_group", statusPayload.IsGroup),
+			slog.Any("configured_scope", i.cfg.StatusCache.Scope),
+		)
 		return false, nil
 	}
 
@@ -127,9 +147,12 @@ func (i *Interceptor) InterceptAndCache(ctx context.Context, instanceID string, 
 }
 
 // shouldCacheStatusType checks if the status type should be cached
+// Uses case-insensitive comparison because config uses lowercase (read,delivered,played,sent)
+// but transformer returns UPPERCASE (READ,PLAYED,RECEIVED,SENT)
 func (i *Interceptor) shouldCacheStatusType(status string) bool {
+	statusLower := strings.ToLower(status)
 	for _, t := range i.cfg.StatusCache.Types {
-		if t == status {
+		if strings.ToLower(t) == statusLower {
 			return true
 		}
 	}
