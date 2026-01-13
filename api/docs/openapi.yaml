@@ -39,11 +39,40 @@ tags:
       Particularly useful for group messages where tracking individual participant statuses is important.
 
       **Key Features:**
-      - Cache status events in Redis for 24 hours
+      - Cache status events in Redis for 24 hours (configurable TTL)
       - Query by messageId, groupId, or phone
       - Aggregate participant statistics for group messages
       - Optional webhook suppression to reduce serverless costs
       - Manual flush to trigger pending webhooks
+
+      **Data Retrieval Options:**
+
+      1. **API Pull (Query on Demand)**
+         - Use `/messages-status` endpoint to query cached statuses
+         - Filter by `messageId`, `groupId`, or `phone`
+         - Supports pagination with `limit` and `offset`
+         - Returns aggregated or raw format
+         - **No webhook configuration required**
+
+      2. **Webhook Push (Automatic Delivery)**
+         - Configure `messageStatusCallbackUrl` (primary) or `deliveryCallbackUrl` (fallback)
+         - StatusCache automatically flushes aggregated data to webhook
+         - Flush triggered by interval (`STATUS_CACHE_FLUSH_INTERVAL`) or threshold (`STATUS_CACHE_FLUSH_THRESHOLD`)
+         - Use `/messages-status/flush` for manual flush
+
+      **Webhook Configuration:**
+      - **Without webhook**: Status events are cached and available via API only
+      - **With webhook**: Status events are cached AND automatically delivered via flush
+      - Webhook URLs: `messageStatusCallbackUrl` (recommended) or `deliveryCallbackUrl` (legacy fallback)
+
+      **Environment Variables:**
+      - `STATUS_CACHE_ENABLED`: Enable/disable caching (default: false)
+      - `STATUS_CACHE_TTL`: Cache expiration time (default: 24h)
+      - `STATUS_CACHE_TYPES`: Receipt types to cache (default: read,delivered,played,sent)
+      - `STATUS_CACHE_SCOPE`: Scope filter - groups, direct, or both (default: groups)
+      - `STATUS_CACHE_SUPPRESS_WEBHOOKS`: Suppress individual receipt webhooks (default: true)
+      - `STATUS_CACHE_FLUSH_INTERVAL`: Auto-flush interval (default: 30s)
+      - `STATUS_CACHE_FLUSH_THRESHOLD`: Auto-flush threshold count (default: 100)
   - name: Media
     description: |
       Media file storage and serving system.
@@ -12536,6 +12565,9 @@ paths:
         (sent, delivered, read, played) for messages, especially useful for group messages
         where tracking individual participant statuses is important.
 
+        **Important:** This endpoint works independently of webhook configuration.
+        You can use Status Cache in API-only mode (pull) without configuring any webhooks.
+
         **Query Types:**
         - By `messageId`: Get status for a specific message
         - By `groupId`: Get all message statuses for a group
@@ -12549,8 +12581,13 @@ paths:
         - Check if a message was read by all group participants
         - Get delivery statistics for messages to a specific contact
         - Retrieve batch status updates for UI dashboards
+        - Poll for status updates without webhook configuration
 
         **Note:** Status data is cached with a configurable TTL (default 24h).
+
+        **Requirements:**
+        - `STATUS_CACHE_ENABLED=true` environment variable
+        - `STATUS_CACHE_SCOPE` must include the message type (groups, direct, or both)
       operationId: getMessagesStatus
       security:
         - ClientTokenAuth: []
@@ -12739,6 +12776,13 @@ paths:
         sent but stored for later delivery. This endpoint allows manual triggering
         of those pending webhooks.
 
+        **Webhook Requirement:** This endpoint REQUIRES a webhook to be configured:
+        - Primary: `messageStatusCallbackUrl`
+        - Fallback: `deliveryCallbackUrl`
+
+        If no webhook is configured, flush will succeed but no data will be delivered.
+        In API-only mode, use `/messages-status` GET endpoint instead.
+
         **Use Cases:**
         - Force immediate delivery of status updates to webhook endpoints
         - Recover from webhook endpoint downtime
@@ -12903,6 +12947,9 @@ paths:
       description: |
         Returns statistics about the status cache for this instance.
 
+        **Important:** This endpoint works independently of webhook configuration.
+        Use it to verify that Status Cache is receiving and storing events.
+
         **Metrics included:**
         - Total cached entries
         - Entries breakdown by instance
@@ -12912,6 +12959,13 @@ paths:
         - Monitor cache usage and storage
         - Determine if flush is needed
         - Debug cache behavior
+        - Verify Status Cache is working (totalEntries > 0)
+
+        **Troubleshooting:**
+        If `totalEntries` is 0, check:
+        1. `STATUS_CACHE_ENABLED=true` is set
+        2. `STATUS_CACHE_SCOPE` matches your message types (groups/direct)
+        3. `STATUS_CACHE_TYPES` includes the receipt types you expect (read,delivered,played,sent)
       operationId: getMessagesStatusStats
       security:
         - ClientTokenAuth: []
