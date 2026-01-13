@@ -26,13 +26,24 @@ func ParseGroupID(id string) (types.JID, error) {
 	if id == "" {
 		return types.EmptyJID, ErrInvalidGroupID
 	}
-	if strings.Contains(id, "@") {
+
+	id = strings.TrimSpace(id)
+
+	// 120363420897515281@g.us
+	if strings.HasSuffix(id, "@g.us") {
 		return types.ParseJID(id)
 	}
+
+	// 120363420897515281-group
 	if strings.HasSuffix(id, groupIDSuffix) {
-		id = strings.TrimSuffix(id, groupIDSuffix)
+		raw := strings.TrimSuffix(id, groupIDSuffix)
+		if raw == "" {
+			return types.EmptyJID, ErrInvalidGroupID
+		}
+		return types.ParseJID(raw + "@g.us")
 	}
-	return types.ParseJID(id + "@g.us")
+
+	return types.EmptyJID, ErrInvalidGroupID
 }
 
 func FormatGroupID(jid types.JID) string {
@@ -310,4 +321,23 @@ func normalizeInviteURL(url string) (string, error) {
 		return parts[len(parts)-1], nil
 	}
 	return url, nil
+}
+
+// IsValidDescriptionID checks if a description/topic ID is a valid WhatsApp message ID.
+// Valid IDs are hexadecimal strings (typically 16+ chars starting with "3EB0" for web clients).
+// Invalid values like "undefined", "null", or empty strings return false.
+func IsValidDescriptionID(id string) bool {
+	if id == "" || id == "undefined" || id == "null" {
+		return false
+	}
+	// Valid message IDs are hex strings, minimum 16 characters
+	if len(id) < 16 {
+		return false
+	}
+	for _, c := range id {
+		if !((c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f')) {
+			return false
+		}
+	}
+	return true
 }
