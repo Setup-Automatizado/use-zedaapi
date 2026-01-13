@@ -110,6 +110,14 @@ func (a *instanceLookupAdapter) StoreJID(ctx context.Context, id uuid.UUID) (str
 	return *inst.StoreJID, nil
 }
 
+func (a *instanceLookupAdapter) IsBusiness(ctx context.Context, id uuid.UUID) (bool, error) {
+	inst, err := a.repo.GetByID(ctx, id)
+	if err != nil {
+		return false, err
+	}
+	return inst.BusinessDevice, nil
+}
+
 type webhookResolverAdapter struct {
 	repo *instances.Repository
 }
