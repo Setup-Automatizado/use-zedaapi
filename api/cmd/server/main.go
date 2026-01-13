@@ -27,6 +27,7 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/events"
 	"go.mau.fi/whatsmeow/api/internal/events/capture"
 	"go.mau.fi/whatsmeow/api/internal/events/dispatch"
+	"go.mau.fi/whatsmeow/api/internal/events/echo"
 	"go.mau.fi/whatsmeow/api/internal/events/media"
 	"go.mau.fi/whatsmeow/api/internal/events/persistence"
 	"go.mau.fi/whatsmeow/api/internal/events/pollstore"
@@ -640,15 +641,29 @@ func main() {
 			WorkersPerInstance:   1, // CRITICAL: Must be 1 for FIFO ordering
 		}
 
+		// Initialize API echo emitter for webhook notifications (fromMe=true, fromApi=true)
+		var echoEmitter *echo.Emitter
+		if cfg.APIEcho.Enabled {
+			echoEmitter = echo.NewEmitter(ctx, &echo.EmitterConfig{
+				InstanceID:  uuid.Nil, // Shared emitter; instance ID comes from EchoRequest
+				EventRouter: eventOrchestrator.GetEventRouter(),
+				Metrics:     metrics,
+				Enabled:     cfg.APIEcho.Enabled,
+				StoreJID:    "", // Instance-specific; comes from EchoRequest
+			})
+			logger.Info("API echo emitter initialized for message queue")
+		}
+
 		coordinatorConfig := &queue.CoordinatorConfig{
 			Pool:            pgPool,
 			ClientRegistry:  &queueClientRegistryAdapter{registry: registry},
-			Processor:       queue.NewWhatsAppMessageProcessor(logger),
+			Processor:       queue.NewWhatsAppMessageProcessor(logger, echoEmitter),
 			Config:          queueConfig,
 			Logger:          logger,
 			CleanupInterval: cfg.MessageQueue.CleanupInterval,
 			CleanupTimeout:  cfg.MessageQueue.CleanupTimeout,
 			Metrics:         metrics,
+			EchoEmitter:     echoEmitter,
 		}
 
 		messageCoordinator, err = queue.NewCoordinator(ctx, coordinatorConfig)
