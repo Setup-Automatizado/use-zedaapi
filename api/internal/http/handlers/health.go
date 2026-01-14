@@ -5,16 +5,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"time"
-
-	"log/slog"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"go.mau.fi/whatsmeow/api/internal/locks"
 	"go.mau.fi/whatsmeow/api/internal/logging"
+	"go.mau.fi/whatsmeow/api/internal/version"
 )
 
 type componentStatus struct {
@@ -49,11 +49,13 @@ func (h *HealthHandler) SetMetrics(healthCheckMetric func(component, status stri
 }
 
 func (h *HealthHandler) Health(w http.ResponseWriter, r *http.Request) {
+	versionInfo := version.Get()
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{
 		"status":    "ok",
 		"service":   "whatsapp-api",
+		"version":   versionInfo.Version,
 		"timestamp": time.Now().UTC().Format(time.RFC3339),
 	})
 }
