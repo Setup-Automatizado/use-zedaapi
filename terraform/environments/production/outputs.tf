@@ -51,4 +51,3 @@ output "s3_bucket_name" {
   description = "Media bucket"
   value       = module.s3.bucket_name
 }
-
