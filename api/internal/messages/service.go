@@ -1,19 +1,7 @@
-//go:build ignore
-// +build ignore
-
-// NOTE: This file contains message queue service implementation with correct metrics.
-// Once the supporting types (SendTextRequest, etc.) are implemented in types.go,
-// remove the build ignore tags from both files.
-//
-// Metrics fixed in this file:
-// - MessageQueueEnqueued (was MessagesQueued)
-// - MessageQueueDuration (was MessageQueueLatency)
-
 package messages
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log/slog"
 	"time"
@@ -32,19 +20,21 @@ import (
 // Service handles message operations
 type Service struct {
 	instancesService *instances.Service
-	queueRepo        queue.Repository
+	queueRepo        *queue.Repository
 	registry         *whatsmeow.ClientRegistry
 	validator        *Validator
 	metrics          *observability.Metrics
+	clientAuthToken  string
 	log              *slog.Logger
 }
 
 // NewService creates a new messages service
 func NewService(
 	instancesService *instances.Service,
-	queueRepo queue.Repository,
+	queueRepo *queue.Repository,
 	registry *whatsmeow.ClientRegistry,
 	metrics *observability.Metrics,
+	clientAuthToken string,
 	log *slog.Logger,
 ) *Service {
 	return &Service{
@@ -53,6 +43,7 @@ func NewService(
 		registry:         registry,
 		validator:        NewValidator(),
 		metrics:          metrics,
+		clientAuthToken:  clientAuthToken,
 		log:              log,
 	}
 }
@@ -119,30 +110,10 @@ func (s *Service) SendText(ctx context.Context, instanceID uuid.UUID, clientToke
 		EnqueuedAt:   time.Now(),
 	}
 
-	// Serialize payload
-	payload, err := json.Marshal(args)
-	if err != nil {
-		logger.Error("failed to serialize message", slog.String("error", err.Error()))
-		return nil, fmt.Errorf("failed to serialize message: %w", err)
-	}
-
 	// Enqueue message
-	queuedMsg := &QueuedMessage{
-		ID:          uuid.New(),
-		InstanceID:  instanceID,
-		MessageID:   zaapID,
-		Type:        string(queue.MessageTypeText),
-		Phone:       jid.String(),
-		Payload:     payload,
-		Status:      "pending",
-		Attempts:    0,
-		MaxAttempts: 3,
-		ScheduledAt: s.calculateScheduledAt(req.GetDelay()),
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
-	}
-
-	if err := s.queueRepo.Enqueue(ctx, queuedMsg); err != nil {
+	scheduledAt := s.calculateScheduledAt(req.GetDelay())
+	_, err = s.queueRepo.Enqueue(ctx, instanceID, args, scheduledAt, 3)
+	if err != nil {
 		logger.Error("failed to enqueue message", slog.String("error", err.Error()))
 		s.metrics.MessageQueueEnqueued.WithLabelValues(instanceID.String(), "text", "enqueue_failed").Inc()
 		return nil, fmt.Errorf("failed to enqueue message: %w", err)
@@ -162,7 +133,7 @@ func (s *Service) SendText(ctx context.Context, instanceID uuid.UUID, clientToke
 		MessageID: zaapID,
 		ID:        zaapID,
 		Status:    "queued",
-		QueuedAt:  queuedMsg.CreatedAt,
+		QueuedAt:  time.Now(),
 	}, nil
 }
 
@@ -236,30 +207,10 @@ func (s *Service) SendImage(ctx context.Context, instanceID uuid.UUID, clientTok
 		EnqueuedAt:   time.Now(),
 	}
 
-	// Serialize payload
-	payload, err := json.Marshal(args)
-	if err != nil {
-		logger.Error("failed to serialize message", slog.String("error", err.Error()))
-		return nil, fmt.Errorf("failed to serialize message: %w", err)
-	}
-
 	// Enqueue message
-	queuedMsg := &QueuedMessage{
-		ID:          uuid.New(),
-		InstanceID:  instanceID,
-		MessageID:   zaapID,
-		Type:        string(queue.MessageTypeImage),
-		Phone:       jid.String(),
-		Payload:     payload,
-		Status:      "pending",
-		Attempts:    0,
-		MaxAttempts: 3,
-		ScheduledAt: s.calculateScheduledAt(req.GetDelay()),
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
-	}
-
-	if err := s.queueRepo.Enqueue(ctx, queuedMsg); err != nil {
+	scheduledAt := s.calculateScheduledAt(req.GetDelay())
+	_, err = s.queueRepo.Enqueue(ctx, instanceID, args, scheduledAt, 3)
+	if err != nil {
 		logger.Error("failed to enqueue message", slog.String("error", err.Error()))
 		s.metrics.MessageQueueEnqueued.WithLabelValues(instanceID.String(), "image", "enqueue_failed").Inc()
 		return nil, fmt.Errorf("failed to enqueue message: %w", err)
@@ -279,7 +230,7 @@ func (s *Service) SendImage(ctx context.Context, instanceID uuid.UUID, clientTok
 		MessageID: zaapID,
 		ID:        zaapID,
 		Status:    "queued",
-		QueuedAt:  queuedMsg.CreatedAt,
+		QueuedAt:  time.Now(),
 	}, nil
 }
 
@@ -345,30 +296,10 @@ func (s *Service) SendAudio(ctx context.Context, instanceID uuid.UUID, clientTok
 		EnqueuedAt:   time.Now(),
 	}
 
-	// Serialize payload
-	payload, err := json.Marshal(args)
-	if err != nil {
-		logger.Error("failed to serialize message", slog.String("error", err.Error()))
-		return nil, fmt.Errorf("failed to serialize message: %w", err)
-	}
-
 	// Enqueue message
-	queuedMsg := &QueuedMessage{
-		ID:          uuid.New(),
-		InstanceID:  instanceID,
-		MessageID:   zaapID,
-		Type:        string(queue.MessageTypeAudio),
-		Phone:       jid.String(),
-		Payload:     payload,
-		Status:      "pending",
-		Attempts:    0,
-		MaxAttempts: 3,
-		ScheduledAt: s.calculateScheduledAt(req.GetDelay()),
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
-	}
-
-	if err := s.queueRepo.Enqueue(ctx, queuedMsg); err != nil {
+	scheduledAt := s.calculateScheduledAt(req.GetDelay())
+	_, err = s.queueRepo.Enqueue(ctx, instanceID, args, scheduledAt, 3)
+	if err != nil {
 		logger.Error("failed to enqueue message", slog.String("error", err.Error()))
 		s.metrics.MessageQueueEnqueued.WithLabelValues(instanceID.String(), "audio", "enqueue_failed").Inc()
 		return nil, fmt.Errorf("failed to enqueue message: %w", err)
@@ -388,7 +319,7 @@ func (s *Service) SendAudio(ctx context.Context, instanceID uuid.UUID, clientTok
 		MessageID: zaapID,
 		ID:        zaapID,
 		Status:    "queued",
-		QueuedAt:  queuedMsg.CreatedAt,
+		QueuedAt:  time.Now(),
 	}, nil
 }
 
@@ -462,30 +393,10 @@ func (s *Service) SendVideo(ctx context.Context, instanceID uuid.UUID, clientTok
 		EnqueuedAt:   time.Now(),
 	}
 
-	// Serialize payload
-	payload, err := json.Marshal(args)
-	if err != nil {
-		logger.Error("failed to serialize message", slog.String("error", err.Error()))
-		return nil, fmt.Errorf("failed to serialize message: %w", err)
-	}
-
 	// Enqueue message
-	queuedMsg := &QueuedMessage{
-		ID:          uuid.New(),
-		InstanceID:  instanceID,
-		MessageID:   zaapID,
-		Type:        string(queue.MessageTypeVideo),
-		Phone:       jid.String(),
-		Payload:     payload,
-		Status:      "pending",
-		Attempts:    0,
-		MaxAttempts: 3,
-		ScheduledAt: s.calculateScheduledAt(req.GetDelay()),
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
-	}
-
-	if err := s.queueRepo.Enqueue(ctx, queuedMsg); err != nil {
+	scheduledAt := s.calculateScheduledAt(req.GetDelay())
+	_, err = s.queueRepo.Enqueue(ctx, instanceID, args, scheduledAt, 3)
+	if err != nil {
 		logger.Error("failed to enqueue message", slog.String("error", err.Error()))
 		s.metrics.MessageQueueEnqueued.WithLabelValues(instanceID.String(), "video", "enqueue_failed").Inc()
 		return nil, fmt.Errorf("failed to enqueue message: %w", err)
@@ -505,7 +416,7 @@ func (s *Service) SendVideo(ctx context.Context, instanceID uuid.UUID, clientTok
 		MessageID: zaapID,
 		ID:        zaapID,
 		Status:    "queued",
-		QueuedAt:  queuedMsg.CreatedAt,
+		QueuedAt:  time.Now(),
 	}, nil
 }
 
@@ -574,30 +485,10 @@ func (s *Service) SendSticker(ctx context.Context, instanceID uuid.UUID, clientT
 		},
 	}
 
-	// Serialize payload
-	payload, err := json.Marshal(args)
-	if err != nil {
-		logger.Error("failed to serialize message", slog.String("error", err.Error()))
-		return nil, fmt.Errorf("failed to serialize message: %w", err)
-	}
-
 	// Enqueue message
-	queuedMsg := &QueuedMessage{
-		ID:          uuid.New(),
-		InstanceID:  instanceID,
-		MessageID:   zaapID,
-		Type:        "sticker", // Use sticker type for tracking
-		Phone:       jid.String(),
-		Payload:     payload,
-		Status:      "pending",
-		Attempts:    0,
-		MaxAttempts: 3,
-		ScheduledAt: s.calculateScheduledAt(req.GetDelay()),
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
-	}
-
-	if err := s.queueRepo.Enqueue(ctx, queuedMsg); err != nil {
+	scheduledAt := s.calculateScheduledAt(req.GetDelay())
+	_, err = s.queueRepo.Enqueue(ctx, instanceID, args, scheduledAt, 3)
+	if err != nil {
 		logger.Error("failed to enqueue message", slog.String("error", err.Error()))
 		s.metrics.MessageQueueEnqueued.WithLabelValues(instanceID.String(), "sticker", "enqueue_failed").Inc()
 		return nil, fmt.Errorf("failed to enqueue message: %w", err)
@@ -617,7 +508,7 @@ func (s *Service) SendSticker(ctx context.Context, instanceID uuid.UUID, clientT
 		MessageID: zaapID,
 		ID:        zaapID,
 		Status:    "queued",
-		QueuedAt:  queuedMsg.CreatedAt,
+		QueuedAt:  time.Now(),
 	}, nil
 }
 
@@ -694,30 +585,10 @@ func (s *Service) SendGif(ctx context.Context, instanceID uuid.UUID, clientToken
 		},
 	}
 
-	// Serialize payload
-	payload, err := json.Marshal(args)
-	if err != nil {
-		logger.Error("failed to serialize message", slog.String("error", err.Error()))
-		return nil, fmt.Errorf("failed to serialize message: %w", err)
-	}
-
 	// Enqueue message
-	queuedMsg := &QueuedMessage{
-		ID:          uuid.New(),
-		InstanceID:  instanceID,
-		MessageID:   zaapID,
-		Type:        "gif", // Use gif type for tracking
-		Phone:       jid.String(),
-		Payload:     payload,
-		Status:      "pending",
-		Attempts:    0,
-		MaxAttempts: 3,
-		ScheduledAt: s.calculateScheduledAt(req.GetDelay()),
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
-	}
-
-	if err := s.queueRepo.Enqueue(ctx, queuedMsg); err != nil {
+	scheduledAt := s.calculateScheduledAt(req.GetDelay())
+	_, err = s.queueRepo.Enqueue(ctx, instanceID, args, scheduledAt, 3)
+	if err != nil {
 		logger.Error("failed to enqueue message", slog.String("error", err.Error()))
 		s.metrics.MessageQueueEnqueued.WithLabelValues(instanceID.String(), "gif", "enqueue_failed").Inc()
 		return nil, fmt.Errorf("failed to enqueue message: %w", err)
@@ -737,7 +608,7 @@ func (s *Service) SendGif(ctx context.Context, instanceID uuid.UUID, clientToken
 		MessageID: zaapID,
 		ID:        zaapID,
 		Status:    "queued",
-		QueuedAt:  queuedMsg.CreatedAt,
+		QueuedAt:  time.Now(),
 	}, nil
 }
 
@@ -745,7 +616,11 @@ func (s *Service) SendGif(ctx context.Context, instanceID uuid.UUID, clientToken
 
 // tokensMatch checks if the provided tokens match the instance tokens
 func (s *Service) tokensMatch(inst *instances.Instance, clientToken, instanceToken string) bool {
-	return inst.ClientToken == clientToken && inst.InstanceToken == instanceToken
+	if inst == nil {
+		return false
+	}
+	// Validate against global client token (from env) and per-instance token
+	return s.clientAuthToken == clientToken && inst.InstanceToken == instanceToken
 }
 
 // normalizePhoneToJID converts a phone number to WhatsApp JID format
