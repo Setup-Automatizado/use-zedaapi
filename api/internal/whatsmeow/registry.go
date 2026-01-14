@@ -1794,6 +1794,20 @@ func (r *ClientRegistry) GetClient(instanceID uuid.UUID) (*whatsmeow.Client, boo
 	return client, client != nil
 }
 
+// IsConnected checks if an instance has an active WhatsApp connection.
+// Returns true if the client exists and is logged in (authenticated).
+func (r *ClientRegistry) IsConnected(instanceID uuid.UUID) bool {
+	r.mu.RLock()
+	state, ok := r.clients[instanceID]
+	r.mu.RUnlock()
+
+	if !ok || state.client == nil {
+		return false
+	}
+
+	return state.client.IsLoggedIn()
+}
+
 func (r *ClientRegistry) Status(info InstanceInfo) StatusSnapshot {
 	r.mu.RLock()
 	state, ok := r.clients[info.ID]
