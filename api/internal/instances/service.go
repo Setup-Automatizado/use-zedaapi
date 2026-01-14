@@ -340,6 +340,11 @@ func (s *Service) tokensMatch(inst *Instance, clientToken, instanceToken string)
 	return s.clientAuthToken == clientToken && inst.InstanceToken == instanceToken
 }
 
+// GetByID retrieves an instance by its ID
+func (s *Service) GetByID(ctx context.Context, id uuid.UUID) (*Instance, error) {
+	return s.repo.GetByID(ctx, id)
+}
+
 func (s *Service) UpdateWebhookDelivery(ctx context.Context, id uuid.UUID, clientToken, instanceToken, value string) (*WebhookSettings, error) {
 	normalized, err := normalizeWebhookValue(value)
 	if err != nil {
