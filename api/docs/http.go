@@ -8,8 +8,9 @@ import (
 	"strings"
 	"sync"
 
-	"go.mau.fi/whatsmeow/api/internal/version"
 	"sigs.k8s.io/yaml"
+
+	"go.mau.fi/whatsmeow/api/internal/version"
 )
 
 //go:embed openapi.yaml

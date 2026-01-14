@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
+
 	wameow "go.mau.fi/whatsmeow"
 	"go.mau.fi/whatsmeow/types"
 
