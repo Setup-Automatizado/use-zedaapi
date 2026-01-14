@@ -26,6 +26,9 @@ export interface HealthResponse {
 	/** Service identifier */
 	service: string;
 
+	/** API version from VERSION file */
+	version?: string;
+
 	/** Response timestamp (ISO 8601) */
 	timestamp?: string;
 }
@@ -169,6 +172,7 @@ export function getAverageHealthCheckDuration(checks: HealthChecks): number {
 
 	if (durations.length === 0) return 0;
 	return (
-		durations.reduce((sum, duration) => sum + duration, 0) / durations.length
+		durations.reduce((sum, duration) => sum + duration, 0) /
+		durations.length
 	);
 }

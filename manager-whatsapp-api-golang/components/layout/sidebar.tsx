@@ -12,6 +12,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
+import { ApiVersion } from "@/components/layout/api-version";
 import { Button } from "@/components/ui/button";
 import {
 	Tooltip,
@@ -65,7 +66,9 @@ export function Sidebar({ user, onSignOut }: SidebarProps) {
 						href="/"
 						className={cn(
 							"flex items-center",
-							isCollapsed ? "justify-center w-full" : "space-x-2 flex-1 px-3",
+							isCollapsed
+								? "justify-center w-full"
+								: "space-x-2 flex-1 px-3",
 						)}
 					>
 						<Image
@@ -76,7 +79,9 @@ export function Sidebar({ user, onSignOut }: SidebarProps) {
 							className="flex-shrink-0 rounded"
 						/>
 						{!isCollapsed && (
-							<span className="font-bold text-lg">WhatsApp API</span>
+							<span className="font-bold text-lg">
+								WhatsApp API
+							</span>
 						)}
 					</Link>
 				</div>
@@ -106,8 +111,13 @@ export function Sidebar({ user, onSignOut }: SidebarProps) {
 						if (isCollapsed) {
 							return (
 								<Tooltip key={item.href}>
-									<TooltipTrigger asChild>{linkContent}</TooltipTrigger>
-									<TooltipContent side="right" sideOffset={10}>
+									<TooltipTrigger asChild>
+										{linkContent}
+									</TooltipTrigger>
+									<TooltipContent
+										side="right"
+										sideOffset={10}
+									>
 										{item.name}
 									</TooltipContent>
 								</Tooltip>
@@ -115,7 +125,9 @@ export function Sidebar({ user, onSignOut }: SidebarProps) {
 						}
 
 						return (
-							<React.Fragment key={item.href}>{linkContent}</React.Fragment>
+							<React.Fragment key={item.href}>
+								{linkContent}
+							</React.Fragment>
 						);
 					})}
 				</nav>
@@ -149,7 +161,10 @@ export function Sidebar({ user, onSignOut }: SidebarProps) {
 											<LogOut className="h-4 w-4" />
 										</Button>
 									</TooltipTrigger>
-									<TooltipContent side="right" sideOffset={10}>
+									<TooltipContent
+										side="right"
+										sideOffset={10}
+									>
 										Sign out
 									</TooltipContent>
 								</Tooltip>
@@ -165,6 +180,9 @@ export function Sidebar({ user, onSignOut }: SidebarProps) {
 							)}
 						</>
 					)}
+
+					{/* API Version */}
+					<ApiVersion collapsed={isCollapsed} className="pt-2" />
 				</div>
 			</div>
 		</TooltipProvider>
