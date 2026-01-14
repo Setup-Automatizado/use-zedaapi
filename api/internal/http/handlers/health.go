@@ -52,11 +52,13 @@ func (h *HealthHandler) Health(w http.ResponseWriter, r *http.Request) {
 	versionInfo := version.Get()
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{
-		"status":    "ok",
-		"service":   "whatsapp-api",
-		"version":   versionInfo.Version,
-		"timestamp": time.Now().UTC().Format(time.RFC3339),
+	json.NewEncoder(w).Encode(map[string]any{
+		"status":     "ok",
+		"service":    "whatsapp-api",
+		"version":    versionInfo.Version,
+		"build_time": versionInfo.BuildTime,
+		"git_commit": versionInfo.GitCommit,
+		"timestamp":  time.Now().UTC().Format(time.RFC3339),
 	})
 }
 
