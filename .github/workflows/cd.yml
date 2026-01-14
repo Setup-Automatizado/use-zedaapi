@@ -56,7 +56,10 @@ jobs:
             conventional-changelog-conventionalcommits@latest
 
       - name: Fetch all tags
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          git config --global url."https://x-access-token:${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
           git fetch --tags --force
           echo "📋 Tags existentes:"
           git tag -l | sort -V | tail -20
