@@ -13,7 +13,8 @@ concurrency:
 
 env:
   GO_VERSION: "1.25"
-  DOCKER_IMAGE_NAME: whatsapp-api-golang
+  API_IMAGE_NAME: whatsapp-api
+  MANAGER_IMAGE_NAME: manager-whatsapp-api
 
 jobs:
   # ======================================
@@ -80,10 +81,10 @@ jobs:
           echo "Patch: ${{ steps.semantic.outputs.new_release_patch_version }}"
 
   # ======================================
-  # Job: Build & Push Docker Images
+  # Job: Build & Push API Docker Image
   # ======================================
-  docker:
-    name: Build & Push Docker
+  docker-api:
+    name: Build & Push API
     runs-on: ubuntu-latest
     needs: release
     if: always()
@@ -100,12 +101,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -120,7 +115,7 @@ jobs:
       - name: Determine version tag
         id: version
         run: |
-          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+          if [ "${{ github.ref }}" = "refs/heads/production" ]; then
             if [ "${{ needs.release.outputs.new_release_published }}" = "true" ]; then
               VERSION="${{ needs.release.outputs.new_release_version }}"
               echo "VERSION=v${VERSION}" >> $GITHUB_OUTPUT
@@ -140,13 +135,12 @@ jobs:
             echo "CHANNEL=unknown" >> $GITHUB_OUTPUT
           fi
 
-      - name: Docker metadata
+      - name: Docker metadata for API
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}
-            ${{ steps.login-ecr.outputs.registry }}/${{ env.DOCKER_IMAGE_NAME }}
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.API_IMAGE_NAME }}
           tags: |
             type=raw,value=${{ steps.version.outputs.VERSION }}
             type=raw,value=${{ steps.version.outputs.CHANNEL }}
@@ -157,7 +151,7 @@ jobs:
             org.opencontainers.image.version=${{ steps.version.outputs.VERSION }}
             org.opencontainers.image.revision=${{ github.sha }}
 
-      - name: Build and push Docker image
+      - name: Build and push API image
         id: build
         uses: docker/build-push-action@v5
         with:
@@ -174,9 +168,102 @@ jobs:
             COMMIT=${{ github.sha }}
             BUILD_TIME=${{ github.event.head_commit.timestamp }}
 
-      - name: Display image info
+      - name: Display API image info
         run: |
-          echo "🐳 Docker images pushed successfully!"
+          echo "API Docker image pushed successfully!"
+          echo "Tags: ${{ steps.meta.outputs.tags }}"
+          echo "Digest: ${{ steps.build.outputs.digest }}"
+
+  # ======================================
+  # Job: Build & Push Manager Docker Image
+  # ======================================
+  docker-manager:
+    name: Build & Push Manager
+    runs-on: ubuntu-latest
+    needs: release
+    if: always()
+    permissions:
+      id-token: write
+      contents: read
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tags }}
+      image_digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Determine version and URLs
+        id: version
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/production" ]; then
+            if [ "${{ needs.release.outputs.new_release_published }}" = "true" ]; then
+              VERSION="${{ needs.release.outputs.new_release_version }}"
+              echo "VERSION=v${VERSION}" >> $GITHUB_OUTPUT
+            else
+              echo "VERSION=latest" >> $GITHUB_OUTPUT
+            fi
+            echo "APP_URL=https://manager.seudominio.com.br" >> $GITHUB_OUTPUT
+          elif [ "${{ github.ref }}" = "refs/heads/develop" ]; then
+            echo "VERSION=develop" >> $GITHUB_OUTPUT
+            echo "APP_URL=http://homolog-manager-alb-936707116.us-east-1.elb.amazonaws.com" >> $GITHUB_OUTPUT
+          elif [ "${{ github.ref }}" = "refs/heads/homolog" ]; then
+            echo "VERSION=homolog" >> $GITHUB_OUTPUT
+            echo "APP_URL=http://homolog-manager-alb-936707116.us-east-1.elb.amazonaws.com" >> $GITHUB_OUTPUT
+          else
+            echo "VERSION=unknown" >> $GITHUB_OUTPUT
+            echo "APP_URL=http://localhost:3000" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Docker metadata for Manager
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.MANAGER_IMAGE_NAME }}
+          tags: |
+            type=raw,value=${{ steps.version.outputs.VERSION }}
+            type=sha,prefix={{branch}}-
+          labels: |
+            org.opencontainers.image.title=WhatsApp Manager
+            org.opencontainers.image.description=WhatsApp API Manager Frontend
+            org.opencontainers.image.version=${{ steps.version.outputs.VERSION }}
+            org.opencontainers.image.revision=${{ github.sha }}
+
+      - name: Build and push Manager image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: ./manager-whatsapp-api-golang
+          file: ./manager-whatsapp-api-golang/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            NEXT_PUBLIC_APP_URL=${{ steps.version.outputs.APP_URL }}
+            VERSION=${{ steps.version.outputs.VERSION }}
+            COMMIT=${{ github.sha }}
+            BUILD_TIME=${{ github.event.head_commit.timestamp }}
+
+      - name: Display Manager image info
+        run: |
+          echo "Manager Docker image pushed successfully!"
           echo "Tags: ${{ steps.meta.outputs.tags }}"
           echo "Digest: ${{ steps.build.outputs.digest }}"
 
@@ -186,14 +273,14 @@ jobs:
   deploy:
     name: Deploy to ECS
     runs-on: ubuntu-latest
-    needs: [release, docker]
-    if: always() && needs.docker.result == 'success'
+    needs: [release, docker-api, docker-manager]
+    if: always() && (needs.docker-api.result == 'success' || needs.docker-manager.result == 'success')
     permissions:
       id-token: write
       contents: read
     environment:
-      name: ${{ github.ref == 'refs/heads/main' && 'production' || github.ref == 'refs/heads/develop' && 'staging' || 'homolog' }}
-      url: ${{ steps.deploy.outputs.service_url }}
+      name: ${{ github.ref == 'refs/heads/production' && 'production' || github.ref == 'refs/heads/develop' && 'develop' || 'homolog' }}
+      url: ${{ steps.url.outputs.service_url }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -205,72 +292,120 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
       - name: Determine environment
         id: env
         run: |
-          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+          if [ "${{ github.ref }}" = "refs/heads/production" ]; then
             echo "ENVIRONMENT=production" >> $GITHUB_OUTPUT
-            echo "CLUSTER=whatsmeow-production" >> $GITHUB_OUTPUT
-            echo "SERVICE=whatsmeow-api-service" >> $GITHUB_OUTPUT
-            echo "TASK_FAMILY=whatsmeow-api-task" >> $GITHUB_OUTPUT
+            echo "CLUSTER=production-whatsmeow-cluster" >> $GITHUB_OUTPUT
           elif [ "${{ github.ref }}" = "refs/heads/develop" ]; then
-            echo "ENVIRONMENT=staging" >> $GITHUB_OUTPUT
-            echo "CLUSTER=whatsmeow-staging" >> $GITHUB_OUTPUT
-            echo "SERVICE=whatsmeow-api-service" >> $GITHUB_OUTPUT
-            echo "TASK_FAMILY=whatsmeow-api-task" >> $GITHUB_OUTPUT
+            echo "ENVIRONMENT=develop" >> $GITHUB_OUTPUT
+            echo "CLUSTER=develop-whatsmeow-cluster" >> $GITHUB_OUTPUT
           elif [ "${{ github.ref }}" = "refs/heads/homolog" ]; then
             echo "ENVIRONMENT=homolog" >> $GITHUB_OUTPUT
-            echo "CLUSTER=whatsmeow-homolog" >> $GITHUB_OUTPUT
-            echo "SERVICE=whatsmeow-api-service" >> $GITHUB_OUTPUT
-            echo "TASK_FAMILY=whatsmeow-api-task" >> $GITHUB_OUTPUT
+            echo "CLUSTER=homolog-whatsmeow-cluster" >> $GITHUB_OUTPUT
           fi
 
-      - name: Download task definition
+      - name: Update API ECS Service
+        if: needs.docker-api.result == 'success'
         run: |
-          aws ecs describe-task-definition \
-            --task-definition ${{ steps.env.outputs.TASK_FAMILY }} \
-            --query taskDefinition > task-definition.json
+          echo "Updating API service..."
+          API_SERVICE="${{ steps.env.outputs.ENVIRONMENT }}-whatsmeow-service"
 
-      - name: Fill in the new image ID in the Amazon ECS task definition
-        id: task-def
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: task-definition.json
-          container-name: api
-          image: ${{ needs.docker.outputs.image_tag }}
+          # Check if service exists
+          if aws ecs describe-services --cluster "${{ steps.env.outputs.CLUSTER }}" --services "$API_SERVICE" --region "${{ secrets.AWS_REGION }}" 2>/dev/null | grep -q '"status": "ACTIVE"'; then
+            aws ecs update-service \
+              --cluster "${{ steps.env.outputs.CLUSTER }}" \
+              --service "$API_SERVICE" \
+              --force-new-deployment \
+              --region "${{ secrets.AWS_REGION }}"
+            echo "API service updated: $API_SERVICE"
+          else
+            echo "::warning::API service not found: $API_SERVICE"
+          fi
 
-      - name: Deploy Amazon ECS task definition
-        id: deploy
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-        with:
-          task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: ${{ steps.env.outputs.SERVICE }}
-          cluster: ${{ steps.env.outputs.CLUSTER }}
-          wait-for-service-stability: true
+      - name: Update Manager ECS Service
+        if: needs.docker-manager.result == 'success'
+        run: |
+          echo "Updating Manager service..."
+          MANAGER_SERVICE="${{ steps.env.outputs.ENVIRONMENT }}-manager-service"
+
+          # Check if service exists
+          if aws ecs describe-services --cluster "${{ steps.env.outputs.CLUSTER }}" --services "$MANAGER_SERVICE" --region "${{ secrets.AWS_REGION }}" 2>/dev/null | grep -q '"status": "ACTIVE"'; then
+            aws ecs update-service \
+              --cluster "${{ steps.env.outputs.CLUSTER }}" \
+              --service "$MANAGER_SERVICE" \
+              --force-new-deployment \
+              --region "${{ secrets.AWS_REGION }}"
+            echo "Manager service updated: $MANAGER_SERVICE"
+          else
+            echo "::warning::Manager service not found: $MANAGER_SERVICE"
+          fi
+
+      - name: Wait for services to stabilize
+        run: |
+          echo "Waiting for services to stabilize..."
+
+          API_SERVICE="${{ steps.env.outputs.ENVIRONMENT }}-whatsmeow-service"
+          MANAGER_SERVICE="${{ steps.env.outputs.ENVIRONMENT }}-manager-service"
+
+          # Wait for API service
+          if aws ecs describe-services --cluster "${{ steps.env.outputs.CLUSTER }}" --services "$API_SERVICE" 2>/dev/null | grep -q '"status": "ACTIVE"'; then
+            echo "Waiting for API service..."
+            aws ecs wait services-stable \
+              --cluster "${{ steps.env.outputs.CLUSTER }}" \
+              --services "$API_SERVICE" || echo "API service wait timed out"
+          fi
+
+          # Wait for Manager service
+          if aws ecs describe-services --cluster "${{ steps.env.outputs.CLUSTER }}" --services "$MANAGER_SERVICE" 2>/dev/null | grep -q '"status": "ACTIVE"'; then
+            echo "Waiting for Manager service..."
+            aws ecs wait services-stable \
+              --cluster "${{ steps.env.outputs.CLUSTER }}" \
+              --services "$MANAGER_SERVICE" || echo "Manager service wait timed out"
+          fi
+
+          echo "Services stabilization complete"
 
       - name: Get service URL
         id: url
         run: |
-          # Get load balancer DNS from service
+          API_SERVICE="${{ steps.env.outputs.ENVIRONMENT }}-whatsmeow-service"
+
+          # Get load balancer DNS from API service
           TARGET_GROUP=$(aws ecs describe-services \
-            --cluster ${{ steps.env.outputs.CLUSTER }} \
-            --services ${{ steps.env.outputs.SERVICE }} \
+            --cluster "${{ steps.env.outputs.CLUSTER }}" \
+            --services "$API_SERVICE" \
             --query 'services[0].loadBalancers[0].targetGroupArn' \
-            --output text)
+            --output text 2>/dev/null || echo "None")
 
-          if [ "$TARGET_GROUP" != "None" ] && [ -n "$TARGET_GROUP" ]; then
+          if [ "$TARGET_GROUP" != "None" ] && [ -n "$TARGET_GROUP" ] && [ "$TARGET_GROUP" != "null" ]; then
             LB_ARN=$(aws elbv2 describe-target-groups \
-              --target-group-arns $TARGET_GROUP \
+              --target-group-arns "$TARGET_GROUP" \
               --query 'TargetGroups[0].LoadBalancerArns[0]' \
-              --output text)
+              --output text 2>/dev/null || echo "")
 
-            DNS_NAME=$(aws elbv2 describe-load-balancers \
-              --load-balancer-arns $LB_ARN \
-              --query 'LoadBalancers[0].DNSName' \
-              --output text)
+            if [ -n "$LB_ARN" ] && [ "$LB_ARN" != "null" ]; then
+              DNS_NAME=$(aws elbv2 describe-load-balancers \
+                --load-balancer-arns "$LB_ARN" \
+                --query 'LoadBalancers[0].DNSName' \
+                --output text 2>/dev/null || echo "")
 
-            echo "SERVICE_URL=http://${DNS_NAME}" >> $GITHUB_OUTPUT
-            echo "service_url=http://${DNS_NAME}" >> $GITHUB_OUTPUT
+              if [ -n "$DNS_NAME" ] && [ "$DNS_NAME" != "null" ]; then
+                echo "SERVICE_URL=http://${DNS_NAME}" >> $GITHUB_OUTPUT
+                echo "service_url=http://${DNS_NAME}" >> $GITHUB_OUTPUT
+              else
+                echo "SERVICE_URL=N/A" >> $GITHUB_OUTPUT
+                echo "service_url=N/A" >> $GITHUB_OUTPUT
+              fi
+            else
+              echo "SERVICE_URL=N/A" >> $GITHUB_OUTPUT
+              echo "service_url=N/A" >> $GITHUB_OUTPUT
+            fi
           else
             echo "SERVICE_URL=N/A" >> $GITHUB_OUTPUT
             echo "service_url=N/A" >> $GITHUB_OUTPUT
@@ -278,12 +413,12 @@ jobs:
 
       - name: Deployment summary
         run: |
-          echo "✅ Deployment successful!"
+          echo "Deployment completed!"
           echo "Environment: ${{ steps.env.outputs.ENVIRONMENT }}"
           echo "Cluster: ${{ steps.env.outputs.CLUSTER }}"
-          echo "Service: ${{ steps.env.outputs.SERVICE }}"
-          echo "Task: ${{ steps.deploy.outputs.task-definition-arn }}"
-          echo "URL: ${{ steps.url.outputs.SERVICE_URL }}"
+          echo "API Service: ${{ steps.env.outputs.ENVIRONMENT }}-whatsmeow-service"
+          echo "Manager Service: ${{ steps.env.outputs.ENVIRONMENT }}-manager-service"
+          echo "API URL: ${{ steps.url.outputs.SERVICE_URL }}"
 
   # ======================================
   # Job: Health Check
@@ -344,7 +479,7 @@ jobs:
   notify:
     name: Send Notifications
     runs-on: ubuntu-latest
-    needs: [release, docker, deploy, health-check]
+    needs: [release, docker-api, docker-manager, deploy, health-check]
     if: always()
     steps:
       - name: Determine status
@@ -354,7 +489,7 @@ jobs:
             echo "STATUS=success" >> $GITHUB_OUTPUT
             echo "COLOR=good" >> $GITHUB_OUTPUT
             echo "EMOJI=✅" >> $GITHUB_OUTPUT
-          elif [ "${{ needs.deploy.result }}" = "failure" ] || [ "${{ needs.docker.result }}" = "failure" ]; then
+          elif [ "${{ needs.deploy.result }}" = "failure" ] || [ "${{ needs.docker-api.result }}" = "failure" ] || [ "${{ needs.docker-manager.result }}" = "failure" ]; then
             echo "STATUS=failure" >> $GITHUB_OUTPUT
             echo "COLOR=danger" >> $GITHUB_OUTPUT
             echo "EMOJI=❌" >> $GITHUB_OUTPUT
@@ -371,22 +506,23 @@ jobs:
 
           **Branch**: `${{ github.ref_name }}`
           **Commit**: `${{ github.sha }}`
-          **Environment**: `${{ github.ref == 'refs/heads/main' && 'production' || github.ref == 'refs/heads/develop' && 'staging' || 'homolog' }}`
+          **Environment**: `${{ github.ref == 'refs/heads/production' && 'production' || github.ref == 'refs/heads/develop' && 'develop' || 'homolog' }}`
 
           ### Results
 
           | Job | Status |
           |-----|--------|
           | Release | ${{ needs.release.result == 'success' && '✅' || needs.release.result == 'failure' && '❌' || '⏭️' }} |
-          | Docker Build | ${{ needs.docker.result == 'success' && '✅' || needs.docker.result == 'failure' && '❌' || '⏭️' }} |
+          | API Build | ${{ needs.docker-api.result == 'success' && '✅' || needs.docker-api.result == 'failure' && '❌' || '⏭️' }} |
+          | Manager Build | ${{ needs.docker-manager.result == 'success' && '✅' || needs.docker-manager.result == 'failure' && '❌' || '⏭️' }} |
           | Deploy | ${{ needs.deploy.result == 'success' && '✅' || needs.deploy.result == 'failure' && '❌' || '⏭️' }} |
           | Health Check | ${{ needs.health-check.result == 'success' && '✅' || needs.health-check.result == 'failure' && '❌' || '⏭️' }} |
 
           ### Version Info
 
           - **Version**: ${{ needs.release.outputs.new_release_version || 'No new release' }}
-          - **Docker Tag**: `${{ needs.docker.outputs.image_tag }}`
-          - **Image Digest**: `${{ needs.docker.outputs.image_digest }}`
+          - **API Tag**: `${{ needs.docker-api.outputs.image_tag }}`
+          - **Manager Tag**: `${{ needs.docker-manager.outputs.image_tag }}`
 
           ---
 
