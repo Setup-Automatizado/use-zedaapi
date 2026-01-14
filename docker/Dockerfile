@@ -158,20 +158,25 @@ CMD ["go", "run", "./api/cmd/server"]
 # ==========================================
 # Stage 5: Testing
 # ==========================================
-FROM golang:1.25-alpine AS testing
+# IMPORTANT: Using Debian-based image (not Alpine) because go-fitz/MuPDF
+# has pre-compiled libraries built against glibc. Alpine uses musl which
+# lacks glibc-specific functions like fopen64, ftello64, fseeko64, tmpfile64.
+FROM golang:1.25 AS testing
 WORKDIR /build
 
 # Install build dependencies including ffmpeg for media processing tests
-# gcc needed for -race flag
-RUN apk add --no-cache \
+# gcc/g++ needed for -race flag and CGO compilation
+RUN apt-get update && apt-get install -y --no-install-recommends \
 	gcc \
-	musl-dev \
+	g++ \
 	git \
 	ca-certificates \
-	ffmpeg
+	ffmpeg \
+	&& rm -rf /var/lib/apt/lists/*
 
-# Copy dependencies
-COPY --from=deps /go/pkg /go/pkg
+# Copy go mod files first for better caching
+COPY go.mod go.sum ./
+RUN go mod download
 
 # Copy source code
 COPY . .
