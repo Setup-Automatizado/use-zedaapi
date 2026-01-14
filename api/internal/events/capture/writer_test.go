@@ -30,16 +30,17 @@ func TestResolveWebhookURL(t *testing.T) {
 			expectedType: "received",
 		},
 		{
-			name:      "notifySentByMe=false, fromMe=true - should filter (empty URL)",
+			name:      "notifySentByMe=false, fromMe=true - should use DeliveryURL",
 			eventType: "message",
 			fromMe:    "true",
 			cfg: &ResolvedWebhookConfig{
+				DeliveryURL:         "https://example.com/delivery",
 				ReceivedURL:         "https://example.com/received",
 				ReceivedDeliveryURL: "https://example.com/received-delivery",
 				NotifySentByMe:      false,
 			},
-			expectedURL:  "",
-			expectedType: "",
+			expectedURL:  "https://example.com/delivery",
+			expectedType: "delivery",
 		},
 		{
 			name:      "notifySentByMe=true, fromMe=false - should use ReceivedDeliveryURL",
@@ -78,16 +79,17 @@ func TestResolveWebhookURL(t *testing.T) {
 			expectedType: "received",
 		},
 		{
-			name:      "receipt event - should use ReceivedDeliveryURL",
+			name:      "receipt event - should use MessageStatusURL",
 			eventType: "receipt",
 			fromMe:    "false",
 			cfg: &ResolvedWebhookConfig{
+				MessageStatusURL:    "https://example.com/message-status",
 				ReceivedURL:         "https://example.com/received",
 				ReceivedDeliveryURL: "https://example.com/received-delivery",
 				NotifySentByMe:      false,
 			},
-			expectedURL:  "https://example.com/received-delivery",
-			expectedType: "receipt",
+			expectedURL:  "https://example.com/message-status",
+			expectedType: "message_status",
 		},
 		{
 			name:      "connected event - should use ConnectedURL",
@@ -185,6 +187,31 @@ func TestResolveWebhookURL(t *testing.T) {
 			expectedURL:  "",
 			expectedType: "",
 		},
+		{
+			name:      "notifySentByMe=false, fromMe=true, no DeliveryURL - should filter",
+			eventType: "message",
+			fromMe:    "true",
+			cfg: &ResolvedWebhookConfig{
+				ReceivedURL:         "https://example.com/received",
+				ReceivedDeliveryURL: "https://example.com/received-delivery",
+				DeliveryURL:         "",
+				NotifySentByMe:      false,
+			},
+			expectedURL:  "",
+			expectedType: "",
+		},
+		{
+			name:      "receipt event - no MessageStatusURL, should be discarded",
+			eventType: "receipt",
+			fromMe:    "false",
+			cfg: &ResolvedWebhookConfig{
+				ReceivedDeliveryURL: "https://example.com/received-delivery",
+				DeliveryURL:         "https://example.com/delivery",
+				NotifySentByMe:      false,
+			},
+			expectedURL:  "",
+			expectedType: "",
+		},
 	}
 
 	for _, tt := range tests {
@@ -248,6 +275,159 @@ func TestResolveWebhookURL_NotifySentByMeRoutingConsistency(t *testing.T) {
 			}
 			if eventType != "received" {
 				t.Errorf("Expected eventType 'received', got %q", eventType)
+			}
+		})
+	}
+}
+
+func TestResolveWebhookURL_APIEchoBypassesNotifySentByMe(t *testing.T) {
+	// This test validates that API echo events (from_api=true) bypass the
+	// NotifySentByMe filter and always get routed to the combined endpoint
+	cfg := &ResolvedWebhookConfig{
+		DeliveryURL:         "https://example.com/delivery",
+		ReceivedURL:         "https://example.com/received",
+		ReceivedDeliveryURL: "https://example.com/received-delivery",
+		NotifySentByMe:      false, // Even when false, API echo should be routed
+	}
+
+	event := &types.InternalEvent{
+		EventID:    uuid.New(),
+		InstanceID: uuid.New(),
+		EventType:  "message",
+		Metadata: map[string]string{
+			"from_me":  "true",
+			"from_api": "true",
+		},
+	}
+
+	url, eventType := resolveWebhookURL(event, cfg)
+
+	if url != cfg.ReceivedDeliveryURL {
+		t.Errorf("API echo should use ReceivedDeliveryURL, got %q", url)
+	}
+	if eventType != "received" {
+		t.Errorf("API echo eventType should be 'received', got %q", eventType)
+	}
+}
+
+func TestResolveWebhookURL_DeliveryURLRoutingConsistency(t *testing.T) {
+	// This test validates Z-API compatibility for separate webhook routing:
+	// When notifySentByMe=false:
+	// - Messages received from others -> received_url
+	// - Messages sent by me -> delivery_url
+
+	cfg := &ResolvedWebhookConfig{
+		DeliveryURL:         "https://example.com/delivery",
+		ReceivedURL:         "https://example.com/received",
+		ReceivedDeliveryURL: "https://example.com/received-and-delivery",
+		NotifySentByMe:      false,
+	}
+
+	testCases := []struct {
+		name        string
+		fromMe      string
+		expectedURL string
+		expectedCat string
+	}{
+		{
+			name:        "received message (fromMe=false) -> received_url",
+			fromMe:      "false",
+			expectedURL: cfg.ReceivedURL,
+			expectedCat: "received",
+		},
+		{
+			name:        "sent by me message (fromMe=true) -> delivery_url",
+			fromMe:      "true",
+			expectedURL: cfg.DeliveryURL,
+			expectedCat: "delivery",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			event := &types.InternalEvent{
+				EventID:    uuid.New(),
+				InstanceID: uuid.New(),
+				EventType:  "message",
+				Metadata: map[string]string{
+					"from_me": tc.fromMe,
+				},
+			}
+
+			url, eventType := resolveWebhookURL(event, cfg)
+
+			if url != tc.expectedURL {
+				t.Errorf("Expected URL %q, got %q", tc.expectedURL, url)
+			}
+			if eventType != tc.expectedCat {
+				t.Errorf("Expected category %q, got %q", tc.expectedCat, eventType)
+			}
+		})
+	}
+}
+
+func TestResolveWebhookURL_MessageStatusURLNoFallback(t *testing.T) {
+	// This test validates that receipt events ONLY go to message_status_url
+	// If message_status_url is not configured, the event is discarded (no fallback)
+
+	testCases := []struct {
+		name        string
+		cfg         *ResolvedWebhookConfig
+		expectedURL string
+		expectedCat string
+	}{
+		{
+			name: "MessageStatusURL configured - should use it",
+			cfg: &ResolvedWebhookConfig{
+				MessageStatusURL:    "https://example.com/message-status",
+				ReceivedDeliveryURL: "https://example.com/received-delivery",
+				DeliveryURL:         "https://example.com/delivery",
+			},
+			expectedURL: "https://example.com/message-status",
+			expectedCat: "message_status",
+		},
+		{
+			name: "no MessageStatusURL - should discard (no fallback)",
+			cfg: &ResolvedWebhookConfig{
+				ReceivedDeliveryURL: "https://example.com/received-delivery",
+				DeliveryURL:         "https://example.com/delivery",
+			},
+			expectedURL: "",
+			expectedCat: "",
+		},
+		{
+			name: "only other URLs configured - should discard",
+			cfg: &ResolvedWebhookConfig{
+				ReceivedURL: "https://example.com/received",
+				DeliveryURL: "https://example.com/delivery",
+			},
+			expectedURL: "",
+			expectedCat: "",
+		},
+		{
+			name:        "no URLs configured - should discard",
+			cfg:         &ResolvedWebhookConfig{},
+			expectedURL: "",
+			expectedCat: "",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			event := &types.InternalEvent{
+				EventID:    uuid.New(),
+				InstanceID: uuid.New(),
+				EventType:  "receipt",
+				Metadata:   map[string]string{},
+			}
+
+			url, eventType := resolveWebhookURL(event, tc.cfg)
+
+			if url != tc.expectedURL {
+				t.Errorf("Expected URL %q, got %q", tc.expectedURL, url)
+			}
+			if eventType != tc.expectedCat {
+				t.Errorf("Expected category %q, got %q", tc.expectedCat, eventType)
 			}
 		})
 	}

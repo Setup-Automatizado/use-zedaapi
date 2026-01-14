@@ -358,19 +358,38 @@ func resolveWebhookURL(event *types.InternalEvent, cfg *ResolvedWebhookConfig) (
 			return cfg.ReceivedURL, "received"
 		}
 
-		// For non-API fromMe messages, apply NotifySentByMe filter
-		if fromMe && !cfg.NotifySentByMe {
+		// When NotifySentByMe is enabled, ALL messages go to combined endpoint
+		// This matches Z-API behavior: messages (received + sent by me) go to receivedAndDeliveryCallbackUrl
+		if cfg.NotifySentByMe {
+			if cfg.ReceivedDeliveryURL != "" {
+				return cfg.ReceivedDeliveryURL, "received"
+			}
+			// Fallback to ReceivedURL for Z-API compatibility
+			return cfg.ReceivedURL, "received"
+		}
+
+		// When NotifySentByMe is disabled, use SEPARATE routing:
+		// - Messages SENT by me -> delivery_url
+		// - Messages RECEIVED from others -> received_url
+		if fromMe {
+			// Messages sent by me go to delivery_url
+			if cfg.DeliveryURL != "" {
+				return cfg.DeliveryURL, "delivery"
+			}
+			// If delivery_url not configured, filter the event
 			return "", ""
 		}
-		// When NotifySentByMe is enabled, use ReceivedDeliveryURL (receivedAndDeliveryCallbackUrl)
-		// This matches Z-API behavior: messages (received + sent by me) go to the combined endpoint
-		if cfg.NotifySentByMe && cfg.ReceivedDeliveryURL != "" {
-			return cfg.ReceivedDeliveryURL, "received"
-		}
-		// Default: use ReceivedURL for regular received messages
+
+		// Messages received from others go to received_url
 		return cfg.ReceivedURL, "received"
+
 	case "receipt":
-		return cfg.ReceivedDeliveryURL, "receipt"
+		// Receipt events (message status: sent, delivered, read, played) go ONLY to message_status_url
+		// If not configured, the event is discarded (no fallback to other webhooks)
+		if cfg.MessageStatusURL != "" {
+			return cfg.MessageStatusURL, "message_status"
+		}
+		return "", ""
 	case "undecryptable":
 		return cfg.ReceivedURL, "received"
 	case "group_info":
