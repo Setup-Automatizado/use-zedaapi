@@ -113,6 +113,41 @@ func (w *TransactionalWriter) WriteEvents(ctx context.Context, events []*types.I
 	}
 
 	for _, internalEvent := range events {
+		// Filter waitingMessage=true events (incomplete messages awaiting sender key)
+		// These are messages that couldn't be decrypted yet and should not be forwarded
+		// Controlled by FILTER_WAITING_MESSAGE env var (default: true)
+		if w.cfg != nil && w.cfg.EventFilters.FilterWaitingMessage && internalEvent.Metadata["waiting_message"] == "true" {
+			skippedCount++
+			w.log.DebugContext(ctx, "filtering waitingMessage=true event",
+				slog.String("instance_id", instanceID.String()),
+				slog.String("event_id", internalEvent.EventID.String()),
+				slog.String("event_type", internalEvent.EventType))
+			w.metrics.EventsInserted.WithLabelValues(
+				instanceID.String(),
+				internalEvent.EventType,
+				"filtered_waiting_message",
+			).Inc()
+			continue
+		}
+
+		// Filter secondary device receipts (Device > 0)
+		// We only want receipts from the primary/native device (Device == 0)
+		// sender_device metadata is only set when Device > 0, so its presence indicates secondary device
+		// Controlled by FILTER_SECONDARY_DEVICE_RECEIPTS env var (default: true)
+		if w.cfg != nil && w.cfg.EventFilters.FilterSecondaryDeviceReceipts && internalEvent.EventType == "receipt" && internalEvent.Metadata["sender_device"] != "" {
+			skippedCount++
+			w.log.DebugContext(ctx, "filtering secondary device receipt",
+				slog.String("instance_id", instanceID.String()),
+				slog.String("event_id", internalEvent.EventID.String()),
+				slog.String("sender_device", internalEvent.Metadata["sender_device"]))
+			w.metrics.EventsInserted.WithLabelValues(
+				instanceID.String(),
+				internalEvent.EventType,
+				"filtered_secondary_device",
+			).Inc()
+			continue
+		}
+
 		if w.metadataEnricher != nil {
 			w.metadataEnricher(resolvedConfig, internalEvent)
 		}

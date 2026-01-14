@@ -203,6 +203,11 @@ type Config struct {
 	APIEcho struct {
 		Enabled bool // Enable API echo webhooks for messages sent via API (fromMe=true, fromApi=true)
 	}
+
+	EventFilters struct {
+		FilterWaitingMessage          bool // Filter events with waitingMessage=true (incomplete messages awaiting sender key)
+		FilterSecondaryDeviceReceipts bool // Filter receipts from secondary devices (Device > 0), only keep primary device receipts
+	}
 }
 
 func Load() (Config, error) {
@@ -747,6 +752,18 @@ func Load() (Config, error) {
 		Enabled bool
 	}{
 		Enabled: apiEchoEnabled,
+	}
+
+	// Event Filters Configuration
+	// Controls filtering of specific event types before persistence
+	filterWaitingMessage := parseBool(getEnv("FILTER_WAITING_MESSAGE", "true"))
+	filterSecondaryDeviceReceipts := parseBool(getEnv("FILTER_SECONDARY_DEVICE_RECEIPTS", "true"))
+	cfg.EventFilters = struct {
+		FilterWaitingMessage          bool
+		FilterSecondaryDeviceReceipts bool
+	}{
+		FilterWaitingMessage:          filterWaitingMessage,
+		FilterSecondaryDeviceReceipts: filterSecondaryDeviceReceipts,
 	}
 
 	cfg.Events = struct {

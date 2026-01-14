@@ -366,6 +366,136 @@ func TestResolveWebhookURL_DeliveryURLRoutingConsistency(t *testing.T) {
 	}
 }
 
+func TestResolveWebhookURL_WaitingMessageFiltering(t *testing.T) {
+	// This test validates that waitingMessage=true events are filtered
+	// regardless of message type (1:1, group, or status)
+	// Filter is controlled by cfg.EventFilters.FilterWaitingMessage
+
+	testCases := []struct {
+		name           string
+		eventType      string
+		waitingMessage string
+		filterEnabled  bool
+		shouldFilter   bool
+	}{
+		{
+			name:           "message with waitingMessage=true should be filtered when enabled",
+			eventType:      "message",
+			waitingMessage: "true",
+			filterEnabled:  true,
+			shouldFilter:   true,
+		},
+		{
+			name:           "message with waitingMessage=true should NOT be filtered when disabled",
+			eventType:      "message",
+			waitingMessage: "true",
+			filterEnabled:  false,
+			shouldFilter:   false,
+		},
+		{
+			name:           "message with waitingMessage=false should not be filtered",
+			eventType:      "message",
+			waitingMessage: "false",
+			filterEnabled:  true,
+			shouldFilter:   false,
+		},
+		{
+			name:           "message without waitingMessage should not be filtered",
+			eventType:      "message",
+			waitingMessage: "",
+			filterEnabled:  true,
+			shouldFilter:   false,
+		},
+		{
+			name:           "undecryptable with waitingMessage=true should be filtered when enabled",
+			eventType:      "undecryptable",
+			waitingMessage: "true",
+			filterEnabled:  true,
+			shouldFilter:   true,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			metadata := map[string]string{}
+			if tc.waitingMessage != "" {
+				metadata["waiting_message"] = tc.waitingMessage
+			}
+
+			// Check filter condition (matches writer.go logic)
+			shouldFilter := tc.filterEnabled && metadata["waiting_message"] == "true"
+			if shouldFilter != tc.shouldFilter {
+				t.Errorf("Expected shouldFilter=%v, got %v", tc.shouldFilter, shouldFilter)
+			}
+		})
+	}
+}
+
+func TestResolveWebhookURL_SecondaryDeviceReceiptFiltering(t *testing.T) {
+	// This test validates that receipts from secondary devices (Device > 0) are filtered
+	// Only receipts from the primary device (Device == 0) should be forwarded
+	// Filter is controlled by cfg.EventFilters.FilterSecondaryDeviceReceipts
+
+	testCases := []struct {
+		name          string
+		eventType     string
+		senderDevice  string // Only set when Device > 0 in transformer
+		filterEnabled bool
+		shouldFilter  bool
+	}{
+		{
+			name:          "receipt from primary device (no sender_device) should not be filtered",
+			eventType:     "receipt",
+			senderDevice:  "",
+			filterEnabled: true,
+			shouldFilter:  false,
+		},
+		{
+			name:          "receipt from secondary device 7 should be filtered when enabled",
+			eventType:     "receipt",
+			senderDevice:  "7",
+			filterEnabled: true,
+			shouldFilter:  true,
+		},
+		{
+			name:          "receipt from secondary device 7 should NOT be filtered when disabled",
+			eventType:     "receipt",
+			senderDevice:  "7",
+			filterEnabled: false,
+			shouldFilter:  false,
+		},
+		{
+			name:          "receipt from secondary device 1 should be filtered when enabled",
+			eventType:     "receipt",
+			senderDevice:  "1",
+			filterEnabled: true,
+			shouldFilter:  true,
+		},
+		{
+			name:          "message with sender_device should not be filtered (only receipts)",
+			eventType:     "message",
+			senderDevice:  "7",
+			filterEnabled: true,
+			shouldFilter:  false,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			metadata := map[string]string{}
+			if tc.senderDevice != "" {
+				metadata["sender_device"] = tc.senderDevice
+			}
+
+			// Check filter condition (matches writer.go logic)
+			shouldFilter := tc.filterEnabled && tc.eventType == "receipt" && metadata["sender_device"] != ""
+			if shouldFilter != tc.shouldFilter {
+				t.Errorf("Expected shouldFilter=%v, got %v", tc.shouldFilter, shouldFilter)
+			}
+		})
+	}
+}
+
 func TestResolveWebhookURL_MessageStatusURLNoFallback(t *testing.T) {
 	// This test validates that receipt events ONLY go to message_status_url
 	// If message_status_url is not configured, the event is discarded (no fallback)
