@@ -30,6 +30,7 @@ export interface InstanceSettingsFormProps {
 	instanceId: string;
 	instanceToken: string;
 	initialValues?: Partial<InstanceSettings>;
+	onSuccess?: () => void;
 }
 
 /**
@@ -54,6 +55,7 @@ export function InstanceSettingsForm({
 	instanceId,
 	instanceToken,
 	initialValues,
+	onSuccess,
 }: InstanceSettingsFormProps) {
 	const [isPending, startTransition] = useTransition();
 
@@ -87,6 +89,7 @@ export function InstanceSettingsForm({
 				if (result.success) {
 					toast.success("Settings updated successfully");
 					reset(data); // Reset form with new values to clear dirty state
+					onSuccess?.(); // Refresh parent data (SWR cache)
 				} else {
 					toast.error(result.error || "Error updating settings");
 				}

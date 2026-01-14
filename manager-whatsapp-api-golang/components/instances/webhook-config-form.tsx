@@ -28,6 +28,7 @@ export interface WebhookConfigFormProps {
 	instanceId: string;
 	instanceToken: string;
 	initialValues?: Partial<WebhookConfig>;
+	onSuccess?: () => void;
 }
 
 /**
@@ -53,6 +54,7 @@ export function WebhookConfigForm({
 	instanceId,
 	instanceToken,
 	initialValues,
+	onSuccess,
 }: WebhookConfigFormProps) {
 	const [isPending, startTransition] = useTransition();
 	const [isClearing, setIsClearing] = useState(false);
@@ -64,10 +66,13 @@ export function WebhookConfigForm({
 			receivedCallbackUrl: initialValues?.receivedCallbackUrl || "",
 			receivedAndDeliveryCallbackUrl:
 				initialValues?.receivedAndDeliveryCallbackUrl || "",
-			messageStatusCallbackUrl: initialValues?.messageStatusCallbackUrl || "",
+			messageStatusCallbackUrl:
+				initialValues?.messageStatusCallbackUrl || "",
 			connectedCallbackUrl: initialValues?.connectedCallbackUrl || "",
-			disconnectedCallbackUrl: initialValues?.disconnectedCallbackUrl || "",
-			presenceChatCallbackUrl: initialValues?.presenceChatCallbackUrl || "",
+			disconnectedCallbackUrl:
+				initialValues?.disconnectedCallbackUrl || "",
+			presenceChatCallbackUrl:
+				initialValues?.presenceChatCallbackUrl || "",
 			notifySentByMe: initialValues?.notifySentByMe || false,
 		},
 	});
@@ -85,7 +90,8 @@ export function WebhookConfigForm({
 		{
 			name: "deliveryCallbackUrl" as const,
 			label: "Delivery Webhook",
-			description: "Notifications when messages are delivered to the recipient",
+			description:
+				"Notifications when messages are delivered to the recipient",
 		},
 		{
 			name: "receivedCallbackUrl" as const,
@@ -95,7 +101,8 @@ export function WebhookConfigForm({
 		{
 			name: "receivedAndDeliveryCallbackUrl" as const,
 			label: "Received and Delivery Webhook",
-			description: "Combined notifications for received and delivered messages",
+			description:
+				"Combined notifications for received and delivered messages",
 		},
 		{
 			name: "messageStatusCallbackUrl" as const,
@@ -110,12 +117,14 @@ export function WebhookConfigForm({
 		{
 			name: "disconnectedCallbackUrl" as const,
 			label: "Disconnection Webhook",
-			description: "Notifications when the instance disconnects from WhatsApp",
+			description:
+				"Notifications when the instance disconnects from WhatsApp",
 		},
 		{
 			name: "presenceChatCallbackUrl" as const,
 			label: "Chat Presence Webhook",
-			description: "Notifications about presence status (typing, online, etc.)",
+			description:
+				"Notifications about presence status (typing, online, etc.)",
 		},
 	];
 
@@ -131,6 +140,7 @@ export function WebhookConfigForm({
 				if (result.success) {
 					toast.success("Webhooks updated successfully");
 					reset(data); // Reset form with new values to clear dirty state
+					onSuccess?.(); // Refresh parent data (SWR cache)
 				} else {
 					toast.error(result.error || "Error updating webhooks");
 				}
@@ -145,8 +155,8 @@ export function WebhookConfigForm({
 	 * Check if any webhook URL is configured (not empty)
 	 * Used to enable/disable Clear All button independently of dirty state
 	 */
-	const hasConfiguredWebhooks = webhookFields.some(
-		(field) => form.getValues(field.name),
+	const hasConfiguredWebhooks = webhookFields.some((field) =>
+		form.getValues(field.name),
 	);
 
 	/**
@@ -179,6 +189,7 @@ export function WebhookConfigForm({
 			if (result.success) {
 				reset(clearedValues);
 				toast.success("All webhooks cleared successfully");
+				onSuccess?.(); // Refresh parent data (SWR cache)
 			} else {
 				toast.error(result.error || "Failed to clear webhooks");
 			}
@@ -235,7 +246,8 @@ export function WebhookConfigForm({
 									Notify Sent Messages
 								</FormLabel>
 								<FormDescription>
-									Receive webhooks for messages sent by this instance
+									Receive webhooks for messages sent by this
+									instance
 								</FormDescription>
 							</div>
 							<FormControl>
@@ -255,7 +267,9 @@ export function WebhookConfigForm({
 						type="button"
 						variant="outline"
 						onClick={handleClearAll}
-						disabled={isPending || isClearing || !hasConfiguredWebhooks}
+						disabled={
+							isPending || isClearing || !hasConfiguredWebhooks
+						}
 					>
 						{isClearing ? (
 							<>

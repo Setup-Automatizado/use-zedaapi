@@ -326,6 +326,7 @@ export default function InstancePage({ params }: InstancePageProps) {
 										instance.presenceChatCallbackUrl || "",
 									notifySentByMe: instance.notifySentByMe || false,
 								}}
+								onSuccess={mutate}
 							/>
 						</CardContent>
 					</Card>
@@ -349,6 +350,7 @@ export default function InstancePage({ params }: InstancePageProps) {
 									callRejectMessage: instance.callRejectMessage || "",
 									notifySentByMe: instance.notifySentByMe || false,
 								}}
+								onSuccess={mutate}
 							/>
 						</CardContent>
 					</Card>
