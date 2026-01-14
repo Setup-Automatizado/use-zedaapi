@@ -55,6 +55,12 @@ jobs:
             @semantic-release/exec@latest \
             conventional-changelog-conventionalcommits@latest
 
+      - name: Fetch all tags
+        run: |
+          git fetch --tags --force
+          echo "📋 Tags existentes:"
+          git tag -l | sort -V | tail -20
+
       - name: Run Semantic Release
         id: semantic
         env:
