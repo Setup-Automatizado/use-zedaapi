@@ -44,7 +44,7 @@ ARG TARGETARCH=amd64
 # -ldflags for version info and size reduction
 # Use TARGETARCH from buildx for multi-platform support
 RUN CGO_ENABLED=1 GOOS=linux GOARCH=${TARGETARCH} go build \
-	-ldflags="-w -s -linkmode external -extldflags '-static' -X main.Version=${VERSION} -X main.Commit=${COMMIT} -X main.BuildTime=${BUILD_TIME}" \
+	-ldflags="-w -s -linkmode external -extldflags '-static' -X go.mau.fi/whatsmeow/api/internal/version.version=${VERSION} -X go.mau.fi/whatsmeow/api/internal/version.gitCommit=${COMMIT} -X go.mau.fi/whatsmeow/api/internal/version.buildTime=${BUILD_TIME}" \
 	-tags musl,netgo \
 	-o /app/api \
 	./api/cmd/server
@@ -87,6 +87,7 @@ COPY --from=builder /app/api /usr/local/bin/api
 # Copy static files and configs
 COPY --from=builder /build/api/.env.example /app/.env.example
 COPY --from=builder /build/api/migrations/ /app/migrations/
+COPY --from=builder /build/VERSION /app/VERSION
 
 # Copy migrations tool if it exists (optional, handled via RUN)
 RUN --mount=type=bind,from=builder,source=/app,target=/tmp/builder \
