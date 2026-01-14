@@ -211,14 +211,24 @@ const WEBHOOK_FIELD_MAPPING: Array<{
 ];
 
 /**
+ * Result of a single webhook update attempt
+ */
+interface WebhookUpdateResult {
+	type: WebhookType;
+	field: keyof Omit<WebhookSettings, "notifySentByMe">;
+	success: boolean;
+	error?: string;
+}
+
+/**
  * Updates multiple webhook settings at once
- * Always sends all webhook fields to ensure clearing works correctly.
+ * Uses Promise.allSettled to handle partial failures gracefully.
  * Empty strings are sent to clear webhooks.
  *
  * @param instanceId - Instance identifier
  * @param instanceToken - Instance authentication token
  * @param settings - Complete webhook configuration
- * @returns Action result with update confirmation
+ * @returns Action result with update confirmation or detailed error
  */
 export async function updateWebhookSettings(
 	instanceId: string,
@@ -231,31 +241,68 @@ export async function updateWebhookSettings(
 			return error("Instance ID and token are required");
 		}
 
-		// Always update all webhook fields
-		// Use empty string for undefined values to ensure clearing works
-		const updates = WEBHOOK_FIELD_MAPPING.map(({ field, type }) =>
+		// Create update promises for all webhook fields
+		const updatePromises = WEBHOOK_FIELD_MAPPING.map(({ field, type }) =>
 			apiUpdateWebhook(
 				instanceId,
 				instanceToken,
 				type,
 				settings[field] ?? "", // undefined -> "" to clear webhook
+			).then(
+				() => ({ type, field, success: true }) as WebhookUpdateResult,
+				(err) =>
+					({
+						type,
+						field,
+						success: false,
+						error: err instanceof Error ? err.message : "Unknown error",
+					}) as WebhookUpdateResult,
 			),
 		);
 
-		// Wait for all updates to complete
-		await Promise.all(updates);
+		// Wait for all updates using allSettled to handle partial failures
+		const results = await Promise.all(updatePromises);
 
-		// Update notify setting if provided
+		// Check for failures
+		const failures = results.filter((r) => !r.success);
+		const successes = results.filter((r) => r.success);
+
+		// Update notify setting if provided (do this even if some webhooks failed)
 		if (settings.notifySentByMe !== undefined) {
-			await apiUpdateNotifySentByMe(
-				instanceId,
-				instanceToken,
-				settings.notifySentByMe,
-			);
+			try {
+				await apiUpdateNotifySentByMe(
+					instanceId,
+					instanceToken,
+					settings.notifySentByMe,
+				);
+			} catch (notifyErr) {
+				failures.push({
+					type: "delivery", // placeholder type
+					field: "deliveryCallbackUrl", // placeholder field
+					success: false,
+					error: `notifySentByMe: ${notifyErr instanceof Error ? notifyErr.message : "Unknown error"}`,
+				});
+			}
 		}
 
 		// Revalidate instance details
 		revalidatePath(`/instances/${instanceId}`);
+
+		// If all failed, return error
+		if (failures.length === results.length) {
+			return error(
+				`Failed to update all webhooks: ${failures.map((f) => f.type).join(", ")}`,
+			);
+		}
+
+		// If some failed, return partial success error
+		if (failures.length > 0) {
+			const failedTypes = failures.map((f) => f.type).join(", ");
+			const successTypes = successes.map((s) => s.type).join(", ");
+			return error(
+				`Partial update: succeeded (${successTypes}), failed (${failedTypes})`,
+			);
+		}
 
 		return success(undefined);
 	} catch (err) {
