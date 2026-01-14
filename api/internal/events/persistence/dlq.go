@@ -81,6 +81,9 @@ func NewDLQRepository(pool *pgxpool.Pool) DLQRepository {
 }
 
 func (r *dlqRepository) InsertFromOutbox(ctx context.Context, event *OutboxEvent, failureReason string, attemptHistory json.RawMessage) error {
+	// Use ON CONFLICT to handle race conditions where multiple workers
+	// may try to insert the same event into DLQ simultaneously.
+	// This makes the operation idempotent - subsequent inserts update the existing record.
 	query := `
 		INSERT INTO event_dlq (
 			instance_id, event_id, event_type, source_lib,
@@ -91,7 +94,15 @@ func (r *dlqRepository) InsertFromOutbox(ctx context.Context, event *OutboxEvent
 			reprocess_status, reprocess_attempts
 		) VALUES (
 			$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, NOW(), 'pending', 0
-		)`
+		)
+		ON CONFLICT (event_id) DO UPDATE SET
+			failure_reason = EXCLUDED.failure_reason,
+			last_error = EXCLUDED.last_error,
+			total_attempts = EXCLUDED.total_attempts,
+			attempt_history = EXCLUDED.attempt_history,
+			last_transport_response = EXCLUDED.last_transport_response,
+			last_attempt_at = EXCLUDED.last_attempt_at,
+			updated_at = NOW()`
 
 	firstAttemptAt := event.CreatedAt
 	lastError := ""
