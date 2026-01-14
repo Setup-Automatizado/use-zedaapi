@@ -33,6 +33,7 @@ type DeliveryResult struct {
 	Retryable       bool
 	ErrorMessage    string
 	ErrorType       string
+	RetryAfter      time.Duration // Extracted from Retry-After header for 429 responses
 }
 
 const (
@@ -87,6 +88,11 @@ func (h *ResponseHandler) HandleHTTPResponse(resp *http.Response, duration time.
 
 	result.Retryable, result.ErrorType = classifyHTTPStatus(resp.StatusCode)
 
+	// Extract Retry-After header for rate-limited responses (HTTP 429)
+	if resp.StatusCode == 429 {
+		result.RetryAfter = h.parseRetryAfter(resp.Header.Get("Retry-After"))
+	}
+
 	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 		result.Success = true
 		result.ErrorType = ""
@@ -99,6 +105,30 @@ func (h *ResponseHandler) HandleHTTPResponse(resp *http.Response, duration time.
 	}
 
 	return result
+}
+
+// parseRetryAfter parses the Retry-After header which can be either:
+// - A number of seconds (e.g., "120")
+// - An HTTP-date (e.g., "Wed, 21 Oct 2015 07:28:00 GMT")
+func (h *ResponseHandler) parseRetryAfter(value string) time.Duration {
+	if value == "" {
+		return 0
+	}
+
+	// Try parsing as seconds first (most common for 429 responses)
+	if seconds, err := strconv.Atoi(value); err == nil {
+		return time.Duration(seconds) * time.Second
+	}
+
+	// Try parsing as HTTP-date
+	if t, err := http.ParseTime(value); err == nil {
+		duration := time.Until(t)
+		if duration > 0 {
+			return duration
+		}
+	}
+
+	return 0
 }
 
 func (h *ResponseHandler) classifyRequestError(err error) (errorType string, retryable bool) {
@@ -169,29 +199,14 @@ func (t *HTTPTransport) Deliver(ctx context.Context, request *DeliveryRequest) (
 		}, err
 	}
 
-	httpReq, err := t.prepareRequest(ctx, request)
-	if err != nil {
-		logger.Error("failed to prepare HTTP request",
-			slog.String("error", err.Error()),
-			slog.String("event_id", request.EventID),
-			slog.String("endpoint", request.Endpoint))
-
-		return &DeliveryResult{
-			Success:      false,
-			Retryable:    false,
-			ErrorMessage: fmt.Sprintf("failed to prepare request: %v", err),
-			ErrorType:    ErrorTypeSerialization,
-		}, err
-	}
-
-	result := t.deliverWithRetry(ctx, httpReq, request, logger)
+	result := t.deliverWithRetry(ctx, request, logger)
 
 	t.logDeliveryResult(logger, request, result)
 
 	return result, nil
 }
 
-func (t *HTTPTransport) deliverWithRetry(ctx context.Context, httpReq *http.Request, request *DeliveryRequest, logger *slog.Logger) *DeliveryResult {
+func (t *HTTPTransport) deliverWithRetry(ctx context.Context, request *DeliveryRequest, logger *slog.Logger) *DeliveryResult {
 	var lastResult *DeliveryResult
 
 	maxAttempts := t.config.MaxRetries
@@ -206,6 +221,24 @@ func (t *HTTPTransport) deliverWithRetry(ctx context.Context, httpReq *http.Requ
 				Retryable:    false,
 				ErrorMessage: fmt.Sprintf("context cancelled: %v", ctx.Err()),
 				ErrorType:    ErrorTypeTimeout,
+			}
+		}
+
+		// Create a fresh HTTP request for each attempt to avoid body reader exhaustion.
+		// The body reader (bytes.Reader) is consumed on each request and cannot be reused.
+		httpReq, err := t.prepareRequest(ctx, request)
+		if err != nil {
+			logger.Error("failed to prepare HTTP request",
+				slog.String("error", err.Error()),
+				slog.String("event_id", request.EventID),
+				slog.String("endpoint", request.Endpoint),
+				slog.Int("attempt", attempt))
+
+			return &DeliveryResult{
+				Success:      false,
+				Retryable:    false,
+				ErrorMessage: fmt.Sprintf("failed to prepare request: %v", err),
+				ErrorType:    ErrorTypeSerialization,
 			}
 		}
 
@@ -246,13 +279,28 @@ func (t *HTTPTransport) deliverWithRetry(ctx context.Context, httpReq *http.Requ
 		}
 
 		if attempt < maxAttempts {
+			// Use Retry-After header if available (for 429 responses), otherwise use exponential backoff.
+			// This respects rate-limit directives from the webhook server.
 			waitDuration := t.calculateBackoff(attempt)
-			logger.Warn("webhook delivery failed, retrying",
+			if lastResult.RetryAfter > 0 {
+				waitDuration = lastResult.RetryAfter
+				// Cap the Retry-After to avoid excessively long waits
+				if waitDuration > t.config.RetryWaitMax {
+					waitDuration = t.config.RetryWaitMax
+				}
+			}
+
+			logAttrs := []any{
 				slog.String("event_id", request.EventID),
 				slog.Int("attempt", attempt),
 				slog.Int("max_attempts", maxAttempts),
 				slog.String("error", lastResult.ErrorMessage),
-				slog.Duration("wait", waitDuration))
+				slog.Duration("wait", waitDuration),
+			}
+			if lastResult.RetryAfter > 0 {
+				logAttrs = append(logAttrs, slog.Duration("retry_after_header", lastResult.RetryAfter))
+			}
+			logger.Warn("webhook delivery failed, retrying", logAttrs...)
 
 			// Record retry metrics
 			if t.metrics != nil {
