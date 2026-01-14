@@ -164,6 +164,9 @@ CMD ["go", "run", "./api/cmd/server"]
 FROM golang:1.25 AS testing
 WORKDIR /build
 
+# Build argument for multi-platform support
+ARG TARGETARCH=amd64
+
 # Install build dependencies including ffmpeg for media processing tests
 # gcc/g++ needed for -race flag and CGO compilation
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -183,7 +186,16 @@ COPY . .
 
 # Run tests with race detector (requires CGO_ENABLED=1)
 # Only test API code, not the entire whatsmeow library
-RUN CGO_ENABLED=1 go test -v -race -coverprofile=coverage.out -covermode=atomic ./api/...
+# NOTE: Race detector (-race) is DISABLED on arm64 because ThreadSanitizer
+# does not work correctly under QEMU emulation (unsupported VMA range error).
+# This affects cross-platform builds where arm64 is emulated on amd64 hosts.
+RUN if [ "$TARGETARCH" = "arm64" ]; then \
+		echo "Running tests WITHOUT race detector (arm64 QEMU incompatible)" && \
+		CGO_ENABLED=1 go test -v -coverprofile=coverage.out -covermode=atomic ./api/...; \
+	else \
+		echo "Running tests WITH race detector (native $TARGETARCH)" && \
+		CGO_ENABLED=1 go test -v -race -coverprofile=coverage.out -covermode=atomic ./api/...; \
+	fi
 
 # Generate coverage report
 RUN go tool cover -html=coverage.out -o coverage.html
