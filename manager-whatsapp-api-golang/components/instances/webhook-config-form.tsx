@@ -5,7 +5,7 @@ import { Loader2, Save } from "lucide-react";
 import { useState, useTransition } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
-import { updateWebhookSettings } from "@/actions";
+import { updateAllWebhooks, updateWebhookSettings } from "@/actions";
 import { Button } from "@/components/ui/button";
 import {
 	Form,
@@ -66,13 +66,10 @@ export function WebhookConfigForm({
 			receivedCallbackUrl: initialValues?.receivedCallbackUrl || "",
 			receivedAndDeliveryCallbackUrl:
 				initialValues?.receivedAndDeliveryCallbackUrl || "",
-			messageStatusCallbackUrl:
-				initialValues?.messageStatusCallbackUrl || "",
+			messageStatusCallbackUrl: initialValues?.messageStatusCallbackUrl || "",
 			connectedCallbackUrl: initialValues?.connectedCallbackUrl || "",
-			disconnectedCallbackUrl:
-				initialValues?.disconnectedCallbackUrl || "",
-			presenceChatCallbackUrl:
-				initialValues?.presenceChatCallbackUrl || "",
+			disconnectedCallbackUrl: initialValues?.disconnectedCallbackUrl || "",
+			presenceChatCallbackUrl: initialValues?.presenceChatCallbackUrl || "",
 			notifySentByMe: initialValues?.notifySentByMe || false,
 		},
 	});
@@ -90,8 +87,7 @@ export function WebhookConfigForm({
 		{
 			name: "deliveryCallbackUrl" as const,
 			label: "Delivery Webhook",
-			description:
-				"Notifications when messages are delivered to the recipient",
+			description: "Notifications when messages are delivered to the recipient",
 		},
 		{
 			name: "receivedCallbackUrl" as const,
@@ -101,8 +97,7 @@ export function WebhookConfigForm({
 		{
 			name: "receivedAndDeliveryCallbackUrl" as const,
 			label: "Received and Delivery Webhook",
-			description:
-				"Combined notifications for received and delivered messages",
+			description: "Combined notifications for received and delivered messages",
 		},
 		{
 			name: "messageStatusCallbackUrl" as const,
@@ -117,14 +112,12 @@ export function WebhookConfigForm({
 		{
 			name: "disconnectedCallbackUrl" as const,
 			label: "Disconnection Webhook",
-			description:
-				"Notifications when the instance disconnects from WhatsApp",
+			description: "Notifications when the instance disconnects from WhatsApp",
 		},
 		{
 			name: "presenceChatCallbackUrl" as const,
 			label: "Chat Presence Webhook",
-			description:
-				"Notifications about presence status (typing, online, etc.)",
+			description: "Notifications about presence status (typing, online, etc.)",
 		},
 	];
 
@@ -161,7 +154,7 @@ export function WebhookConfigForm({
 
 	/**
 	 * Clear all webhook URLs and persist to server
-	 * Unlike just resetting the form, this actually calls the API to clear webhooks
+	 * Uses the bulk endpoint /update-every-webhooks for atomic clearing
 	 */
 	const handleClearAll = async () => {
 		setIsClearing(true);
@@ -179,12 +172,11 @@ export function WebhookConfigForm({
 		};
 
 		try {
-			// Call API to persist the clearing
-			const result = await updateWebhookSettings(
-				instanceId,
-				instanceToken,
-				clearedValues,
-			);
+			// Use bulk endpoint for atomic clearing of all webhooks
+			const result = await updateAllWebhooks(instanceId, instanceToken, {
+				value: "", // Empty string clears all webhooks
+				notifySentByMe: notifySentByMe ?? false,
+			});
 
 			if (result.success) {
 				reset(clearedValues);
@@ -246,8 +238,7 @@ export function WebhookConfigForm({
 									Notify Sent Messages
 								</FormLabel>
 								<FormDescription>
-									Receive webhooks for messages sent by this
-									instance
+									Receive webhooks for messages sent by this instance
 								</FormDescription>
 							</div>
 							<FormControl>
@@ -267,9 +258,7 @@ export function WebhookConfigForm({
 						type="button"
 						variant="outline"
 						onClick={handleClearAll}
-						disabled={
-							isPending || isClearing || !hasConfiguredWebhooks
-						}
+						disabled={isPending || isClearing || !hasConfiguredWebhooks}
 					>
 						{isClearing ? (
 							<>
