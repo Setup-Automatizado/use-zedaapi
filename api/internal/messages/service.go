@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
 	"go.mau.fi/whatsmeow/types"
 
 	"go.mau.fi/whatsmeow/api/internal/instances"

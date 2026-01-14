@@ -6,10 +6,11 @@ import (
 	"log/slog"
 	"strings"
 
+	"google.golang.org/protobuf/proto"
+
 	wameow "go.mau.fi/whatsmeow"
 	waProto "go.mau.fi/whatsmeow/binary/proto"
 	"go.mau.fi/whatsmeow/types"
-	"google.golang.org/protobuf/proto"
 
 	"go.mau.fi/whatsmeow/api/internal/events/echo"
 )

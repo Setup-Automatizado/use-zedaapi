@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/nfnt/resize"
+
 	wameow "go.mau.fi/whatsmeow"
 
 	"github.com/gen2brain/go-fitz"

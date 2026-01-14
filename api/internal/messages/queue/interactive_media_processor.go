@@ -6,9 +6,10 @@ import (
 	"log/slog"
 	"strings"
 
+	"google.golang.org/protobuf/proto"
+
 	wameow "go.mau.fi/whatsmeow"
 	waProto "go.mau.fi/whatsmeow/binary/proto"
-	"google.golang.org/protobuf/proto"
 )
 
 // InteractiveMediaProcessor handles media processing for interactive messages

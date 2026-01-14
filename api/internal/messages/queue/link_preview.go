@@ -18,9 +18,10 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	"google.golang.org/protobuf/proto"
+
 	wameow "go.mau.fi/whatsmeow"
 	waProto "go.mau.fi/whatsmeow/binary/proto"
-	"google.golang.org/protobuf/proto"
 )
 
 // LinkPreviewGenerator handles link preview generation with metadata and thumbnails
