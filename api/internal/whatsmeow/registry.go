@@ -1703,6 +1703,29 @@ func (r *ClientRegistry) wrapEventHandler(instanceID uuid.UUID) func(evt interfa
 				r.ResetClient(instanceID, reason)
 			}
 
+		case *events.QR:
+			// Capture fresh QR codes from whatsmeow events and update cache
+			if len(e.Codes) > 0 {
+				now := time.Now()
+				cached := &CachedPairingCode{
+					Code:      e.Codes[0],
+					Type:      PairingCodeTypeQR,
+					CreatedAt: now,
+					ExpiresAt: now.Add(pairingCodeTTL),
+					SessionID: uuid.NewString(),
+				}
+				r.setCachedPairingCode(instanceID, cached)
+
+				r.log.Info("QR code cache updated from event",
+					slog.String("instanceId", instanceID.String()),
+					slog.Int("codes_received", len(e.Codes)))
+
+				// If multiple codes received, start monitoring for renewals
+				if len(e.Codes) > 1 {
+					go r.monitorQRCodesFromEvent(instanceID, cached.SessionID, e.Codes[1:])
+				}
+			}
+
 		case *events.CallOffer:
 			// Handle automatic call rejection if configured
 			r.mu.RLock()
@@ -2177,6 +2200,56 @@ func (r *ClientRegistry) monitorQRCodeRenewals(instanceID uuid.UUID, qrChan <-ch
 		}
 	}
 	r.invalidatePairingCache(instanceID, "channel_closed")
+}
+
+// monitorQRCodesFromEvent handles QR code rotation from *events.QR payloads.
+// Each code is cached with pairingCodeTTL (20s) and rotated sequentially.
+func (r *ClientRegistry) monitorQRCodesFromEvent(instanceID uuid.UUID, sessionID string, remainingCodes []string) {
+	const qrCodeInterval = 20 * time.Second
+
+	for i, code := range remainingCodes {
+		// Check if session is still valid before sleeping
+		if cached, ok := r.getCachedPairingCode(instanceID, PairingCodeTypeQR); !ok || cached.SessionID != sessionID {
+			r.log.Debug("QR event monitor stopped - session changed",
+				slog.String("instanceId", instanceID.String()),
+				slog.String("sessionId", sessionID))
+			return
+		}
+
+		// Check if instance is already paired
+		r.mu.RLock()
+		state, exists := r.clients[instanceID]
+		isPaired := exists && state != nil && state.client != nil &&
+			state.client.Store != nil && state.client.Store.ID != nil
+		r.mu.RUnlock()
+
+		if isPaired {
+			r.log.Debug("QR event monitor stopped - instance paired",
+				slog.String("instanceId", instanceID.String()))
+			return
+		}
+
+		time.Sleep(qrCodeInterval)
+
+		// Update cache with next QR code
+		now := time.Now()
+		cached := &CachedPairingCode{
+			Code:      code,
+			Type:      PairingCodeTypeQR,
+			CreatedAt: now,
+			ExpiresAt: now.Add(pairingCodeTTL),
+			SessionID: sessionID,
+		}
+		r.setCachedPairingCode(instanceID, cached)
+		r.log.Debug("QR code rotated from event",
+			slog.String("instanceId", instanceID.String()),
+			slog.Int("code_index", i+1),
+			slog.Int("remaining", len(remainingCodes)-i-1))
+	}
+
+	r.log.Debug("QR event codes exhausted",
+		slog.String("instanceId", instanceID.String()),
+		slog.String("sessionId", sessionID))
 }
 
 func (r *ClientRegistry) PairPhone(ctx context.Context, info InstanceInfo, phone string) (string, error) {
