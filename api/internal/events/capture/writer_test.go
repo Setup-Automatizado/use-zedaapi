@@ -67,7 +67,7 @@ func TestResolveWebhookURL(t *testing.T) {
 			expectedType: "received",
 		},
 		{
-			name:      "notifySentByMe=true, ReceivedDeliveryURL empty - should fallback to ReceivedURL",
+			name:      "notifySentByMe=true, ReceivedDeliveryURL empty, fromMe=false - should fallback to ReceivedURL",
 			eventType: "message",
 			fromMe:    "false",
 			cfg: &ResolvedWebhookConfig{
@@ -77,6 +77,19 @@ func TestResolveWebhookURL(t *testing.T) {
 			},
 			expectedURL:  "https://example.com/received",
 			expectedType: "received",
+		},
+		{
+			name:      "notifySentByMe=true, ReceivedDeliveryURL empty, fromMe=true - should fallback to DeliveryURL",
+			eventType: "message",
+			fromMe:    "true",
+			cfg: &ResolvedWebhookConfig{
+				ReceivedURL:         "https://example.com/received",
+				DeliveryURL:         "https://example.com/delivery",
+				ReceivedDeliveryURL: "",
+				NotifySentByMe:      true,
+			},
+			expectedURL:  "https://example.com/delivery",
+			expectedType: "delivery",
 		},
 		{
 			name:      "receipt event - should use MessageStatusURL",
@@ -132,7 +145,7 @@ func TestResolveWebhookURL(t *testing.T) {
 			expectedType: "presence",
 		},
 		{
-			name:      "group_info event - should use ReceivedURL",
+			name:      "group_info event - should use ReceivedURL when ReceivedDeliveryURL empty",
 			eventType: "group_info",
 			fromMe:    "false",
 			cfg: &ResolvedWebhookConfig{
@@ -142,7 +155,18 @@ func TestResolveWebhookURL(t *testing.T) {
 			expectedType: "received",
 		},
 		{
-			name:      "group_joined event - should use ReceivedURL",
+			name:      "group_info event - should prefer ReceivedDeliveryURL",
+			eventType: "group_info",
+			fromMe:    "false",
+			cfg: &ResolvedWebhookConfig{
+				ReceivedURL:         "https://example.com/received",
+				ReceivedDeliveryURL: "https://example.com/received-delivery",
+			},
+			expectedURL:  "https://example.com/received-delivery",
+			expectedType: "received",
+		},
+		{
+			name:      "group_joined event - should use ReceivedURL when ReceivedDeliveryURL empty",
 			eventType: "group_joined",
 			fromMe:    "false",
 			cfg: &ResolvedWebhookConfig{
@@ -152,7 +176,18 @@ func TestResolveWebhookURL(t *testing.T) {
 			expectedType: "received",
 		},
 		{
-			name:      "undecryptable event - should use ReceivedURL",
+			name:      "group_joined event - should prefer ReceivedDeliveryURL",
+			eventType: "group_joined",
+			fromMe:    "false",
+			cfg: &ResolvedWebhookConfig{
+				ReceivedURL:         "https://example.com/received",
+				ReceivedDeliveryURL: "https://example.com/received-delivery",
+			},
+			expectedURL:  "https://example.com/received-delivery",
+			expectedType: "received",
+		},
+		{
+			name:      "undecryptable event - should use ReceivedURL when ReceivedDeliveryURL empty",
 			eventType: "undecryptable",
 			fromMe:    "false",
 			cfg: &ResolvedWebhookConfig{
@@ -162,13 +197,35 @@ func TestResolveWebhookURL(t *testing.T) {
 			expectedType: "received",
 		},
 		{
-			name:      "picture event - should use ReceivedURL",
+			name:      "undecryptable event - should prefer ReceivedDeliveryURL",
+			eventType: "undecryptable",
+			fromMe:    "false",
+			cfg: &ResolvedWebhookConfig{
+				ReceivedURL:         "https://example.com/received",
+				ReceivedDeliveryURL: "https://example.com/received-delivery",
+			},
+			expectedURL:  "https://example.com/received-delivery",
+			expectedType: "received",
+		},
+		{
+			name:      "picture event - should use ReceivedURL when ReceivedDeliveryURL empty",
 			eventType: "picture",
 			fromMe:    "false",
 			cfg: &ResolvedWebhookConfig{
 				ReceivedURL: "https://example.com/received",
 			},
 			expectedURL:  "https://example.com/received",
+			expectedType: "received",
+		},
+		{
+			name:      "picture event - should prefer ReceivedDeliveryURL",
+			eventType: "picture",
+			fromMe:    "false",
+			cfg: &ResolvedWebhookConfig{
+				ReceivedURL:         "https://example.com/received",
+				ReceivedDeliveryURL: "https://example.com/received-delivery",
+			},
+			expectedURL:  "https://example.com/received-delivery",
 			expectedType: "received",
 		},
 		{

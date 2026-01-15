@@ -393,13 +393,20 @@ func resolveWebhookURL(event *types.InternalEvent, cfg *ResolvedWebhookConfig) (
 			return cfg.ReceivedURL, "received"
 		}
 
-		// When NotifySentByMe is enabled, ALL messages go to combined endpoint
-		// This matches Z-API behavior: messages (received + sent by me) go to receivedAndDeliveryCallbackUrl
+		// When NotifySentByMe is enabled:
+		// - If receivedAndDeliveryCallbackUrl is configured, send ALL messages there
+		// - If NOT configured, fall back to individual webhooks (receivedCallbackUrl / deliveryCallbackUrl)
 		if cfg.NotifySentByMe {
 			if cfg.ReceivedDeliveryURL != "" {
 				return cfg.ReceivedDeliveryURL, "received"
 			}
-			// Fallback to ReceivedURL for Z-API compatibility
+			// Combined endpoint not configured - fall back to individual webhooks
+			if fromMe {
+				if cfg.DeliveryURL != "" {
+					return cfg.DeliveryURL, "delivery"
+				}
+				return "", ""
+			}
 			return cfg.ReceivedURL, "received"
 		}
 
@@ -425,13 +432,11 @@ func resolveWebhookURL(event *types.InternalEvent, cfg *ResolvedWebhookConfig) (
 			return cfg.MessageStatusURL, "message_status"
 		}
 		return "", ""
-	case "undecryptable":
-		return cfg.ReceivedURL, "received"
-	case "group_info":
-		return cfg.ReceivedURL, "received"
-	case "group_joined":
-		return cfg.ReceivedURL, "received"
-	case "picture":
+	case "undecryptable", "group_info", "group_joined", "picture":
+		// These events go to receivedAndDeliveryCallbackUrl if configured, otherwise receivedCallbackUrl
+		if cfg.ReceivedDeliveryURL != "" {
+			return cfg.ReceivedDeliveryURL, "received"
+		}
 		return cfg.ReceivedURL, "received"
 	case "chat_presence":
 		return cfg.ChatPresenceURL, "chat_presence"
