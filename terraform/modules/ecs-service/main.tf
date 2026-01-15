@@ -136,7 +136,7 @@ locals {
     SHUTDOWN_LOCK_TIMEOUT    = "5s"
 
     # Status Cache Configuration
-    STATUS_CACHE_ENABLED            = "true"
+    STATUS_CACHE_ENABLED            = "false"
     STATUS_CACHE_TTL                = "24h"
     STATUS_CACHE_TYPES              = "read,delivered,played,sent"
     STATUS_CACHE_SCOPE              = "groups"
