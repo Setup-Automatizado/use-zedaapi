@@ -1783,6 +1783,8 @@ func mapReceiptStatus(receiptEvent *events.Receipt) string {
 		return "SENT"
 	}
 
+	// Z-API valid statuses: PENDING, SENT, RECEIVED, READ, READ_BY_ME, PLAYED, PLAYED_BY_ME
+	// See api/z_api/message_status/ for all supported status types
 	switch receiptEvent.Type {
 	case watypes.ReceiptTypeReadSelf:
 		return "READ_BY_ME"
@@ -1812,9 +1814,17 @@ func mapReceiptStatus(receiptEvent *events.Receipt) string {
 
 func (t *Transformer) transformChatPresence(ctx context.Context, logger *slog.Logger, event *types.InternalEvent) (*PresenceChatCallback, error) {
 	var status string
-	switch event.Metadata["state"] {
+	state := event.Metadata["state"]
+	media := event.Metadata["media"]
+
+	switch state {
 	case "composing":
-		status = "COMPOSING"
+		// Check media type to distinguish between typing text and recording audio
+		if media == "audio" {
+			status = "RECORDING"
+		} else {
+			status = "COMPOSING"
+		}
 	case "paused":
 		status = "PAUSED"
 	case "recording":
