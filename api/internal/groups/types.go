@@ -8,17 +8,20 @@ type ListParams struct {
 
 // Summary represents the payload for a single group item.
 type Summary struct {
-	IsGroup         bool    `json:"isGroup"`
-	Name            string  `json:"name"`
-	Phone           string  `json:"phone"`
-	Unread          string  `json:"unread"`
-	LastMessageTime *string `json:"lastMessageTime"`
-	IsMuted         string  `json:"isMuted"`
-	MuteEndTime     *string `json:"muteEndTime"`
-	IsMarkedSpam    bool    `json:"isMarkedSpam"`
-	Archived        bool    `json:"archived"`
-	Pinned          bool    `json:"pinned"`
-	MessagesUnread  string  `json:"messagesUnread"`
+	IsGroup             bool    `json:"isGroup"`
+	Name                string  `json:"name"`
+	Phone               string  `json:"phone"`
+	Unread              string  `json:"unread"`
+	LastMessageTime     *string `json:"lastMessageTime"`
+	IsMuted             string  `json:"isMuted"`
+	MuteEndTime         *string `json:"muteEndTime"`
+	IsMarkedSpam        bool    `json:"isMarkedSpam"`
+	Archived            bool    `json:"archived"`
+	Pinned              bool    `json:"pinned"`
+	MessagesUnread      string  `json:"messagesUnread"`
+	IsGroupAnnouncement bool    `json:"isGroupAnnouncement"`
+	IsCommunity         bool    `json:"isCommunity"`
+	CommunityID         *string `json:"communityId"`
 }
 
 // ListResult contains the paginated result of the List operation.
@@ -124,6 +127,7 @@ type Metadata struct {
 	AdminOnlySettings    bool                 `json:"adminOnlySettings"`
 	RequireAdminApproval bool                 `json:"requireAdminApproval"`
 	IsGroupAnnouncement  bool                 `json:"isGroupAnnouncement"`
+	IsCommunity          bool                 `json:"isCommunity"`
 	Participants         []ParticipantSummary `json:"participants"`
 	SubjectTime          int64                `json:"subjectTime"`
 	SubjectOwner         string               `json:"subjectOwner"`

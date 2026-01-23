@@ -140,17 +140,20 @@ func toSummary(info *types.GroupInfo, settings types.LocalChatSettings, now time
 	isMuted, muteEnd := evaluateMute(settings, now)
 
 	return Summary{
-		IsGroup:         true,
-		Name:            info.GroupName.Name,
-		Phone:           conversationIdentifierFromJID(info.JID),
-		Unread:          "0",
-		LastMessageTime: lastMessage,
-		IsMuted:         isMuted,
-		MuteEndTime:     muteEnd,
-		IsMarkedSpam:    false,
-		Archived:        settings.Archived,
-		Pinned:          settings.Pinned,
-		MessagesUnread:  "0",
+		IsGroup:             true,
+		Name:                info.GroupName.Name,
+		Phone:               conversationIdentifierFromJID(info.JID),
+		Unread:              "0",
+		LastMessageTime:     lastMessage,
+		IsMuted:             isMuted,
+		MuteEndTime:         muteEnd,
+		IsMarkedSpam:        false,
+		Archived:            settings.Archived,
+		Pinned:              settings.Pinned,
+		MessagesUnread:      "0",
+		IsGroupAnnouncement: info.IsAnnounce,
+		IsCommunity:         info.IsParent,
+		CommunityID:         selectCommunityID(info),
 	}
 }
 
