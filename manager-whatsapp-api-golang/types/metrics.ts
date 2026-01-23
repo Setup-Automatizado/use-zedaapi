@@ -173,6 +173,22 @@ export interface MediaMetrics {
 	cleanupRuns: number;
 	filesDeleted: number;
 	cleanupDeletedBytes: number;
+	// New detailed metrics
+	downloadErrors: number;
+	uploadAttempts: number;
+	uploadErrors: number;
+	uploadSizeBytes: number;
+	presignedUrlGenerated: number;
+	deleteAttempts: number;
+	failures: number;
+	fallbackAttempts: number;
+	fallbackSuccess: number;
+	fallbackFailure: number;
+	cleanupTotal: number;
+	cleanupErrors: number;
+	avgCleanupDurationMs: number;
+	serveRequests: number;
+	serveBytes: number;
 	byType?: Record<
 		string,
 		{
@@ -189,6 +205,9 @@ export interface MediaMetrics {
 			failures: number;
 		}
 	>;
+	byErrorType?: Record<string, number>;
+	byFallbackType?: Record<string, number>;
+	byStorageType?: Record<string, number>;
 }
 
 /**
@@ -197,6 +216,7 @@ export interface MediaMetrics {
 export interface SystemMetrics {
 	circuitBreakerByInstance: Record<string, string>;
 	circuitBreakerState: CircuitBreakerState;
+	circuitBreakerTransitions: number;
 	healthChecks: Record<
 		string,
 		{
@@ -211,12 +231,18 @@ export interface SystemMetrics {
 		reacquisitions: number;
 		fallbacks: number;
 	};
+	splitBrainInvalidLocks: number;
 	reconciliation: {
 		success: number;
 		failure: number;
 		skipped: number;
 		error: number;
 		avgDurationMs: number;
+	};
+	queueDrain: {
+		durationMs: number;
+		timeouts: number;
+		drainedMessages: number;
 	};
 	splitBrainDetected: number;
 	orphanedInstances: number;
@@ -371,6 +397,12 @@ export interface EventMetrics {
 	avgDeliveryMs: number;
 	outboxBacklog: number;
 	dlqSize: number;
+	// DLQ detailed metrics
+	dlqEvents: number;
+	dlqReprocessAttempts: number;
+	dlqReprocessSuccess: number;
+	// Sequence gaps
+	sequenceGaps: number;
 	byType?: Record<
 		string,
 		{
@@ -392,6 +424,26 @@ export interface EventMetrics {
 			delivered: number;
 			failed: number;
 			backlog: number;
+			sequenceGaps: number;
+		}
+	>;
+}
+
+/**
+ * Handler metrics (for groups, communities, newsletters)
+ */
+export interface HandlerMetrics {
+	totalRequests: number;
+	successRequests: number;
+	failedRequests: number;
+	avgLatencyMs: number;
+	byOperation?: Record<
+		string,
+		{
+			total: number;
+			success: number;
+			failed: number;
+			avgLatencyMs: number;
 		}
 	>;
 }
@@ -434,6 +486,10 @@ export interface DashboardMetrics {
 	media: MediaMetrics;
 	transport: TransportMetrics;
 	statusCache: StatusCacheMetrics;
+	// Handler metrics for specialized endpoints
+	groups: HandlerMetrics;
+	communities: HandlerMetrics;
+	newsletters: HandlerMetrics;
 	system: SystemMetrics & {
 		circuitBreakerState: CircuitBreakerState;
 		lockAcquisitions: {
