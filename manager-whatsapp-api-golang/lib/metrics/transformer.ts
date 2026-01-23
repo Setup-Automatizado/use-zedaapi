@@ -11,6 +11,7 @@ import type {
 	CircuitBreakerState,
 	DashboardMetrics,
 	EventMetrics,
+	HandlerMetrics,
 	HTTPMetrics,
 	MediaMetrics,
 	MessageQueueMetrics,
@@ -111,6 +112,9 @@ export function transformToDashboard(
 		workers: transformWorkerMetrics(families),
 		transport: transformTransportMetrics(families, instanceId),
 		statusCache: transformStatusCacheMetrics(families, instanceId),
+		groups: transformHandlerMetrics(families, "groups"),
+		communities: transformHandlerMetrics(families, "communities"),
+		newsletters: transformHandlerMetrics(families, "newsletters"),
 		instances,
 	};
 }
@@ -268,6 +272,10 @@ function transformEventMetrics(
 		avgDeliveryMs: 0,
 		outboxBacklog: 0,
 		dlqSize: 0,
+		dlqEvents: 0,
+		dlqReprocessAttempts: 0,
+		dlqReprocessSuccess: 0,
+		sequenceGaps: 0,
 		byType: {},
 		byInstance: {},
 	};
@@ -313,6 +321,7 @@ function transformEventMetrics(
 						delivered: 0,
 						failed: 0,
 						backlog: 0,
+						sequenceGaps: 0,
 					};
 				}
 				metrics.byInstance[instId].captured += sample.value;
@@ -372,6 +381,7 @@ function transformEventMetrics(
 						delivered: 0,
 						failed: 0,
 						backlog: 0,
+						sequenceGaps: 0,
 					};
 				}
 				metrics.byInstance[instId].processed += sample.value;
@@ -414,6 +424,7 @@ function transformEventMetrics(
 						delivered: 0,
 						failed: 0,
 						backlog: 0,
+						sequenceGaps: 0,
 					};
 				}
 				metrics.byInstance[instId].delivered += sample.value;
@@ -456,6 +467,7 @@ function transformEventMetrics(
 						delivered: 0,
 						failed: 0,
 						backlog: 0,
+						sequenceGaps: 0,
 					};
 				}
 				metrics.byInstance[instId].failed += sample.value;
@@ -492,6 +504,64 @@ function transformEventMetrics(
 	if (dlqFamily) {
 		for (const sample of dlqFamily.samples) {
 			metrics.dlqSize += sample.value;
+		}
+	}
+
+	// dlq_events_total
+	const dlqEventsFamily = getFamily(families, "dlq_events_total");
+	if (dlqEventsFamily) {
+		for (const sample of dlqEventsFamily.samples) {
+			if (!shouldInclude(sample.labels)) continue;
+			metrics.dlqEvents += sample.value;
+		}
+	}
+
+	// dlq_reprocess_attempts_total
+	const dlqReprocessFamily = getFamily(
+		families,
+		"dlq_reprocess_attempts_total",
+	);
+	if (dlqReprocessFamily) {
+		for (const sample of dlqReprocessFamily.samples) {
+			if (!shouldInclude(sample.labels)) continue;
+			metrics.dlqReprocessAttempts += sample.value;
+		}
+	}
+
+	// dlq_reprocess_success_total
+	const dlqSuccessFamily = getFamily(families, "dlq_reprocess_success_total");
+	if (dlqSuccessFamily) {
+		for (const sample of dlqSuccessFamily.samples) {
+			if (!shouldInclude(sample.labels)) continue;
+			metrics.dlqReprocessSuccess += sample.value;
+		}
+	}
+
+	// event_sequence_gaps (gauge)
+	const sequenceGapsFamily = getFamily(families, "event_sequence_gaps");
+	if (sequenceGapsFamily) {
+		for (const sample of sequenceGapsFamily.samples) {
+			if (!shouldInclude(sample.labels)) continue;
+			metrics.sequenceGaps += sample.value;
+
+			const instId = sample.labels.instance_id;
+			if (instId) {
+				if (!metrics.byInstance) metrics.byInstance = {};
+
+				if (!metrics.byInstance[instId]) {
+					metrics.byInstance[instId] = {
+						captured: 0,
+						buffered: 0,
+						inserted: 0,
+						processed: 0,
+						delivered: 0,
+						failed: 0,
+						backlog: 0,
+						sequenceGaps: 0,
+					};
+				}
+				metrics.byInstance[instId].sequenceGaps = sample.value;
+			}
 		}
 	}
 
@@ -759,8 +829,27 @@ function transformMediaMetrics(
 		cleanupRuns: 0,
 		filesDeleted: 0,
 		cleanupDeletedBytes: 0,
+		// New detailed metrics
+		downloadErrors: 0,
+		uploadAttempts: 0,
+		uploadErrors: 0,
+		uploadSizeBytes: 0,
+		presignedUrlGenerated: 0,
+		deleteAttempts: 0,
+		failures: 0,
+		fallbackAttempts: 0,
+		fallbackSuccess: 0,
+		fallbackFailure: 0,
+		cleanupTotal: 0,
+		cleanupErrors: 0,
+		avgCleanupDurationMs: 0,
+		serveRequests: 0,
+		serveBytes: 0,
 		byType: {},
 		byInstance: {},
+		byErrorType: {},
+		byFallbackType: {},
+		byStorageType: {},
 	};
 
 	const shouldInclude = (labels: Record<string, string>) => {
@@ -943,6 +1032,201 @@ function transformMediaMetrics(
 		}
 	}
 
+	// media_download_size_bytes (histogram)
+	const downloadSizeFamily = getFamily(families, "media_download_size_bytes");
+	if (downloadSizeFamily) {
+		const histograms = extractHistograms(downloadSizeFamily);
+		for (const h of histograms) {
+			if (instanceId && h.labels.instance_id !== instanceId) continue;
+			metrics.totalDownloadBytes += h.sum;
+		}
+	}
+
+	// media_download_errors_total
+	const downloadErrorsFamily = getFamily(
+		families,
+		"media_download_errors_total",
+	);
+	if (downloadErrorsFamily) {
+		for (const sample of downloadErrorsFamily.samples) {
+			metrics.downloadErrors += sample.value;
+			const errorType = sample.labels.error_type || "unknown";
+			if (!metrics.byErrorType) metrics.byErrorType = {};
+			metrics.byErrorType[errorType] =
+				(metrics.byErrorType[errorType] || 0) + sample.value;
+		}
+	}
+
+	// media_upload_attempts_total
+	const uploadAttemptsFamily = getFamily(
+		families,
+		"media_upload_attempts_total",
+	);
+	if (uploadAttemptsFamily) {
+		for (const sample of uploadAttemptsFamily.samples) {
+			metrics.uploadAttempts += sample.value;
+		}
+	}
+
+	// media_upload_errors_total
+	const uploadErrorsFamily = getFamily(families, "media_upload_errors_total");
+	if (uploadErrorsFamily) {
+		for (const sample of uploadErrorsFamily.samples) {
+			metrics.uploadErrors += sample.value;
+			const errorType = sample.labels.error_type || "unknown";
+			if (!metrics.byErrorType) metrics.byErrorType = {};
+			metrics.byErrorType[errorType] =
+				(metrics.byErrorType[errorType] || 0) + sample.value;
+		}
+	}
+
+	// media_upload_size_bytes_total
+	const uploadSizeFamily = getFamily(
+		families,
+		"media_upload_size_bytes_total",
+	);
+	if (uploadSizeFamily) {
+		for (const sample of uploadSizeFamily.samples) {
+			metrics.uploadSizeBytes += sample.value;
+			metrics.totalUploadBytes += sample.value;
+		}
+	}
+
+	// media_presigned_url_generated_total
+	const presignedFamily = getFamily(
+		families,
+		"media_presigned_url_generated_total",
+	);
+	if (presignedFamily) {
+		for (const sample of presignedFamily.samples) {
+			metrics.presignedUrlGenerated += sample.value;
+		}
+	}
+
+	// media_delete_attempts_total
+	const deleteAttemptsFamily = getFamily(
+		families,
+		"media_delete_attempts_total",
+	);
+	if (deleteAttemptsFamily) {
+		for (const sample of deleteAttemptsFamily.samples) {
+			metrics.deleteAttempts += sample.value;
+		}
+	}
+
+	// media_failures_total
+	const failuresFamily = getFamily(families, "media_failures_total");
+	if (failuresFamily) {
+		for (const sample of failuresFamily.samples) {
+			if (!shouldInclude(sample.labels)) continue;
+			metrics.failures += sample.value;
+		}
+	}
+
+	// media_fallback_attempts_total
+	const fallbackAttemptsFamily = getFamily(
+		families,
+		"media_fallback_attempts_total",
+	);
+	if (fallbackAttemptsFamily) {
+		for (const sample of fallbackAttemptsFamily.samples) {
+			if (!shouldInclude(sample.labels)) continue;
+			metrics.fallbackAttempts += sample.value;
+			const fallbackType = sample.labels.fallback_type || "unknown";
+			if (!metrics.byFallbackType) metrics.byFallbackType = {};
+			metrics.byFallbackType[fallbackType] =
+				(metrics.byFallbackType[fallbackType] || 0) + sample.value;
+		}
+	}
+
+	// media_fallback_success_total
+	const fallbackSuccessFamily = getFamily(
+		families,
+		"media_fallback_success_total",
+	);
+	if (fallbackSuccessFamily) {
+		for (const sample of fallbackSuccessFamily.samples) {
+			if (!shouldInclude(sample.labels)) continue;
+			metrics.fallbackSuccess += sample.value;
+			const storageType = sample.labels.storage_type || "unknown";
+			if (!metrics.byStorageType) metrics.byStorageType = {};
+			metrics.byStorageType[storageType] =
+				(metrics.byStorageType[storageType] || 0) + sample.value;
+		}
+	}
+
+	// media_fallback_failure_total
+	const fallbackFailureFamily = getFamily(
+		families,
+		"media_fallback_failure_total",
+	);
+	if (fallbackFailureFamily) {
+		for (const sample of fallbackFailureFamily.samples) {
+			if (!shouldInclude(sample.labels)) continue;
+			metrics.fallbackFailure += sample.value;
+		}
+	}
+
+	// media_cleanup_total
+	const cleanupTotalFamily = getFamily(families, "media_cleanup_total");
+	if (cleanupTotalFamily) {
+		for (const sample of cleanupTotalFamily.samples) {
+			metrics.cleanupTotal += sample.value;
+		}
+	}
+
+	// media_cleanup_errors_total
+	const cleanupErrorsFamily = getFamily(
+		families,
+		"media_cleanup_errors_total",
+	);
+	if (cleanupErrorsFamily) {
+		for (const sample of cleanupErrorsFamily.samples) {
+			metrics.cleanupErrors += sample.value;
+		}
+	}
+
+	// media_cleanup_duration_seconds (histogram)
+	const cleanupDurationFamily = getFamily(
+		families,
+		"media_cleanup_duration_seconds",
+	);
+	if (cleanupDurationFamily) {
+		const histograms = extractHistograms(cleanupDurationFamily);
+		let totalSum = 0;
+		let totalCount = 0;
+
+		for (const h of histograms) {
+			totalSum += h.sum;
+			totalCount += h.count;
+		}
+
+		if (totalCount > 0) {
+			metrics.avgCleanupDurationMs = (totalSum / totalCount) * 1000;
+		}
+	}
+
+	// media_serve_requests_total
+	const serveRequestsFamily = getFamily(
+		families,
+		"media_serve_requests_total",
+	);
+	if (serveRequestsFamily) {
+		for (const sample of serveRequestsFamily.samples) {
+			if (!shouldInclude(sample.labels)) continue;
+			metrics.serveRequests += sample.value;
+		}
+	}
+
+	// media_serve_bytes_total
+	const serveBytesFamily = getFamily(families, "media_serve_bytes_total");
+	if (serveBytesFamily) {
+		for (const sample of serveBytesFamily.samples) {
+			if (!shouldInclude(sample.labels)) continue;
+			metrics.serveBytes += sample.value;
+		}
+	}
+
 	return metrics;
 }
 
@@ -957,6 +1241,7 @@ function transformSystemMetrics(
 	const metrics: SystemMetrics = {
 		circuitBreakerState: "unknown",
 		circuitBreakerByInstance: {},
+		circuitBreakerTransitions: 0,
 		lockAcquisitions: {
 			success: 0,
 			failure: 0,
@@ -964,6 +1249,7 @@ function transformSystemMetrics(
 			fallbacks: 0,
 		},
 		splitBrainDetected: 0,
+		splitBrainInvalidLocks: 0,
 		healthChecks: {},
 		orphanedInstances: 0,
 		reconciliation: {
@@ -972,6 +1258,11 @@ function transformSystemMetrics(
 			skipped: 0,
 			error: 0,
 			avgDurationMs: 0,
+		},
+		queueDrain: {
+			durationMs: 0,
+			timeouts: 0,
+			drainedMessages: 0,
 		},
 	};
 
@@ -1115,6 +1406,70 @@ function transformSystemMetrics(
 		if (totalCount > 0) {
 			metrics.reconciliation.avgDurationMs =
 				(totalSum / totalCount) * 1000;
+		}
+	}
+
+	// circuit_breaker_transitions_total
+	const circuitTransitionsFamily = getFamily(
+		families,
+		"circuit_breaker_transitions_total",
+	);
+	if (circuitTransitionsFamily) {
+		for (const sample of circuitTransitionsFamily.samples) {
+			metrics.circuitBreakerTransitions += sample.value;
+		}
+	}
+
+	// split_brain_invalid_locks_total
+	const invalidLocksFamily = getFamily(
+		families,
+		"split_brain_invalid_locks_total",
+	);
+	if (invalidLocksFamily) {
+		for (const sample of invalidLocksFamily.samples) {
+			metrics.splitBrainInvalidLocks += sample.value;
+		}
+	}
+
+	// queue_drain_duration_seconds (histogram)
+	const queueDrainDurationFamily = getFamily(
+		families,
+		"queue_drain_duration_seconds",
+	);
+	if (queueDrainDurationFamily) {
+		const histograms = extractHistograms(queueDrainDurationFamily);
+		let totalSum = 0;
+		let totalCount = 0;
+
+		for (const h of histograms) {
+			totalSum += h.sum;
+			totalCount += h.count;
+		}
+
+		if (totalCount > 0) {
+			metrics.queueDrain.durationMs = (totalSum / totalCount) * 1000;
+		}
+	}
+
+	// queue_drain_timeouts_total
+	const queueDrainTimeoutsFamily = getFamily(
+		families,
+		"queue_drain_timeouts_total",
+	);
+	if (queueDrainTimeoutsFamily) {
+		for (const sample of queueDrainTimeoutsFamily.samples) {
+			metrics.queueDrain.timeouts += sample.value;
+		}
+	}
+
+	// queue_drained_messages_total
+	const queueDrainedMessagesFamily = getFamily(
+		families,
+		"queue_drained_messages_total",
+	);
+	if (queueDrainedMessagesFamily) {
+		for (const sample of queueDrainedMessagesFamily.samples) {
+			metrics.queueDrain.drainedMessages += sample.value;
 		}
 	}
 
@@ -1626,4 +1981,101 @@ function mapCircuitState(value: number): CircuitBreakerState {
 		default:
 			return "unknown";
 	}
+}
+
+/**
+ * Transform handler metrics for groups, communities, newsletters
+ */
+function transformHandlerMetrics(
+	families: ParsedMetrics["families"],
+	handlerType: "groups" | "communities" | "newsletters",
+): HandlerMetrics {
+	const metrics: HandlerMetrics = {
+		totalRequests: 0,
+		successRequests: 0,
+		failedRequests: 0,
+		avgLatencyMs: 0,
+		byOperation: {},
+	};
+
+	// {handler}_requests_total (labels: operation, status)
+	const requestsFamily = getFamily(families, `${handlerType}_requests_total`);
+	if (requestsFamily) {
+		for (const sample of requestsFamily.samples) {
+			const operation = sample.labels.operation || "unknown";
+			const status = sample.labels.status || "unknown";
+
+			metrics.totalRequests += sample.value;
+
+			if (status === "success") {
+				metrics.successRequests += sample.value;
+			} else if (status === "failure" || status === "error") {
+				metrics.failedRequests += sample.value;
+			}
+
+			// By operation
+			if (!metrics.byOperation) metrics.byOperation = {};
+
+			if (!metrics.byOperation[operation]) {
+				metrics.byOperation[operation] = {
+					total: 0,
+					success: 0,
+					failed: 0,
+					avgLatencyMs: 0,
+				};
+			}
+			metrics.byOperation[operation].total += sample.value;
+			if (status === "success") {
+				metrics.byOperation[operation].success += sample.value;
+			} else if (status === "failure" || status === "error") {
+				metrics.byOperation[operation].failed += sample.value;
+			}
+		}
+	}
+
+	// {handler}_latency_seconds (histogram, labels: operation)
+	const latencyFamily = getFamily(families, `${handlerType}_latency_seconds`);
+	if (latencyFamily) {
+		const histograms = extractHistograms(latencyFamily);
+		let totalSum = 0;
+		let totalCount = 0;
+
+		// Track per-operation latencies
+		const operationLatencies: Record<
+			string,
+			{ sum: number; count: number }
+		> = {};
+
+		for (const h of histograms) {
+			const operation = h.labels.operation || "unknown";
+
+			totalSum += h.sum;
+			totalCount += h.count;
+
+			// Track per-operation
+			if (!operationLatencies[operation]) {
+				operationLatencies[operation] = { sum: 0, count: 0 };
+			}
+			operationLatencies[operation].sum += h.sum;
+			operationLatencies[operation].count += h.count;
+		}
+
+		if (totalCount > 0) {
+			metrics.avgLatencyMs = (totalSum / totalCount) * 1000;
+		}
+
+		// Update per-operation avgLatencyMs
+		for (const [operation, data] of Object.entries(operationLatencies)) {
+			if (
+				metrics.byOperation &&
+				metrics.byOperation[operation] &&
+				data.count > 0
+			) {
+				metrics.byOperation[operation].avgLatencyMs =
+					(data.sum / data.count) * 1000;
+			}
+		}
+	}
+
+	return metrics;
 }
