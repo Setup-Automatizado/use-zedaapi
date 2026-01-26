@@ -5715,7 +5715,8 @@ func (h *MessageHandler) modifyChatClear(ctx context.Context, client *wameow.Cli
 // modifyChatDelete deletes a chat using whatsmeow appstate
 func (h *MessageHandler) modifyChatDelete(ctx context.Context, client *wameow.Client, chatJID types.JID) error {
 	// Build delete chat patch - use current time as last message timestamp
-	patch := appstate.BuildDeleteChat(chatJID, time.Now(), nil)
+	// deleteMedia=true to also remove associated media from the chat
+	patch := appstate.BuildDeleteChat(chatJID, time.Now(), nil, true)
 	return client.SendAppState(ctx, patch)
 }
 
