@@ -374,6 +374,10 @@ func (s *Service) UpdateWebhookReceivedDelivery(ctx context.Context, id uuid.UUI
 	}
 	return s.updateWebhookConfig(ctx, id, clientToken, instanceToken, func(cfg *WebhookConfig) error {
 		cfg.ReceivedDeliveryURL = strPtr(normalized)
+		// When a combined endpoint is configured, automatically enable NotifySentByMe
+		// so all messages (sent and received) are delivered to this endpoint.
+		// When cleared, disable it.
+		cfg.NotifySentByMe = normalized != ""
 		return nil
 	})
 }
