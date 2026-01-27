@@ -418,11 +418,18 @@ func resolveWebhookURL(event *types.InternalEvent, cfg *ResolvedWebhookConfig) (
 			if cfg.DeliveryURL != "" {
 				return cfg.DeliveryURL, "delivery"
 			}
-			// If delivery_url not configured, filter the event
+			// Fall back to received_delivery_url (combined endpoint)
+			if cfg.ReceivedDeliveryURL != "" {
+				return cfg.ReceivedDeliveryURL, "delivery"
+			}
+			// If no webhook configured, filter the event
 			return "", ""
 		}
 
-		// Messages received from others go to received_url
+		// Messages received from others go to received_delivery_url if set, otherwise received_url
+		if cfg.ReceivedDeliveryURL != "" {
+			return cfg.ReceivedDeliveryURL, "received"
+		}
 		return cfg.ReceivedURL, "received"
 
 	case "receipt":
