@@ -162,6 +162,7 @@ type Config struct {
 		MaxBackoff           time.Duration
 		BackoffMultiplier    float64
 		DisconnectRetryDelay time.Duration
+		ProxyRetryDelay      time.Duration
 		CompletedRetention   time.Duration
 		FailedRetention      time.Duration
 		CleanupInterval      time.Duration
@@ -207,6 +208,28 @@ type Config struct {
 	EventFilters struct {
 		FilterWaitingMessage          bool // Filter events with waitingMessage=true (incomplete messages awaiting sender key)
 		FilterSecondaryDeviceReceipts bool // Filter receipts from secondary devices (Device > 0), only keep primary device receipts
+	}
+
+	Proxy struct {
+		HealthCheckInterval    time.Duration
+		HealthCheckTimeout     time.Duration
+		MaxConsecutiveFailures int
+		DLQOnUnhealthy         bool
+		PauseQueueOnUnhealthy  bool
+		LogRetentionPeriod     time.Duration
+		CleanupInterval        time.Duration
+	}
+
+	ProxyPool struct {
+		Enabled              bool
+		SyncInterval         time.Duration
+		DefaultCountryCodes  string
+		AssignmentRetryDelay time.Duration
+		MaxAssignmentRetries int
+		WebshareAPIKey       string
+		WebshareEndpoint     string
+		WebsharePlanID       string
+		WebshareMode         string
 	}
 }
 
@@ -580,6 +603,10 @@ func Load() (Config, error) {
 	if err != nil {
 		return cfg, fmt.Errorf("invalid MESSAGE_QUEUE_DISCONNECT_RETRY_DELAY: %w", err)
 	}
+	mqProxyRetryDelay, err := parseDuration(getEnv("MESSAGE_QUEUE_PROXY_RETRY_DELAY", "2m"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid MESSAGE_QUEUE_PROXY_RETRY_DELAY: %w", err)
+	}
 	mqCompletedRetention, err := parseDuration(getEnv("MESSAGE_QUEUE_COMPLETED_RETENTION", "24h"))
 	if err != nil {
 		return cfg, fmt.Errorf("invalid MESSAGE_QUEUE_COMPLETED_RETENTION: %w", err)
@@ -605,6 +632,7 @@ func Load() (Config, error) {
 		MaxBackoff           time.Duration
 		BackoffMultiplier    float64
 		DisconnectRetryDelay time.Duration
+		ProxyRetryDelay      time.Duration
 		CompletedRetention   time.Duration
 		FailedRetention      time.Duration
 		CleanupInterval      time.Duration
@@ -617,6 +645,7 @@ func Load() (Config, error) {
 		MaxBackoff:           mqMaxBackoff,
 		BackoffMultiplier:    mqBackoffMultiplier,
 		DisconnectRetryDelay: mqDisconnectRetryDelay,
+		ProxyRetryDelay:      mqProxyRetryDelay,
 		CompletedRetention:   mqCompletedRetention,
 		FailedRetention:      mqFailedRetention,
 		CleanupInterval:      mqCleanupInterval,
@@ -764,6 +793,83 @@ func Load() (Config, error) {
 	}{
 		FilterWaitingMessage:          filterWaitingMessage,
 		FilterSecondaryDeviceReceipts: filterSecondaryDeviceReceipts,
+	}
+
+	// Proxy Configuration
+	proxyHealthCheckInterval, err := parseDuration(getEnv("PROXY_HEALTH_CHECK_INTERVAL", "60s"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid PROXY_HEALTH_CHECK_INTERVAL: %w", err)
+	}
+	proxyHealthCheckTimeout, err := parseDuration(getEnv("PROXY_HEALTH_CHECK_TIMEOUT", "10s"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid PROXY_HEALTH_CHECK_TIMEOUT: %w", err)
+	}
+	proxyMaxConsecutiveFailures := mustParsePositiveInt(getEnv("PROXY_MAX_CONSECUTIVE_FAILURES", "3"))
+	proxyDLQOnUnhealthy := parseBool(getEnv("PROXY_DLQ_ON_UNHEALTHY", "true"))
+	proxyPauseQueueOnUnhealthy := parseBool(getEnv("PROXY_PAUSE_QUEUE_ON_UNHEALTHY", "true"))
+	proxyLogRetentionPeriod, err := parseDuration(getEnv("PROXY_LOG_RETENTION_PERIOD", "168h"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid PROXY_LOG_RETENTION_PERIOD: %w", err)
+	}
+	proxyCleanupInterval, err := parseDuration(getEnv("PROXY_CLEANUP_INTERVAL", "1h"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid PROXY_CLEANUP_INTERVAL: %w", err)
+	}
+	cfg.Proxy = struct {
+		HealthCheckInterval    time.Duration
+		HealthCheckTimeout     time.Duration
+		MaxConsecutiveFailures int
+		DLQOnUnhealthy         bool
+		PauseQueueOnUnhealthy  bool
+		LogRetentionPeriod     time.Duration
+		CleanupInterval        time.Duration
+	}{
+		HealthCheckInterval:    proxyHealthCheckInterval,
+		HealthCheckTimeout:     proxyHealthCheckTimeout,
+		MaxConsecutiveFailures: proxyMaxConsecutiveFailures,
+		DLQOnUnhealthy:         proxyDLQOnUnhealthy,
+		PauseQueueOnUnhealthy:  proxyPauseQueueOnUnhealthy,
+		LogRetentionPeriod:     proxyLogRetentionPeriod,
+		CleanupInterval:        proxyCleanupInterval,
+	}
+
+	// Proxy Pool Configuration
+	proxyPoolEnabled := parseBool(getEnv("PROXY_POOL_ENABLED", "false"))
+	proxyPoolSyncInterval, err := parseDuration(getEnv("PROXY_POOL_SYNC_INTERVAL", "15m"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid PROXY_POOL_SYNC_INTERVAL: %w", err)
+	}
+	proxyPoolDefaultCountryCodes := getEnv("PROXY_POOL_DEFAULT_COUNTRY_CODES", "BR,AR,CL,CO,MX,PE,EC,UY,PY,BO,VE,US,CA")
+	proxyPoolAssignmentRetryDelay, err := parseDuration(getEnv("PROXY_POOL_ASSIGNMENT_RETRY_DELAY", "5s"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid PROXY_POOL_ASSIGNMENT_RETRY_DELAY: %w", err)
+	}
+	proxyPoolMaxAssignmentRetries := mustParsePositiveInt(getEnv("PROXY_POOL_MAX_ASSIGNMENT_RETRIES", "3"))
+	proxyPoolWebshareAPIKey := strings.TrimSpace(os.Getenv("PROXY_POOL_WEBSHARE_API_KEY"))
+	proxyPoolWebshareEndpoint := getEnv("PROXY_POOL_WEBSHARE_ENDPOINT", "https://proxy.webshare.io/api/v2")
+	proxyPoolWebsharePlanID := strings.TrimSpace(os.Getenv("PROXY_POOL_WEBSHARE_PLAN_ID"))
+	proxyPoolWebshareMode := getEnv("PROXY_POOL_WEBSHARE_MODE", "direct")
+
+	cfg.ProxyPool = struct {
+		Enabled              bool
+		SyncInterval         time.Duration
+		DefaultCountryCodes  string
+		AssignmentRetryDelay time.Duration
+		MaxAssignmentRetries int
+		WebshareAPIKey       string
+		WebshareEndpoint     string
+		WebsharePlanID       string
+		WebshareMode         string
+	}{
+		Enabled:              proxyPoolEnabled,
+		SyncInterval:         proxyPoolSyncInterval,
+		DefaultCountryCodes:  proxyPoolDefaultCountryCodes,
+		AssignmentRetryDelay: proxyPoolAssignmentRetryDelay,
+		MaxAssignmentRetries: proxyPoolMaxAssignmentRetries,
+		WebshareAPIKey:       proxyPoolWebshareAPIKey,
+		WebshareEndpoint:     proxyPoolWebshareEndpoint,
+		WebsharePlanID:       proxyPoolWebsharePlanID,
+		WebshareMode:         proxyPoolWebshareMode,
 	}
 
 	cfg.Events = struct {
