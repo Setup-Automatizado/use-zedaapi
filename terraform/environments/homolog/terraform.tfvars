@@ -57,6 +57,8 @@ redis_node_type               = "cache.t3.micro"
 redis_replicas_per_node_group = 0
 redis_auth_token              = "y52kar3uAQuu5TDgt27stBfvPcoaSwh1"
 redis_lock_key_prefix         = "funnelchat"
+redis_lock_ttl                = "30s"
+redis_lock_refresh_interval   = "10s"
 
 # --------------------------------------------------
 # S3 (armazenamento de mídia)
@@ -93,6 +95,7 @@ additional_secret_values = {
   partner_auth_token = "iB4uIxOYOMFSnScXWlphBg=="
   client_auth_token  = "iB4uIxOYOMFSnScXWlphBg=="
   sentry_dsn         = "https://2e9b95288cbd7051e60d263580ceb8e0@o4510360009441280.ingest.us.sentry.io/4510360011538432"
+  webshare_api_key   = "shhz7zca1xjtkazd2do791kbyrmfy0wkqbtkxzuy"
 }
 
 # --------------------------------------------------
@@ -124,8 +127,35 @@ worker_rebalance_interval = "30s"
 secret_recovery_window    = 7
 s3_endpoint               = ""
 api_base_url              = "http://homolog-whatsmeow-alb-731186848.us-east-1.elb.amazonaws.com"
-extra_environment         = {}
-secret_env_mapping        = {}
+extra_environment = {
+  # Application Feature Flags
+  API_ECHO_ENABLED                 = "true"
+  FILTER_WAITING_MESSAGE           = "true"
+  FILTER_SECONDARY_DEVICE_RECEIPTS = "true"
+
+  # Status Cache (Redis-based webhook deduplication)
+  STATUS_CACHE_ENABLED = "true"
+
+  # Proxy Pool Configuration (Webshare Integration)
+  PROXY_POOL_ENABLED                = "true"
+  PROXY_POOL_SYNC_INTERVAL          = "5m"
+  PROXY_POOL_DEFAULT_COUNTRY_CODES  = "BR,US,AR,CL,CO,MX,PE,EC,UY,PY,BO,VE,US,CA"
+  PROXY_POOL_ASSIGNMENT_RETRY_DELAY = "5s"
+  PROXY_POOL_MAX_ASSIGNMENT_RETRIES = "3"
+  PROXY_POOL_WEBSHARE_ENDPOINT      = "https://proxy.webshare.io/api/v2"
+  PROXY_POOL_WEBSHARE_PLAN_ID       = "12784271"
+  PROXY_POOL_WEBSHARE_MODE          = "direct"
+}
+secret_env_mapping = {
+  PARTNER_AUTH_TOKEN          = "partner_auth_token"
+  CLIENT_AUTH_TOKEN           = "client_auth_token"
+  SENTRY_DSN                 = "sentry_dsn"
+  S3_ACCESS_KEY              = "s3_access_key"
+  S3_SECRET_KEY              = "s3_secret_key"
+  MEDIA_LOCAL_SECRET_KEY     = "media_local_secret_key"
+  PROXY_POOL_WEBSHARE_API_KEY = "webshare_api_key"
+}
+redis_username = "default"
 
 # --------------------------------------------------
 # Manager Frontend Configuration

@@ -30,8 +30,12 @@ locals {
     NEXT_PUBLIC_APP_URL        = var.app_url
     BETTER_AUTH_URL            = var.app_url
 
-    # WhatsApp API Backend Connection
+    # WhatsApp API Backend Connection (internal ALB for server-side)
     WHATSAPP_API_URL           = var.whatsapp_api_url
+
+    # Public API URL (for client-side components and curl examples)
+    NEXT_PUBLIC_WHATSAPP_API_URL = var.whatsapp_api_public_url
+    NEXT_PUBLIC_API_BASE_URL     = var.whatsapp_api_public_url
 
     # S3/MinIO Configuration
     S3_ENDPOINT                = var.s3_endpoint
@@ -53,6 +57,10 @@ locals {
     # OAuth Configuration (Client IDs are public)
     GITHUB_CLIENT_ID           = var.github_client_id
     GOOGLE_CLIENT_ID           = var.google_client_id
+
+    # Security Configuration (HTTPS via CloudFront)
+    TRUSTED_ORIGINS            = var.app_url
+    SECURE_COOKIES             = var.secure_cookies ? "true" : "false"
   }
 
   environment_definitions = [

@@ -56,15 +56,17 @@ additional_secret_values = {
   partner_auth_token = "80c1f79d907334e75a0403fd79431006bfafdad0634594e13f8194bdb7711a3b"
   client_auth_token  = "80c1f79d907334e75a0403fd79431006bfafdad0634594e13f8194bdb7711a3b"
   sentry_dsn         = "https://CHANGE_ME_STAGING_SENTRY_DSN"
+  webshare_api_key   = "shhz7zca1xjtkazd2do791kbyrmfy0wkqbtkxzuy"
 }
 
 secret_env_mapping = {
-  PARTNER_AUTH_TOKEN     = "partner_auth_token"
-  CLIENT_AUTH_TOKEN      = "client_auth_token"
-  SENTRY_DSN             = "sentry_dsn"
-  S3_ACCESS_KEY          = "s3_access_key"
-  S3_SECRET_KEY          = "s3_secret_key"
-  MEDIA_LOCAL_SECRET_KEY = "media_local_secret_key"
+  PARTNER_AUTH_TOKEN          = "partner_auth_token"
+  CLIENT_AUTH_TOKEN           = "client_auth_token"
+  SENTRY_DSN                 = "sentry_dsn"
+  S3_ACCESS_KEY              = "s3_access_key"
+  S3_SECRET_KEY              = "s3_secret_key"
+  MEDIA_LOCAL_SECRET_KEY     = "media_local_secret_key"
+  PROXY_POOL_WEBSHARE_API_KEY = "webshare_api_key"
 }
 
 secret_recovery_window = 7
@@ -82,6 +84,16 @@ autoscaling_memory_target = 80
 
 extra_environment = {
   PROMETHEUS_ENABLED = "true"
+
+  # Proxy Pool Configuration (Webshare Integration)
+  PROXY_POOL_ENABLED                = "true"
+  PROXY_POOL_SYNC_INTERVAL          = "5m"
+  PROXY_POOL_DEFAULT_COUNTRY_CODES  = "BR,AR,CL,CO,MX,PE,EC,UY,PY,BO,VE,US,CA"
+  PROXY_POOL_ASSIGNMENT_RETRY_DELAY = "5s"
+  PROXY_POOL_MAX_ASSIGNMENT_RETRIES = "3"
+  PROXY_POOL_WEBSHARE_ENDPOINT      = "https://proxy.webshare.io/api/v2"
+  PROXY_POOL_WEBSHARE_PLAN_ID       = "12784271"
+  PROXY_POOL_WEBSHARE_MODE          = "direct"
 }
 
 media_local_secret_key      = "80c1f79d907334e75a0403fd79431006bfafdad0634594e13f8194bdb7711a3b"

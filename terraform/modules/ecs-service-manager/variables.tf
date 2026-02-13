@@ -62,8 +62,14 @@ variable "app_url" {
 }
 
 variable "whatsapp_api_url" {
-  description = "Internal URL for WhatsApp API backend"
+  description = "Internal URL for WhatsApp API backend (ALB)"
   type        = string
+}
+
+variable "whatsapp_api_public_url" {
+  description = "Public URL for WhatsApp API (CloudFront HTTPS)"
+  type        = string
+  default     = ""
 }
 
 # --------------------------------------------------
@@ -233,6 +239,12 @@ variable "google_client_id" {
   description = "Google OAuth Client ID"
   type        = string
   default     = ""
+}
+
+variable "secure_cookies" {
+  description = "Enable secure cookies (true for HTTPS via CloudFront)"
+  type        = bool
+  default     = true
 }
 
 # --------------------------------------------------

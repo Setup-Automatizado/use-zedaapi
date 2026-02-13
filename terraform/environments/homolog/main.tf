@@ -269,6 +269,10 @@ locals {
     manager_database_url   = local.manager_db_dsn
     better_auth_secret     = lookup(var.manager_additional_secrets, "better_auth_secret", "change-me-32-char-secret-key-xxx")
     smtp_password          = lookup(var.manager_additional_secrets, "smtp_password", "")
+    s3_access_key          = var.s3_access_key
+    s3_secret_key          = var.s3_secret_key
+    github_client_secret   = lookup(var.manager_additional_secrets, "github_client_secret", "")
+    google_client_secret   = lookup(var.manager_additional_secrets, "google_client_secret", "")
   }, var.additional_secret_values)
 }
 
@@ -297,7 +301,8 @@ module "ecs_service_manager" {
 
   manager_image    = var.manager_image
   app_url          = var.manager_app_url != "" ? var.manager_app_url : module.alb_manager[0].manager_url
-  whatsapp_api_url = "http://${module.alb.alb_dns_name}"
+  whatsapp_api_url        = "http://${module.alb.alb_dns_name}"
+  whatsapp_api_public_url = "http://${module.alb.alb_dns_name}"
 
   # S3 Configuration (use custom MinIO endpoint or default AWS S3)
   s3_endpoint   = var.manager_s3_endpoint != "" ? var.manager_s3_endpoint : var.s3_endpoint
@@ -319,6 +324,9 @@ module "ecs_service_manager" {
   # OAuth Configuration
   github_client_id = var.manager_github_client_id
   google_client_id = var.manager_google_client_id
+
+  # Security (HTTP only in homolog - no CloudFront)
+  secure_cookies = false
 
   # Task Configuration
   task_cpu               = var.manager_task_cpu
