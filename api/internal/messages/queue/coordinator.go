@@ -15,6 +15,13 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/observability"
 )
 
+// pauseState tracks a paused instance with a safety timeout.
+type pauseState struct {
+	reason   string
+	pausedAt time.Time
+	timer    *time.Timer
+}
+
 // Coordinator manages the lifecycle of queue workers
 // It creates workers dynamically as instances connect/disconnect
 type Coordinator struct {
@@ -28,6 +35,10 @@ type Coordinator struct {
 	// Worker management
 	mu      sync.RWMutex
 	workers map[uuid.UUID]*Worker
+
+	// Proxy pause control
+	pauseMu         sync.RWMutex
+	pausedInstances map[uuid.UUID]*pauseState
 
 	// Cleanup job
 	cleanupTicker  *time.Ticker
@@ -94,17 +105,18 @@ func NewCoordinator(ctx context.Context, cfg *CoordinatorConfig) (*Coordinator, 
 	ctx, cancel := context.WithCancel(ctx)
 
 	c := &Coordinator{
-		repo:           repo,
-		clientRegistry: cfg.ClientRegistry,
-		processor:      processor,
-		config:         cfg.Config,
-		log:            cfg.Logger,
-		metrics:        cfg.Metrics,
-		workers:        make(map[uuid.UUID]*Worker),
-		cleanupStop:    make(chan struct{}),
-		cleanupTimeout: cfg.CleanupTimeout,
-		ctx:            ctx,
-		cancel:         cancel,
+		repo:            repo,
+		clientRegistry:  cfg.ClientRegistry,
+		processor:       processor,
+		config:          cfg.Config,
+		log:             cfg.Logger,
+		metrics:         cfg.Metrics,
+		workers:         make(map[uuid.UUID]*Worker),
+		pausedInstances: make(map[uuid.UUID]*pauseState),
+		cleanupStop:     make(chan struct{}),
+		cleanupTimeout:  cfg.CleanupTimeout,
+		ctx:             ctx,
+		cancel:          cancel,
 	}
 
 	// Start cleanup job
@@ -182,6 +194,78 @@ func (c *Coordinator) isDraining() bool {
 	return c.draining
 }
 
+// PauseInstance pauses message processing for an instance during proxy operations.
+// A safety timeout of 5 minutes auto-resumes to prevent permanent pauses.
+func (c *Coordinator) PauseInstance(ctx context.Context, instanceID uuid.UUID, reason string) error {
+	c.pauseMu.Lock()
+	defer c.pauseMu.Unlock()
+
+	// Already paused, update reason
+	if existing, ok := c.pausedInstances[instanceID]; ok {
+		existing.reason = reason
+		c.log.Debug("instance already paused, updated reason",
+			slog.String("instance_id", instanceID.String()),
+			slog.String("reason", reason))
+		return nil
+	}
+
+	// Safety timeout: auto-resume after 5 minutes to prevent stuck pauses
+	const safetyTimeout = 5 * time.Minute
+	timer := time.AfterFunc(safetyTimeout, func() {
+		c.log.Warn("auto-resuming instance after safety timeout",
+			slog.String("instance_id", instanceID.String()),
+			slog.String("original_reason", reason),
+			slog.Duration("timeout", safetyTimeout))
+		_ = c.ResumeInstance(context.Background(), instanceID)
+	})
+
+	c.pausedInstances[instanceID] = &pauseState{
+		reason:   reason,
+		pausedAt: time.Now(),
+		timer:    timer,
+	}
+
+	c.log.Info("instance paused for proxy operation",
+		slog.String("instance_id", instanceID.String()),
+		slog.String("reason", reason))
+
+	return nil
+}
+
+// ResumeInstance resumes message processing for a previously paused instance.
+func (c *Coordinator) ResumeInstance(ctx context.Context, instanceID uuid.UUID) error {
+	c.pauseMu.Lock()
+	defer c.pauseMu.Unlock()
+
+	state, ok := c.pausedInstances[instanceID]
+	if !ok {
+		return nil // Not paused, nothing to do
+	}
+
+	// Stop safety timer
+	if state.timer != nil {
+		state.timer.Stop()
+	}
+
+	pauseDuration := time.Since(state.pausedAt)
+	delete(c.pausedInstances, instanceID)
+
+	c.log.Info("instance resumed after proxy operation",
+		slog.String("instance_id", instanceID.String()),
+		slog.String("reason", state.reason),
+		slog.Duration("paused_for", pauseDuration))
+
+	return nil
+}
+
+// IsInstancePaused returns true if message processing is paused for the instance.
+func (c *Coordinator) IsInstancePaused(instanceID uuid.UUID) bool {
+	c.pauseMu.RLock()
+	defer c.pauseMu.RUnlock()
+	_, ok := c.pausedInstances[instanceID]
+	return ok
+}
+
 // AddInstance creates and starts a worker for a specific instance
 func (c *Coordinator) AddInstance(instanceID uuid.UUID) error {
 	c.mu.Lock()
@@ -204,6 +288,9 @@ func (c *Coordinator) AddInstance(instanceID uuid.UUID) error {
 		c.log,
 		c.metrics,
 	)
+
+	// Wire pause checker for proxy operations
+	worker.SetPauseChecker(c.IsInstancePaused)
 
 	// Start worker
 	worker.Start(c.ctx)

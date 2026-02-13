@@ -35,6 +35,9 @@ type Worker struct {
 	log            *slog.Logger
 	metrics        *observability.Metrics
 
+	// Proxy pause check
+	isPaused func(uuid.UUID) bool
+
 	// Control channels
 	stopCh chan struct{}
 	doneCh chan struct{}
@@ -64,6 +67,11 @@ func NewWorker(
 		stopCh:         make(chan struct{}),
 		doneCh:         make(chan struct{}),
 	}
+}
+
+// SetPauseChecker sets the function used to check if the instance is paused.
+func (w *Worker) SetPauseChecker(fn func(uuid.UUID) bool) {
+	w.isPaused = fn
 }
 
 // Start begins processing messages for this instance
@@ -158,6 +166,13 @@ func (w *Worker) processNext(ctx context.Context) error {
 	// No messages available
 	if msg == nil {
 		return nil
+	}
+
+	// Check if instance is paused for proxy operation
+	if w.isPaused != nil && w.isPaused(w.instanceID) {
+		w.log.Debug("instance paused for proxy operation, rescheduling message",
+			slog.Int64("message_id", msg.ID))
+		return w.repo.RescheduleOnDisconnect(ctx, msg.ID, w.config.ProxyRetryDelay)
 	}
 
 	w.log.Debug("processing message",
