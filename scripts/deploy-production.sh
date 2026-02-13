@@ -32,7 +32,7 @@ create-dbs)
     --task-definition production-whatsmeow-task \
     --launch-type FARGATE \
     --network-configuration "awsvpcConfiguration={subnets=[$SUBNET],securityGroups=[$SG],assignPublicIp=DISABLED}" \
-    --overrides "{\"containerOverrides\":[{\"name\":\"api\",\"command\":[\"sh\",\"-c\",\"apk add --no-cache postgresql16-client && PGPASSWORD=${DB_PASS} psql -h ${RDS_HOST} -U ${DB_USER} -d whatsapp_api -c 'CREATE DATABASE whatsmeow_store;' && PGPASSWORD=${DB_PASS} psql -h ${RDS_HOST} -U ${DB_USER} -d whatsapp_api -c 'CREATE DATABASE manager_db;'\"]}]}" \
+    --overrides "{\"containerOverrides\":[{\"name\":\"api\",\"command\":[\"sh\",\"-c\",\"apk add --no-cache postgresql16-client && PGPASSWORD=${DB_PASS} psql -h ${RDS_HOST} -U ${DB_USER} -d api_core -c 'CREATE DATABASE whatsmeow_store;' || true && PGPASSWORD=${DB_PASS} psql -h ${RDS_HOST} -U ${DB_USER} -d api_core -c 'CREATE DATABASE manager_db;' || true\"]}]}" \
     --query 'tasks[0].taskArn' \
     --output text)
 
@@ -110,9 +110,10 @@ build-manager)
     exit 1
   fi
 
-  # Build for linux/amd64 (ECS Fargate), --load to make image available locally
+  # Build for linux/amd64 (ECS Fargate), --target runner for production image
   docker buildx build \
     -f "${MANAGER_DIR}/Dockerfile" \
+    --target runner \
     --platform linux/amd64 \
     --load \
     --build-arg NEXT_PUBLIC_APP_URL="$MANAGER_CF" \
@@ -123,7 +124,19 @@ build-manager)
 
   docker push "${ECR_URL}/manager-whatsapp-api:latest"
 
-  echo "==> Manager image pushed!"
+  # Build migration/seed image (separate stage with full deps)
+  echo "==> Build & Push Manager Migration image..."
+  docker buildx build \
+    -f "${MANAGER_DIR}/Dockerfile" \
+    --target migration \
+    --platform linux/amd64 \
+    --load \
+    -t "${ECR_URL}/manager-whatsapp-api:migrate" \
+    "$MANAGER_DIR"
+
+  docker push "${ECR_URL}/manager-whatsapp-api:migrate"
+
+  echo "==> Manager images pushed (latest + migrate)!"
   echo "==> Proximo: ./scripts/deploy-production.sh migrate-manager"
   ;;
 
@@ -161,6 +174,44 @@ migrate-manager)
 
   echo ""
   echo "==> Fase 5 concluida!"
+  echo "==> Proximo: ./scripts/deploy-production.sh seed-manager"
+  ;;
+
+# ============================================
+# FASE 5b: Seed do Manager (Admin user)
+# ============================================
+seed-manager)
+  echo "==> Rodando seed do Manager (admin user)..."
+
+  TASK_ARN=$(aws ecs run-task \
+    --profile "$PROFILE" \
+    --region "$REGION" \
+    --cluster "$CLUSTER" \
+    --task-definition production-manager-migrate \
+    --launch-type FARGATE \
+    --network-configuration "awsvpcConfiguration={subnets=[$SUBNET],securityGroups=[$SG],assignPublicIp=DISABLED}" \
+    --overrides '{"containerOverrides":[{"name":"migrate","command":["bun","run","prisma/seed.ts"]}]}' \
+    --query 'tasks[0].taskArn' \
+    --output text)
+
+  echo "Seed task iniciada: $TASK_ARN"
+  echo ""
+  echo "Aguardando seed finalizar..."
+  aws ecs wait tasks-stopped \
+    --profile "$PROFILE" \
+    --region "$REGION" \
+    --cluster "$CLUSTER" \
+    --tasks "$TASK_ARN"
+
+  echo "Seed finalizado. Verificando logs..."
+  aws logs tail /ecs/production/manager \
+    --profile "$PROFILE" \
+    --region "$REGION" \
+    --since 5m \
+    --format short | tail -20
+
+  echo ""
+  echo "==> Fase 5b concluida!"
   echo "==> Proximo: ./scripts/deploy-production.sh deploy-services"
   ;;
 
@@ -244,8 +295,9 @@ help|*)
   echo "  create-dbs       Fase 3: Criar databases no RDS"
   echo "  ecr-login        Fase 4a: Login no ECR"
   echo "  build-api        Fase 4b: Build & push API (Go)"
-  echo "  build-manager    Fase 4c: Build & push Manager (Next.js)"
-  echo "  migrate-manager  Fase 5: Rodar Prisma migrations"
+  echo "  build-manager    Fase 4c: Build & push Manager + Migrate (Next.js)"
+  echo "  migrate-manager  Fase 5a: Rodar Prisma db push"
+  echo "  seed-manager     Fase 5b: Rodar seed (admin user)"
   echo "  deploy-services  Fase 6: Force deploy ECS services"
   echo "  validate         Fase 7: Validar endpoints"
   echo ""
