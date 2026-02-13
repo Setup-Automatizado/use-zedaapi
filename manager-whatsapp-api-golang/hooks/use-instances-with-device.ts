@@ -113,7 +113,8 @@ function filterInstancesByStatus(
 	}
 
 	return instances.filter((instance) => {
-		const isConnected = instance.whatsappConnected && instance.phoneConnected;
+		const isConnected =
+			instance.whatsappConnected && instance.phoneConnected;
 
 		if (status === "connected") {
 			return isConnected;
@@ -150,7 +151,8 @@ export function useInstancesWithDevice(
 	} = useInstances(apiParams);
 
 	// Filter instances by status on client side
-	const filteredInstances = filterInstancesByStatus(rawInstances, status);
+	const safeRawInstances = rawInstances ?? [];
+	const filteredInstances = filterInstancesByStatus(safeRawInstances, status);
 
 	// Adjust pagination for filtered results
 	const pagination = rawPagination
@@ -162,7 +164,8 @@ export function useInstancesWithDevice(
 		: undefined;
 
 	// Build a stable key for device fetching (use raw instances to get all device info)
-	const instanceIds = rawInstances?.map((i) => i.instanceId).join(",") || "";
+	const instanceIds =
+		safeRawInstances.map((i) => i.instanceId).join(",") || "";
 
 	// Fetch device info for all instances
 	const {
@@ -170,10 +173,8 @@ export function useInstancesWithDevice(
 		isLoading: isLoadingDevices,
 		mutate: mutateDevices,
 	} = useSWR<BatchDeviceResponse>(
-		rawInstances && rawInstances.length > 0
-			? ["devices-batch", instanceIds]
-			: null,
-		() => fetchDevicesBatch(rawInstances || []),
+		safeRawInstances.length > 0 ? ["devices-batch", instanceIds] : null,
+		() => fetchDevicesBatch(safeRawInstances),
 		{
 			revalidateOnFocus: false,
 			revalidateOnReconnect: false,

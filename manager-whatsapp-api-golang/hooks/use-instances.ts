@@ -92,7 +92,8 @@ function buildQueryString(params: UseInstancesParams): string {
 	const searchParams = new URLSearchParams();
 
 	if (params.page) searchParams.set("page", params.page.toString());
-	if (params.pageSize) searchParams.set("pageSize", params.pageSize.toString());
+	if (params.pageSize)
+		searchParams.set("pageSize", params.pageSize.toString());
 	if (params.query) searchParams.set("query", params.query);
 	if (params.status && params.status !== "all")
 		searchParams.set("status", params.status);
@@ -117,15 +118,25 @@ async function fetchInstances(url: string): Promise<InstanceListResponse> {
 		cache: "no-store",
 	});
 
+	const data = await response.json();
+
 	if (!response.ok) {
+		// If the response includes a valid shape (content array), use it
+		if (data && Array.isArray(data.content)) {
+			return data as InstanceListResponse;
+		}
 		const error = new Error(
-			`Failed to fetch instances: ${response.statusText}`,
+			data?.error || `Failed to fetch instances: ${response.statusText}`,
 		) as Error & { status?: number };
 		error.status = response.status;
 		throw error;
 	}
 
-	return response.json();
+	// Ensure content is always an array
+	return {
+		...data,
+		content: data.content ?? [],
+	} as InstanceListResponse;
 }
 
 /**
@@ -156,13 +167,13 @@ export function useInstances(
 		});
 
 	return {
-		instances: data?.content,
+		instances: data?.content ?? undefined,
 		pagination: data
 			? {
-					total: data.total,
-					totalPage: data.totalPage,
-					pageSize: data.pageSize,
-					page: data.page,
+					total: data.total ?? 0,
+					totalPage: data.totalPage ?? 0,
+					pageSize: data.pageSize ?? 10,
+					page: data.page ?? 1,
 				}
 			: undefined,
 		isLoading,

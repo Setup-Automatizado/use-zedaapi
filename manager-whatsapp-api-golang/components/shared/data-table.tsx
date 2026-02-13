@@ -56,7 +56,8 @@ export function DataTable<T extends Record<string, any>>({
 	pagination,
 	className,
 }: DataTableProps<T>) {
-	const isEmpty = !isLoading && data.length === 0;
+	const safeData = data ?? [];
+	const isEmpty = !isLoading && safeData.length === 0;
 	const showPagination = pagination && pagination.total > pagination.pageSize;
 
 	const totalPages = pagination
@@ -91,7 +92,10 @@ export function DataTable<T extends Record<string, any>>({
 					<TableHeader>
 						<TableRow>
 							{columns.map((column) => (
-								<TableHead key={column.key} className={column.className}>
+								<TableHead
+									key={column.key}
+									className={column.className}
+								>
 									{column.label}
 								</TableHead>
 							))}
@@ -100,9 +104,12 @@ export function DataTable<T extends Record<string, any>>({
 					<TableBody>
 						{isLoading
 							? Array.from({ length: 5 }).map((_, index) => (
-									<TableRowSkeleton key={index} columns={columns.length} />
+									<TableRowSkeleton
+										key={index}
+										columns={columns.length}
+									/>
 								))
-							: data.map((item, index) => (
+							: safeData.map((item, index) => (
 									<TableRow
 										key={getRowKey(item, index)}
 										className={cn(
@@ -117,13 +124,16 @@ export function DataTable<T extends Record<string, any>>({
 												className={column.className}
 												onClick={
 													column.preventRowClick
-														? (e) => e.stopPropagation()
+														? (e) =>
+																e.stopPropagation()
 														: undefined
 												}
 											>
 												{column.render
 													? column.render(item)
-													: item[column.key]?.toString() || "-"}
+													: item[
+															column.key
+														]?.toString() || "-"}
 											</TableCell>
 										))}
 									</TableRow>
@@ -135,13 +145,16 @@ export function DataTable<T extends Record<string, any>>({
 			{showPagination && !isLoading && (
 				<div className="flex items-center justify-between">
 					<div className="text-sm text-muted-foreground">
-						Showing {startItem} to {endItem} of {pagination.total} results
+						Showing {startItem} to {endItem} of {pagination.total}{" "}
+						results
 					</div>
 					<div className="flex items-center gap-2">
 						<Button
 							variant="outline"
 							size="sm"
-							onClick={() => pagination.onPageChange(pagination.page - 1)}
+							onClick={() =>
+								pagination.onPageChange(pagination.page - 1)
+							}
 							disabled={!canGoPrevious}
 						>
 							<ChevronLeft className="h-4 w-4" />
@@ -155,7 +168,9 @@ export function DataTable<T extends Record<string, any>>({
 						<Button
 							variant="outline"
 							size="sm"
-							onClick={() => pagination.onPageChange(pagination.page + 1)}
+							onClick={() =>
+								pagination.onPageChange(pagination.page + 1)
+							}
 							disabled={!canGoNext}
 						>
 							Next

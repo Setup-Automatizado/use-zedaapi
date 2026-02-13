@@ -11,8 +11,8 @@
  */
 
 import { NextResponse } from "next/server";
-import { getHealth } from "@/lib/api/health";
-import prisma from "@/lib/prisma";
+
+export const dynamic = "force-dynamic";
 
 /**
  * GET /api/health
@@ -30,6 +30,10 @@ import prisma from "@/lib/prisma";
 export async function GET() {
 	const timestamp = new Date().toISOString();
 
+	// Dynamic imports to avoid Prisma initialization at build time
+	const prisma = (await import("@/lib/prisma")).default;
+	const { getHealth } = await import("@/lib/api/health");
+
 	// Check manager database first (critical)
 	try {
 		await prisma.$queryRaw`SELECT 1`;
@@ -41,7 +45,9 @@ export async function GET() {
 				service: "manager",
 				timestamp,
 				error:
-					error instanceof Error ? error.message : "Database connection failed",
+					error instanceof Error
+						? error.message
+						: "Database connection failed",
 			},
 			{ status: 503 },
 		);

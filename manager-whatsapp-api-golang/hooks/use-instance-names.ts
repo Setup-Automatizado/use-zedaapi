@@ -54,7 +54,11 @@ export interface InstanceInfo {
 	isBusiness?: boolean;
 }
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+const fetcher = async (url: string) => {
+	const res = await fetch(url);
+	if (!res.ok) throw new Error(`HTTP ${res.status}`);
+	return res.json();
+};
 
 /**
  * Fetch all instances with pagination support for large counts
@@ -66,12 +70,16 @@ async function fetchAllInstances(): Promise<Instance[]> {
 	let hasMore = true;
 
 	while (hasMore) {
-		const response = await fetcher(`/api/instances?page=${page}&pageSize=${PAGE_SIZE}`);
+		const response = await fetcher(
+			`/api/instances?page=${page}&pageSize=${PAGE_SIZE}`,
+		);
 		const instances = response.content || [];
 		allInstances.push(...instances);
 
 		// Check if there are more pages
-		hasMore = instances.length === PAGE_SIZE && allInstances.length < response.total;
+		hasMore =
+			instances.length === PAGE_SIZE &&
+			allInstances.length < response.total;
 		page++;
 
 		// Safety limit to prevent infinite loops
@@ -81,7 +89,9 @@ async function fetchAllInstances(): Promise<Instance[]> {
 	return allInstances;
 }
 
-const deviceFetcher = async (instances: Instance[]): Promise<DeviceBatchResponse> => {
+const deviceFetcher = async (
+	instances: Instance[],
+): Promise<DeviceBatchResponse> => {
 	const connectedInstances = instances
 		.filter((i) => i.whatsappConnected && i.phoneConnected)
 		.map((i) => ({
@@ -143,7 +153,11 @@ export function useInstanceNames() {
 				}
 			} catch (error) {
 				if (mounted) {
-					setInstancesError(error instanceof Error ? error : new Error("Failed to load instances"));
+					setInstancesError(
+						error instanceof Error
+							? error
+							: new Error("Failed to load instances"),
+					);
 				}
 			} finally {
 				if (mounted) {
@@ -166,7 +180,7 @@ export function useInstanceNames() {
 		{
 			revalidateOnFocus: false,
 			dedupingInterval: 120000, // Cache for 2 minutes
-		}
+		},
 	);
 
 	const instanceMap = useMemo(() => {
@@ -183,7 +197,9 @@ export function useInstanceNames() {
 				phone,
 				formattedPhone: phone ? formatPhoneNumber(phone) : undefined,
 				avatarUrl: device?.imgUrl,
-				connected: Boolean(instance.whatsappConnected && instance.phoneConnected),
+				connected: Boolean(
+					instance.whatsappConnected && instance.phoneConnected,
+				),
 				isBusiness: device?.isBusiness,
 			});
 		}
@@ -193,81 +209,105 @@ export function useInstanceNames() {
 	/**
 	 * Get friendly display name for an instance
 	 */
-	const getDisplayName = useCallback((instanceId: string): string => {
-		const instance = instanceMap.get(instanceId);
-		if (instance) {
-			if (instance.name && instance.name !== "string") {
-				return instance.name;
+	const getDisplayName = useCallback(
+		(instanceId: string): string => {
+			const instance = instanceMap.get(instanceId);
+			if (instance) {
+				if (instance.name && instance.name !== "string") {
+					return instance.name;
+				}
 			}
-		}
-		return truncateId(instanceId);
-	}, [instanceMap]);
+			return truncateId(instanceId);
+		},
+		[instanceMap],
+	);
 
 	/**
 	 * Get short display name (max 15 chars)
 	 */
-	const getShortName = useCallback((instanceId: string): string => {
-		const name = getDisplayName(instanceId);
-		if (name.length <= 15) return name;
-		return `${name.slice(0, 12)}...`;
-	}, [getDisplayName]);
+	const getShortName = useCallback(
+		(instanceId: string): string => {
+			const name = getDisplayName(instanceId);
+			if (name.length <= 15) return name;
+			return `${name.slice(0, 12)}...`;
+		},
+		[getDisplayName],
+	);
 
 	/**
 	 * Get phone number for an instance
 	 */
-	const getPhone = useCallback((instanceId: string): string | undefined => {
-		return instanceMap.get(instanceId)?.phone;
-	}, [instanceMap]);
+	const getPhone = useCallback(
+		(instanceId: string): string | undefined => {
+			return instanceMap.get(instanceId)?.phone;
+		},
+		[instanceMap],
+	);
 
 	/**
 	 * Get formatted phone number for an instance
 	 */
-	const getFormattedPhone = useCallback((instanceId: string): string | undefined => {
-		return instanceMap.get(instanceId)?.formattedPhone;
-	}, [instanceMap]);
+	const getFormattedPhone = useCallback(
+		(instanceId: string): string | undefined => {
+			return instanceMap.get(instanceId)?.formattedPhone;
+		},
+		[instanceMap],
+	);
 
 	/**
 	 * Get avatar URL for an instance
 	 */
-	const getAvatarUrl = useCallback((instanceId: string): string | undefined => {
-		return instanceMap.get(instanceId)?.avatarUrl;
-	}, [instanceMap]);
+	const getAvatarUrl = useCallback(
+		(instanceId: string): string | undefined => {
+			return instanceMap.get(instanceId)?.avatarUrl;
+		},
+		[instanceMap],
+	);
 
 	/**
 	 * Get full instance info
 	 */
-	const getInstanceInfo = useCallback((instanceId: string): InstanceInfo | undefined => {
-		return instanceMap.get(instanceId);
-	}, [instanceMap]);
+	const getInstanceInfo = useCallback(
+		(instanceId: string): InstanceInfo | undefined => {
+			return instanceMap.get(instanceId);
+		},
+		[instanceMap],
+	);
 
 	/**
 	 * Search instances by name or phone
 	 */
-	const searchInstances = useCallback((query: string): InstanceInfo[] => {
-		if (!query.trim()) return [];
+	const searchInstances = useCallback(
+		(query: string): InstanceInfo[] => {
+			if (!query.trim()) return [];
 
-		const lowerQuery = query.toLowerCase().trim();
-		const results: InstanceInfo[] = [];
+			const lowerQuery = query.toLowerCase().trim();
+			const results: InstanceInfo[] = [];
 
-		for (const info of instanceMap.values()) {
-			// Search by name
-			if (info.name.toLowerCase().includes(lowerQuery)) {
-				results.push(info);
-				continue;
+			for (const info of instanceMap.values()) {
+				// Search by name
+				if (info.name.toLowerCase().includes(lowerQuery)) {
+					results.push(info);
+					continue;
+				}
+				// Search by phone (raw or formatted)
+				if (
+					info.phone?.includes(lowerQuery) ||
+					info.formattedPhone?.toLowerCase().includes(lowerQuery)
+				) {
+					results.push(info);
+					continue;
+				}
+				// Search by ID
+				if (info.id.toLowerCase().includes(lowerQuery)) {
+					results.push(info);
+				}
 			}
-			// Search by phone (raw or formatted)
-			if (info.phone?.includes(lowerQuery) || info.formattedPhone?.toLowerCase().includes(lowerQuery)) {
-				results.push(info);
-				continue;
-			}
-			// Search by ID
-			if (info.id.toLowerCase().includes(lowerQuery)) {
-				results.push(info);
-			}
-		}
 
-		return results;
-	}, [instanceMap]);
+			return results;
+		},
+		[instanceMap],
+	);
 
 	/**
 	 * Get all instances with display info
@@ -305,7 +345,7 @@ function truncateId(id: string): string {
  */
 export function formatInstanceLabel(
 	instanceId: string,
-	name?: string | null
+	name?: string | null,
 ): string {
 	if (name && name !== "string" && name.trim()) {
 		return name;

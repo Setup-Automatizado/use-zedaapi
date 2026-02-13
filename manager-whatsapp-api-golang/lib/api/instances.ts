@@ -67,8 +67,11 @@ export async function listInstances(
 ): Promise<InstanceListResponse> {
 	const response = await listInstancesRaw(page, pageSize, query);
 	return {
-		...response,
-		content: normalizeInstances(response.content),
+		total: response.total ?? 0,
+		totalPage: response.totalPage ?? 0,
+		pageSize: response.pageSize ?? pageSize,
+		page: response.page ?? page,
+		content: normalizeInstances(response.content ?? []),
 	};
 }
 
