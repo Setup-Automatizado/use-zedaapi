@@ -35,13 +35,23 @@ type ThumbnailResult struct {
 	FileEncSha256 []byte
 	FileSha256    []byte
 	FileLength    uint64
+	PageCount     uint32 // PDF page count (0 for non-PDF)
 }
 
 const (
-	// MaxThumbnailWidth is the maximum width for thumbnails (mobile compatibility)
-	MaxThumbnailWidth = 400
-	// ThumbnailJPEGQuality is the JPEG quality for thumbnails (1-100)
-	ThumbnailJPEGQuality = 85
+	// ImageThumbnailMaxSize is the max dimension for image thumbnails (72x72 matches WhatsApp multidevice)
+	ImageThumbnailMaxSize = 72
+	// VideoThumbnailWidth is the width for video thumbnails (100px wide, aspect ratio maintained)
+	VideoThumbnailWidth = 100
+	// PDFThumbnailMaxSize is the max dimension for PDF thumbnails
+	PDFThumbnailMaxSize = 300
+
+	// ImageThumbnailJPEGQuality is the JPEG quality for image thumbnails
+	ImageThumbnailJPEGQuality = 85
+	// VideoThumbnailJPEGQuality is the JPEG quality for video thumbnails
+	VideoThumbnailJPEGQuality = 80
+	// PDFThumbnailJPEGQuality is the JPEG quality for PDF thumbnails
+	PDFThumbnailJPEGQuality = 95
 )
 
 // NewThumbnailGenerator creates a new thumbnail generator
@@ -65,11 +75,11 @@ func (t *ThumbnailGenerator) GenerateAndUploadImageThumbnail(ctx context.Context
 		slog.Int("width", img.Bounds().Dx()),
 		slog.Int("height", img.Bounds().Dy()))
 
-	// Resize image maintaining aspect ratio
-	thumbnail := t.resizeImageMaintainAspect(img, MaxThumbnailWidth, MaxThumbnailWidth)
+	// Resize to 72x72 max maintaining aspect ratio (matches WhatsApp multidevice thumbnail size)
+	thumbnail := resize.Thumbnail(ImageThumbnailMaxSize, ImageThumbnailMaxSize, img, resize.Lanczos3)
 
 	// Encode as JPEG
-	thumbnailData, err := t.encodeJPEG(thumbnail, ThumbnailJPEGQuality)
+	thumbnailData, err := t.encodeJPEG(thumbnail, ImageThumbnailJPEGQuality)
 	if err != nil {
 		return nil, fmt.Errorf("encode thumbnail: %w", err)
 	}
@@ -116,8 +126,8 @@ func (t *ThumbnailGenerator) GenerateAndUploadDocumentThumbnail(ctx context.Cont
 		return nil, nil
 	}
 
-	// Extract first page as image
-	thumbnailData, width, height, err := t.extractPDFFirstPage(documentData)
+	// Extract first page as image + page count
+	thumbnailData, width, height, pageCount, err := t.extractPDFFirstPage(documentData)
 	if err != nil {
 		t.log.Warn("failed to extract PDF first page",
 			slog.String("error", err.Error()))
@@ -129,7 +139,15 @@ func (t *ThumbnailGenerator) GenerateAndUploadDocumentThumbnail(ctx context.Cont
 	}
 
 	// Upload thumbnail
-	return t.uploadThumbnail(ctx, thumbnailData, width, height)
+	result, err := t.uploadThumbnail(ctx, thumbnailData, width, height)
+	if err != nil {
+		return nil, err
+	}
+
+	// Set page count from PDF
+	result.PageCount = uint32(pageCount)
+
+	return result, nil
 }
 
 // extractVideoFrameFFmpeg extracts a frame from video using ffmpeg
@@ -145,13 +163,11 @@ func (t *ThumbnailGenerator) extractVideoFrameFFmpeg(videoData []byte) ([]byte, 
 	defer os.Remove(tempVideoPath)
 	defer os.Remove(tempFramePath)
 
-	// Extract frame at 1 second using ffmpeg
+	// Extract frame at 1 second using ffmpeg (no scaling, raw frame)
 	cmd := exec.Command("ffmpeg",
 		"-i", tempVideoPath,
 		"-ss", "00:00:01.000",
 		"-vframes", "1",
-		"-vf", "scale=480:-1", // Scale to 480px width, maintain aspect ratio
-		"-q:v", "3", // High quality
 		tempFramePath)
 
 	// Run ffmpeg
@@ -169,76 +185,73 @@ func (t *ThumbnailGenerator) extractVideoFrameFFmpeg(videoData []byte) ([]byte, 
 	img, _, err := image.Decode(bytes.NewReader(frameData))
 	if err != nil {
 		// Return frame data anyway, use default dimensions
-		return frameData, 480, 360, nil
+		return frameData, 100, 75, nil
 	}
 
-	bounds := img.Bounds()
-
-	// Resize if needed
-	resized := t.resizeImageMaintainAspect(img, MaxThumbnailWidth, MaxThumbnailWidth)
+	// Resize to 100px width maintaining aspect ratio (matches WhatsApp multidevice)
+	resized := resize.Resize(VideoThumbnailWidth, 0, img, resize.Lanczos3)
 
 	// Re-encode as JPEG
-	thumbnailData, err := t.encodeJPEG(resized, ThumbnailJPEGQuality)
+	thumbnailData, err := t.encodeJPEG(resized, VideoThumbnailJPEGQuality)
 	if err != nil {
-		return frameData, bounds.Dx(), bounds.Dy(), nil
+		return frameData, img.Bounds().Dx(), img.Bounds().Dy(), nil
 	}
 
 	return thumbnailData, resized.Bounds().Dx(), resized.Bounds().Dy(), nil
 }
 
-// extractPDFFirstPage extracts first page of PDF as image
-func (t *ThumbnailGenerator) extractPDFFirstPage(pdfData []byte) ([]byte, int, int, error) {
+// extractPDFFirstPage extracts first page of PDF as image and returns page count
+func (t *ThumbnailGenerator) extractPDFFirstPage(pdfData []byte) ([]byte, int, int, int, error) {
 	// Open PDF document
 	doc, err := fitz.NewFromMemory(pdfData)
 	if err != nil {
-		return nil, 0, 0, fmt.Errorf("open pdf: %w", err)
+		return nil, 0, 0, 0, fmt.Errorf("open pdf: %w", err)
 	}
 	defer doc.Close()
 
-	// Check if PDF has pages
-	if doc.NumPage() == 0 {
-		return nil, 0, 0, fmt.Errorf("pdf has no pages")
+	// Get page count
+	pageCount := doc.NumPage()
+	if pageCount == 0 {
+		return nil, 0, 0, 0, fmt.Errorf("pdf has no pages")
 	}
 
 	// Render first page as image
 	img, err := doc.Image(0) // Page 0 (first page)
 	if err != nil {
-		return nil, 0, 0, fmt.Errorf("render pdf page: %w", err)
+		return nil, 0, 0, 0, fmt.Errorf("render pdf page: %w", err)
 	}
 
-	// Resize maintaining aspect ratio
-	resized := t.resizeImageMaintainAspect(img, MaxThumbnailWidth, MaxThumbnailWidth)
+	// Resize maintaining aspect ratio (300px max matches WhatsApp PDF thumbnail size)
+	resized := t.resizeImageMaintainAspect(img, PDFThumbnailMaxSize, PDFThumbnailMaxSize)
 
 	// Encode as JPEG
-	thumbnailData, err := t.encodeJPEG(resized, 95) // Higher quality for PDF thumbnails
+	thumbnailData, err := t.encodeJPEG(resized, PDFThumbnailJPEGQuality)
 	if err != nil {
-		return nil, 0, 0, fmt.Errorf("encode pdf thumbnail: %w", err)
+		return nil, 0, 0, 0, fmt.Errorf("encode pdf thumbnail: %w", err)
 	}
 
 	bounds := resized.Bounds()
-	return thumbnailData, bounds.Dx(), bounds.Dy(), nil
+	return thumbnailData, bounds.Dx(), bounds.Dy(), pageCount, nil
 }
 
-// generateDefaultVideoThumbnail generates a simple default thumbnail for videos
-func (t *ThumbnailGenerator) generateDefaultVideoThumbnail(ctx context.Context) (*ThumbnailResult, error) {
-	// Create a simple 480x360 gray image
-	img := image.NewRGBA(image.Rect(0, 0, 480, 360))
-
-	// Fill with gray
-	for y := 0; y < 360; y++ {
-		for x := 0; x < 480; x++ {
-			img.Set(x, y, image.White)
-		}
+// generateDefaultVideoThumbnail returns a minimal 1x1 pixel JPEG placeholder
+// This matches WhatsApp multidevice behavior for fallback thumbnails
+func (t *ThumbnailGenerator) generateDefaultVideoThumbnail(_ context.Context) (*ThumbnailResult, error) {
+	// Minimal valid 1x1 JPEG (matches WhatsApp multidevice default)
+	data := []byte{
+		0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46, 0x00, 0x01,
+		0x01, 0x01, 0x00, 0x48, 0x00, 0x48, 0x00, 0x00, 0xFF, 0xC0, 0x00, 0x11,
+		0x08, 0x00, 0x01, 0x00, 0x01, 0x01, 0x01, 0x11, 0x00, 0x02, 0x11, 0x01,
+		0x03, 0x11, 0x01, 0xFF, 0xC4, 0x00, 0x14, 0x00, 0x01, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x08, 0xFF, 0xDA, 0x00, 0x08, 0x01, 0x01, 0x00, 0x00, 0x3F, 0x00, 0x00,
+		0xFF, 0xD9,
 	}
-
-	// Encode as JPEG
-	thumbnailData, err := t.encodeJPEG(img, ThumbnailJPEGQuality)
-	if err != nil {
-		return nil, fmt.Errorf("encode default thumbnail: %w", err)
-	}
-
-	// Upload thumbnail
-	return t.uploadThumbnail(ctx, thumbnailData, 480, 360)
+	return &ThumbnailResult{
+		Data:   data,
+		Width:  1,
+		Height: 1,
+	}, nil
 }
 
 // resizeImageMaintainAspect resizes image maintaining aspect ratio
