@@ -10,11 +10,13 @@ ARG BUILD_TIME=""
 ARG VERSION=""
 ARG COMMIT=""
 ARG NEXT_PUBLIC_APP_URL="http://localhost:3000"
+ARG NEXT_PUBLIC_WHATSAPP_API_URL=""
+ARG NEXT_PUBLIC_API_BASE_URL=""
 
 # --------------------------------------------------
 # Stage 1: Dependencies
 # --------------------------------------------------
-FROM oven/bun:1.3.4-alpine AS deps
+FROM oven/bun:1-alpine AS deps
 
 WORKDIR /app
 
@@ -31,7 +33,7 @@ RUN bun prisma generate
 # --------------------------------------------------
 # Stage 2: Builder
 # --------------------------------------------------
-FROM oven/bun:1.3.4-alpine AS builder
+FROM oven/bun:1-alpine AS builder
 
 WORKDIR /app
 
@@ -47,12 +49,16 @@ ARG BUILD_TIME
 ARG VERSION
 ARG COMMIT
 ARG NEXT_PUBLIC_APP_URL
+ARG NEXT_PUBLIC_WHATSAPP_API_URL
+ARG NEXT_PUBLIC_API_BASE_URL
 
 # Variaveis de ambiente para build
 # NEXT_PUBLIC_* precisa estar definido no build time
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
+ENV NEXT_PUBLIC_WHATSAPP_API_URL=${NEXT_PUBLIC_WHATSAPP_API_URL}
+ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
 
 # Executar build do Next.js
 RUN bun run build
@@ -60,7 +66,7 @@ RUN bun run build
 # --------------------------------------------------
 # Stage 3: Production Runner
 # --------------------------------------------------
-FROM oven/bun:1.3.4-alpine AS runner
+FROM oven/bun:1-alpine AS runner
 
 WORKDIR /app
 
@@ -83,6 +89,15 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/lib/generated ./lib/generated
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
+
+# Copiar Prisma CLI completo para migrations (usado pela task de migration no ECS)
+# Inclui build/, WASM files e engines necessarios para prisma migrate deploy
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules/prisma ./node_modules/prisma
+COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
+
+# Criar symlink correto para que `bun prisma` encontre o CLI
+RUN mkdir -p node_modules/.bin && \
+    ln -sf ../prisma/build/index.js node_modules/.bin/prisma
 
 # Metadata
 ARG BUILD_TIME
