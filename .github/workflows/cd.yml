@@ -216,16 +216,20 @@ jobs:
             else
               echo "VERSION=latest" >> $GITHUB_OUTPUT
             fi
-            echo "APP_URL=https://manager.seudominio.com.br" >> $GITHUB_OUTPUT
+            echo "APP_URL=${{ secrets.MANAGER_APP_URL || 'https://manager.cloudfront.net' }}" >> $GITHUB_OUTPUT
+            echo "API_PUBLIC_URL=${{ secrets.API_PUBLIC_URL || 'https://api.cloudfront.net' }}" >> $GITHUB_OUTPUT
           elif [ "${{ github.ref }}" = "refs/heads/develop" ]; then
             echo "VERSION=develop" >> $GITHUB_OUTPUT
             echo "APP_URL=http://homolog-manager-alb-936707116.us-east-1.elb.amazonaws.com" >> $GITHUB_OUTPUT
+            echo "API_PUBLIC_URL=http://homolog-whatsmeow-alb-1474920577.us-east-1.elb.amazonaws.com" >> $GITHUB_OUTPUT
           elif [ "${{ github.ref }}" = "refs/heads/homolog" ]; then
             echo "VERSION=homolog" >> $GITHUB_OUTPUT
             echo "APP_URL=http://homolog-manager-alb-936707116.us-east-1.elb.amazonaws.com" >> $GITHUB_OUTPUT
+            echo "API_PUBLIC_URL=http://homolog-whatsmeow-alb-1474920577.us-east-1.elb.amazonaws.com" >> $GITHUB_OUTPUT
           else
             echo "VERSION=unknown" >> $GITHUB_OUTPUT
             echo "APP_URL=http://localhost:3000" >> $GITHUB_OUTPUT
+            echo "API_PUBLIC_URL=http://localhost:8080" >> $GITHUB_OUTPUT
           fi
 
       - name: Docker metadata for Manager
@@ -236,6 +240,7 @@ jobs:
             ${{ steps.login-ecr.outputs.registry }}/${{ env.MANAGER_IMAGE_NAME }}
           tags: |
             type=raw,value=${{ steps.version.outputs.VERSION }}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/production' }}
             type=sha,prefix={{branch}}-
           labels: |
             org.opencontainers.image.title=WhatsApp Manager
@@ -257,6 +262,8 @@ jobs:
           cache-to: type=gha,mode=max
           build-args: |
             NEXT_PUBLIC_APP_URL=${{ steps.version.outputs.APP_URL }}
+            NEXT_PUBLIC_WHATSAPP_API_URL=${{ steps.version.outputs.API_PUBLIC_URL }}
+            NEXT_PUBLIC_API_BASE_URL=${{ steps.version.outputs.API_PUBLIC_URL }}
             VERSION=${{ steps.version.outputs.VERSION }}
             COMMIT=${{ github.sha }}
             BUILD_TIME=${{ github.event.head_commit.timestamp }}
