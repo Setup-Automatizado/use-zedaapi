@@ -44,8 +44,13 @@ export type { SubscriptionManagementProps } from "./subscription-management";
 export { SubscriptionManagement } from "./subscription-management";
 export type { TokenDisplayProps } from "./token-display";
 export { TokenDisplay } from "./token-display";
+export type { ProxyConfigFormProps } from "./proxy-config-form";
+// Proxy configuration components
+export { ProxyConfigForm } from "./proxy-config-form";
 export type { WebhookConfigFormProps } from "./webhook-config-form";
 // Webhook configuration components
 export { WebhookConfigForm } from "./webhook-config-form";
 export type { WebhookFieldProps } from "./webhook-field";
 export { WebhookField } from "./webhook-field";
+export type { PoolProxyAssignmentProps } from "./pool-proxy-assignment";
+export { PoolProxyAssignment } from "./pool-proxy-assignment";

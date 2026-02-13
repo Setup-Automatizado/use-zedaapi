@@ -84,6 +84,41 @@ export {
 	normalizeInstance,
 	normalizeInstances,
 } from "./instance";
+// Proxy types
+export type {
+	ProxyConfig,
+	ProxyHealthLog,
+	ProxyHealthResponse,
+	ProxyResponse,
+	ProxySwapRequest,
+	ProxyTestRequest,
+	ProxyTestResponse,
+	ProxyUpdateRequest,
+} from "./proxy";
+export { getProxyHealthColor, sanitizeProxyUrlForDisplay } from "./proxy";
+// Pool types
+export type {
+	AssignGroupRequest,
+	AssignPoolProxyRequest,
+	BulkAssignRequest,
+	BulkAssignResult,
+	CreateGroupRequest,
+	CreateProviderRequest,
+	PoolAssignment,
+	PoolGroup,
+	PoolProvider,
+	PoolProxy,
+	PoolProxyListResponse,
+	PoolProxyStatus,
+	PoolStats,
+	ProviderStat,
+	UpdateProviderRequest,
+} from "./pool";
+export {
+	getPoolHealthColor,
+	getPoolProxyStatusColor,
+	sanitizePoolProxyUrl,
+} from "./pool";
 // Webhook types
 export type {
 	AllWebhooksUpdateRequest,

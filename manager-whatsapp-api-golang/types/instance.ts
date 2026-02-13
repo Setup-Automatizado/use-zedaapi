@@ -94,7 +94,7 @@ export function normalizeInstance(data: InstanceData): Instance {
  * Normalize an array of instances
  */
 export function normalizeInstances(data: InstanceData[]): Instance[] {
-	return data;
+	return data ?? [];
 }
 
 /**

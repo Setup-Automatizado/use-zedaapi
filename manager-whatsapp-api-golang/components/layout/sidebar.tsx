@@ -3,6 +3,7 @@
 import {
 	Activity,
 	BarChart3,
+	Globe,
 	LayoutDashboard,
 	LogOut,
 	Settings,
@@ -32,6 +33,7 @@ interface NavItem {
 const navItems: NavItem[] = [
 	{ name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
 	{ name: "Instances", href: "/instances", icon: Smartphone },
+	{ name: "Proxy Pool", href: "/proxy-pool", icon: Globe },
 	{ name: "Health", href: "/health", icon: Activity },
 	{ name: "Metrics", href: "/metrics", icon: BarChart3 },
 	{ name: "Settings", href: "/settings", icon: Settings },

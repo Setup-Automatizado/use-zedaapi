@@ -7,6 +7,7 @@ import {
 	Copy,
 	Key,
 	Settings,
+	Shield,
 	TestTube,
 	Webhook,
 } from "lucide-react";
@@ -18,6 +19,8 @@ import {
 	InstanceSettingsForm,
 	InstanceStatistics,
 	MessageTestForm,
+	PoolProxyAssignment,
+	ProxyConfigForm,
 	SubscriptionManagement,
 	TokenDisplay,
 	WebhookConfigForm,
@@ -52,11 +55,14 @@ export default function InstancePage({ params }: InstancePageProps) {
 		"tokens",
 		"test",
 		"webhooks",
+		"proxy",
 		"settings",
 	];
 	const defaultTab =
 		tabParam && validTabs.includes(tabParam) ? tabParam : "overview";
-	const { instance, isLoading, error, mutate } = useInstance(resolvedParams.id);
+	const { instance, isLoading, error, mutate } = useInstance(
+		resolvedParams.id,
+	);
 	const { isConnected, smartphoneConnected } = useInstanceStatus(
 		resolvedParams.id,
 		{
@@ -115,12 +121,15 @@ export default function InstancePage({ params }: InstancePageProps) {
 
 		const fetchDeviceInfo = async () => {
 			try {
-				const response = await fetch(`/api/instances/${instance.id}/device`, {
-					method: "GET",
-					headers: {
-						"Content-Type": "application/json",
+				const response = await fetch(
+					`/api/instances/${instance.id}/device`,
+					{
+						method: "GET",
+						headers: {
+							"Content-Type": "application/json",
+						},
 					},
-				});
+				);
 
 				if (response.ok && !cancelled) {
 					const data = await response.json();
@@ -146,14 +155,19 @@ export default function InstancePage({ params }: InstancePageProps) {
 	if (error) {
 		return (
 			<div className="space-y-6">
-				<Button variant="ghost" onClick={() => router.back()} className="mb-4">
+				<Button
+					variant="ghost"
+					onClick={() => router.back()}
+					className="mb-4"
+				>
 					<ArrowLeft className="mr-2 h-4 w-4" />
 					Back
 				</Button>
 				<Alert variant="destructive">
 					<AlertTitle>Error loading instance</AlertTitle>
 					<AlertDescription>
-						{error.message || "Could not load instance information."}
+						{error.message ||
+							"Could not load instance information."}
 					</AlertDescription>
 				</Alert>
 			</div>
@@ -175,7 +189,11 @@ export default function InstancePage({ params }: InstancePageProps) {
 	return (
 		<div className="space-y-6">
 			<div className="flex items-center gap-4">
-				<Button variant="ghost" onClick={() => router.back()} size="icon">
+				<Button
+					variant="ghost"
+					onClick={() => router.back()}
+					size="icon"
+				>
 					<ArrowLeft className="h-4 w-4" />
 				</Button>
 				<PageHeader
@@ -203,6 +221,10 @@ export default function InstancePage({ params }: InstancePageProps) {
 						<Webhook className="mr-2 h-4 w-4" />
 						Webhooks
 					</TabsTrigger>
+					<TabsTrigger value="proxy">
+						<Shield className="mr-2 h-4 w-4" />
+						Proxy
+					</TabsTrigger>
 					<TabsTrigger value="settings">
 						<Settings className="mr-2 h-4 w-4" />
 						Settings
@@ -218,7 +240,10 @@ export default function InstancePage({ params }: InstancePageProps) {
 							smartphoneConnected={smartphoneConnected}
 						/>
 
-						<SubscriptionManagement instance={instance} onUpdate={mutate} />
+						<SubscriptionManagement
+							instance={instance}
+							onUpdate={mutate}
+						/>
 					</div>
 				</TabsContent>
 
@@ -232,8 +257,8 @@ export default function InstancePage({ params }: InstancePageProps) {
 							<CardHeader>
 								<CardTitle>Authentication Tokens</CardTitle>
 								<CardDescription>
-									Use these tokens to authenticate API requests for this
-									instance.
+									Use these tokens to authenticate API
+									requests for this instance.
 								</CardDescription>
 							</CardHeader>
 							<CardContent className="space-y-6">
@@ -256,7 +281,8 @@ export default function InstancePage({ params }: InstancePageProps) {
 								<div>
 									<CardTitle>Usage Example</CardTitle>
 									<CardDescription>
-										Example cURL request to send a text message
+										Example cURL request to send a text
+										message
 									</CardDescription>
 								</div>
 								<Button
@@ -274,8 +300,8 @@ export default function InstancePage({ params }: InstancePageProps) {
 							</CardHeader>
 							<CardContent>
 								<p className="text-xs text-muted-foreground mb-2">
-									Tokens are masked for security. Click copy to get the real
-									values.
+									Tokens are masked for security. Click copy
+									to get the real values.
 								</p>
 								<pre className="rounded-lg bg-muted p-4 text-sm overflow-x-auto">
 									<code>{`curl -X POST \\
@@ -304,8 +330,9 @@ export default function InstancePage({ params }: InstancePageProps) {
 						<CardHeader>
 							<CardTitle>Webhook URLs</CardTitle>
 							<CardDescription>
-								Configure the endpoints to receive WhatsApp event notifications.
-								Leave blank to disable specific webhooks.
+								Configure the endpoints to receive WhatsApp
+								event notifications. Leave blank to disable
+								specific webhooks.
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
@@ -313,18 +340,23 @@ export default function InstancePage({ params }: InstancePageProps) {
 								instanceId={instance.id}
 								instanceToken={instance.instanceToken}
 								initialValues={{
-									deliveryCallbackUrl: instance.deliveryCallbackUrl || "",
-									receivedCallbackUrl: instance.receivedCallbackUrl || "",
+									deliveryCallbackUrl:
+										instance.deliveryCallbackUrl || "",
+									receivedCallbackUrl:
+										instance.receivedCallbackUrl || "",
 									receivedAndDeliveryCallbackUrl:
-										instance.receivedAndDeliveryCallbackUrl || "",
+										instance.receivedAndDeliveryCallbackUrl ||
+										"",
 									messageStatusCallbackUrl:
 										instance.messageStatusCallbackUrl || "",
-									connectedCallbackUrl: instance.connectedCallbackUrl || "",
+									connectedCallbackUrl:
+										instance.connectedCallbackUrl || "",
 									disconnectedCallbackUrl:
 										instance.disconnectedCallbackUrl || "",
 									presenceChatCallbackUrl:
 										instance.presenceChatCallbackUrl || "",
-									notifySentByMe: instance.notifySentByMe || false,
+									notifySentByMe:
+										instance.notifySentByMe || false,
 								}}
 								onSuccess={mutate}
 							/>
@@ -332,12 +364,44 @@ export default function InstancePage({ params }: InstancePageProps) {
 					</Card>
 				</TabsContent>
 
+				<TabsContent value="proxy" className="mt-6">
+					<div className="space-y-6">
+						<PoolProxyAssignment
+							instanceId={instance.id}
+							instanceToken={instance.instanceToken}
+							onUpdate={mutate}
+						/>
+
+						<Card>
+							<CardHeader>
+								<CardTitle>
+									Manual Proxy Configuration
+								</CardTitle>
+								<CardDescription>
+									Configure a proxy manually for this
+									instance&apos;s WhatsApp connection.
+									Supports HTTP, HTTPS, and SOCKS5 proxies
+									with health monitoring.
+								</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<ProxyConfigForm
+									instanceId={instance.id}
+									instanceToken={instance.instanceToken}
+									onSuccess={mutate}
+								/>
+							</CardContent>
+						</Card>
+					</div>
+				</TabsContent>
+
 				<TabsContent value="settings" className="mt-6">
 					<Card>
 						<CardHeader>
 							<CardTitle>Message and Call Settings</CardTitle>
 							<CardDescription>
-								Customize how your instance handles incoming messages and calls.
+								Customize how your instance handles incoming
+								messages and calls.
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
@@ -345,10 +409,14 @@ export default function InstancePage({ params }: InstancePageProps) {
 								instanceId={instance.id}
 								instanceToken={instance.instanceToken}
 								initialValues={{
-									autoReadMessage: instance.autoReadMessage || false,
-									callRejectAuto: instance.callRejectAuto || false,
-									callRejectMessage: instance.callRejectMessage || "",
-									notifySentByMe: instance.notifySentByMe || false,
+									autoReadMessage:
+										instance.autoReadMessage || false,
+									callRejectAuto:
+										instance.callRejectAuto || false,
+									callRejectMessage:
+										instance.callRejectMessage || "",
+									notifySentByMe:
+										instance.notifySentByMe || false,
 								}}
 								onSuccess={mutate}
 							/>

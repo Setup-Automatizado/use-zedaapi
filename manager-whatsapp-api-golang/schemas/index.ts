@@ -31,6 +31,36 @@ export {
 	type UpdateSettings,
 	UpdateSettingsSchema,
 } from "./settings";
+// Proxy schemas
+export {
+	type ProxyConfigFormValues,
+	type ProxyConfigInput,
+	ProxyConfigSchema,
+	type ProxySwapInput,
+	ProxySwapSchema,
+	type ProxyTestInput,
+	ProxyTestSchema,
+	ProxyUrlSchema,
+} from "./proxy";
+// Pool schemas
+export {
+	type AssignGroupInput,
+	AssignGroupSchema,
+	type AssignPoolProxyInput,
+	AssignPoolProxySchema,
+	type BulkAssignFormValues,
+	type BulkAssignInput,
+	BulkAssignSchema,
+	type CreateGroupFormValues,
+	type CreateGroupInput,
+	CreateGroupSchema,
+	type CreateProviderFormValues,
+	type CreateProviderInput,
+	CreateProviderSchema,
+	type UpdateProviderFormValues,
+	type UpdateProviderInput,
+	UpdateProviderSchema,
+} from "./pool";
 // Webhook schemas
 export {
 	type BulkWebhookUpdate,

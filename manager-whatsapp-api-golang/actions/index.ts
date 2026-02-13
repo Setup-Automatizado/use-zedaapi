@@ -29,6 +29,15 @@ export {
 	updateProfileName,
 	updateProfilePicture,
 } from "./settings";
+// Proxy configuration actions
+export {
+	fetchProxyConfig,
+	fetchProxyHealth,
+	removeProxyConfig,
+	swapProxyConnection,
+	testProxyConnection,
+	updateProxyConfig,
+} from "./proxy";
 // Webhook configuration actions
 export {
 	updateAllWebhooks,
@@ -36,3 +45,21 @@ export {
 	updateWebhook,
 	updateWebhookSettings,
 } from "./webhooks";
+// Pool management actions
+export {
+	assignInstancePoolProxy,
+	assignInstanceToGroup,
+	bulkAssignPoolProxies,
+	createPoolGroup,
+	createPoolProvider,
+	deletePoolGroup,
+	deletePoolProvider,
+	fetchInstancePoolAssignment,
+	fetchPoolGroups,
+	fetchPoolProviders,
+	fetchPoolProxies,
+	fetchPoolStats,
+	releaseInstancePoolProxy,
+	syncPoolProvider,
+	updatePoolProvider,
+} from "./pool";
