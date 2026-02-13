@@ -119,7 +119,7 @@ func (s *Service) Create(ctx context.Context, instanceID uuid.UUID, params Creat
 
 	description := strings.TrimSpace(params.Description)
 	if description != "" {
-		if descErr := client.SetGroupDescription(info.JID, description); descErr != nil {
+		if descErr := client.SetGroupTopic(ctx, info.JID, "", "", description); descErr != nil {
 			logger.Warn("failed to set community description",
 				slog.String("error", descErr.Error()))
 		}
@@ -477,7 +477,7 @@ func (s *Service) UpdateDescription(ctx context.Context, instanceID uuid.UUID, p
 		return OperationResult{}, fmt.Errorf("get whatsapp client: %w", err)
 	}
 
-	if err := client.SetGroupDescription(communityJID, description); err != nil {
+	if err := client.SetGroupTopic(ctx, communityJID, "", "", description); err != nil {
 		logger.Error("failed to update community description",
 			slog.String("error", err.Error()))
 		return OperationResult{}, fmt.Errorf("update community description: %w", err)

@@ -40,7 +40,7 @@ type NewslettersService interface {
 	TransferOwnership(ctx context.Context, instanceID uuid.UUID, params newsletters.TransferOwnershipParams) (newsletters.OperationResult, error)
 }
 
-// NewslettersHandler exposes newsletter-related endpoints mirroring the Z-API surface.
+// NewslettersHandler exposes newsletter-related endpoints mirroring the FUNNELCHAT surface.
 type NewslettersHandler struct {
 	instanceService InstanceStatusProvider
 	service         NewslettersService
@@ -68,7 +68,7 @@ func NewNewslettersHandler(
 }
 
 // RegisterRoutes binds all newsletter routes that must exist under the
-// instance/token prefix to maintain compatibility with the Z-API contract.
+// instance/token prefix to maintain compatibility with the FUNNELCHAT contract.
 func (h *NewslettersHandler) RegisterRoutes(r chi.Router) {
 	r.Post("/create-newsletter", h.createNewsletter)
 	r.Post("/update-newsletter-picture", h.updateNewsletterPicture)

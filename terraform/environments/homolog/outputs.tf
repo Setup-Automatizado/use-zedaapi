@@ -52,3 +52,21 @@ output "s3_bucket_name" {
   value       = module.s3.bucket_name
 }
 
+# ==================================================
+# Manager Outputs
+# ==================================================
+
+output "manager_alb_dns_name" {
+  description = "Manager ALB DNS name"
+  value       = var.enable_manager ? module.alb_manager[0].alb_dns_name : null
+}
+
+output "manager_url" {
+  description = "Manager URL"
+  value       = var.enable_manager ? module.alb_manager[0].manager_url : null
+}
+
+output "api_url" {
+  description = "API URL (ALB da API)"
+  value       = "http://${module.alb.alb_dns_name}"
+}

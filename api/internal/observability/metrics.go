@@ -90,6 +90,14 @@ type Metrics struct {
 	QueueDrainDuration             prometheus.Histogram
 	QueueDrainTimeouts             prometheus.Counter
 	QueueDrainedMessages           prometheus.Counter
+	// Status Cache Metrics
+	StatusCacheOperations   *prometheus.CounterVec
+	StatusCacheSize         *prometheus.GaugeVec
+	StatusCacheHits         *prometheus.CounterVec
+	StatusCacheMisses       *prometheus.CounterVec
+	StatusCacheSuppressions *prometheus.CounterVec
+	StatusCacheFlushed      *prometheus.CounterVec
+	StatusCacheDuration     *prometheus.HistogramVec
 }
 
 func NewMetrics(namespace string, reg prometheus.Registerer) *Metrics {
@@ -578,6 +586,50 @@ func NewMetrics(namespace string, reg prometheus.Registerer) *Metrics {
 		Help:      "Total messages processed during queue drain operations.",
 	})
 
+	// Status Cache Metrics
+	statusCacheOperations := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: namespace,
+		Name:      "status_cache_operations_total",
+		Help:      "Total status cache operations by instance, operation, and status.",
+	}, []string{"instance_id", "operation", "status"})
+
+	statusCacheSize := prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Namespace: namespace,
+		Name:      "status_cache_size",
+		Help:      "Current size of status cache by instance.",
+	}, []string{"instance_id"})
+
+	statusCacheHits := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: namespace,
+		Name:      "status_cache_hits_total",
+		Help:      "Total status cache hits by instance.",
+	}, []string{"instance_id"})
+
+	statusCacheMisses := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: namespace,
+		Name:      "status_cache_misses_total",
+		Help:      "Total status cache misses by instance.",
+	}, []string{"instance_id"})
+
+	statusCacheSuppressions := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: namespace,
+		Name:      "status_cache_suppressions_total",
+		Help:      "Total webhook suppressions due to caching by instance and status type.",
+	}, []string{"instance_id", "status_type"})
+
+	statusCacheFlushed := prometheus.NewCounterVec(prometheus.CounterOpts{
+		Namespace: namespace,
+		Name:      "status_cache_flushed_total",
+		Help:      "Total status cache flushes by instance and trigger type.",
+	}, []string{"instance_id", "trigger"})
+
+	statusCacheDuration := prometheus.NewHistogramVec(prometheus.HistogramOpts{
+		Namespace: namespace,
+		Name:      "status_cache_operation_duration_seconds",
+		Help:      "Duration of status cache operations in seconds.",
+		Buckets:   prometheus.DefBuckets,
+	}, []string{"instance_id", "operation"})
+
 	reg.MustRegister(
 		requests, duration, queue,
 		lockAcquisitions, lockReacquisitionAttempts, lockReacquisitionFallbacks,
@@ -607,6 +659,9 @@ func NewMetrics(namespace string, reg prometheus.Registerer) *Metrics {
 		messageQueueErrors, messageQueueWorkers,
 		orphanedInstances, reconciliationAttempts, reconciliationDuration,
 		queueDrainDuration, queueDrainTimeouts, queueDrainedMessages,
+		statusCacheOperations, statusCacheSize, statusCacheHits,
+		statusCacheMisses, statusCacheSuppressions, statusCacheFlushed,
+		statusCacheDuration,
 	)
 
 	return &Metrics{
@@ -689,5 +744,12 @@ func NewMetrics(namespace string, reg prometheus.Registerer) *Metrics {
 		QueueDrainDuration:             queueDrainDuration,
 		QueueDrainTimeouts:             queueDrainTimeouts,
 		QueueDrainedMessages:           queueDrainedMessages,
+		StatusCacheOperations:          statusCacheOperations,
+		StatusCacheSize:                statusCacheSize,
+		StatusCacheHits:                statusCacheHits,
+		StatusCacheMisses:              statusCacheMisses,
+		StatusCacheSuppressions:        statusCacheSuppressions,
+		StatusCacheFlushed:             statusCacheFlushed,
+		StatusCacheDuration:            statusCacheDuration,
 	}
 }

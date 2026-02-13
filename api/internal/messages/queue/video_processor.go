@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"log/slog"
 
+	"google.golang.org/protobuf/proto"
+
 	wameow "go.mau.fi/whatsmeow"
 	waProto "go.mau.fi/whatsmeow/binary/proto"
 	"go.mau.fi/whatsmeow/types"
-	"google.golang.org/protobuf/proto"
+
+	"go.mau.fi/whatsmeow/api/internal/events/echo"
 )
 
 // VideoProcessor handles video message sending via WhatsApp
@@ -17,14 +20,16 @@ type VideoProcessor struct {
 	mediaDownloader *MediaDownloader
 	thumbGenerator  *ThumbnailGenerator
 	presenceHelper  *PresenceHelper
+	echoEmitter     *echo.Emitter
 }
 
 // NewVideoProcessor creates a new video message processor
-func NewVideoProcessor(log *slog.Logger) *VideoProcessor {
+func NewVideoProcessor(log *slog.Logger, echoEmitter *echo.Emitter) *VideoProcessor {
 	return &VideoProcessor{
 		log:             log.With(slog.String("processor", "video")),
 		mediaDownloader: NewMediaDownloader(100), // 100MB max for videos
 		presenceHelper:  NewPresenceHelper(),
+		echoEmitter:     echoEmitter,
 	}
 }
 
@@ -55,9 +60,31 @@ func (p *VideoProcessor) Process(ctx context.Context, client *wameow.Client, arg
 		return fmt.Errorf("download video: %w", err)
 	}
 
-	// Validate media type
-	if err := p.mediaDownloader.ValidateMediaType(mimeType, MediaTypeVideo); err != nil {
-		return fmt.Errorf("invalid media type: %w", err)
+	// Determine if this is a GIF message
+	isGif := args.Metadata != nil && args.Metadata["is_gif"] == true
+
+	// Handle actual GIF files: convert to MP4 for WhatsApp compatibility
+	if isGif && mimeType == "image/gif" {
+		mp4Data, convErr := ConvertGifToMP4(videoData)
+		if convErr != nil {
+			p.log.Warn("failed to convert GIF to MP4, sending as-is",
+				slog.String("error", convErr.Error()),
+				slog.String("phone", args.Phone))
+			// Skip media type validation since it's still image/gif
+		} else {
+			videoData = mp4Data
+			mimeType = "video/mp4"
+			p.log.Debug("converted GIF to MP4 successfully",
+				slog.String("phone", args.Phone),
+				slog.Int("mp4_size", len(mp4Data)))
+		}
+	}
+
+	// Validate media type (skip for unconverted GIF files)
+	if mimeType != "image/gif" {
+		if err := p.mediaDownloader.ValidateMediaType(mimeType, MediaTypeVideo); err != nil {
+			return fmt.Errorf("invalid media type: %w", err)
+		}
 	}
 
 	// Detect video dimensions
@@ -71,6 +98,15 @@ func (p *VideoProcessor) Process(ctx context.Context, client *wameow.Client, arg
 		p.log.Debug("detected video dimensions",
 			slog.Int("width", width),
 			slog.Int("height", height))
+	}
+
+	// Extract video duration
+	duration, err := GetVideoDuration(videoData)
+	if err != nil {
+		p.log.Warn("failed to detect video duration",
+			slog.String("error", err.Error()),
+			slog.String("mime_type", mimeType))
+		duration = 0
 	}
 
 	// Generate and upload thumbnail (lazy initialization)
@@ -102,7 +138,7 @@ func (p *VideoProcessor) Process(ctx context.Context, client *wameow.Client, arg
 	}
 
 	// Build video message
-	msg := p.buildMessage(args, uploaded, mimeType, width, height, thumbnail, contextInfo)
+	msg := p.buildMessage(args, uploaded, mimeType, width, height, duration, thumbnail, contextInfo, isGif)
 
 	// Send message
 	resp, err := client.SendMessage(ctx, recipientJID, msg)
@@ -116,11 +152,33 @@ func (p *VideoProcessor) Process(ctx context.Context, client *wameow.Client, arg
 		slog.String("whatsapp_message_id", resp.ID),
 		slog.Int("width", width),
 		slog.Int("height", height),
+		slog.Int64("duration_seconds", duration),
 		slog.Int64("file_size", int64(uploaded.FileLength)),
 		slog.Bool("has_thumbnail", thumbnail != nil),
+		slog.Bool("is_gif", isGif),
 		slog.Time("timestamp", resp.Timestamp))
 
 	args.WhatsAppMessageID = resp.ID
+
+	// Emit API echo event for webhook notification
+	if p.echoEmitter != nil {
+		echoReq := &echo.EchoRequest{
+			InstanceID:        args.InstanceID,
+			WhatsAppMessageID: resp.ID,
+			RecipientJID:      recipientJID,
+			Message:           msg,
+			Timestamp:         resp.Timestamp,
+			MessageType:       "video",
+			MediaType:         "video",
+			ZaapID:            args.ZaapID,
+			HasMedia:          true,
+		}
+		if err := p.echoEmitter.EmitEcho(ctx, echoReq); err != nil {
+			p.log.Warn("failed to emit API echo",
+				slog.String("error", err.Error()),
+				slog.String("zaap_id", args.ZaapID))
+		}
+	}
 
 	return nil
 }
@@ -131,8 +189,10 @@ func (p *VideoProcessor) buildMessage(
 	uploaded wameow.UploadResponse,
 	mimeType string,
 	width, height int,
+	duration int64,
 	thumbnail *ThumbnailResult,
 	contextInfo *waProto.ContextInfo,
+	isGif bool,
 ) *waProto.Message {
 	videoMsg := &waProto.VideoMessage{
 		URL:           proto.String(uploaded.URL),
@@ -144,6 +204,16 @@ func (p *VideoProcessor) buildMessage(
 		FileLength:    proto.Uint64(uploaded.FileLength),
 		ViewOnce:      proto.Bool(args.ViewOnce),
 		ContextInfo:   contextInfo,
+	}
+
+	// Set GIF playback flag so WhatsApp renders this as GIF, not video
+	if isGif {
+		videoMsg.GifPlayback = proto.Bool(true)
+	}
+
+	// Add video duration if detected
+	if duration > 0 {
+		videoMsg.Seconds = proto.Uint32(uint32(duration))
 	}
 
 	// Add video dimensions if detected
@@ -160,9 +230,15 @@ func (p *VideoProcessor) buildMessage(
 	// Add thumbnail if generated successfully
 	if thumbnail != nil {
 		videoMsg.JPEGThumbnail = thumbnail.Data
-		videoMsg.ThumbnailDirectPath = proto.String(thumbnail.DirectPath)
-		videoMsg.ThumbnailSHA256 = thumbnail.FileSha256
-		videoMsg.ThumbnailEncSHA256 = thumbnail.FileEncSha256
+		if thumbnail.DirectPath != "" {
+			videoMsg.ThumbnailDirectPath = proto.String(thumbnail.DirectPath)
+		}
+		if len(thumbnail.FileSha256) > 0 {
+			videoMsg.ThumbnailSHA256 = thumbnail.FileSha256
+		}
+		if len(thumbnail.FileEncSha256) > 0 {
+			videoMsg.ThumbnailEncSHA256 = thumbnail.FileEncSha256
+		}
 	}
 
 	if args.VideoContent != nil && args.VideoContent.IsPTV {

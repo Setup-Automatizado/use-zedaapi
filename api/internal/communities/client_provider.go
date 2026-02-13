@@ -27,7 +27,7 @@ type Client interface {
 	UnlinkGroup(parent, child types.JID) error
 	UpdateGroupParticipants(jid types.JID, participantChanges []types.JID, action whatsmeowclient.ParticipantChange) ([]types.GroupParticipant, error)
 	SetGroupMemberAddMode(jid types.JID, mode types.GroupMemberAddMode) error
-	SetGroupDescription(jid types.JID, description string) error
+	SetGroupTopic(ctx context.Context, jid types.JID, previousID, newID, topic string) error
 	LeaveGroup(jid types.JID) error
 }
 
@@ -177,11 +177,11 @@ func (a *whatsAppClientAdapter) SetGroupMemberAddMode(jid types.JID, mode types.
 	return a.client.SetGroupMemberAddMode(context.Background(), jid, mode)
 }
 
-func (a *whatsAppClientAdapter) SetGroupDescription(jid types.JID, description string) error {
+func (a *whatsAppClientAdapter) SetGroupTopic(ctx context.Context, jid types.JID, previousID, newID, topic string) error {
 	if a.client == nil {
 		return ErrClientNotConnected
 	}
-	return a.client.SetGroupDescription(context.Background(), jid, description)
+	return a.client.SetGroupTopic(ctx, jid, previousID, newID, topic)
 }
 
 func (a *whatsAppClientAdapter) LeaveGroup(jid types.JID) error {

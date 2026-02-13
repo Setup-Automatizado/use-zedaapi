@@ -6,6 +6,7 @@ import (
 	"log/slog"
 
 	"github.com/google/uuid"
+
 	whatsmeowclient "go.mau.fi/whatsmeow"
 	"go.mau.fi/whatsmeow/api/internal/instances"
 	"go.mau.fi/whatsmeow/api/internal/logging"

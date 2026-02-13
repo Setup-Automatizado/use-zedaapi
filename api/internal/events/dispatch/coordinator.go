@@ -18,6 +18,12 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/observability"
 )
 
+// StatusInterceptor is an interface for status cache interception
+type StatusInterceptor interface {
+	ShouldIntercept(eventType string) bool
+	InterceptAndCache(ctx context.Context, instanceID string, eventType string, payload []byte) (suppress bool, err error)
+}
+
 type Coordinator struct {
 	cfg               *config.Config
 	pool              *pgxpool.Pool
@@ -27,6 +33,7 @@ type Coordinator struct {
 	lookup            InstanceLookup
 	metrics           *observability.Metrics
 	pollStore         pollstore.Store
+	statusInterceptor StatusInterceptor
 
 	mu       sync.RWMutex
 	workers  map[uuid.UUID]*InstanceWorker
@@ -70,11 +77,56 @@ func (c *Coordinator) Start(ctx context.Context) error {
 
 	c.running = true
 
+	// Start periodic metrics update routine
+	c.wg.Add(1)
+	go c.metricsUpdateLoop(ctx)
+
 	logger := logging.ContextLogger(ctx, nil)
 	logger.Info("dispatch coordinator started",
 		slog.Int("workers", len(c.workers)))
 
 	return nil
+}
+
+// metricsUpdateLoop periodically updates outbox backlog metrics
+func (c *Coordinator) metricsUpdateLoop(ctx context.Context) {
+	defer c.wg.Done()
+
+	ticker := time.NewTicker(30 * time.Second)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-c.stopChan:
+			return
+		case <-ticker.C:
+			c.updateBacklogMetrics(ctx)
+		}
+	}
+}
+
+// updateBacklogMetrics updates the EventOutboxBacklog gauge for all registered instances
+func (c *Coordinator) updateBacklogMetrics(ctx context.Context) {
+	if c.metrics == nil {
+		return
+	}
+
+	c.mu.RLock()
+	instanceIDs := make([]uuid.UUID, 0, len(c.workers))
+	for id := range c.workers {
+		instanceIDs = append(instanceIDs, id)
+	}
+	c.mu.RUnlock()
+
+	for _, instanceID := range instanceIDs {
+		count, err := c.outboxRepo.CountPendingByInstance(ctx, instanceID)
+		if err != nil {
+			continue
+		}
+		c.metrics.EventOutboxBacklog.WithLabelValues(instanceID.String()).Set(float64(count))
+	}
 }
 
 func (c *Coordinator) RegisterInstance(ctx context.Context, instanceID uuid.UUID) error {
@@ -103,6 +155,11 @@ func (c *Coordinator) RegisterInstance(ctx context.Context, instanceID uuid.UUID
 		c.pollStore,
 		c.metrics,
 	)
+
+	// Set status interceptor if available
+	if c.statusInterceptor != nil {
+		worker.SetStatusInterceptor(c.statusInterceptor)
+	}
 
 	c.wg.Add(1)
 	go func() {
@@ -201,4 +258,16 @@ func (c *Coordinator) IsInstanceRegistered(instanceID uuid.UUID) bool {
 func (c *Coordinator) createWorkerContext() context.Context {
 	ctx := context.Background()
 	return ctx
+}
+
+// SetStatusInterceptor sets the status cache interceptor for receipt events
+func (c *Coordinator) SetStatusInterceptor(interceptor StatusInterceptor) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.statusInterceptor = interceptor
+
+	// Update existing workers
+	for _, worker := range c.workers {
+		worker.SetStatusInterceptor(interceptor)
+	}
 }

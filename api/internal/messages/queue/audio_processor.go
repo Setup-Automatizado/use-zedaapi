@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"log/slog"
 
+	"google.golang.org/protobuf/proto"
+
 	wameow "go.mau.fi/whatsmeow"
 	waProto "go.mau.fi/whatsmeow/binary/proto"
 	"go.mau.fi/whatsmeow/types"
-	"google.golang.org/protobuf/proto"
+
+	"go.mau.fi/whatsmeow/api/internal/events/echo"
 )
 
 // AudioProcessor handles audio message sending via WhatsApp
@@ -19,15 +22,17 @@ type AudioProcessor struct {
 	mediaDownloader *MediaDownloader
 	audioConverter  *AudioConverter
 	presenceHelper  *PresenceHelper
+	echoEmitter     *echo.Emitter
 }
 
 // NewAudioProcessor creates a new audio message processor
-func NewAudioProcessor(log *slog.Logger) *AudioProcessor {
+func NewAudioProcessor(log *slog.Logger, echoEmitter *echo.Emitter) *AudioProcessor {
 	return &AudioProcessor{
 		log:             log.With(slog.String("processor", "audio")),
 		mediaDownloader: NewMediaDownloader(100), // 100MB max for audio
 		audioConverter:  NewAudioConverter(log),
 		presenceHelper:  NewPresenceHelper(),
+		echoEmitter:     echoEmitter,
 	}
 }
 
@@ -70,13 +75,19 @@ func (p *AudioProcessor) Process(ctx context.Context, client *wameow.Client, arg
 	var audioDataToUpload []byte
 	var finalMimeType string
 	var duration int64
+	var waveform []byte
 
 	if p.audioConverter.IsOpusFormat(mimeType) {
-		// Already in Opus/OGG format
+		// Already in Opus/OGG format - still need to generate waveform and get duration
 		audioDataToUpload = audioData
 		finalMimeType = "audio/ogg; codecs=opus"
+		// Generate waveform for existing Opus audio
+		waveform = p.audioConverter.GenerateWaveformFromData(audioData, mimeType)
+		duration = p.audioConverter.GetDurationFromData(audioData, mimeType)
 		p.log.Debug("audio already in native Opus/OGG format",
-			slog.String("mime_type", mimeType))
+			slog.String("mime_type", mimeType),
+			slog.Int("waveform_samples", len(waveform)),
+			slog.Int64("duration_seconds", duration))
 	} else {
 		// Convert to Opus/OGG for native voice note experience
 		p.log.Info("converting audio to native Opus/OGG format",
@@ -91,17 +102,21 @@ func (p *AudioProcessor) Process(ctx context.Context, client *wameow.Client, arg
 				slog.String("original_mime", mimeType))
 			audioDataToUpload = audioData
 			finalMimeType = mimeType
+			// Try to generate waveform anyway
+			waveform = p.audioConverter.GenerateWaveformFromData(audioData, mimeType)
 		} else {
 			// Conversion successful
 			audioDataToUpload = converted.Data
 			finalMimeType = converted.MimeType
 			duration = converted.Duration
+			waveform = converted.Waveform
 
 			p.log.Info("audio converted to Opus/OGG successfully",
 				slog.String("original_mime", mimeType),
 				slog.Int("original_size_bytes", len(audioData)),
 				slog.Int("converted_size_bytes", len(converted.Data)),
-				slog.Int64("duration_seconds", duration))
+				slog.Int64("duration_seconds", duration),
+				slog.Int("waveform_samples", len(waveform)))
 		}
 	}
 
@@ -124,8 +139,8 @@ func (p *AudioProcessor) Process(ctx context.Context, client *wameow.Client, arg
 	// All Opus/OGG audio should be sent as PTT (voice note)
 	isPTT := p.audioConverter.IsOpusFormat(finalMimeType)
 
-	// Build audio message
-	msg := p.buildMessage(args, uploaded, finalMimeType, isPTT, duration, contextInfo)
+	// Build audio message with waveform for voice note visualization
+	msg := p.buildMessage(args, uploaded, finalMimeType, isPTT, duration, waveform, contextInfo)
 
 	// Send message
 	resp, err := client.SendMessage(ctx, recipientJID, msg)
@@ -146,6 +161,26 @@ func (p *AudioProcessor) Process(ctx context.Context, client *wameow.Client, arg
 
 	args.WhatsAppMessageID = resp.ID
 
+	// Emit API echo event for webhook notification
+	if p.echoEmitter != nil {
+		echoReq := &echo.EchoRequest{
+			InstanceID:        args.InstanceID,
+			WhatsAppMessageID: resp.ID,
+			RecipientJID:      recipientJID,
+			Message:           msg,
+			Timestamp:         resp.Timestamp,
+			MessageType:       "audio",
+			MediaType:         "audio",
+			ZaapID:            args.ZaapID,
+			HasMedia:          true,
+		}
+		if err := p.echoEmitter.EmitEcho(ctx, echoReq); err != nil {
+			p.log.Warn("failed to emit API echo",
+				slog.String("error", err.Error()),
+				slog.String("zaap_id", args.ZaapID))
+		}
+	}
+
 	return nil
 }
 
@@ -156,6 +191,7 @@ func (p *AudioProcessor) buildMessage(
 	mimeType string,
 	isPTT bool,
 	duration int64,
+	waveform []byte,
 	contextInfo *waProto.ContextInfo,
 ) *waProto.Message {
 	audioMsg := &waProto.AudioMessage{
@@ -173,6 +209,11 @@ func (p *AudioProcessor) buildMessage(
 	// Add duration if available (helps with voice note display)
 	if duration > 0 {
 		audioMsg.Seconds = proto.Uint32(uint32(duration))
+	}
+
+	// Add waveform data for voice note visualization (the wave bars in WhatsApp)
+	if len(waveform) > 0 {
+		audioMsg.Waveform = waveform
 	}
 
 	return &waProto.Message{

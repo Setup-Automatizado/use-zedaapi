@@ -9,6 +9,8 @@ import (
 	"sync"
 
 	"sigs.k8s.io/yaml"
+
+	"go.mau.fi/whatsmeow/api/internal/version"
 )
 
 //go:embed openapi.yaml
@@ -62,6 +64,11 @@ func generateDynamicSpec(baseURL string) ([]byte, []byte, error) {
 	var spec OpenAPISpec
 	if err := yaml.Unmarshal(specYAML, &spec); err != nil {
 		return nil, nil, fmt.Errorf("failed to parse base spec: %w", err)
+	}
+
+	// Inject dynamic version from VERSION file
+	if spec.Info != nil {
+		spec.Info["version"] = version.String()
 	}
 
 	spec.Servers = generateServers(baseURL)

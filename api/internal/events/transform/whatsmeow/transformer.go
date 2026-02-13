@@ -789,9 +789,30 @@ func (t *Transformer) transformReceipt(ctx context.Context, logger *slog.Logger,
 		t.populatePhotoMetadata(ctx, provider, event.Metadata, "sender", senderJID)
 	}
 
+	// Determine Z-API status for logging
+	var zapiStatus string
+	switch receipt.Type {
+	case watypes.ReceiptTypeRead, watypes.ReceiptTypeReadSelf:
+		zapiStatus = "READ"
+	case watypes.ReceiptTypePlayed, watypes.ReceiptTypePlayedSelf:
+		zapiStatus = "PLAYED"
+	case watypes.ReceiptTypeDelivered:
+		zapiStatus = "RECEIVED"
+	case watypes.ReceiptTypeSender:
+		zapiStatus = "SENT"
+	default:
+		zapiStatus = "UNKNOWN"
+	}
+
+	// INFO log for visibility - always shows receipt events
 	logger.InfoContext(ctx, "transformed receipt event",
+		slog.String("component", "whatsmeow_transformer"),
+		slog.String("instance_id", t.instanceID.String()),
 		slog.String("event_id", eventID.String()),
 		slog.String("receipt_type", string(receipt.Type)),
+		slog.String("zapi_status", zapiStatus),
+		slog.Bool("is_from_me", receipt.IsFromMe),
+		slog.Bool("is_group", receipt.Chat.Server == watypes.GroupServer),
 		slog.Int("message_count", len(receipt.MessageIDs)),
 	)
 
@@ -1318,9 +1339,20 @@ func (t *Transformer) transformGroupInfo(ctx context.Context, logger *slog.Logge
 		event.Metadata["membership_request_method"] = method
 	}
 
-	logger.InfoContext(ctx, "transformed group info event",
+	// DEBUG: Detailed logging to investigate missing group webhooks
+	logger.WarnContext(ctx, "DEBUG_GROUP_INFO: transformed group info event",
 		slog.String("event_id", eventID.String()),
 		slog.String("group_id", info.JID.String()),
+		slog.Int("join_count", len(info.Join)),
+		slog.Int("leave_count", len(info.Leave)),
+		slog.Int("promote_count", len(info.Promote)),
+		slog.Int("demote_count", len(info.Demote)),
+		slog.Int("membership_requests_created", len(info.MembershipRequestsCreated)),
+		slog.Int("membership_requests_revoked", len(info.MembershipRequestsRevoked)),
+		slog.Bool("has_name_change", info.Name != nil),
+		slog.Bool("has_topic_change", info.Topic != nil),
+		slog.Bool("has_announce_change", info.Announce != nil),
+		slog.Bool("has_locked_change", info.Locked != nil),
 	)
 
 	return event, nil

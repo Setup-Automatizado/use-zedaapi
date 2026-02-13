@@ -12,6 +12,33 @@ This repository implements a production-grade WhatsApp API built on the whatsmeo
 
 ---
 
+## NATS Migration (Active Project)
+
+**PostgreSQL → NATS JetStream migration in progress.**
+
+### Quick Start
+```bash
+# Check current progress
+cat docs/STAGE_TRACKER.md
+
+# Start/continue migration work
+/nats-stage
+```
+
+### Context Loading Order
+1. `docs/STAGE_TRACKER.md` - Current progress
+2. `docs/NATS_MIGRATION_STAGES.md` - Stage instructions
+3. `docs/NATS_CONTEXT.md` - Quick reference
+4. `docs/PRD_NATS_MIGRATION.md` - Full spec (load sections only)
+
+### Rules
+- Read `.claude/rules/nats-migration.md` for development rules
+- Never skip stages
+- Complete all checkboxes before proceeding
+- Update STAGE_TRACKER.md after each session
+
+---
+
 ## Quick Commands
 
 ```bash

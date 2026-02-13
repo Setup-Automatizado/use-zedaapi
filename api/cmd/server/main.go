@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"log/slog"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -26,6 +28,7 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/events"
 	"go.mau.fi/whatsmeow/api/internal/events/capture"
 	"go.mau.fi/whatsmeow/api/internal/events/dispatch"
+	"go.mau.fi/whatsmeow/api/internal/events/echo"
 	"go.mau.fi/whatsmeow/api/internal/events/media"
 	"go.mau.fi/whatsmeow/api/internal/events/persistence"
 	"go.mau.fi/whatsmeow/api/internal/events/pollstore"
@@ -41,8 +44,11 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/messages/queue"
 	"go.mau.fi/whatsmeow/api/internal/newsletters"
 	"go.mau.fi/whatsmeow/api/internal/observability"
+	proxycheck "go.mau.fi/whatsmeow/api/internal/proxy"
+	"go.mau.fi/whatsmeow/api/internal/proxy/webshare"
 	redisinit "go.mau.fi/whatsmeow/api/internal/redis"
 	sentryinit "go.mau.fi/whatsmeow/api/internal/sentry"
+	"go.mau.fi/whatsmeow/api/internal/statuscache"
 	"go.mau.fi/whatsmeow/api/internal/whatsmeow"
 	"go.mau.fi/whatsmeow/api/internal/workers"
 	"go.mau.fi/whatsmeow/api/migrations"
@@ -89,6 +95,10 @@ func (a *repositoryAdapter) GetConnectionState(ctx context.Context, id uuid.UUID
 	}, nil
 }
 
+func (a *repositoryAdapter) GetCallRejectConfig(ctx context.Context, id uuid.UUID) (bool, *string, error) {
+	return a.repo.GetCallRejectConfig(ctx, id)
+}
+
 type instanceLookupAdapter struct {
 	repo *instances.Repository
 }
@@ -102,6 +112,14 @@ func (a *instanceLookupAdapter) StoreJID(ctx context.Context, id uuid.UUID) (str
 		return "", nil
 	}
 	return *inst.StoreJID, nil
+}
+
+func (a *instanceLookupAdapter) IsBusiness(ctx context.Context, id uuid.UUID) (bool, error) {
+	inst, err := a.repo.GetByID(ctx, id)
+	if err != nil {
+		return false, err
+	}
+	return inst.BusinessDevice, nil
 }
 
 type webhookResolverAdapter struct {
@@ -147,6 +165,119 @@ func (a *queueClientRegistryAdapter) GetClient(instanceID string) (*wameow.Clien
 		return nil, false
 	}
 	return a.registry.GetClient(id)
+}
+
+// proxyHealthRepoAdapter bridges instances.Repository to proxy.Repository.
+type proxyHealthRepoAdapter struct {
+	repo *instances.Repository
+}
+
+func (a *proxyHealthRepoAdapter) ListInstancesWithProxy(ctx context.Context) ([]proxycheck.ProxyInstance, error) {
+	items, err := a.repo.ListInstancesWithProxy(ctx)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]proxycheck.ProxyInstance, len(items))
+	for i, item := range items {
+		result[i] = proxycheck.ProxyInstance{
+			InstanceID:     item.InstanceID,
+			ProxyURL:       item.ProxyURL,
+			HealthStatus:   item.HealthStatus,
+			HealthFailures: item.HealthFailures,
+		}
+	}
+	return result, nil
+}
+
+func (a *proxyHealthRepoAdapter) UpdateProxyHealthStatus(ctx context.Context, id uuid.UUID, status string, failures int) error {
+	return a.repo.UpdateProxyHealthStatus(ctx, id, status, failures)
+}
+
+func (a *proxyHealthRepoAdapter) InsertProxyHealthLog(ctx context.Context, entry proxycheck.HealthLog) error {
+	return a.repo.InsertProxyHealthLog(ctx, instances.ProxyHealthLog{
+		InstanceID:   entry.InstanceID,
+		ProxyURL:     entry.ProxyURL,
+		Status:       entry.Status,
+		LatencyMs:    entry.LatencyMs,
+		ErrorMessage: entry.ErrorMessage,
+		CheckedAt:    entry.CheckedAt,
+	})
+}
+
+func (a *proxyHealthRepoAdapter) CleanupProxyHealthLogs(ctx context.Context, retention time.Duration) (int64, error) {
+	return a.repo.CleanupProxyHealthLogs(ctx, retention)
+}
+
+// proxyRepoAdapter bridges instances.Repository to whatsmeow.ProxyRepository.
+type proxyRepoAdapter struct {
+	repo *instances.Repository
+}
+
+func (a *proxyRepoAdapter) GetProxyConfig(ctx context.Context, id uuid.UUID) (*whatsmeow.ProxyConfig, error) {
+	cfg, err := a.repo.GetProxyConfig(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return &whatsmeow.ProxyConfig{
+		ProxyURL:       cfg.ProxyURL,
+		Enabled:        cfg.Enabled,
+		NoWebsocket:    cfg.NoWebsocket,
+		OnlyLogin:      cfg.OnlyLogin,
+		NoMedia:        cfg.NoMedia,
+		HealthStatus:   cfg.HealthStatus,
+		HealthFailures: cfg.HealthFailures,
+	}, nil
+}
+
+func (a *proxyRepoAdapter) ListInstancesWithProxy(ctx context.Context) ([]whatsmeow.ProxyInstance, error) {
+	items, err := a.repo.ListInstancesWithProxy(ctx)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]whatsmeow.ProxyInstance, len(items))
+	for i, item := range items {
+		result[i] = whatsmeow.ProxyInstance{
+			InstanceID:     item.InstanceID,
+			ProxyURL:       item.ProxyURL,
+			HealthStatus:   item.HealthStatus,
+			HealthFailures: item.HealthFailures,
+		}
+	}
+	return result, nil
+}
+
+func (a *proxyRepoAdapter) UpdateProxyHealthStatus(ctx context.Context, id uuid.UUID, status string, failures int) error {
+	return a.repo.UpdateProxyHealthStatus(ctx, id, status, failures)
+}
+
+// registrySwapperAdapter bridges *whatsmeow.ClientRegistry to proxy.RegistrySwapper.
+type registrySwapperAdapter struct {
+	registry *whatsmeow.ClientRegistry
+}
+
+func (a *registrySwapperAdapter) ApplyProxy(ctx context.Context, instanceID uuid.UUID, proxyURL string, noWebsocket, onlyLogin, noMedia bool) error {
+	return a.registry.ApplyProxy(ctx, instanceID, proxyURL, noWebsocket, onlyLogin, noMedia)
+}
+
+func (a *registrySwapperAdapter) SwapProxy(ctx context.Context, instanceID uuid.UUID, proxyURL string, noWebsocket, onlyLogin, noMedia bool) error {
+	return a.registry.SwapProxy(ctx, instanceID, proxyURL, noWebsocket, onlyLogin, noMedia)
+}
+
+// instanceProxyUpdaterAdapter bridges *instances.Repository to proxy.InstanceProxyUpdater.
+type instanceProxyUpdaterAdapter struct {
+	repo *instances.Repository
+}
+
+func (a *instanceProxyUpdaterAdapter) UpdateProxyURL(ctx context.Context, id uuid.UUID, proxyURL *string, enabled bool) error {
+	cfg := instances.ProxyConfig{
+		ProxyURL: proxyURL,
+		Enabled:  enabled,
+	}
+	return a.repo.UpdateProxyConfig(ctx, id, cfg)
+}
+
+func (a *instanceProxyUpdaterAdapter) ClearProxyConfig(ctx context.Context, id uuid.UUID) error {
+	return a.repo.ClearProxyConfig(ctx, id)
 }
 
 func storeJIDEnricher() capture.MetadataEnricher {
@@ -274,7 +405,7 @@ func main() {
 	httpTransportConfig := transporthttp.DefaultConfig()
 	httpTransportConfig.Timeout = cfg.Events.WebhookTimeout
 	httpTransportConfig.MaxRetries = cfg.Events.WebhookMaxRetries
-	transportRegistry := transport.NewRegistry(httpTransportConfig)
+	transportRegistry := transport.NewRegistry(httpTransportConfig, metrics)
 	defer transportRegistry.Close()
 
 	dispatchCoordinator := dispatch.NewCoordinator(
@@ -302,6 +433,105 @@ func main() {
 
 	logger.Info("dispatch system initialized",
 		slog.Int("workers", dispatchCoordinator.GetWorkerCount()))
+
+	// Initialize status cache system if enabled
+	var statusCacheService *statuscache.ServiceImpl
+	if cfg.StatusCache.Enabled {
+		statusCacheRepo := statuscache.NewRedisRepository(
+			redisClient,
+			cfg.StatusCache.TTL,
+			"funnelchat",
+		)
+
+		// Create webhook dispatcher for flush operations
+		// This will look up the instance's webhook URL and send via HTTP transport
+		webhookDispatcher := statuscache.NewFlushDispatcher(func(ctx context.Context, instanceID string, payload []byte) error {
+			// Look up instance webhook configuration
+			instID, parseErr := uuid.Parse(instanceID)
+			if parseErr != nil {
+				return fmt.Errorf("invalid instance ID: %w", parseErr)
+			}
+
+			webhookConfig, err := repo.GetWebhookConfig(ctx, instID)
+			if err != nil {
+				return fmt.Errorf("failed to get webhook config: %w", err)
+			}
+
+			// Use message status URL, fallback to delivery URL
+			var targetURL string
+			if webhookConfig.MessageStatusURL != nil && *webhookConfig.MessageStatusURL != "" {
+				targetURL = *webhookConfig.MessageStatusURL
+			} else if webhookConfig.DeliveryURL != nil && *webhookConfig.DeliveryURL != "" {
+				targetURL = *webhookConfig.DeliveryURL
+			} else {
+				// No webhook URL configured, skip silently
+				return nil
+			}
+
+			// Get HTTP transport
+			trans, err := transportRegistry.GetTransport(transport.TransportTypeHTTP)
+			if err != nil {
+				return fmt.Errorf("failed to get transport: %w", err)
+			}
+
+			// Build request
+			request := &transport.DeliveryRequest{
+				Endpoint:    targetURL,
+				Payload:     payload,
+				Headers:     map[string]string{"Content-Type": "application/json"},
+				EventID:     fmt.Sprintf("flush-%s-%d", instanceID, time.Now().UnixNano()),
+				EventType:   "receipt",
+				InstanceID:  instanceID,
+				Attempt:     1,
+				MaxAttempts: 3,
+			}
+
+			// Deliver webhook
+			result, err := trans.Deliver(ctx, request)
+			if err != nil {
+				return fmt.Errorf("delivery failed: %w", err)
+			}
+			if !result.Success {
+				return fmt.Errorf("delivery unsuccessful: %s", result.ErrorMessage)
+			}
+
+			return nil
+		})
+
+		statusCacheService = statuscache.NewService(
+			statusCacheRepo,
+			&cfg,
+			webhookDispatcher,
+			metrics,
+			logger,
+		)
+
+		if err := statusCacheService.Start(ctx); err != nil {
+			logger.Error("failed to start status cache service", slog.String("error", err.Error()))
+		} else {
+			logger.Info("status cache service started",
+				slog.Duration("ttl", cfg.StatusCache.TTL),
+				slog.Bool("suppress_webhooks", cfg.StatusCache.SuppressWebhooks),
+			)
+
+			// Create interceptor and wire to dispatch coordinator
+			statusInterceptor := statuscache.NewInterceptor(statusCacheService, &cfg, logger)
+			dispatchCoordinator.SetStatusInterceptor(statusInterceptor)
+			logger.Info("status cache interceptor configured for dispatch coordinator")
+		}
+
+		defer func() {
+			if statusCacheService != nil {
+				logger.Info("stopping status cache service")
+				stopCtx, stopCancel := context.WithTimeout(context.Background(), 10*time.Second)
+				if err := statusCacheService.Stop(stopCtx); err != nil {
+					logger.Error("status cache service stop error", slog.String("error", err.Error()))
+				}
+				stopCancel()
+				logger.Info("status cache service stopped")
+			}
+		}()
+	}
 
 	mediaRepo := persistence.NewMediaRepository(pgPool)
 	mediaCoordinator := media.NewMediaCoordinator(
@@ -429,6 +659,7 @@ func main() {
 		logger.Error("whatsmeow registry", slog.String("error", err.Error()))
 		os.Exit(1)
 	}
+	registry.SetProxyRepository(&proxyRepoAdapter{repo: repo})
 	defer func() {
 		logger.Info("phase 2: closing whatsmeow registry")
 		registryCloseDone := make(chan error, 1)
@@ -470,6 +701,124 @@ func main() {
 		workerDirectory.Stop(stopCtx)
 		stopCancel()
 	}()
+
+	// Initialize proxy health checker
+	proxyMetrics := proxycheck.NewMetrics(cfg.Prometheus.Namespace, prometheus.DefaultRegisterer)
+	proxyHealthChecker := proxycheck.NewHealthChecker(
+		&proxyHealthRepoAdapter{repo: repo},
+		proxycheck.Config{
+			HealthCheckInterval:    cfg.Proxy.HealthCheckInterval,
+			HealthCheckTimeout:     cfg.Proxy.HealthCheckTimeout,
+			MaxConsecutiveFailures: cfg.Proxy.MaxConsecutiveFailures,
+			DLQOnUnhealthy:         cfg.Proxy.DLQOnUnhealthy,
+			PauseQueueOnUnhealthy:  cfg.Proxy.PauseQueueOnUnhealthy,
+			LogRetentionPeriod:     cfg.Proxy.LogRetentionPeriod,
+			CleanupInterval:        cfg.Proxy.CleanupInterval,
+		},
+		logger,
+		proxyMetrics,
+	)
+	proxyHealthChecker.SetUnhealthyCallback(func(ctx context.Context, instanceID uuid.UUID, proxyURL string, failures int) {
+		logger.Error("proxy unhealthy callback triggered",
+			slog.String("component", "proxy_health_checker"),
+			slog.String("instance_id", instanceID.String()),
+			slog.Int("failures", failures))
+	})
+	proxyHealthChecker.SetRecoveredCallback(func(ctx context.Context, instanceID uuid.UUID, proxyURL string) {
+		logger.Info("proxy recovered callback triggered",
+			slog.String("component", "proxy_health_checker"),
+			slog.String("instance_id", instanceID.String()))
+	})
+	proxyHealthChecker.Start(ctx)
+	defer func() {
+		logger.Info("stopping proxy health checker")
+		proxyHealthChecker.Stop()
+		logger.Info("proxy health checker stopped")
+	}()
+
+	logger.Info("proxy health checker initialized",
+		slog.Duration("interval", cfg.Proxy.HealthCheckInterval),
+		slog.Int("max_failures", cfg.Proxy.MaxConsecutiveFailures))
+
+	// Initialize proxy pool system if enabled
+	var autoHealer *proxycheck.AutoHealer
+	var poolHandler *proxycheck.PoolHandler
+	if cfg.ProxyPool.Enabled {
+		poolRepo := proxycheck.NewPoolRepository(pgPool)
+		poolMetrics := proxycheck.NewPoolMetrics(cfg.Prometheus.Namespace, prometheus.DefaultRegisterer)
+
+		countryCodes := strings.Split(cfg.ProxyPool.DefaultCountryCodes, ",")
+		for i := range countryCodes {
+			countryCodes[i] = strings.TrimSpace(countryCodes[i])
+		}
+
+		poolCfg := proxycheck.PoolConfig{
+			SyncInterval:         cfg.ProxyPool.SyncInterval,
+			DefaultCountryCodes:  countryCodes,
+			AssignmentRetryDelay: cfg.ProxyPool.AssignmentRetryDelay,
+			MaxAssignmentRetries: cfg.ProxyPool.MaxAssignmentRetries,
+		}
+
+		registrySwapper := &registrySwapperAdapter{registry: registry}
+		poolManager := proxycheck.NewPoolManager(poolRepo, registrySwapper, lockManager, poolCfg, logger, poolMetrics)
+		poolManager.SetInstanceUpdater(&instanceProxyUpdaterAdapter{repo: repo})
+
+		// Register Webshare provider if API key is configured
+		if cfg.ProxyPool.WebshareAPIKey != "" {
+			// Create provider record in database (idempotent)
+			providerRecord, err := poolRepo.CreateProvider(ctx, proxycheck.CreateProviderRequest{
+				Name:                 "webshare",
+				ProviderType:         "webshare",
+				Enabled:              true,
+				Priority:             100,
+				APIKey:               cfg.ProxyPool.WebshareAPIKey,
+				APIEndpoint:          cfg.ProxyPool.WebshareEndpoint,
+				MaxInstancesPerProxy: 1,
+				CountryCodes:         countryCodes,
+				RateLimitRPM:         240,
+			})
+			if err != nil {
+				// Provider may already exist, try to find it
+				providers, listErr := poolRepo.ListProviders(ctx)
+				if listErr != nil {
+					logger.Error("failed to list providers for webshare lookup", slog.String("error", listErr.Error()))
+				} else {
+					for _, p := range providers {
+						if p.Name == "webshare" {
+							providerRecord = &p
+							break
+						}
+					}
+				}
+			}
+
+			if providerRecord != nil {
+				wsProvider := webshare.NewProvider(cfg.ProxyPool.WebshareAPIKey, cfg.ProxyPool.WebshareEndpoint, cfg.ProxyPool.WebsharePlanID, cfg.ProxyPool.WebshareMode, logger)
+				poolManager.RegisterProvider(providerRecord.ID, wsProvider)
+				logger.Info("webshare provider registered",
+					slog.String("provider_id", providerRecord.ID.String()))
+			}
+		}
+
+		// Wire auto-healer to existing health checker callbacks
+		autoHealer = proxycheck.NewAutoHealer(poolManager, poolRepo, lockManager, logger, poolMetrics)
+		proxyHealthChecker.SetUnhealthyCallback(autoHealer.OnProxyUnhealthy)
+		proxyHealthChecker.SetRecoveredCallback(autoHealer.OnProxyRecovered)
+
+		poolManager.Start(ctx)
+		defer func() {
+			logger.Info("stopping proxy pool manager")
+			poolManager.Stop()
+			logger.Info("proxy pool manager stopped")
+		}()
+
+		poolService := proxycheck.NewPoolService(poolManager, poolRepo, logger)
+		poolHandler = proxycheck.NewPoolHandler(poolService, logger)
+
+		logger.Info("proxy pool system initialized",
+			slog.Duration("sync_interval", cfg.ProxyPool.SyncInterval),
+			slog.Bool("webshare_enabled", cfg.ProxyPool.WebshareAPIKey != ""))
+	}
 
 	instanceService := instances.NewService(repo, registry, cfg.Client.AuthToken, logger)
 	reconcileCtx, reconcileCancel := context.WithTimeout(ctx, 30*time.Second)
@@ -522,20 +871,35 @@ func main() {
 			MaxBackoff:           cfg.MessageQueue.MaxBackoff,
 			BackoffMultiplier:    cfg.MessageQueue.BackoffMultiplier,
 			DisconnectRetryDelay: cfg.MessageQueue.DisconnectRetryDelay,
+			ProxyRetryDelay:      cfg.MessageQueue.ProxyRetryDelay,
 			CompletedRetention:   cfg.MessageQueue.CompletedRetention,
 			FailedRetention:      cfg.MessageQueue.FailedRetention,
 			WorkersPerInstance:   1, // CRITICAL: Must be 1 for FIFO ordering
 		}
 
+		// Initialize API echo emitter for webhook notifications (fromMe=true, fromApi=true)
+		var echoEmitter *echo.Emitter
+		if cfg.APIEcho.Enabled {
+			echoEmitter = echo.NewEmitter(ctx, &echo.EmitterConfig{
+				InstanceID:  uuid.Nil, // Shared emitter; instance ID comes from EchoRequest
+				EventRouter: eventOrchestrator.GetEventRouter(),
+				Metrics:     metrics,
+				Enabled:     cfg.APIEcho.Enabled,
+				StoreJID:    "", // Instance-specific; comes from EchoRequest
+			})
+			logger.Info("API echo emitter initialized for message queue")
+		}
+
 		coordinatorConfig := &queue.CoordinatorConfig{
 			Pool:            pgPool,
 			ClientRegistry:  &queueClientRegistryAdapter{registry: registry},
-			Processor:       queue.NewWhatsAppMessageProcessor(logger),
+			Processor:       queue.NewWhatsAppMessageProcessor(logger, echoEmitter),
 			Config:          queueConfig,
 			Logger:          logger,
 			CleanupInterval: cfg.MessageQueue.CleanupInterval,
 			CleanupTimeout:  cfg.MessageQueue.CleanupTimeout,
 			Metrics:         metrics,
+			EchoEmitter:     echoEmitter,
 		}
 
 		messageCoordinator, err = queue.NewCoordinator(ctx, coordinatorConfig)
@@ -547,6 +911,17 @@ func main() {
 		logger.Info("message queue coordinator initialized",
 			slog.Duration("poll_interval", cfg.MessageQueue.PollInterval),
 			slog.Int("max_attempts", cfg.MessageQueue.MaxAttempts))
+
+		// Wire proxy-queue integration: pause message processing during proxy failures/swaps
+		if cfg.ProxyPool.Enabled && messageCoordinator != nil {
+			proxyHealthChecker.SetQueuePauser(messageCoordinator)
+			if autoHealer != nil {
+				autoHealer.SetQueuePauser(messageCoordinator)
+			}
+			registry.SetQueuePauser(messageCoordinator)
+			logger.Info("proxy-queue integration wired: message queue will pause during proxy failures and swaps",
+				slog.Bool("pause_on_unhealthy", cfg.Proxy.PauseQueueOnUnhealthy))
+		}
 
 		// Create message handler for HTTP endpoints
 		messageHandler = handlers.NewMessageHandler(
@@ -586,6 +961,18 @@ func main() {
 	communitiesHandler := handlers.NewCommunitiesHandler(instanceService, communitiesService, metrics, logger)
 	newslettersHandler := handlers.NewNewslettersHandler(instanceService, newslettersService, metrics, logger)
 
+	// Create StatusCacheHandler if service is enabled
+	var statusCacheHTTPHandler *handlers.StatusCacheHandler
+	if statusCacheService != nil {
+		statusCacheHTTPHandler = handlers.NewStatusCacheHandler(statusCacheService, logger)
+	}
+
+	// Create PrivacyHandler for privacy settings endpoints
+	var privacyHandler *handlers.PrivacyHandler
+	if messageCoordinator != nil {
+		privacyHandler = handlers.NewPrivacyHandler(messageCoordinator, instanceService, logger)
+	}
+
 	healthHandler.SetMetrics(func(component, status string) {
 		metrics.HealthChecks.WithLabelValues(component, status).Inc()
 	})
@@ -602,6 +989,9 @@ func main() {
 		GroupsHandler:      groupsHandler,
 		CommunitiesHandler: communitiesHandler,
 		NewslettersHandler: newslettersHandler,
+		StatusCacheHandler: statusCacheHTTPHandler,
+		PrivacyHandler:     privacyHandler,
+		PoolHandler:        poolHandler,
 		PartnerToken:       cfg.Partner.AuthToken,
 		DocsConfig:         docs.Config{BaseURL: cfg.HTTP.BaseURL},
 	})

@@ -1,0 +1,116 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String    @id
+  name          String
+  email         String
+  emailVerified Boolean   @default(false)
+  image         String?
+  role          String    @default("USER")
+  banned        Boolean?  @default(false)
+  banReason     String?
+  banExpiresAt  DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+
+  twoFactorEnabled Boolean?    @default(false)
+  twofactors       TwoFactor[]
+
+  // Relacao com convites enviados
+  invitationsSent AllowedUser[] @relation("InvitedBy")
+  allowedUser     AllowedUser?  @relation("AllowedUserLink")
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+model TwoFactor {
+  id          String  @id
+  secret      String
+  backupCodes String
+  userId      String  @unique
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  method      String  @default("totp") // "totp" or "email"
+
+  @@index([secret])
+  @@map("twoFactor")
+}
+
+model AllowedUser {
+  id          String    @id @default(cuid())
+  email       String    @unique
+  role        String    @default("USER")
+  invitedById String?
+  invitedBy   User?     @relation("InvitedBy", fields: [invitedById], references: [id])
+  invitedAt   DateTime  @default(now())
+  acceptedAt  DateTime?
+  userId      String?   @unique
+  user        User?     @relation("AllowedUserLink", fields: [userId], references: [id])
+
+  @@index([email])
+  @@index([invitedById])
+  @@map("allowed_user")
+}

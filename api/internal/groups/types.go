@@ -6,19 +6,22 @@ type ListParams struct {
 	PageSize int
 }
 
-// Summary represents the Z-API compatible payload for a single group item.
+// Summary represents the payload for a single group item.
 type Summary struct {
-	IsGroup         bool    `json:"isGroup"`
-	Name            string  `json:"name"`
-	Phone           string  `json:"phone"`
-	Unread          string  `json:"unread"`
-	LastMessageTime *string `json:"lastMessageTime"`
-	IsMuted         string  `json:"isMuted"`
-	MuteEndTime     *string `json:"muteEndTime"`
-	IsMarkedSpam    bool    `json:"isMarkedSpam"`
-	Archived        bool    `json:"archived"`
-	Pinned          bool    `json:"pinned"`
-	MessagesUnread  string  `json:"messagesUnread"`
+	IsGroup             bool    `json:"isGroup"`
+	Name                string  `json:"name"`
+	Phone               string  `json:"phone"`
+	Unread              string  `json:"unread"`
+	LastMessageTime     *string `json:"lastMessageTime"`
+	IsMuted             string  `json:"isMuted"`
+	MuteEndTime         *string `json:"muteEndTime"`
+	IsMarkedSpam        bool    `json:"isMarkedSpam"`
+	Archived            bool    `json:"archived"`
+	Pinned              bool    `json:"pinned"`
+	MessagesUnread      string  `json:"messagesUnread"`
+	IsGroupAnnouncement bool    `json:"isGroupAnnouncement"`
+	IsCommunity         bool    `json:"isCommunity"`
+	CommunityID         *string `json:"communityId"`
 }
 
 // ListResult contains the paginated result of the List operation.
@@ -80,7 +83,7 @@ type InvitationLinkResult struct {
 	InvitationLink string `json:"invitationLink"`
 }
 
-// ValueResult mirrors the generic Z-API boolean response.
+// ValueResult mirrors the generic FUNNELCHAT boolean response.
 type ValueResult struct {
 	Value bool `json:"value"`
 }
@@ -124,12 +127,13 @@ type Metadata struct {
 	AdminOnlySettings    bool                 `json:"adminOnlySettings"`
 	RequireAdminApproval bool                 `json:"requireAdminApproval"`
 	IsGroupAnnouncement  bool                 `json:"isGroupAnnouncement"`
+	IsCommunity          bool                 `json:"isCommunity"`
 	Participants         []ParticipantSummary `json:"participants"`
 	SubjectTime          int64                `json:"subjectTime"`
 	SubjectOwner         string               `json:"subjectOwner"`
 }
 
-// ParticipantSummary adapts WhatsApp participant data to the Z-API schema.
+// ParticipantSummary adapts WhatsApp participant data to the FUNNELCHAT schema.
 type ParticipantSummary struct {
 	Phone        string  `json:"phone"`
 	LID          string  `json:"lid,omitempty"`

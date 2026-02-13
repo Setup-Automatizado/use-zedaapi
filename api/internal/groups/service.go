@@ -29,6 +29,7 @@ type Client interface {
 	UpdateGroupRequestParticipants(jid types.JID, participantChanges []types.JID, action whatsmeow.ParticipantRequestChange) ([]types.GroupParticipant, error)
 	LeaveGroup(jid types.JID) error
 	GetGroupInfo(jid types.JID) (*types.GroupInfo, error)
+	GetGroupInfoWithContext(ctx context.Context, jid types.JID) (*types.GroupInfo, error)
 	GetGroupInviteLink(jid types.JID, reset bool) (string, error)
 	GetGroupInfoFromLink(code string) (*types.GroupInfo, error)
 	JoinGroupWithLink(code string) (types.JID, error)
@@ -36,7 +37,7 @@ type Client interface {
 	SetGroupLocked(jid types.JID, locked bool) error
 	SetGroupJoinApprovalMode(jid types.JID, mode bool) error
 	SetGroupMemberAddMode(jid types.JID, mode types.GroupMemberAddMode) error
-	SetGroupDescription(jid types.JID, description string) error
+	SetGroupTopic(ctx context.Context, jid types.JID, previousID, newID, topic string) error
 	SendMessage(ctx context.Context, to types.JID, message *waProto.Message, extra ...whatsmeow.SendRequestExtra) (whatsmeow.SendResponse, error)
 }
 
@@ -139,17 +140,20 @@ func toSummary(info *types.GroupInfo, settings types.LocalChatSettings, now time
 	isMuted, muteEnd := evaluateMute(settings, now)
 
 	return Summary{
-		IsGroup:         true,
-		Name:            info.GroupName.Name,
-		Phone:           conversationIdentifierFromJID(info.JID),
-		Unread:          "0",
-		LastMessageTime: lastMessage,
-		IsMuted:         isMuted,
-		MuteEndTime:     muteEnd,
-		IsMarkedSpam:    false,
-		Archived:        settings.Archived,
-		Pinned:          settings.Pinned,
-		MessagesUnread:  "0",
+		IsGroup:             true,
+		Name:                info.GroupName.Name,
+		Phone:               conversationIdentifierFromJID(info.JID),
+		Unread:              "0",
+		LastMessageTime:     lastMessage,
+		IsMuted:             isMuted,
+		MuteEndTime:         muteEnd,
+		IsMarkedSpam:        false,
+		Archived:            settings.Archived,
+		Pinned:              settings.Pinned,
+		MessagesUnread:      "0",
+		IsGroupAnnouncement: info.IsAnnounce,
+		IsCommunity:         info.IsParent,
+		CommunityID:         selectCommunityID(info),
 	}
 }
 

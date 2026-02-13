@@ -150,6 +150,13 @@ func (a *whatsAppClientAdapter) GetGroupInfo(jid types.JID) (*types.GroupInfo, e
 	return a.client.GetGroupInfo(context.Background(), jid)
 }
 
+func (a *whatsAppClientAdapter) GetGroupInfoWithContext(ctx context.Context, jid types.JID) (*types.GroupInfo, error) {
+	if a.client == nil {
+		return nil, ErrClientNotConnected
+	}
+	return a.client.GetGroupInfo(ctx, jid)
+}
+
 func (a *whatsAppClientAdapter) GetGroupInviteLink(jid types.JID, reset bool) (string, error) {
 	if a.client == nil {
 		return "", ErrClientNotConnected
@@ -199,11 +206,11 @@ func (a *whatsAppClientAdapter) SetGroupMemberAddMode(jid types.JID, mode types.
 	return a.client.SetGroupMemberAddMode(context.Background(), jid, mode)
 }
 
-func (a *whatsAppClientAdapter) SetGroupDescription(jid types.JID, description string) error {
+func (a *whatsAppClientAdapter) SetGroupTopic(ctx context.Context, jid types.JID, previousID, newID, topic string) error {
 	if a.client == nil {
 		return ErrClientNotConnected
 	}
-	return a.client.SetGroupDescription(context.Background(), jid, description)
+	return a.client.SetGroupTopic(ctx, jid, previousID, newID, topic)
 }
 
 func (a *whatsAppClientAdapter) SendMessage(ctx context.Context, to types.JID, message *waProto.Message, extra ...whatsmeowclient.SendRequestExtra) (whatsmeowclient.SendResponse, error) {

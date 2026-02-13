@@ -30,6 +30,9 @@ const (
 	payloadTypeGroupInfo     = "group_info"
 	payloadTypePicture       = "picture"
 	payloadTypeUndecryptable = "undecryptable"
+	payloadTypePushName      = "push_name"
+	payloadTypeBusinessName  = "business_name"
+	payloadTypeUserAbout     = "user_about"
 )
 
 var (
@@ -48,6 +51,9 @@ func init() {
 	gob.Register(&whatsmeowevents.GroupInfo{})
 	gob.Register(&whatsmeowevents.Picture{})
 	gob.Register(&whatsmeowevents.UndecryptableMessage{})
+	gob.Register(&whatsmeowevents.PushName{})
+	gob.Register(&whatsmeowevents.BusinessName{})
+	gob.Register(&whatsmeowevents.UserAbout{})
 	gob.Register(uuid.UUID{})
 }
 
@@ -295,6 +301,24 @@ func encodeRawPayload(payload interface{}) (*persistedPayload, error) {
 			return nil, fmt.Errorf("marshal undecryptable payload: %w", err)
 		}
 		return &persistedPayload{Type: payloadTypeUndecryptable, Data: data}, nil
+	case *whatsmeowevents.PushName:
+		data, err := json.Marshal(evt)
+		if err != nil {
+			return nil, fmt.Errorf("marshal push_name payload: %w", err)
+		}
+		return &persistedPayload{Type: payloadTypePushName, Data: data}, nil
+	case *whatsmeowevents.BusinessName:
+		data, err := json.Marshal(evt)
+		if err != nil {
+			return nil, fmt.Errorf("marshal business_name payload: %w", err)
+		}
+		return &persistedPayload{Type: payloadTypeBusinessName, Data: data}, nil
+	case *whatsmeowevents.UserAbout:
+		data, err := json.Marshal(evt)
+		if err != nil {
+			return nil, fmt.Errorf("marshal user_about payload: %w", err)
+		}
+		return &persistedPayload{Type: payloadTypeUserAbout, Data: data}, nil
 	default:
 		return nil, fmt.Errorf("unsupported raw payload type %T", payload)
 	}
@@ -356,6 +380,24 @@ func decodeRawPayload(payload *persistedPayload) (interface{}, error) {
 		var evt whatsmeowevents.UndecryptableMessage
 		if err := json.Unmarshal(payload.Data, &evt); err != nil {
 			return nil, fmt.Errorf("unmarshal undecryptable payload: %w", err)
+		}
+		return &evt, nil
+	case payloadTypePushName:
+		var evt whatsmeowevents.PushName
+		if err := json.Unmarshal(payload.Data, &evt); err != nil {
+			return nil, fmt.Errorf("unmarshal push_name payload: %w", err)
+		}
+		return &evt, nil
+	case payloadTypeBusinessName:
+		var evt whatsmeowevents.BusinessName
+		if err := json.Unmarshal(payload.Data, &evt); err != nil {
+			return nil, fmt.Errorf("unmarshal business_name payload: %w", err)
+		}
+		return &evt, nil
+	case payloadTypeUserAbout:
+		var evt whatsmeowevents.UserAbout
+		if err := json.Unmarshal(payload.Data, &evt); err != nil {
+			return nil, fmt.Errorf("unmarshal user_about payload: %w", err)
 		}
 		return &evt, nil
 	default:

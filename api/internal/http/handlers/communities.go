@@ -36,7 +36,7 @@ type CommunitiesService interface {
 	RemoveAdmins(ctx context.Context, instanceID uuid.UUID, params communities.ParticipantsParams) (communities.OperationResult, error)
 }
 
-// CommunitiesHandler exposes community-related endpoints matching the Z-API surface.
+// CommunitiesHandler exposes community-related endpoints matching the FUNNELCHAT surface.
 type CommunitiesHandler struct {
 	instanceService InstanceStatusProvider
 	service         CommunitiesService

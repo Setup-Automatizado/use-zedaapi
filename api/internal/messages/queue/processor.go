@@ -7,38 +7,51 @@ import (
 	"log/slog"
 
 	wameow "go.mau.fi/whatsmeow"
+
+	"go.mau.fi/whatsmeow/api/internal/events/echo"
 )
 
 // WhatsAppMessageProcessor orchestrates message processing by delegating to type-specific processors
 // This follows the Strategy pattern for clean separation of concerns
 type WhatsAppMessageProcessor struct {
-	textProcessor        *TextProcessor
-	imageProcessor       *ImageProcessor
-	audioProcessor       *AudioProcessor
-	videoProcessor       *VideoProcessor
-	documentProcessor    *DocumentProcessor
-	locationProcessor    *LocationProcessor
-	contactProcessor     *ContactProcessor
-	interactiveProcessor *InteractiveProcessor
-	pollProcessor        *PollProcessor
-	eventProcessor       *EventProcessor
-	log                  *slog.Logger
+	textProcessor            *TextProcessor
+	imageProcessor           *ImageProcessor
+	audioProcessor           *AudioProcessor
+	videoProcessor           *VideoProcessor
+	documentProcessor        *DocumentProcessor
+	stickerProcessor         *StickerProcessor
+	ptvProcessor             *PTVProcessor
+	locationProcessor        *LocationProcessor
+	contactProcessor         *ContactProcessor
+	interactiveProcessor     *InteractiveProcessor
+	interactiveZAPIProcessor *InteractiveZAPIProcessor
+	pollProcessor            *PollProcessor
+	eventProcessor           *EventProcessor
+	statusProcessor          *StatusProcessor
+	echoEmitter              *echo.Emitter
+	log                      *slog.Logger
 }
 
 // NewWhatsAppMessageProcessor creates a new message processor with all type-specific processors
-func NewWhatsAppMessageProcessor(log *slog.Logger) *WhatsAppMessageProcessor {
+// echoEmitter can be nil if API echo is disabled
+func NewWhatsAppMessageProcessor(log *slog.Logger, echoEmitter *echo.Emitter) *WhatsAppMessageProcessor {
 	return &WhatsAppMessageProcessor{
-		textProcessor:        NewTextProcessor(log),
-		imageProcessor:       NewImageProcessor(log),
-		audioProcessor:       NewAudioProcessor(log),
-		videoProcessor:       NewVideoProcessor(log),
-		documentProcessor:    NewDocumentProcessor(log),
-		locationProcessor:    NewLocationProcessor(log),
-		contactProcessor:     NewContactProcessor(log),
-		interactiveProcessor: NewInteractiveProcessor(log),
-		pollProcessor:        NewPollProcessor(log),
-		eventProcessor:       NewEventProcessor(log),
-		log:                  log,
+		textProcessor:            NewTextProcessor(log, echoEmitter),
+		imageProcessor:           NewImageProcessor(log, echoEmitter),
+		audioProcessor:           NewAudioProcessor(log, echoEmitter),
+		videoProcessor:           NewVideoProcessor(log, echoEmitter),
+		documentProcessor:        NewDocumentProcessor(log, echoEmitter),
+		stickerProcessor:         NewStickerProcessor(log, echoEmitter),
+		ptvProcessor:             NewPTVProcessor(log, echoEmitter),
+		locationProcessor:        NewLocationProcessor(log, echoEmitter),
+		contactProcessor:         NewContactProcessor(log, echoEmitter),
+		interactiveProcessor:     NewInteractiveProcessor(log, echoEmitter),
+		interactiveZAPIProcessor: NewInteractiveZAPIProcessor(log, echoEmitter),
+		pollProcessor:            NewPollProcessor(log, echoEmitter),
+		eventProcessor:           NewEventProcessor(log, echoEmitter),
+		statusProcessor:          NewStatusProcessor(log, echoEmitter),
+		echoEmitter:              echoEmitter,
+		log:                      log,
 	}
 }
 
@@ -74,6 +87,10 @@ func (p *WhatsAppMessageProcessor) Process(ctx context.Context, client *wameow.C
 		return p.videoProcessor.Process(ctx, client, &args)
 	case MessageTypeDocument:
 		return p.documentProcessor.Process(ctx, client, &args)
+	case MessageTypeSticker:
+		return p.stickerProcessor.Process(ctx, client, &args)
+	case MessageTypePTV:
+		return p.ptvProcessor.Process(ctx, client, &args)
 	case MessageTypeLocation:
 		return p.locationProcessor.Process(ctx, client, &args)
 	case MessageTypeContact:
@@ -84,6 +101,31 @@ func (p *WhatsAppMessageProcessor) Process(ctx context.Context, client *wameow.C
 		return p.pollProcessor.Process(ctx, client, &args)
 	case MessageTypeEvent:
 		return p.eventProcessor.Process(ctx, client, &args)
+
+	// interactive message types
+	case MessageTypeButtonList:
+		return p.interactiveZAPIProcessor.ProcessButtonList(ctx, client, &args)
+	case MessageTypeButtonActions:
+		return p.interactiveZAPIProcessor.ProcessButtonActions(ctx, client, &args)
+	case MessageTypeOptionList:
+		return p.interactiveZAPIProcessor.ProcessOptionList(ctx, client, &args)
+	case MessageTypeButtonPIX:
+		return p.interactiveZAPIProcessor.ProcessButtonPIX(ctx, client, &args)
+	case MessageTypeButtonOTP:
+		return p.interactiveZAPIProcessor.ProcessButtonOTP(ctx, client, &args)
+	case MessageTypeCarousel:
+		return p.interactiveZAPIProcessor.ProcessCarousel(ctx, client, &args)
+
+	// Status/Stories message types (sent to status@broadcast)
+	case MessageTypeTextStatus:
+		return p.statusProcessor.ProcessText(ctx, client, &args)
+	case MessageTypeImageStatus:
+		return p.statusProcessor.ProcessImage(ctx, client, &args)
+	case MessageTypeAudioStatus:
+		return p.statusProcessor.ProcessAudio(ctx, client, &args)
+	case MessageTypeVideoStatus:
+		return p.statusProcessor.ProcessVideo(ctx, client, &args)
+
 	default:
 		return fmt.Errorf("unsupported message type: %s", args.MessageType)
 	}

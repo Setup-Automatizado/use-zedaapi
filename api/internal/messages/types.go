@@ -1,6 +1,3 @@
-//go:build ignore
-// +build ignore
-
 package messages
 
 import (
@@ -9,7 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// SendTextRequest represents Z-API send-text request with dual field names for compatibility
+// SendTextRequest represents FUNNELCHAT send-text request with dual field names for compatibility
 type SendTextRequest struct {
 	Phone        string `json:"phone" validate:"required,e164"`
 	PhoneAlt     string `json:"Phone,omitempty"`
@@ -117,7 +114,7 @@ func (m *Media) GetMimeType() string {
 	return m.MimeTypeAlt
 }
 
-// SendImageRequest represents Z-API send-image request
+// SendImageRequest represents FUNNELCHAT send-image request
 type SendImageRequest struct {
 	Phone        string `json:"phone" validate:"required,e164"`
 	PhoneAlt     string `json:"Phone,omitempty"`
@@ -161,7 +158,7 @@ func (r *SendImageRequest) GetDelay() int {
 	return r.DelayAlt
 }
 
-// SendAudioRequest represents Z-API send-audio request
+// SendAudioRequest represents FUNNELCHAT send-audio request
 type SendAudioRequest struct {
 	Phone        string `json:"phone" validate:"required,e164"`
 	PhoneAlt     string `json:"Phone,omitempty"`
@@ -195,7 +192,7 @@ func (r *SendAudioRequest) GetDelay() int {
 	return r.DelayAlt
 }
 
-// SendVideoRequest represents Z-API send-video request
+// SendVideoRequest represents FUNNELCHAT send-video request
 type SendVideoRequest struct {
 	Phone        string `json:"phone" validate:"required,e164"`
 	PhoneAlt     string `json:"Phone,omitempty"`
@@ -239,7 +236,7 @@ func (r *SendVideoRequest) GetDelay() int {
 	return r.DelayAlt
 }
 
-// SendStickerRequest represents Z-API send-sticker request
+// SendStickerRequest represents FUNNELCHAT send-sticker request
 type SendStickerRequest struct {
 	Phone        string `json:"phone" validate:"required,e164"`
 	PhoneAlt     string `json:"Phone,omitempty"`
@@ -273,7 +270,7 @@ func (r *SendStickerRequest) GetDelay() int {
 	return r.DelayAlt
 }
 
-// SendGifRequest represents Z-API send-gif request
+// SendGifRequest represents FUNNELCHAT send-gif request
 type SendGifRequest struct {
 	Phone        string `json:"phone" validate:"required,e164"`
 	PhoneAlt     string `json:"Phone,omitempty"`
@@ -317,7 +314,7 @@ func (r *SendGifRequest) GetDelay() int {
 	return r.DelayAlt
 }
 
-// SendMessageResult represents the response for send message operations (Z-API compatible)
+// SendMessageResult represents the response for send message operations
 type SendMessageResult struct {
 	ZaapID      string    `json:"zaapId"`
 	MessageID   string    `json:"messageId"`
@@ -329,20 +326,20 @@ type SendMessageResult struct {
 
 // QueuedMessage represents an internal message in the queue
 type QueuedMessage struct {
-	ID             uuid.UUID `json:"id"`
-	InstanceID     uuid.UUID `json:"instance_id"`
-	MessageID      string    `json:"message_id"`
-	Type           string    `json:"type"`
-	Phone          string    `json:"phone"`
-	Payload        []byte    `json:"payload"`
-	Status         string    `json:"status"`
-	Attempts       int       `json:"attempts"`
-	MaxAttempts    int       `json:"max_attempts"`
-	ScheduledAt    time.Time `json:"scheduled_at"`
-	NextAttemptAt  time.Time `json:"next_attempt_at"`
+	ID             uuid.UUID  `json:"id"`
+	InstanceID     uuid.UUID  `json:"instance_id"`
+	MessageID      string     `json:"message_id"`
+	Type           string     `json:"type"`
+	Phone          string     `json:"phone"`
+	Payload        []byte     `json:"payload"`
+	Status         string     `json:"status"`
+	Attempts       int        `json:"attempts"`
+	MaxAttempts    int        `json:"max_attempts"`
+	ScheduledAt    time.Time  `json:"scheduled_at"`
+	NextAttemptAt  time.Time  `json:"next_attempt_at"`
 	DeliveredAt    *time.Time `json:"delivered_at,omitempty"`
-	LastError      string    `json:"last_error,omitempty"`
-	SequenceNumber int64     `json:"sequence_number"`
-	CreatedAt      time.Time `json:"created_at"`
-	UpdatedAt      time.Time `json:"updated_at"`
+	LastError      string     `json:"last_error,omitempty"`
+	SequenceNumber int64      `json:"sequence_number"`
+	CreatedAt      time.Time  `json:"created_at"`
+	UpdatedAt      time.Time  `json:"updated_at"`
 }
