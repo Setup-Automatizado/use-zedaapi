@@ -15,6 +15,7 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/http/handlers"
 	ourMiddleware "go.mau.fi/whatsmeow/api/internal/http/middleware"
 	"go.mau.fi/whatsmeow/api/internal/observability"
+	proxypool "go.mau.fi/whatsmeow/api/internal/proxy"
 )
 
 type RouterDeps struct {
@@ -31,6 +32,7 @@ type RouterDeps struct {
 	NewslettersHandler *handlers.NewslettersHandler
 	StatusCacheHandler *handlers.StatusCacheHandler
 	PrivacyHandler     *handlers.PrivacyHandler
+	PoolHandler        *proxypool.PoolHandler
 	PartnerToken       string
 	DocsConfig         docs.Config
 }
@@ -96,6 +98,12 @@ func NewRouter(deps RouterDeps) http.Handler {
 		}
 	}
 
+	// Inject pool handler into instance handler BEFORE Register() so
+	// the instance-level pool routes are mounted inside the route group.
+	if deps.PoolHandler != nil && deps.InstanceHandler != nil {
+		deps.InstanceHandler.SetPoolHandler(deps.PoolHandler)
+	}
+
 	if deps.InstanceHandler != nil {
 		deps.InstanceHandler.Register(r)
 	}
@@ -104,6 +112,14 @@ func NewRouter(deps RouterDeps) http.Handler {
 		r.Group(func(pr chi.Router) {
 			pr.Use(ourMiddleware.PartnerAuth(deps.PartnerToken))
 			deps.PartnerHandler.Register(pr)
+		})
+	}
+
+	// Register pool handler partner routes (under partner auth)
+	if deps.PoolHandler != nil {
+		r.Group(func(pr chi.Router) {
+			pr.Use(ourMiddleware.PartnerAuth(deps.PartnerToken))
+			deps.PoolHandler.RegisterPartnerRoutes(pr)
 		})
 	}
 
