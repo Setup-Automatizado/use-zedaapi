@@ -166,6 +166,9 @@ func (p *InteractiveMediaProcessor) ProcessMediaURL(ctx context.Context, mediaUR
 		result.ThumbnailEncSHA256 = thumbnail.FileEncSha256
 		result.ThumbnailWidth = thumbnail.Width
 		result.ThumbnailHeight = thumbnail.Height
+		if thumbnail.PageCount > 0 {
+			result.PageCount = thumbnail.PageCount
+		}
 	}
 
 	return result, nil
@@ -275,6 +278,12 @@ func (p *InteractiveMediaProcessor) BuildDocumentMessageProto(media *ProcessedMe
 		}
 		if len(media.ThumbnailEncSHA256) > 0 {
 			docMsg.ThumbnailEncSHA256 = media.ThumbnailEncSHA256
+		}
+		if media.ThumbnailWidth > 0 {
+			docMsg.ThumbnailWidth = proto.Uint32(media.ThumbnailWidth)
+		}
+		if media.ThumbnailHeight > 0 {
+			docMsg.ThumbnailHeight = proto.Uint32(media.ThumbnailHeight)
 		}
 	}
 

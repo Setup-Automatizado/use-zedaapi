@@ -303,9 +303,24 @@ func (p *DocumentProcessor) buildMessage(
 	// Add thumbnail if generated successfully
 	if thumbnail != nil {
 		docMsg.JPEGThumbnail = thumbnail.Data
-		docMsg.ThumbnailDirectPath = proto.String(thumbnail.DirectPath)
-		docMsg.ThumbnailSHA256 = thumbnail.FileSha256
-		docMsg.ThumbnailEncSHA256 = thumbnail.FileEncSha256
+		if thumbnail.DirectPath != "" {
+			docMsg.ThumbnailDirectPath = proto.String(thumbnail.DirectPath)
+		}
+		if len(thumbnail.FileSha256) > 0 {
+			docMsg.ThumbnailSHA256 = thumbnail.FileSha256
+		}
+		if len(thumbnail.FileEncSha256) > 0 {
+			docMsg.ThumbnailEncSHA256 = thumbnail.FileEncSha256
+		}
+		if thumbnail.Width > 0 {
+			docMsg.ThumbnailWidth = proto.Uint32(thumbnail.Width)
+		}
+		if thumbnail.Height > 0 {
+			docMsg.ThumbnailHeight = proto.Uint32(thumbnail.Height)
+		}
+		if thumbnail.PageCount > 0 {
+			docMsg.PageCount = proto.Uint32(thumbnail.PageCount)
+		}
 	}
 
 	return &waProto.Message{
