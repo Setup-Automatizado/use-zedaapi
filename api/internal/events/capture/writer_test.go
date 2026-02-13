@@ -18,7 +18,7 @@ func TestResolveWebhookURL(t *testing.T) {
 		expectedType string
 	}{
 		{
-			name:      "notifySentByMe=false, fromMe=false - should use ReceivedURL",
+			name:      "notifySentByMe=false, fromMe=false - should prefer ReceivedDeliveryURL",
 			eventType: "message",
 			fromMe:    "false",
 			cfg: &ResolvedWebhookConfig{
@@ -26,7 +26,7 @@ func TestResolveWebhookURL(t *testing.T) {
 				ReceivedDeliveryURL: "https://example.com/received-delivery",
 				NotifySentByMe:      false,
 			},
-			expectedURL:  "https://example.com/received",
+			expectedURL:  "https://example.com/received-delivery",
 			expectedType: "received",
 		},
 		{
@@ -245,7 +245,7 @@ func TestResolveWebhookURL(t *testing.T) {
 			expectedType: "",
 		},
 		{
-			name:      "notifySentByMe=false, fromMe=true, no DeliveryURL - should filter",
+			name:      "notifySentByMe=false, fromMe=true, no DeliveryURL - should fallback to ReceivedDeliveryURL",
 			eventType: "message",
 			fromMe:    "true",
 			cfg: &ResolvedWebhookConfig{
@@ -254,8 +254,8 @@ func TestResolveWebhookURL(t *testing.T) {
 				DeliveryURL:         "",
 				NotifySentByMe:      false,
 			},
-			expectedURL:  "",
-			expectedType: "",
+			expectedURL:  "https://example.com/received-delivery",
+			expectedType: "delivery",
 		},
 		{
 			name:      "receipt event - no MessageStatusURL, should be discarded",
@@ -387,9 +387,9 @@ func TestResolveWebhookURL_DeliveryURLRoutingConsistency(t *testing.T) {
 		expectedCat string
 	}{
 		{
-			name:        "received message (fromMe=false) -> received_url",
+			name:        "received message (fromMe=false) -> received_delivery_url (combined takes precedence)",
 			fromMe:      "false",
-			expectedURL: cfg.ReceivedURL,
+			expectedURL: cfg.ReceivedDeliveryURL,
 			expectedCat: "received",
 		},
 		{
