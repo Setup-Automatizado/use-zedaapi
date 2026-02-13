@@ -99,6 +99,36 @@ tags:
       - Update profile name (push name)
       - Update profile picture
       - Update profile description (About/Status)
+  - name: Proxy
+    description: |
+      Per-instance proxy configuration and health monitoring.
+
+      **Key Features:**
+      - Configure HTTP, HTTPS, or SOCKS5 proxies per instance
+      - Test proxy connectivity before applying
+      - Hot-swap proxy on active connections without losing WhatsApp session
+      - Automatic health monitoring with configurable failure thresholds
+      - DLQ protection: messages queued to DLQ when proxy is unhealthy
+      - Granular control: separate proxy for websocket, media, or login only
+
+      **Supported Proxy Schemes:**
+      - `http://host:port` - HTTP proxy
+      - `https://host:port` - HTTPS proxy
+      - `socks5://user:pass@host:port` - SOCKS5 proxy with optional auth
+
+      **Health Check Behavior:**
+      - Periodic TCP connectivity test through proxy to web.whatsapp.com:443
+      - After N consecutive failures (default: 3), proxy marked as unhealthy
+      - Unhealthy proxies are not applied to new connections
+      - Webhook notification sent to instance's disconnected URL on failure
+      - Pending messages moved to DLQ to prevent cascade failures
+
+      **Environment Variables:**
+      - `PROXY_HEALTH_CHECK_INTERVAL`: Check interval (default: 60s)
+      - `PROXY_HEALTH_CHECK_TIMEOUT`: Check timeout (default: 10s)
+      - `PROXY_MAX_CONSECUTIVE_FAILURES`: Failure threshold (default: 3)
+      - `PROXY_DLQ_ON_UNHEALTHY`: Move messages to DLQ on failure (default: true)
+      - `PROXY_PAUSE_QUEUE_ON_UNHEALTHY`: Pause queue on failure (default: true)
 components:
   securitySchemes:
     ClientTokenAuth:
@@ -128,6 +158,114 @@ components:
         type: string
       description: Token returned during provisioning.
   schemas:
+    ProxyUpdateRequest:
+      type: object
+      required:
+        - proxyUrl
+      properties:
+        proxyUrl:
+          type: string
+          description: Proxy URL (http, https, or socks5 scheme)
+          example: "socks5://user:pass@proxy.example.com:1080"
+        noWebsocket:
+          type: boolean
+          description: Do not use proxy for websocket connections
+          default: false
+        onlyLogin:
+          type: boolean
+          description: Use proxy only for pre-login websocket
+          default: false
+        noMedia:
+          type: boolean
+          description: Do not use proxy for media uploads/downloads
+          default: false
+    ProxyTestRequest:
+      type: object
+      required:
+        - proxyUrl
+      properties:
+        proxyUrl:
+          type: string
+          description: Proxy URL to test
+          example: "http://proxy.example.com:8080"
+    ProxySwapRequest:
+      type: object
+      required:
+        - proxyUrl
+      properties:
+        proxyUrl:
+          type: string
+          description: New proxy URL to hot-swap to
+          example: "socks5://new-proxy.example.com:1080"
+    ProxyConfig:
+      type: object
+      properties:
+        proxyUrl:
+          type: string
+          nullable: true
+          description: Configured proxy URL (credentials masked)
+        proxyEnabled:
+          type: boolean
+          description: Whether proxy is active for this instance
+        healthStatus:
+          type: string
+          enum: [healthy, unhealthy, unknown]
+          description: Current proxy health status
+        lastHealthCheck:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp of last health check
+        healthFailures:
+          type: integer
+          description: Consecutive health check failures
+        noWebsocket:
+          type: boolean
+        onlyLogin:
+          type: boolean
+        noMedia:
+          type: boolean
+    ProxyTestResponse:
+      type: object
+      properties:
+        reachable:
+          type: boolean
+          description: Whether the proxy can reach WhatsApp servers
+        latencyMs:
+          type: integer
+          description: Round-trip latency in milliseconds
+        error:
+          type: string
+          description: Error message if unreachable
+    ProxyHealthResponse:
+      type: object
+      properties:
+        proxy:
+          $ref: '#/components/schemas/ProxyConfig'
+        logs:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              instanceId:
+                type: string
+                format: uuid
+              proxyUrl:
+                type: string
+              status:
+                type: string
+                enum: [healthy, unhealthy, timeout, unreachable]
+              latencyMs:
+                type: integer
+                nullable: true
+              errorMessage:
+                type: string
+                nullable: true
+              checkedAt:
+                type: string
+                format: date-time
     ErrorResponse:
       type: object
       properties:
@@ -6337,6 +6475,272 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /instances/{instanceId}/token/{instanceToken}/update-proxy:
+    put:
+      tags:
+        - Proxy
+      summary: Set or update proxy configuration
+      description: |
+        Configures a proxy for this instance's WhatsApp connection.
+        Supports HTTP, HTTPS, and SOCKS5 proxies.
+        The proxy is applied to the live client if connected.
+      operationId: updateProxy
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProxyUpdateRequest"
+            examples:
+              http_proxy:
+                summary: HTTP proxy
+                value:
+                  proxyUrl: "http://proxy.example.com:8080"
+              socks5_proxy:
+                summary: SOCKS5 proxy with auth
+                value:
+                  proxyUrl: "socks5://user:pass@proxy.example.com:1080"
+              media_only:
+                summary: Proxy only for media, not websocket
+                value:
+                  proxyUrl: "http://media-proxy.example.com:8080"
+                  noWebsocket: true
+      responses:
+        "200":
+          description: Proxy configuration updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: boolean
+                  proxy:
+                    $ref: "#/components/schemas/ProxyConfig"
+        "400":
+          description: Invalid proxy URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Instance not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /instances/{instanceId}/token/{instanceToken}/proxy:
+    get:
+      tags:
+        - Proxy
+      summary: Get proxy configuration
+      description: Returns the current proxy configuration and health status for this instance.
+      operationId: getProxy
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      responses:
+        "200":
+          description: Proxy configuration
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: boolean
+                  proxy:
+                    $ref: "#/components/schemas/ProxyConfig"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Instance not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      tags:
+        - Proxy
+      summary: Remove proxy configuration
+      description: |
+        Removes the proxy configuration from this instance.
+        The client reverts to direct connection (or environment proxy).
+      operationId: removeProxy
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      responses:
+        "200":
+          description: Proxy removed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValueResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Instance not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /instances/{instanceId}/token/{instanceToken}/proxy/test:
+    post:
+      tags:
+        - Proxy
+      summary: Test proxy connectivity
+      description: |
+        Tests a proxy URL by attempting to connect through it to WhatsApp servers.
+        Does NOT apply the proxy - use update-proxy to apply it.
+        Returns reachability status and latency.
+      operationId: testProxy
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProxyTestRequest"
+      responses:
+        "200":
+          description: Proxy test result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProxyTestResponse"
+        "400":
+          description: Invalid proxy URL format
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /instances/{instanceId}/token/{instanceToken}/proxy/swap:
+    post:
+      tags:
+        - Proxy
+      summary: Hot-swap proxy on active connection
+      description: |
+        Atomically swaps the proxy on an active WhatsApp connection.
+        The new proxy is tested before applying. The client is disconnected
+        from the current proxy and immediately reconnected through the new one.
+        The WhatsApp session is preserved - only the transport changes.
+
+        **Important:** The proxy is validated before swap. If the new proxy
+        is unreachable, the swap is rejected and the current connection is maintained.
+      operationId: swapProxy
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProxySwapRequest"
+      responses:
+        "200":
+          description: Proxy swapped successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: boolean
+                  proxy:
+                    $ref: "#/components/schemas/ProxyConfig"
+        "400":
+          description: Invalid proxy URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Proxy unreachable - swap rejected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /instances/{instanceId}/token/{instanceToken}/proxy/health:
+    get:
+      tags:
+        - Proxy
+      summary: Get proxy health status and history
+      description: |
+        Returns the current proxy health status along with recent health check logs.
+        Useful for monitoring proxy reliability and diagnosing connectivity issues.
+      operationId: getProxyHealth
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      responses:
+        "200":
+          description: Proxy health status and logs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProxyHealthResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Instance not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /instances/{instanceId}/token/{instanceToken}/integrator/on-demand/subscription:
     post:
       tags:
