@@ -14,9 +14,15 @@ import { hashPassword as betterAuthHashPassword } from "better-auth/crypto";
 import { PrismaClient } from "../lib/generated/prisma/client";
 
 // Create Prisma client with PostgreSQL adapter
-const adapter = new PrismaPg({
-	connectionString: process.env.DATABASE_URL!,
-});
+// pg v8+ treats sslmode=require as verify-full; RDS uses Amazon CA (self-signed chain)
+let connectionString = process.env.DATABASE_URL!;
+if (process.env.NODE_ENV === "production") {
+	connectionString = connectionString.replace(
+		"sslmode=require",
+		"sslmode=no-verify",
+	);
+}
+const adapter = new PrismaPg({ connectionString });
 const prisma = new PrismaClient({ adapter });
 
 // Admin credentials

@@ -6,13 +6,16 @@ const globalForPrisma = global as unknown as {
 };
 
 function createPrismaClient(): PrismaClient {
-	const adapter = new PrismaPg({
-		connectionString: process.env.DATABASE_URL!,
-		ssl:
-			process.env.NODE_ENV === "production"
-				? { rejectUnauthorized: false }
-				: undefined,
-	});
+	let connectionString = process.env.DATABASE_URL!;
+	// pg v8+ treats sslmode=require as verify-full (validates certificate).
+	// RDS AWS uses Amazon CA (self-signed chain), so use no-verify instead.
+	if (process.env.NODE_ENV === "production") {
+		connectionString = connectionString.replace(
+			"sslmode=require",
+			"sslmode=no-verify",
+		);
+	}
+	const adapter = new PrismaPg({ connectionString });
 	return new PrismaClient({ adapter });
 }
 
