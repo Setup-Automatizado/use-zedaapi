@@ -184,9 +184,15 @@ func (p *ImageProcessor) buildMessage(
 	// Add thumbnail if generated successfully
 	if thumbnail != nil {
 		imageMsg.JPEGThumbnail = thumbnail.Data
-		imageMsg.ThumbnailDirectPath = proto.String(thumbnail.DirectPath)
-		imageMsg.ThumbnailSHA256 = thumbnail.FileSha256
-		imageMsg.ThumbnailEncSHA256 = thumbnail.FileEncSha256
+		if thumbnail.DirectPath != "" {
+			imageMsg.ThumbnailDirectPath = proto.String(thumbnail.DirectPath)
+		}
+		if len(thumbnail.FileSha256) > 0 {
+			imageMsg.ThumbnailSHA256 = thumbnail.FileSha256
+		}
+		if len(thumbnail.FileEncSha256) > 0 {
+			imageMsg.ThumbnailEncSHA256 = thumbnail.FileEncSha256
+		}
 	}
 
 	return &waProto.Message{

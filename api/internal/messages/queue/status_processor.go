@@ -200,9 +200,15 @@ func (p *StatusProcessor) ProcessImage(ctx context.Context, client *wameow.Clien
 	// Add thumbnail if generated
 	if thumbnail != nil {
 		imageMsg.JPEGThumbnail = thumbnail.Data
-		imageMsg.ThumbnailDirectPath = proto.String(thumbnail.DirectPath)
-		imageMsg.ThumbnailSHA256 = thumbnail.FileSha256
-		imageMsg.ThumbnailEncSHA256 = thumbnail.FileEncSha256
+		if thumbnail.DirectPath != "" {
+			imageMsg.ThumbnailDirectPath = proto.String(thumbnail.DirectPath)
+		}
+		if len(thumbnail.FileSha256) > 0 {
+			imageMsg.ThumbnailSHA256 = thumbnail.FileSha256
+		}
+		if len(thumbnail.FileEncSha256) > 0 {
+			imageMsg.ThumbnailEncSHA256 = thumbnail.FileEncSha256
+		}
 	}
 
 	msg := &waProto.Message{
@@ -409,6 +415,14 @@ func (p *StatusProcessor) ProcessVideo(ctx context.Context, client *wameow.Clien
 		return fmt.Errorf("invalid media type: %w", err)
 	}
 
+	// Extract video duration
+	duration, err := GetVideoDuration(videoData)
+	if err != nil {
+		p.log.Warn("failed to detect video duration for status",
+			slog.String("error", err.Error()))
+		duration = 0
+	}
+
 	// Generate thumbnail (lazy initialization)
 	var thumbnail *ThumbnailResult
 	if p.thumbGenerator == nil {
@@ -437,6 +451,11 @@ func (p *StatusProcessor) ProcessVideo(ctx context.Context, client *wameow.Clien
 		FileLength:    proto.Uint64(uploaded.FileLength),
 	}
 
+	// Add video duration
+	if duration > 0 {
+		videoMsg.Seconds = proto.Uint32(uint32(duration))
+	}
+
 	// Add caption if provided
 	if args.VideoContent.Caption != nil && *args.VideoContent.Caption != "" {
 		videoMsg.Caption = args.VideoContent.Caption
@@ -445,9 +464,15 @@ func (p *StatusProcessor) ProcessVideo(ctx context.Context, client *wameow.Clien
 	// Add thumbnail if generated
 	if thumbnail != nil {
 		videoMsg.JPEGThumbnail = thumbnail.Data
-		videoMsg.ThumbnailDirectPath = proto.String(thumbnail.DirectPath)
-		videoMsg.ThumbnailSHA256 = thumbnail.FileSha256
-		videoMsg.ThumbnailEncSHA256 = thumbnail.FileEncSha256
+		if thumbnail.DirectPath != "" {
+			videoMsg.ThumbnailDirectPath = proto.String(thumbnail.DirectPath)
+		}
+		if len(thumbnail.FileSha256) > 0 {
+			videoMsg.ThumbnailSHA256 = thumbnail.FileSha256
+		}
+		if len(thumbnail.FileEncSha256) > 0 {
+			videoMsg.ThumbnailEncSHA256 = thumbnail.FileEncSha256
+		}
 		if thumbnail.Width > 0 {
 			videoMsg.Width = proto.Uint32(thumbnail.Width)
 		}
@@ -470,6 +495,7 @@ func (p *StatusProcessor) ProcessVideo(ctx context.Context, client *wameow.Clien
 		slog.String("zaap_id", args.ZaapID),
 		slog.String("recipient", recipientJID.String()),
 		slog.String("whatsapp_message_id", resp.ID),
+		slog.Int64("duration_seconds", duration),
 		slog.Int64("file_size", int64(uploaded.FileLength)),
 		slog.Bool("has_thumbnail", thumbnail != nil),
 		slog.Bool("has_caption", args.VideoContent.Caption != nil),

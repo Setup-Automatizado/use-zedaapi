@@ -81,6 +81,15 @@ func (p *PTVProcessor) Process(ctx context.Context, client *wameow.Client, args 
 			slog.Int("height", height))
 	}
 
+	// Extract video duration
+	duration, err := GetVideoDuration(videoData)
+	if err != nil {
+		p.log.Warn("failed to detect PTV duration",
+			slog.String("error", err.Error()),
+			slog.String("mime_type", mimeType))
+		duration = 0
+	}
+
 	// Generate and upload thumbnail (lazy initialization)
 	var thumbnail *ThumbnailResult
 	if p.thumbGenerator == nil {
@@ -109,7 +118,7 @@ func (p *PTVProcessor) Process(ctx context.Context, client *wameow.Client, args 
 	}
 
 	// Build PTV message
-	msg := p.buildMessage(args, uploaded, mimeType, width, height, thumbnail, contextInfo)
+	msg := p.buildMessage(args, uploaded, mimeType, width, height, duration, thumbnail, contextInfo)
 
 	// Send message
 	resp, err := client.SendMessage(ctx, recipientJID, msg)
@@ -123,6 +132,7 @@ func (p *PTVProcessor) Process(ctx context.Context, client *wameow.Client, args 
 		slog.String("whatsapp_message_id", resp.ID),
 		slog.Int("width", width),
 		slog.Int("height", height),
+		slog.Int64("duration_seconds", duration),
 		slog.Int64("file_size", int64(uploaded.FileLength)),
 		slog.Bool("has_thumbnail", thumbnail != nil),
 		slog.Time("timestamp", resp.Timestamp))
@@ -159,6 +169,7 @@ func (p *PTVProcessor) buildMessage(
 	uploaded wameow.UploadResponse,
 	mimeType string,
 	width, height int,
+	duration int64,
 	thumbnail *ThumbnailResult,
 	contextInfo *waProto.ContextInfo,
 ) *waProto.Message {
@@ -172,6 +183,11 @@ func (p *PTVProcessor) buildMessage(
 		FileLength:    proto.Uint64(uploaded.FileLength),
 		ViewOnce:      proto.Bool(args.ViewOnce),
 		ContextInfo:   contextInfo,
+	}
+
+	// Add video duration
+	if duration > 0 {
+		videoMsg.Seconds = proto.Uint32(uint32(duration))
 	}
 
 	// Add video dimensions
@@ -188,9 +204,15 @@ func (p *PTVProcessor) buildMessage(
 	// Add thumbnail if generated successfully
 	if thumbnail != nil {
 		videoMsg.JPEGThumbnail = thumbnail.Data
-		videoMsg.ThumbnailDirectPath = proto.String(thumbnail.DirectPath)
-		videoMsg.ThumbnailSHA256 = thumbnail.FileSha256
-		videoMsg.ThumbnailEncSHA256 = thumbnail.FileEncSha256
+		if thumbnail.DirectPath != "" {
+			videoMsg.ThumbnailDirectPath = proto.String(thumbnail.DirectPath)
+		}
+		if len(thumbnail.FileSha256) > 0 {
+			videoMsg.ThumbnailSHA256 = thumbnail.FileSha256
+		}
+		if len(thumbnail.FileEncSha256) > 0 {
+			videoMsg.ThumbnailEncSHA256 = thumbnail.FileEncSha256
+		}
 	}
 
 	// PTV uses PtvMessage wrapper instead of VideoMessage
