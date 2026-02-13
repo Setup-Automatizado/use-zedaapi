@@ -147,6 +147,11 @@ func validateSchema(ctx context.Context, conn *pgxpool.Conn, logger *slog.Logger
 		"message_queue",
 		"message_dlq",
 		"worker_sessions",
+		"proxy_health_log",
+		"proxy_providers",
+		"proxy_pool",
+		"proxy_assignments",
+		"proxy_groups",
 	}
 
 	// Check all required tables exist
