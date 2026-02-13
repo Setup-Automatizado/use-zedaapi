@@ -27,6 +27,8 @@ var (
 	ErrInvalidPhoneNumber    = errors.New("invalid phone number")
 	ErrInstanceInactive      = errors.New("instance subscription inactive")
 	ErrInstanceAlreadyPaired = errors.New("instance already paired")
+	ErrInvalidProxyURL       = errors.New("invalid proxy url: must be http, https, or socks5 scheme")
+	ErrProxyUnreachable      = errors.New("proxy is unreachable")
 )
 
 type Service struct {

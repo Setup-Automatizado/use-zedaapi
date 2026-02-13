@@ -155,6 +155,13 @@ type WorkerDirectory interface {
 
 var ErrNotAssignedOwner = errors.New("instance not assigned to this worker")
 
+// QueuePauser allows pausing/resuming message queue during proxy swaps.
+// Defined locally to avoid circular dependency with the proxy package.
+type QueuePauser interface {
+	PauseInstance(ctx context.Context, instanceID uuid.UUID, reason string) error
+	ResumeInstance(ctx context.Context, instanceID uuid.UUID) error
+}
+
 type ClientRegistry struct {
 	log                  *slog.Logger
 	workerID             string
@@ -202,6 +209,8 @@ type ClientRegistry struct {
 	ensureWithLockOverride func(context.Context, InstanceInfo, locks.Lock) (*whatsmeow.Client, bool, error)
 
 	pairingCodeCache *pairingCache
+	proxyRepo        ProxyRepository
+	queuePauser      QueuePauser
 }
 
 type clientState struct {
@@ -220,6 +229,7 @@ type clientState struct {
 	lidResolver        eventctx.LIDResolver
 	pollDecrypter      eventctx.PollDecrypter
 	autoConnectStarted bool
+	proxyURL           string
 }
 
 type ClientRegistryMetrics struct {
@@ -411,6 +421,8 @@ func (r *ClientRegistry) EnsureClientWithLock(ctx context.Context, info Instance
 		}
 	}
 
+	appliedProxy := r.resolveProxyURL(ctx, info.ID)
+
 	clientState := &clientState{
 		client:         client,
 		storeJID:       info.StoreJID,
@@ -418,6 +430,7 @@ func (r *ClientRegistry) EnsureClientWithLock(ctx context.Context, info Instance
 		createdAt:      time.Now().UTC(),
 		lock:           lock,
 		lockMode:       lockMode,
+		proxyURL:       appliedProxy,
 	}
 	if storeReset {
 		clientState.storeJID = nil
@@ -542,6 +555,8 @@ func (r *ClientRegistry) EnsureClient(ctx context.Context, info InstanceInfo) (*
 		}
 	}
 
+	appliedProxy := r.resolveProxyURL(ctx, info.ID)
+
 	clientState := &clientState{
 		client:         client,
 		storeJID:       info.StoreJID,
@@ -549,6 +564,7 @@ func (r *ClientRegistry) EnsureClient(ctx context.Context, info InstanceInfo) (*
 		createdAt:      time.Now().UTC(),
 		lock:           lock,
 		lockMode:       lockMode,
+		proxyURL:       appliedProxy,
 	}
 	if storeReset {
 		clientState.storeJID = nil
@@ -1108,6 +1124,11 @@ func (r *ClientRegistry) instantiateClientWithLock(ctx context.Context, info Ins
 
 	client := whatsmeow.NewClient(deviceStore, waLog.Stdout("instance-"+info.ID.String(), logLevelOrDefault(r.logLevel), false))
 	client.EnableAutoReconnect = true
+
+	// Apply per-instance proxy configuration before Connect()
+	proxyURL := r.applyProxyFromConfig(ctx, info.ID, client)
+	_ = proxyURL // tracked in clientState after return
+
 	client.AddEventHandler(r.wrapEventHandler(info.ID))
 
 	return client, storeReset, lock, nil

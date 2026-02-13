@@ -100,3 +100,41 @@ type ListResult struct {
 type CreateParams struct {
 	Name string `json:"name"`
 }
+
+// ProxyConfig holds per-instance proxy configuration.
+type ProxyConfig struct {
+	ProxyURL        *string    `json:"proxyUrl,omitempty"`
+	Enabled         bool       `json:"proxyEnabled"`
+	NoWebsocket     bool       `json:"noWebsocket"`
+	OnlyLogin       bool       `json:"onlyLogin"`
+	NoMedia         bool       `json:"noMedia"`
+	HealthStatus    string     `json:"healthStatus"`
+	LastHealthCheck *time.Time `json:"lastHealthCheck,omitempty"`
+	HealthFailures  int        `json:"healthFailures"`
+}
+
+// ProxyTestResult holds the result of a proxy connectivity test.
+type ProxyTestResult struct {
+	Reachable bool   `json:"reachable"`
+	LatencyMs int    `json:"latencyMs"`
+	Error     string `json:"error,omitempty"`
+}
+
+// ProxyHealthLog represents a single health check entry.
+type ProxyHealthLog struct {
+	ID           int64     `json:"id"`
+	InstanceID   uuid.UUID `json:"instanceId"`
+	ProxyURL     string    `json:"proxyUrl"`
+	Status       string    `json:"status"`
+	LatencyMs    *int      `json:"latencyMs,omitempty"`
+	ErrorMessage *string   `json:"errorMessage,omitempty"`
+	CheckedAt    time.Time `json:"checkedAt"`
+}
+
+// ProxyInstance is a lightweight struct for health-check enumeration.
+type ProxyInstance struct {
+	InstanceID     uuid.UUID
+	ProxyURL       string
+	HealthStatus   string
+	HealthFailures int
+}
