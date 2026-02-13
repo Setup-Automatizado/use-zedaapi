@@ -37,13 +37,11 @@ COPY . .
 ARG VERSION=dev
 ARG COMMIT=unknown
 ARG BUILD_TIME
-ARG TARGETARCH=amd64
 
 # Build with CGO enabled for go-fitz/MuPDF support
 # Static linking for portable binary
 # -ldflags for version info and size reduction
-# Use TARGETARCH from buildx for multi-platform support
-RUN CGO_ENABLED=1 GOOS=linux GOARCH=${TARGETARCH} go build \
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build \
 	-ldflags="-w -s -linkmode external -extldflags '-static' -X go.mau.fi/whatsmeow/api/internal/version.version=${VERSION} -X go.mau.fi/whatsmeow/api/internal/version.gitCommit=${COMMIT} -X go.mau.fi/whatsmeow/api/internal/version.buildTime=${BUILD_TIME}" \
 	-tags musl,netgo \
 	-o /app/api \
@@ -51,7 +49,7 @@ RUN CGO_ENABLED=1 GOOS=linux GOARCH=${TARGETARCH} go build \
 
 # Build migrations tool (if exists)
 RUN if [ -f "./api/cmd/migrate/main.go" ]; then \
-	CGO_ENABLED=1 GOOS=linux GOARCH=${TARGETARCH} go build \
+	CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build \
 	-ldflags="-w -s -linkmode external -extldflags '-static'" \
 	-tags musl,netgo \
 	-o /app/migrate \
@@ -164,9 +162,6 @@ CMD ["go", "run", "./api/cmd/server"]
 FROM golang:1.25 AS testing
 WORKDIR /build
 
-# Build argument for multi-platform support
-ARG TARGETARCH=amd64
-
 # Install build dependencies including ffmpeg for media processing tests
 # gcc/g++ needed for -race flag and CGO compilation
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -186,16 +181,7 @@ COPY . .
 
 # Run tests with race detector (requires CGO_ENABLED=1)
 # Only test API code, not the entire whatsmeow library
-# NOTE: Race detector (-race) is DISABLED on arm64 because ThreadSanitizer
-# does not work correctly under QEMU emulation (unsupported VMA range error).
-# This affects cross-platform builds where arm64 is emulated on amd64 hosts.
-RUN if [ "$TARGETARCH" = "arm64" ]; then \
-		echo "Running tests WITHOUT race detector (arm64 QEMU incompatible)" && \
-		CGO_ENABLED=1 go test -v -coverprofile=coverage.out -covermode=atomic ./api/...; \
-	else \
-		echo "Running tests WITH race detector (native $TARGETARCH)" && \
-		CGO_ENABLED=1 go test -v -race -coverprofile=coverage.out -covermode=atomic ./api/...; \
-	fi
+RUN CGO_ENABLED=1 go test -v -race -coverprofile=coverage.out -covermode=atomic ./api/...
 
 # Generate coverage report
 RUN go tool cover -html=coverage.out -o coverage.html
