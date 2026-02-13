@@ -4,6 +4,7 @@
 *.dll
 *.so
 *.dylib
+server
 
 # Test binary, built with `go test -c`
 *.test
@@ -53,6 +54,8 @@ tmp/
 *.tfstate.backup
 *.tfstate.*.backup
 .terraform.lock.hcl
+*.tfplan
+tfplan
 
 # Claude Code
 .claude/
@@ -65,3 +68,4 @@ api/z_api/
 api/whatsmeow_schema_webhooks/
 api/whatsapp_business_account_webhooks/
 docs
+!api/docs
