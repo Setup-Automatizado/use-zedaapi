@@ -10,14 +10,14 @@ on:
   push:
     branches:
       - production
-      - develop
+      - homolog
     paths:
       - "manager-whatsapp-api-golang/**"
       - ".github/workflows/manager-deploy.yml"
   pull_request:
     branches:
       - production
-      - develop
+      - homolog
     paths:
       - "manager-whatsapp-api-golang/**"
   workflow_dispatch:
@@ -77,7 +77,7 @@ jobs:
     name: Deploy to Homolog
     needs: build
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/develop' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'homolog')
+    if: github.ref == 'refs/heads/homolog' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'homolog')
     environment: homolog
 
     env:

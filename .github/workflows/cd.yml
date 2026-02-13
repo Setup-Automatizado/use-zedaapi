@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - production
-      - develop
       - homolog
 
 concurrency:
@@ -124,9 +123,6 @@ jobs:
               echo "VERSION=latest" >> $GITHUB_OUTPUT
               echo "CHANNEL=latest" >> $GITHUB_OUTPUT
             fi
-          elif [ "${{ github.ref }}" = "refs/heads/develop" ]; then
-            echo "VERSION=develop" >> $GITHUB_OUTPUT
-            echo "CHANNEL=develop" >> $GITHUB_OUTPUT
           elif [ "${{ github.ref }}" = "refs/heads/homolog" ]; then
             echo "VERSION=homolog" >> $GITHUB_OUTPUT
             echo "CHANNEL=homolog" >> $GITHUB_OUTPUT
@@ -157,7 +153,7 @@ jobs:
         with:
           context: .
           file: docker/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -218,10 +214,6 @@ jobs:
             fi
             echo "APP_URL=${{ secrets.MANAGER_APP_URL || 'https://manager.cloudfront.net' }}" >> $GITHUB_OUTPUT
             echo "API_PUBLIC_URL=${{ secrets.API_PUBLIC_URL || 'https://api.cloudfront.net' }}" >> $GITHUB_OUTPUT
-          elif [ "${{ github.ref }}" = "refs/heads/develop" ]; then
-            echo "VERSION=develop" >> $GITHUB_OUTPUT
-            echo "APP_URL=http://homolog-manager-alb-936707116.us-east-1.elb.amazonaws.com" >> $GITHUB_OUTPUT
-            echo "API_PUBLIC_URL=http://homolog-whatsmeow-alb-1474920577.us-east-1.elb.amazonaws.com" >> $GITHUB_OUTPUT
           elif [ "${{ github.ref }}" = "refs/heads/homolog" ]; then
             echo "VERSION=homolog" >> $GITHUB_OUTPUT
             echo "APP_URL=http://homolog-manager-alb-936707116.us-east-1.elb.amazonaws.com" >> $GITHUB_OUTPUT
@@ -286,7 +278,7 @@ jobs:
       id-token: write
       contents: read
     environment:
-      name: ${{ github.ref == 'refs/heads/production' && 'production' || github.ref == 'refs/heads/develop' && 'develop' || 'homolog' }}
+      name: ${{ github.ref == 'refs/heads/production' && 'production' || 'homolog' }}
       url: ${{ steps.url.outputs.service_url }}
     steps:
       - name: Checkout code
@@ -309,9 +301,6 @@ jobs:
           if [ "${{ github.ref }}" = "refs/heads/production" ]; then
             echo "ENVIRONMENT=production" >> $GITHUB_OUTPUT
             echo "CLUSTER=production-whatsmeow-cluster" >> $GITHUB_OUTPUT
-          elif [ "${{ github.ref }}" = "refs/heads/develop" ]; then
-            echo "ENVIRONMENT=develop" >> $GITHUB_OUTPUT
-            echo "CLUSTER=develop-whatsmeow-cluster" >> $GITHUB_OUTPUT
           elif [ "${{ github.ref }}" = "refs/heads/homolog" ]; then
             echo "ENVIRONMENT=homolog" >> $GITHUB_OUTPUT
             echo "CLUSTER=homolog-whatsmeow-cluster" >> $GITHUB_OUTPUT
@@ -513,7 +502,7 @@ jobs:
 
           **Branch**: `${{ github.ref_name }}`
           **Commit**: `${{ github.sha }}`
-          **Environment**: `${{ github.ref == 'refs/heads/production' && 'production' || github.ref == 'refs/heads/develop' && 'develop' || 'homolog' }}`
+          **Environment**: `${{ github.ref == 'refs/heads/production' && 'production' || 'homolog' }}`
 
           ### Results
 

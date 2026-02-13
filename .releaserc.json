@@ -3,11 +3,6 @@
     "+([0-9])?(.{+([0-9]),x}).x",
     "production",
     {
-      "name": "develop",
-      "channel": "develop",
-      "prerelease": "develop"
-    },
-    {
       "name": "homolog",
       "channel": "homolog",
       "prerelease": "homolog"
@@ -162,7 +157,7 @@
     [
       "@semantic-release/github",
       {
-        "successComment": "🎉 This ${issue.pull_request ? 'PR is included' : 'issue has been resolved'} in version ${nextRelease.version}.\n\nThe release is available on [GitHub release](<github_release_url>).\n\nDocker images:\n- `latest`: latest stable release\n- `v${nextRelease.version}`: this specific version\n- `develop`: development branch\n- `homolog`: homolog branch",
+        "successComment": "🎉 This ${issue.pull_request ? 'PR is included' : 'issue has been resolved'} in version ${nextRelease.version}.\n\nThe release is available on [GitHub release](<github_release_url>).\n\nDocker images:\n- `latest`: latest stable release\n- `v${nextRelease.version}`: this specific version\n- `homolog`: homolog branch",
         "labels": ["released"],
         "releasedLabels": ["released<%= nextRelease.channel ? `-${nextRelease.channel}` : \"\" %>"]
       }
