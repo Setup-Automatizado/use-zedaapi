@@ -36,7 +36,10 @@ export default async function proxy(request: NextRequest) {
 
 	// Verificar se existe cookie de sessao do Better Auth
 	// Nota: O prefixo do cookie e configurado em lib/auth.ts como "whatsapp-manager"
-	const sessionCookie = request.cookies.get("whatsapp-manager.session_token");
+	// Quando SECURE_COOKIES=true, Better Auth adiciona prefixo "__Secure-"
+	const sessionCookie =
+		request.cookies.get("__Secure-whatsapp-manager.session_token") ||
+		request.cookies.get("whatsapp-manager.session_token");
 	const hasSession = !!sessionCookie?.value;
 
 	// Verificar se e uma rota publica
