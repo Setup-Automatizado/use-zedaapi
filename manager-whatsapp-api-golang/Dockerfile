@@ -90,15 +90,6 @@ COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/lib/generated ./lib/generated
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
 
-# Copiar Prisma CLI completo para migrations (usado pela task de migration no ECS)
-# Inclui build/, WASM files e engines necessarios para prisma migrate deploy
-COPY --from=deps --chown=nextjs:nodejs /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
-
-# Criar symlink correto para que `bun prisma` encontre o CLI
-RUN mkdir -p node_modules/.bin && \
-    ln -sf ../prisma/build/index.js node_modules/.bin/prisma
-
 # Metadata
 ARG BUILD_TIME
 ARG VERSION
@@ -129,3 +120,19 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
 
 # Iniciar aplicacao
 CMD ["bun", "run", "--bun", "server.js"]
+
+# --------------------------------------------------
+# Stage 4: Migration Runner (for ECS one-shot tasks)
+# --------------------------------------------------
+FROM oven/bun:1-alpine AS migration
+
+WORKDIR /app
+
+# Copiar todas as dependencias (prisma CLI precisa de deps transitivas)
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/prisma ./prisma
+COPY --from=deps /app/lib/generated ./lib/generated
+COPY --from=deps /app/package.json ./package.json
+COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
+
+CMD ["bun", "prisma", "migrate", "deploy"]
