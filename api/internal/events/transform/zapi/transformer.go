@@ -26,14 +26,16 @@ import (
 
 type Transformer struct {
 	connectedPhone string
+	isBusiness     bool
 	debugRaw       bool
 	dumpDir        string
 	pollStore      pollstore.Store
 }
 
-func NewTransformer(connectedPhone string, debug bool, dumpDir string, store pollstore.Store) *Transformer {
+func NewTransformer(connectedPhone string, isBusiness bool, debug bool, dumpDir string, store pollstore.Store) *Transformer {
 	return &Transformer{
 		connectedPhone: connectedPhone,
+		isBusiness:     isBusiness,
 		debugRaw:       debug,
 		dumpDir:        strings.TrimSpace(dumpDir),
 		pollStore:      store,
@@ -97,7 +99,7 @@ func (t *Transformer) Transform(ctx context.Context, event *types.InternalEvent)
 	case "push_name", "business_name", "user_about":
 		result, err = t.transformProfileEvent(ctx, logger, event)
 	default:
-		logger.Debug("unsupported event type for Z-API transformation")
+		logger.Debug("unsupported event type for FUNNELCHAT transformation")
 		return nil, transform.ErrUnsupportedEvent
 	}
 
@@ -118,7 +120,7 @@ func (t *Transformer) Transform(ctx context.Context, event *types.InternalEvent)
 
 	t.dumpPayload(logger, event, payload)
 
-	logger.InfoContext(ctx, "transformed to Z-API webhook",
+	logger.InfoContext(ctx, "transformed to FUNNELCHAT webhook",
 		slog.Int("payload_size", len(payload)),
 	)
 
@@ -171,9 +173,20 @@ func (t *Transformer) dumpPayload(logger *slog.Logger, event *types.InternalEven
 }
 
 func (t *Transformer) transformMessage(ctx context.Context, logger *slog.Logger, event *types.InternalEvent) (*ReceivedCallback, error) {
-	msgEvent, ok := event.RawPayload.(*events.Message)
-	if !ok {
-		return nil, fmt.Errorf("invalid message payload type")
+	// Support both *events.Message (from whatsmeow) and *waE2E.Message (from API echo)
+	var msgEvent *events.Message
+	var msgProto *waE2E.Message
+
+	switch payload := event.RawPayload.(type) {
+	case *events.Message:
+		msgEvent = payload
+		msgProto = payload.Message
+	case *waE2E.Message:
+		// API echo: RawPayload is the proto directly
+		msgProto = payload
+		msgEvent = nil // No events.Message wrapper for API echo
+	default:
+		return nil, fmt.Errorf("invalid message payload type: %T", event.RawPayload)
 	}
 
 	chatJID, chatParseErr := parseJID(event.Metadata["chat"])
@@ -390,7 +403,8 @@ func (t *Transformer) transformMessage(ctx context.Context, logger *slog.Logger,
 		}
 	}
 
-	if msgEvent.SourceWebMsg != nil {
+	// SourceWebMsg is only available for whatsmeow events, not API echo
+	if msgEvent != nil && msgEvent.SourceWebMsg != nil {
 		if stub := msgEvent.SourceWebMsg.GetMessageStubType(); stub != waWeb.WebMessageInfo_UNKNOWN {
 			rawParams := msgEvent.SourceWebMsg.GetMessageStubParameters()
 			name, params, reqMethod := mapMessageStubToZAPINotification(stub, rawParams)
@@ -405,13 +419,13 @@ func (t *Transformer) transformMessage(ctx context.Context, logger *slog.Logger,
 		}
 	}
 
-	if call := msgEvent.Message.GetCall(); call != nil {
+	if call := msgProto.GetCall(); call != nil {
 		if key := call.GetCallKey(); len(key) > 0 {
 			callback.CallID = strings.ToUpper(hex.EncodeToString(key))
 		}
 	}
 
-	if invite := msgEvent.Message.GetGroupInviteMessage(); invite != nil {
+	if invite := msgProto.GetGroupInviteMessage(); invite != nil {
 		if code := invite.GetInviteCode(); code != "" {
 			callback.Code = code
 		}
@@ -438,8 +452,8 @@ func (t *Transformer) transformMessage(ctx context.Context, logger *slog.Logger,
 		callback.IsGroup = false
 	}
 
-	if err := t.extractMessageContent(ctx, logger, msgEvent.Message, callback, event); err != nil {
-		kinds := messagePayloadKinds(msgEvent.Message)
+	if err := t.extractMessageContent(ctx, logger, msgProto, callback, event); err != nil {
+		kinds := messagePayloadKinds(msgProto)
 		logger.WarnContext(ctx, "unsupported message content type",
 			slog.String("message_id", callback.MessageID),
 			slog.String("payload_kinds", strings.Join(kinds, ",")),
@@ -1769,6 +1783,8 @@ func mapReceiptStatus(receiptEvent *events.Receipt) string {
 		return "SENT"
 	}
 
+	// Z-API valid statuses: PENDING, SENT, RECEIVED, READ, READ_BY_ME, PLAYED, PLAYED_BY_ME
+	// See api/z_api/message_status/ for all supported status types
 	switch receiptEvent.Type {
 	case watypes.ReceiptTypeReadSelf:
 		return "READ_BY_ME"
@@ -1798,9 +1814,17 @@ func mapReceiptStatus(receiptEvent *events.Receipt) string {
 
 func (t *Transformer) transformChatPresence(ctx context.Context, logger *slog.Logger, event *types.InternalEvent) (*PresenceChatCallback, error) {
 	var status string
-	switch event.Metadata["state"] {
+	state := event.Metadata["state"]
+	media := event.Metadata["media"]
+
+	switch state {
 	case "composing":
-		status = "COMPOSING"
+		// Check media type to distinguish between typing text and recording audio
+		if media == "audio" {
+			status = "RECORDING"
+		} else {
+			status = "COMPOSING"
+		}
 	case "paused":
 		status = "PAUSED"
 	case "recording":
@@ -1920,6 +1944,7 @@ func (t *Transformer) transformConnected(ctx context.Context, logger *slog.Logge
 		Momment:    event.CapturedAt.UnixMilli(),
 		InstanceID: event.InstanceID.String(),
 		Phone:      t.connectedPhone,
+		IsBusiness: t.isBusiness,
 	}
 
 	return callback, nil

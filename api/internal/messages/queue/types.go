@@ -59,6 +59,7 @@ type Config struct {
 
 	// WhatsApp disconnection handling
 	DisconnectRetryDelay time.Duration // Delay when WhatsApp is offline (default: 30s)
+	ProxyRetryDelay      time.Duration // Delay when instance paused for proxy operation (default: 2m)
 
 	// Cleanup configuration
 	CompletedRetention time.Duration // How long to keep completed messages (default: 24h)
@@ -83,6 +84,7 @@ func DefaultConfig() *Config {
 
 		// Disconnection
 		DisconnectRetryDelay: 30 * time.Second,
+		ProxyRetryDelay:      2 * time.Minute,
 
 		// Cleanup
 		CompletedRetention: 24 * time.Hour,
@@ -121,6 +123,7 @@ var (
 	ErrInvalidWorkerCount = &QueueError{Code: "INVALID_WORKER_COUNT", Message: "WorkersPerInstance must be 1 for FIFO ordering guarantee"}
 	ErrInvalidBatchSize   = &QueueError{Code: "INVALID_BATCH_SIZE", Message: "BatchSize must be 1 for FIFO ordering guarantee"}
 	ErrQueueStopped       = &QueueError{Code: "QUEUE_STOPPED", Message: "queue has been stopped"}
+	ErrInstancePaused     = &QueueError{Code: "INSTANCE_PAUSED", Message: "instance is paused for proxy operation"}
 	ErrPayloadTooLarge    = &QueueError{Code: "PAYLOAD_TOO_LARGE", Message: "message payload exceeds maximum size"}
 )
 

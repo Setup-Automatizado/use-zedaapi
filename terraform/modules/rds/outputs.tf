@@ -26,4 +26,3 @@ output "db_subnet_group_name" {
   description = "Subnet group name"
   value       = aws_db_subnet_group.this.name
 }
-

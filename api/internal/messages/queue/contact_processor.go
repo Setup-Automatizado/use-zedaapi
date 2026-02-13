@@ -8,19 +8,23 @@ import (
 	wameow "go.mau.fi/whatsmeow"
 	waProto "go.mau.fi/whatsmeow/binary/proto"
 	"go.mau.fi/whatsmeow/types"
+
+	"go.mau.fi/whatsmeow/api/internal/events/echo"
 )
 
 // ContactProcessor handles contact message sending via WhatsApp
 type ContactProcessor struct {
 	log            *slog.Logger
 	presenceHelper *PresenceHelper
+	echoEmitter    *echo.Emitter
 }
 
 // NewContactProcessor creates a new contact message processor
-func NewContactProcessor(log *slog.Logger) *ContactProcessor {
+func NewContactProcessor(log *slog.Logger, echoEmitter *echo.Emitter) *ContactProcessor {
 	return &ContactProcessor{
 		log:            log.With(slog.String("processor", "contact")),
 		presenceHelper: NewPresenceHelper(),
+		echoEmitter:    echoEmitter,
 	}
 }
 
@@ -46,7 +50,7 @@ func (p *ContactProcessor) Process(ctx context.Context, client *wameow.Client, a
 	}
 
 	// Build vCard (contact card)
-	// If VCard is provided directly (Z-API format), use it
+	// If VCard is provided directly, use it
 	// Otherwise, build from individual fields
 	var vcard string
 	var displayName string
@@ -111,6 +115,25 @@ func (p *ContactProcessor) Process(ctx context.Context, client *wameow.Client, a
 		slog.Time("timestamp", resp.Timestamp))
 
 	args.WhatsAppMessageID = resp.ID
+
+	// Emit API echo event for webhook notification
+	if p.echoEmitter != nil {
+		echoReq := &echo.EchoRequest{
+			InstanceID:        args.InstanceID,
+			WhatsAppMessageID: resp.ID,
+			RecipientJID:      recipientJID,
+			Message:           msg,
+			Timestamp:         resp.Timestamp,
+			MessageType:       "contact",
+			ZaapID:            args.ZaapID,
+			HasMedia:          false,
+		}
+		if err := p.echoEmitter.EmitEcho(ctx, echoReq); err != nil {
+			p.log.Warn("failed to emit API echo",
+				slog.String("error", err.Error()),
+				slog.String("zaap_id", args.ZaapID))
+		}
+	}
 
 	return nil
 }
@@ -268,7 +291,7 @@ func (p *ContactProcessor) extractDisplayNameFromVCard(vcard string) string {
 		line = trimSpace(line)
 		if len(line) > 3 {
 			// Case-insensitive match for FN:
-			if (line[:3] == "FN:" || line[:3] == "fn:") {
+			if line[:3] == "FN:" || line[:3] == "fn:" {
 				name := line[3:]
 				// Unescape vCard value
 				name = unescapeVCardValue(name)
@@ -282,7 +305,7 @@ func (p *ContactProcessor) extractDisplayNameFromVCard(vcard string) string {
 	for _, line := range lines {
 		line = trimSpace(line)
 		if len(line) > 2 {
-			if (line[:2] == "N:" || line[:2] == "n:") {
+			if line[:2] == "N:" || line[:2] == "n:" {
 				parts := splitVCardField(line[2:])
 				// Build name from available parts: Prefix FirstName MiddleName LastName Suffix
 				var nameParts []string
@@ -510,6 +533,25 @@ func (p *ContactProcessor) ProcessMultiple(ctx context.Context, client *wameow.C
 		slog.Time("timestamp", resp.Timestamp))
 
 	args.WhatsAppMessageID = resp.ID
+
+	// Emit API echo event for webhook notification
+	if p.echoEmitter != nil {
+		echoReq := &echo.EchoRequest{
+			InstanceID:        args.InstanceID,
+			WhatsAppMessageID: resp.ID,
+			RecipientJID:      recipientJID,
+			Message:           msg,
+			Timestamp:         resp.Timestamp,
+			MessageType:       "contacts",
+			ZaapID:            args.ZaapID,
+			HasMedia:          false,
+		}
+		if err := p.echoEmitter.EmitEcho(ctx, echoReq); err != nil {
+			p.log.Warn("failed to emit API echo",
+				slog.String("error", err.Error()),
+				slog.String("zaap_id", args.ZaapID))
+		}
+	}
 
 	return nil
 }

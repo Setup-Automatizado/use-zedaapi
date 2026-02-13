@@ -7,19 +7,22 @@ import (
 	"time"
 
 	wameow "go.mau.fi/whatsmeow"
+	"go.mau.fi/whatsmeow/api/internal/events/echo"
 	waProto "go.mau.fi/whatsmeow/binary/proto"
 	"go.mau.fi/whatsmeow/types"
 )
 
 // PollProcessor handles sending poll messages through WhatsApp
 type PollProcessor struct {
-	log *slog.Logger
+	log         *slog.Logger
+	echoEmitter *echo.Emitter
 }
 
 // NewPollProcessor creates a new poll processor instance
-func NewPollProcessor(log *slog.Logger) *PollProcessor {
+func NewPollProcessor(log *slog.Logger, echoEmitter *echo.Emitter) *PollProcessor {
 	return &PollProcessor{
-		log: log.With(slog.String("processor", "poll")),
+		log:         log.With(slog.String("processor", "poll")),
+		echoEmitter: echoEmitter,
 	}
 }
 
@@ -88,6 +91,25 @@ func (p *PollProcessor) Process(ctx context.Context, client *wameow.Client, args
 	// Store WhatsApp message ID for tracking
 	args.WhatsAppMessageID = resp.ID
 
+	// Emit API echo event for webhook notification
+	if p.echoEmitter != nil {
+		echoReq := &echo.EchoRequest{
+			InstanceID:        args.InstanceID,
+			WhatsAppMessageID: resp.ID,
+			RecipientJID:      recipientJID,
+			Message:           msg,
+			Timestamp:         resp.Timestamp,
+			MessageType:       "poll",
+			ZaapID:            args.ZaapID,
+			HasMedia:          false,
+		}
+		if err := p.echoEmitter.EmitEcho(ctx, echoReq); err != nil {
+			p.log.Warn("failed to emit API echo",
+				slog.String("error", err.Error()),
+				slog.String("zaap_id", args.ZaapID))
+		}
+	}
+
 	return nil
 }
 
@@ -112,8 +134,8 @@ func (p *PollProcessor) buildPollMessage(content *PollMessage) (*waProto.Message
 	question := content.Question
 	msg := &waProto.Message{
 		PollCreationMessage: &waProto.PollCreationMessage{
-			Name:                    &question,
-			Options:                 options,
+			Name:                   &question,
+			Options:                options,
 			SelectableOptionsCount: &maxSelections,
 		},
 	}

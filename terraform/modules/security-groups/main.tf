@@ -116,6 +116,21 @@ resource "aws_vpc_security_group_ingress_rule" "ecs_api_from_alb" {
   }
 }
 
+# Inbound: Manager port from ALB (Next.js on port 3000)
+resource "aws_vpc_security_group_ingress_rule" "ecs_manager_from_alb" {
+  security_group_id = aws_security_group.ecs_tasks.id
+  description       = "Allow Manager traffic from ALB"
+
+  referenced_security_group_id = aws_security_group.alb.id
+  from_port                    = 3000
+  to_port                      = 3000
+  ip_protocol                  = "tcp"
+
+  tags = {
+    Name = "manager-from-alb"
+  }
+}
+
 # Inbound: Self (for internal container communication)
 resource "aws_vpc_security_group_ingress_rule" "ecs_self" {
   security_group_id = aws_security_group.ecs_tasks.id

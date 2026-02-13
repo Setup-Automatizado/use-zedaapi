@@ -21,4 +21,3 @@ output "replication_group_id" {
   description = "Replication group identifier"
   value       = aws_elasticache_replication_group.this.id
 }
-

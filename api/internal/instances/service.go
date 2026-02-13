@@ -27,6 +27,8 @@ var (
 	ErrInvalidPhoneNumber    = errors.New("invalid phone number")
 	ErrInstanceInactive      = errors.New("instance subscription inactive")
 	ErrInstanceAlreadyPaired = errors.New("instance already paired")
+	ErrInvalidProxyURL       = errors.New("invalid proxy url: must be http, https, or socks5 scheme")
+	ErrProxyUnreachable      = errors.New("proxy is unreachable")
 )
 
 type Service struct {
@@ -340,6 +342,11 @@ func (s *Service) tokensMatch(inst *Instance, clientToken, instanceToken string)
 	return s.clientAuthToken == clientToken && inst.InstanceToken == instanceToken
 }
 
+// GetByID retrieves an instance by its ID
+func (s *Service) GetByID(ctx context.Context, id uuid.UUID) (*Instance, error) {
+	return s.repo.GetByID(ctx, id)
+}
+
 func (s *Service) UpdateWebhookDelivery(ctx context.Context, id uuid.UUID, clientToken, instanceToken, value string) (*WebhookSettings, error) {
 	normalized, err := normalizeWebhookValue(value)
 	if err != nil {
@@ -369,6 +376,10 @@ func (s *Service) UpdateWebhookReceivedDelivery(ctx context.Context, id uuid.UUI
 	}
 	return s.updateWebhookConfig(ctx, id, clientToken, instanceToken, func(cfg *WebhookConfig) error {
 		cfg.ReceivedDeliveryURL = strPtr(normalized)
+		// When a combined endpoint is configured, automatically enable NotifySentByMe
+		// so all messages (sent and received) are delivered to this endpoint.
+		// When cleared, disable it.
+		cfg.NotifySentByMe = normalized != ""
 		return nil
 	})
 }
@@ -442,6 +453,39 @@ func (s *Service) UpdateEveryWebhooks(ctx context.Context, id uuid.UUID, clientT
 		}
 		return nil
 	})
+}
+
+func (s *Service) UpdateCallRejectAuto(ctx context.Context, id uuid.UUID, clientToken, instanceToken string, value bool) error {
+	inst, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+	if !s.tokensMatch(inst, clientToken, instanceToken) {
+		return ErrUnauthorized
+	}
+	return s.repo.UpdateCallRejectAuto(ctx, id, value)
+}
+
+func (s *Service) UpdateCallRejectMessage(ctx context.Context, id uuid.UUID, clientToken, instanceToken string, value *string) error {
+	inst, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+	if !s.tokensMatch(inst, clientToken, instanceToken) {
+		return ErrUnauthorized
+	}
+	return s.repo.UpdateCallRejectMessage(ctx, id, value)
+}
+
+func (s *Service) UpdateAutoReadMessage(ctx context.Context, id uuid.UUID, clientToken, instanceToken string, value bool) error {
+	inst, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+	if !s.tokensMatch(inst, clientToken, instanceToken) {
+		return ErrUnauthorized
+	}
+	return s.repo.UpdateAutoReadMessage(ctx, id, value)
 }
 
 type PartnerCreateParams struct {
@@ -687,8 +731,9 @@ func toWebhookSettings(cfg *WebhookConfig) *WebhookSettings {
 
 func normalizeWebhookValue(value string) (string, error) {
 	trimmed := strings.TrimSpace(value)
+	// Allow empty value to clear the webhook
 	if trimmed == "" {
-		return "", ErrMissingWebhookValue
+		return "", nil
 	}
 	if !strings.HasPrefix(strings.ToLower(trimmed), "https://") && !strings.HasPrefix(strings.ToLower(trimmed), "http://") {
 		return "", ErrInvalidWebhookURL
@@ -712,6 +757,9 @@ func (s *Service) normalizeWebhookPointer(value *string) (*string, error) {
 }
 
 func strPtr(v string) *string {
+	if v == "" {
+		return nil
+	}
 	copyVal := v
 	return &copyVal
 }

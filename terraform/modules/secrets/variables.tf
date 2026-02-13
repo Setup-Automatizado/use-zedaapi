@@ -3,12 +3,12 @@
 # ==================================================
 
 variable "environment" {
-  description = "Environment name (production, staging, homolog)"
+  description = "Environment name (production, staging, homolog) with optional suffix"
   type        = string
 
   validation {
-    condition     = contains(["production", "staging", "homolog"], var.environment)
-    error_message = "Environment must be production, staging, or homolog."
+    condition     = can(regex("^(production|staging|homolog)(-[a-z]+)?$", var.environment))
+    error_message = "Environment must be production, staging, or homolog (with optional suffix like -manager)."
   }
 }
 

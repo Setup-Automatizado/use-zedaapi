@@ -46,6 +46,10 @@ func (s *stubInstanceRepo) GetConnectionState(context.Context, uuid.UUID) (*Conn
 	return nil, nil
 }
 
+func (s *stubInstanceRepo) GetCallRejectConfig(context.Context, uuid.UUID) (bool, *string, error) {
+	return false, nil, nil
+}
+
 func newTestLogger() *slog.Logger {
 	return slog.New(slog.NewTextHandler(io.Discard, &slog.HandlerOptions{}))
 }

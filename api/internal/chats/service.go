@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
 	watypes "go.mau.fi/whatsmeow/types"
 )
 

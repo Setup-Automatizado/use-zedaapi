@@ -7,19 +7,22 @@ import (
 	"time"
 
 	wameow "go.mau.fi/whatsmeow"
+	"go.mau.fi/whatsmeow/api/internal/events/echo"
 	waProto "go.mau.fi/whatsmeow/binary/proto"
 	"go.mau.fi/whatsmeow/types"
 )
 
 // InteractiveProcessor handles interactive message sending via WhatsApp (buttons, lists)
 type InteractiveProcessor struct {
-	log *slog.Logger
+	log         *slog.Logger
+	echoEmitter *echo.Emitter
 }
 
 // NewInteractiveProcessor creates a new interactive message processor
-func NewInteractiveProcessor(log *slog.Logger) *InteractiveProcessor {
+func NewInteractiveProcessor(log *slog.Logger, echoEmitter *echo.Emitter) *InteractiveProcessor {
 	return &InteractiveProcessor{
-		log: log.With(slog.String("processor", "interactive")),
+		log:         log.With(slog.String("processor", "interactive")),
+		echoEmitter: echoEmitter,
 	}
 }
 
@@ -94,6 +97,25 @@ func (p *InteractiveProcessor) Process(ctx context.Context, client *wameow.Clien
 		slog.Time("timestamp", resp.Timestamp))
 
 	args.WhatsAppMessageID = resp.ID
+
+	// Emit API echo event for webhook notification
+	if p.echoEmitter != nil {
+		echoReq := &echo.EchoRequest{
+			InstanceID:        args.InstanceID,
+			WhatsAppMessageID: resp.ID,
+			RecipientJID:      recipientJID,
+			Message:           msg,
+			Timestamp:         resp.Timestamp,
+			MessageType:       "interactive",
+			ZaapID:            args.ZaapID,
+			HasMedia:          false,
+		}
+		if err := p.echoEmitter.EmitEcho(ctx, echoReq); err != nil {
+			p.log.Warn("failed to emit API echo",
+				slog.String("error", err.Error()),
+				slog.String("zaap_id", args.ZaapID))
+		}
+	}
 
 	return nil
 }

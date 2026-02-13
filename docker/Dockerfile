@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1
-
 # ==========================================
 # Stage 1: Build Dependencies
 # ==========================================
@@ -21,6 +19,14 @@ RUN go mod download && go mod verify
 FROM golang:1.25-alpine AS builder
 WORKDIR /build
 
+# Install CGO dependencies for MuPDF/go-fitz
+# mupdf-dev: headers and static libs for PDF processing
+RUN apk add --no-cache \
+	gcc \
+	g++ \
+	musl-dev \
+	mupdf-dev
+
 # Copy dependencies from deps stage
 COPY --from=deps /go/pkg /go/pkg
 
@@ -33,19 +39,21 @@ ARG COMMIT=unknown
 ARG BUILD_TIME
 ARG TARGETARCH=amd64
 
-# Build with optimizations
-# CGO_ENABLED=0 for static binary
+# Build with CGO enabled for go-fitz/MuPDF support
+# Static linking for portable binary
 # -ldflags for version info and size reduction
 # Use TARGETARCH from buildx for multi-platform support
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} go build \
-	-ldflags="-w -s -X main.Version=${VERSION} -X main.Commit=${COMMIT} -X main.BuildTime=${BUILD_TIME}" \
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=${TARGETARCH} go build \
+	-ldflags="-w -s -linkmode external -extldflags '-static' -X go.mau.fi/whatsmeow/api/internal/version.version=${VERSION} -X go.mau.fi/whatsmeow/api/internal/version.gitCommit=${COMMIT} -X go.mau.fi/whatsmeow/api/internal/version.buildTime=${BUILD_TIME}" \
+	-tags musl,netgo \
 	-o /app/api \
 	./api/cmd/server
 
 # Build migrations tool (if exists)
 RUN if [ -f "./api/cmd/migrate/main.go" ]; then \
-	CGO_ENABLED=0 GOOS=linux GOARCH=${TARGETARCH} go build \
-	-ldflags="-w -s" \
+	CGO_ENABLED=1 GOOS=linux GOARCH=${TARGETARCH} go build \
+	-ldflags="-w -s -linkmode external -extldflags '-static'" \
+	-tags musl,netgo \
 	-o /app/migrate \
 	./api/cmd/migrate; \
 	fi
@@ -55,23 +63,17 @@ RUN if [ -f "./api/cmd/migrate/main.go" ]; then \
 # ==========================================
 FROM alpine:3.21 AS production
 
-# Install runtime dependencies including ffmpeg and mupdf for media processing
+# Install runtime dependencies
 # ffmpeg: audio conversion (Opus), video analysis, thumbnail generation
 # ffprobe: video/audio metadata extraction (included with ffmpeg)
-# mupdf: PDF processing library required by github.com/gen2brain/go-fitz
+# mupdf: NOT needed - statically linked in binary via go-fitz
 RUN apk add --no-cache \
 	ca-certificates \
 	tzdata \
 	curl \
 	ffmpeg \
-	mupdf \
 	&& addgroup -g 1000 app \
-	&& adduser -D -u 1000 -G app app \
-	&& libmupdf=$(find /usr/lib -maxdepth 1 -name 'libmupdf.so.*' -print -quit) \
-	&& [ -n "${libmupdf}" ] \
-	&& ln -sf "${libmupdf}" /usr/lib/libmupdf.so \
-	&& libmupdf_third=$(find /usr/lib -maxdepth 1 -name 'libmupdf-third.so.*' -print -quit) \
-	&& if [ -n "${libmupdf_third}" ]; then ln -sf "${libmupdf_third}" /usr/lib/libmupdf-third.so; fi
+	&& adduser -D -u 1000 -G app app
 
 # Set timezone
 ENV TZ=UTC
@@ -85,6 +87,7 @@ COPY --from=builder /app/api /usr/local/bin/api
 # Copy static files and configs
 COPY --from=builder /build/api/.env.example /app/.env.example
 COPY --from=builder /build/api/migrations/ /app/migrations/
+COPY --from=builder /build/VERSION /app/VERSION
 
 # Copy migrations tool if it exists (optional, handled via RUN)
 RUN --mount=type=bind,from=builder,source=/app,target=/tmp/builder \
@@ -155,27 +158,44 @@ CMD ["go", "run", "./api/cmd/server"]
 # ==========================================
 # Stage 5: Testing
 # ==========================================
-FROM golang:1.25-alpine AS testing
+# IMPORTANT: Using Debian-based image (not Alpine) because go-fitz/MuPDF
+# has pre-compiled libraries built against glibc. Alpine uses musl which
+# lacks glibc-specific functions like fopen64, ftello64, fseeko64, tmpfile64.
+FROM golang:1.25 AS testing
 WORKDIR /build
 
+# Build argument for multi-platform support
+ARG TARGETARCH=amd64
+
 # Install build dependencies including ffmpeg for media processing tests
-# gcc needed for -race flag
-RUN apk add --no-cache \
+# gcc/g++ needed for -race flag and CGO compilation
+RUN apt-get update && apt-get install -y --no-install-recommends \
 	gcc \
-	musl-dev \
+	g++ \
 	git \
 	ca-certificates \
-	ffmpeg
+	ffmpeg \
+	&& rm -rf /var/lib/apt/lists/*
 
-# Copy dependencies
-COPY --from=deps /go/pkg /go/pkg
+# Copy go mod files first for better caching
+COPY go.mod go.sum ./
+RUN go mod download
 
 # Copy source code
 COPY . .
 
 # Run tests with race detector (requires CGO_ENABLED=1)
 # Only test API code, not the entire whatsmeow library
-RUN CGO_ENABLED=1 go test -v -race -coverprofile=coverage.out -covermode=atomic ./api/...
+# NOTE: Race detector (-race) is DISABLED on arm64 because ThreadSanitizer
+# does not work correctly under QEMU emulation (unsupported VMA range error).
+# This affects cross-platform builds where arm64 is emulated on amd64 hosts.
+RUN if [ "$TARGETARCH" = "arm64" ]; then \
+		echo "Running tests WITHOUT race detector (arm64 QEMU incompatible)" && \
+		CGO_ENABLED=1 go test -v -coverprofile=coverage.out -covermode=atomic ./api/...; \
+	else \
+		echo "Running tests WITH race detector (native $TARGETARCH)" && \
+		CGO_ENABLED=1 go test -v -race -coverprofile=coverage.out -covermode=atomic ./api/...; \
+	fi
 
 # Generate coverage report
 RUN go tool cover -html=coverage.out -o coverage.html

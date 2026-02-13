@@ -7,10 +7,13 @@ import (
 	"path/filepath"
 	"strings"
 
+	"google.golang.org/protobuf/proto"
+
 	wameow "go.mau.fi/whatsmeow"
 	waProto "go.mau.fi/whatsmeow/binary/proto"
 	"go.mau.fi/whatsmeow/types"
-	"google.golang.org/protobuf/proto"
+
+	"go.mau.fi/whatsmeow/api/internal/events/echo"
 )
 
 // DocumentProcessor handles document message sending via WhatsApp
@@ -19,14 +22,16 @@ type DocumentProcessor struct {
 	mediaDownloader *MediaDownloader
 	thumbGenerator  *ThumbnailGenerator
 	presenceHelper  *PresenceHelper
+	echoEmitter     *echo.Emitter
 }
 
 // NewDocumentProcessor creates a new document message processor
-func NewDocumentProcessor(log *slog.Logger) *DocumentProcessor {
+func NewDocumentProcessor(log *slog.Logger, echoEmitter *echo.Emitter) *DocumentProcessor {
 	return &DocumentProcessor{
 		log:             log.With(slog.String("processor", "document")),
 		mediaDownloader: NewMediaDownloader(1000), // 1000MB max for documents
 		presenceHelper:  NewPresenceHelper(),
+		echoEmitter:     echoEmitter,
 	}
 }
 
@@ -112,6 +117,26 @@ func (p *DocumentProcessor) Process(ctx context.Context, client *wameow.Client, 
 		slog.Time("timestamp", resp.Timestamp))
 
 	args.WhatsAppMessageID = resp.ID
+
+	// Emit API echo event for webhook notification
+	if p.echoEmitter != nil {
+		echoReq := &echo.EchoRequest{
+			InstanceID:        args.InstanceID,
+			WhatsAppMessageID: resp.ID,
+			RecipientJID:      recipientJID,
+			Message:           msg,
+			Timestamp:         resp.Timestamp,
+			MessageType:       "document",
+			MediaType:         "document",
+			ZaapID:            args.ZaapID,
+			HasMedia:          true,
+		}
+		if err := p.echoEmitter.EmitEcho(ctx, echoReq); err != nil {
+			p.log.Warn("failed to emit API echo",
+				slog.String("error", err.Error()),
+				slog.String("zaap_id", args.ZaapID))
+		}
+	}
 
 	return nil
 }
@@ -278,9 +303,24 @@ func (p *DocumentProcessor) buildMessage(
 	// Add thumbnail if generated successfully
 	if thumbnail != nil {
 		docMsg.JPEGThumbnail = thumbnail.Data
-		docMsg.ThumbnailDirectPath = proto.String(thumbnail.DirectPath)
-		docMsg.ThumbnailSHA256 = thumbnail.FileSha256
-		docMsg.ThumbnailEncSHA256 = thumbnail.FileEncSha256
+		if thumbnail.DirectPath != "" {
+			docMsg.ThumbnailDirectPath = proto.String(thumbnail.DirectPath)
+		}
+		if len(thumbnail.FileSha256) > 0 {
+			docMsg.ThumbnailSHA256 = thumbnail.FileSha256
+		}
+		if len(thumbnail.FileEncSha256) > 0 {
+			docMsg.ThumbnailEncSHA256 = thumbnail.FileEncSha256
+		}
+		if thumbnail.Width > 0 {
+			docMsg.ThumbnailWidth = proto.Uint32(thumbnail.Width)
+		}
+		if thumbnail.Height > 0 {
+			docMsg.ThumbnailHeight = proto.Uint32(thumbnail.Height)
+		}
+		if thumbnail.PageCount > 0 {
+			docMsg.PageCount = proto.Uint32(thumbnail.PageCount)
+		}
 	}
 
 	return &waProto.Message{

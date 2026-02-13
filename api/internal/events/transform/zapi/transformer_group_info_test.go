@@ -16,7 +16,7 @@ import (
 )
 
 func TestTransformGroupInfoMembershipRequest(t *testing.T) {
-	transformer := NewTransformer("5511999999999", false, "", nil)
+	transformer := NewTransformer("5511999999999", false, false, "", nil)
 
 	groupJID := types.NewJID("120363420116051586", types.GroupServer)
 	memberJID := types.NewJID("227294266302623", types.HiddenUserServer)
@@ -67,7 +67,7 @@ func TestTransformGroupInfoMembershipRequest(t *testing.T) {
 }
 
 func TestTransformGroupInfoMembershipRequestRevoked(t *testing.T) {
-	transformer := NewTransformer("5511999999999", false, "", nil)
+	transformer := NewTransformer("5511999999999", false, false, "", nil)
 
 	groupJID := types.NewJID("120363420116051586", types.GroupServer)
 	memberJID := types.NewJID("227294266302623", types.HiddenUserServer)

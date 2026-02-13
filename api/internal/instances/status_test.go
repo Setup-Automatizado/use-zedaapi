@@ -8,7 +8,7 @@ import (
 )
 
 // TestStatusJSONMarshallingMatchesZAPI ensures that the serialized payload only
-// surfaces the Z-API compatible fields while keeping the internal attributes
+// surfaces the fields while keeping the internal attributes
 // available in the struct for future use.
 func TestStatusJSONMarshallingMatchesZAPI(t *testing.T) {
 	t.Parallel()

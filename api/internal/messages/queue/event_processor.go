@@ -6,21 +6,25 @@ import (
 	"log/slog"
 	"time"
 
+	"google.golang.org/protobuf/proto"
+
 	wameow "go.mau.fi/whatsmeow"
+	"go.mau.fi/whatsmeow/api/internal/events/echo"
 	waProto "go.mau.fi/whatsmeow/binary/proto"
 	"go.mau.fi/whatsmeow/types"
-	"google.golang.org/protobuf/proto"
 )
 
 // EventProcessor handles sending event/calendar messages through WhatsApp
 type EventProcessor struct {
-	log *slog.Logger
+	log         *slog.Logger
+	echoEmitter *echo.Emitter
 }
 
 // NewEventProcessor creates a new event processor instance
-func NewEventProcessor(log *slog.Logger) *EventProcessor {
+func NewEventProcessor(log *slog.Logger, echoEmitter *echo.Emitter) *EventProcessor {
 	return &EventProcessor{
-		log: log.With(slog.String("processor", "event")),
+		log:         log.With(slog.String("processor", "event")),
+		echoEmitter: echoEmitter,
 	}
 }
 
@@ -88,6 +92,25 @@ func (p *EventProcessor) Process(ctx context.Context, client *wameow.Client, arg
 
 	// Store WhatsApp message ID for tracking
 	args.WhatsAppMessageID = resp.ID
+
+	// Emit API echo event for webhook notification
+	if p.echoEmitter != nil {
+		echoReq := &echo.EchoRequest{
+			InstanceID:        args.InstanceID,
+			WhatsAppMessageID: resp.ID,
+			RecipientJID:      recipientJID,
+			Message:           msg,
+			Timestamp:         resp.Timestamp,
+			MessageType:       "event",
+			ZaapID:            args.ZaapID,
+			HasMedia:          false,
+		}
+		if err := p.echoEmitter.EmitEcho(ctx, echoReq); err != nil {
+			p.log.Warn("failed to emit API echo",
+				slog.String("error", err.Error()),
+				slog.String("zaap_id", args.ZaapID))
+		}
+	}
 
 	return nil
 }

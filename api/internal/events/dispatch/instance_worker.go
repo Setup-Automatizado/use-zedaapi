@@ -83,8 +83,8 @@ func (w *InstanceWorker) Run(ctx context.Context) {
 	logger.Info("instance worker started",
 		slog.Duration("poll_interval", w.cfg.Events.PollInterval))
 
-	w.metrics.WorkersActive.WithLabelValues(w.instanceID.String()).Inc()
-	defer w.metrics.WorkersActive.WithLabelValues(w.instanceID.String()).Dec()
+	w.metrics.WorkersActive.WithLabelValues("dispatch").Inc()
+	defer w.metrics.WorkersActive.WithLabelValues("dispatch").Dec()
 
 	ticker := time.NewTicker(w.cfg.Events.PollInterval)
 	defer ticker.Stop()
@@ -107,7 +107,7 @@ func (w *InstanceWorker) Run(ctx context.Context) {
 			if err := w.pollAndProcess(ctx); err != nil {
 				logger.Error("poll and process failed",
 					slog.String("error", err.Error()))
-				w.metrics.WorkerErrors.WithLabelValues(w.instanceID.String(), "poll_error").Inc()
+				w.metrics.WorkerErrors.WithLabelValues("dispatch", "poll_error").Inc()
 			}
 		}
 	}
@@ -129,6 +129,11 @@ func (w *InstanceWorker) isRunning() bool {
 	w.mu.RLock()
 	defer w.mu.RUnlock()
 	return w.running
+}
+
+// SetStatusInterceptor sets the status cache interceptor for receipt events
+func (w *InstanceWorker) SetStatusInterceptor(interceptor StatusInterceptor) {
+	w.processor.SetStatusInterceptor(interceptor)
 }
 
 func (w *InstanceWorker) pollAndProcess(ctx context.Context) error {
@@ -181,7 +186,7 @@ func (w *InstanceWorker) pollAndProcess(ctx context.Context) error {
 		slog.Int("failed", failureCount),
 		slog.Duration("duration", time.Since(start)))
 
-	w.metrics.WorkerTaskDuration.WithLabelValues(w.instanceID.String(), "poll_and_process").Observe(time.Since(start).Seconds())
+	w.metrics.WorkerTaskDuration.WithLabelValues("dispatch", "poll_and_process").Observe(time.Since(start).Seconds())
 
 	return nil
 }

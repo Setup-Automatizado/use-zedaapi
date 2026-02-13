@@ -6,7 +6,7 @@ type ListParams struct {
 	PageSize int
 }
 
-// Summary captures the minimal Z-API compatible payload for a community entry.
+// Summary captures the minimal payload for a community entry.
 type Summary struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
@@ -66,12 +66,12 @@ type OperationResult struct {
 	Success *bool `json:"success,omitempty"`
 }
 
-// NewValueResult builds an OperationResult with the Z-API `value` field.
+// NewValueResult builds an OperationResult with the FUNNELCHAT `value` field.
 func NewValueResult(ok bool) OperationResult {
 	return OperationResult{Value: boolPtr(ok)}
 }
 
-// NewSuccessResult builds an OperationResult with the Z-API `success` field.
+// NewSuccessResult builds an OperationResult with the FUNNELCHAT `success` field.
 func NewSuccessResult(ok bool) OperationResult {
 	return OperationResult{Success: boolPtr(ok)}
 }

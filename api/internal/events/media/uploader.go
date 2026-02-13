@@ -39,8 +39,19 @@ func NewS3Uploader(ctx context.Context, cfg *config.Config, metrics *observabili
 	)
 
 	awsCfg := aws.Config{
-		Region:      cfg.S3.Region,
-		Credentials: credentials.NewStaticCredentialsProvider(cfg.S3.AccessKey, cfg.S3.SecretKey, ""),
+		Region: cfg.S3.Region,
+	}
+
+	// Usar credenciais estaticas APENAS se fornecidas (dev/MinIO)
+	// Em producao/homolog com ECS, IAM Role sera usado automaticamente
+	if cfg.S3.AccessKey != "" && cfg.S3.SecretKey != "" {
+		logger.Info("using static S3 credentials (MinIO/dev mode)",
+			slog.String("credential_mode", "static"))
+		awsCfg.Credentials = credentials.NewStaticCredentialsProvider(cfg.S3.AccessKey, cfg.S3.SecretKey, "")
+	} else {
+		logger.Info("using IAM Role credentials chain",
+			slog.String("credential_mode", "iam_role"))
+		// AWS SDK usara automaticamente: env vars -> IAM Role -> EC2 metadata
 	}
 
 	if cfg.S3.Endpoint != "" {

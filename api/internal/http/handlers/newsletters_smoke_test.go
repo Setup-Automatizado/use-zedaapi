@@ -17,29 +17,29 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/newsletters"
 )
 
-// Smoke tests validate all 18 newsletter endpoints are callable and return Z-API compatible responses
+// Smoke tests validate all 18 newsletter endpoints are callable and return responses
 // These tests use mocks to verify handler -> service integration without requiring WhatsApp connection
 
 // mockNewslettersService implements newsletters.Service for smoke testing
 type mockNewslettersService struct {
-	listFunc                  func(ctx context.Context, instanceID uuid.UUID, params newsletters.ListParams) (newsletters.ListResult, error)
-	createFunc                func(ctx context.Context, instanceID uuid.UUID, params newsletters.CreateParams) (newsletters.CreateResult, error)
-	updatePictureFunc         func(ctx context.Context, instanceID uuid.UUID, params newsletters.UpdatePictureParams) (newsletters.OperationResult, error)
-	updateNameFunc            func(ctx context.Context, instanceID uuid.UUID, params newsletters.UpdateNameParams) (newsletters.OperationResult, error)
-	updateDescriptionFunc     func(ctx context.Context, instanceID uuid.UUID, params newsletters.UpdateDescriptionParams) (newsletters.OperationResult, error)
-	followFunc                func(ctx context.Context, instanceID uuid.UUID, params newsletters.IDParams) (newsletters.OperationResult, error)
-	unfollowFunc              func(ctx context.Context, instanceID uuid.UUID, params newsletters.IDParams) (newsletters.OperationResult, error)
-	muteFunc                  func(ctx context.Context, instanceID uuid.UUID, params newsletters.IDParams) (newsletters.OperationResult, error)
-	unmuteFunc                func(ctx context.Context, instanceID uuid.UUID, params newsletters.IDParams) (newsletters.OperationResult, error)
-	deleteFunc                func(ctx context.Context, instanceID uuid.UUID, params newsletters.IDParams) (newsletters.OperationResult, error)
-	getMetadataFunc           func(ctx context.Context, instanceID uuid.UUID, id string) (newsletters.MetadataResult, error)
-	searchFunc                func(ctx context.Context, instanceID uuid.UUID, params newsletters.SearchParams) (newsletters.SearchResult, error)
-	updateSettingsFunc        func(ctx context.Context, instanceID uuid.UUID, params newsletters.SettingsParams) (newsletters.OperationResult, error)
-	sendAdminInviteFunc       func(ctx context.Context, instanceID uuid.UUID, params newsletters.AdminActionParams) (newsletters.OperationResult, error)
-	acceptAdminInviteFunc     func(ctx context.Context, instanceID uuid.UUID, params newsletters.IDParams) (newsletters.OperationResult, error)
-	removeAdminFunc           func(ctx context.Context, instanceID uuid.UUID, params newsletters.AdminActionParams) (newsletters.OperationResult, error)
-	revokeAdminInviteFunc     func(ctx context.Context, instanceID uuid.UUID, params newsletters.AdminActionParams) (newsletters.OperationResult, error)
-	transferOwnershipFunc     func(ctx context.Context, instanceID uuid.UUID, params newsletters.TransferOwnershipParams) (newsletters.OperationResult, error)
+	listFunc              func(ctx context.Context, instanceID uuid.UUID, params newsletters.ListParams) (newsletters.ListResult, error)
+	createFunc            func(ctx context.Context, instanceID uuid.UUID, params newsletters.CreateParams) (newsletters.CreateResult, error)
+	updatePictureFunc     func(ctx context.Context, instanceID uuid.UUID, params newsletters.UpdatePictureParams) (newsletters.OperationResult, error)
+	updateNameFunc        func(ctx context.Context, instanceID uuid.UUID, params newsletters.UpdateNameParams) (newsletters.OperationResult, error)
+	updateDescriptionFunc func(ctx context.Context, instanceID uuid.UUID, params newsletters.UpdateDescriptionParams) (newsletters.OperationResult, error)
+	followFunc            func(ctx context.Context, instanceID uuid.UUID, params newsletters.IDParams) (newsletters.OperationResult, error)
+	unfollowFunc          func(ctx context.Context, instanceID uuid.UUID, params newsletters.IDParams) (newsletters.OperationResult, error)
+	muteFunc              func(ctx context.Context, instanceID uuid.UUID, params newsletters.IDParams) (newsletters.OperationResult, error)
+	unmuteFunc            func(ctx context.Context, instanceID uuid.UUID, params newsletters.IDParams) (newsletters.OperationResult, error)
+	deleteFunc            func(ctx context.Context, instanceID uuid.UUID, params newsletters.IDParams) (newsletters.OperationResult, error)
+	getMetadataFunc       func(ctx context.Context, instanceID uuid.UUID, id string) (newsletters.MetadataResult, error)
+	searchFunc            func(ctx context.Context, instanceID uuid.UUID, params newsletters.SearchParams) (newsletters.SearchResult, error)
+	updateSettingsFunc    func(ctx context.Context, instanceID uuid.UUID, params newsletters.SettingsParams) (newsletters.OperationResult, error)
+	sendAdminInviteFunc   func(ctx context.Context, instanceID uuid.UUID, params newsletters.AdminActionParams) (newsletters.OperationResult, error)
+	acceptAdminInviteFunc func(ctx context.Context, instanceID uuid.UUID, params newsletters.IDParams) (newsletters.OperationResult, error)
+	removeAdminFunc       func(ctx context.Context, instanceID uuid.UUID, params newsletters.AdminActionParams) (newsletters.OperationResult, error)
+	revokeAdminInviteFunc func(ctx context.Context, instanceID uuid.UUID, params newsletters.AdminActionParams) (newsletters.OperationResult, error)
+	transferOwnershipFunc func(ctx context.Context, instanceID uuid.UUID, params newsletters.TransferOwnershipParams) (newsletters.OperationResult, error)
 }
 
 func (m *mockNewslettersService) List(ctx context.Context, instanceID uuid.UUID, params newsletters.ListParams) (newsletters.ListResult, error) {
@@ -740,5 +740,5 @@ func TestSmokeAll_EndpointCount(t *testing.T) {
 		}
 	}
 
-	assert.Equal(t, 18, registeredCount, "All 18 newsletter endpoints must be registered (17 Z-API + 1 bonus)")
+	assert.Equal(t, 18, registeredCount, "All 18 newsletter endpoints must be registered (17 FUNNELCHAT + 1 bonus)")
 }

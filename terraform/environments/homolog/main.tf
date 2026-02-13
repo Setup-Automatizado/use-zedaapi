@@ -85,6 +85,8 @@ module "alb" {
   expose_minio_console       = false
   enable_deletion_protection = false
 
+  # NOTA: Manager tem seu proprio ALB em alb-manager/
+
   tags = local.common_tags
 }
 
@@ -238,5 +240,108 @@ module "ecs_service" {
 
   depends_on = [
     module.alb
+  ]
+}
+
+# ==================================================
+# Manager Frontend Service (Conditional)
+# ==================================================
+
+# ALB dedicado para o Manager (separado da API)
+module "alb_manager" {
+  source = "../../modules/alb-manager"
+  count  = var.enable_manager ? 1 : 0
+
+  environment                = local.environment
+  vpc_id                     = module.vpc.vpc_id
+  public_subnet_ids          = module.vpc.public_subnet_ids
+  alb_security_group_id      = module.security_groups.alb_security_group_id
+  certificate_arn            = var.certificate_arn
+  enable_deletion_protection = false
+
+  tags = local.common_tags
+}
+
+locals {
+  manager_db_dsn = "postgresql://${local.db_user_url}:${local.db_password_url}@${module.rds.db_endpoint}:${module.rds.db_port}/${var.manager_db_name}?sslmode=require"
+
+  manager_secret_payload = merge({
+    manager_database_url   = local.manager_db_dsn
+    better_auth_secret     = lookup(var.manager_additional_secrets, "better_auth_secret", "change-me-32-char-secret-key-xxx")
+    smtp_password          = lookup(var.manager_additional_secrets, "smtp_password", "")
+    s3_access_key          = var.s3_access_key
+    s3_secret_key          = var.s3_secret_key
+    github_client_secret   = lookup(var.manager_additional_secrets, "github_client_secret", "")
+    google_client_secret   = lookup(var.manager_additional_secrets, "google_client_secret", "")
+  }, var.additional_secret_values)
+}
+
+module "manager_secrets" {
+  source = "../../modules/secrets"
+  count  = var.enable_manager ? 1 : 0
+
+  environment             = "${local.environment}-manager"
+  secret_payload          = local.manager_secret_payload
+  recovery_window_in_days = var.secret_recovery_window
+
+  tags = local.common_tags
+}
+
+module "ecs_service_manager" {
+  source = "../../modules/ecs-service-manager"
+  count  = var.enable_manager ? 1 : 0
+
+  environment           = local.environment
+  cluster_id            = module.ecs_cluster.cluster_id
+  cluster_name          = module.ecs_cluster.cluster_name
+  subnet_ids            = module.vpc.public_subnet_ids
+  ecs_security_group_id = module.security_groups.ecs_tasks_security_group_id
+  target_group_arn      = module.alb_manager[0].target_group_arn
+  secrets_arn           = module.manager_secrets[0].secret_arn
+
+  manager_image    = var.manager_image
+  app_url          = var.manager_app_url != "" ? var.manager_app_url : module.alb_manager[0].manager_url
+  whatsapp_api_url        = "http://${module.alb.alb_dns_name}"
+  whatsapp_api_public_url = "http://${module.alb.alb_dns_name}"
+
+  # S3 Configuration (use custom MinIO endpoint or default AWS S3)
+  s3_endpoint   = var.manager_s3_endpoint != "" ? var.manager_s3_endpoint : var.s3_endpoint
+  s3_bucket     = var.manager_s3_bucket != "" ? var.manager_s3_bucket : module.s3.bucket_name
+  s3_bucket_arn = module.s3.bucket_arn
+  s3_public_url = var.manager_s3_public_url != "" ? var.manager_s3_public_url : var.s3_public_base_url
+  aws_region    = var.aws_region
+
+  # SMTP Configuration
+  smtp_host   = var.manager_smtp_host
+  smtp_port   = var.manager_smtp_port
+  smtp_user   = var.manager_smtp_user
+
+  # Email Configuration
+  email_from_name    = var.manager_email_from_name
+  email_from_address = var.manager_email_from_address
+  support_email      = var.manager_support_email
+
+  # OAuth Configuration
+  github_client_id = var.manager_github_client_id
+  google_client_id = var.manager_google_client_id
+
+  # Security (HTTP only in homolog - no CloudFront)
+  secure_cookies = false
+
+  # Task Configuration
+  task_cpu               = var.manager_task_cpu
+  task_memory            = var.manager_task_memory
+  desired_count          = var.manager_desired_count
+  enable_execute_command = var.enable_execute_command
+  assign_public_ip       = true
+
+  # Auto Scaling (disabled for homolog)
+  enable_autoscaling = false
+
+  tags = local.common_tags
+
+  depends_on = [
+    module.alb_manager,
+    module.manager_secrets
   ]
 }

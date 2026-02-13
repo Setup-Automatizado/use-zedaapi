@@ -21,6 +21,9 @@ type InstanceHandler struct {
 	groupsHandler      *GroupsHandler
 	communitiesHandler *CommunitiesHandler
 	newslettersHandler *NewslettersHandler
+	statusCacheHandler *StatusCacheHandler
+	privacyHandler     *PrivacyHandler
+	poolHandler        interface{ RegisterInstanceRoutes(chi.Router) }
 	log                *slog.Logger
 }
 
@@ -48,6 +51,21 @@ func (h *InstanceHandler) SetNewslettersHandler(newslettersHandler *NewslettersH
 	h.newslettersHandler = newslettersHandler
 }
 
+// SetStatusCacheHandler injects the StatusCacheHandler for route registration
+func (h *InstanceHandler) SetStatusCacheHandler(statusCacheHandler *StatusCacheHandler) {
+	h.statusCacheHandler = statusCacheHandler
+}
+
+// SetPrivacyHandler injects the PrivacyHandler for route registration
+func (h *InstanceHandler) SetPrivacyHandler(privacyHandler *PrivacyHandler) {
+	h.privacyHandler = privacyHandler
+}
+
+// SetPoolHandler injects the PoolHandler for route registration
+func (h *InstanceHandler) SetPoolHandler(handler interface{ RegisterInstanceRoutes(chi.Router) }) {
+	h.poolHandler = handler
+}
+
 func (h *InstanceHandler) Register(r chi.Router) {
 	r.Route("/instances/{instanceId}/token/{token}", func(r chi.Router) {
 		// Instance management routes
@@ -69,6 +87,17 @@ func (h *InstanceHandler) Register(r chi.Router) {
 		r.Put("/update-webhook-chat-presence", h.updateWebhookChatPresence)
 		r.Put("/update-notify-sent-by-me", h.updateNotifySentByMe)
 		r.Put("/update-every-webhooks", h.updateEveryWebhooks)
+		r.Put("/update-call-reject-auto", h.updateCallRejectAuto)
+		r.Put("/update-call-reject-message", h.updateCallRejectMessage)
+		r.Put("/update-auto-read-message", h.updateAutoReadMessage)
+
+		// Proxy configuration routes
+		r.Put("/update-proxy", h.updateProxy)
+		r.Get("/proxy", h.getProxy)
+		r.Delete("/proxy", h.removeProxy)
+		r.Post("/proxy/test", h.testProxy)
+		r.Post("/proxy/swap", h.swapProxy)
+		r.Get("/proxy/health", h.getProxyHealth)
 
 		// Message routes (delegated to MessageHandler)
 		if h.messageHandler != nil {
@@ -88,6 +117,21 @@ func (h *InstanceHandler) Register(r chi.Router) {
 		// Newsletter routes
 		if h.newslettersHandler != nil {
 			h.newslettersHandler.RegisterRoutes(r)
+		}
+
+		// Status cache routes
+		if h.statusCacheHandler != nil {
+			h.statusCacheHandler.RegisterRoutes(r)
+		}
+
+		// Privacy settings routes
+		if h.privacyHandler != nil {
+			h.privacyHandler.RegisterRoutes(r)
+		}
+
+		// Pool proxy routes
+		if h.poolHandler != nil {
+			h.poolHandler.RegisterInstanceRoutes(r)
 		}
 	})
 }
@@ -184,6 +228,14 @@ type webhookEveryRequest struct {
 
 type notifySentByMeRequest struct {
 	NotifySentByMe bool `json:"notifySentByMe"`
+}
+
+type boolValueRequest struct {
+	Value bool `json:"value"`
+}
+
+type stringValueRequest struct {
+	Value string `json:"value"`
 }
 
 type webhookUpdateResponse struct {
@@ -380,7 +432,264 @@ func (h *InstanceHandler) handleServiceError(ctx context.Context, w http.Respons
 		respondError(w, http.StatusConflict, "instance already paired")
 		return
 	}
+	if errors.Is(err, instances.ErrInvalidProxyURL) {
+		respondError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	if errors.Is(err, instances.ErrProxyUnreachable) {
+		respondError(w, http.StatusUnprocessableEntity, err.Error())
+		return
+	}
 	logger := logging.ContextLogger(ctx, h.log)
 	logger.Error("service error", slog.String("error", err.Error()))
 	respondError(w, http.StatusInternalServerError, "internal error")
+}
+
+func (h *InstanceHandler) updateCallRejectAuto(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	instanceID, ok := h.parseInstanceID(w, r)
+	if !ok {
+		return
+	}
+	ctx = logging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
+	instanceToken := chi.URLParam(r, "token")
+	clientToken := r.Header.Get("Client-Token")
+
+	var req boolValueRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondError(w, http.StatusBadRequest, "invalid json payload")
+		return
+	}
+	if err := h.service.UpdateCallRejectAuto(ctx, instanceID, clientToken, instanceToken, req.Value); err != nil {
+		h.handleServiceError(ctx, w, err)
+		return
+	}
+	respondJSON(w, http.StatusOK, valueResponse{Value: true})
+}
+
+func (h *InstanceHandler) updateCallRejectMessage(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	instanceID, ok := h.parseInstanceID(w, r)
+	if !ok {
+		return
+	}
+	ctx = logging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
+	instanceToken := chi.URLParam(r, "token")
+	clientToken := r.Header.Get("Client-Token")
+
+	var req stringValueRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondError(w, http.StatusBadRequest, "invalid json payload")
+		return
+	}
+	var value *string
+	if req.Value != "" {
+		value = &req.Value
+	}
+	if err := h.service.UpdateCallRejectMessage(ctx, instanceID, clientToken, instanceToken, value); err != nil {
+		h.handleServiceError(ctx, w, err)
+		return
+	}
+	respondJSON(w, http.StatusOK, valueResponse{Value: true})
+}
+
+func (h *InstanceHandler) updateAutoReadMessage(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	instanceID, ok := h.parseInstanceID(w, r)
+	if !ok {
+		return
+	}
+	ctx = logging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
+	instanceToken := chi.URLParam(r, "token")
+	clientToken := r.Header.Get("Client-Token")
+
+	var req boolValueRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondError(w, http.StatusBadRequest, "invalid json payload")
+		return
+	}
+	if err := h.service.UpdateAutoReadMessage(ctx, instanceID, clientToken, instanceToken, req.Value); err != nil {
+		h.handleServiceError(ctx, w, err)
+		return
+	}
+	respondJSON(w, http.StatusOK, valueResponse{Value: true})
+}
+
+// Proxy request/response types
+
+type proxyUpdateRequest struct {
+	ProxyURL    string `json:"proxyUrl"`
+	NoWebsocket bool   `json:"noWebsocket,omitempty"`
+	OnlyLogin   bool   `json:"onlyLogin,omitempty"`
+	NoMedia     bool   `json:"noMedia,omitempty"`
+}
+
+type proxyTestRequest struct {
+	ProxyURL string `json:"proxyUrl"`
+}
+
+type proxySwapRequest struct {
+	ProxyURL string `json:"proxyUrl"`
+}
+
+type proxyResponse struct {
+	Value bool                   `json:"value"`
+	Proxy *instances.ProxyConfig `json:"proxy,omitempty"`
+}
+
+type proxyTestResponse struct {
+	Reachable bool   `json:"reachable"`
+	LatencyMs int    `json:"latencyMs"`
+	Error     string `json:"error,omitempty"`
+}
+
+type proxyHealthResponse struct {
+	Proxy *instances.ProxyConfig     `json:"proxy"`
+	Logs  []instances.ProxyHealthLog `json:"logs"`
+}
+
+func (h *InstanceHandler) updateProxy(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	instanceID, ok := h.parseInstanceID(w, r)
+	if !ok {
+		return
+	}
+	ctx = logging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
+	instanceToken := chi.URLParam(r, "token")
+	clientToken := r.Header.Get("Client-Token")
+
+	var req proxyUpdateRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondError(w, http.StatusBadRequest, "invalid json payload")
+		return
+	}
+
+	cfg := instances.ProxyConfig{
+		Enabled:     req.ProxyURL != "",
+		NoWebsocket: req.NoWebsocket,
+		OnlyLogin:   req.OnlyLogin,
+		NoMedia:     req.NoMedia,
+	}
+	if req.ProxyURL != "" {
+		cfg.ProxyURL = &req.ProxyURL
+	}
+
+	result, err := h.service.UpdateProxy(ctx, instanceID, clientToken, instanceToken, cfg)
+	if err != nil {
+		h.handleServiceError(ctx, w, err)
+		return
+	}
+	respondJSON(w, http.StatusOK, proxyResponse{Value: true, Proxy: result})
+}
+
+func (h *InstanceHandler) getProxy(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	instanceID, ok := h.parseInstanceID(w, r)
+	if !ok {
+		return
+	}
+	ctx = logging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
+	instanceToken := chi.URLParam(r, "token")
+	clientToken := r.Header.Get("Client-Token")
+
+	cfg, err := h.service.GetProxy(ctx, instanceID, clientToken, instanceToken)
+	if err != nil {
+		h.handleServiceError(ctx, w, err)
+		return
+	}
+	respondJSON(w, http.StatusOK, proxyResponse{Value: true, Proxy: cfg})
+}
+
+func (h *InstanceHandler) removeProxy(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	instanceID, ok := h.parseInstanceID(w, r)
+	if !ok {
+		return
+	}
+	ctx = logging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
+	instanceToken := chi.URLParam(r, "token")
+	clientToken := r.Header.Get("Client-Token")
+
+	if err := h.service.RemoveProxy(ctx, instanceID, clientToken, instanceToken); err != nil {
+		h.handleServiceError(ctx, w, err)
+		return
+	}
+	respondJSON(w, http.StatusOK, valueResponse{Value: true})
+}
+
+func (h *InstanceHandler) testProxy(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	instanceID, ok := h.parseInstanceID(w, r)
+	if !ok {
+		return
+	}
+	ctx = logging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
+	instanceToken := chi.URLParam(r, "token")
+	clientToken := r.Header.Get("Client-Token")
+
+	var req proxyTestRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondError(w, http.StatusBadRequest, "invalid json payload")
+		return
+	}
+
+	result, err := h.service.TestProxy(ctx, instanceID, clientToken, instanceToken, req.ProxyURL)
+	if err != nil {
+		h.handleServiceError(ctx, w, err)
+		return
+	}
+	respondJSON(w, http.StatusOK, proxyTestResponse{
+		Reachable: result.Reachable,
+		LatencyMs: result.LatencyMs,
+		Error:     result.Error,
+	})
+}
+
+func (h *InstanceHandler) swapProxy(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	instanceID, ok := h.parseInstanceID(w, r)
+	if !ok {
+		return
+	}
+	ctx = logging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
+	instanceToken := chi.URLParam(r, "token")
+	clientToken := r.Header.Get("Client-Token")
+
+	var req proxySwapRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		respondError(w, http.StatusBadRequest, "invalid json payload")
+		return
+	}
+
+	result, err := h.service.SwapProxy(ctx, instanceID, clientToken, instanceToken, req.ProxyURL)
+	if err != nil {
+		h.handleServiceError(ctx, w, err)
+		return
+	}
+	respondJSON(w, http.StatusOK, proxyResponse{Value: true, Proxy: result})
+}
+
+func (h *InstanceHandler) getProxyHealth(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	instanceID, ok := h.parseInstanceID(w, r)
+	if !ok {
+		return
+	}
+	ctx = logging.WithAttrs(ctx, slog.String("instance_id", instanceID.String()))
+	instanceToken := chi.URLParam(r, "token")
+	clientToken := r.Header.Get("Client-Token")
+
+	cfg, err := h.service.GetProxy(ctx, instanceID, clientToken, instanceToken)
+	if err != nil {
+		h.handleServiceError(ctx, w, err)
+		return
+	}
+
+	logs, err := h.service.GetProxyHealthLogs(ctx, instanceID, clientToken, instanceToken, 50)
+	if err != nil {
+		h.handleServiceError(ctx, w, err)
+		return
+	}
+
+	respondJSON(w, http.StatusOK, proxyHealthResponse{Proxy: cfg, Logs: logs})
 }

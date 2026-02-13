@@ -10,8 +10,17 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+
+	"go.mau.fi/whatsmeow/api/internal/events/echo"
 	"go.mau.fi/whatsmeow/api/internal/observability"
 )
+
+// pauseState tracks a paused instance with a safety timeout.
+type pauseState struct {
+	reason   string
+	pausedAt time.Time
+	timer    *time.Timer
+}
 
 // Coordinator manages the lifecycle of queue workers
 // It creates workers dynamically as instances connect/disconnect
@@ -26,6 +35,10 @@ type Coordinator struct {
 	// Worker management
 	mu      sync.RWMutex
 	workers map[uuid.UUID]*Worker
+
+	// Proxy pause control
+	pauseMu         sync.RWMutex
+	pausedInstances map[uuid.UUID]*pauseState
 
 	// Cleanup job
 	cleanupTicker  *time.Ticker
@@ -50,6 +63,7 @@ type CoordinatorConfig struct {
 	Config         *Config
 	Logger         *slog.Logger
 	Metrics        *observability.Metrics
+	EchoEmitter    *echo.Emitter // API echo emitter for webhook notifications
 
 	// Cleanup configuration
 	CleanupInterval time.Duration // How often to run cleanup (default: 1h)
@@ -84,23 +98,25 @@ func NewCoordinator(ctx context.Context, cfg *CoordinatorConfig) (*Coordinator, 
 	// Create processor if not provided
 	processor := cfg.Processor
 	if processor == nil {
-		processor = NewDefaultMessageProcessor(cfg.Logger)
+		// Use WhatsAppMessageProcessor with echo emitter for API webhook notifications
+		processor = NewWhatsAppMessageProcessor(cfg.Logger, cfg.EchoEmitter)
 	}
 
 	ctx, cancel := context.WithCancel(ctx)
 
 	c := &Coordinator{
-		repo:           repo,
-		clientRegistry: cfg.ClientRegistry,
-		processor:      processor,
-		config:         cfg.Config,
-		log:            cfg.Logger,
-		metrics:        cfg.Metrics,
-		workers:        make(map[uuid.UUID]*Worker),
-		cleanupStop:    make(chan struct{}),
-		cleanupTimeout: cfg.CleanupTimeout,
-		ctx:            ctx,
-		cancel:         cancel,
+		repo:            repo,
+		clientRegistry:  cfg.ClientRegistry,
+		processor:       processor,
+		config:          cfg.Config,
+		log:             cfg.Logger,
+		metrics:         cfg.Metrics,
+		workers:         make(map[uuid.UUID]*Worker),
+		pausedInstances: make(map[uuid.UUID]*pauseState),
+		cleanupStop:     make(chan struct{}),
+		cleanupTimeout:  cfg.CleanupTimeout,
+		ctx:             ctx,
+		cancel:          cancel,
 	}
 
 	// Start cleanup job
@@ -113,7 +129,57 @@ func NewCoordinator(ctx context.Context, cfg *CoordinatorConfig) (*Coordinator, 
 		slog.Duration("poll_interval", cfg.Config.PollInterval),
 		slog.Duration("cleanup_interval", cfg.CleanupInterval))
 
+	// Start periodic metrics update
+	c.wg.Add(1)
+	go c.metricsUpdateLoop()
+
 	return c, nil
+}
+
+// metricsUpdateLoop periodically updates queue size metrics
+func (c *Coordinator) metricsUpdateLoop() {
+	defer c.wg.Done()
+
+	ticker := time.NewTicker(30 * time.Second)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-c.ctx.Done():
+			return
+		case <-c.cleanupStop:
+			return
+		case <-ticker.C:
+			c.updateQueueMetrics()
+		}
+	}
+}
+
+// updateQueueMetrics updates the MessageQueueSize gauge for all registered instances
+func (c *Coordinator) updateQueueMetrics() {
+	if c.metrics == nil {
+		return
+	}
+
+	c.mu.RLock()
+	instanceIDs := make([]uuid.UUID, 0, len(c.workers))
+	for id := range c.workers {
+		instanceIDs = append(instanceIDs, id)
+	}
+	c.mu.RUnlock()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	for _, instanceID := range instanceIDs {
+		stats, err := c.repo.GetStats(ctx, instanceID)
+		if err != nil {
+			continue
+		}
+		c.metrics.MessageQueueSize.WithLabelValues(instanceID.String(), "pending").Set(float64(stats.PendingCount))
+		c.metrics.MessageQueueSize.WithLabelValues(instanceID.String(), "processing").Set(float64(stats.ProcessingCount))
+		c.metrics.MessageQueueSize.WithLabelValues(instanceID.String(), "failed").Set(float64(stats.FailedCount))
+	}
 }
 
 func (c *Coordinator) setDraining(active bool) {
@@ -126,6 +192,78 @@ func (c *Coordinator) isDraining() bool {
 	c.drainMu.RLock()
 	defer c.drainMu.RUnlock()
 	return c.draining
+}
+
+// PauseInstance pauses message processing for an instance during proxy operations.
+// A safety timeout of 5 minutes auto-resumes to prevent permanent pauses.
+func (c *Coordinator) PauseInstance(ctx context.Context, instanceID uuid.UUID, reason string) error {
+	c.pauseMu.Lock()
+	defer c.pauseMu.Unlock()
+
+	// Already paused, update reason
+	if existing, ok := c.pausedInstances[instanceID]; ok {
+		existing.reason = reason
+		c.log.Debug("instance already paused, updated reason",
+			slog.String("instance_id", instanceID.String()),
+			slog.String("reason", reason))
+		return nil
+	}
+
+	// Safety timeout: auto-resume after 5 minutes to prevent stuck pauses
+	const safetyTimeout = 5 * time.Minute
+	timer := time.AfterFunc(safetyTimeout, func() {
+		c.log.Warn("auto-resuming instance after safety timeout",
+			slog.String("instance_id", instanceID.String()),
+			slog.String("original_reason", reason),
+			slog.Duration("timeout", safetyTimeout))
+		_ = c.ResumeInstance(context.Background(), instanceID)
+	})
+
+	c.pausedInstances[instanceID] = &pauseState{
+		reason:   reason,
+		pausedAt: time.Now(),
+		timer:    timer,
+	}
+
+	c.log.Info("instance paused for proxy operation",
+		slog.String("instance_id", instanceID.String()),
+		slog.String("reason", reason))
+
+	return nil
+}
+
+// ResumeInstance resumes message processing for a previously paused instance.
+func (c *Coordinator) ResumeInstance(ctx context.Context, instanceID uuid.UUID) error {
+	c.pauseMu.Lock()
+	defer c.pauseMu.Unlock()
+
+	state, ok := c.pausedInstances[instanceID]
+	if !ok {
+		return nil // Not paused, nothing to do
+	}
+
+	// Stop safety timer
+	if state.timer != nil {
+		state.timer.Stop()
+	}
+
+	pauseDuration := time.Since(state.pausedAt)
+	delete(c.pausedInstances, instanceID)
+
+	c.log.Info("instance resumed after proxy operation",
+		slog.String("instance_id", instanceID.String()),
+		slog.String("reason", state.reason),
+		slog.Duration("paused_for", pauseDuration))
+
+	return nil
+}
+
+// IsInstancePaused returns true if message processing is paused for the instance.
+func (c *Coordinator) IsInstancePaused(instanceID uuid.UUID) bool {
+	c.pauseMu.RLock()
+	defer c.pauseMu.RUnlock()
+	_, ok := c.pausedInstances[instanceID]
+	return ok
 }
 
 // AddInstance creates and starts a worker for a specific instance
@@ -148,13 +286,22 @@ func (c *Coordinator) AddInstance(instanceID uuid.UUID) error {
 		c.processor,
 		c.config,
 		c.log,
+		c.metrics,
 	)
+
+	// Wire pause checker for proxy operations
+	worker.SetPauseChecker(c.IsInstancePaused)
 
 	// Start worker
 	worker.Start(c.ctx)
 
 	// Track worker
 	c.workers[instanceID] = worker
+
+	// Update metrics
+	if c.metrics != nil {
+		c.metrics.MessageQueueWorkers.WithLabelValues(instanceID.String()).Inc()
+	}
 
 	c.log.Info("added queue worker for instance",
 		slog.String("instance_id", instanceID.String()),
@@ -182,6 +329,11 @@ func (c *Coordinator) RemoveInstance(ctx context.Context, instanceID uuid.UUID) 
 		return err
 	}
 
+	// Update metrics
+	if c.metrics != nil {
+		c.metrics.MessageQueueWorkers.WithLabelValues(instanceID.String()).Dec()
+	}
+
 	c.log.Info("removed queue worker for instance",
 		slog.String("instance_id", instanceID.String()),
 		slog.Int("total_workers", len(c.workers)))
@@ -202,7 +354,16 @@ func (c *Coordinator) Enqueue(ctx context.Context, instanceID uuid.UUID, payload
 	// Enqueue message
 	id, err := c.repo.Enqueue(ctx, instanceID, payload, scheduledAt, c.config.MaxAttempts)
 	if err != nil {
+		// Track enqueue errors
+		if c.metrics != nil {
+			c.metrics.MessageQueueErrors.WithLabelValues(instanceID.String(), "message", "enqueue").Inc()
+		}
 		return 0, fmt.Errorf("enqueue message: %w", err)
+	}
+
+	// Track successful enqueue
+	if c.metrics != nil {
+		c.metrics.MessageQueueEnqueued.WithLabelValues(instanceID.String(), "message", "success").Inc()
 	}
 
 	c.log.Debug("message enqueued",
@@ -484,7 +645,7 @@ func (c *Coordinator) EnqueueMessage(ctx context.Context, instanceID uuid.UUID, 
 }
 
 // ListQueueJobs retrieves messages from the queue with pagination
-// Returns QueueListResponse compatible with Z-API format
+// Returns QueueListResponse
 func (c *Coordinator) ListQueueJobs(ctx context.Context, instanceID uuid.UUID, limit, offset int) (*QueueListResponse, error) {
 	// Get messages from repository
 	messages, total, err := c.repo.ListMessages(ctx, instanceID, limit, offset)
@@ -604,4 +765,13 @@ func generateZaapID() string {
 	timestamp := time.Now().UnixNano()
 	random := uuid.New().String()[:8]
 	return fmt.Sprintf("%d%s", timestamp, random)
+}
+
+// GetClient returns the whatsmeow client for an instance
+// This is used for direct WhatsApp operations (delete message, modify chat, etc.)
+func (c *Coordinator) GetClient(instanceID uuid.UUID) (ClientRegistry, bool) {
+	if c.clientRegistry == nil {
+		return nil, false
+	}
+	return c.clientRegistry, true
 }

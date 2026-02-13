@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"image"
 	"io"
+	"math"
 	"net/http"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"time"
 
@@ -16,6 +18,45 @@ import (
 	"golang.org/x/image/tiff"
 	"golang.org/x/image/webp"
 )
+
+// GetVideoDuration extracts video duration in seconds using ffprobe.
+// Returns 0 with an error if ffprobe is not available or fails.
+func GetVideoDuration(data []byte) (int64, error) {
+	if _, err := exec.LookPath("ffprobe"); err != nil {
+		return 0, fmt.Errorf("ffprobe not found: %w", err)
+	}
+
+	tempFile, err := os.CreateTemp("", "video_dur_*")
+	if err != nil {
+		return 0, fmt.Errorf("create temp file: %w", err)
+	}
+	defer os.Remove(tempFile.Name())
+
+	if _, err := tempFile.Write(data); err != nil {
+		tempFile.Close()
+		return 0, fmt.Errorf("write temp file: %w", err)
+	}
+	tempFile.Close()
+
+	cmd := exec.Command("ffprobe",
+		"-v", "error",
+		"-show_entries", "format=duration",
+		"-of", "csv=p=0",
+		tempFile.Name())
+
+	output, err := cmd.Output()
+	if err != nil {
+		return 0, fmt.Errorf("ffprobe failed: %w", err)
+	}
+
+	durationStr := strings.TrimSpace(string(output))
+	durationFloat, err := strconv.ParseFloat(durationStr, 64)
+	if err != nil {
+		return 0, fmt.Errorf("parse duration: %w", err)
+	}
+
+	return int64(math.Round(durationFloat)), nil
+}
 
 // MediaType represents supported media types for validation
 type MediaType string
@@ -408,7 +449,8 @@ func (d *MediaDownloader) ValidateMediaType(mimeType string, mediaType MediaType
 			return fmt.Errorf("invalid image type: %s", mimeType)
 		}
 	case MediaTypeVideo:
-		if !strings.HasPrefix(mimeType, "video/") {
+		// Accept video/* and image/gif (GIF files are converted to MP4 before sending)
+		if !strings.HasPrefix(mimeType, "video/") && mimeType != "image/gif" {
 			return fmt.Errorf("invalid video type: %s", mimeType)
 		}
 	case MediaTypeAudio:
@@ -420,6 +462,71 @@ func (d *MediaDownloader) ValidateMediaType(mimeType string, mediaType MediaType
 		return nil
 	}
 	return nil
+}
+
+// ConvertGifToMP4 converts a GIF image to MP4 video using ffmpeg.
+// Returns the MP4 data or an error if ffmpeg is not available or conversion fails.
+func ConvertGifToMP4(gifData []byte) ([]byte, error) {
+	// Check if ffmpeg is available
+	if _, err := exec.LookPath("ffmpeg"); err != nil {
+		return nil, fmt.Errorf("ffmpeg not found: %w", err)
+	}
+
+	// Create temp input file
+	inputFile, err := os.CreateTemp("", "gif_input_*.gif")
+	if err != nil {
+		return nil, fmt.Errorf("create input temp file: %w", err)
+	}
+	defer os.Remove(inputFile.Name())
+
+	// Create temp output file
+	outputFile, err := os.CreateTemp("", "gif_output_*.mp4")
+	if err != nil {
+		inputFile.Close()
+		return nil, fmt.Errorf("create output temp file: %w", err)
+	}
+	outputPath := outputFile.Name()
+	outputFile.Close()
+	defer os.Remove(outputPath)
+
+	// Write GIF data to input file
+	if _, err := inputFile.Write(gifData); err != nil {
+		inputFile.Close()
+		return nil, fmt.Errorf("write gif data: %w", err)
+	}
+	inputFile.Close()
+
+	// Run ffmpeg conversion
+	// -f gif: force GIF input format
+	// -i: input file
+	// -movflags faststart: optimize for streaming
+	// -pix_fmt yuv420p: ensure compatibility
+	// -vf: scale to even dimensions (required by h264)
+	// -y: overwrite output
+	cmd := exec.Command("ffmpeg",
+		"-f", "gif",
+		"-i", inputFile.Name(),
+		"-movflags", "faststart",
+		"-pix_fmt", "yuv420p",
+		"-vf", "scale=trunc(iw/2)*2:trunc(ih/2)*2",
+		"-y", outputPath,
+	)
+
+	if output, err := cmd.CombinedOutput(); err != nil {
+		return nil, fmt.Errorf("ffmpeg conversion failed: %w (output: %s)", err, string(output))
+	}
+
+	// Read converted MP4 data
+	mp4Data, err := os.ReadFile(outputPath)
+	if err != nil {
+		return nil, fmt.Errorf("read converted mp4: %w", err)
+	}
+
+	if len(mp4Data) == 0 {
+		return nil, fmt.Errorf("ffmpeg produced empty output")
+	}
+
+	return mp4Data, nil
 }
 
 // GetMediaDimensions returns actual width and height for images and videos

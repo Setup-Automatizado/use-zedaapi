@@ -14,7 +14,7 @@ import (
 	"go.mau.fi/whatsmeow/types"
 )
 
-// Create provisions a new group on WhatsApp and returns the Z-API compliant identifiers.
+// Create provisions a new group on WhatsApp and returns the FUNNELCHAT compliant identifiers.
 func (s *Service) Create(ctx context.Context, instanceID uuid.UUID, params CreateParams) (CreateResult, error) {
 	logger := logging.ContextLogger(ctx, s.log).With(
 		slog.String("component", "groups_service"),
@@ -557,8 +557,37 @@ func (s *Service) UpdateDescription(ctx context.Context, instanceID uuid.UUID, p
 		return ValueResult{}, fmt.Errorf("get whatsapp client: %w", err)
 	}
 
-	if err := client.SetGroupDescription(groupJID, params.GroupDescription); err != nil {
-		logger.Error("failed to set group description", slog.String("error", err.Error()))
+	// Fetch current group info to validate TopicID before updating.
+	// This prevents 409 conflicts when WhatsApp returns invalid IDs like "undefined".
+	var previousID string
+	groupInfo, err := client.GetGroupInfoWithContext(ctx, groupJID)
+	if err != nil {
+		// Log warning but continue - will try without previousID
+		logger.Warn("failed to fetch group info for description update",
+			slog.String("error", err.Error()),
+			slog.String("parsed_jid", groupJID.String()),
+		)
+	} else if groupInfo != nil {
+		// Validate TopicID before using - only use if it's a valid hex message ID
+		if IsValidDescriptionID(groupInfo.TopicID) {
+			previousID = groupInfo.TopicID
+			logger.Debug("using valid previous description ID",
+				slog.String("topic_id", previousID),
+			)
+		} else if groupInfo.TopicID != "" {
+			logger.Warn("group has invalid description ID, skipping prev attribute",
+				slog.String("topic_id", groupInfo.TopicID),
+				slog.String("parsed_jid", groupJID.String()),
+			)
+		}
+	}
+
+	if err := client.SetGroupTopic(ctx, groupJID, previousID, "", params.GroupDescription); err != nil {
+		logger.Error("failed to set group description",
+			slog.String("error", err.Error()),
+			slog.String("parsed_jid", groupJID.String()),
+			slog.String("previous_id", previousID),
+		)
 		return ValueResult{}, fmt.Errorf("set group description: %w", err)
 	}
 

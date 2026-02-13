@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"go.mau.fi/whatsmeow/api/internal/events/transport/http"
+	"go.mau.fi/whatsmeow/api/internal/observability"
 )
 
 type httpTransportWrapper struct {
@@ -55,12 +56,14 @@ type Registry struct {
 	mu         sync.RWMutex
 	transports map[TransportType]Transport
 	httpConfig *http.Config
+	metrics    *observability.Metrics
 }
 
-func NewRegistry(httpConfig *http.Config) *Registry {
+func NewRegistry(httpConfig *http.Config, metrics *observability.Metrics) *Registry {
 	return &Registry{
 		transports: make(map[TransportType]Transport),
 		httpConfig: httpConfig,
+		metrics:    metrics,
 	}
 }
 
@@ -95,7 +98,7 @@ func (r *Registry) createTransport(transportType TransportType) (Transport, erro
 			return nil, fmt.Errorf("HTTP transport config not provided")
 		}
 		return &httpTransportWrapper{
-			impl: http.NewHTTPTransport(r.httpConfig),
+			impl: http.NewHTTPTransportWithMetrics(r.httpConfig, r.metrics),
 		}, nil
 
 	case TransportTypeRabbitMQ:

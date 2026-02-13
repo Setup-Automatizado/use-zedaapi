@@ -418,6 +418,7 @@ type ConnectedCallback struct {
 	Momment    int64  `json:"momment"`
 	InstanceID string `json:"instanceId"`
 	Phone      string `json:"phone,omitempty"`
+	IsBusiness bool   `json:"isBusiness"`
 }
 
 type DisconnectedCallback struct {

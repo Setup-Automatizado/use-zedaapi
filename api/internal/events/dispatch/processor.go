@@ -44,6 +44,7 @@ type EventProcessor struct {
 	lookup            InstanceLookup
 	metrics           *observability.Metrics
 	pollStore         pollstore.Store
+	statusInterceptor StatusInterceptor
 }
 
 type transportConfig struct {
@@ -54,6 +55,7 @@ type transportConfig struct {
 
 type InstanceLookup interface {
 	StoreJID(ctx context.Context, instanceID uuid.UUID) (string, error)
+	IsBusiness(ctx context.Context, instanceID uuid.UUID) (bool, error)
 }
 
 func NewEventProcessor(
@@ -76,6 +78,11 @@ func NewEventProcessor(
 		metrics:           metrics,
 		pollStore:         pollStore,
 	}
+}
+
+// SetStatusInterceptor sets the status cache interceptor for receipt events
+func (p *EventProcessor) SetStatusInterceptor(interceptor StatusInterceptor) {
+	p.statusInterceptor = interceptor
 }
 
 func (p *EventProcessor) Process(ctx context.Context, event *persistence.OutboxEvent) error {
@@ -105,6 +112,25 @@ func (p *EventProcessor) Process(ctx context.Context, event *persistence.OutboxE
 			return p.handleSkippedEvent(ctx, event, skippedErr.Reason)
 		}
 		return p.handleTransformError(ctx, event, err)
+	}
+
+	// Check if status cache should intercept this event (receipt events)
+	if p.statusInterceptor != nil && p.statusInterceptor.ShouldIntercept(event.EventType) {
+		suppress, interceptErr := p.statusInterceptor.InterceptAndCache(ctx, p.instanceID.String(), event.EventType, webhookPayload)
+		if interceptErr != nil {
+			logger.Warn("status cache intercept error, continuing with webhook delivery",
+				slog.String("error", interceptErr.Error()))
+		} else if suppress {
+			return p.handleCachedStatusEvent(ctx, event, start)
+		}
+	}
+
+	// Check if this event was persisted for status cache only (no webhook configured)
+	// If so, mark as completed since status cache already handled it
+	if p.isStatusCacheOnlyEvent(event) {
+		logger.Debug("status cache only event - no webhook delivery needed",
+			slog.String("event_id", event.EventID.String()))
+		return p.handleCachedStatusEvent(ctx, event, start)
 	}
 
 	deliveryResult, err := p.deliverWebhook(ctx, event, webhookPayload)
@@ -156,13 +182,14 @@ func (p *EventProcessor) transformEvent(ctx context.Context, event *persistence.
 	}
 
 	connectedPhone := p.connectedPhone(ctx)
+	isBusiness := p.isBusiness(ctx)
 	debugRaw := false
 	dumpDir := ""
 	if p.cfg != nil {
 		debugRaw = p.cfg.Events.DebugRawPayload
 		dumpDir = p.cfg.Events.DebugDumpDir
 	}
-	zapiTransformer := transformzapi.NewTransformer(connectedPhone, debugRaw, dumpDir, p.pollStore)
+	zapiTransformer := transformzapi.NewTransformer(connectedPhone, isBusiness, debugRaw, dumpDir, p.pollStore)
 
 	payload, err := zapiTransformer.Transform(ctx, internalEvent)
 	if err != nil {
@@ -279,7 +306,7 @@ func (p *EventProcessor) handleRetryableError(ctx context.Context, event *persis
 		return fmt.Errorf("update for retry: %w", err)
 	}
 
-	p.metrics.EventRetries.WithLabelValues(p.instanceID.String(), event.EventType).Inc()
+	p.metrics.EventRetries.WithLabelValues(p.instanceID.String(), event.EventType, fmt.Sprintf("%d", newAttemptCount)).Inc()
 	p.metrics.EventsProcessed.WithLabelValues(p.instanceID.String(), event.EventType, "retrying").Inc()
 
 	return fmt.Errorf("retryable error: %s", errorMsg)
@@ -333,6 +360,33 @@ func (p *EventProcessor) connectedPhone(ctx context.Context) string {
 	return jid
 }
 
+func (p *EventProcessor) isBusiness(ctx context.Context) bool {
+	if p.lookup == nil {
+		return false
+	}
+	isBusiness, err := p.lookup.IsBusiness(ctx, p.instanceID)
+	if err != nil {
+		return false
+	}
+	return isBusiness
+}
+
+// isStatusCacheOnlyEvent checks if this event was persisted for status cache only
+// (no webhook was configured at capture time, but status cache is enabled)
+func (p *EventProcessor) isStatusCacheOnlyEvent(event *persistence.OutboxEvent) bool {
+	if len(event.TransportConfig) == 0 {
+		return false
+	}
+	var cfg struct {
+		Type       string `json:"type"`
+		NoDelivery bool   `json:"no_delivery"`
+	}
+	if err := json.Unmarshal(event.TransportConfig, &cfg); err != nil {
+		return false
+	}
+	return cfg.Type == "status_cache_only" && cfg.NoDelivery
+}
+
 func (p *EventProcessor) handleTransformError(ctx context.Context, event *persistence.OutboxEvent, err error) error {
 	logger := logging.ContextLogger(ctx, nil)
 
@@ -379,7 +433,7 @@ func (p *EventProcessor) handleDeliveryError(ctx context.Context, event *persist
 		return fmt.Errorf("update for retry: %w", updateErr)
 	}
 
-	p.metrics.EventRetries.WithLabelValues(p.instanceID.String(), event.EventType).Inc()
+	p.metrics.EventRetries.WithLabelValues(p.instanceID.String(), event.EventType, fmt.Sprintf("%d", newAttemptCount)).Inc()
 
 	return fmt.Errorf("delivery error (will retry): %w", err)
 }
@@ -456,6 +510,34 @@ func (p *EventProcessor) handleSkippedEvent(ctx context.Context, event *persiste
 	}
 
 	p.metrics.EventsProcessed.WithLabelValues(p.instanceID.String(), event.EventType, "skipped").Inc()
+
+	return nil
+}
+
+// handleCachedStatusEvent marks the event as delivered when it was cached and webhook suppressed
+func (p *EventProcessor) handleCachedStatusEvent(ctx context.Context, event *persistence.OutboxEvent, startTime time.Time) error {
+	logger := logging.ContextLogger(ctx, nil)
+
+	duration := time.Since(startTime)
+
+	responseJSON, _ := json.Marshal(map[string]interface{}{
+		"status":    "cached",
+		"reason":    "status_cache_webhook_suppressed",
+		"timestamp": time.Now(),
+	})
+
+	if err := p.outboxRepo.MarkDelivered(ctx, event.EventID, responseJSON); err != nil {
+		logger.Error("failed to mark cached event as delivered",
+			slog.String("error", err.Error()))
+		return fmt.Errorf("mark cached event as delivered: %w", err)
+	}
+
+	logger.Debug("status event cached and webhook suppressed",
+		slog.String("event_id", event.EventID.String()),
+		slog.String("event_type", event.EventType),
+		slog.Duration("duration", duration))
+
+	p.metrics.EventsProcessed.WithLabelValues(p.instanceID.String(), event.EventType, "cached").Inc()
 
 	return nil
 }

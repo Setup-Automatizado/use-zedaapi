@@ -113,6 +113,41 @@ func (w *TransactionalWriter) WriteEvents(ctx context.Context, events []*types.I
 	}
 
 	for _, internalEvent := range events {
+		// Filter waitingMessage=true events (incomplete messages awaiting sender key)
+		// These are messages that couldn't be decrypted yet and should not be forwarded
+		// Controlled by FILTER_WAITING_MESSAGE env var (default: true)
+		if w.cfg != nil && w.cfg.EventFilters.FilterWaitingMessage && internalEvent.Metadata["waiting_message"] == "true" {
+			skippedCount++
+			w.log.DebugContext(ctx, "filtering waitingMessage=true event",
+				slog.String("instance_id", instanceID.String()),
+				slog.String("event_id", internalEvent.EventID.String()),
+				slog.String("event_type", internalEvent.EventType))
+			w.metrics.EventsInserted.WithLabelValues(
+				instanceID.String(),
+				internalEvent.EventType,
+				"filtered_waiting_message",
+			).Inc()
+			continue
+		}
+
+		// Filter secondary device receipts (Device > 0)
+		// We only want receipts from the primary/native device (Device == 0)
+		// sender_device metadata is only set when Device > 0, so its presence indicates secondary device
+		// Controlled by FILTER_SECONDARY_DEVICE_RECEIPTS env var (default: true)
+		if w.cfg != nil && w.cfg.EventFilters.FilterSecondaryDeviceReceipts && internalEvent.EventType == "receipt" && internalEvent.Metadata["sender_device"] != "" {
+			skippedCount++
+			w.log.DebugContext(ctx, "filtering secondary device receipt",
+				slog.String("instance_id", instanceID.String()),
+				slog.String("event_id", internalEvent.EventID.String()),
+				slog.String("sender_device", internalEvent.Metadata["sender_device"]))
+			w.metrics.EventsInserted.WithLabelValues(
+				instanceID.String(),
+				internalEvent.EventType,
+				"filtered_secondary_device",
+			).Inc()
+			continue
+		}
+
 		if w.metadataEnricher != nil {
 			w.metadataEnricher(resolvedConfig, internalEvent)
 		}
@@ -174,7 +209,12 @@ func (w *TransactionalWriter) WriteEvents(ctx context.Context, events []*types.I
 		}
 
 		transportConfig, shouldDeliver := w.buildTransportConfig(internalEvent, resolvedConfig)
-		if !shouldDeliver {
+
+		// When StatusCache is enabled, receipt events should be persisted even without webhook
+		// The StatusCache interceptor in the processor will handle caching and suppress webhook delivery
+		statusCacheWillHandle := w.cfg != nil && w.cfg.StatusCache.Enabled && internalEvent.EventType == "receipt"
+
+		if !shouldDeliver && !statusCacheWillHandle {
 			skippedCount++
 			w.log.WarnContext(ctx, "skipping event without webhook destination",
 				slog.String("instance_id", instanceID.String()),
@@ -187,6 +227,31 @@ func (w *TransactionalWriter) WriteEvents(ctx context.Context, events []*types.I
 				"skipped",
 			).Inc()
 			continue
+		}
+
+		// For StatusCache-handled receipts without webhook, create a minimal transport config
+		if statusCacheWillHandle && !shouldDeliver {
+			w.log.DebugContext(ctx, "persisting receipt for status cache (no webhook configured)",
+				slog.String("instance_id", instanceID.String()),
+				slog.String("event_id", internalEvent.EventID.String()))
+			// Create transport config that marks this for status cache only
+			config := struct {
+				URL        string `json:"url"`
+				Type       string `json:"type"`
+				NoDelivery bool   `json:"no_delivery"`
+			}{
+				URL:        "",
+				Type:       "status_cache_only",
+				NoDelivery: true,
+			}
+			var err error
+			transportConfig, err = json.Marshal(config)
+			if err != nil {
+				w.log.Error("marshal status cache transport config",
+					slog.String("event_id", internalEvent.EventID.String()),
+					slog.String("error", err.Error()))
+				continue
+			}
 		}
 
 		outboxEvent := &persistence.OutboxEvent{
@@ -316,19 +381,69 @@ func resolveWebhookURL(event *types.InternalEvent, cfg *ResolvedWebhookConfig) (
 	switch event.EventType {
 	case "message":
 		fromMe := event.Metadata["from_me"] == "true"
-		if fromMe && !cfg.NotifySentByMe {
+		fromAPI := event.Metadata["from_api"] == "true"
+
+		// API echo events are ALWAYS routed regardless of NotifySentByMe setting
+		// This ensures the partner always receives confirmation of their API calls
+		if fromAPI {
+			// Prefer ReceivedDeliveryURL for API echo, fall back to ReceivedURL
+			if cfg.ReceivedDeliveryURL != "" {
+				return cfg.ReceivedDeliveryURL, "received"
+			}
+			return cfg.ReceivedURL, "received"
+		}
+
+		// When NotifySentByMe is enabled:
+		// - If receivedAndDeliveryCallbackUrl is configured, send ALL messages there
+		// - If NOT configured, fall back to individual webhooks (receivedCallbackUrl / deliveryCallbackUrl)
+		if cfg.NotifySentByMe {
+			if cfg.ReceivedDeliveryURL != "" {
+				return cfg.ReceivedDeliveryURL, "received"
+			}
+			// Combined endpoint not configured - fall back to individual webhooks
+			if fromMe {
+				if cfg.DeliveryURL != "" {
+					return cfg.DeliveryURL, "delivery"
+				}
+				return "", ""
+			}
+			return cfg.ReceivedURL, "received"
+		}
+
+		// When NotifySentByMe is disabled, use SEPARATE routing:
+		// - Messages SENT by me -> delivery_url
+		// - Messages RECEIVED from others -> received_url
+		if fromMe {
+			// Messages sent by me go to delivery_url
+			if cfg.DeliveryURL != "" {
+				return cfg.DeliveryURL, "delivery"
+			}
+			// Fall back to received_delivery_url (combined endpoint)
+			if cfg.ReceivedDeliveryURL != "" {
+				return cfg.ReceivedDeliveryURL, "delivery"
+			}
+			// If no webhook configured, filter the event
 			return "", ""
 		}
+
+		// Messages received from others go to received_delivery_url if set, otherwise received_url
+		if cfg.ReceivedDeliveryURL != "" {
+			return cfg.ReceivedDeliveryURL, "received"
+		}
 		return cfg.ReceivedURL, "received"
+
 	case "receipt":
-		return cfg.ReceivedDeliveryURL, "receipt"
-	case "undecryptable":
-		return cfg.ReceivedURL, "received"
-	case "group_info":
-		return cfg.ReceivedURL, "received"
-	case "group_joined":
-		return cfg.ReceivedURL, "received"
-	case "picture":
+		// Receipt events (message status: sent, delivered, read, played) go ONLY to message_status_url
+		// If not configured, the event is discarded (no fallback to other webhooks)
+		if cfg.MessageStatusURL != "" {
+			return cfg.MessageStatusURL, "message_status"
+		}
+		return "", ""
+	case "undecryptable", "group_info", "group_joined", "picture":
+		// These events go to receivedAndDeliveryCallbackUrl if configured, otherwise receivedCallbackUrl
+		if cfg.ReceivedDeliveryURL != "" {
+			return cfg.ReceivedDeliveryURL, "received"
+		}
 		return cfg.ReceivedURL, "received"
 	case "chat_presence":
 		return cfg.ChatPresenceURL, "chat_presence"

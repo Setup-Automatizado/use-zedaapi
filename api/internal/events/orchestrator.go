@@ -312,3 +312,10 @@ func (o *Orchestrator) HandleEvent(ctx context.Context, instanceID uuid.UUID, ra
 
 	return handler.HandleEvent(ctx, rawEvent)
 }
+
+// GetEventRouter returns the event router for API echo functionality
+// This allows external components (like the message queue) to inject events
+// into the event pipeline
+func (o *Orchestrator) GetEventRouter() *capture.EventRouter {
+	return o.router
+}

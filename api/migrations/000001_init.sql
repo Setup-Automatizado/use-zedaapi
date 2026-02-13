@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS event_outbox (
     event_type VARCHAR(50) NOT NULL,
     source_lib VARCHAR(20) NOT NULL DEFAULT 'whatsmeow',
 
-    -- Event data (Z-API compatible schema)
+    -- Event data
     payload JSONB NOT NULL,
     metadata JSONB,
 
