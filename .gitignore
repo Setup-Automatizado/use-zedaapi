@@ -64,3 +64,4 @@ tmp/
 api/z_api/
 api/whatsmeow_schema_webhooks/
 api/whatsapp_business_account_webhooks/
+docs
