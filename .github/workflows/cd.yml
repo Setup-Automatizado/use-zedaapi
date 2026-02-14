@@ -116,17 +116,22 @@ jobs:
       - name: Determine version tag
         id: version
         run: |
+          # Read current version from VERSION file as fallback
+          CURRENT_VERSION="$(cat VERSION 2>/dev/null | tr -d '[:space:]')"
+          if [ -z "$CURRENT_VERSION" ]; then
+            CURRENT_VERSION="unknown"
+          fi
+
           if [ "${{ github.ref }}" = "refs/heads/production" ]; then
             if [ "${{ needs.release.outputs.new_release_published }}" = "true" ]; then
               VERSION="${{ needs.release.outputs.new_release_version }}"
               echo "VERSION=v${VERSION}" >> $GITHUB_OUTPUT
-              echo "CHANNEL=latest" >> $GITHUB_OUTPUT
             else
-              echo "VERSION=latest" >> $GITHUB_OUTPUT
-              echo "CHANNEL=latest" >> $GITHUB_OUTPUT
+              echo "VERSION=v${CURRENT_VERSION}" >> $GITHUB_OUTPUT
             fi
+            echo "CHANNEL=latest" >> $GITHUB_OUTPUT
           elif [ "${{ github.ref }}" = "refs/heads/homolog" ]; then
-            echo "VERSION=homolog" >> $GITHUB_OUTPUT
+            echo "VERSION=${CURRENT_VERSION}-homolog" >> $GITHUB_OUTPUT
             echo "CHANNEL=homolog" >> $GITHUB_OUTPUT
           else
             echo "VERSION=unknown" >> $GITHUB_OUTPUT
@@ -209,17 +214,23 @@ jobs:
       - name: Determine version and URLs
         id: version
         run: |
+          # Read current version from VERSION file as fallback
+          CURRENT_VERSION="$(cat VERSION 2>/dev/null | tr -d '[:space:]')"
+          if [ -z "$CURRENT_VERSION" ]; then
+            CURRENT_VERSION="unknown"
+          fi
+
           if [ "${{ github.ref }}" = "refs/heads/production" ]; then
             if [ "${{ needs.release.outputs.new_release_published }}" = "true" ]; then
               VERSION="${{ needs.release.outputs.new_release_version }}"
               echo "VERSION=v${VERSION}" >> $GITHUB_OUTPUT
             else
-              echo "VERSION=latest" >> $GITHUB_OUTPUT
+              echo "VERSION=v${CURRENT_VERSION}" >> $GITHUB_OUTPUT
             fi
             echo "APP_URL=${{ secrets.MANAGER_APP_URL || 'https://manager.cloudfront.net' }}" >> $GITHUB_OUTPUT
             echo "API_PUBLIC_URL=${{ secrets.API_PUBLIC_URL || 'https://api.cloudfront.net' }}" >> $GITHUB_OUTPUT
           elif [ "${{ github.ref }}" = "refs/heads/homolog" ]; then
-            echo "VERSION=homolog" >> $GITHUB_OUTPUT
+            echo "VERSION=${CURRENT_VERSION}-homolog" >> $GITHUB_OUTPUT
             echo "APP_URL=http://homolog-manager-alb-936707116.us-east-1.elb.amazonaws.com" >> $GITHUB_OUTPUT
             echo "API_PUBLIC_URL=http://homolog-whatsmeow-alb-1474920577.us-east-1.elb.amazonaws.com" >> $GITHUB_OUTPUT
           else
