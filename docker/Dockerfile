@@ -41,7 +41,9 @@ ARG BUILD_TIME
 # Build with CGO enabled for go-fitz/MuPDF support
 # Static linking for portable binary
 # -ldflags for version info and size reduction
-RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build \
+# TARGETARCH is automatically set by Docker Buildx for multi-platform builds
+ARG TARGETARCH
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=${TARGETARCH} go build \
 	-ldflags="-w -s -linkmode external -extldflags '-static' -X go.mau.fi/whatsmeow/api/internal/version.version=${VERSION} -X go.mau.fi/whatsmeow/api/internal/version.gitCommit=${COMMIT} -X go.mau.fi/whatsmeow/api/internal/version.buildTime=${BUILD_TIME}" \
 	-tags musl,netgo \
 	-o /app/api \
@@ -49,7 +51,7 @@ RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build \
 
 # Build migrations tool (if exists)
 RUN if [ -f "./api/cmd/migrate/main.go" ]; then \
-	CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build \
+	CGO_ENABLED=1 GOOS=linux GOARCH=${TARGETARCH} go build \
 	-ldflags="-w -s -linkmode external -extldflags '-static'" \
 	-tags musl,netgo \
 	-o /app/migrate \
