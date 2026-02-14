@@ -4,11 +4,9 @@ on:
   push:
     branches-ignore:
       - 'main'
-      - 'production'
-      - 'homolog'
   pull_request:
     branches:
-      - '**'
+      - main
 
 concurrency:
   group: ci-${{ github.ref }}

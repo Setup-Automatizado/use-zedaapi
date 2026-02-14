@@ -1,14 +1,8 @@
 {
   "branches": [
-    "+([0-9])?(.{+([0-9]),x}).x",
-    "production",
-    {
-      "name": "homolog",
-      "channel": "homolog",
-      "prerelease": "homolog"
-    }
+    "main"
   ],
-  "repositoryUrl": "https://github.com/Funnelchat20/whatsapp-api-golang",
+  "repositoryUrl": "https://github.com/Setup-Automatizado/zedaapi",
   "plugins": [
     [
       "@semantic-release/commit-analyzer",
@@ -74,57 +68,57 @@
           "types": [
             {
               "type": "feat",
-              "section": "✨ Features",
+              "section": "Features",
               "hidden": false
             },
             {
               "type": "fix",
-              "section": "🐛 Bug Fixes",
+              "section": "Bug Fixes",
               "hidden": false
             },
             {
               "type": "perf",
-              "section": "⚡ Performance Improvements",
+              "section": "Performance Improvements",
               "hidden": false
             },
             {
               "type": "refactor",
-              "section": "♻️ Code Refactoring",
+              "section": "Code Refactoring",
               "hidden": false
             },
             {
               "type": "docs",
-              "section": "📝 Documentation",
+              "section": "Documentation",
               "hidden": false
             },
             {
               "type": "style",
-              "section": "💄 Styles",
+              "section": "Styles",
               "hidden": true
             },
             {
               "type": "test",
-              "section": "✅ Tests",
+              "section": "Tests",
               "hidden": true
             },
             {
               "type": "chore",
-              "section": "🔧 Chores",
+              "section": "Chores",
               "hidden": true
             },
             {
               "type": "build",
-              "section": "📦 Build System",
+              "section": "Build System",
               "hidden": true
             },
             {
               "type": "ci",
-              "section": "👷 CI/CD",
+              "section": "CI/CD",
               "hidden": true
             },
             {
               "type": "revert",
-              "section": "⏪ Reverts",
+              "section": "Reverts",
               "hidden": false
             }
           ]
@@ -144,22 +138,22 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "echo ${nextRelease.version} > VERSION && sed -i 's/\"version\": \"[^\"]*\"/\"version\": \"${nextRelease.version}\"/' manager-whatsapp-api-golang/package.json"
+        "prepareCmd": "echo ${nextRelease.version} > VERSION"
       }
     ],
     [
       "@semantic-release/git",
       {
-        "assets": ["CHANGELOG.md", "VERSION", "manager-whatsapp-api-golang/package.json"],
+        "assets": ["CHANGELOG.md", "VERSION"],
         "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
       }
     ],
     [
       "@semantic-release/github",
       {
-        "successComment": "🎉 This ${issue.pull_request ? 'PR is included' : 'issue has been resolved'} in version ${nextRelease.version}.\n\nThe release is available on [GitHub release](<github_release_url>).\n\nDocker images:\n- `latest`: latest stable release\n- `v${nextRelease.version}`: this specific version\n- `homolog`: homolog branch",
+        "successComment": "This ${issue.pull_request ? 'PR is included' : 'issue has been resolved'} in version ${nextRelease.version}.\n\nDocker image: `latest` or `v${nextRelease.version}`",
         "labels": ["released"],
-        "releasedLabels": ["released<%= nextRelease.channel ? `-${nextRelease.channel}` : \"\" %>"]
+        "releasedLabels": ["released"]
       }
     ]
   ],
