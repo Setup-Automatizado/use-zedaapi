@@ -201,6 +201,7 @@ jobs:
         with:
           context: .
           file: docker/Dockerfile
+          target: production
           push: false
           tags: whatsmeow-api:test
           cache-from: type=gha

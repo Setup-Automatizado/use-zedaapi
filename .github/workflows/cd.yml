@@ -160,6 +160,7 @@ jobs:
         with:
           context: .
           file: docker/Dockerfile
+          target: production
           platforms: linux/amd64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
