@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.2](https://github.com/Funnelchat20/whatsapp-api-golang/compare/v3.0.1...v3.0.2) (2026-02-14)
+
+### 🐛 Bug Fixes
+
+* **deploy:** add target production to API Docker build ([faa4a8f](https://github.com/Funnelchat20/whatsapp-api-golang/commit/faa4a8f6db2c7956b5874bb63d86fb25c70408a5))
+
 ## [3.0.1](https://github.com/Funnelchat20/whatsapp-api-golang/compare/v3.0.0...v3.0.1) (2026-02-14)
 
 ### 🐛 Bug Fixes
