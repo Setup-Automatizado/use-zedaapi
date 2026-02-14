@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.1](https://github.com/Funnelchat20/whatsapp-api-golang/compare/v3.0.0...v3.0.1) (2026-02-14)
+
+### 🐛 Bug Fixes
+
+* **deploy:** add target stage to Manager Docker builds and separate migration image ([2449cc4](https://github.com/Funnelchat20/whatsapp-api-golang/commit/2449cc4e7079e09502c38fdeab8af85d2629bb0a))
+* **deps:** move golang.org/x/time to direct dependency ([e25b127](https://github.com/Funnelchat20/whatsapp-api-golang/commit/e25b127053b46b8bce62a9b83fb0c821e732f03c))
+* **version:** reset version from develop prerelease to stable 2.0.0 ([5ceaebf](https://github.com/Funnelchat20/whatsapp-api-golang/commit/5ceaebfd0bd7f7f6688639f6129475f0adcc6d04))
+* **version:** sync version to 3.0.0 matching production release tag ([ea9c57c](https://github.com/Funnelchat20/whatsapp-api-golang/commit/ea9c57c7cf3b903b23dbfb9bb6d0cb8969ee771e))
+* **docker:** target amd64 only and simplify test stage ([ec63482](https://github.com/Funnelchat20/whatsapp-api-golang/commit/ec634820a55997c82870192ca2f84a081eede28a))
+* **deploy:** use VERSION file fallback instead of literal "latest" string ([5cb7478](https://github.com/Funnelchat20/whatsapp-api-golang/commit/5cb7478a321c8cdf3478a3b86d7b8975d75d8f5a))
+
+### ♻️ Code Refactoring
+
+* **ci:** consolidate to two environments (homolog + production) ([65e465d](https://github.com/Funnelchat20/whatsapp-api-golang/commit/65e465dd18229bd25e7bf020190c6f25fe5236fb))
+
+### 📝 Documentation
+
+* **infra:** add comprehensive infrastructure and CI/CD documentation ([fc24587](https://github.com/Funnelchat20/whatsapp-api-golang/commit/fc24587022d8ef4e7ce49d11ad1ebbe890d57c04))
+
 ## [3.0.0](https://github.com/Funnelchat20/whatsapp-api-golang/compare/v2.0.0...v3.0.0) (2026-02-13)
 
 ### ⚠ BREAKING CHANGES
