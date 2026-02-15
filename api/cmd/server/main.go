@@ -30,6 +30,7 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/events/dispatch"
 	"go.mau.fi/whatsmeow/api/internal/events/echo"
 	"go.mau.fi/whatsmeow/api/internal/events/media"
+	eventsnats "go.mau.fi/whatsmeow/api/internal/events/nats"
 	"go.mau.fi/whatsmeow/api/internal/events/persistence"
 	"go.mau.fi/whatsmeow/api/internal/events/pollstore"
 	"go.mau.fi/whatsmeow/api/internal/events/transport"
@@ -42,6 +43,7 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/locks"
 	"go.mau.fi/whatsmeow/api/internal/logging"
 	"go.mau.fi/whatsmeow/api/internal/messages/queue"
+	natsclient "go.mau.fi/whatsmeow/api/internal/nats"
 	"go.mau.fi/whatsmeow/api/internal/newsletters"
 	"go.mau.fi/whatsmeow/api/internal/observability"
 	proxycheck "go.mau.fi/whatsmeow/api/internal/proxy"
@@ -150,6 +152,7 @@ func (a *webhookResolverAdapter) Resolve(ctx context.Context, id uuid.UUID) (*ca
 		DisconnectedURL:     deref(webhook.DisconnectedURL),
 		ChatPresenceURL:     deref(webhook.ChatPresenceURL),
 		ConnectedURL:        deref(webhook.ConnectedURL),
+		HistorySyncURL:      deref(webhook.HistorySyncURL),
 		NotifySentByMe:      webhook.NotifySentByMe,
 		StoreJID:            inst.StoreJID,
 	}, nil
@@ -165,6 +168,43 @@ func (a *queueClientRegistryAdapter) GetClient(instanceID string) (*wameow.Clien
 		return nil, false
 	}
 	return a.registry.GetClient(id)
+}
+
+// dispatchWebhookResolverAdapter bridges instances.Repository to dispatch.WebhookResolver.
+type dispatchWebhookResolverAdapter struct {
+	repo        *instances.Repository
+	clientToken string
+}
+
+func (a *dispatchWebhookResolverAdapter) ResolveWebhook(ctx context.Context, id uuid.UUID) (*dispatch.ResolvedWebhook, error) {
+	inst, err := a.repo.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	webhook, err := a.repo.GetWebhookConfig(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	deref := func(ptr *string) string {
+		if ptr == nil {
+			return ""
+		}
+		return *ptr
+	}
+	return &dispatch.ResolvedWebhook{
+		DeliveryURL:         deref(webhook.DeliveryURL),
+		ReceivedURL:         deref(webhook.ReceivedURL),
+		ReceivedDeliveryURL: deref(webhook.ReceivedDeliveryURL),
+		MessageStatusURL:    deref(webhook.MessageStatusURL),
+		DisconnectedURL:     deref(webhook.DisconnectedURL),
+		ChatPresenceURL:     deref(webhook.ChatPresenceURL),
+		ConnectedURL:        deref(webhook.ConnectedURL),
+		HistorySyncURL:      deref(webhook.HistorySyncURL),
+		NotifySentByMe:      webhook.NotifySentByMe,
+		StoreJID:            inst.StoreJID,
+		ClientToken:         a.clientToken,
+		IsBusiness:          inst.BusinessDevice,
+	}, nil
 }
 
 // proxyHealthRepoAdapter bridges instances.Repository to proxy.Repository.
@@ -280,6 +320,39 @@ func (a *instanceProxyUpdaterAdapter) ClearProxyConfig(ctx context.Context, id u
 	return a.repo.ClearProxyConfig(ctx, id)
 }
 
+// mediaClientProviderAdapter provides WhatsApp clients to NATS media workers.
+// The registry reference is set after registry creation via SetRegistry().
+type mediaClientProviderAdapter struct {
+	registry *whatsmeow.ClientRegistry
+}
+
+func (a *mediaClientProviderAdapter) GetClient(instanceID uuid.UUID) (*wameow.Client, bool) {
+	if a.registry == nil {
+		return nil, false
+	}
+	return a.registry.GetClient(instanceID)
+}
+
+// mediaTaskPublisherAdapter bridges media.NATSMediaPublisher to capture.MediaTaskPublisher.
+// This allows the NATSEventWriter to publish media tasks without importing media directly.
+type mediaTaskPublisherAdapter struct {
+	pub *media.NATSMediaPublisher
+}
+
+func (a *mediaTaskPublisherAdapter) PublishMediaTask(ctx context.Context, info capture.MediaTaskInfo) error {
+	return a.pub.PublishTask(ctx, media.MediaTask{
+		InstanceID:  info.InstanceID,
+		EventID:     info.EventID,
+		MediaKey:    info.MediaKey,
+		DirectPath:  info.DirectPath,
+		MediaType:   info.MediaType,
+		MimeType:    info.MimeType,
+		FileLength:  info.FileLength,
+		PublishedAt: time.Now(),
+		Payload:     info.Payload,
+	})
+}
+
 func storeJIDEnricher() capture.MetadataEnricher {
 	return func(cfg *capture.ResolvedWebhookConfig, event *types.InternalEvent) {
 		if cfg == nil || cfg.StoreJID == nil || *cfg.StoreJID == "" {
@@ -378,6 +451,57 @@ func main() {
 	})
 	defer redisClient.Close()
 
+	// Initialize NATS client if enabled
+	var natsClient *natsclient.Client
+	var natsMetrics *natsclient.NATSMetrics
+	if cfg.NATS.Enabled {
+		natsMetrics = natsclient.NewNATSMetrics(cfg.Prometheus.Namespace, prometheus.DefaultRegisterer)
+		natsCfg := natsclient.Config{
+			URL:                   cfg.NATS.URL,
+			Token:                 cfg.NATS.Token,
+			ConnectTimeout:        cfg.NATS.ConnectTimeout,
+			ReconnectWait:         cfg.NATS.ReconnectWait,
+			MaxReconnects:         cfg.NATS.MaxReconnects,
+			PublishTimeout:        cfg.NATS.PublishTimeout,
+			DrainTimeout:          cfg.NATS.DrainTimeout,
+			StreamMessageQueue:    "MESSAGE_QUEUE",
+			StreamWhatsAppEvents:  "WHATSAPP_EVENTS",
+			StreamMediaProcessing: "MEDIA_PROCESSING",
+			StreamDLQ:             "DLQ",
+		}
+		natsClient = natsclient.NewClient(natsCfg, logger, natsMetrics)
+		if err := natsClient.Connect(ctx); err != nil {
+			logger.Error("nats connect failed", slog.String("error", err.Error()))
+			os.Exit(1)
+		}
+		defer func() {
+			logger.Info("draining NATS connection")
+			if err := natsClient.Drain(cfg.NATS.DrainTimeout); err != nil {
+				logger.Warn("nats drain error", slog.String("error", err.Error()))
+			}
+		}()
+
+		if err := natsclient.EnsureAllStreams(ctx, natsClient.JetStream(), natsCfg, logger); err != nil {
+			logger.Error("nats ensure streams failed", slog.String("error", err.Error()))
+			os.Exit(1)
+		}
+		logger.Info("NATS JetStream initialized", slog.String("url", cfg.NATS.URL))
+	}
+
+	// Create NATS KV bucket for media results (used to coordinate media URL injection).
+	// The CompletionHandler writes results here; the dispatch worker reads them.
+	var mediaResultKV *natsclient.MediaResultKV
+	if cfg.NATS.Enabled && natsClient != nil {
+		var kvErr error
+		mediaResultKV, kvErr = natsclient.EnsureMediaResultsBucket(ctx, natsClient.JetStream())
+		if kvErr != nil {
+			logger.Warn("media results KV bucket creation failed (media URLs will not be injected into webhooks)",
+				slog.String("error", kvErr.Error()))
+		} else {
+			logger.Info("NATS media results KV bucket created")
+		}
+	}
+
 	pollStore := pollstore.NewRedisStore(redisClient, 365*24*time.Hour)
 	redisLockManager := locks.NewRedisManager(redisClient)
 
@@ -390,6 +514,19 @@ func main() {
 	if err != nil {
 		logger.Error("failed to create event orchestrator", slog.String("error", err.Error()))
 		os.Exit(1)
+	}
+
+	// Inject NATS event writer if NATS is enabled
+	if cfg.NATS.Enabled && natsClient != nil {
+		eventPublisher := eventsnats.NewEventPublisher(natsClient, logger, metrics)
+		natsWriter := capture.NewNATSEventWriter(eventPublisher, &cfg, metrics, logger)
+
+		// Wire media task publisher so events with HasMedia also queue a media task
+		mediaPublisher := media.NewNATSMediaPublisher(natsClient, logger, metrics)
+		natsWriter.SetMediaTaskPublisher(&mediaTaskPublisherAdapter{pub: mediaPublisher})
+
+		eventOrchestrator.SetEventWriter(natsWriter)
+		logger.Info("NATS event writer injected into orchestrator (with media task publisher)")
 	}
 
 	eventIntegration := events.NewIntegrationHelper(ctx, eventOrchestrator)
@@ -408,16 +545,41 @@ func main() {
 	transportRegistry := transport.NewRegistry(httpTransportConfig, metrics)
 	defer transportRegistry.Close()
 
-	dispatchCoordinator := dispatch.NewCoordinator(
-		&cfg,
-		pgPool,
-		outboxRepo,
-		dlqRepo,
-		transportRegistry,
-		&instanceLookupAdapter{repo: repo},
-		pollStore,
-		metrics,
-	)
+	var dispatchCoordinator dispatch.DispatchCoordinator
+	if cfg.NATS.Enabled && natsClient != nil {
+		// NATS-based dispatch coordinator
+		eventCfg := eventsnats.DefaultNATSEventConfig()
+		eventCfg.WebhookTimeout = cfg.Events.WebhookTimeout
+
+		natsDispatch := dispatch.NewNATSDispatchCoordinator(&dispatch.NATSDispatchCoordinatorConfig{
+			NATSClient:        natsClient,
+			Config:            &cfg,
+			EventConfig:       eventCfg,
+			TransportRegistry: transportRegistry,
+			WebhookResolver:   &dispatchWebhookResolverAdapter{repo: repo, clientToken: cfg.Client.AuthToken},
+			PollStore:         pollStore,
+			MediaResults:      mediaResultKV,
+			Metrics:           metrics,
+			NATSMetrics:       natsMetrics,
+			Logger:            logger,
+		})
+		dispatchCoordinator = natsDispatch
+		logger.Info("NATS dispatch coordinator created")
+	} else {
+		// PostgreSQL-based dispatch coordinator
+		pgDispatch := dispatch.NewCoordinator(
+			&cfg,
+			pgPool,
+			outboxRepo,
+			dlqRepo,
+			transportRegistry,
+			&instanceLookupAdapter{repo: repo},
+			pollStore,
+			metrics,
+		)
+		dispatchCoordinator = pgDispatch
+		logger.Info("PostgreSQL dispatch coordinator created")
+	}
 
 	if err := dispatchCoordinator.Start(ctx); err != nil {
 		logger.Error("failed to start dispatch coordinator", slog.String("error", err.Error()))
@@ -534,12 +696,82 @@ func main() {
 	}
 
 	mediaRepo := persistence.NewMediaRepository(pgPool)
-	mediaCoordinator := media.NewMediaCoordinator(
-		&cfg,
-		mediaRepo,
-		outboxRepo,
-		metrics,
-	)
+
+	// mediaClientProvider is used by NATS media workers to get WhatsApp clients.
+	// It wraps the registry, which is created later. SetRegistry() is called after registry init.
+	mediaClientProv := &mediaClientProviderAdapter{}
+
+	var mediaCoordinator media.MediaCoordinatorProvider
+	var natsMediaCoord *media.NATSMediaCoordinator
+	if cfg.NATS.Enabled && natsClient != nil {
+		var natsMediaErr error
+		natsMediaCoord, natsMediaErr = media.NewNATSMediaCoordinator(ctx, &media.NATSMediaCoordinatorConfig{
+			NATSClient:     natsClient,
+			ClientProvider: mediaClientProv,
+			Config:         &cfg,
+			MediaConfig:    media.DefaultNATSMediaConfig(),
+			Metrics:        metrics,
+			NATSMetrics:    natsMetrics,
+			Logger:         logger,
+		})
+		if natsMediaErr != nil {
+			logger.Error("failed to create NATS media coordinator", slog.String("error", natsMediaErr.Error()))
+			os.Exit(1)
+		}
+		mediaCoordinator = natsMediaCoord
+		logger.Info("NATS media coordinator initialized")
+
+		defer func() {
+			logger.Info("stopping NATS media coordinator")
+			stopCtx, stopCancel := context.WithTimeout(context.Background(), 30*time.Second)
+			if err := natsMediaCoord.Stop(stopCtx); err != nil {
+				logger.Error("NATS media coordinator stop error", slog.String("error", err.Error()))
+			}
+			stopCancel()
+			logger.Info("NATS media coordinator stopped")
+		}()
+
+		// Start media completion handler to consume media.done events.
+		// The callback writes results to the NATS KV store so that the dispatch
+		// worker can inject media URLs into webhook payloads before delivery.
+		var completionCallback func(ctx context.Context, result media.MediaResult)
+		if mediaResultKV != nil {
+			completionCallback = func(ctx context.Context, result media.MediaResult) {
+				if err := mediaResultKV.Put(ctx, result.EventID.String(), result.Success, result.MediaURL, result.Error); err != nil {
+					logger.Error("failed to store media result in KV",
+						slog.String("event_id", result.EventID.String()),
+						slog.Bool("success", result.Success),
+						slog.String("error", err.Error()))
+				} else {
+					logger.Debug("media result stored in KV",
+						slog.String("event_id", result.EventID.String()),
+						slog.Bool("success", result.Success),
+						slog.String("media_url", result.MediaURL))
+				}
+			}
+		}
+		completionHandler := media.NewCompletionHandler(media.CompletionHandlerConfig{
+			NATSClient: natsClient,
+			Metrics:    metrics,
+			Logger:     logger,
+			Callback:   completionCallback,
+		})
+		if completionErr := completionHandler.Start(ctx); completionErr != nil {
+			logger.Warn("media completion handler start failed (non-fatal)",
+				slog.String("error", completionErr.Error()))
+		} else {
+			logger.Info("media completion handler started")
+			defer completionHandler.Stop()
+		}
+	} else {
+		mediaCoordinator = media.NewMediaCoordinator(
+			&cfg,
+			mediaRepo,
+			outboxRepo,
+			metrics,
+		)
+		logger.Info("PostgreSQL media coordinator initialized")
+	}
 
 	logger.Info("media processing system initialized",
 		slog.Int("max_workers", cfg.Workers.Media))
@@ -660,6 +892,8 @@ func main() {
 		os.Exit(1)
 	}
 	registry.SetProxyRepository(&proxyRepoAdapter{repo: repo})
+	// Wire the client provider for NATS media workers now that registry is available
+	mediaClientProv.registry = registry
 	defer func() {
 		logger.Info("phase 2: closing whatsmeow registry")
 		registryCloseDone := make(chan error, 1)
@@ -860,23 +1094,9 @@ func main() {
 	chatsService := chats.NewService(chatsProvider, logger)
 
 	// Initialize message queue coordinator
-	var messageCoordinator *queue.Coordinator
+	var messageCoordinator queue.QueueCoordinator
 	var messageHandler *handlers.MessageHandler
 	if cfg.MessageQueue.Enabled {
-		queueConfig := &queue.Config{
-			PollInterval:         cfg.MessageQueue.PollInterval,
-			BatchSize:            1, // CRITICAL: Must be 1 for FIFO ordering
-			MaxAttempts:          cfg.MessageQueue.MaxAttempts,
-			InitialBackoff:       cfg.MessageQueue.InitialBackoff,
-			MaxBackoff:           cfg.MessageQueue.MaxBackoff,
-			BackoffMultiplier:    cfg.MessageQueue.BackoffMultiplier,
-			DisconnectRetryDelay: cfg.MessageQueue.DisconnectRetryDelay,
-			ProxyRetryDelay:      cfg.MessageQueue.ProxyRetryDelay,
-			CompletedRetention:   cfg.MessageQueue.CompletedRetention,
-			FailedRetention:      cfg.MessageQueue.FailedRetention,
-			WorkersPerInstance:   1, // CRITICAL: Must be 1 for FIFO ordering
-		}
-
 		// Initialize API echo emitter for webhook notifications (fromMe=true, fromApi=true)
 		var echoEmitter *echo.Emitter
 		if cfg.APIEcho.Enabled {
@@ -890,27 +1110,75 @@ func main() {
 			logger.Info("API echo emitter initialized for message queue")
 		}
 
-		coordinatorConfig := &queue.CoordinatorConfig{
-			Pool:            pgPool,
-			ClientRegistry:  &queueClientRegistryAdapter{registry: registry},
-			Processor:       queue.NewWhatsAppMessageProcessor(logger, echoEmitter),
-			Config:          queueConfig,
-			Logger:          logger,
-			CleanupInterval: cfg.MessageQueue.CleanupInterval,
-			CleanupTimeout:  cfg.MessageQueue.CleanupTimeout,
-			Metrics:         metrics,
-			EchoEmitter:     echoEmitter,
-		}
+		if cfg.NATS.Enabled && natsClient != nil {
+			// NATS-based message queue coordinator
+			natsCfgQueue := queue.NATSConfig{
+				MaxAttempts:          cfg.MessageQueue.MaxAttempts,
+				InitialBackoff:       cfg.MessageQueue.InitialBackoff,
+				MaxBackoff:           cfg.MessageQueue.MaxBackoff,
+				BackoffMultiplier:    cfg.MessageQueue.BackoffMultiplier,
+				DisconnectRetryDelay: cfg.MessageQueue.DisconnectRetryDelay,
+				ProxyRetryDelay:      cfg.MessageQueue.ProxyRetryDelay,
+			}
 
-		messageCoordinator, err = queue.NewCoordinator(ctx, coordinatorConfig)
-		if err != nil {
-			logger.Error("failed to initialize message queue coordinator", slog.String("error", err.Error()))
-			os.Exit(1)
-		}
+			natsCoord, natsErr := queue.NewNATSCoordinator(ctx, &queue.NATSCoordinatorConfig{
+				NATSClient:     natsClient,
+				ClientRegistry: &queueClientRegistryAdapter{registry: registry},
+				Processor:      queue.NewWhatsAppMessageProcessor(logger, echoEmitter),
+				Config:         natsCfgQueue,
+				Logger:         logger,
+				Metrics:        metrics,
+				NATSMetrics:    natsMetrics,
+				EchoEmitter:    echoEmitter,
+				RedisClient:    redisClient,
+			})
+			if natsErr != nil {
+				logger.Error("failed to initialize NATS message queue coordinator", slog.String("error", natsErr.Error()))
+				os.Exit(1)
+			}
+			messageCoordinator = natsCoord
 
-		logger.Info("message queue coordinator initialized",
-			slog.Duration("poll_interval", cfg.MessageQueue.PollInterval),
-			slog.Int("max_attempts", cfg.MessageQueue.MaxAttempts))
+			logger.Info("NATS message queue coordinator initialized",
+				slog.Int("max_attempts", cfg.MessageQueue.MaxAttempts))
+		} else {
+			// PostgreSQL-based message queue coordinator
+			queueConfig := &queue.Config{
+				PollInterval:         cfg.MessageQueue.PollInterval,
+				BatchSize:            1, // CRITICAL: Must be 1 for FIFO ordering
+				MaxAttempts:          cfg.MessageQueue.MaxAttempts,
+				InitialBackoff:       cfg.MessageQueue.InitialBackoff,
+				MaxBackoff:           cfg.MessageQueue.MaxBackoff,
+				BackoffMultiplier:    cfg.MessageQueue.BackoffMultiplier,
+				DisconnectRetryDelay: cfg.MessageQueue.DisconnectRetryDelay,
+				ProxyRetryDelay:      cfg.MessageQueue.ProxyRetryDelay,
+				CompletedRetention:   cfg.MessageQueue.CompletedRetention,
+				FailedRetention:      cfg.MessageQueue.FailedRetention,
+				WorkersPerInstance:   1, // CRITICAL: Must be 1 for FIFO ordering
+			}
+
+			coordinatorConfig := &queue.CoordinatorConfig{
+				Pool:            pgPool,
+				ClientRegistry:  &queueClientRegistryAdapter{registry: registry},
+				Processor:       queue.NewWhatsAppMessageProcessor(logger, echoEmitter),
+				Config:          queueConfig,
+				Logger:          logger,
+				CleanupInterval: cfg.MessageQueue.CleanupInterval,
+				CleanupTimeout:  cfg.MessageQueue.CleanupTimeout,
+				Metrics:         metrics,
+				EchoEmitter:     echoEmitter,
+			}
+
+			pgCoord, pgErr := queue.NewCoordinator(ctx, coordinatorConfig)
+			if pgErr != nil {
+				logger.Error("failed to initialize message queue coordinator", slog.String("error", pgErr.Error()))
+				os.Exit(1)
+			}
+			messageCoordinator = pgCoord
+
+			logger.Info("PostgreSQL message queue coordinator initialized",
+				slog.Duration("poll_interval", cfg.MessageQueue.PollInterval),
+				slog.Int("max_attempts", cfg.MessageQueue.MaxAttempts))
+		}
 
 		// Wire proxy-queue integration: pause message processing during proxy failures/swaps
 		if cfg.ProxyPool.Enabled && messageCoordinator != nil {
@@ -971,6 +1239,10 @@ func main() {
 	var privacyHandler *handlers.PrivacyHandler
 	if messageCoordinator != nil {
 		privacyHandler = handlers.NewPrivacyHandler(messageCoordinator, instanceService, logger)
+	}
+
+	if natsClient != nil {
+		healthHandler.SetNATSClient(natsClient)
 	}
 
 	healthHandler.SetMetrics(func(component, status string) {
