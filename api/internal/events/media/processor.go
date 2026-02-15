@@ -118,10 +118,12 @@ func (p *MediaProcessor) Process(
 
 	logger.Info("starting media processing")
 
-	err := p.mediaRepo.UpdateDownloadStatus(ctx, eventID, persistence.MediaStatusDownloading, 1, nil, nil)
-	if err != nil {
-		logger.Error("failed to update download status",
-			slog.String("error", err.Error()))
+	if p.mediaRepo != nil {
+		err := p.mediaRepo.UpdateDownloadStatus(ctx, eventID, persistence.MediaStatusDownloading, 1, nil, nil)
+		if err != nil {
+			logger.Error("failed to update download status",
+				slog.String("error", err.Error()))
+		}
 	}
 
 	downloadResult, err := p.downloader.Download(ctx, client, instanceID, eventID, msg)
@@ -130,7 +132,9 @@ func (p *MediaProcessor) Process(
 			slog.String("error", err.Error()))
 
 		errMsg := err.Error()
-		_ = p.mediaRepo.UpdateDownloadStatus(ctx, eventID, persistence.MediaStatusFailed, 1, nil, &errMsg)
+		if p.mediaRepo != nil {
+			_ = p.mediaRepo.UpdateDownloadStatus(ctx, eventID, persistence.MediaStatusFailed, 1, nil, &errMsg)
+		}
 
 		p.metrics.MediaFailures.WithLabelValues(instanceID.String(), "unknown", "download").Inc()
 		return nil, fmt.Errorf("download failed: %w", err)
@@ -140,10 +144,12 @@ func (p *MediaProcessor) Process(
 		slog.Int64("file_size", downloadResult.FileSize),
 		slog.String("content_type", downloadResult.ContentType))
 
-	err = p.mediaRepo.UpdateDownloadStatus(ctx, eventID, persistence.MediaStatusDownloaded, 1, nil, nil)
-	if err != nil {
-		logger.Error("failed to update download status",
-			slog.String("error", err.Error()))
+	if p.mediaRepo != nil {
+		err = p.mediaRepo.UpdateDownloadStatus(ctx, eventID, persistence.MediaStatusDownloaded, 1, nil, nil)
+		if err != nil {
+			logger.Error("failed to update download status",
+				slog.String("error", err.Error()))
+		}
 	}
 
 	s3Key, presignedURL, err := p.uploader.Upload(
@@ -167,12 +173,14 @@ func (p *MediaProcessor) Process(
 		slog.String("s3_key", s3Key),
 		slog.String("s3_url", presignedURL))
 
-	expiresAt := time.Now().Add(p.urlExpiry)
-	err = p.mediaRepo.UpdateUploadInfo(ctx, eventID, p.bucket, s3Key, presignedURL, persistence.S3URLPresigned, &expiresAt)
-	if err != nil {
-		logger.Error("failed to update upload info",
-			slog.String("error", err.Error()))
-		return nil, fmt.Errorf("failed to update upload info: %w", err)
+	if p.mediaRepo != nil {
+		expiresAt := time.Now().Add(p.urlExpiry)
+		err = p.mediaRepo.UpdateUploadInfo(ctx, eventID, p.bucket, s3Key, presignedURL, persistence.S3URLPresigned, &expiresAt)
+		if err != nil {
+			logger.Error("failed to update upload info",
+				slog.String("error", err.Error()))
+			return nil, fmt.Errorf("failed to update upload info: %w", err)
+		}
 	}
 
 	duration := time.Since(start)
@@ -359,13 +367,15 @@ func (p *MediaProcessor) uploadToS3WithRetry(
 			} else {
 				urlType = persistence.S3URLPublic
 			}
-			_ = p.mediaRepo.UpdateUploadInfoWithStorage(
-				ctx, eventID,
-				p.bucket, s3Key, mediaURL,
-				urlType,
-				persistence.StorageTypeS3,
-				expiresAt,
-			)
+			if p.mediaRepo != nil {
+				_ = p.mediaRepo.UpdateUploadInfoWithStorage(
+					ctx, eventID,
+					p.bucket, s3Key, mediaURL,
+					urlType,
+					persistence.StorageTypeS3,
+					expiresAt,
+				)
+			}
 
 			if attempt > 0 {
 				logger.Info("S3 upload succeeded after retry", slog.Int("attempt", attempt))
@@ -420,15 +430,17 @@ func (p *MediaProcessor) uploadToLocalStorage(
 		return nil, fmt.Errorf("local storage failed: %w", err)
 	}
 
-	_ = p.mediaRepo.UpdateUploadInfoWithStorage(
-		ctx, eventID,
-		"local", storeResult.LocalPath, storeResult.PublicURL,
-		persistence.S3URLPresigned,
-		persistence.StorageTypeLocal,
-		&storeResult.ExpiresAt,
-	)
+	if p.mediaRepo != nil {
+		_ = p.mediaRepo.UpdateUploadInfoWithStorage(
+			ctx, eventID,
+			"local", storeResult.LocalPath, storeResult.PublicURL,
+			persistence.S3URLPresigned,
+			persistence.StorageTypeLocal,
+			&storeResult.ExpiresAt,
+		)
 
-	_ = p.mediaRepo.UpdateFallbackStatus(ctx, eventID, true, nil)
+		_ = p.mediaRepo.UpdateFallbackStatus(ctx, eventID, true, nil)
+	}
 
 	logger.Info("media stored locally",
 		slog.String("local_path", storeResult.LocalPath),
@@ -453,6 +465,9 @@ func (p *MediaProcessor) updateOutboxMediaInfo(
 	mediaError *string,
 	processed bool,
 ) error {
+	if p.outboxRepo == nil {
+		return nil // NATS mode - outbox not used, media results published via NATS
+	}
 	return p.outboxRepo.UpdateMediaInfo(ctx, eventID, mediaURL, mediaError, processed)
 }
 
