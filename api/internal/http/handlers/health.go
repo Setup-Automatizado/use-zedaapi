@@ -30,9 +30,15 @@ type readinessResponse struct {
 	Checks     map[string]componentStatus `json:"checks"`
 }
 
+// NATSHealthChecker provides NATS health status for readiness checks.
+type NATSHealthChecker interface {
+	IsConnected() bool
+}
+
 type HealthHandler struct {
 	db          *pgxpool.Pool
 	lockManager locks.Manager
+	natsClient  NATSHealthChecker
 
 	healthCheckMetric func(component, status string)
 }
@@ -42,6 +48,11 @@ func NewHealthHandler(db *pgxpool.Pool, lockManager locks.Manager) *HealthHandle
 		db:          db,
 		lockManager: lockManager,
 	}
+}
+
+// SetNATSClient enables NATS health checking in the readiness probe.
+func (h *HealthHandler) SetNATSClient(client NATSHealthChecker) {
+	h.natsClient = client
 }
 
 func (h *HealthHandler) SetMetrics(healthCheckMetric func(component, status string)) {
@@ -75,6 +86,14 @@ func (h *HealthHandler) Ready(w http.ResponseWriter, r *http.Request) {
 		"redis":    redisStatus,
 	}
 	ready := dbStatus.Status == "healthy" && redisStatus.Status == "healthy"
+
+	if h.natsClient != nil {
+		natsStatus := h.checkNATS()
+		checks["nats"] = natsStatus
+		if natsStatus.Status != "healthy" {
+			ready = false
+		}
+	}
 
 	if dbErr != nil {
 		logger.Error("database health check failed",
@@ -175,6 +194,29 @@ func (h *HealthHandler) checkRedis(ctx context.Context) (componentStatus, error)
 		return result, fmt.Errorf("redis check failed: %w", err)
 	}
 	return result, err
+}
+
+func (h *HealthHandler) checkNATS() componentStatus {
+	result := componentStatus{Status: "healthy"}
+	start := time.Now()
+	defer func() {
+		result.DurationMs = time.Since(start).Milliseconds()
+	}()
+
+	if h.natsClient == nil {
+		result.Status = "unhealthy"
+		result.Error = "nats client not configured"
+		h.recordMetric("nats", result.Status)
+		return result
+	}
+
+	if !h.natsClient.IsConnected() {
+		result.Status = "unhealthy"
+		result.Error = "nats not connected"
+	}
+
+	h.recordMetric("nats", result.Status)
+	return result
 }
 
 func (h *HealthHandler) recordMetric(component, status string) {
