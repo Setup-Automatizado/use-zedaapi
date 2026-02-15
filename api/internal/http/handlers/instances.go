@@ -85,6 +85,7 @@ func (h *InstanceHandler) Register(r chi.Router) {
 		r.Put("/update-webhook-disconnected", h.updateWebhookDisconnected)
 		r.Put("/update-webhook-connected", h.updateWebhookConnected)
 		r.Put("/update-webhook-chat-presence", h.updateWebhookChatPresence)
+		r.Put("/update-webhook-history-sync", h.updateWebhookHistorySync)
 		r.Put("/update-notify-sent-by-me", h.updateNotifySentByMe)
 		r.Put("/update-every-webhooks", h.updateEveryWebhooks)
 		r.Put("/update-call-reject-auto", h.updateCallRejectAuto)
@@ -296,6 +297,10 @@ func (h *InstanceHandler) updateWebhookConnected(w http.ResponseWriter, r *http.
 
 func (h *InstanceHandler) updateWebhookChatPresence(w http.ResponseWriter, r *http.Request) {
 	h.updateWebhookWithValue(w, r, h.service.UpdateWebhookChatPresence)
+}
+
+func (h *InstanceHandler) updateWebhookHistorySync(w http.ResponseWriter, r *http.Request) {
+	h.updateWebhookWithValue(w, r, h.service.UpdateWebhookHistorySync)
 }
 
 func (h *InstanceHandler) updateNotifySentByMe(w http.ResponseWriter, r *http.Request) {

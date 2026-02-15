@@ -14,6 +14,7 @@ import (
 
 	"go.mau.fi/whatsmeow/api/internal/events/types"
 	"go.mau.fi/whatsmeow/proto/waE2E"
+	"go.mau.fi/whatsmeow/proto/waHistorySync"
 	"go.mau.fi/whatsmeow/proto/waWeb"
 	whatsmeowtypes "go.mau.fi/whatsmeow/types"
 	whatsmeowevents "go.mau.fi/whatsmeow/types/events"
@@ -33,6 +34,7 @@ const (
 	payloadTypePushName      = "push_name"
 	payloadTypeBusinessName  = "business_name"
 	payloadTypeUserAbout     = "user_about"
+	payloadTypeHistorySync   = "history_sync"
 )
 
 var (
@@ -54,6 +56,7 @@ func init() {
 	gob.Register(&whatsmeowevents.PushName{})
 	gob.Register(&whatsmeowevents.BusinessName{})
 	gob.Register(&whatsmeowevents.UserAbout{})
+	gob.Register(&whatsmeowevents.HistorySync{})
 	gob.Register(uuid.UUID{})
 }
 
@@ -319,6 +322,15 @@ func encodeRawPayload(payload interface{}) (*persistedPayload, error) {
 			return nil, fmt.Errorf("marshal user_about payload: %w", err)
 		}
 		return &persistedPayload{Type: payloadTypeUserAbout, Data: data}, nil
+	case *whatsmeowevents.HistorySync:
+		if evt.Data == nil {
+			return &persistedPayload{Type: payloadTypeHistorySync}, nil
+		}
+		data, err := protoMarshalOpts.Marshal(evt.Data)
+		if err != nil {
+			return nil, fmt.Errorf("marshal history_sync payload: %w", err)
+		}
+		return &persistedPayload{Type: payloadTypeHistorySync, Data: data}, nil
 	default:
 		return nil, fmt.Errorf("unsupported raw payload type %T", payload)
 	}
@@ -400,6 +412,15 @@ func decodeRawPayload(payload *persistedPayload) (interface{}, error) {
 			return nil, fmt.Errorf("unmarshal user_about payload: %w", err)
 		}
 		return &evt, nil
+	case payloadTypeHistorySync:
+		evt := &whatsmeowevents.HistorySync{}
+		if len(payload.Data) > 0 {
+			evt.Data = &waHistorySync.HistorySync{}
+			if err := protoUnmarshalOpts.Unmarshal(payload.Data, evt.Data); err != nil {
+				return nil, fmt.Errorf("unmarshal history_sync payload: %w", err)
+			}
+		}
+		return evt, nil
 	default:
 		return nil, fmt.Errorf("unsupported raw payload encoding type %q", payload.Type)
 	}

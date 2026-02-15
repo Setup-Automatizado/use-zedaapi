@@ -428,6 +428,17 @@ func (s *Service) UpdateWebhookChatPresence(ctx context.Context, id uuid.UUID, c
 	})
 }
 
+func (s *Service) UpdateWebhookHistorySync(ctx context.Context, id uuid.UUID, clientToken, instanceToken, value string) (*WebhookSettings, error) {
+	normalized, err := normalizeWebhookValue(value)
+	if err != nil {
+		return nil, err
+	}
+	return s.updateWebhookConfig(ctx, id, clientToken, instanceToken, func(cfg *WebhookConfig) error {
+		cfg.HistorySyncURL = strPtr(normalized)
+		return nil
+	})
+}
+
 func (s *Service) UpdateNotifySentByMe(ctx context.Context, id uuid.UUID, clientToken, instanceToken string, notify bool) (*WebhookSettings, error) {
 	return s.updateWebhookConfig(ctx, id, clientToken, instanceToken, func(cfg *WebhookConfig) error {
 		cfg.NotifySentByMe = notify
@@ -448,6 +459,7 @@ func (s *Service) UpdateEveryWebhooks(ctx context.Context, id uuid.UUID, clientT
 		cfg.DisconnectedURL = strPtr(normalized)
 		cfg.ChatPresenceURL = strPtr(normalized)
 		cfg.ConnectedURL = strPtr(normalized)
+		cfg.HistorySyncURL = strPtr(normalized)
 		if notify != nil {
 			cfg.NotifySentByMe = *notify
 		}
@@ -498,6 +510,7 @@ type PartnerCreateParams struct {
 	ConnectedCallbackURL        *string
 	MessageStatusCallbackURL    *string
 	ChatPresenceCallbackURL     *string
+	HistorySyncCallbackURL      *string
 	NotifySentByMe              bool
 	CallRejectAuto              *bool
 	CallRejectMessage           *string
@@ -556,6 +569,10 @@ func (s *Service) CreatePartnerInstance(ctx context.Context, params PartnerCreat
 	if err != nil {
 		return nil, err
 	}
+	historySync, err := s.normalizeWebhookPointer(params.HistorySyncCallbackURL)
+	if err != nil {
+		return nil, err
+	}
 
 	if err := s.repo.Insert(ctx, &inst); err != nil {
 		return nil, err
@@ -573,6 +590,7 @@ func (s *Service) CreatePartnerInstance(ctx context.Context, params PartnerCreat
 		DisconnectedURL:     disconnected,
 		ChatPresenceURL:     chatPresence,
 		ConnectedURL:        connected,
+		HistorySyncURL:      historySync,
 		NotifySentByMe:      params.NotifySentByMe,
 	}
 	if err := s.repo.UpsertWebhookConfig(ctx, cfg); err != nil {
@@ -725,6 +743,7 @@ func toWebhookSettings(cfg *WebhookConfig) *WebhookSettings {
 		DisconnectedURL:     cfg.DisconnectedURL,
 		ChatPresenceURL:     cfg.ChatPresenceURL,
 		ConnectedURL:        cfg.ConnectedURL,
+		HistorySyncURL:      cfg.HistorySyncURL,
 		NotifySentByMe:      cfg.NotifySentByMe,
 	}
 }

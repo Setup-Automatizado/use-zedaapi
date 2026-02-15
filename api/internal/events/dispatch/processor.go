@@ -22,11 +22,6 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/observability"
 )
 
-const (
-	historySyncEventType  = "history_sync"
-	skipReasonHistorySync = "history_sync_temporarily_ignored"
-)
-
 type skippedEventError struct {
 	Reason string
 }
@@ -165,13 +160,6 @@ func (p *EventProcessor) transformEvent(ctx context.Context, event *persistence.
 	// TODO: Temporary debug logging for schema verification - remove after validation
 	if debugPayload, _ := json.Marshal(internalEvent); len(debugPayload) > 0 {
 		logger.Debug("debug internal event payload (temporary)", slog.String("payload", string(debugPayload)))
-	}
-
-	if internalEvent.EventType == historySyncEventType {
-		logger.Warn("skipping history sync event",
-			slog.String("event_id", event.EventID.String()),
-			slog.String("reason", skipReasonHistorySync))
-		return nil, &skippedEventError{Reason: skipReasonHistorySync}
 	}
 
 	if event.MediaURL != nil && *event.MediaURL != "" {

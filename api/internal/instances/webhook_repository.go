@@ -19,6 +19,7 @@ type WebhookConfig struct {
 	DisconnectedURL     *string
 	ChatPresenceURL     *string
 	ConnectedURL        *string
+	HistorySyncURL      *string
 	NotifySentByMe      bool
 	CreatedAt           time.Time
 	UpdatedAt           time.Time
@@ -35,8 +36,9 @@ func (r *Repository) UpsertWebhookConfig(ctx context.Context, cfg WebhookConfig)
             disconnected_url,
             chat_presence_url,
             connected_url,
+            history_sync_url,
             notify_sent_by_me
-        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
         ON CONFLICT (instance_id) DO UPDATE SET
             delivery_url = EXCLUDED.delivery_url,
             received_url = EXCLUDED.received_url,
@@ -45,6 +47,7 @@ func (r *Repository) UpsertWebhookConfig(ctx context.Context, cfg WebhookConfig)
             disconnected_url = EXCLUDED.disconnected_url,
             chat_presence_url = EXCLUDED.chat_presence_url,
             connected_url = EXCLUDED.connected_url,
+            history_sync_url = EXCLUDED.history_sync_url,
             notify_sent_by_me = EXCLUDED.notify_sent_by_me,
             updated_at = NOW()
     `
@@ -57,6 +60,7 @@ func (r *Repository) UpsertWebhookConfig(ctx context.Context, cfg WebhookConfig)
 		cfg.DisconnectedURL,
 		cfg.ChatPresenceURL,
 		cfg.ConnectedURL,
+		cfg.HistorySyncURL,
 		cfg.NotifySentByMe,
 	)
 	if err != nil {
@@ -68,7 +72,7 @@ func (r *Repository) UpsertWebhookConfig(ctx context.Context, cfg WebhookConfig)
 func (r *Repository) GetWebhookConfig(ctx context.Context, id uuid.UUID) (*WebhookConfig, error) {
 	query := `SELECT instance_id, delivery_url, received_url, received_delivery_url,
 	          message_status_url, disconnected_url, chat_presence_url, connected_url,
-	          notify_sent_by_me, created_at, updated_at
+	          history_sync_url, notify_sent_by_me, created_at, updated_at
 	          FROM webhook_configs WHERE instance_id=$1`
 	row := r.pool.QueryRow(ctx, query, id)
 	var cfg WebhookConfig
@@ -81,6 +85,7 @@ func (r *Repository) GetWebhookConfig(ctx context.Context, id uuid.UUID) (*Webho
 		&cfg.DisconnectedURL,
 		&cfg.ChatPresenceURL,
 		&cfg.ConnectedURL,
+		&cfg.HistorySyncURL,
 		&cfg.NotifySentByMe,
 		&cfg.CreatedAt,
 		&cfg.UpdatedAt,

@@ -40,6 +40,7 @@ type WebhookSettings struct {
 	ConnectedURL        *string `json:"connectedCallbackUrl,omitempty"`
 	MessageStatusURL    *string `json:"messageStatusCallbackUrl,omitempty"`
 	ChatPresenceURL     *string `json:"presenceChatCallbackUrl,omitempty"`
+	HistorySyncURL      *string `json:"historySyncCallbackUrl,omitempty"`
 	NotifySentByMe      bool    `json:"notifySentByMe"`
 }
 

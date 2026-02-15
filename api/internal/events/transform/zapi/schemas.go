@@ -1,5 +1,7 @@
 package zapi
 
+import "encoding/json"
+
 type ReceivedCallback struct {
 	IsStatusReply    bool    `json:"isStatusReply"`
 	SenderLid        string  `json:"senderLid,omitempty"`
@@ -435,4 +437,20 @@ type DeliveryCallback struct {
 	MessageID  string `json:"messageId"`
 	Type       string `json:"type"`
 	InstanceID string `json:"instanceId"`
+}
+
+// HistorySyncCallback wraps the raw whatsmeow HistorySync data for webhook delivery.
+// Data contains the full protobuf-serialized waHistorySync.HistorySync as JSON,
+// including conversations, messages, pushnames, status messages, and all other fields.
+type HistorySyncCallback struct {
+	Type              string          `json:"type"`
+	InstanceID        string          `json:"instanceId"`
+	Momment           int64           `json:"momment"`
+	SyncType          string          `json:"syncType"`
+	ChunkOrder        uint32          `json:"chunkOrder"`
+	Progress          uint32          `json:"progress"`
+	ConversationCount int             `json:"conversationCount"`
+	StatusMsgCount    int             `json:"statusMessageCount"`
+	PushnameCount     int             `json:"pushnameCount"`
+	Data              json.RawMessage `json:"data"`
 }

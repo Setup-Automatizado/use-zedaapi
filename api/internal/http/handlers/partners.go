@@ -44,6 +44,7 @@ type partnerCreateRequest struct {
 	ConnectedCallbackURL        *string `json:"connectedCallbackUrl"`
 	MessageStatusCallbackURL    *string `json:"messageStatusCallbackUrl"`
 	PresenceCallbackURL         *string `json:"presenceChatCallbackUrl"`
+	HistorySyncCallbackURL      *string `json:"historySyncCallbackUrl"`
 	NotifySentByMe              bool    `json:"notifySentByMe"`
 	CallRejectAuto              *bool   `json:"callRejectAuto"`
 	CallRejectMessage           *string `json:"callRejectMessage"`
@@ -101,6 +102,7 @@ type instanceListItem struct {
 	ConnectedCallbackUrl           *string `json:"connectedCallbackUrl,omitempty"`
 	MessageStatusCallbackUrl       *string `json:"messageStatusCallbackUrl,omitempty"`
 	PresenceChatCallbackUrl        *string `json:"presenceChatCallbackUrl,omitempty"`
+	HistorySyncCallbackUrl         *string `json:"historySyncCallbackUrl,omitempty"`
 
 	// Additional Fields (our API)
 	SessionName        string  `json:"sessionName,omitempty"`
@@ -131,6 +133,7 @@ func (h *PartnerHandler) createInstance(w http.ResponseWriter, r *http.Request) 
 		ConnectedCallbackURL:        req.ConnectedCallbackURL,
 		MessageStatusCallbackURL:    req.MessageStatusCallbackURL,
 		ChatPresenceCallbackURL:     req.PresenceCallbackURL,
+		HistorySyncCallbackURL:      req.HistorySyncCallbackURL,
 		NotifySentByMe:              req.NotifySentByMe,
 		CallRejectAuto:              req.CallRejectAuto,
 		CallRejectMessage:           req.CallRejectMessage,
@@ -262,6 +265,7 @@ func (h *PartnerHandler) listInstances(w http.ResponseWriter, r *http.Request) {
 			item.ConnectedCallbackUrl = inst.Webhooks.ConnectedURL
 			item.MessageStatusCallbackUrl = inst.Webhooks.MessageStatusURL
 			item.PresenceChatCallbackUrl = inst.Webhooks.ChatPresenceURL
+			item.HistorySyncCallbackUrl = inst.Webhooks.HistorySyncURL
 			item.NotifySentByMe = inst.Webhooks.NotifySentByMe
 		}
 

@@ -48,6 +48,7 @@ type ResolvedWebhookConfig struct {
 	DisconnectedURL     string
 	ChatPresenceURL     string
 	ConnectedURL        string
+	HistorySyncURL      string
 	NotifySentByMe      bool
 	StoreJID            *string
 }
@@ -453,6 +454,8 @@ func resolveWebhookURL(event *types.InternalEvent, cfg *ResolvedWebhookConfig) (
 		return cfg.ConnectedURL, "connected"
 	case "disconnected":
 		return cfg.DisconnectedURL, "disconnected"
+	case "history_sync":
+		return cfg.HistorySyncURL, "history_sync"
 	default:
 		return "", ""
 	}

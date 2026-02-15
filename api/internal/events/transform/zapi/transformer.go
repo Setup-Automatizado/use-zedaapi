@@ -52,7 +52,8 @@ func (t *Transformer) SupportsEventType(eventType string) bool {
 		"call_offer", "call_offer_notice", "call_transport", "call_relay_latency", "call_terminate", "call_reject",
 		"group_joined",
 		"newsletter_join", "newsletter_leave", "newsletter_mute_change", "newsletter_live_update",
-		"push_name", "business_name", "user_about":
+		"push_name", "business_name", "user_about",
+		"history_sync":
 		return true
 	default:
 		return false
@@ -98,6 +99,8 @@ func (t *Transformer) Transform(ctx context.Context, event *types.InternalEvent)
 		result, err = t.transformNewsletterLiveUpdateEvent(ctx, logger, event)
 	case "push_name", "business_name", "user_about":
 		result, err = t.transformProfileEvent(ctx, logger, event)
+	case "history_sync":
+		result, err = t.transformHistorySync(ctx, logger, event)
 	default:
 		logger.Debug("unsupported event type for FUNNELCHAT transformation")
 		return nil, transform.ErrUnsupportedEvent
@@ -1958,6 +1961,49 @@ func (t *Transformer) transformDisconnected(ctx context.Context, logger *slog.Lo
 		InstanceID:   event.InstanceID.String(),
 		Error:        "Device has been disconnected",
 	}
+
+	return callback, nil
+}
+
+func (t *Transformer) transformHistorySync(_ context.Context, logger *slog.Logger, event *types.InternalEvent) (*HistorySyncCallback, error) {
+	syncType := event.Metadata["history_sync_type"]
+	chunkOrder := uint32(0)
+	if v, err := strconv.ParseUint(event.Metadata["chunk_order"], 10, 32); err == nil {
+		chunkOrder = uint32(v)
+	}
+	progress := uint32(0)
+	if v, err := strconv.ParseUint(event.Metadata["progress"], 10, 32); err == nil {
+		progress = uint32(v)
+	}
+	conversationCount := 0
+	if v, err := strconv.Atoi(event.Metadata["conversation_count"]); err == nil {
+		conversationCount = v
+	}
+	statusMsgCount := 0
+	if v, err := strconv.Atoi(event.Metadata["status_message_count"]); err == nil {
+		statusMsgCount = v
+	}
+	pushnameCount := 0
+	if v, err := strconv.Atoi(event.Metadata["pushname_count"]); err == nil {
+		pushnameCount = v
+	}
+
+	callback := &HistorySyncCallback{
+		Type:              "HistorySyncCallback",
+		InstanceID:        event.InstanceID.String(),
+		Momment:           event.CapturedAt.UnixMilli(),
+		SyncType:          syncType,
+		ChunkOrder:        chunkOrder,
+		Progress:          progress,
+		ConversationCount: conversationCount,
+		StatusMsgCount:    statusMsgCount,
+		PushnameCount:     pushnameCount,
+	}
+
+	logger.Debug("transformed history sync event",
+		slog.String("sync_type", syncType),
+		slog.Uint64("chunk_order", uint64(chunkOrder)),
+		slog.Uint64("progress", uint64(progress)))
 
 	return callback, nil
 }
