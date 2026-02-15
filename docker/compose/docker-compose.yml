@@ -61,6 +61,10 @@ services:
       LOG_LEVEL: ${LOG_LEVEL:-info}
       ENVIRONMENT: ${ENVIRONMENT:-production}
 
+      # NATS
+      NATS_ENABLED: ${NATS_ENABLED:-false}
+      NATS_URL: ${NATS_URL:-nats://nats:4222}
+
       # Observability
       SENTRY_DSN: ${SENTRY_DSN:-}
       PROMETHEUS_ENABLED: ${PROMETHEUS_ENABLED:-true}
@@ -68,6 +72,8 @@ services:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      nats:
         condition: service_healthy
       minio:
         condition: service_healthy
@@ -127,6 +133,46 @@ services:
       - whatsmeow-network
 
   # ==================================
+  # NATS Server (JetStream)
+  # ==================================
+  nats:
+    image: nats:2.10-alpine
+    container_name: whatsmeow-nats
+    ports:
+      - "${NATS_CLIENT_PORT:-4222}:4222"
+      - "${NATS_MONITOR_PORT:-8222}:8222"
+    command: ["--config", "/etc/nats/nats-server.conf"]
+    volumes:
+      - nats-data:/data
+      - ../nats/nats-server.conf:/etc/nats/nats-server.conf:ro
+    healthcheck:
+      test: ["CMD", "nats-server", "--signal", "ldm="]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - whatsmeow-network
+
+  # ==================================
+  # NATS Stream Setup (init container)
+  # ==================================
+  nats-setup:
+    image: natsio/nats-box:latest
+    container_name: whatsmeow-nats-setup
+    depends_on:
+      nats:
+        condition: service_healthy
+    environment:
+      NATS_URL: nats://nats:4222
+    volumes:
+      - ../nats/setup-streams.sh:/setup-streams.sh:ro
+    entrypoint: ["/bin/sh", "/setup-streams.sh"]
+    networks:
+      - whatsmeow-network
+
+  # ==================================
   # MinIO Object Storage
   # ==================================
   minio:
@@ -178,6 +224,8 @@ volumes:
   postgres-data:
     driver: local
   redis-data:
+    driver: local
+  nats-data:
     driver: local
   minio-data:
     driver: local
