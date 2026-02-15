@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.0](https://github.com/Setup-Automatizado/zedaapi/compare/v3.0.3...v3.1.0) (2026-02-15)
+
+### Features
+
+* **media:** add comprehensive MIME type mapping and public S3 URLs ([9df0281](https://github.com/Setup-Automatizado/zedaapi/commit/9df0281eae5e4c44e3dd0bc93546ac0e3d7bcbe2))
+* **nats:** add event capture NATS writer with media task publishing ([3e70844](https://github.com/Setup-Automatizado/zedaapi/commit/3e70844c6e5048e243233c306570b7f63ae4813c))
+* **nats:** add event dispatch NATS coordinator and workers ([08d0777](https://github.com/Setup-Automatizado/zedaapi/commit/08d077716f423c549b4be9e9d6b18931a3360ddb))
+* **nats:** add event envelope types and JetStream publisher ([a892dfd](https://github.com/Setup-Automatizado/zedaapi/commit/a892dfdb1980da00bcf52eeba86b5dd635fd8414))
+* **events:** add history sync event support with webhook routing ([b8a01a1](https://github.com/Setup-Automatizado/zedaapi/commit/b8a01a18dfbadbe243d99882e0302e291d1a4c23))
+* **nats:** add JetStream core client infrastructure ([3eef412](https://github.com/Setup-Automatizado/zedaapi/commit/3eef4126199170effe8fd1701831515e4edce5f0))
+* **nats:** add media processing NATS coordinator, workers, and KV store ([ceaafaa](https://github.com/Setup-Automatizado/zedaapi/commit/ceaafaa642c57e8b81078cc29281a292f2379532))
+* **nats:** add message queue NATS coordinator and workers ([9f44b61](https://github.com/Setup-Automatizado/zedaapi/commit/9f44b61db0957222e23c391c03d68878f49de0b2))
+* **config:** add NATS configuration and S3 public URL defaults ([f375d0a](https://github.com/Setup-Automatizado/zedaapi/commit/f375d0a1a1e05229dccc94ebafa0e9d129d9fb6c))
+* **health:** add NATS health check to readiness probe ([d2092ea](https://github.com/Setup-Automatizado/zedaapi/commit/d2092eae3e46c52ba6270e977d2675fb71b9bce0))
+* **docker:** add NATS server and stream setup to compose stack ([48639d8](https://github.com/Setup-Automatizado/zedaapi/commit/48639d8b3a69cbcb03742107f9a6e1749398579a))
+* **server:** wire NATS dual-mode startup in main.go ([4d4b8ef](https://github.com/Setup-Automatizado/zedaapi/commit/4d4b8efd9c0ca63a5b2f2e29b3915faf08b638c1))
+
+### Bug Fixes
+
+* **media:** guard mediaRepo nil access in NATS mode ([d96b1b5](https://github.com/Setup-Automatizado/zedaapi/commit/d96b1b5cf3869321d6c9211ae9590717e90e8148))
+
+### Code Refactoring
+
+* **events:** use interfaces for coordinator and writer injection ([0616a4e](https://github.com/Setup-Automatizado/zedaapi/commit/0616a4edff5df491a7d82e90fd6fba19dd9506d3))
+
+### Documentation
+
+* **config:** update .env.example with NATS and missing variables ([1b740db](https://github.com/Setup-Automatizado/zedaapi/commit/1b740db0d4e6c050c88b80345df8ee3c4eafa1c2))
+* update project documentation and OpenAPI specs ([5cbc5b5](https://github.com/Setup-Automatizado/zedaapi/commit/5cbc5b5f2d1a89f656cc08f01fdae3ae3a89255d))
+
 ## [3.0.3](https://github.com/Setup-Automatizado/zedaapi/compare/v3.0.2...v3.0.3) (2026-02-14)
 
 ### Code Refactoring
