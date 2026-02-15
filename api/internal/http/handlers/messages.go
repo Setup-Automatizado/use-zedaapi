@@ -51,7 +51,7 @@ type ChatsService interface {
 
 // MessageHandler handles HTTP requests for message queue operations
 type MessageHandler struct {
-	coordinator     *queue.Coordinator
+	coordinator     queue.QueueCoordinator
 	instanceService InstanceStatusProvider
 	contactsService ContactsService
 	chatsService    ChatsService
@@ -62,7 +62,7 @@ type MessageHandler struct {
 
 // NewMessageHandler creates a new message handler
 func NewMessageHandler(
-	coordinator *queue.Coordinator,
+	coordinator queue.QueueCoordinator,
 	instanceService InstanceStatusProvider,
 	contactsService ContactsService,
 	chatsService ChatsService,

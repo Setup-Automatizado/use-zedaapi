@@ -184,8 +184,8 @@ type ClientRegistry struct {
 	metrics              ClientRegistryMetrics
 	obsMetrics           *observability.Metrics
 	eventIntegration     *internalevents.IntegrationHelper
-	dispatchCoordinator  *dispatch.Coordinator
-	mediaCoordinator     *media.MediaCoordinator
+	dispatchCoordinator  dispatch.DispatchCoordinator
+	mediaCoordinator     media.MediaCoordinatorProvider
 	contactMetadataCfg   ContactMetadataConfig
 	contactMetadataRedis *redis.Client
 	eventHandlerTimeout  time.Duration
@@ -282,8 +282,8 @@ func NewClientRegistry(
 	pairCallback func(context.Context, uuid.UUID, string) error,
 	resetCallback func(context.Context, uuid.UUID, string) error,
 	eventIntegration *internalevents.IntegrationHelper,
-	dispatchCoordinator *dispatch.Coordinator,
-	mediaCoordinator *media.MediaCoordinator,
+	dispatchCoordinator dispatch.DispatchCoordinator,
+	mediaCoordinator media.MediaCoordinatorProvider,
 	eventHandlerTimeout time.Duration,
 	contactMetadataCfg ContactMetadataConfig,
 	contactMetadataRedis *redis.Client,

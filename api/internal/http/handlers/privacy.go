@@ -19,14 +19,14 @@ import (
 
 // PrivacyHandler handles HTTP requests for privacy settings operations
 type PrivacyHandler struct {
-	coordinator     *queue.Coordinator
+	coordinator     queue.QueueCoordinator
 	instanceService InstanceStatusProvider
 	log             *slog.Logger
 }
 
 // NewPrivacyHandler creates a new privacy handler
 func NewPrivacyHandler(
-	coordinator *queue.Coordinator,
+	coordinator queue.QueueCoordinator,
 	instanceService InstanceStatusProvider,
 	log *slog.Logger,
 ) *PrivacyHandler {

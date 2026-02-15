@@ -28,7 +28,7 @@ type Orchestrator struct {
 	dlqRepo    persistence.DLQRepository
 	mediaRepo  persistence.MediaRepository
 	router     *capture.EventRouter
-	writer     *capture.TransactionalWriter
+	writer     capture.EventWriter
 	pollStore  pollstore.Store
 	mu         sync.RWMutex
 	handlers   map[uuid.UUID]*capture.EventHandler
@@ -91,6 +91,13 @@ func NewOrchestrator(
 	)
 
 	return orchestrator, nil
+}
+
+// SetEventWriter replaces the default TransactionalWriter with an alternative EventWriter.
+// This is used to inject NATSEventWriter when NATS is enabled.
+// Must be called before any instances are registered.
+func (o *Orchestrator) SetEventWriter(writer capture.EventWriter) {
+	o.writer = writer
 }
 
 func (o *Orchestrator) RegisterInstance(ctx context.Context, instanceID uuid.UUID) error {
