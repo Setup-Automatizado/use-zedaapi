@@ -231,6 +231,17 @@ type Config struct {
 		WebsharePlanID       string
 		WebshareMode         string
 	}
+
+	NATS struct {
+		Enabled        bool
+		URL            string
+		Token          string
+		ConnectTimeout time.Duration
+		ReconnectWait  time.Duration
+		MaxReconnects  int
+		PublishTimeout time.Duration
+		DrainTimeout   time.Duration
+	}
 }
 
 func Load() (Config, error) {
@@ -359,7 +370,7 @@ func Load() (Config, error) {
 		AccessKey:        os.Getenv("S3_ACCESS_KEY"),
 		SecretKey:        os.Getenv("S3_SECRET_KEY"),
 		UseSSL:           parseBool(getEnv("S3_USE_SSL", "false")),
-		UsePresignedURLs: parseBool(getEnv("S3_USE_PRESIGNED_URLS", "true")),
+		UsePresignedURLs: parseBool(getEnv("S3_USE_PRESIGNED_URLS", "false")),
 		PublicBaseURL:    os.Getenv("S3_PUBLIC_BASE_URL"),
 		ACL:              getEnv("S3_ACL", ""),
 	}
@@ -870,6 +881,48 @@ func Load() (Config, error) {
 		WebshareEndpoint:     proxyPoolWebshareEndpoint,
 		WebsharePlanID:       proxyPoolWebsharePlanID,
 		WebshareMode:         proxyPoolWebshareMode,
+	}
+
+	// NATS Configuration
+	natsEnabled := parseBool(getEnv("NATS_ENABLED", "false"))
+	natsConnectTimeout, err := parseDuration(getEnv("NATS_CONNECT_TIMEOUT", "10s"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid NATS_CONNECT_TIMEOUT: %w", err)
+	}
+	natsReconnectWait, err := parseDuration(getEnv("NATS_RECONNECT_WAIT", "2s"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid NATS_RECONNECT_WAIT: %w", err)
+	}
+	natsMaxReconnects, err := parseInt(getEnv("NATS_MAX_RECONNECTS", "-1"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid NATS_MAX_RECONNECTS: %w", err)
+	}
+	natsPublishTimeout, err := parseDuration(getEnv("NATS_PUBLISH_TIMEOUT", "5s"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid NATS_PUBLISH_TIMEOUT: %w", err)
+	}
+	natsDrainTimeout, err := parseDuration(getEnv("NATS_DRAIN_TIMEOUT", "30s"))
+	if err != nil {
+		return cfg, fmt.Errorf("invalid NATS_DRAIN_TIMEOUT: %w", err)
+	}
+	cfg.NATS = struct {
+		Enabled        bool
+		URL            string
+		Token          string
+		ConnectTimeout time.Duration
+		ReconnectWait  time.Duration
+		MaxReconnects  int
+		PublishTimeout time.Duration
+		DrainTimeout   time.Duration
+	}{
+		Enabled:        natsEnabled,
+		URL:            getEnv("NATS_URL", "nats://localhost:4222"),
+		Token:          os.Getenv("NATS_TOKEN"),
+		ConnectTimeout: natsConnectTimeout,
+		ReconnectWait:  natsReconnectWait,
+		MaxReconnects:  natsMaxReconnects,
+		PublishTimeout: natsPublishTimeout,
+		DrainTimeout:   natsDrainTimeout,
 	}
 
 	cfg.Events = struct {
