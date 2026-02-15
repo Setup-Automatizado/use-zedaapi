@@ -397,6 +397,14 @@
             ],
             "format": "uri"
           },
+          "historySyncCallbackUrl": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri",
+            "description": "Dedicated webhook endpoint for WhatsApp history sync events."
+          },
           "notifySentByMe": {
             "type": "boolean"
           }
@@ -535,6 +543,11 @@
           "presenceChatCallbackUrl": {
             "type": "string",
             "format": "uri"
+          },
+          "historySyncCallbackUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "Dedicated webhook endpoint for WhatsApp history sync events."
           },
           "notifySentByMe": {
             "type": "boolean",
@@ -730,6 +743,14 @@
               "null"
             ],
             "format": "uri"
+          },
+          "historySyncCallbackUrl": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri",
+            "description": "Dedicated webhook endpoint for WhatsApp history sync events."
           },
           "sessionName": {
             "type": "string",
@@ -7626,6 +7647,71 @@
         "summary": "Update chat presence webhook",
         "description": "Mirrors FUNNELCHAT `/update-webhook-chat-presence`, configuring the typing/presence webhook endpoint.",
         "operationId": "updateWebhookChatPresence",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WebhookValueRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Webhook updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WebhookUpdateResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid payload or non-HTTPS URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/update-webhook-history-sync": {
+      "put": {
+        "tags": [
+          "Instances"
+        ],
+        "summary": "Update history sync webhook",
+        "description": "Configures the dedicated webhook endpoint for WhatsApp history sync events. When set, history sync data is delivered to this URL instead of the default received webhook.",
+        "operationId": "updateWebhookHistorySync",
         "security": [
           {
             "ClientTokenAuth": []

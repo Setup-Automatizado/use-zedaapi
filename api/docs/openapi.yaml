@@ -450,6 +450,10 @@ components:
         connectedCallbackUrl:
           type: [string, "null"]
           format: uri
+        historySyncCallbackUrl:
+          type: [string, "null"]
+          format: uri
+          description: Dedicated webhook endpoint for WhatsApp history sync events.
         notifySentByMe:
           type: boolean
       additionalProperties: false
@@ -548,6 +552,10 @@ components:
         presenceChatCallbackUrl:
           type: string
           format: uri
+        historySyncCallbackUrl:
+          type: string
+          format: uri
+          description: Dedicated webhook endpoint for WhatsApp history sync events.
         notifySentByMe:
           type: boolean
           default: false
@@ -676,6 +684,10 @@ components:
         presenceChatCallbackUrl:
           type: [string, "null"]
           format: uri
+        historySyncCallbackUrl:
+          type: [string, "null"]
+          format: uri
+          description: Dedicated webhook endpoint for WhatsApp history sync events.
         sessionName:
           type: string
           description: Underlying WhatsApp session display name.
@@ -6242,6 +6254,43 @@ paths:
       summary: Update chat presence webhook
       description: "Mirrors FUNNELCHAT `/update-webhook-chat-presence`, configuring the typing/presence webhook endpoint."
       operationId: updateWebhookChatPresence
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WebhookValueRequest"
+      responses:
+        "200":
+          description: Webhook updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookUpdateResponse"
+        "400":
+          description: Invalid payload or non-HTTPS URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /instances/{instanceId}/token/{instanceToken}/update-webhook-history-sync:
+    put:
+      tags:
+        - Instances
+      summary: Update history sync webhook
+      description: "Configures a dedicated webhook endpoint for WhatsApp history sync events. History sync events contain batches of historical messages and are forwarded separately from other event types."
+      operationId: updateWebhookHistorySync
       security:
         - ClientTokenAuth: []
       parameters:
