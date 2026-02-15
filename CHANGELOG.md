@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.3](https://github.com/Setup-Automatizado/zedaapi/compare/v3.0.2...v3.0.3) (2026-02-14)
+
+### Code Refactoring
+
+* **infra:** remove AWS Terraform infrastructure and deploy scripts ([6abf049](https://github.com/Setup-Automatizado/zedaapi/commit/6abf049cb6892c98492fb40693da9a3680dc3f19))
+
 ## [3.0.2](https://github.com/Funnelchat20/whatsapp-api-golang/compare/v3.0.1...v3.0.2) (2026-02-14)
 
 ### 🐛 Bug Fixes
