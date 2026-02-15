@@ -3,6 +3,7 @@ package media
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -75,17 +76,54 @@ func (d *MediaDownloader) Download(ctx context.Context, client *whatsmeow.Client
 		return nil, fmt.Errorf("invalid media message: %w", err)
 	}
 
-	logger.Debug("downloading media",
+	// DEBUG: Log all DownloadableMessage fields before download
+	directPath := downloadable.GetDirectPath()
+	mediaKeyBytes := downloadable.GetMediaKey()
+	fileSHA256Bytes := downloadable.GetFileSHA256()
+	fileEncSHA256Bytes := downloadable.GetFileEncSHA256()
+	var fileLength int64 = -1
+	if sized, ok := msg.(interface{ GetFileLength() uint64 }); ok {
+		fileLength = int64(sized.GetFileLength())
+	} else if sized, ok := msg.(interface{ GetFileSizeBytes() uint64 }); ok {
+		fileLength = int64(sized.GetFileSizeBytes())
+	}
+	var url string
+	if urlable, ok := msg.(interface{ GetURL() string }); ok {
+		url = urlable.GetURL()
+	}
+
+	logger.Info("media download starting - proto fields debug",
 		slog.String("media_type", mediaType),
 		slog.String("content_type", contentType),
-		slog.String("file_name", fileName))
+		slog.String("file_name", fileName),
+		slog.String("direct_path", directPath),
+		slog.Int("media_key_len", len(mediaKeyBytes)),
+		slog.Int("file_sha256_len", len(fileSHA256Bytes)),
+		slog.Int("file_enc_sha256_len", len(fileEncSHA256Bytes)),
+		slog.Int64("file_length", fileLength),
+		slog.Bool("has_url", url != ""),
+		slog.Bool("has_direct_path", directPath != ""),
+		slog.String("msg_type", fmt.Sprintf("%T", msg)),
+	)
 
 	data, err := client.Download(downloadCtx, downloadable)
 	if err != nil {
 		duration := time.Since(start)
+
+		// DEBUG: Log detailed error info including data length (whatsmeow returns data even on ErrFileLengthMismatch)
 		logger.Error("whatsapp media download failed",
 			slog.String("error", err.Error()),
-			slog.Duration("duration", duration))
+			slog.Duration("duration", duration),
+			slog.Int("data_len_returned", len(data)),
+			slog.Bool("is_file_length_mismatch", errors.Is(err, whatsmeow.ErrFileLengthMismatch)),
+			slog.Bool("is_invalid_sha256", errors.Is(err, whatsmeow.ErrInvalidMediaSHA256)),
+			slog.Bool("is_no_url", errors.Is(err, whatsmeow.ErrNoURLPresent)),
+			slog.Bool("is_too_short", errors.Is(err, whatsmeow.ErrTooShortFile)),
+			slog.Bool("is_invalid_hmac", errors.Is(err, whatsmeow.ErrInvalidMediaHMAC)),
+			slog.Bool("is_invalid_enc_sha256", errors.Is(err, whatsmeow.ErrInvalidMediaEncSHA256)),
+			slog.String("direct_path", directPath),
+			slog.Int64("expected_file_length", fileLength),
+		)
 
 		d.metrics.MediaDownloadsTotal.WithLabelValues(instanceID.String(), mediaType, "failure").Inc()
 		d.metrics.MediaDownloadErrors.WithLabelValues(classifyDownloadError(err)).Inc()
