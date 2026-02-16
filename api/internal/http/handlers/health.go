@@ -65,7 +65,7 @@ func (h *HealthHandler) Health(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]any{
 		"status":     "ok",
-		"service":    "whatsapp-api",
+		"service":    "zedaapi",
 		"version":    versionInfo.Version,
 		"build_time": versionInfo.BuildTime,
 		"git_commit": versionInfo.GitCommit,

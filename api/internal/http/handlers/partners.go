@@ -87,7 +87,7 @@ type instanceListItem struct {
 	Token string `json:"token"`
 	Due   int64  `json:"due"`
 
-	// FUNNELCHAT Extended Fields
+	// Zé da API Extended Fields
 	Name              string `json:"name"`
 	Created           string `json:"created"`
 	PhoneConnected    bool   `json:"phoneConnected"`

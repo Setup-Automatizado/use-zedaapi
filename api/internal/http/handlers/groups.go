@@ -45,7 +45,7 @@ type GroupsService interface {
 	AcceptInvite(ctx context.Context, instanceID uuid.UUID, inviteURL string) (groups.AcceptInviteResult, error)
 }
 
-// GroupsHandler exposes group-related endpoints matching the FUNNELCHAT surface.
+// GroupsHandler exposes group-related endpoints matching the Zé da API surface.
 type GroupsHandler struct {
 	instanceService    InstanceStatusProvider
 	service            GroupsService

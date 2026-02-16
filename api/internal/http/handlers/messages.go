@@ -550,7 +550,7 @@ type PollOption struct {
 // Example: {"phone": "554499999999", "message": "Outra enquete", "poll": [{"name": "Option1"}, {"name": "Option2"}], "pollMaxOptions": 1}
 type SendPollRequest struct {
 	Phone          string       `json:"phone"`                    // Required: recipient phone number
-	Message        string       `json:"message"`                  // Required: poll question text (FUNNELCHAT uses "message")
+	Message        string       `json:"message"`                  // Required: poll question text (Zé da API uses "message")
 	Poll           []PollOption `json:"poll"`                     // Required: poll options array with name field (2-12 options)
 	PollMaxOptions *int         `json:"pollMaxOptions,omitempty"` // Optional: 0 for single choice, 1+ for multiple choice (default: 0)
 	MessageID      string       `json:"messageId,omitempty"`      // Optional: reply to message ID
@@ -980,8 +980,8 @@ func (h *MessageHandler) toWhatsAppStatus(status *instances.Status) *WhatsAppSta
 
 // QueueMessageResponse represents a message in the queue
 type QueueMessageResponse struct {
-	ID           string `json:"_id"`               // Message ID (same as ZaapId for FUNNELCHAT compat)
-	ZaapId       string `json:"zaapId"`            // FUNNELCHAT message ID
+	ID           string `json:"_id"`               // Message ID (same as ZaapId for Zé da API compat)
+	ZaapId       string `json:"zaapId"`            // Zé da API message ID
 	MessageId    string `json:"messageId"`         // WhatsApp message ID
 	InstanceId   string `json:"instanceId"`        // Instance ID
 	Phone        string `json:"phone"`             // Recipient phone
@@ -990,7 +990,7 @@ type QueueMessageResponse struct {
 	DelayTyping  int64  `json:"delayTyping"`       // Typing indicator duration in seconds
 	Created      int64  `json:"created"`           // Unix timestamp in milliseconds
 
-	// Additional fields (not in FUNNELCHAT but useful)
+	// Additional fields (not in Zé da API but useful)
 	MessageType    string   `json:"messageType,omitempty"`    // Message type (text, image, etc)
 	Status         string   `json:"status,omitempty"`         // Job status
 	SequenceNumber int64    `json:"sequenceNumber,omitempty"` // FIFO sequence
@@ -1055,9 +1055,9 @@ func (h *MessageHandler) sendText(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Convert delays from seconds to milliseconds with FUNNELCHAT defaults
-	// FUNNELCHAT: delayMessage range 1-15 seconds, default 1-3 seconds random
-	// FUNNELCHAT: delayTyping range 1-15 seconds, default 0
+	// Convert delays from seconds to milliseconds with Zé da API defaults
+	// Zé da API: delayMessage range 1-15 seconds, default 1-3 seconds random
+	// Zé da API: delayTyping range 1-15 seconds, default 0
 	delayMessage := int64(0)
 	if req.DelayMessage != nil {
 		seconds := *req.DelayMessage
@@ -1183,8 +1183,8 @@ func (h *MessageHandler) sendImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Convert delays from seconds to milliseconds with FUNNELCHAT defaults
-	// FUNNELCHAT: delayMessage range 1-15 seconds, default 1-3 seconds random
+	// Convert delays from seconds to milliseconds with Zé da API defaults
+	// Zé da API: delayMessage range 1-15 seconds, default 1-3 seconds random
 	delayMessage := int64(0)
 	if req.DelayMessage != nil {
 		seconds := *req.DelayMessage
@@ -1324,7 +1324,7 @@ func (h *MessageHandler) sendSticker(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Convert delays from seconds to milliseconds with FUNNELCHAT defaults
+	// Convert delays from seconds to milliseconds with Zé da API defaults
 	delayMessage := int64(0)
 	if req.DelayMessage != nil {
 		seconds := *req.DelayMessage
@@ -1704,7 +1704,7 @@ func (h *MessageHandler) sendPTV(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Convert delays from seconds to milliseconds with FUNNELCHAT defaults
+	// Convert delays from seconds to milliseconds with Zé da API defaults
 	delayMessage := int64(0)
 	if req.DelayMessage != nil {
 		seconds := *req.DelayMessage
@@ -1839,7 +1839,7 @@ func (h *MessageHandler) sendGif(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Convert delays from seconds to milliseconds with FUNNELCHAT defaults
+	// Convert delays from seconds to milliseconds with Zé da API defaults
 	delayMessage := int64(0)
 	if req.DelayMessage != nil {
 		seconds := *req.DelayMessage
@@ -2203,7 +2203,7 @@ func (h *MessageHandler) sendContact(w http.ResponseWriter, r *http.Request) {
 	// Normalize phone number
 	phone = normalizePhoneNumber(phone)
 
-	// Validate FUNNELCHAT required contact fields
+	// Validate Zé da API required contact fields
 	contactName := strings.TrimSpace(req.ContactName)
 	if contactName == "" {
 		h.log.WarnContext(ctx, "missing contact name")
@@ -2245,7 +2245,7 @@ func (h *MessageHandler) sendContact(w http.ResponseWriter, r *http.Request) {
 		delayTyping = int64(seconds) * 1000
 	}
 
-	// Build ContactMessage with ALL fields (FUNNELCHAT + extended optional fields)
+	// Build ContactMessage with ALL fields (Zé da API + extended optional fields)
 	contactMsg := &queue.ContactMessage{
 		// Required
 
@@ -2482,7 +2482,7 @@ func (h *MessageHandler) clearQueue(w http.ResponseWriter, r *http.Request) {
 
 	h.log.InfoContext(ctx, "queue cleared successfully")
 
-	// FUNNELCHAT returns 200 OK with empty body
+	// Zé da API returns 200 OK with empty body
 	respondJSON(w, http.StatusOK, map[string]string{
 		"message": "Queue cleared successfully",
 	})
@@ -2544,7 +2544,7 @@ func (h *MessageHandler) cancelQueueMessage(w http.ResponseWriter, r *http.Reque
 
 	h.log.InfoContext(ctx, "message cancelled successfully")
 
-	// FUNNELCHAT returns 200 OK with empty body
+	// Zé da API returns 200 OK with empty body
 	respondJSON(w, http.StatusOK, map[string]string{
 		"message": "Message cancelled successfully",
 	})
@@ -2627,7 +2627,7 @@ func (h *MessageHandler) getContacts(w http.ResponseWriter, r *http.Request) {
 		slog.Int("total_contacts", result.Total),
 		slog.Int("page_items", len(result.Items)))
 
-	// FUNNELCHAT returns array of contacts (not wrapped in object)
+	// Zé da API returns array of contacts (not wrapped in object)
 	respondJSON(w, http.StatusOK, result.Items)
 }
 
@@ -2710,7 +2710,7 @@ func (h *MessageHandler) getChats(w http.ResponseWriter, r *http.Request) {
 		slog.Int("total_chats", result.TotalCount),
 		slog.Int("page_items", len(result.Chats)))
 
-	// FUNNELCHAT returns array of chats (not wrapped in object)
+	// Zé da API returns array of chats (not wrapped in object)
 	respondJSON(w, http.StatusOK, result.Chats)
 }
 
@@ -2771,7 +2771,7 @@ func (h *MessageHandler) phoneExists(w http.ResponseWriter, r *http.Request) {
 	h.log.InfoContext(ctx, "phone check completed",
 		slog.Bool("exists", result.Exists))
 
-	// FUNNELCHAT returns the response object directly
+	// Zé da API returns the response object directly
 	respondJSON(w, http.StatusOK, result)
 }
 
@@ -2787,7 +2787,7 @@ func (h *MessageHandler) phoneExists(w http.ResponseWriter, r *http.Request) {
 // Request body:
 // - phones: Array of phone numbers in format DDI DDD NUMBER (e.g., ["551199999999", "551188888888"])
 //
-// Maximum batch size: 50,000 numbers per request (FUNNELCHAT limit)
+// Maximum batch size: 50,000 numbers per request (Zé da API limit)
 //
 
 func (h *MessageHandler) phoneExistsBatch(w http.ResponseWriter, r *http.Request) {
@@ -2814,7 +2814,7 @@ func (h *MessageHandler) phoneExistsBatch(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	// FUNNELCHAT limit: 50,000 numbers per request
+	// Zé da API limit: 50,000 numbers per request
 	const maxBatchSize = 50000
 	if len(req.Phones) > maxBatchSize {
 		h.log.WarnContext(ctx, "batch size exceeds limit",
@@ -2863,7 +2863,7 @@ func (h *MessageHandler) phoneExistsBatch(w http.ResponseWriter, r *http.Request
 	h.log.InfoContext(ctx, "batch phone check completed",
 		slog.Int("results_count", len(results)))
 
-	// FUNNELCHAT returns array of results
+	// Zé da API returns array of results
 	respondJSON(w, http.StatusOK, results)
 }
 
@@ -2891,7 +2891,7 @@ func normalizePhoneNumber(phone string) string {
 		return phone
 	}
 
-	// FUNNELCHAT style suffixes for groups/channels/broadcast lists
+	// Zé da API style suffixes for groups/channels/broadcast lists
 	if strings.HasSuffix(phone, "-group") {
 		base := strings.TrimSuffix(phone, "-group")
 		return base + "@g.us"
@@ -3942,7 +3942,7 @@ func (h *MessageHandler) sendCarousel(w http.ResponseWriter, r *http.Request) {
 // 4. Enqueues message with FIFO ordering
 // 5. Returns immediately with zaapId as messageId (non-blocking)
 //
-// FUNNELCHAT Request format:
+// Zé da API Request format:
 // {"phone": "554499999999", "message": "Poll question", "poll": [{"name": "Option1"}, {"name": "Option2"}], "pollMaxOptions": 1}
 func (h *MessageHandler) sendPoll(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -3974,7 +3974,7 @@ func (h *MessageHandler) sendPoll(w http.ResponseWriter, r *http.Request) {
 	// Normalize phone number to WhatsApp format
 	phone = normalizePhoneNumber(phone)
 
-	// Validate poll question (FUNNELCHAT uses "message" field)
+	// Validate poll question (Zé da API uses "message" field)
 	question := strings.TrimSpace(req.Message)
 	if question == "" {
 		h.log.WarnContext(ctx, "missing poll question")
@@ -4009,7 +4009,7 @@ func (h *MessageHandler) sendPoll(w http.ResponseWriter, r *http.Request) {
 		options[i] = optName
 	}
 
-	// Set max selections (FUNNELCHAT: 0 = single choice, 1+ = multi-choice)
+	// Set max selections (Zé da API: 0 = single choice, 1+ = multi-choice)
 	maxSelections := 0
 	if req.PollMaxOptions != nil {
 		maxSelections = *req.PollMaxOptions
@@ -4021,7 +4021,7 @@ func (h *MessageHandler) sendPoll(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Convert delays from seconds to milliseconds with FUNNELCHAT defaults
+	// Convert delays from seconds to milliseconds with Zé da API defaults
 	delayMessage := int64(0)
 	if req.DelayMessage != nil {
 		seconds := *req.DelayMessage
@@ -4092,7 +4092,7 @@ func (h *MessageHandler) sendPoll(w http.ResponseWriter, r *http.Request) {
 // 4. Enqueues message with FIFO ordering
 // 5. Returns immediately with zaapId as messageId (non-blocking)
 //
-// FUNNELCHAT Request format:
+// Zé da API Request format:
 // {"phone": "120363356737170752-group", "event": {"name": "Event Name", "dateTime": "2024-04-29T09:30:53.309Z", "description": "...", "location": {...}}}
 func (h *MessageHandler) sendEvent(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -4171,7 +4171,7 @@ func (h *MessageHandler) sendEvent(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Convert delays from seconds to milliseconds with FUNNELCHAT defaults
+	// Convert delays from seconds to milliseconds with Zé da API defaults
 	delayMessage := int64(0)
 	if req.DelayMessage != nil {
 		seconds := *req.DelayMessage
@@ -4245,7 +4245,7 @@ func (h *MessageHandler) sendEvent(w http.ResponseWriter, r *http.Request) {
 // 4. Enqueues message with FIFO ordering
 // 5. Returns immediately with zaapId as messageId (non-blocking)
 //
-// FUNNELCHAT Request format:
+// Zé da API Request format:
 // {"phone": "5544999999999", "message": "Check this out", "linkUrl": "https://example.com", "title": "Title", "linkDescription": "Description", "image": "https://..."}
 func (h *MessageHandler) sendLink(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -4302,7 +4302,7 @@ func (h *MessageHandler) sendLink(w http.ResponseWriter, r *http.Request) {
 		messageText = messageText + "\n\n" + linkUrl
 	}
 
-	// Convert delays from seconds to milliseconds with FUNNELCHAT defaults
+	// Convert delays from seconds to milliseconds with Zé da API defaults
 	delayMessage := int64(0)
 	if req.DelayMessage != nil {
 		seconds := *req.DelayMessage

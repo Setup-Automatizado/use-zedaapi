@@ -740,5 +740,5 @@ func TestSmokeAll_EndpointCount(t *testing.T) {
 		}
 	}
 
-	assert.Equal(t, 18, registeredCount, "All 18 newsletter endpoints must be registered (17 FUNNELCHAT + 1 bonus)")
+	assert.Equal(t, 18, registeredCount, "All 18 newsletter endpoints must be registered (17 Zé da API + 1 bonus)")
 }
