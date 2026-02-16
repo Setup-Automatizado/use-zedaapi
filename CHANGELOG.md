@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.2.0](https://github.com/Setup-Automatizado/zedaapi/compare/v3.1.0...v3.2.0) (2026-02-16)
+
+### Features
+
+* **infra:** add complete production Docker Swarm stack ([f50c5e9](https://github.com/Setup-Automatizado/zedaapi/commit/f50c5e996d61c7f956a5800e9869f2fc7689cfc8))
+* **infra:** add sticky sessions and scale to 2 replicas in production ([65497b3](https://github.com/Setup-Automatizado/zedaapi/commit/65497b3117b18ce038a52c7ab5dbf42bb94297ae))
+
+### Code Refactoring
+
+* **config:** rename funnelchat defaults to zedaapi ([c2e879c](https://github.com/Setup-Automatizado/zedaapi/commit/c2e879cd229f8ed0e13e10beb9ddaa103c7775c2))
+* rename FUNNELCHAT references to Zé da API across codebase ([4a0d380](https://github.com/Setup-Automatizado/zedaapi/commit/4a0d3802cb1e9f9d0bc5cf91467329ff6eaaf7a4))
+* **http:** rename FUNNELCHAT to Zé da API in handlers ([1b52efa](https://github.com/Setup-Automatizado/zedaapi/commit/1b52efa8bc2af802ce30e3473b7190130aec3646))
+* **infra:** rename funnelchat to zedaapi in Docker and CI ([ba8e2cf](https://github.com/Setup-Automatizado/zedaapi/commit/ba8e2cfff3df1ab1ead207cebccfac1544d98e95))
+
+### Documentation
+
+* **openapi:** rename FunnelChat to Zé da API in API specification ([9928742](https://github.com/Setup-Automatizado/zedaapi/commit/9928742d036ecb6f658fa705f69b395137c37433))
+* update project documentation ([b3a31f8](https://github.com/Setup-Automatizado/zedaapi/commit/b3a31f8cc64ca738295478157346e6f4d201bd3c))
+* **changelog:** update repository URLs from Funnelchat20 to Setup-Automatizado ([ae5e0d4](https://github.com/Setup-Automatizado/zedaapi/commit/ae5e0d47bc57edfe0a6d3cc6a61e40b5744427c2))
+
 ## [3.1.0](https://github.com/Setup-Automatizado/zedaapi/compare/v3.0.3...v3.1.0) (2026-02-15)
 
 ### Features
