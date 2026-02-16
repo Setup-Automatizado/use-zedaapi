@@ -24,12 +24,14 @@ func startEmbeddedNATS(t *testing.T) *natsserver.Server {
 
 	dir := t.TempDir()
 	opts := &natsserver.Options{
-		Host:      "127.0.0.1",
-		Port:      -1, // random port
-		JetStream: true,
-		StoreDir:  dir,
-		NoLog:     true,
-		NoSigs:    true,
+		Host:               "127.0.0.1",
+		Port:               -1, // random port
+		JetStream:          true,
+		JetStreamMaxStore:  200 * 1024 * 1024 * 1024, // 200GB virtual limit (not pre-allocated)
+		JetStreamMaxMemory: 1 * 1024 * 1024 * 1024,   // 1GB
+		StoreDir:           dir,
+		NoLog:              true,
+		NoSigs:             true,
 	}
 
 	srv, err := natsserver.NewServer(opts)
