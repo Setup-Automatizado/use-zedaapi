@@ -41,7 +41,7 @@ func (c *Client) Connect(ctx context.Context) error {
 	}
 
 	opts := []natsgo.Option{
-		natsgo.Name("funnelchat-api"),
+		natsgo.Name("zedaapi"),
 		natsgo.Timeout(c.cfg.ConnectTimeout),
 		natsgo.ReconnectWait(c.cfg.ReconnectWait),
 		natsgo.MaxReconnects(c.cfg.MaxReconnects),

@@ -20,7 +20,7 @@ type RedisRepository struct {
 // NewRedisRepository creates a new RedisRepository
 func NewRedisRepository(client *redis.Client, ttl time.Duration, keyPrefix string) *RedisRepository {
 	if keyPrefix == "" {
-		keyPrefix = "funnelchat"
+		keyPrefix = "zedaapi"
 	}
 	return &RedisRepository{
 		client:    client,

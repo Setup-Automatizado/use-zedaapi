@@ -80,5 +80,5 @@ func (s *RedisStore) ResolveOptions(ctx context.Context, instanceID uuid.UUID, p
 }
 
 func (s *RedisStore) key(instanceID uuid.UUID, pollID string) string {
-	return fmt.Sprintf("funnelchat:instance:%s:poll:%s", instanceID.String(), pollID)
+	return fmt.Sprintf("zedaapi:instance:%s:poll:%s", instanceID.String(), pollID)
 }

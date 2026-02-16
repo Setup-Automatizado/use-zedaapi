@@ -150,7 +150,7 @@ func newContactMetadataCache(
 		photoNodes:        make(map[string]*list.Element),
 		photoOrder:        list.New(),
 		redis:             redisClient,
-		redisPrefix:       fmt.Sprintf("funnelchat:instance:%s:contact", instanceID.String()),
+		redisPrefix:       fmt.Sprintf("zedaapi:instance:%s:contact", instanceID.String()),
 		legacyRedisPrefix: fmt.Sprintf("contactmeta:%s", instanceID.String()),
 		fetchQueue:        make(chan fetchRequest, cfg.FetchQueueSize),
 		fetchWorkers:      cfg.PrefetchWorkers,

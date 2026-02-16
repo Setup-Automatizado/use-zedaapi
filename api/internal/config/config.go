@@ -298,7 +298,7 @@ func Load() (Config, error) {
 		DSN      string
 		MaxConns int32
 	}{
-		DSN:      getEnv("POSTGRES_DSN", "postgres://funnelchat:funnelchat@localhost:5432/funnelchat_api?sslmode=disable"),
+		DSN:      getEnv("POSTGRES_DSN", "postgres://zedaapi:zedaapi@localhost:5432/zedaapi_api?sslmode=disable"),
 		MaxConns: maxConns,
 	}
 
@@ -306,7 +306,7 @@ func Load() (Config, error) {
 		DSN      string
 		LogLevel string
 	}{
-		DSN:      getEnv("WAMEOW_POSTGRES_DSN", "postgres://funnelchat:funnelchat@localhost:5432/funnelchat_store?sslmode=disable"),
+		DSN:      getEnv("WAMEOW_POSTGRES_DSN", "postgres://zedaapi:zedaapi@localhost:5432/zedaapi_store?sslmode=disable"),
 		LogLevel: getEnv("WAMEOW_LOG_LEVEL", "INFO"),
 	}
 
@@ -347,7 +347,7 @@ func Load() (Config, error) {
 		TTL             time.Duration
 		RefreshInterval time.Duration
 	}{
-		KeyPrefix:       getEnv("REDIS_LOCK_KEY_PREFIX", "funnelchat"),
+		KeyPrefix:       getEnv("REDIS_LOCK_KEY_PREFIX", "zedaapi"),
 		TTL:             lockTTL,
 		RefreshInterval: lockRefresh,
 	}
@@ -366,7 +366,7 @@ func Load() (Config, error) {
 	}{
 		Endpoint:         getEnv("S3_ENDPOINT", "http://localhost:9000"),
 		Region:           getEnv("S3_REGION", "us-east-1"),
-		Bucket:           getEnv("S3_BUCKET", "funnelchat-media"),
+		Bucket:           getEnv("S3_BUCKET", "zedaapi-media"),
 		AccessKey:        os.Getenv("S3_ACCESS_KEY"),
 		SecretKey:        os.Getenv("S3_SECRET_KEY"),
 		UseSSL:           parseBool(getEnv("S3_USE_SSL", "false")),
@@ -458,7 +458,7 @@ func Load() (Config, error) {
 		RebalanceInterval: rebalanceInterval,
 	}
 
-	cfg.Prometheus.Namespace = getEnv("PROMETHEUS_NAMESPACE", "funnelchat_api")
+	cfg.Prometheus.Namespace = getEnv("PROMETHEUS_NAMESPACE", "zedaapi_api")
 
 	cfg.Partner.AuthToken = strings.TrimSpace(os.Getenv("PARTNER_AUTH_TOKEN"))
 	cfg.Client.AuthToken = strings.TrimSpace(os.Getenv("CLIENT_AUTH_TOKEN"))

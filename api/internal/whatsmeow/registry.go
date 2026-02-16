@@ -138,7 +138,7 @@ type LockConfig struct {
 
 func (c LockConfig) withDefaults() LockConfig {
 	if c.KeyPrefix == "" {
-		c.KeyPrefix = "funnelchat"
+		c.KeyPrefix = "zedaapi"
 	}
 	if c.TTL <= 0 {
 		c.TTL = 30 * time.Second
@@ -2004,7 +2004,7 @@ func (r *ClientRegistry) canHandleInstance(instanceID uuid.UUID) bool {
 func (r *ClientRegistry) lockKey(instanceID uuid.UUID) string {
 	prefix := r.lockKeyPrefix
 	if prefix == "" {
-		prefix = "funnelchat"
+		prefix = "zedaapi"
 	}
 	return fmt.Sprintf("%s:instance:%s", prefix, instanceID.String())
 }
