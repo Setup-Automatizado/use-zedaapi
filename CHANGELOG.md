@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.2.1](https://github.com/Setup-Automatizado/zedaapi/compare/v3.2.0...v3.2.1) (2026-02-16)
+
+### Bug Fixes
+
+* **nats:** set explicit JetStream storage limits in embedded test server ([989dc75](https://github.com/Setup-Automatizado/zedaapi/commit/989dc75a6ab18bc234e1cc61f749461f8d38b724))
+
 ## [3.2.0](https://github.com/Setup-Automatizado/zedaapi/compare/v3.1.0...v3.2.0) (2026-02-16)
 
 ### Features
