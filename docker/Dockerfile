@@ -191,7 +191,7 @@ RUN go tool cover -html=coverage.out -o coverage.html
 # ==========================================
 # Metadata
 # ==========================================
-LABEL maintainer="WhatsApp API"
+LABEL maintainer="Zé da API WhatsApp API"
 LABEL description="WhatsApp API with ffmpeg support for media processing"
 LABEL version="${VERSION}"
-LABEL org.opencontainers.image.source="https://github.com/Funnelchat20/whatsapp-api-golang"
+LABEL org.opencontainers.image.source="https://github.com/setup-automatizado/zedaapi"

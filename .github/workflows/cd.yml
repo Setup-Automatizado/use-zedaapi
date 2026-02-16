@@ -11,7 +11,7 @@ concurrency:
 
 env:
   GO_VERSION: "1.25"
-  DOCKERHUB_IMAGE: ${{ vars.DOCKERHUB_USERNAME }}/whatsapp-api
+  DOCKERHUB_IMAGE: ${{ vars.DOCKERHUB_USERNAME }}/zedaapi
 
 jobs:
   # ======================================
@@ -190,7 +190,7 @@ jobs:
           ### Image Info
 
           - **Version**: ${{ needs.docker-api.outputs.version || 'N/A' }}
-          - **Image**: \`${{ vars.DOCKERHUB_USERNAME }}/whatsapp-api\`
+          - **Image**: \`${{ vars.DOCKERHUB_USERNAME }}/zedaapi\`
           - **Tags**: \`latest\`, \`${{ needs.docker-api.outputs.version || 'N/A' }}\`, \`sha-${GITHUB_SHA::7}\`
           - **Platforms**: \`linux/amd64\`, \`linux/arm64\`
 

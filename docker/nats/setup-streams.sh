@@ -1,5 +1,5 @@
 #!/bin/sh
-# Idempotent stream creation for FunnelChat NATS JetStream
+# Idempotent stream creation for ZedaAPI NATS JetStream
 # This script is run as an init container in docker-compose
 
 set -e
