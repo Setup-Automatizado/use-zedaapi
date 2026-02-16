@@ -90,7 +90,7 @@ const swaggerUIHTML = `<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8"/>
-    <title>FunnelChat API Docs</title>
+    <title>Zé da API Docs</title>
     <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui.css"/>
     <style>
       body { margin: 0; background: #fafafa; }

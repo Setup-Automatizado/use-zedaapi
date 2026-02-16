@@ -1,6 +1,6 @@
 openapi: 3.1.0
 info:
-  title: FunnelChat API (Whatsmeow Bridge)
+  title: Zé da API (Whatsmeow Bridge)
   version: 0.1.0
   description: "REST API, backed by Whatsmeow.
 
@@ -241,7 +241,7 @@ components:
       type: object
       properties:
         proxy:
-          $ref: '#/components/schemas/ProxyConfig'
+          $ref: "#/components/schemas/ProxyConfig"
         logs:
           type: array
           items:
@@ -282,7 +282,7 @@ components:
           example: ok
         service:
           type: string
-          example: whatsapp-api
+          example: zedaapi
       required:
         - status
         - service
@@ -334,13 +334,13 @@ components:
       properties:
         connected:
           type: boolean
-          description: Mirrors FUNNELCHAT `connected`, indicating if the instance is linked to WhatsApp.
+          description: Mirrors Zé da API `connected`, indicating if the instance is linked to WhatsApp.
         error:
           type: [string, "null"]
-          description: Same semantics as FUNNELCHAT, detailing why the instance is not connected (empty string when everything is ok).
+          description: Same semantics as Zé da API, detailing why the instance is not connected (empty string when everything is ok).
         smartphoneConnected:
           type: boolean
-          description: Matches FUNNELCHAT `smartphoneConnected`, signalling if the paired device has internet access.
+          description: Matches Zé da API `smartphoneConnected`, signalling if the paired device has internet access.
       required:
         - connected
         - error
@@ -636,14 +636,14 @@ components:
         id:
           type: string
           format: uuid
-          description: Instance identifier (FUNNELCHAT field).
+          description: Instance identifier (Zé da API field).
         token:
           type: string
-          description: Instance token used by FUNNELCHAT clients.
+          description: Instance token used by Zé da API clients.
         due:
           type: integer
           format: int64
-          description: Millisecond timestamp used by FUNNELCHAT tooling.
+          description: Millisecond timestamp used by Zé da API tooling.
         name:
           type: string
           description: Human friendly name for the instance.
@@ -763,7 +763,7 @@ components:
           example: 39BB1684570F00E91090F6BBC7EE7646
         zaapId:
           type: string
-          description: FUNNELCHAT message tracking ID
+          description: Zé da API message tracking ID
           example: 39BB1684570F00E91090F6BBC7EE7646
         messageId:
           type: string
@@ -781,7 +781,7 @@ components:
         message:
           type: [string, "null"]
           description: Message text content (only for text messages)
-          example: Hello from FUNNELCHAT
+          example: Hello from Zé da API
         delayMessage:
           type: integer
           format: int64
@@ -896,7 +896,7 @@ components:
         subject:
           type: string
           description: Group name
-          example: FUNNELCHAT Community
+          example: Zé da API Community
       required:
         - phone
         - subject
@@ -911,7 +911,7 @@ components:
         message:
           type: string
           description: Text message content
-          example: Hello from FUNNELCHAT!
+          example: Hello from Zé da API!
         messageId:
           type: [string, "null"]
           description: Optional WhatsApp message ID to reply to
@@ -3040,7 +3040,7 @@ components:
           description: "Group JID identifier (`{id}-group`)."
         unread:
           type: string
-          description: Number of unread messages represented as string for FUNNELCHAT parity.
+          description: Number of unread messages represented as string for Zé da API parity.
         name:
           type: string
           description: Group name.
@@ -5008,7 +5008,7 @@ components:
         name:
           type: string
           description: Option text
-          example: "FUNNELCHATAPI"
+          example: "Zé da API"
       required:
         - name
       additionalProperties: false
@@ -5031,7 +5031,7 @@ components:
           example: "554499999999"
         message:
           type: string
-          description: Poll question text (FUNNELCHAT uses "message" field for the question)
+          description: Poll question text (Zé da API uses "message" field for the question)
           example: "Outra enquete"
         poll:
           type: array
@@ -5041,8 +5041,8 @@ components:
           minItems: 2
           maxItems: 12
           example:
-            - name: "FUNNELCHATAPI"
-            - name: "Testeee"
+            - name: "Zé da API"
+            - name: "Test"
         pollMaxOptions:
           type: integer
           description: "Maximum selections allowed: 0 for single choice, 1+ for multiple choice"
@@ -5184,12 +5184,12 @@ components:
         image:
           type: string
           description: Custom preview image URL
-          example: "https://app.funnelchatapi.io/logos/zapi-dark.png"
+          example: "https://api.zedaapi.com/logos/zeapi-dark.png"
         linkUrl:
           type: string
           format: uri
           description: URL to share
-          example: "https://app.funnelchatapi.io"
+          example: "https://api.zedaapi.com"
         title:
           type: string
           description: Custom link preview title
@@ -5472,7 +5472,7 @@ paths:
           name: middleware
           schema:
             type: string
-          description: Informational middleware flag (matches FUNNELCHAT contract).
+          description: Informational middleware flag (matches Zé da API contract).
         - in: query
           name: page
           required: true
@@ -5488,7 +5488,7 @@ paths:
             type: integer
             minimum: 1
             maximum: 200
-          description: Page size (defaults to 15 as in FUNNELCHAT examples).
+          description: Page size (defaults to 15 as in Zé da API examples).
           example: 15
       responses:
         "200":
@@ -5508,7 +5508,7 @@ paths:
       tags:
         - Partner
       summary: Partner creates an instance on demand
-      description: Mirrors FUNNELCHAT partner endpoint for provisioning instances via integrator credentials.
+      description: Mirrors Zé da API partner endpoint for provisioning instances via integrator credentials.
       operationId: partnerCreateInstance
       security:
         - PartnerBearer: []
@@ -5680,7 +5680,7 @@ paths:
       tags:
         - Instances
       summary: Retrieve instance status
-      description: "Mirrors FUNNELCHAT `/status`, returning live connectivity information for a provisioned instance."
+      description: "Mirrors Zé da API `/status`, returning live connectivity information for a provisioned instance."
       operationId: getInstanceStatus
       security:
         - ClientTokenAuth: []
@@ -5711,7 +5711,7 @@ paths:
       tags:
         - Instances
       summary: Fetch QR code for pairing
-      description: "Mirrors FUNNELCHAT `/qr-code`, returning the current QR string required to link a phone."
+      description: "Mirrors Zé da API `/qr-code`, returning the current QR string required to link a phone."
       operationId: getInstanceQRCode
       security:
         - ClientTokenAuth: []
@@ -5736,7 +5736,7 @@ paths:
       tags:
         - Instances
       summary: Fetch QR code as base64 image
-      description: "Mirrors FUNNELCHAT `/qr-code/image`, returning a PNG image encoded in base64 for rendering in clients."
+      description: "Mirrors Zé da API `/qr-code/image`, returning a PNG image encoded in base64 for rendering in clients."
       operationId: getInstanceQRCodeImage
       security:
         - ClientTokenAuth: []
@@ -5761,7 +5761,7 @@ paths:
       tags:
         - Instances
       summary: Retrieve device metadata
-      description: "Mirrors FUNNELCHAT `/device`, returning information about the currently linked phone."
+      description: "Mirrors Zé da API `/device`, returning information about the currently linked phone."
       operationId: getInstanceDevice
       security:
         - ClientTokenAuth: []
@@ -5793,7 +5793,7 @@ paths:
         - Instances
       summary: Fetch phone pairing code
       description:
-        Mirrors FUNNELCHAT `/phone-code/{phone}`, returning a code that can be typed into WhatsApp instead of scanning
+        Mirrors Zé da API `/phone-code/{phone}`, returning a code that can be typed into WhatsApp instead of scanning
         the QR code.
       operationId: getInstancePhoneCode
       security:
@@ -5831,7 +5831,7 @@ paths:
       tags:
         - Instances
       summary: Restart an instance connection
-      description: "Equivalent to FUNNELCHAT `/restart`, forcing the client to reconnect to WhatsApp."
+      description: "Equivalent to Zé da API `/restart`, forcing the client to reconnect to WhatsApp."
       operationId: restartInstanceGet
       security:
         - ClientTokenAuth: []
@@ -5857,7 +5857,7 @@ paths:
       tags:
         - Instances
       summary: Restart an instance connection
-      description: "Equivalent to FUNNELCHAT `/restart`, forcing the client to reconnect to WhatsApp."
+      description: "Equivalent to Zé da API `/restart`, forcing the client to reconnect to WhatsApp."
       operationId: restartInstance
       security:
         - ClientTokenAuth: []
@@ -6028,7 +6028,7 @@ paths:
       tags:
         - Instances
       summary: Update delivery webhook
-      description: "Mirrors FUNNELCHAT `/update-webhook-delivery`, configuring the sent-message webhook endpoint."
+      description: "Mirrors Zé da API `/update-webhook-delivery`, configuring the sent-message webhook endpoint."
       operationId: updateWebhookDelivery
       security:
         - ClientTokenAuth: []
@@ -6065,7 +6065,7 @@ paths:
       tags:
         - Instances
       summary: Update received webhook
-      description: "Mirrors FUNNELCHAT `/update-webhook-received`, configuring the incoming message webhook endpoint."
+      description: "Mirrors Zé da API `/update-webhook-received`, configuring the incoming message webhook endpoint."
       operationId: updateWebhookReceived
       security:
         - ClientTokenAuth: []
@@ -6103,7 +6103,7 @@ paths:
         - Instances
       summary: Update received+delivery webhook
       description:
-        Mirrors FUNNELCHAT `/update-webhook-received-delivery`, configuring the webhook used when `notifySentByMe` is
+        Mirrors Zé da API `/update-webhook-received-delivery`, configuring the webhook used when `notifySentByMe` is
         enabled.
       operationId: updateWebhookReceivedDelivery
       security:
@@ -6141,7 +6141,7 @@ paths:
       tags:
         - Instances
       summary: Update message status webhook
-      description: "Mirrors FUNNELCHAT `/update-webhook-message-status`, configuring delivery-read status updates."
+      description: "Mirrors Zé da API `/update-webhook-message-status`, configuring delivery-read status updates."
       operationId: updateWebhookMessageStatus
       security:
         - ClientTokenAuth: []
@@ -6178,7 +6178,7 @@ paths:
       tags:
         - Instances
       summary: Update disconnected webhook
-      description: "Mirrors FUNNELCHAT `/update-webhook-disconnected`, configuring the disconnect notification endpoint."
+      description: "Mirrors Zé da API `/update-webhook-disconnected`, configuring the disconnect notification endpoint."
       operationId: updateWebhookDisconnected
       security:
         - ClientTokenAuth: []
@@ -6215,7 +6215,7 @@ paths:
       tags:
         - Instances
       summary: Update connected webhook
-      description: "Mirrors FUNNELCHAT `/update-webhook-connected`, configuring the connection notification endpoint."
+      description: "Mirrors Zé da API `/update-webhook-connected`, configuring the connection notification endpoint."
       operationId: updateWebhookConnected
       security:
         - ClientTokenAuth: []
@@ -6252,7 +6252,7 @@ paths:
       tags:
         - Instances
       summary: Update chat presence webhook
-      description: "Mirrors FUNNELCHAT `/update-webhook-chat-presence`, configuring the typing/presence webhook endpoint."
+      description: "Mirrors Zé da API `/update-webhook-chat-presence`, configuring the typing/presence webhook endpoint."
       operationId: updateWebhookChatPresence
       security:
         - ClientTokenAuth: []
@@ -6326,7 +6326,7 @@ paths:
       tags:
         - Instances
       summary: Toggle notify-sent-by-me
-      description: "Mirrors FUNNELCHAT `/update-notify-sent-by-me`, enabling or disabling callbacks for messages sent by the instance."
+      description: "Mirrors Zé da API `/update-notify-sent-by-me`, enabling or disabling callbacks for messages sent by the instance."
       operationId: updateNotifySentByMe
       security:
         - ClientTokenAuth: []
@@ -6363,7 +6363,7 @@ paths:
       tags:
         - Instances
       summary: Update all webhooks at once
-      description: "Mirrors FUNNELCHAT `/update-every-webhooks`, applying the same HTTPS endpoint to every webhook type."
+      description: "Mirrors Zé da API `/update-every-webhooks`, applying the same HTTPS endpoint to every webhook type."
       operationId: updateEveryWebhooks
       security:
         - ClientTokenAuth: []
@@ -6400,7 +6400,7 @@ paths:
       tags:
         - Instances
       summary: Toggle automatic call rejection
-      description: "Mirrors FUNNELCHAT `/update-call-reject-auto`, enabling or disabling automatic rejection of incoming calls."
+      description: "Mirrors Zé da API `/update-call-reject-auto`, enabling or disabling automatic rejection of incoming calls."
       operationId: updateCallRejectAuto
       security:
         - ClientTokenAuth: []
@@ -6443,7 +6443,7 @@ paths:
       tags:
         - Instances
       summary: Update call rejection message
-      description: "Mirrors FUNNELCHAT `/update-call-reject-message`, setting the message sent when rejecting calls."
+      description: "Mirrors Zé da API `/update-call-reject-message`, setting the message sent when rejecting calls."
       operationId: updateCallRejectMessage
       security:
         - ClientTokenAuth: []
@@ -6486,7 +6486,7 @@ paths:
       tags:
         - Instances
       summary: Toggle automatic message reading
-      description: "Mirrors FUNNELCHAT `/update-auto-read-message`, enabling or disabling automatic marking of messages as read."
+      description: "Mirrors Zé da API `/update-auto-read-message`, enabling or disabling automatic marking of messages as read."
       operationId: updateAutoReadMessage
       security:
         - ClientTokenAuth: []
@@ -6795,7 +6795,7 @@ paths:
       tags:
         - Partner
       summary: Activate partner subscription
-      description: Enables on-demand billing/usage for the specified instance (FUNNELCHAT parity).
+      description: Enables on-demand billing/usage for the specified instance (Zé da API parity).
       operationId: partnerSubscribeInstance
       security:
         - PartnerBearer: []
@@ -6826,7 +6826,7 @@ paths:
       tags:
         - Partner
       summary: Cancel partner subscription
-      description: Cancels the on-demand subscription for the instance, matching FUNNELCHAT behaviour.
+      description: Cancels the on-demand subscription for the instance, matching Zé da API behaviour.
       operationId: partnerCancelInstance
       security:
         - PartnerBearer: []
@@ -6896,7 +6896,7 @@ paths:
               $ref: "#/components/schemas/SendTextRequest"
             example:
               phone: "5511999999999"
-              message: Hello from FUNNELCHAT!
+              message: Hello from Zé da API!
               delayMessage: 5
               delayTyping: 3
       responses:
@@ -7621,7 +7621,7 @@ paths:
                   messageId: 7AD29EAA5EF34C301F0B
                   instanceId: 550e8400-e29b-41d4-a716-446655440000
                   phone: "5511999999999"
-                  message: Hello from FUNNELCHAT
+                  message: Hello from Zé da API
                   delayMessage: 5
                   delayTyping: 3
                   created: 1624977905648
@@ -10238,7 +10238,7 @@ paths:
 
         **Important Notes:**
         - Use this API for form validation purposes
-        - Do NOT use before sending messages (FUNNELCHAT validates automatically)
+        - Do NOT use before sending messages (Zé da API validates automatically)
         - Using for message validation creates duplicate checks
         - Not designed for spam - use responsibly
 
@@ -10607,7 +10607,7 @@ paths:
           example: 10
       responses:
         "200":
-          description: Array of groups (unwrapped, matching FUNNELCHAT behaviour).
+          description: Array of groups (unwrapped, matching Zé da API behaviour).
           content:
             application/json:
               schema:
@@ -10658,7 +10658,7 @@ paths:
               $ref: "#/components/schemas/GroupCreateRequest"
             example:
               autoInvite: true
-              groupName: "Grupo FUNNELCHAT"
+              groupName: "Grupo Zé da API"
               phones:
                 - "5544999999999"
                 - "5544888888888"
@@ -10765,7 +10765,7 @@ paths:
               $ref: "#/components/schemas/GroupUpdatePhotoRequest"
             example:
               groupId: "120363019502650977-group"
-              groupPhoto: "https://www.funnelchat/wp-content/themes/funnelchat/dist/images/logo.svg"
+              groupPhoto: "https://api.zedaapi.com/wp-content/themes/zedaapi/dist/images/logo.svg"
       responses:
         "200":
           description: Group photo updated successfully.
@@ -11709,7 +11709,7 @@ paths:
           example: 10
       responses:
         "200":
-          description: Array of communities (unwrapped, matching FUNNELCHAT behaviour).
+          description: Array of communities (unwrapped, matching Zé da API behaviour).
           content:
             application/json:
               schema:
@@ -12006,7 +12006,7 @@ paths:
         - Communities
       summary: Delete community
       description: |
-        Mirrors FUNNELCHAT `DELETE /communities/{communityId}`, permanently deleting a community.
+        Mirrors Zé da API `DELETE /communities/{communityId}`, permanently deleting a community.
 
         **Important**: This action is irreversible. All linked groups will be unlinked but not deleted.
       operationId: deleteCommunity
@@ -12127,7 +12127,7 @@ paths:
               $ref: "#/components/schemas/NewsletterUpdatePictureRequest"
             example:
               id: "120363336258908380@newsletter"
-              pictureUrl: "https://www.funnelchatapi.io/wp-content/themes/funnelchatapi/dist/images/logo.svg"
+              pictureUrl: "https://api.zedaapi.com/wp-content/themes/zedaapi/dist/images/logo.svg"
       responses:
         "201":
           description: Channel picture updated successfully.
@@ -12532,7 +12532,7 @@ paths:
         - $ref: "#/components/parameters/InstanceToken"
       responses:
         "200":
-          description: Array of channels (unwrapped, matching FUNNELCHAT behaviour).
+          description: Array of channels (unwrapped, matching Zé da API behaviour).
           content:
             application/json:
               schema:
@@ -12637,7 +12637,7 @@ paths:
                 countryCodes:
                   - BR
                   - CA
-              searchText: "FUNNELCHAT"
+              searchText: "Zé da API"
       responses:
         "200":
           description: Search results returned successfully.
@@ -13029,7 +13029,7 @@ paths:
 
         **Response Formats:**
         - `aggregated` (default): Returns aggregated counts and optionally participant details
-        - `raw`: Returns data in FUNNELCHAT webhook format for compatibility
+        - `raw`: Returns data in Zé da API webhook format for compatibility
 
         **Use Cases:**
         - Check if a message was read by all group participants
@@ -13087,7 +13087,7 @@ paths:
           description: |
             Response format:
             - `aggregated`: Returns aggregated counts with optional participant details
-            - `raw`: Returns data in FUNNELCHAT MessageStatusCallback webhook format
+            - `raw`: Returns data in Zé da API MessageStatusCallback webhook format
         - name: limit
           in: query
           required: false
