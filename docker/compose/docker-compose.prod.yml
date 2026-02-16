@@ -227,7 +227,7 @@ services:
 
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 2
       restart_policy:
         condition: on-failure
         delay: 10s
@@ -250,6 +250,12 @@ services:
         - traefik.http.routers.zedaapi_server.tls.certresolver=letsencryptresolver
         - traefik.http.routers.zedaapi_server.service=zedaapi_server
         - traefik.http.services.zedaapi_server.loadbalancer.server.port=8080
+        # Sticky session — garante que QR Code e WebSocket vão para a mesma réplica
+        - traefik.http.services.zedaapi_server.loadbalancer.sticky.cookie=true
+        - traefik.http.services.zedaapi_server.loadbalancer.sticky.cookie.name=zedaapi_affinity
+        - traefik.http.services.zedaapi_server.loadbalancer.sticky.cookie.secure=true
+        - traefik.http.services.zedaapi_server.loadbalancer.sticky.cookie.httponly=true
+        - traefik.http.services.zedaapi_server.loadbalancer.sticky.cookie.samesite=strict
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 10s
