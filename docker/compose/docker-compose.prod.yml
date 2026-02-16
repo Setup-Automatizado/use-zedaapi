@@ -1,59 +1,676 @@
-# Production environment overrides
-# Use with: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up
-
-version: '3.9'
+# =============================================================================
+#  Zé da API — Production Docker Swarm Stack (Portainer)
+# =============================================================================
 
 services:
-  api:
-    image: ${DOCKER_IMAGE}  # Must be provided
-    build: null  # Disable build in production
+  # =================== ZÉ DA API SERVER (Go WhatsApp API) ===================
+  zedaapi_server:
+    image: setupautomatizado/zedaapi:latest
+    networks:
+      - network_public
     environment:
-      LOG_LEVEL: info
-      ENVIRONMENT: production
-      GIN_MODE: release
+      # =================== APPLICATION ===================
+      - APP_ENV=production
+
+      # =================== HTTP SERVER ===================
+      - HTTP_ADDR=0.0.0.0:8080
+      - API_BASE_URL=https://api.zedaapi.com
+      - HTTP_READ_HEADER_TIMEOUT=5s
+      - HTTP_READ_TIMEOUT=15s
+      - HTTP_WRITE_TIMEOUT=30s
+      - HTTP_IDLE_TIMEOUT=120s
+      - HTTP_MAX_HEADER_BYTES=1048576
+
+      # =================== LOGGING ===================
+      - LOG_LEVEL=INFO
+
+      # =================== POSTGRESQL — Application Database ===================
+      - POSTGRES_DSN=postgres://zedaapi:922GAvaUvxw4dSZoWAdtGFpKclNHkz@postgres_zedaapi:5432/zedaapi_app?sslmode=disable
+      - POSTGRES_MAX_CONNS=32
+
+      # =================== POSTGRESQL — whatsmeow Store ===================
+      - WAMEOW_POSTGRES_DSN=postgres://zedaapi:922GAvaUvxw4dSZoWAdtGFpKclNHkz@postgres_zedaapi:5432/zedaapi_store?sslmode=disable
+      - WAMEOW_LOG_LEVEL=INFO
+
+      # =================== REDIS ===================
+      - REDIS_ADDR=redis_zedaapi:6379
+      - REDIS_USERNAME=
+      - REDIS_PASSWORD=t8ccMAHqZMybCy8WxctXJLcKcDpvQlq
+      - REDIS_DB=0
+      - REDIS_TLS_ENABLED=false
+
+      # =================== REDIS DISTRIBUTED LOCK ===================
+      - REDIS_LOCK_KEY_PREFIX=zedaapi
+      - REDIS_LOCK_TTL=30s
+      - REDIS_LOCK_REFRESH_INTERVAL=10s
+
+      # =================== NATS JETSTREAM ===================
+      - NATS_ENABLED=true
+      - NATS_URL=nats://nats_zedaapi:4222
+      - NATS_TOKEN=
+      - NATS_CONNECT_TIMEOUT=10s
+      - NATS_RECONNECT_WAIT=2s
+      - NATS_MAX_RECONNECTS=-1
+      - NATS_PUBLISH_TIMEOUT=5s
+      - NATS_DRAIN_TIMEOUT=30s
+
+      # =================== S3 / MINIO STORAGE ===================
+      - S3_ENDPOINT=http://minio_zedaapi:9000
+      - S3_REGION=us-east-1
+      - S3_BUCKET=zedaapi-media
+      - S3_ACCESS_KEY=tzDw52ICssgjYmmt1E7s
+      - S3_SECRET_KEY=Sq1pnzf9SMl8k9tqOyEfqiZ7i1TVAxP1vwlmeemu
+      - S3_USE_SSL=false
+      - S3_USE_PRESIGNED_URLS=false
+      - S3_PUBLIC_BASE_URL=https://s3.zedaapi.com
+      - S3_URL_EXPIRATION=6d
+      - S3_MEDIA_RETENTION=720h
+      - S3_ACL=public-read
+
+      # =================== MEDIA LOCAL STORAGE (fallback) ===================
+      - MEDIA_LOCAL_STORAGE_PATH=/var/zedaapi/media
+      - MEDIA_LOCAL_URL_EXPIRY=720h
+      - MEDIA_LOCAL_SECRET_KEY=8Q73hYJYZPWSWFkfPjuaXYZ6g0YlZE
+      - MEDIA_LOCAL_PUBLIC_BASE_URL=https://api.zedaapi.com/media
+      - LOCAL_MEDIA_RETENTION=720h
+
+      # =================== MEDIA CLEANUP ===================
+      - MEDIA_CLEANUP_INTERVAL=168h
+      - MEDIA_CLEANUP_BATCH_SIZE=200
+
+      # =================== DOCUMENT RENDERING ===================
+      - MUPDF_VERSION=1.24.10
+
+      # =================== SENTRY ERROR TRACKING ===================
+      - SENTRY_DSN=
+      - SENTRY_ENVIRONMENT=production
+      - SENTRY_RELEASE=latest
+
+      # =================== AUTHENTICATION ===================
+      - PARTNER_AUTH_TOKEN=zJXERlneHxncXRtgRA9GkDz9waORrcKQ
+      - CLIENT_AUTH_TOKEN=GC5QyQjYMXXpzismHktRafDEI41dJ0IQ
+
+      # =================== WORKERS ===================
+      - WEBHOOK_DISPATCHER_CONCURRENCY=8
+      - MEDIA_WORKER_CONCURRENCY=4
+      - WORKER_HEARTBEAT_INTERVAL=5s
+      - WORKER_HEARTBEAT_EXPIRY=20s
+      - WORKER_REBALANCE_INTERVAL=30s
+
+      # =================== PROMETHEUS METRICS ===================
+      - PROMETHEUS_NAMESPACE=zedaapi
+
+      # =================== CONTACT METADATA CACHE ===================
+      - CONTACT_METADATA_CACHE_CAPACITY=50000
+      - CONTACT_METADATA_NAME_TTL=24h
+      - CONTACT_METADATA_PHOTO_TTL=24h
+      - CONTACT_METADATA_ERROR_TTL=24h
+      - CONTACT_METADATA_PREFETCH_WORKERS=4
+      - CONTACT_METADATA_FETCH_QUEUE_SIZE=1024
+
+      # =================== EVENT PIPELINE ===================
+      - EVENT_BUFFER_SIZE=1000
+      - EVENT_BATCH_SIZE=10
+      - EVENT_POLL_INTERVAL=100ms
+      - EVENT_PROCESSING_TIMEOUT=30s
+      - EVENT_HANDLER_TIMEOUT=60s
+      - EVENT_SHUTDOWN_GRACE_PERIOD=30s
+
+      # =================== EVENT RETRY ===================
+      - EVENT_MAX_RETRY_ATTEMPTS=6
+      - EVENT_RETRY_DELAYS=0s,10s,30s,2m,5m,15m
+
+      # =================== CIRCUIT BREAKER ===================
+      - CB_ENABLED=true
+      - CB_MAX_FAILURES=5
+      - CB_TIMEOUT=60s
+      - CB_COOLDOWN=30s
+
+      # =================== DEAD LETTER QUEUE (DLQ) ===================
+      - DLQ_RETENTION_PERIOD=7d
+      - DLQ_REPROCESS_ENABLED=true
+
+      # =================== MEDIA PROCESSING ===================
+      - MEDIA_BUFFER_SIZE=500
+      - MEDIA_BATCH_SIZE=5
+      - MEDIA_MAX_RETRIES=3
+      - MEDIA_POLL_INTERVAL=1s
+      - MEDIA_DOWNLOAD_TIMEOUT=5m
+      - MEDIA_UPLOAD_TIMEOUT=10m
+      - MEDIA_MAX_FILE_SIZE=104857600
+      - MEDIA_CHUNK_SIZE=5242880
+
+      # =================== WEBHOOK TRANSPORT ===================
+      - WEBHOOK_TIMEOUT=60s
+      - WEBHOOK_MAX_RETRIES=3
+      - TRANSPORT_BUFFER_SIZE=100
+
+      # =================== EVENT CLEANUP ===================
+      - DELIVERED_RETENTION_PERIOD=1d
+      - CLEANUP_INTERVAL=1h
+
+      # =================== EVENT DEBUG ===================
+      - EVENTS_DEBUG_RAW_PAYLOAD=false
+      - EVENTS_DEBUG_DUMP_DIR=/tmp/debug-events
+
+      # =================== MESSAGE QUEUE (outbound /send-*) ===================
+      - MESSAGE_QUEUE_ENABLED=true
+      - MESSAGE_QUEUE_POLL_INTERVAL=100ms
+      - MESSAGE_QUEUE_MAX_ATTEMPTS=3
+      - MESSAGE_QUEUE_INITIAL_BACKOFF=1s
+      - MESSAGE_QUEUE_MAX_BACKOFF=5m
+      - MESSAGE_QUEUE_BACKOFF_MULTIPLIER=2.0
+      - MESSAGE_QUEUE_DISCONNECT_RETRY_DELAY=30s
+      - MESSAGE_QUEUE_PROXY_RETRY_DELAY=2m
+      - MESSAGE_QUEUE_COMPLETED_RETENTION=24h
+      - MESSAGE_QUEUE_FAILED_RETENTION=7d
+      - MESSAGE_QUEUE_CLEANUP_INTERVAL=1h
+      - MESSAGE_QUEUE_CLEANUP_TIMEOUT=5m
+
+      # =================== RECONCILIATION ===================
+      - RECONCILIATION_ENABLED=true
+      - RECONCILIATION_INTERVAL=10s
+
+      # =================== AUTO-CONNECT ===================
+      - AUTO_CONNECT_PAIRED=true
+      - AUTO_CONNECT_MAX_ATTEMPTS=3
+      - AUTO_CONNECT_INITIAL_BACKOFF=1s
+      - AUTO_CONNECT_MAX_BACKOFF=10s
+
+      # =================== SHUTDOWN TIMEOUTS ===================
+      - SHUTDOWN_TIMEOUT=120s
+      - SHUTDOWN_HTTP_TIMEOUT=30s
+      - SHUTDOWN_QUEUE_TIMEOUT=60s
+      - SHUTDOWN_EVENT_TIMEOUT=10s
+      - SHUTDOWN_CLIENT_TIMEOUT=10s
+      - SHUTDOWN_LOCK_TIMEOUT=5s
+
+      # =================== STATUS CACHE (Redis dedup) ===================
+      - STATUS_CACHE_ENABLED=false
+      - STATUS_CACHE_TTL=24h
+      - STATUS_CACHE_TYPES=read,delivered,played,sent
+      - STATUS_CACHE_SCOPE=groups
+      - STATUS_CACHE_SUPPRESS_WEBHOOKS=true
+      - STATUS_CACHE_FLUSH_BATCH_SIZE=100
+      - STATUS_CACHE_CLEANUP_INTERVAL=1h
+      - STATUS_CACHE_OPERATION_TIMEOUT=10s
+
+      # =================== API ECHO ===================
+      - API_ECHO_ENABLED=true
+
+      # =================== EVENT FILTERS ===================
+      - FILTER_WAITING_MESSAGE=true
+      - FILTER_SECONDARY_DEVICE_RECEIPTS=true
+
+      # =================== PROXY HEALTH CHECK ===================
+      - PROXY_HEALTH_CHECK_INTERVAL=60s
+      - PROXY_HEALTH_CHECK_TIMEOUT=10s
+      - PROXY_MAX_CONSECUTIVE_FAILURES=3
+      - PROXY_DLQ_ON_UNHEALTHY=true
+      - PROXY_PAUSE_QUEUE_ON_UNHEALTHY=true
+      - PROXY_LOG_RETENTION_PERIOD=168h
+      - PROXY_CLEANUP_INTERVAL=1h
+
+      # =================== PROXY POOL (Webshare) ===================
+      - PROXY_POOL_ENABLED=false
+      - PROXY_POOL_SYNC_INTERVAL=15m
+      - PROXY_POOL_DEFAULT_COUNTRY_CODES=BR,AR,CL,CO,MX,PE,EC,UY,PY,BO,VE,US,CA
+      - PROXY_POOL_ASSIGNMENT_RETRY_DELAY=5s
+      - PROXY_POOL_MAX_ASSIGNMENT_RETRIES=3
+      - PROXY_POOL_WEBSHARE_API_KEY=
+      - PROXY_POOL_WEBSHARE_ENDPOINT=https://proxy.webshare.io/api/v2
+      - PROXY_POOL_WEBSHARE_PLAN_ID=
+      - PROXY_POOL_WEBSHARE_MODE=direct
+
+      # =================== TIMEZONE ===================
+      - TZ=America/Sao_Paulo
+
     deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 10
+        window: 300s
+      placement:
+        constraints: [node.role == manager]
       resources:
         limits:
-          cpus: '0.5'
-          memory: 1024M
+          cpus: "2"
+          memory: 2G
         reservations:
-          cpus: '0.25'
+          cpus: "0.5"
           memory: 512M
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.zedaapi_server.rule=Host(`api.zedaapi.com`)
+        - traefik.http.routers.zedaapi_server.entrypoints=websecure
+        - traefik.http.routers.zedaapi_server.priority=1
+        - traefik.http.routers.zedaapi_server.tls.certresolver=letsencryptresolver
+        - traefik.http.routers.zedaapi_server.service=zedaapi_server
+        - traefik.http.services.zedaapi_server.loadbalancer.server.port=8080
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+  # =================== POSTGRESQL 17 ===================
+  postgres_zedaapi:
+    image: postgres:17-alpine
+    hostname: "{{.Service.Name}}.{{.Task.Slot}}"
+    networks:
+      - network_public
+    entrypoint: docker-entrypoint.sh
+    command:
+      - postgres
+      - --max_connections=400
+      - --shared_buffers=256MB
+      - --effective_cache_size=768MB
+      - --work_mem=4MB
+      - --maintenance_work_mem=64MB
+      - --wal_buffers=8MB
+      - --checkpoint_completion_target=0.9
+      - --random_page_cost=1.1
+      - --effective_io_concurrency=200
+      - --log_min_duration_statement=1000
+    volumes:
+      - postgres_data_zedaapi:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=zedaapi
+      - POSTGRES_PASSWORD=922GAvaUvxw4dSZoWAdtGFpKclNHkz
+      - POSTGRES_DB=zedaapi_app
+      - POSTGRES_INITDB_ARGS=--encoding=UTF8 --lc-collate=C --lc-ctype=C
+      - TZ=America/Sao_Paulo
+    deploy:
+      mode: replicated
+      replicas: 1
       restart_policy:
         condition: on-failure
         delay: 5s
         max_attempts: 3
         window: 120s
-
-  postgres:
-    environment:
-      POSTGRES_HOST_AUTH_METHOD: md5  # Require password
-    deploy:
+      placement:
+        constraints:
+          - node.role == manager
       resources:
         limits:
-          cpus: '0.25'
+          cpus: "2"
+          memory: 2G
+        reservations:
+          cpus: "0.25"
           memory: 512M
-        reservations:
-          cpus: '0.125'
-          memory: 256M
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U zedaapi -d zedaapi_app"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
-  redis:
-    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+  # =================== REDIS 7 ===================
+  redis_zedaapi:
+    image: redis:7-alpine
+    networks:
+      - network_public
+    command: >
+      redis-server
+      --appendonly yes
+      --requirepass t8ccMAHqZMybCy8WxctXJLcKcDpvQlq
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+      --tcp-keepalive 60
+      --timeout 300
+      --save 900 1
+      --save 300 10
+      --save 60 10000
+    volumes:
+      - redis_data_zedaapi:/data
+    environment:
+      - TZ=America/Sao_Paulo
     deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      placement:
+        constraints:
+          - node.role == manager
       resources:
         limits:
-          cpus: '0.25'
-          memory: 256M
+          cpus: "0.5"
+          memory: 768M
         reservations:
-          cpus: '0.125'
+          cpus: "0.1"
+          memory: 128M
+    healthcheck:
+      test:
+        ["CMD", "redis-cli", "-a", "t8ccMAHqZMybCy8WxctXJLcKcDpvQlq", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # =================== NATS 2.10 (JetStream) ===================
+  nats_zedaapi:
+    image: nats:2.10-alpine
+    networks:
+      - network_public
+    entrypoint:
+      - sh
+      - -c
+      - |
+        printf '%s\n' \
+          'server_name: zedaapi-nats' \
+          'port: 4222' \
+          'max_connections: 50000' \
+          'max_payload: 8MB' \
+          'http_port: 8222' \
+          'jetstream {' \
+          '  store_dir: /data/jetstream' \
+          '  max_memory_store: 1GB' \
+          '  max_file_store: 100GB' \
+          '}' \
+          'debug: false' \
+          'trace: false' \
+          'logtime: true' \
+          'max_pending: 64MB' \
+          'ping_interval: "30s"' \
+          'ping_max: 3' \
+          'write_deadline: "10s"' \
+          > /tmp/nats-server.conf
+        exec nats-server -c /tmp/nats-server.conf
+    volumes:
+      - nats_data_zedaapi:/data
+    environment:
+      - TZ=America/Sao_Paulo
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: "1"
+          memory: 2G
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+      labels:
+        - traefik.enable=false
+    healthcheck:
+      test:
+        ["CMD-SHELL", "wget -qO- http://localhost:8222/healthz >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # =================== NATS Stream Setup (init container) ===================
+  nats_setup_zedaapi:
+    image: natsio/nats-box:latest
+    networks:
+      - network_public
+    environment:
+      - NATS_URL=nats://nats_zedaapi:4222
+    entrypoint:
+      - sh
+      - -c
+      - |
+        echo "Waiting for NATS server at $$NATS_URL..."
+        MAX_RETRIES=30
+        retries=0
+        until nats server check connection --server="$$NATS_URL" 2>/dev/null; do
+          retries=$$((retries + 1))
+          if [ "$$retries" -ge "$$MAX_RETRIES" ]; then
+            echo "ERROR: NATS server not available after $$MAX_RETRIES attempts"
+            exit 1
+          fi
+          echo "Waiting for NATS... (attempt $$retries/$$MAX_RETRIES)"
+          sleep 2
+        done
+        echo "NATS server is ready. Creating streams..."
+
+        create_stream() {
+          STREAM_NAME=$$1
+          shift
+          echo "Creating stream $$STREAM_NAME..."
+          if nats stream info "$$STREAM_NAME" --server="$$NATS_URL" >/dev/null 2>&1; then
+            echo "  Stream $$STREAM_NAME already exists, updating..."
+            nats stream edit "$$STREAM_NAME" --server="$$NATS_URL" "$$@" --force 2>&1 || echo "  WARN: update failed for $$STREAM_NAME"
+          else
+            nats stream add "$$STREAM_NAME" --server="$$NATS_URL" "$$@" --defaults 2>&1 || echo "  ERROR: create failed for $$STREAM_NAME"
+          fi
+        }
+
+        create_stream MESSAGE_QUEUE \
+          --subjects="messages.>" \
+          --retention=work \
+          --max-age=72h \
+          --max-bytes=10G \
+          --storage=file \
+          --replicas=1 \
+          --discard=old \
+          --dupe-window=2m \
+          --max-msg-size=8M
+
+        create_stream WHATSAPP_EVENTS \
+          --subjects="events.>" \
+          --retention=limits \
+          --max-age=168h \
+          --max-bytes=50G \
+          --storage=file \
+          --replicas=1 \
+          --discard=old \
+          --dupe-window=1h \
+          --max-msg-size=2M
+
+        create_stream MEDIA_PROCESSING \
+          --subjects="media.tasks.>,media.done.>" \
+          --retention=limits \
+          --max-age=168h \
+          --max-bytes=5G \
+          --storage=file \
+          --replicas=1 \
+          --discard=old \
+          --dupe-window=2m \
+          --max-msg-size=1M
+
+        create_stream DLQ \
+          --subjects="dlq.>" \
+          --retention=limits \
+          --max-age=720h \
+          --max-bytes=5G \
+          --storage=file \
+          --replicas=1 \
+          --discard=old \
+          --dupe-window=2m \
+          --max-msg-size=2M
+
+        echo ""
+        echo "=== Stream verification ==="
+        nats stream ls --server="$$NATS_URL"
+        nats stream ls --server="$$NATS_URL" --names > /tmp/streams.txt 2>/dev/null
+        STREAM_COUNT=0
+        while read -r line; do
+          STREAM_COUNT=$$((STREAM_COUNT + 1))
+        done < /tmp/streams.txt
+        if [ "$$STREAM_COUNT" -ge 4 ]; then
+          echo "All 4 streams verified."
+        else
+          echo "WARNING: Expected 4 streams, found $$STREAM_COUNT"
+          exit 1
+        fi
+        echo "Stream setup complete."
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 5
+        window: 120s
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: "0.25"
           memory: 128M
 
-  minio:
+  # =================== MINIO OBJECT STORAGE ===================
+  minio_zedaapi:
+    image: quay.io/minio/minio:RELEASE.2025-04-08T15-41-24Z
+    networks:
+      - network_public
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data_zedaapi:/data
+    environment:
+      - MINIO_ROOT_USER=tzDw52ICssgjYmmt1E7s
+      - MINIO_ROOT_PASSWORD=Sq1pnzf9SMl8k9tqOyEfqiZ7i1TVAxP1vwlmeemu
+      - MINIO_BROWSER_REDIRECT_URL=https://storage.zedaapi.com
+      - MINIO_SERVER_URL=https://s3.zedaapi.com
+      - TZ=America/Sao_Paulo
     deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+      placement:
+        constraints:
+          - node.role == manager
       resources:
         limits:
-          cpus: '0.5'
-          memory: 1024M
+          cpus: "1"
+          memory: 2G
         reservations:
-          cpus: '0.25'
+          cpus: "0.25"
           memory: 512M
+      labels:
+        # MinIO API (S3)
+        - traefik.enable=true
+        - traefik.http.routers.minio_zedaapi_api.rule=Host(`s3.zedaapi.com`)
+        - traefik.http.routers.minio_zedaapi_api.entrypoints=websecure
+        - traefik.http.routers.minio_zedaapi_api.tls.certresolver=letsencryptresolver
+        - traefik.http.routers.minio_zedaapi_api.service=minio_zedaapi_api
+        - traefik.http.services.minio_zedaapi_api.loadbalancer.server.port=9000
+        # MinIO Console
+        - traefik.http.routers.minio_zedaapi_console.rule=Host(`storage.zedaapi.com`)
+        - traefik.http.routers.minio_zedaapi_console.entrypoints=websecure
+        - traefik.http.routers.minio_zedaapi_console.tls.certresolver=letsencryptresolver
+        - traefik.http.routers.minio_zedaapi_console.service=minio_zedaapi_console
+        - traefik.http.services.minio_zedaapi_console.loadbalancer.server.port=9001
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # =================== MINIO BUCKET INIT ===================
+  minio_init_zedaapi:
+    image: minio/mc:latest
+    networks:
+      - network_public
+    environment:
+      - MINIO_HOST=https://s3.zedaapi.com
+      - MINIO_ACCESS_KEY=tzDw52ICssgjYmmt1E7s
+      - MINIO_SECRET_KEY=Sq1pnzf9SMl8k9tqOyEfqiZ7i1TVAxP1vwlmeemu
+      - BUCKET_NAME=zedaapi-media
+    entrypoint:
+      - sh
+      - -c
+      - |
+        sleep 10
+        mc alias set myminio $$MINIO_HOST $$MINIO_ACCESS_KEY $$MINIO_SECRET_KEY --api S3v4 --insecure
+        echo "Waiting for MinIO at $$MINIO_HOST..."
+        MAX_RETRIES=30
+        retries=0
+        until mc mb myminio/$$BUCKET_NAME --ignore-existing --insecure 2>&1; do
+          retries=$$((retries + 1))
+          if [ "$$retries" -ge "$$MAX_RETRIES" ]; then
+            echo "ERROR: MinIO not available after $$MAX_RETRIES attempts"
+            exit 1
+          fi
+          echo "Waiting for MinIO... (attempt $$retries/$$MAX_RETRIES)"
+          sleep 5
+          mc alias set myminio $$MINIO_HOST $$MINIO_ACCESS_KEY $$MINIO_SECRET_KEY --api S3v4 --insecure 2>/dev/null
+        done
+        mc anonymous set download myminio/$$BUCKET_NAME --insecure
+        echo "Bucket $$BUCKET_NAME created successfully with public-read policy"
+        exit 0
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 5
+        window: 120s
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 128M
+
+# =================== VOLUMES (external — create before deploy) ===================
+volumes:
+  postgres_data_zedaapi:
+    name: postgres_data_zedaapi
+    external: true
+  redis_data_zedaapi:
+    name: redis_data_zedaapi
+    external: true
+  nats_data_zedaapi:
+    name: nats_data_zedaapi
+    external: true
+  minio_data_zedaapi:
+    name: minio_data_zedaapi
+    external: true
+
+# =================== NETWORKS (external overlay) ===================
+networks:
+  network_public:
+    name: network_public
+    external: true
