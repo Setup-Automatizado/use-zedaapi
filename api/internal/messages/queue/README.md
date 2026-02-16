@@ -121,7 +121,7 @@ A ordem FIFO é garantida através de 5 mecanismos complementares:
 
 ```
 Mensagem 1: sequence=1, priority=-1, scheduled_at=10:00:00
-Mensagem 2: sequence=2, priority=-2, scheduled_at=10:00:03  
+Mensagem 2: sequence=2, priority=-2, scheduled_at=10:00:03
 Mensagem 3: sequence=3, priority=-3, scheduled_at=10:00:06
 
 River processa: -1 → -2 → -3 (ordem FIFO garantida)
@@ -230,7 +230,7 @@ As migrations são executadas automaticamente ao criar o `RiverQueueManager`:
 ```sql
 -- River core tables
 river_job
-river_leader  
+river_leader
 river_migration
 
 -- Custom tables
@@ -277,7 +277,7 @@ MESSAGE_QUEUE_MAX_JITTER=3s
 ### Configuração em Go
 
 ```go
-import "github.com/your-org/whatsapp-api/api/internal/config"
+import "github.com/your-org/zedaapi/api/internal/config"
 
 cfg, err := config.Load()
 if err != nil {
@@ -299,21 +299,21 @@ package main
 import (
     "context"
     "log/slog"
-    
+
     "github.com/jackc/pgx/v5/pgxpool"
-    "github.com/your-org/whatsapp-api/api/internal/messages/queue"
+    "github.com/Setup-Automatizado/zedaapi/api/internal/messages/queue"
 )
 
 func main() {
     ctx := context.Background()
-    
+
     // 1. Criar pool de conexões
     pool, err := pgxpool.New(ctx, "postgres://...")
     if err != nil {
         panic(err)
     }
     defer pool.Close()
-    
+
     // 2. Criar coordenador (inicia River automaticamente)
     coordinator, err := queue.NewCoordinator(ctx, &queue.CoordinatorConfig{
         Pool:           pool,
@@ -324,13 +324,13 @@ func main() {
         panic(err)
     }
     defer coordinator.Stop(ctx)
-    
+
     // 3. Adicionar fila para instância
     instanceID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")
     if err := coordinator.AddInstanceQueue(ctx, instanceID); err != nil {
         panic(err)
     }
-    
+
     // 4. Enfileirar mensagem
     zaapID, err := coordinator.EnqueueMessage(ctx, instanceID, queue.SendMessageArgs{
         Phone:        "5511999999999",
@@ -342,7 +342,7 @@ func main() {
     if err != nil {
         panic(err)
     }
-    
+
     log.Printf("Mensagem enfileirada: %s", zaapID)
 }
 ```
@@ -407,17 +407,17 @@ type Coordinator interface {
     RemoveInstanceQueue(ctx context.Context, instanceID uuid.UUID) error
     Stop(ctx context.Context) error
     IsStarted() bool
-    
+
     // Enqueue
     EnqueueMessage(ctx context.Context, instanceID uuid.UUID, args SendMessageArgs) (zaapID string, err error)
-    
+
     // Query
     GetQueueStats(ctx context.Context, instanceID uuid.UUID) (*QueueStats, error)
     GetQueuePosition(ctx context.Context, zaapID string) (int, error)
     GetJobByZaapID(ctx context.Context, zaapID string) (*QueueJobInfo, error)
     ListQueueJobs(ctx context.Context, instanceID uuid.UUID, limit, offset int) (*QueueListResponse, error)
     ListActiveQueues() []*InstanceQueue
-    
+
     // Management
     CancelJob(ctx context.Context, zaapID string) error
 }
@@ -430,24 +430,24 @@ type SendMessageArgs struct {
     // Identificação
     ZaapID     string    // Gerado automaticamente
     InstanceID uuid.UUID // UUID da instância
-    
+
     // Destinatário
     Phone string // Formato: 5511999999999 ou 5511999999999@s.whatsapp.net
-    
+
     // Tipo e conteúdo
     MessageType MessageType // text, image, audio, etc.
     TextContent *TextMessage
     ImageContent *MediaMessage
     // ... outros tipos
-    
+
     // Delays
     DelayMessage int64 // Delay antes de agendar (ms)
     DelayTyping  int64 // Indicador "digitando..." (ms)
-    
+
     // FIFO (preenchido automaticamente)
     SequenceNumber int64
     ScheduledFor   time.Time
-    
+
     // Metadata
     EnqueuedAt time.Time
     Metadata   map[string]interface{}
@@ -485,10 +485,10 @@ func TestFIFOOrdering(t *testing.T) {
         require.NoError(t, err)
         zaapIDs = append(zaapIDs, zaapID)
     }
-    
+
     // 2. Aguardar processamento
     time.Sleep(5 * time.Second)
-    
+
     // 3. Verificar ordem de envio
     for i, zaapID := range zaapIDs {
         job, err := coordinator.GetJobByZaapID(ctx, zaapID)

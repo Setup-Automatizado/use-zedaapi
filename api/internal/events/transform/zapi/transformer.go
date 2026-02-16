@@ -102,7 +102,7 @@ func (t *Transformer) Transform(ctx context.Context, event *types.InternalEvent)
 	case "history_sync":
 		result, err = t.transformHistorySync(ctx, logger, event)
 	default:
-		logger.Debug("unsupported event type for FUNNELCHAT transformation")
+		logger.Debug("unsupported event type for Zé da API transformation")
 		return nil, transform.ErrUnsupportedEvent
 	}
 
@@ -123,7 +123,7 @@ func (t *Transformer) Transform(ctx context.Context, event *types.InternalEvent)
 
 	t.dumpPayload(logger, event, payload)
 
-	logger.InfoContext(ctx, "transformed to FUNNELCHAT webhook",
+	logger.InfoContext(ctx, "transformed to Zé da API webhook",
 		slog.Int("payload_size", len(payload)),
 	)
 

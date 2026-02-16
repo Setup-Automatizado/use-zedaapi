@@ -38,7 +38,7 @@ func DefaultConfig() *Config {
 		DisableCompression:     false,
 		MaxResponseHeaderBytes: 1 << 20 * 100,
 		InsecureSkipVerify:     false,
-		UserAgent:              "FunnelChat-Webhook/1.0",
+		UserAgent:              "ZedaAPI-Webhook/1.0",
 		MaxRetries:             3,
 		RetryWaitMin:           2 * time.Second,
 		RetryWaitMax:           30 * time.Second,

@@ -369,10 +369,10 @@ func (t *HTTPTransport) prepareRequest(ctx context.Context, request *DeliveryReq
 		httpReq.Header.Set(key, value)
 	}
 
-	httpReq.Header.Set("X-FunnelChat-Event-ID", request.EventID)
-	httpReq.Header.Set("X-FunnelChat-Event-Type", request.EventType)
-	httpReq.Header.Set("X-FunnelChat-Instance-ID", request.InstanceID)
-	httpReq.Header.Set("X-FunnelChat-Delivery-Attempt", fmt.Sprintf("%d", request.Attempt))
+	httpReq.Header.Set("X-ZedaAPI-Event-ID", request.EventID)
+	httpReq.Header.Set("X-ZedaAPI-Event-Type", request.EventType)
+	httpReq.Header.Set("X-ZedaAPI-Instance-ID", request.InstanceID)
+	httpReq.Header.Set("X-ZedaAPI-Delivery-Attempt", fmt.Sprintf("%d", request.Attempt))
 
 	return httpReq, nil
 }

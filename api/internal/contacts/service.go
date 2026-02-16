@@ -114,7 +114,7 @@ func (s *Service) toContact(jid types.JID, info types.ContactInfo) Contact {
 	// Extract phone number from JID
 	phone := jid.User
 
-	// FUNNELCHAT expects fields to be nil if not available (not empty strings)
+	// Zé da API expects fields to be nil if not available (not empty strings)
 	var name *string
 	if info.FullName != "" {
 		name = &info.FullName
@@ -231,7 +231,7 @@ func (s *Service) IsOnWhatsApp(ctx context.Context, instanceID uuid.UUID, phone 
 
 // IsOnWhatsAppBatch checks if multiple phone numbers are registered on WhatsApp.
 // Returns a slice of batch responses with validation results for each phone.
-// Maximum batch size is 50,000 numbers per request (FUNNELCHAT limit).
+// Maximum batch size is 50,000 numbers per request (Zé da API limit).
 func (s *Service) IsOnWhatsAppBatch(ctx context.Context, instanceID uuid.UUID, phones []string) ([]PhoneExistsBatchResponse, error) {
 	logger := logging.ContextLogger(ctx, s.log)
 

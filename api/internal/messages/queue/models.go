@@ -149,7 +149,7 @@ type LocationMessage struct {
 }
 
 // ContactMessage represents a contact message
-// Supports both pre-formatted vCard (FUNNELCHAT) and structured fields
+// Supports both pre-formatted vCard (Zé da API) and structured fields
 type ContactMessage struct {
 	// Option 1: Pre-formatted vCard string
 	// If provided, this takes precedence over individual fields

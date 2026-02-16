@@ -75,7 +75,7 @@ type Summary struct {
 	ViewMetadata     *ViewMetadata `json:"viewMetadata,omitempty"`
 }
 
-// ViewMetadata mirrors the nested object returned by FUNNELCHAT for newsletters.
+// ViewMetadata mirrors the nested object returned by Zé da API for newsletters.
 type ViewMetadata struct {
 	Mute string `json:"mute"`
 	Role string `json:"role"`
@@ -113,7 +113,7 @@ type SearchResult struct {
 	Data   []SearchItem `json:"data"`
 }
 
-// OperationResult mirrors the boolean success envelope used across FUNNELCHAT mutations.
+// OperationResult mirrors the boolean success envelope used across Zé da API mutations.
 type OperationResult struct {
 	Value   bool    `json:"value"`
 	Message *string `json:"message,omitempty"`

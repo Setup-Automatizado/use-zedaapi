@@ -7,7 +7,7 @@ type ListParams struct {
 }
 
 // Contact represents the payload for a single contact.
-// Maps whatsmeow's types.ContactInfo to FUNNELCHAT expected format.
+// Maps whatsmeow's types.ContactInfo to Zé da API expected format.
 type Contact struct {
 	Phone  string  `json:"phone"`  // Phone number
 	Name   *string `json:"name"`   // Full name (only if in contacts)

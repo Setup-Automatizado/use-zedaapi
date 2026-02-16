@@ -190,7 +190,7 @@ type PendingWebhook struct {
 	Status      string `json:"status"`
 	Timestamp   int64  `json:"timestamp"`
 	Device      int    `json:"device,omitempty"`
-	Payload     []byte `json:"payload"` // Original FUNNELCHAT payload for flush
+	Payload     []byte `json:"payload"` // Original Zé da API payload for flush
 }
 
 // CacheStats contains statistics about the status cache
@@ -202,12 +202,12 @@ type CacheStats struct {
 	NewestEntry       int64            `json:"newestEntry,omitempty"` // Unix timestamp
 }
 
-// RawStatusPayload matches the FUNNELCHAT webhook payload format exactly
+// RawStatusPayload matches the Zé da API webhook payload format exactly
 // This allows systems to process cached data identically to webhooks
 type RawStatusPayload struct {
 	Status         string   `json:"status"`
 	Ids            []string `json:"ids"`
-	Momment        int64    `json:"momment"` // FUNNELCHAT uses "momment" (typo preserved for compatibility)
+	Momment        int64    `json:"momment"` // Zé da API uses "momment" (typo preserved for compatibility)
 	Phone          string   `json:"phone"`
 	ChatLid        string   `json:"chatLid,omitempty"`
 	ChatPN         string   `json:"chat_pn,omitempty"`

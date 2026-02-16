@@ -14,8 +14,8 @@ const (
 	ButtonTypeReviewAndPay ButtonType = "review_and_pay"
 )
 
-// NormalizeButtonType converts FUNNELCHAT uppercase format to internal format
-// Accepts both FUNNELCHAT style (CALL, URL, COPY) and internal style (cta_call, cta_url)
+// NormalizeButtonType converts Zé da API uppercase format to internal format
+// Accepts both Zé da API style (CALL, URL, COPY) and internal style (cta_call, cta_url)
 func NormalizeButtonType(t string) ButtonType {
 	switch strings.ToUpper(t) {
 	case "CALL", "CTA_CALL":
@@ -46,7 +46,7 @@ const (
 	PIXKeyTypeEVP   PIXKeyType = "EVP" // Random key
 )
 
-// SendButtonListRequest - FUNNELCHAT /send-button-list format
+// SendButtonListRequest - Zé da API /send-button-list format
 type SendButtonListRequest struct {
 	Phone        string            `json:"phone" validate:"required"`
 	Message      string            `json:"message" validate:"required,max=4096"`
@@ -70,7 +70,7 @@ type ButtonListItem struct {
 	Label string `json:"label" validate:"required,max=20"`
 }
 
-// SendButtonActionsRequest - FUNNELCHAT /send-button-actions format
+// SendButtonActionsRequest - Zé da API /send-button-actions format
 type SendButtonActionsRequest struct {
 	Phone         string               `json:"phone" validate:"required"`
 	Message       string               `json:"message" validate:"required,max=4096"`
@@ -109,7 +109,7 @@ type ActionButton struct {
 }
 
 // GetNormalizedType returns the normalized button type
-// Accepts both FUNNELCHAT uppercase (CALL, URL) and internal lowercase (cta_call, cta_url)
+// Accepts both Zé da API uppercase (CALL, URL) and internal lowercase (cta_call, cta_url)
 func (b *ActionButton) GetNormalizedType() ButtonType {
 	return NormalizeButtonType(string(b.Type))
 }
@@ -127,7 +127,7 @@ type PaymentItem struct {
 	Price    int64  `json:"price"` // Price in cents
 }
 
-// SendOptionListRequest - FUNNELCHAT /send-option-list format
+// SendOptionListRequest - Zé da API /send-option-list format
 type SendOptionListRequest struct {
 	Phone        string            `json:"phone" validate:"required"`
 	Message      string            `json:"message" validate:"required,max=4096"`
@@ -157,7 +157,7 @@ type OptionRow struct {
 	Description *string `json:"description,omitempty" validate:"omitempty,max=72"`
 }
 
-// SendButtonPIXRequest - FUNNELCHAT /send-button-pix format
+// SendButtonPIXRequest - Zé da API /send-button-pix format
 type SendButtonPIXRequest struct {
 	Phone         string     `json:"phone" validate:"required"`
 	Message       *string    `json:"message,omitempty" validate:"omitempty,max=4096"`
@@ -172,7 +172,7 @@ type SendButtonPIXRequest struct {
 	MessageId     *string    `json:"messageId,omitempty"`
 }
 
-// SendButtonOTPRequest - FUNNELCHAT /send-button-otp format
+// SendButtonOTPRequest - Zé da API /send-button-otp format
 type SendButtonOTPRequest struct {
 	Phone        string  `json:"phone" validate:"required"`
 	Message      string  `json:"message" validate:"required,max=4096"`
@@ -193,7 +193,7 @@ const (
 	CarouselCardTypeAlbum   CarouselCardType = "ALBUM_IMAGE"
 )
 
-// SendCarouselRequest - FUNNELCHAT /send-carousel format
+// SendCarouselRequest - Zé da API /send-carousel format
 type SendCarouselRequest struct {
 	Phone        string           `json:"phone" validate:"required"`
 	Message      string           `json:"message,omitempty"` // Carousel body text displayed above cards

@@ -83,7 +83,7 @@ type InvitationLinkResult struct {
 	InvitationLink string `json:"invitationLink"`
 }
 
-// ValueResult mirrors the generic FUNNELCHAT boolean response.
+// ValueResult mirrors the generic Zé da API boolean response.
 type ValueResult struct {
 	Value bool `json:"value"`
 }
@@ -133,7 +133,7 @@ type Metadata struct {
 	SubjectOwner         string               `json:"subjectOwner"`
 }
 
-// ParticipantSummary adapts WhatsApp participant data to the FUNNELCHAT schema.
+// ParticipantSummary adapts WhatsApp participant data to the Zé da API schema.
 type ParticipantSummary struct {
 	Phone        string  `json:"phone"`
 	LID          string  `json:"lid,omitempty"`

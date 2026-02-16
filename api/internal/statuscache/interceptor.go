@@ -26,7 +26,7 @@ func NewInterceptor(service Service, cfg *config.Config, log *slog.Logger) *Inte
 	}
 }
 
-// MessageStatusPayload represents the FUNNELCHAT message status webhook payload
+// MessageStatusPayload represents the Zé da API message status webhook payload
 // This must match the structure from transform/zapi/schemas.go
 type MessageStatusPayload struct {
 	Status         string   `json:"status"`

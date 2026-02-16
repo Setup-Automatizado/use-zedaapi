@@ -66,12 +66,12 @@ type OperationResult struct {
 	Success *bool `json:"success,omitempty"`
 }
 
-// NewValueResult builds an OperationResult with the FUNNELCHAT `value` field.
+// NewValueResult builds an OperationResult with the Zé da API `value` field.
 func NewValueResult(ok bool) OperationResult {
 	return OperationResult{Value: boolPtr(ok)}
 }
 
-// NewSuccessResult builds an OperationResult with the FUNNELCHAT `success` field.
+// NewSuccessResult builds an OperationResult with the Zé da API `success` field.
 func NewSuccessResult(ok bool) OperationResult {
 	return OperationResult{Success: boolPtr(ok)}
 }

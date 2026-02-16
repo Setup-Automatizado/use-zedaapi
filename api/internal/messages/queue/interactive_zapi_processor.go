@@ -25,7 +25,7 @@ type InteractiveZAPIProcessor struct {
 	echoEmitter    *echo.Emitter
 }
 
-// NewInteractiveZAPIProcessor creates a new FUNNELCHAT interactive message processor
+// NewInteractiveZAPIProcessor creates a new Zé da API interactive message processor
 func NewInteractiveZAPIProcessor(log *slog.Logger, echoEmitter *echo.Emitter) *InteractiveZAPIProcessor {
 	return &InteractiveZAPIProcessor{
 		protoBuilder:   interactive.NewProtoBuilder(),
@@ -36,7 +36,7 @@ func NewInteractiveZAPIProcessor(log *slog.Logger, echoEmitter *echo.Emitter) *I
 	}
 }
 
-// NewInteractiveZAPIProcessorWithClient creates a new FUNNELCHAT interactive message processor with a WhatsApp client
+// NewInteractiveZAPIProcessorWithClient creates a new Zé da API interactive message processor with a WhatsApp client
 // for media processing capabilities (thumbnail generation, upload, etc.)
 func NewInteractiveZAPIProcessorWithClient(client *wameow.Client, log *slog.Logger, echoEmitter *echo.Emitter) *InteractiveZAPIProcessor {
 	return &InteractiveZAPIProcessor{
@@ -56,7 +56,7 @@ func (p *InteractiveZAPIProcessor) SetClient(client *wameow.Client) {
 	}
 }
 
-// ProcessButtonList sends a button list message via WhatsApp (FUNNELCHAT /send-button-list)
+// ProcessButtonList sends a button list message via WhatsApp (Zé da API /send-button-list)
 func (p *InteractiveZAPIProcessor) ProcessButtonList(ctx context.Context, client *wameow.Client, args *SendMessageArgs) error {
 	if args.InteractiveContent == nil {
 		return fmt.Errorf("interactive_content is required for button_list messages")
@@ -76,7 +76,7 @@ func (p *InteractiveZAPIProcessor) ProcessButtonList(ctx context.Context, client
 		}
 	}
 
-	// Convert queue model to FUNNELCHAT request format
+	// Convert queue model to Zé da API request format
 	req := p.convertToButtonListRequest(args)
 
 	// Process media if present (image or video)
@@ -175,7 +175,7 @@ func (p *InteractiveZAPIProcessor) getMediaURLFromButtonList(args *SendMessageAr
 	return ""
 }
 
-// ProcessButtonActions sends a button actions message via WhatsApp (FUNNELCHAT /send-button-actions)
+// ProcessButtonActions sends a button actions message via WhatsApp (Zé da API /send-button-actions)
 func (p *InteractiveZAPIProcessor) ProcessButtonActions(ctx context.Context, client *wameow.Client, args *SendMessageArgs) error {
 	if args.InteractiveContent == nil {
 		return fmt.Errorf("interactive_content is required for button_actions messages")
@@ -195,7 +195,7 @@ func (p *InteractiveZAPIProcessor) ProcessButtonActions(ctx context.Context, cli
 		}
 	}
 
-	// Convert queue model to FUNNELCHAT request format
+	// Convert queue model to Zé da API request format
 	req := p.convertToButtonActionsRequest(args)
 
 	// Process media if present (image, video, or document)
@@ -303,7 +303,7 @@ func (p *InteractiveZAPIProcessor) getMediaURLFromButtonActions(args *SendMessag
 	return ""
 }
 
-// ProcessOptionList sends an option list message via WhatsApp (FUNNELCHAT /send-option-list)
+// ProcessOptionList sends an option list message via WhatsApp (Zé da API /send-option-list)
 func (p *InteractiveZAPIProcessor) ProcessOptionList(ctx context.Context, client *wameow.Client, args *SendMessageArgs) error {
 	if args.InteractiveContent == nil {
 		return fmt.Errorf("interactive_content is required for option_list messages")
@@ -323,7 +323,7 @@ func (p *InteractiveZAPIProcessor) ProcessOptionList(ctx context.Context, client
 		}
 	}
 
-	// Convert queue model to FUNNELCHAT request format
+	// Convert queue model to Zé da API request format
 	req := p.convertToOptionListRequest(args)
 
 	// Build proto message using our builder
@@ -374,7 +374,7 @@ func (p *InteractiveZAPIProcessor) ProcessOptionList(ctx context.Context, client
 	return nil
 }
 
-// ProcessButtonPIX sends a PIX payment button message via WhatsApp (FUNNELCHAT /send-button-pix)
+// ProcessButtonPIX sends a PIX payment button message via WhatsApp (Zé da API /send-button-pix)
 func (p *InteractiveZAPIProcessor) ProcessButtonPIX(ctx context.Context, client *wameow.Client, args *SendMessageArgs) error {
 	if args.InteractiveContent == nil || args.InteractiveContent.PIXPayment == nil {
 		return fmt.Errorf("interactive_content with pix_payment is required for button_pix messages")
@@ -394,7 +394,7 @@ func (p *InteractiveZAPIProcessor) ProcessButtonPIX(ctx context.Context, client 
 		}
 	}
 
-	// Convert queue model to FUNNELCHAT request format
+	// Convert queue model to Zé da API request format
 	req := p.convertToButtonPIXRequest(args)
 
 	// Build proto message using our builder
@@ -445,7 +445,7 @@ func (p *InteractiveZAPIProcessor) ProcessButtonPIX(ctx context.Context, client 
 	return nil
 }
 
-// ProcessButtonOTP sends an OTP button message via WhatsApp (FUNNELCHAT /send-button-otp)
+// ProcessButtonOTP sends an OTP button message via WhatsApp (Zé da API /send-button-otp)
 func (p *InteractiveZAPIProcessor) ProcessButtonOTP(ctx context.Context, client *wameow.Client, args *SendMessageArgs) error {
 	if args.InteractiveContent == nil || args.InteractiveContent.OTPCode == nil {
 		return fmt.Errorf("interactive_content with otp_code is required for button_otp messages")
@@ -465,7 +465,7 @@ func (p *InteractiveZAPIProcessor) ProcessButtonOTP(ctx context.Context, client 
 		}
 	}
 
-	// Convert queue model to FUNNELCHAT request format
+	// Convert queue model to Zé da API request format
 	req := p.convertToButtonOTPRequest(args)
 
 	// Build proto message using our builder
@@ -515,7 +515,7 @@ func (p *InteractiveZAPIProcessor) ProcessButtonOTP(ctx context.Context, client 
 	return nil
 }
 
-// ProcessCarousel sends a carousel message with multiple cards via WhatsApp (FUNNELCHAT /send-carousel)
+// ProcessCarousel sends a carousel message with multiple cards via WhatsApp (Zé da API /send-carousel)
 func (p *InteractiveZAPIProcessor) ProcessCarousel(ctx context.Context, client *wameow.Client, args *SendMessageArgs) error {
 	if args.InteractiveContent == nil || len(args.InteractiveContent.CarouselCards) == 0 {
 		return fmt.Errorf("interactive_content with carousel_cards is required for carousel messages")
@@ -535,7 +535,7 @@ func (p *InteractiveZAPIProcessor) ProcessCarousel(ctx context.Context, client *
 		}
 	}
 
-	// Convert queue model to FUNNELCHAT request format
+	// Convert queue model to Zé da API request format
 	req := p.convertToCarouselRequest(args)
 
 	// Process media for each card that has media URL
@@ -633,7 +633,7 @@ func (p *InteractiveZAPIProcessor) ProcessCarousel(ctx context.Context, client *
 	return nil
 }
 
-// Conversion helpers - convert from queue models to FUNNELCHAT request formats
+// Conversion helpers - convert from queue models to Zé da API request formats
 
 func (p *InteractiveZAPIProcessor) convertToButtonListRequest(args *SendMessageArgs) *interactive.SendButtonListRequest {
 	content := args.InteractiveContent

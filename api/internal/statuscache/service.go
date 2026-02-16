@@ -15,7 +15,7 @@ type Service interface {
 	QueryByPhone(ctx context.Context, instanceID, phone string, params QueryParams) (*QueryResult, error)
 	QueryAll(ctx context.Context, instanceID string, params QueryParams) (*QueryResult, error)
 
-	// Raw queries (FUNNELCHAT webhook format - identical to webhook payload)
+	// Raw queries (Zé da API webhook format - identical to webhook payload)
 	GetRawStatus(ctx context.Context, instanceID, messageID string) (*RawQueryResult, error)
 	QueryRawByGroup(ctx context.Context, instanceID, groupID string, params QueryParams) (*RawQueryResult, error)
 	QueryRawByPhone(ctx context.Context, instanceID, phone string, params QueryParams) (*RawQueryResult, error)

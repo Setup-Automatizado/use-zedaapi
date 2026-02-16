@@ -7,7 +7,7 @@ import (
 )
 
 // Chat represents a WhatsApp conversation (can be a contact or a group).
-// This follows the FUNNELCHAT principle that "everything is a chat".
+// This follows the Zé da API principle that "everything is a chat".
 type Chat struct {
 	Phone           string    `json:"phone"`           // WhatsApp JID (e.g., "5511999999999@s.whatsapp.net" or group JID)
 	Name            string    `json:"name"`            // Contact name or group subject

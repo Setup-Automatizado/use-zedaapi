@@ -77,7 +77,7 @@ func NewMediaProcessor(
 
 	bucket := cfg.S3.Bucket
 	if bucket == "" {
-		bucket = "funnelchat-media"
+		bucket = "zedaapi-media"
 	}
 
 	urlExpiry := cfg.S3.URLExpiry

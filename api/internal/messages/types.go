@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
-// SendTextRequest represents FUNNELCHAT send-text request with dual field names for compatibility
+// SendTextRequest represents Zé da API send-text request with dual field names for compatibility
 type SendTextRequest struct {
 	Phone        string `json:"phone" validate:"required,e164"`
 	PhoneAlt     string `json:"Phone,omitempty"`
@@ -114,7 +114,7 @@ func (m *Media) GetMimeType() string {
 	return m.MimeTypeAlt
 }
 
-// SendImageRequest represents FUNNELCHAT send-image request
+// SendImageRequest represents Zé da API send-image request
 type SendImageRequest struct {
 	Phone        string `json:"phone" validate:"required,e164"`
 	PhoneAlt     string `json:"Phone,omitempty"`
@@ -158,7 +158,7 @@ func (r *SendImageRequest) GetDelay() int {
 	return r.DelayAlt
 }
 
-// SendAudioRequest represents FUNNELCHAT send-audio request
+// SendAudioRequest represents Zé da API send-audio request
 type SendAudioRequest struct {
 	Phone        string `json:"phone" validate:"required,e164"`
 	PhoneAlt     string `json:"Phone,omitempty"`
@@ -192,7 +192,7 @@ func (r *SendAudioRequest) GetDelay() int {
 	return r.DelayAlt
 }
 
-// SendVideoRequest represents FUNNELCHAT send-video request
+// SendVideoRequest represents Zé da API send-video request
 type SendVideoRequest struct {
 	Phone        string `json:"phone" validate:"required,e164"`
 	PhoneAlt     string `json:"Phone,omitempty"`
@@ -236,7 +236,7 @@ func (r *SendVideoRequest) GetDelay() int {
 	return r.DelayAlt
 }
 
-// SendStickerRequest represents FUNNELCHAT send-sticker request
+// SendStickerRequest represents Zé da API send-sticker request
 type SendStickerRequest struct {
 	Phone        string `json:"phone" validate:"required,e164"`
 	PhoneAlt     string `json:"Phone,omitempty"`
@@ -270,7 +270,7 @@ func (r *SendStickerRequest) GetDelay() int {
 	return r.DelayAlt
 }
 
-// SendGifRequest represents FUNNELCHAT send-gif request
+// SendGifRequest represents Zé da API send-gif request
 type SendGifRequest struct {
 	Phone        string `json:"phone" validate:"required,e164"`
 	PhoneAlt     string `json:"Phone,omitempty"`

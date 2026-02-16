@@ -14,7 +14,7 @@ import (
 	"go.mau.fi/whatsmeow/types"
 )
 
-// Create provisions a new group on WhatsApp and returns the FUNNELCHAT compliant identifiers.
+// Create provisions a new group on WhatsApp and returns the Zé da API compliant identifiers.
 func (s *Service) Create(ctx context.Context, instanceID uuid.UUID, params CreateParams) (CreateResult, error) {
 	logger := logging.ContextLogger(ctx, s.log).With(
 		slog.String("component", "groups_service"),
