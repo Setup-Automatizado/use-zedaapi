@@ -127,8 +127,8 @@ Webhook delivery URLs are resolved per event type from `webhook_configs` table. 
 Env vars loaded from `api/.env` (see `api/.env.example` for all options). Critical vars:
 
 ```env
-POSTGRES_DSN=postgres://user:pass@localhost:5432/funnelchat_api?sslmode=disable
-WAMEOW_POSTGRES_DSN=postgres://user:pass@localhost:5432/funnelchat_store?sslmode=disable
+POSTGRES_DSN=postgres://user:pass@localhost:5432/zedaapi_api?sslmode=disable
+WAMEOW_POSTGRES_DSN=postgres://user:pass@localhost:5432/zedaapi_store?sslmode=disable
 REDIS_ADDR=localhost:6379
 NATS_ENABLED=true
 NATS_URL=nats://localhost:4222
