@@ -55,7 +55,8 @@ type SendButtonListRequest struct {
 	Footer       *string           `json:"footer,omitempty"`
 	Image        *string           `json:"image,omitempty"`        // URL or base64
 	Video        *string           `json:"video,omitempty"`        // URL or base64
-	DelayMessage *int              `json:"delayMessage,omitempty"` // Delay in milliseconds
+	DelayMessage *int              `json:"delayMessage,omitempty"` // Delay in seconds
+	ScheduledFor *string           `json:"scheduledFor,omitempty"` // ISO 8601 timestamp for scheduled delivery (overrides delayMessage)
 	MessageId    *string           `json:"messageId,omitempty"`    // Custom tracking ID
 }
 
@@ -78,6 +79,7 @@ type SendButtonActionsRequest struct {
 	Footer        *string              `json:"footer,omitempty" validate:"omitempty,max=60"`
 	ButtonActions ButtonActionsPayload `json:"buttonActions" validate:"required"`
 	DelayMessage  *int                 `json:"delayMessage,omitempty"`
+	ScheduledFor  *string              `json:"scheduledFor,omitempty"` // ISO 8601 timestamp for scheduled delivery (overrides delayMessage)
 	MessageId     *string              `json:"messageId,omitempty"`
 }
 
@@ -136,6 +138,7 @@ type SendOptionListRequest struct {
 	ButtonLabel  string            `json:"buttonLabel" validate:"required,max=20"`
 	OptionList   OptionListPayload `json:"optionList" validate:"required"`
 	DelayMessage *int              `json:"delayMessage,omitempty"`
+	ScheduledFor *string           `json:"scheduledFor,omitempty"` // ISO 8601 timestamp for scheduled delivery (overrides delayMessage)
 	MessageId    *string           `json:"messageId,omitempty"`
 }
 
@@ -169,6 +172,7 @@ type SendButtonPIXRequest struct {
 	Title         *string    `json:"title,omitempty" validate:"omitempty,max=60"`
 	Footer        *string    `json:"footer,omitempty" validate:"omitempty,max=60"`
 	DelayMessage  *int       `json:"delayMessage,omitempty"`
+	ScheduledFor  *string    `json:"scheduledFor,omitempty"` // ISO 8601 timestamp for scheduled delivery (overrides delayMessage)
 	MessageId     *string    `json:"messageId,omitempty"`
 }
 
@@ -180,6 +184,7 @@ type SendButtonOTPRequest struct {
 	Title        *string `json:"title,omitempty" validate:"omitempty,max=60"`
 	Footer       *string `json:"footer,omitempty" validate:"omitempty,max=60"`
 	DelayMessage *int    `json:"delayMessage,omitempty"`
+	ScheduledFor *string `json:"scheduledFor,omitempty"` // ISO 8601 timestamp for scheduled delivery (overrides delayMessage)
 	MessageId    *string `json:"messageId,omitempty"`
 }
 
@@ -200,6 +205,7 @@ type SendCarouselRequest struct {
 	Cards        []CarouselCard   `json:"cards" validate:"required,min=1,max=10,dive"`
 	CardType     CarouselCardType `json:"cardType,omitempty"` // defaults to HSCROLL_CARDS
 	DelayMessage *int             `json:"delayMessage,omitempty"`
+	ScheduledFor *string          `json:"scheduledFor,omitempty"` // ISO 8601 timestamp for scheduled delivery (overrides delayMessage)
 	MessageId    *string          `json:"messageId,omitempty"`
 }
 

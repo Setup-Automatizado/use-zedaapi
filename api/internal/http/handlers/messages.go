@@ -1121,9 +1121,7 @@ func (h *MessageHandler) sendText(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Convert delays from seconds to milliseconds with Zé da API defaults
-	// Zé da API: delayMessage range 1-15 seconds, default 1-3 seconds random
-	// Zé da API: delayTyping range 1-15 seconds, default 0
+	// Resolve delays (delayMessage supports any duration; scheduledFor overrides with ISO 8601)
 	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
 	delayTyping := resolveTypingDelay(req.DelayTyping)
 
@@ -1222,8 +1220,7 @@ func (h *MessageHandler) sendImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Convert delays from seconds to milliseconds with Zé da API defaults
-	// Zé da API: delayMessage range 1-15 seconds, default 1-3 seconds random
+	// Resolve delays (delayMessage supports any duration; scheduledFor overrides with ISO 8601)
 	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
 	delayTyping := resolveTypingDelay(req.DelayTyping)
 
@@ -1336,7 +1333,7 @@ func (h *MessageHandler) sendSticker(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Convert delays from seconds to milliseconds with Zé da API defaults
+	// Resolve delays (delayMessage supports any duration; scheduledFor overrides with ISO 8601)
 	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
 	delayTyping := resolveTypingDelay(req.DelayTyping)
 
@@ -1438,7 +1435,7 @@ func (h *MessageHandler) sendAudio(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Convert delays from seconds to milliseconds
+	// Resolve delays (delayMessage supports any duration; scheduledFor overrides with ISO 8601)
 	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
 	delayTyping := resolveTypingDelay(req.DelayTyping)
 
@@ -1646,7 +1643,7 @@ func (h *MessageHandler) sendPTV(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Convert delays from seconds to milliseconds with Zé da API defaults
+	// Resolve delays (delayMessage supports any duration; scheduledFor overrides with ISO 8601)
 	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
 	delayTyping := resolveTypingDelay(req.DelayTyping)
 
@@ -1758,7 +1755,7 @@ func (h *MessageHandler) sendGif(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Convert delays from seconds to milliseconds with Zé da API defaults
+	// Resolve delays (delayMessage supports any duration; scheduledFor overrides with ISO 8601)
 	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
 	delayTyping := resolveTypingDelay(req.DelayTyping)
 
@@ -3795,7 +3792,7 @@ func (h *MessageHandler) sendPoll(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Convert delays from seconds to milliseconds with Zé da API defaults
+	// Resolve delays (delayMessage supports any duration; scheduledFor overrides with ISO 8601)
 	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
 	delayTyping := resolveTypingDelay(req.DelayTyping)
 
@@ -3921,7 +3918,7 @@ func (h *MessageHandler) sendEvent(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Convert delays from seconds to milliseconds with Zé da API defaults
+	// Resolve delays (delayMessage supports any duration; scheduledFor overrides with ISO 8601)
 	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
 	delayTyping := resolveTypingDelay(req.DelayTyping)
 
@@ -4028,7 +4025,7 @@ func (h *MessageHandler) sendLink(w http.ResponseWriter, r *http.Request) {
 		messageText = messageText + "\n\n" + linkUrl
 	}
 
-	// Convert delays from seconds to milliseconds with Zé da API defaults
+	// Resolve delays (delayMessage supports any duration; scheduledFor overrides with ISO 8601)
 	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
 	delayTyping := resolveTypingDelay(req.DelayTyping)
 
@@ -4821,10 +4818,13 @@ func (h *MessageHandler) forwardMessage(w http.ResponseWriter, r *http.Request) 
 		forwardedMessage.LocationMessage.ContextInfo = contextInfo
 	}
 
-	// Apply delay if specified
-	if req.DelayMessage != nil && *req.DelayMessage > 0 {
-		delay := *req.DelayMessage
-		time.Sleep(time.Duration(delay) * time.Second)
+	// Apply delay if specified (scheduledFor overrides delayMessage)
+	if req.ScheduledFor != nil && *req.ScheduledFor != "" {
+		if t, err := time.Parse(time.RFC3339, *req.ScheduledFor); err == nil && t.After(time.Now()) {
+			time.Sleep(time.Until(t))
+		}
+	} else if req.DelayMessage != nil && *req.DelayMessage > 0 {
+		time.Sleep(time.Duration(*req.DelayMessage) * time.Second)
 	}
 
 	// Send the forwarded message
@@ -4956,10 +4956,13 @@ func (h *MessageHandler) sendPollVote(w http.ResponseWriter, r *http.Request) {
 		Timestamp: time.Now(), // Timestamp is not critical for voting
 	}
 
-	// Apply delay if specified
-	if req.DelayMessage != nil && *req.DelayMessage > 0 {
-		delay := *req.DelayMessage
-		time.Sleep(time.Duration(delay) * time.Second)
+	// Apply delay if specified (scheduledFor overrides delayMessage)
+	if req.ScheduledFor != nil && *req.ScheduledFor != "" {
+		if t, err := time.Parse(time.RFC3339, *req.ScheduledFor); err == nil && t.After(time.Now()) {
+			time.Sleep(time.Until(t))
+		}
+	} else if req.DelayMessage != nil && *req.DelayMessage > 0 {
+		time.Sleep(time.Duration(*req.DelayMessage) * time.Second)
 	}
 
 	// Build the poll vote message
@@ -5769,10 +5772,13 @@ func (h *MessageHandler) sendEditEvent(w http.ResponseWriter, r *http.Request) {
 		eventMsg.IsCanceled = proto.Bool(true)
 	}
 
-	// Apply delay if specified
-	if req.DelayMessage != nil && *req.DelayMessage > 0 {
-		delay := *req.DelayMessage
-		time.Sleep(time.Duration(delay) * time.Second)
+	// Apply delay if specified (scheduledFor overrides delayMessage)
+	if req.ScheduledFor != nil && *req.ScheduledFor != "" {
+		if t, err := time.Parse(time.RFC3339, *req.ScheduledFor); err == nil && t.After(time.Now()) {
+			time.Sleep(time.Until(t))
+		}
+	} else if req.DelayMessage != nil && *req.DelayMessage > 0 {
+		time.Sleep(time.Duration(*req.DelayMessage) * time.Second)
 	}
 
 	// Send the edit event message
@@ -5904,10 +5910,13 @@ func (h *MessageHandler) sendEventResponse(w http.ResponseWriter, r *http.Reques
 		eventResponseMsg.ExtraGuestCount = proto.Int32(int32(*req.ExtraGuestCount))
 	}
 
-	// Apply delay if specified
-	if req.DelayMessage != nil && *req.DelayMessage > 0 {
-		delay := *req.DelayMessage
-		time.Sleep(time.Duration(delay) * time.Second)
+	// Apply delay if specified (scheduledFor overrides delayMessage)
+	if req.ScheduledFor != nil && *req.ScheduledFor != "" {
+		if t, err := time.Parse(time.RFC3339, *req.ScheduledFor); err == nil && t.After(time.Now()) {
+			time.Sleep(time.Until(t))
+		}
+	} else if req.DelayMessage != nil && *req.DelayMessage > 0 {
+		time.Sleep(time.Duration(*req.DelayMessage) * time.Second)
 	}
 
 	// Marshal the event response for encryption
@@ -5995,7 +6004,7 @@ func (h *MessageHandler) sendTextStatus(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	// Convert delay from seconds to milliseconds
+	// Resolve delay (delayMessage supports any duration; scheduledFor overrides with ISO 8601)
 	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
 
 	// Parse font if provided
@@ -6081,7 +6090,7 @@ func (h *MessageHandler) sendImageStatus(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// Convert delay from seconds to milliseconds
+	// Resolve delay (delayMessage supports any duration; scheduledFor overrides with ISO 8601)
 	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
 
 	// Create message args for status broadcast
@@ -6152,7 +6161,7 @@ func (h *MessageHandler) sendAudioStatus(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// Convert delay from seconds to milliseconds
+	// Resolve delay (delayMessage supports any duration; scheduledFor overrides with ISO 8601)
 	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
 
 	// Create message args for status broadcast
@@ -6219,7 +6228,7 @@ func (h *MessageHandler) sendVideoStatus(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// Convert delay from seconds to milliseconds
+	// Resolve delay (delayMessage supports any duration; scheduledFor overrides with ISO 8601)
 	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
 
 	// Create message args for status broadcast
