@@ -162,6 +162,12 @@ type QueuePauser interface {
 	ResumeInstance(ctx context.Context, instanceID uuid.UUID) error
 }
 
+// QueueInstanceRemover allows removing message queue workers for an instance.
+// Defined locally to avoid circular dependency with the queue package.
+type QueueInstanceRemover interface {
+	RemoveInstance(ctx context.Context, instanceID uuid.UUID) error
+}
+
 type ClientRegistry struct {
 	log                  *slog.Logger
 	workerID             string
@@ -211,6 +217,7 @@ type ClientRegistry struct {
 	pairingCodeCache *pairingCache
 	proxyRepo        ProxyRepository
 	queuePauser      QueuePauser
+	queueCoordinator QueueInstanceRemover
 }
 
 type clientState struct {
@@ -350,6 +357,12 @@ func (r *ClientRegistry) WorkerID() string {
 
 func (r *ClientRegistry) WorkerHostname() string {
 	return r.hostname
+}
+
+// SetQueueCoordinator sets the optional queue coordinator for removing message queue
+// workers during instance reset. Defined as a setter to avoid circular dependencies.
+func (r *ClientRegistry) SetQueueCoordinator(q QueueInstanceRemover) {
+	r.queueCoordinator = q
 }
 
 func (r *ClientRegistry) EnsureClientWithLock(ctx context.Context, info InstanceInfo, externalLock locks.Lock) (*whatsmeow.Client, bool, error) {
@@ -1304,6 +1317,66 @@ func (r *ClientRegistry) resetClient(instanceID uuid.UUID, reason string, delete
 		slog.String("reason", reason),
 	)
 
+	// Flush event buffers before unregistering workers
+	if r.eventIntegration != nil {
+		flushCtx, flushCancel := context.WithTimeout(context.Background(), 5*time.Second)
+		if err := r.eventIntegration.OnInstanceDisconnect(flushCtx, instanceID); err != nil {
+			r.log.Warn("failed to flush instance buffer during reset",
+				slog.String("instanceId", instanceID.String()),
+				slog.String("reason", reason),
+				slog.String("error", err.Error()))
+		}
+		flushCancel()
+	}
+
+	// Unregister NATS dispatch worker
+	if r.dispatchCoordinator != nil {
+		unregCtx, unregCancel := context.WithTimeout(context.Background(), 5*time.Second)
+		if err := r.dispatchCoordinator.UnregisterInstance(unregCtx, instanceID); err != nil {
+			r.log.Warn("failed to unregister instance from dispatch coordinator during reset",
+				slog.String("instanceId", instanceID.String()),
+				slog.String("reason", reason),
+				slog.String("error", err.Error()))
+		}
+		unregCancel()
+	}
+
+	// Unregister NATS media worker
+	if r.mediaCoordinator != nil {
+		if err := r.mediaCoordinator.UnregisterInstance(instanceID); err != nil {
+			r.log.Warn("failed to unregister instance from media coordinator during reset",
+				slog.String("instanceId", instanceID.String()),
+				slog.String("reason", reason),
+				slog.String("error", err.Error()))
+		}
+	}
+
+	// Unregister NATS message queue worker (created lazily on first message, may not exist)
+	if r.queueCoordinator != nil {
+		queueCtx, queueCancel := context.WithTimeout(context.Background(), 5*time.Second)
+		if err := r.queueCoordinator.RemoveInstance(queueCtx, instanceID); err != nil {
+			if !strings.Contains(err.Error(), "not found") {
+				r.log.Warn("failed to remove instance from message queue coordinator during reset",
+					slog.String("instanceId", instanceID.String()),
+					slog.String("reason", reason),
+					slog.String("error", err.Error()))
+			}
+		}
+		queueCancel()
+	}
+
+	// Unregister event handler and buffer
+	if r.eventIntegration != nil {
+		removeCtx, removeCancel := context.WithTimeout(context.Background(), 5*time.Second)
+		if err := r.eventIntegration.OnInstanceRemove(removeCtx, instanceID); err != nil {
+			r.log.Warn("failed to unregister instance from event system during reset",
+				slog.String("instanceId", instanceID.String()),
+				slog.String("reason", reason),
+				slog.String("error", err.Error()))
+		}
+		removeCancel()
+	}
+
 	if state.lockRefreshCancel != nil {
 		r.log.Debug("stopping lock refresh goroutine",
 			slog.String("instanceId", instanceID.String()))
@@ -1678,29 +1751,6 @@ func (r *ClientRegistry) wrapEventHandler(instanceID uuid.UUID) func(evt interfa
 			}
 			r.mu.Unlock()
 			r.announcePresenceUnavailable(instanceID, "logged_out")
-			if r.dispatchCoordinator != nil {
-				if err := r.dispatchCoordinator.UnregisterInstance(ctx, instanceID); err != nil {
-					r.log.Error("failed to unregister instance from dispatch coordinator",
-						slog.String("instanceId", instanceID.String()),
-						slog.String("error", err.Error()))
-				}
-			}
-
-			if r.mediaCoordinator != nil {
-				if err := r.mediaCoordinator.UnregisterInstance(instanceID); err != nil {
-					r.log.Error("failed to unregister instance from media coordinator",
-						slog.String("instanceId", instanceID.String()),
-						slog.String("error", err.Error()))
-				}
-			}
-
-			if r.eventIntegration != nil {
-				if err := r.eventIntegration.OnInstanceRemove(ctx, instanceID); err != nil {
-					r.log.Error("failed to unregister instance from event system",
-						slog.String("instanceId", instanceID.String()),
-						slog.String("error", err.Error()))
-				}
-			}
 
 			reason := "logged_out"
 			if desc := e.Reason.String(); desc != "" {
@@ -2811,7 +2861,7 @@ func (r *ClientRegistry) reconcileOrphanedInstances(ctx context.Context, logger 
 		return
 	}
 
-	logger.Info("reconciliation: recovering orphaned instances",
+	logger.Debug("reconciliation: recovering orphaned instances",
 		slog.Int("count", len(orphaned)))
 
 	for _, link := range orphaned {
