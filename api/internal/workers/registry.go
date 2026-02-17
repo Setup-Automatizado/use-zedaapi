@@ -15,22 +15,25 @@ import (
 type Config struct {
 	HeartbeatInterval time.Duration
 	Expiry            time.Duration
+	AdvertiseAddr     string
 }
 
 type Info struct {
-	ID       string
-	Hostname string
-	AppEnv   string
-	LastSeen time.Time
+	ID            string
+	Hostname      string
+	AppEnv        string
+	LastSeen      time.Time
+	AdvertiseAddr string
 }
 
 type Registry struct {
-	pool     *pgxpool.Pool
-	workerID string
-	hostname string
-	appEnv   string
-	cfg      Config
-	log      *slog.Logger
+	pool          *pgxpool.Pool
+	workerID      string
+	hostname      string
+	appEnv        string
+	advertiseAddr string
+	cfg           Config
+	log           *slog.Logger
 
 	stopOnce sync.Once
 	stopCh   chan struct{}
@@ -48,14 +51,15 @@ func NewRegistry(pool *pgxpool.Pool, workerID, hostname, appEnv string, cfg Conf
 	}
 
 	r := &Registry{
-		pool:     pool,
-		workerID: workerID,
-		hostname: hostname,
-		appEnv:   appEnv,
-		cfg:      cfg,
-		log:      log,
-		stopCh:   make(chan struct{}),
-		doneCh:   make(chan struct{}),
+		pool:          pool,
+		workerID:      workerID,
+		hostname:      hostname,
+		appEnv:        appEnv,
+		advertiseAddr: cfg.AdvertiseAddr,
+		cfg:           cfg,
+		log:           log,
+		stopCh:        make(chan struct{}),
+		doneCh:        make(chan struct{}),
 	}
 	r.cache.Store([]Info{})
 	return r
@@ -86,9 +90,19 @@ func (r *Registry) ActiveWorkers() []Info {
 	out := make([]Info, len(raw))
 	copy(out, raw)
 	if len(out) == 0 {
-		out = append(out, Info{ID: r.workerID, Hostname: r.hostname, AppEnv: r.appEnv, LastSeen: time.Now()})
+		out = append(out, Info{ID: r.workerID, Hostname: r.hostname, AppEnv: r.appEnv, LastSeen: time.Now(), AdvertiseAddr: r.advertiseAddr})
 	}
 	return out
+}
+
+func (r *Registry) ResolveAddr(workerID string) (string, bool) {
+	workers := r.ActiveWorkers()
+	for _, w := range workers {
+		if w.ID == workerID && w.AdvertiseAddr != "" {
+			return w.AdvertiseAddr, true
+		}
+	}
+	return "", false
 }
 
 func (r *Registry) AssignedOwner(instanceID uuid.UUID) string {
@@ -160,13 +174,14 @@ func (r *Registry) beat(ctx context.Context) {
 
 func (r *Registry) upsertWorker(ctx context.Context) error {
 	_, err := r.pool.Exec(ctx, `
-        INSERT INTO worker_sessions (worker_id, hostname, app_env, last_seen)
-        VALUES ($1, $2, $3, NOW())
+        INSERT INTO worker_sessions (worker_id, hostname, app_env, last_seen, metadata)
+        VALUES ($1, $2, $3, NOW(), jsonb_build_object('advertise_addr', $4))
         ON CONFLICT (worker_id) DO UPDATE
         SET hostname = EXCLUDED.hostname,
             app_env = EXCLUDED.app_env,
-            last_seen = EXCLUDED.last_seen
-    `, r.workerID, r.hostname, r.appEnv)
+            last_seen = EXCLUDED.last_seen,
+            metadata = jsonb_set(worker_sessions.metadata, '{advertise_addr}', to_jsonb($4::text))
+    `, r.workerID, r.hostname, r.appEnv, r.advertiseAddr)
 	return err
 }
 
@@ -176,7 +191,7 @@ func (r *Registry) refreshWorkers(ctx context.Context) {
 
 	threshold := time.Now().Add(-r.cfg.Expiry)
 	rows, err := r.pool.Query(refreshCtx, `
-        SELECT worker_id, hostname, last_seen
+        SELECT worker_id, hostname, last_seen, COALESCE(metadata->>'advertise_addr', '') as advertise_addr
         FROM worker_sessions
         WHERE app_env = $1 AND last_seen >= $2
         ORDER BY last_seen DESC
@@ -194,7 +209,7 @@ func (r *Registry) refreshWorkers(ctx context.Context) {
 	var workers []Info
 	for rows.Next() {
 		var info Info
-		if err := rows.Scan(&info.ID, &info.Hostname, &info.LastSeen); err != nil {
+		if err := rows.Scan(&info.ID, &info.Hostname, &info.LastSeen, &info.AdvertiseAddr); err != nil {
 			if r.log != nil {
 				r.log.Warn("scan worker failed",
 					slog.String("worker_id", r.workerID),
@@ -207,7 +222,7 @@ func (r *Registry) refreshWorkers(ctx context.Context) {
 	}
 
 	if len(workers) == 0 {
-		workers = append(workers, Info{ID: r.workerID, Hostname: r.hostname, AppEnv: r.appEnv, LastSeen: time.Now()})
+		workers = append(workers, Info{ID: r.workerID, Hostname: r.hostname, AppEnv: r.appEnv, LastSeen: time.Now(), AdvertiseAddr: r.advertiseAddr})
 	}
 
 	r.cache.Store(workers)

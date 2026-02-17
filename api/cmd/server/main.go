@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"log/slog"
+	"net"
 	"os"
 	"os/signal"
 	"strings"
@@ -39,6 +41,7 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/groups"
 	apihandler "go.mau.fi/whatsmeow/api/internal/http"
 	"go.mau.fi/whatsmeow/api/internal/http/handlers"
+	ourmiddleware "go.mau.fi/whatsmeow/api/internal/http/middleware"
 	"go.mau.fi/whatsmeow/api/internal/instances"
 	"go.mau.fi/whatsmeow/api/internal/locks"
 	"go.mau.fi/whatsmeow/api/internal/logging"
@@ -351,6 +354,60 @@ func (a *mediaTaskPublisherAdapter) PublishMediaTask(ctx context.Context, info c
 		PublishedAt: time.Now(),
 		Payload:     info.Payload,
 	})
+}
+
+// routingLocatorAdapter bridges *whatsmeow.ClientRegistry to middleware.InstanceLocator.
+type routingLocatorAdapter struct {
+	registry *whatsmeow.ClientRegistry
+}
+
+func (a *routingLocatorAdapter) HasClient(instanceID uuid.UUID) bool {
+	_, ok := a.registry.GetClient(instanceID)
+	return ok
+}
+
+// routingOwnerAdapter bridges *instances.Repository to middleware.InstanceOwnerLookup.
+type routingOwnerAdapter struct {
+	repo *instances.Repository
+}
+
+func (a *routingOwnerAdapter) LookupOwner(ctx context.Context, instanceID uuid.UUID) (string, error) {
+	inst, err := a.repo.GetByID(ctx, instanceID)
+	if err != nil {
+		if errors.Is(err, instances.ErrInstanceNotFound) {
+			return "", nil
+		}
+		return "", err
+	}
+	if inst.WorkerID == nil {
+		return "", nil
+	}
+	return *inst.WorkerID, nil
+}
+
+// resolveAdvertiseAddr determines the HTTP address this replica can be reached at.
+// It resolves the hostname to an IP (for Docker Swarm / K8s overlay networks) and
+// combines it with the port extracted from the listen address.
+func resolveAdvertiseAddr(hostname, listenAddr string, logger *slog.Logger) string {
+	_, port, err := net.SplitHostPort(listenAddr)
+	if err != nil {
+		port = "8080"
+	}
+
+	ips, err := net.LookupHost(hostname)
+	if err != nil || len(ips) == 0 {
+		logger.Warn("could not resolve hostname, using hostname directly",
+			slog.String("hostname", hostname),
+			slog.Any("error", err),
+		)
+		return "http://" + hostname + ":" + port
+	}
+
+	ip := ips[0]
+	if strings.Contains(ip, ":") {
+		ip = "[" + ip + "]"
+	}
+	return "http://" + ip + ":" + port
 }
 
 func storeJIDEnricher() capture.MetadataEnricher {
@@ -913,6 +970,12 @@ func main() {
 		}
 	}()
 
+	advertiseAddr := resolveAdvertiseAddr(registry.WorkerHostname(), cfg.HTTP.Addr, logger)
+	logger.Info("resolved advertise address",
+		slog.String("hostname", registry.WorkerHostname()),
+		slog.String("advertise_addr", advertiseAddr),
+	)
+
 	workerDirectory := workers.NewRegistry(
 		pgPool,
 		registry.WorkerID(),
@@ -921,6 +984,7 @@ func main() {
 		workers.Config{
 			HeartbeatInterval: cfg.WorkerRegistry.HeartbeatInterval,
 			Expiry:            cfg.WorkerRegistry.Expiry,
+			AdvertiseAddr:     advertiseAddr,
 		},
 		logger,
 	)
@@ -1191,12 +1255,18 @@ func main() {
 				slog.Bool("pause_on_unhealthy", cfg.Proxy.PauseQueueOnUnhealthy))
 		}
 
+		// Wire queue coordinator for cleanup during instance reset
+		if messageCoordinator != nil {
+			registry.SetQueueCoordinator(messageCoordinator)
+		}
+
 		// Create message handler for HTTP endpoints
 		messageHandler = handlers.NewMessageHandler(
 			messageCoordinator,
 			instanceService,
 			contactsService,
 			chatsService,
+			registry,
 			logger,
 			cfg.Shutdown.QueueDrainTimeout,
 		)
@@ -1249,6 +1319,17 @@ func main() {
 		metrics.HealthChecks.WithLabelValues(component, status).Inc()
 	})
 
+	// Instance-aware routing middleware: proxies requests to the replica
+	// that owns the WhatsApp client for the target instance.
+	routingMW := ourmiddleware.NewRoutingMiddleware(
+		&routingLocatorAdapter{registry: registry},
+		workerDirectory,
+		&routingOwnerAdapter{repo: repo},
+		registry.WorkerID(),
+		logger,
+	)
+	defer routingMW.Close()
+
 	router := apihandler.NewRouter(apihandler.RouterDeps{
 		Logger:             logger,
 		Metrics:            metrics,
@@ -1266,6 +1347,7 @@ func main() {
 		PoolHandler:        poolHandler,
 		PartnerToken:       cfg.Partner.AuthToken,
 		DocsConfig:         docs.Config{BaseURL: cfg.HTTP.BaseURL},
+		RoutingMiddleware:  routingMW.Handler,
 	})
 
 	server := apihandler.NewServer(

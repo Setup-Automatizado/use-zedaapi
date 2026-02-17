@@ -37,6 +37,7 @@ type RouterDeps struct {
 	PoolHandler        *proxypool.PoolHandler
 	PartnerToken       string
 	DocsConfig         docs.Config
+	RoutingMiddleware  func(http.Handler) http.Handler
 }
 
 func NewRouter(deps RouterDeps) http.Handler {
@@ -54,6 +55,9 @@ func NewRouter(deps RouterDeps) http.Handler {
 	}
 	if deps.SentryHandler != nil {
 		r.Use(deps.SentryHandler.Handle)
+	}
+	if deps.RoutingMiddleware != nil {
+		r.Use(deps.RoutingMiddleware)
 	}
 
 	// Serve embedded public assets (favicons, manifest, etc.) at root level.
