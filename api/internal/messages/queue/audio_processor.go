@@ -143,7 +143,7 @@ func (p *AudioProcessor) Process(ctx context.Context, client *wameow.Client, arg
 	msg := p.buildMessage(args, uploaded, finalMimeType, isPTT, duration, waveform, contextInfo)
 
 	// Send message
-	resp, err := client.SendMessage(ctx, recipientJID, msg)
+	resp, err := client.SendMessage(ctx, recipientJID, msg, BuildSendExtra(args))
 	if err != nil {
 		return fmt.Errorf("send audio message: %w", err)
 	}

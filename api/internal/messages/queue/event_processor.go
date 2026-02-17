@@ -79,7 +79,7 @@ func (p *EventProcessor) Process(ctx context.Context, client *wameow.Client, arg
 	}
 
 	// Send message
-	resp, err := client.SendMessage(ctx, recipientJID, msg)
+	resp, err := client.SendMessage(ctx, recipientJID, msg, BuildSendExtra(args))
 	if err != nil {
 		return fmt.Errorf("send event message: %w", err)
 	}

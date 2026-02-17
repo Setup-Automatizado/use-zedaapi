@@ -97,12 +97,16 @@ func (s *Service) SendText(ctx context.Context, instanceID uuid.UUID, clientToke
 	// Generate unique message ID (zaapId)
 	zaapID := uuid.New().String()
 
+	// Pre-generate WhatsApp message ID for end-to-end correlation
+	whatsAppMessageID := s.preGenerateWhatsAppMessageID(instanceID)
+
 	// Create queue message
 	args := queue.SendMessageArgs{
-		ZaapID:      zaapID,
-		InstanceID:  instanceID,
-		Phone:       jid.String(),
-		MessageType: queue.MessageTypeText,
+		ZaapID:            zaapID,
+		InstanceID:        instanceID,
+		Phone:             jid.String(),
+		MessageType:       queue.MessageTypeText,
+		WhatsAppMessageID: whatsAppMessageID,
 		TextContent: &queue.TextMessage{
 			Message: req.GetMessage(),
 		},
@@ -126,12 +130,17 @@ func (s *Service) SendText(ctx context.Context, instanceID uuid.UUID, clientToke
 
 	logger.Info("text message queued successfully",
 		slog.String("zaap_id", zaapID),
+		slog.String("whatsapp_message_id", whatsAppMessageID),
 		slog.Duration("duration", duration))
 
+	msgID := whatsAppMessageID
+	if msgID == "" {
+		msgID = zaapID
+	}
 	return &SendMessageResult{
 		ZaapID:    zaapID,
-		MessageID: zaapID,
-		ID:        zaapID,
+		MessageID: msgID,
+		ID:        msgID,
 		Status:    "queued",
 		QueuedAt:  time.Now(),
 	}, nil
@@ -186,6 +195,9 @@ func (s *Service) SendImage(ctx context.Context, instanceID uuid.UUID, clientTok
 	// Generate unique message ID (zaapId)
 	zaapID := uuid.New().String()
 
+	// Pre-generate WhatsApp message ID for end-to-end correlation
+	whatsAppMessageID := s.preGenerateWhatsAppMessageID(instanceID)
+
 	// Prepare caption
 	var caption *string
 	if req.GetCaption() != "" {
@@ -195,10 +207,11 @@ func (s *Service) SendImage(ctx context.Context, instanceID uuid.UUID, clientTok
 
 	// Create queue message
 	args := queue.SendMessageArgs{
-		ZaapID:      zaapID,
-		InstanceID:  instanceID,
-		Phone:       jid.String(),
-		MessageType: queue.MessageTypeImage,
+		ZaapID:            zaapID,
+		InstanceID:        instanceID,
+		Phone:             jid.String(),
+		MessageType:       queue.MessageTypeImage,
+		WhatsAppMessageID: whatsAppMessageID,
 		ImageContent: &queue.MediaMessage{
 			MediaURL: req.GetImage(),
 			Caption:  caption,
@@ -223,12 +236,17 @@ func (s *Service) SendImage(ctx context.Context, instanceID uuid.UUID, clientTok
 
 	logger.Info("image message queued successfully",
 		slog.String("zaap_id", zaapID),
+		slog.String("whatsapp_message_id", whatsAppMessageID),
 		slog.Duration("duration", duration))
 
+	msgID := whatsAppMessageID
+	if msgID == "" {
+		msgID = zaapID
+	}
 	return &SendMessageResult{
 		ZaapID:    zaapID,
-		MessageID: zaapID,
-		ID:        zaapID,
+		MessageID: msgID,
+		ID:        msgID,
 		Status:    "queued",
 		QueuedAt:  time.Now(),
 	}, nil
@@ -283,12 +301,16 @@ func (s *Service) SendAudio(ctx context.Context, instanceID uuid.UUID, clientTok
 	// Generate unique message ID (zaapId)
 	zaapID := uuid.New().String()
 
+	// Pre-generate WhatsApp message ID for end-to-end correlation
+	whatsAppMessageID := s.preGenerateWhatsAppMessageID(instanceID)
+
 	// Create queue message
 	args := queue.SendMessageArgs{
-		ZaapID:      zaapID,
-		InstanceID:  instanceID,
-		Phone:       jid.String(),
-		MessageType: queue.MessageTypeAudio,
+		ZaapID:            zaapID,
+		InstanceID:        instanceID,
+		Phone:             jid.String(),
+		MessageType:       queue.MessageTypeAudio,
+		WhatsAppMessageID: whatsAppMessageID,
 		AudioContent: &queue.MediaMessage{
 			MediaURL: req.GetAudio(),
 		},
@@ -312,12 +334,17 @@ func (s *Service) SendAudio(ctx context.Context, instanceID uuid.UUID, clientTok
 
 	logger.Info("audio message queued successfully",
 		slog.String("zaap_id", zaapID),
+		slog.String("whatsapp_message_id", whatsAppMessageID),
 		slog.Duration("duration", duration))
 
+	msgID := whatsAppMessageID
+	if msgID == "" {
+		msgID = zaapID
+	}
 	return &SendMessageResult{
 		ZaapID:    zaapID,
-		MessageID: zaapID,
-		ID:        zaapID,
+		MessageID: msgID,
+		ID:        msgID,
 		Status:    "queued",
 		QueuedAt:  time.Now(),
 	}, nil
@@ -372,6 +399,9 @@ func (s *Service) SendVideo(ctx context.Context, instanceID uuid.UUID, clientTok
 	// Generate unique message ID (zaapId)
 	zaapID := uuid.New().String()
 
+	// Pre-generate WhatsApp message ID for end-to-end correlation
+	whatsAppMessageID := s.preGenerateWhatsAppMessageID(instanceID)
+
 	// Prepare caption
 	var caption *string
 	if req.GetCaption() != "" {
@@ -381,10 +411,11 @@ func (s *Service) SendVideo(ctx context.Context, instanceID uuid.UUID, clientTok
 
 	// Create queue message
 	args := queue.SendMessageArgs{
-		ZaapID:      zaapID,
-		InstanceID:  instanceID,
-		Phone:       jid.String(),
-		MessageType: queue.MessageTypeVideo,
+		ZaapID:            zaapID,
+		InstanceID:        instanceID,
+		Phone:             jid.String(),
+		MessageType:       queue.MessageTypeVideo,
+		WhatsAppMessageID: whatsAppMessageID,
 		VideoContent: &queue.MediaMessage{
 			MediaURL: req.GetVideo(),
 			Caption:  caption,
@@ -409,12 +440,17 @@ func (s *Service) SendVideo(ctx context.Context, instanceID uuid.UUID, clientTok
 
 	logger.Info("video message queued successfully",
 		slog.String("zaap_id", zaapID),
+		slog.String("whatsapp_message_id", whatsAppMessageID),
 		slog.Duration("duration", duration))
 
+	msgID := whatsAppMessageID
+	if msgID == "" {
+		msgID = zaapID
+	}
 	return &SendMessageResult{
 		ZaapID:    zaapID,
-		MessageID: zaapID,
-		ID:        zaapID,
+		MessageID: msgID,
+		ID:        msgID,
 		Status:    "queued",
 		QueuedAt:  time.Now(),
 	}, nil
@@ -469,12 +505,16 @@ func (s *Service) SendSticker(ctx context.Context, instanceID uuid.UUID, clientT
 	// Generate unique message ID (zaapId)
 	zaapID := uuid.New().String()
 
+	// Pre-generate WhatsApp message ID for end-to-end correlation
+	whatsAppMessageID := s.preGenerateWhatsAppMessageID(instanceID)
+
 	// Create queue message - stickers use image message type with special handling
 	args := queue.SendMessageArgs{
-		ZaapID:      zaapID,
-		InstanceID:  instanceID,
-		Phone:       jid.String(),
-		MessageType: queue.MessageTypeImage, // Stickers are handled as images
+		ZaapID:            zaapID,
+		InstanceID:        instanceID,
+		Phone:             jid.String(),
+		MessageType:       queue.MessageTypeImage, // Stickers are handled as images
+		WhatsAppMessageID: whatsAppMessageID,
 		ImageContent: &queue.MediaMessage{
 			MediaURL: req.GetSticker(),
 		},
@@ -501,12 +541,17 @@ func (s *Service) SendSticker(ctx context.Context, instanceID uuid.UUID, clientT
 
 	logger.Info("sticker message queued successfully",
 		slog.String("zaap_id", zaapID),
+		slog.String("whatsapp_message_id", whatsAppMessageID),
 		slog.Duration("duration", duration))
 
+	msgID := whatsAppMessageID
+	if msgID == "" {
+		msgID = zaapID
+	}
 	return &SendMessageResult{
 		ZaapID:    zaapID,
-		MessageID: zaapID,
-		ID:        zaapID,
+		MessageID: msgID,
+		ID:        msgID,
 		Status:    "queued",
 		QueuedAt:  time.Now(),
 	}, nil
@@ -561,6 +606,9 @@ func (s *Service) SendGif(ctx context.Context, instanceID uuid.UUID, clientToken
 	// Generate unique message ID (zaapId)
 	zaapID := uuid.New().String()
 
+	// Pre-generate WhatsApp message ID for end-to-end correlation
+	whatsAppMessageID := s.preGenerateWhatsAppMessageID(instanceID)
+
 	// Prepare caption
 	var caption *string
 	if req.GetCaption() != "" {
@@ -570,10 +618,11 @@ func (s *Service) SendGif(ctx context.Context, instanceID uuid.UUID, clientToken
 
 	// Create queue message - GIFs are sent as videos with gifPlayback flag
 	args := queue.SendMessageArgs{
-		ZaapID:      zaapID,
-		InstanceID:  instanceID,
-		Phone:       jid.String(),
-		MessageType: queue.MessageTypeVideo, // GIFs are handled as videos
+		ZaapID:            zaapID,
+		InstanceID:        instanceID,
+		Phone:             jid.String(),
+		MessageType:       queue.MessageTypeVideo, // GIFs are handled as videos
+		WhatsAppMessageID: whatsAppMessageID,
 		VideoContent: &queue.MediaMessage{
 			MediaURL: req.GetGif(),
 			Caption:  caption,
@@ -601,18 +650,35 @@ func (s *Service) SendGif(ctx context.Context, instanceID uuid.UUID, clientToken
 
 	logger.Info("gif message queued successfully",
 		slog.String("zaap_id", zaapID),
+		slog.String("whatsapp_message_id", whatsAppMessageID),
 		slog.Duration("duration", duration))
 
+	msgID := whatsAppMessageID
+	if msgID == "" {
+		msgID = zaapID
+	}
 	return &SendMessageResult{
 		ZaapID:    zaapID,
-		MessageID: zaapID,
-		ID:        zaapID,
+		MessageID: msgID,
+		ID:        msgID,
 		Status:    "queued",
 		QueuedAt:  time.Now(),
 	}, nil
 }
 
 // Helper methods
+
+// preGenerateWhatsAppMessageID generates a WhatsApp message ID before enqueuing.
+// This enables end-to-end correlation: the API response contains the same ID
+// that WhatsApp will use for receipts (delivered, read).
+func (s *Service) preGenerateWhatsAppMessageID(instanceID uuid.UUID) string {
+	if client, ok := s.registry.GetClient(instanceID); ok && client != nil {
+		return client.GenerateMessageID()
+	}
+	s.log.Warn("failed to pre-generate WhatsApp message ID: client not available",
+		slog.String("instance_id", instanceID.String()))
+	return ""
+}
 
 // tokensMatch checks if the provided tokens match the instance tokens
 func (s *Service) tokensMatch(inst *instances.Instance, clientToken, instanceToken string) bool {

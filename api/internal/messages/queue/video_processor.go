@@ -141,7 +141,7 @@ func (p *VideoProcessor) Process(ctx context.Context, client *wameow.Client, arg
 	msg := p.buildMessage(args, uploaded, mimeType, width, height, duration, thumbnail, contextInfo, isGif)
 
 	// Send message
-	resp, err := client.SendMessage(ctx, recipientJID, msg)
+	resp, err := client.SendMessage(ctx, recipientJID, msg, BuildSendExtra(args))
 	if err != nil {
 		return fmt.Errorf("send video message: %w", err)
 	}

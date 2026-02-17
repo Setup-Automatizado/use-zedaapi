@@ -93,7 +93,7 @@ func (p *StatusProcessor) ProcessText(ctx context.Context, client *wameow.Client
 	}
 
 	// Send to status@broadcast
-	resp, err := client.SendMessage(ctx, recipientJID, msg)
+	resp, err := client.SendMessage(ctx, recipientJID, msg, BuildSendExtra(args))
 	if err != nil {
 		return fmt.Errorf("send text status: %w", err)
 	}
@@ -216,7 +216,7 @@ func (p *StatusProcessor) ProcessImage(ctx context.Context, client *wameow.Clien
 	}
 
 	// Send to status@broadcast
-	resp, err := client.SendMessage(ctx, recipientJID, msg)
+	resp, err := client.SendMessage(ctx, recipientJID, msg, BuildSendExtra(args))
 	if err != nil {
 		return fmt.Errorf("send image status: %w", err)
 	}
@@ -355,7 +355,7 @@ func (p *StatusProcessor) ProcessAudio(ctx context.Context, client *wameow.Clien
 	}
 
 	// Send to status@broadcast
-	resp, err := client.SendMessage(ctx, recipientJID, msg)
+	resp, err := client.SendMessage(ctx, recipientJID, msg, BuildSendExtra(args))
 	if err != nil {
 		return fmt.Errorf("send audio status: %w", err)
 	}
@@ -486,7 +486,7 @@ func (p *StatusProcessor) ProcessVideo(ctx context.Context, client *wameow.Clien
 	}
 
 	// Send to status@broadcast
-	resp, err := client.SendMessage(ctx, recipientJID, msg)
+	resp, err := client.SendMessage(ctx, recipientJID, msg, BuildSendExtra(args))
 	if err != nil {
 		return fmt.Errorf("send video status: %w", err)
 	}

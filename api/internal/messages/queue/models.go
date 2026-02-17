@@ -70,7 +70,7 @@ type SendMessageArgs struct {
 
 	// Metadata for tracking and debugging
 	EnqueuedAt        time.Time              `json:"enqueued_at"`                   // When the job was created
-	WhatsAppMessageID string                 `json:"whatsapp_message_id,omitempty"` // Real WhatsApp message ID (filled after send)
+	WhatsAppMessageID string                 `json:"whatsapp_message_id,omitempty"` // Pre-generated WhatsApp message ID (set before enqueue, used by whatsmeow SendRequestExtra)
 	Metadata          map[string]interface{} `json:"metadata,omitempty"`            // Additional custom metadata
 }
 
@@ -361,7 +361,7 @@ type QueueJobInfo struct {
 	Errors            []string     `json:"errors,omitempty"`
 	Attempt           int          `json:"attempt"`
 	MaxAttempts       int          `json:"max_attempts"`
-	WhatsAppMessageID string       `json:"whatsapp_message_id,omitempty"` // Real WhatsApp message ID
+	WhatsAppMessageID string       `json:"whatsapp_message_id,omitempty"` // Pre-generated WhatsApp message ID (set before enqueue)
 	DelayMessage      int64        `json:"delay_message"`                 // Delay in milliseconds
 	DelayTyping       int64        `json:"delay_typing"`                  // Typing indicator in milliseconds
 	TextContent       *TextMessage `json:"text_content,omitempty"`        // Text message content (for text messages)

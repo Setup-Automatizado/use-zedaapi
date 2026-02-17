@@ -124,7 +124,7 @@ func (p *InteractiveZAPIProcessor) ProcessButtonList(ctx context.Context, client
 	}
 
 	// Send message
-	resp, err := client.SendMessage(ctx, recipientJID, msg)
+	resp, err := client.SendMessage(ctx, recipientJID, msg, BuildSendExtra(args))
 	if err != nil {
 		return fmt.Errorf("send button list message: %w", err)
 	}
@@ -249,7 +249,7 @@ func (p *InteractiveZAPIProcessor) ProcessButtonActions(ctx context.Context, cli
 	}
 
 	// Send message
-	resp, err := client.SendMessage(ctx, recipientJID, msg)
+	resp, err := client.SendMessage(ctx, recipientJID, msg, BuildSendExtra(args))
 	if err != nil {
 		return fmt.Errorf("send button actions message: %w", err)
 	}
@@ -338,7 +338,7 @@ func (p *InteractiveZAPIProcessor) ProcessOptionList(ctx context.Context, client
 	}
 
 	// Send message
-	resp, err := client.SendMessage(ctx, recipientJID, msg)
+	resp, err := client.SendMessage(ctx, recipientJID, msg, BuildSendExtra(args))
 	if err != nil {
 		return fmt.Errorf("send option list message: %w", err)
 	}
@@ -409,7 +409,7 @@ func (p *InteractiveZAPIProcessor) ProcessButtonPIX(ctx context.Context, client 
 	}
 
 	// Send message
-	resp, err := client.SendMessage(ctx, recipientJID, msg)
+	resp, err := client.SendMessage(ctx, recipientJID, msg, BuildSendExtra(args))
 	if err != nil {
 		return fmt.Errorf("send button pix message: %w", err)
 	}
@@ -480,7 +480,7 @@ func (p *InteractiveZAPIProcessor) ProcessButtonOTP(ctx context.Context, client 
 	}
 
 	// Send message
-	resp, err := client.SendMessage(ctx, recipientJID, msg)
+	resp, err := client.SendMessage(ctx, recipientJID, msg, BuildSendExtra(args))
 	if err != nil {
 		return fmt.Errorf("send button otp message: %w", err)
 	}
@@ -596,7 +596,7 @@ func (p *InteractiveZAPIProcessor) ProcessCarousel(ctx context.Context, client *
 	}
 
 	// Send message
-	resp, err := client.SendMessage(ctx, recipientJID, msg)
+	resp, err := client.SendMessage(ctx, recipientJID, msg, BuildSendExtra(args))
 	if err != nil {
 		return fmt.Errorf("send carousel message: %w", err)
 	}

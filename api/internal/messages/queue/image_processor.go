@@ -109,7 +109,7 @@ func (p *ImageProcessor) Process(ctx context.Context, client *wameow.Client, arg
 	msg := p.buildMessage(args, uploaded, mimeType, width, height, thumbnail, contextInfo)
 
 	// Send message
-	resp, err := client.SendMessage(ctx, recipientJID, msg)
+	resp, err := client.SendMessage(ctx, recipientJID, msg, BuildSendExtra(args))
 	if err != nil {
 		return fmt.Errorf("send image message: %w", err)
 	}

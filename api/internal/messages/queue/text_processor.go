@@ -79,7 +79,7 @@ func (p *TextProcessor) Process(ctx context.Context, client *wameow.Client, args
 	msg := p.buildMessage(args, contextInfo, extendedText)
 
 	// Send message
-	resp, err := client.SendMessage(ctx, recipientJID, msg)
+	resp, err := client.SendMessage(ctx, recipientJID, msg, BuildSendExtra(args))
 	if err != nil {
 		return fmt.Errorf("send text message: %w", err)
 	}

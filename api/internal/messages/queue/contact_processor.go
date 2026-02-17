@@ -86,7 +86,7 @@ func (p *ContactProcessor) Process(ctx context.Context, client *wameow.Client, a
 	}
 
 	// Send message
-	resp, err := client.SendMessage(ctx, recipientJID, msg)
+	resp, err := client.SendMessage(ctx, recipientJID, msg, BuildSendExtra(args))
 	if err != nil {
 		return fmt.Errorf("send contact message: %w", err)
 	}
@@ -518,7 +518,7 @@ func (p *ContactProcessor) ProcessMultiple(ctx context.Context, client *wameow.C
 	}
 
 	// Send message
-	resp, err := client.SendMessage(ctx, recipientJID, msg)
+	resp, err := client.SendMessage(ctx, recipientJID, msg, BuildSendExtra(args))
 	if err != nil {
 		return fmt.Errorf("send contacts array message: %w", err)
 	}

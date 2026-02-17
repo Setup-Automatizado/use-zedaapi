@@ -84,7 +84,7 @@ func (p *InteractiveProcessor) Process(ctx context.Context, client *wameow.Clien
 	// }
 
 	// Send message
-	resp, err := client.SendMessage(ctx, recipientJID, msg)
+	resp, err := client.SendMessage(ctx, recipientJID, msg, BuildSendExtra(args))
 	if err != nil {
 		return fmt.Errorf("send interactive message: %w", err)
 	}

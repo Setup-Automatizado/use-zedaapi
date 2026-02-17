@@ -49,12 +49,18 @@ type ChatsService interface {
 	List(ctx context.Context, instanceID uuid.UUID, params chats.ListParams) (chats.ListResult, error)
 }
 
+// MessageIDGenerator provides access to WhatsApp clients for pre-generating message IDs.
+type MessageIDGenerator interface {
+	GetClient(uuid.UUID) (*wameow.Client, bool)
+}
+
 // MessageHandler handles HTTP requests for message queue operations
 type MessageHandler struct {
 	coordinator     queue.QueueCoordinator
 	instanceService InstanceStatusProvider
 	contactsService ContactsService
 	chatsService    ChatsService
+	msgIDGen        MessageIDGenerator
 	log             *slog.Logger
 	drainRetryAfter time.Duration
 	enqueueMessage  func(context.Context, uuid.UUID, queue.SendMessageArgs) (string, error)
@@ -66,6 +72,7 @@ func NewMessageHandler(
 	instanceService InstanceStatusProvider,
 	contactsService ContactsService,
 	chatsService ChatsService,
+	msgIDGen MessageIDGenerator,
 	log *slog.Logger,
 	drainRetryAfter time.Duration,
 ) *MessageHandler {
@@ -77,6 +84,7 @@ func NewMessageHandler(
 		instanceService: instanceService,
 		contactsService: contactsService,
 		chatsService:    chatsService,
+		msgIDGen:        msgIDGen,
 		log:             log,
 		drainRetryAfter: drainRetryAfter,
 	}
@@ -897,7 +905,7 @@ type SendVideoStatusRequest struct {
 // format
 type SendMessageResponse struct {
 	ZaapID         string          `json:"zaapId"`                   // Unique message ID in our system
-	MessageID      string          `json:"messageId"`                // WhatsApp message ID (initially same as zaapId, updated after send)
+	MessageID      string          `json:"messageId"`                // Pre-generated WhatsApp message ID (3EB0xxx format), falls back to zaapId if unavailable
 	ID             string          `json:"id"`                       // Same as messageId (for Zapier compatibility)
 	Status         string          `json:"status"`                   // Queue status (queued, failed, etc.)
 	WhatsAppStatus *WhatsAppStatus `json:"whatsAppStatus,omitempty"` // Snapshot of WhatsApp connectivity
@@ -957,11 +965,41 @@ func (h *MessageHandler) handleInstanceServiceError(ctx context.Context, w http.
 	}
 }
 
-func (h *MessageHandler) newSendMessageResponse(zaapID string, status *instances.Status) SendMessageResponse {
+// preGenerateWhatsAppMessageID generates a WhatsApp message ID before enqueuing.
+// This enables end-to-end correlation: the API response contains the same ID
+// that WhatsApp will use for receipts (delivered, read).
+func (h *MessageHandler) preGenerateWhatsAppMessageID(instanceID uuid.UUID) string {
+	if h.msgIDGen == nil {
+		return ""
+	}
+	client, ok := h.msgIDGen.GetClient(instanceID)
+	if !ok || client == nil {
+		h.log.Warn("failed to pre-generate WhatsApp message ID: client not available",
+			slog.String("instance_id", instanceID.String()))
+		return ""
+	}
+	return client.GenerateMessageID()
+}
+
+// enqueueWithPreGeneratedID wraps enqueueMessage to pre-generate a WhatsApp
+// message ID before enqueuing. Returns (zaapID, whatsAppMsgID, error).
+func (h *MessageHandler) enqueueWithPreGeneratedID(ctx context.Context, instanceID uuid.UUID, args *queue.SendMessageArgs) (string, string, error) {
+	if args.WhatsAppMessageID == "" {
+		args.WhatsAppMessageID = h.preGenerateWhatsAppMessageID(instanceID)
+	}
+	zaapID, err := h.enqueueMessage(ctx, instanceID, *args)
+	return zaapID, args.WhatsAppMessageID, err
+}
+
+func (h *MessageHandler) newSendMessageResponse(zaapID, whatsAppMsgID string, status *instances.Status) SendMessageResponse {
+	msgID := zaapID
+	if whatsAppMsgID != "" {
+		msgID = whatsAppMsgID
+	}
 	response := SendMessageResponse{
 		ZaapID:    zaapID,
-		MessageID: zaapID,
-		ID:        zaapID,
+		MessageID: msgID,
+		ID:        msgID,
 		Status:    "queued",
 	}
 	response.WhatsAppStatus = h.toWhatsAppStatus(status)
@@ -1142,7 +1180,7 @@ func (h *MessageHandler) sendText(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Enqueue message (non-blocking)
-	zaapID, err := h.enqueueMessage(ctx, instanceID, args)
+	zaapID, whatsAppMsgID, err := h.enqueueWithPreGeneratedID(ctx, instanceID, &args)
 	if err != nil {
 		h.handleEnqueueError(ctx, w, err)
 		return
@@ -1153,8 +1191,8 @@ func (h *MessageHandler) sendText(w http.ResponseWriter, r *http.Request) {
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
 	// Return response
-	// Initially, messageId = zaapId (will be updated with real WhatsApp ID after send)
-	response := h.newSendMessageResponse(zaapID, instStatus)
+	// messageId = pre-generated WhatsApp ID (3EB0xxx format) for end-to-end correlation
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
 
 	// Return 200 OK
 	respondJSON(w, http.StatusOK, response)
@@ -1252,7 +1290,7 @@ func (h *MessageHandler) sendImage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Enqueue message (non-blocking)
-	zaapID, err := h.enqueueMessage(ctx, instanceID, args)
+	zaapID, whatsAppMsgID, err := h.enqueueWithPreGeneratedID(ctx, instanceID, &args)
 	if err != nil {
 		h.handleEnqueueError(ctx, w, err)
 		return
@@ -1267,8 +1305,8 @@ func (h *MessageHandler) sendImage(w http.ResponseWriter, r *http.Request) {
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
 	// Return response
-	// Initially, messageId = zaapId (will be updated with real WhatsApp ID after send)
-	response := h.newSendMessageResponse(zaapID, instStatus)
+	// messageId = pre-generated WhatsApp ID (3EB0xxx format) for end-to-end correlation
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
 
 	// Return 200 OK
 	respondJSON(w, http.StatusOK, response)
@@ -1356,7 +1394,7 @@ func (h *MessageHandler) sendSticker(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Enqueue message (non-blocking)
-	zaapID, err := h.enqueueMessage(ctx, instanceID, args)
+	zaapID, whatsAppMsgID, err := h.enqueueWithPreGeneratedID(ctx, instanceID, &args)
 	if err != nil {
 		h.handleEnqueueError(ctx, w, err)
 		return
@@ -1369,7 +1407,7 @@ func (h *MessageHandler) sendSticker(w http.ResponseWriter, r *http.Request) {
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
 	// Return response
-	response := h.newSendMessageResponse(zaapID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
 
 	// Return 200 OK
 	respondJSON(w, http.StatusOK, response)
@@ -1459,7 +1497,7 @@ func (h *MessageHandler) sendAudio(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Enqueue message (non-blocking)
-	zaapID, err := h.enqueueMessage(ctx, instanceID, args)
+	zaapID, whatsAppMsgID, err := h.enqueueWithPreGeneratedID(ctx, instanceID, &args)
 	if err != nil {
 		h.handleEnqueueError(ctx, w, err)
 		return
@@ -1473,7 +1511,7 @@ func (h *MessageHandler) sendAudio(w http.ResponseWriter, r *http.Request) {
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
 	// Return response
-	response := h.newSendMessageResponse(zaapID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
 
 	respondJSON(w, http.StatusOK, response)
 }
@@ -1561,7 +1599,7 @@ func (h *MessageHandler) sendVideo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Enqueue message
-	zaapID, err := h.enqueueMessage(ctx, instanceID, args)
+	zaapID, whatsAppMsgID, err := h.enqueueWithPreGeneratedID(ctx, instanceID, &args)
 	if err != nil {
 		h.handleEnqueueError(ctx, w, err)
 		return
@@ -1576,7 +1614,7 @@ func (h *MessageHandler) sendVideo(w http.ResponseWriter, r *http.Request) {
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
 	// Return response
-	response := h.newSendMessageResponse(zaapID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
 
 	respondJSON(w, http.StatusOK, response)
 }
@@ -1675,7 +1713,7 @@ func (h *MessageHandler) sendPTV(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Enqueue message (non-blocking)
-	zaapID, err := h.enqueueMessage(ctx, instanceID, args)
+	zaapID, whatsAppMsgID, err := h.enqueueWithPreGeneratedID(ctx, instanceID, &args)
 	if err != nil {
 		h.handleEnqueueError(ctx, w, err)
 		return
@@ -1690,7 +1728,7 @@ func (h *MessageHandler) sendPTV(w http.ResponseWriter, r *http.Request) {
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
 	// Return response
-	response := h.newSendMessageResponse(zaapID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
 
 	respondJSON(w, http.StatusOK, response)
 }
@@ -1792,7 +1830,7 @@ func (h *MessageHandler) sendGif(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Enqueue message (non-blocking)
-	zaapID, err := h.enqueueMessage(ctx, instanceID, args)
+	zaapID, whatsAppMsgID, err := h.enqueueWithPreGeneratedID(ctx, instanceID, &args)
 	if err != nil {
 		h.handleEnqueueError(ctx, w, err)
 		return
@@ -1807,7 +1845,7 @@ func (h *MessageHandler) sendGif(w http.ResponseWriter, r *http.Request) {
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
 	// Return response
-	response := h.newSendMessageResponse(zaapID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
 
 	// Return 200 OK
 	respondJSON(w, http.StatusOK, response)
@@ -1904,7 +1942,7 @@ func (h *MessageHandler) sendDocument(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Enqueue message
-	zaapID, err := h.enqueueMessage(ctx, instanceID, args)
+	zaapID, whatsAppMsgID, err := h.enqueueWithPreGeneratedID(ctx, instanceID, &args)
 	if err != nil {
 		h.handleEnqueueError(ctx, w, err)
 		return
@@ -1919,7 +1957,7 @@ func (h *MessageHandler) sendDocument(w http.ResponseWriter, r *http.Request) {
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
 	// Return response
-	response := h.newSendMessageResponse(zaapID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
 
 	respondJSON(w, http.StatusOK, response)
 }
@@ -1997,7 +2035,7 @@ func (h *MessageHandler) sendLocation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Enqueue message
-	zaapID, err := h.enqueueMessage(ctx, instanceID, args)
+	zaapID, whatsAppMsgID, err := h.enqueueWithPreGeneratedID(ctx, instanceID, &args)
 	if err != nil {
 		h.handleEnqueueError(ctx, w, err)
 		return
@@ -2014,7 +2052,7 @@ func (h *MessageHandler) sendLocation(w http.ResponseWriter, r *http.Request) {
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
 	// Return response
-	response := h.newSendMessageResponse(zaapID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
 
 	respondJSON(w, http.StatusOK, response)
 }
@@ -2121,7 +2159,7 @@ func (h *MessageHandler) sendContact(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Enqueue message
-	zaapID, err := h.enqueueMessage(ctx, instanceID, args)
+	zaapID, whatsAppMsgID, err := h.enqueueWithPreGeneratedID(ctx, instanceID, &args)
 	if err != nil {
 		h.handleEnqueueError(ctx, w, err)
 		return
@@ -2134,7 +2172,7 @@ func (h *MessageHandler) sendContact(w http.ResponseWriter, r *http.Request) {
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
 	// Return response
-	response := h.newSendMessageResponse(zaapID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
 
 	respondJSON(w, http.StatusOK, response)
 }
@@ -2814,7 +2852,7 @@ func convertJobToQueueMessage(job queue.QueueJobInfo) QueueMessageResponse {
 		Errors:         job.Errors,              // Additional field
 	}
 
-	// If WhatsApp message ID is empty, use zaapId (not sent yet)
+	// If WhatsApp message ID is empty, fall back to zaapId
 	if response.MessageId == "" {
 		response.MessageId = job.ZaapID
 	}
@@ -2989,7 +3027,7 @@ func (h *MessageHandler) sendContacts(w http.ResponseWriter, r *http.Request) {
 	args.ContactContent = contacts[0]
 
 	// Enqueue message
-	zaapID, err := h.enqueueMessage(ctx, instanceID, args)
+	zaapID, whatsAppMsgID, err := h.enqueueWithPreGeneratedID(ctx, instanceID, &args)
 	if err != nil {
 		h.handleEnqueueError(ctx, w, err)
 		return
@@ -3002,7 +3040,7 @@ func (h *MessageHandler) sendContacts(w http.ResponseWriter, r *http.Request) {
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
 	// Return response
-	response := h.newSendMessageResponse(zaapID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
 
 	respondJSON(w, http.StatusOK, response)
 }
@@ -3092,7 +3130,7 @@ func (h *MessageHandler) sendButtonList(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// Enqueue message
-	zaapID, err := h.enqueueMessage(ctx, instanceID, args)
+	zaapID, whatsAppMsgID, err := h.enqueueWithPreGeneratedID(ctx, instanceID, &args)
 	if err != nil {
 		h.handleEnqueueError(ctx, w, err)
 		return
@@ -3104,7 +3142,7 @@ func (h *MessageHandler) sendButtonList(w http.ResponseWriter, r *http.Request) 
 		slog.Int("button_count", len(req.Buttons)),
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
-	response := h.newSendMessageResponse(zaapID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
 	respondJSON(w, http.StatusOK, response)
 }
 
@@ -3239,7 +3277,7 @@ func (h *MessageHandler) sendButtonActions(w http.ResponseWriter, r *http.Reques
 	}
 
 	// Enqueue message
-	zaapID, err := h.enqueueMessage(ctx, instanceID, args)
+	zaapID, whatsAppMsgID, err := h.enqueueWithPreGeneratedID(ctx, instanceID, &args)
 	if err != nil {
 		h.handleEnqueueError(ctx, w, err)
 		return
@@ -3251,7 +3289,7 @@ func (h *MessageHandler) sendButtonActions(w http.ResponseWriter, r *http.Reques
 		slog.Int("button_count", len(req.Buttons)),
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
-	response := h.newSendMessageResponse(zaapID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
 	respondJSON(w, http.StatusOK, response)
 }
 
@@ -3357,7 +3395,7 @@ func (h *MessageHandler) sendOptionList(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// Enqueue message
-	zaapID, err := h.enqueueMessage(ctx, instanceID, args)
+	zaapID, whatsAppMsgID, err := h.enqueueWithPreGeneratedID(ctx, instanceID, &args)
 	if err != nil {
 		h.handleEnqueueError(ctx, w, err)
 		return
@@ -3370,7 +3408,7 @@ func (h *MessageHandler) sendOptionList(w http.ResponseWriter, r *http.Request) 
 		slog.Int("total_rows", totalRows),
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
-	response := h.newSendMessageResponse(zaapID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
 	respondJSON(w, http.StatusOK, response)
 }
 
@@ -3457,7 +3495,7 @@ func (h *MessageHandler) sendButtonPIX(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Enqueue message
-	zaapID, err := h.enqueueMessage(ctx, instanceID, args)
+	zaapID, whatsAppMsgID, err := h.enqueueWithPreGeneratedID(ctx, instanceID, &args)
 	if err != nil {
 		h.handleEnqueueError(ctx, w, err)
 		return
@@ -3469,7 +3507,7 @@ func (h *MessageHandler) sendButtonPIX(w http.ResponseWriter, r *http.Request) {
 		slog.String("pix_key_type", req.KeyType),
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
-	response := h.newSendMessageResponse(zaapID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
 	respondJSON(w, http.StatusOK, response)
 }
 
@@ -3543,7 +3581,7 @@ func (h *MessageHandler) sendButtonOTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Enqueue message
-	zaapID, err := h.enqueueMessage(ctx, instanceID, args)
+	zaapID, whatsAppMsgID, err := h.enqueueWithPreGeneratedID(ctx, instanceID, &args)
 	if err != nil {
 		h.handleEnqueueError(ctx, w, err)
 		return
@@ -3554,7 +3592,7 @@ func (h *MessageHandler) sendButtonOTP(w http.ResponseWriter, r *http.Request) {
 		slog.String("phone", phone),
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
-	response := h.newSendMessageResponse(zaapID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
 	respondJSON(w, http.StatusOK, response)
 }
 
@@ -3688,7 +3726,7 @@ func (h *MessageHandler) sendCarousel(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Enqueue message
-	zaapID, err := h.enqueueMessage(ctx, instanceID, args)
+	zaapID, whatsAppMsgID, err := h.enqueueWithPreGeneratedID(ctx, instanceID, &args)
 	if err != nil {
 		h.handleEnqueueError(ctx, w, err)
 		return
@@ -3700,7 +3738,7 @@ func (h *MessageHandler) sendCarousel(w http.ResponseWriter, r *http.Request) {
 		slog.Int("cards_count", len(req.Cards)),
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
-	response := h.newSendMessageResponse(zaapID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
 	respondJSON(w, http.StatusOK, response)
 }
 
@@ -3812,7 +3850,7 @@ func (h *MessageHandler) sendPoll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Enqueue message (non-blocking)
-	zaapID, err := h.enqueueMessage(ctx, instanceID, args)
+	zaapID, whatsAppMsgID, err := h.enqueueWithPreGeneratedID(ctx, instanceID, &args)
 	if err != nil {
 		h.handleEnqueueError(ctx, w, err)
 		return
@@ -3826,7 +3864,7 @@ func (h *MessageHandler) sendPoll(w http.ResponseWriter, r *http.Request) {
 		slog.Int("max_selections", maxSelections),
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
-	response := h.newSendMessageResponse(zaapID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
 	respondJSON(w, http.StatusOK, response)
 }
 
@@ -3941,7 +3979,7 @@ func (h *MessageHandler) sendEvent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Enqueue message (non-blocking)
-	zaapID, err := h.enqueueMessage(ctx, instanceID, args)
+	zaapID, whatsAppMsgID, err := h.enqueueWithPreGeneratedID(ctx, instanceID, &args)
 	if err != nil {
 		h.handleEnqueueError(ctx, w, err)
 		return
@@ -3955,7 +3993,7 @@ func (h *MessageHandler) sendEvent(w http.ResponseWriter, r *http.Request) {
 		slog.Bool("canceled", req.Event.Canceled),
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
-	response := h.newSendMessageResponse(zaapID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
 	respondJSON(w, http.StatusOK, response)
 }
 
@@ -4053,7 +4091,7 @@ func (h *MessageHandler) sendLink(w http.ResponseWriter, r *http.Request) {
 	args.LinkPreview = &forcePreview
 
 	// Enqueue message (non-blocking)
-	zaapID, err := h.enqueueMessage(ctx, instanceID, args)
+	zaapID, whatsAppMsgID, err := h.enqueueWithPreGeneratedID(ctx, instanceID, &args)
 	if err != nil {
 		h.handleEnqueueError(ctx, w, err)
 		return
@@ -4066,7 +4104,7 @@ func (h *MessageHandler) sendLink(w http.ResponseWriter, r *http.Request) {
 		slog.String("title", req.Title),
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
-	response := h.newSendMessageResponse(zaapID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
 	respondJSON(w, http.StatusOK, response)
 }
 
@@ -6040,7 +6078,7 @@ func (h *MessageHandler) sendTextStatus(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// Enqueue message
-	zaapID, err := h.enqueueMessage(ctx, instanceID, args)
+	zaapID, whatsAppMsgID, err := h.enqueueWithPreGeneratedID(ctx, instanceID, &args)
 	if err != nil {
 		h.handleEnqueueError(ctx, w, err)
 		return
@@ -6050,7 +6088,7 @@ func (h *MessageHandler) sendTextStatus(w http.ResponseWriter, r *http.Request) 
 		slog.String("zaap_id", zaapID),
 		slog.String("message_type", "text_status"))
 
-	response := h.newSendMessageResponse(zaapID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
 	respondJSON(w, http.StatusOK, response)
 }
 
@@ -6111,7 +6149,7 @@ func (h *MessageHandler) sendImageStatus(w http.ResponseWriter, r *http.Request)
 	}
 
 	// Enqueue message
-	zaapID, err := h.enqueueMessage(ctx, instanceID, args)
+	zaapID, whatsAppMsgID, err := h.enqueueWithPreGeneratedID(ctx, instanceID, &args)
 	if err != nil {
 		h.handleEnqueueError(ctx, w, err)
 		return
@@ -6121,7 +6159,7 @@ func (h *MessageHandler) sendImageStatus(w http.ResponseWriter, r *http.Request)
 		slog.String("zaap_id", zaapID),
 		slog.String("message_type", "image_status"))
 
-	response := h.newSendMessageResponse(zaapID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
 	respondJSON(w, http.StatusOK, response)
 }
 
@@ -6178,7 +6216,7 @@ func (h *MessageHandler) sendAudioStatus(w http.ResponseWriter, r *http.Request)
 	}
 
 	// Enqueue message
-	zaapID, err := h.enqueueMessage(ctx, instanceID, args)
+	zaapID, whatsAppMsgID, err := h.enqueueWithPreGeneratedID(ctx, instanceID, &args)
 	if err != nil {
 		h.handleEnqueueError(ctx, w, err)
 		return
@@ -6188,7 +6226,7 @@ func (h *MessageHandler) sendAudioStatus(w http.ResponseWriter, r *http.Request)
 		slog.String("zaap_id", zaapID),
 		slog.String("message_type", "audio_status"))
 
-	response := h.newSendMessageResponse(zaapID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
 	respondJSON(w, http.StatusOK, response)
 }
 
@@ -6249,7 +6287,7 @@ func (h *MessageHandler) sendVideoStatus(w http.ResponseWriter, r *http.Request)
 	}
 
 	// Enqueue message
-	zaapID, err := h.enqueueMessage(ctx, instanceID, args)
+	zaapID, whatsAppMsgID, err := h.enqueueWithPreGeneratedID(ctx, instanceID, &args)
 	if err != nil {
 		h.handleEnqueueError(ctx, w, err)
 		return
@@ -6259,6 +6297,6 @@ func (h *MessageHandler) sendVideoStatus(w http.ResponseWriter, r *http.Request)
 		slog.String("zaap_id", zaapID),
 		slog.String("message_type", "video_status"))
 
-	response := h.newSendMessageResponse(zaapID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
 	respondJSON(w, http.StatusOK, response)
 }
