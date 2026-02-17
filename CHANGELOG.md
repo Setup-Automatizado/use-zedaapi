@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.3.1](https://github.com/Setup-Automatizado/zedaapi/compare/v3.3.0...v3.3.1) (2026-02-17)
+
+### Bug Fixes
+
+* **public:** add missing trailing newlines to static assets ([6c2bc8a](https://github.com/Setup-Automatizado/zedaapi/commit/6c2bc8a8b9c1536e514af889aae1c28737996b13))
+
 ## [3.3.0](https://github.com/Setup-Automatizado/zedaapi/compare/v3.2.1...v3.3.0) (2026-02-17)
 
 ### Features
