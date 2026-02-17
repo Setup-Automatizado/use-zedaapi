@@ -36,7 +36,7 @@ nats stream add MESSAGE_QUEUE \
   --replicas=1 \
   --discard=old \
   --dupe-window=2m \
-  --max-msg-size=8388608 \
+  --max-msg-size=67108864 \
   --no-deny-delete \
   --no-deny-purge \
   --defaults 2>/dev/null || \
@@ -48,7 +48,7 @@ nats stream update MESSAGE_QUEUE \
   --max-bytes=10737418240 \
   --discard=old \
   --dupe-window=2m \
-  --max-msg-size=8388608 \
+  --max-msg-size=67108864 \
   --force 2>/dev/null || true
 
 echo "Stream MESSAGE_QUEUE created/updated"
@@ -65,7 +65,7 @@ nats stream add WHATSAPP_EVENTS \
   --replicas=1 \
   --discard=old \
   --dupe-window=1h \
-  --max-msg-size=2097152 \
+  --max-msg-size=67108864 \
   --no-deny-delete \
   --no-deny-purge \
   --defaults 2>/dev/null || \
@@ -77,7 +77,7 @@ nats stream update WHATSAPP_EVENTS \
   --max-bytes=53687091200 \
   --discard=old \
   --dupe-window=1h \
-  --max-msg-size=2097152 \
+  --max-msg-size=67108864 \
   --force 2>/dev/null || true
 
 echo "Stream WHATSAPP_EVENTS created/updated"
@@ -94,7 +94,7 @@ nats stream add MEDIA_PROCESSING \
   --replicas=1 \
   --discard=old \
   --dupe-window=2m \
-  --max-msg-size=1048576 \
+  --max-msg-size=67108864 \
   --no-deny-delete \
   --no-deny-purge \
   --defaults 2>/dev/null || \
@@ -106,7 +106,7 @@ nats stream update MEDIA_PROCESSING \
   --max-bytes=5368709120 \
   --discard=old \
   --dupe-window=2m \
-  --max-msg-size=1048576 \
+  --max-msg-size=67108864 \
   --force 2>/dev/null || true
 
 echo "Stream MEDIA_PROCESSING created/updated"
@@ -123,7 +123,7 @@ nats stream add DLQ \
   --replicas=1 \
   --discard=old \
   --dupe-window=2m \
-  --max-msg-size=2097152 \
+  --max-msg-size=67108864 \
   --no-deny-delete \
   --no-deny-purge \
   --defaults 2>/dev/null || \
@@ -135,7 +135,7 @@ nats stream update DLQ \
   --max-bytes=5368709120 \
   --discard=old \
   --dupe-window=2m \
-  --max-msg-size=2097152 \
+  --max-msg-size=67108864 \
   --force 2>/dev/null || true
 
 echo "Stream DLQ created/updated"

@@ -389,7 +389,7 @@ services:
           'server_name: zedaapi-nats' \
           'port: 4222' \
           'max_connections: 50000' \
-          'max_payload: 8MB' \
+          'max_payload: 64MB' \
           'http_port: 8222' \
           'jetstream {' \
           '  store_dir: /data/jetstream' \
@@ -488,7 +488,7 @@ services:
           --replicas=1 \
           --discard=old \
           --dupe-window=2m \
-          --max-msg-size=8M
+          --max-msg-size=64M
 
         create_stream WHATSAPP_EVENTS \
           --subjects="events.>" \
@@ -499,7 +499,7 @@ services:
           --replicas=1 \
           --discard=old \
           --dupe-window=1h \
-          --max-msg-size=2M
+          --max-msg-size=64M
 
         create_stream MEDIA_PROCESSING \
           --subjects="media.tasks.>,media.done.>" \
@@ -510,7 +510,7 @@ services:
           --replicas=1 \
           --discard=old \
           --dupe-window=2m \
-          --max-msg-size=1M
+          --max-msg-size=64M
 
         create_stream DLQ \
           --subjects="dlq.>" \
@@ -521,7 +521,7 @@ services:
           --replicas=1 \
           --discard=old \
           --dupe-window=2m \
-          --max-msg-size=2M
+          --max-msg-size=64M
 
         echo ""
         echo "=== Stream verification ==="

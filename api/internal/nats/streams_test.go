@@ -23,7 +23,7 @@ func TestMessageQueueStreamConfig(t *testing.T) {
 	assert.Equal(t, jetstream.FileStorage, cfg.Storage)
 	assert.Equal(t, jetstream.DiscardOld, cfg.Discard)
 	assert.Equal(t, 2*time.Minute, cfg.Duplicates)
-	assert.Equal(t, int32(8*1024*1024), cfg.MaxMsgSize)
+	assert.Equal(t, int32(64*1024*1024), cfg.MaxMsgSize)
 	assert.False(t, cfg.NoAck)
 }
 
@@ -35,7 +35,7 @@ func TestWhatsAppEventsStreamConfig(t *testing.T) {
 	assert.Equal(t, 168*time.Hour, cfg.MaxAge)
 	assert.Equal(t, int64(50*1024*1024*1024), cfg.MaxBytes)
 	assert.Equal(t, 1*time.Hour, cfg.Duplicates)
-	assert.Equal(t, int32(2*1024*1024), cfg.MaxMsgSize)
+	assert.Equal(t, int32(64*1024*1024), cfg.MaxMsgSize)
 }
 
 func TestMediaProcessingStreamConfig(t *testing.T) {
@@ -62,9 +62,12 @@ func TestMessageConsumerConfig(t *testing.T) {
 	assert.Equal(t, "messages.test-instance-id", cfg.FilterSubject)
 	assert.Equal(t, jetstream.AckExplicitPolicy, cfg.AckPolicy)
 	assert.Equal(t, 30*time.Second, cfg.AckWait)
-	assert.Equal(t, 5, cfg.MaxDeliver)
+	assert.Equal(t, 10, cfg.MaxDeliver)
 	assert.Equal(t, 1, cfg.MaxAckPending) // FIFO guarantee
-	assert.Len(t, cfg.BackOff, 5)
+	assert.Len(t, cfg.BackOff, 10)
+	// BackOff[0] and [1] should be short (1s) for quick multi-replica failover
+	assert.Equal(t, 1*time.Second, cfg.BackOff[0])
+	assert.Equal(t, 1*time.Second, cfg.BackOff[1])
 }
 
 func TestEventConsumerConfig(t *testing.T) {

@@ -29,7 +29,7 @@ func MessageQueueStreamConfig(name string) jetstream.StreamConfig {
 		Storage:           jetstream.FileStorage,
 		Discard:           jetstream.DiscardOld,
 		Duplicates:        2 * time.Minute,
-		MaxMsgSize:        8 * 1024 * 1024, // 8MB
+		MaxMsgSize:        64 * 1024 * 1024, // 64MB — matches server max_payload
 		NoAck:             false,
 		MaxMsgsPerSubject: -1,
 	}
@@ -46,7 +46,7 @@ func WhatsAppEventsStreamConfig(name string) jetstream.StreamConfig {
 		Storage:           jetstream.FileStorage,
 		Discard:           jetstream.DiscardOld,
 		Duplicates:        1 * time.Hour,
-		MaxMsgSize:        2 * 1024 * 1024, // 2MB
+		MaxMsgSize:        64 * 1024 * 1024, // 64MB — history_sync events can be very large
 		NoAck:             false,
 		MaxMsgsPerSubject: -1,
 	}
@@ -63,7 +63,7 @@ func MediaProcessingStreamConfig(name string) jetstream.StreamConfig {
 		Storage:           jetstream.FileStorage,
 		Discard:           jetstream.DiscardOld,
 		Duplicates:        2 * time.Minute,
-		MaxMsgSize:        1024 * 1024, // 1MB
+		MaxMsgSize:        64 * 1024 * 1024, // 64MB — matches server max_payload
 		NoAck:             false,
 		MaxMsgsPerSubject: -1,
 	}
@@ -80,7 +80,7 @@ func DLQStreamConfig(name string) jetstream.StreamConfig {
 		Storage:           jetstream.FileStorage,
 		Discard:           jetstream.DiscardOld,
 		Duplicates:        2 * time.Minute,
-		MaxMsgSize:        2 * 1024 * 1024, // 2MB
+		MaxMsgSize:        64 * 1024 * 1024, // 64MB — must match WHATSAPP_EVENTS for failed events
 		NoAck:             false,
 		MaxMsgsPerSubject: -1,
 	}
@@ -88,15 +88,35 @@ func DLQStreamConfig(name string) jetstream.StreamConfig {
 
 // MessageConsumerConfig returns a consumer config for per-instance message processing.
 // MaxAckPending=1 guarantees FIFO ordering per instance.
+//
+// MaxDeliver=10 accounts for:
+//   - 1-2 scheduling NAKs (NakWithDelay for future-scheduled messages)
+//   - 1-3 multi-replica NAKs (client may be on another replica)
+//   - 3-5 actual processing error retries
+//
+// BackOff starts short (1s) for quick multi-replica failover, then escalates
+// for genuine error retries. Workers always ACK/NAK explicitly; BackOff only
+// affects AckWait timeouts (e.g., worker crashes).
 func MessageConsumerConfig(instanceID string) jetstream.ConsumerConfig {
 	return jetstream.ConsumerConfig{
 		Durable:       fmt.Sprintf("msg-%s", instanceID),
 		FilterSubject: fmt.Sprintf("messages.%s", instanceID),
 		AckPolicy:     jetstream.AckExplicitPolicy,
 		AckWait:       30 * time.Second,
-		MaxDeliver:    5,
+		MaxDeliver:    10,
 		MaxAckPending: 1, // CRITICAL: FIFO guarantee
-		BackOff:       []time.Duration{1 * time.Second, 5 * time.Second, 30 * time.Second, 2 * time.Minute, 5 * time.Minute},
+		BackOff: []time.Duration{
+			1 * time.Second,  // delivery 1: quick retry (scheduling/wrong replica)
+			1 * time.Second,  // delivery 2: quick retry (wrong replica)
+			2 * time.Second,  // delivery 3: short retry
+			5 * time.Second,  // delivery 4: error retry
+			15 * time.Second, // delivery 5: error retry
+			30 * time.Second, // delivery 6: error retry
+			1 * time.Minute,  // delivery 7: error retry
+			2 * time.Minute,  // delivery 8: error retry
+			5 * time.Minute,  // delivery 9: final retry
+			5 * time.Minute,  // delivery 10: final retry
+		},
 		DeliverPolicy: jetstream.DeliverAllPolicy,
 	}
 }
