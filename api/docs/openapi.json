@@ -58,7 +58,7 @@
     },
     {
       "name": "Status Cache",
-      "description": "Message delivery status caching system for tracking receipts (sent, delivered, read, played).\nParticularly useful for group messages where tracking individual participant statuses is important.\n\n**Key Features:**\n- Cache status events in Redis for 24 hours\n- Query by messageId, groupId, or phone\n- Aggregate participant statistics for group messages\n- Optional webhook suppression to reduce serverless costs\n- Manual flush to trigger pending webhooks\n"
+      "description": "Message delivery status caching system for tracking receipts (sent, delivered, read, played).\nParticularly useful for group messages where tracking individual participant statuses is important.\n\n**Key Features:**\n- Cache status events in Redis for 24 hours (configurable TTL)\n- Query by messageId, groupId, or phone\n- Aggregate participant statistics for group messages\n- Optional webhook suppression to reduce serverless costs\n- Manual flush to trigger pending webhooks\n\n**Data Retrieval Options:**\n\n1. **API Pull (Query on Demand)**\n   - Use `/messages-status` endpoint to query cached statuses\n   - Filter by `messageId`, `groupId`, or `phone`\n   - Supports pagination with `limit` and `offset`\n   - Returns aggregated or raw format\n   - **No webhook configuration required**\n\n2. **Webhook Push (Automatic Delivery)**\n   - Configure `messageStatusCallbackUrl` (primary) or `deliveryCallbackUrl` (fallback)\n   - StatusCache automatically flushes aggregated data to webhook\n   - Flush triggered by interval (`STATUS_CACHE_FLUSH_INTERVAL`) or threshold (`STATUS_CACHE_FLUSH_THRESHOLD`)\n   - Use `/messages-status/flush` for manual flush\n\n**Webhook Configuration:**\n- **Without webhook**: Status events are cached and available via API only\n- **With webhook**: Status events are cached AND automatically delivered via flush\n- Webhook URLs: `messageStatusCallbackUrl` (recommended) or `deliveryCallbackUrl` (legacy fallback)\n\n**Environment Variables:**\n- `STATUS_CACHE_ENABLED`: Enable/disable caching (default: false)\n- `STATUS_CACHE_TTL`: Cache expiration time (default: 24h)\n- `STATUS_CACHE_TYPES`: Receipt types to cache (default: read,delivered,played,sent)\n- `STATUS_CACHE_SCOPE`: Scope filter - groups, direct, or both (default: groups)\n- `STATUS_CACHE_SUPPRESS_WEBHOOKS`: Suppress individual receipt webhooks (default: true)\n- `STATUS_CACHE_FLUSH_INTERVAL`: Auto-flush interval (default: 30s)\n- `STATUS_CACHE_FLUSH_THRESHOLD`: Auto-flush threshold count (default: 100)\n"
     },
     {
       "name": "Media",
@@ -71,6 +71,10 @@
     {
       "name": "Profile",
       "description": "WhatsApp profile management for the connected account.\n\n**Key Features:**\n- Update profile name (push name)\n- Update profile picture\n- Update profile description (About/Status)\n"
+    },
+    {
+      "name": "Proxy",
+      "description": "Per-instance proxy configuration and health monitoring.\n\n**Key Features:**\n- Configure HTTP, HTTPS, or SOCKS5 proxies per instance\n- Test proxy connectivity before applying\n- Hot-swap proxy on active connections without losing WhatsApp session\n- Automatic health monitoring with configurable failure thresholds\n- DLQ protection: messages queued to DLQ when proxy is unhealthy\n- Granular control: separate proxy for websocket, media, or login only\n\n**Supported Proxy Schemes:**\n- `http://host:port` - HTTP proxy\n- `https://host:port` - HTTPS proxy\n- `socks5://user:pass@host:port` - SOCKS5 proxy with optional auth\n\n**Health Check Behavior:**\n- Periodic TCP connectivity test through proxy to web.whatsapp.com:443\n- After N consecutive failures (default: 3), proxy marked as unhealthy\n- Unhealthy proxies are not applied to new connections\n- Webhook notification sent to instance's disconnected URL on failure\n- Pending messages moved to DLQ to prevent cascade failures\n\n**Environment Variables:**\n- `PROXY_HEALTH_CHECK_INTERVAL`: Check interval (default: 60s)\n- `PROXY_HEALTH_CHECK_TIMEOUT`: Check timeout (default: 10s)\n- `PROXY_MAX_CONSECUTIVE_FAILURES`: Failure threshold (default: 3)\n- `PROXY_DLQ_ON_UNHEALTHY`: Move messages to DLQ on failure (default: true)\n- `PROXY_PAUSE_QUEUE_ON_UNHEALTHY`: Pause queue on failure (default: true)\n"
     }
   ],
   "components": {
@@ -110,6 +114,166 @@
       }
     },
     "schemas": {
+      "ProxyUpdateRequest": {
+        "type": "object",
+        "required": [
+          "proxyUrl"
+        ],
+        "properties": {
+          "proxyUrl": {
+            "type": "string",
+            "description": "Proxy URL (http, https, or socks5 scheme)",
+            "example": "socks5://user:pass@proxy.example.com:1080"
+          },
+          "noWebsocket": {
+            "type": "boolean",
+            "description": "Do not use proxy for websocket connections",
+            "default": false
+          },
+          "onlyLogin": {
+            "type": "boolean",
+            "description": "Use proxy only for pre-login websocket",
+            "default": false
+          },
+          "noMedia": {
+            "type": "boolean",
+            "description": "Do not use proxy for media uploads/downloads",
+            "default": false
+          }
+        }
+      },
+      "ProxyTestRequest": {
+        "type": "object",
+        "required": [
+          "proxyUrl"
+        ],
+        "properties": {
+          "proxyUrl": {
+            "type": "string",
+            "description": "Proxy URL to test",
+            "example": "http://proxy.example.com:8080"
+          }
+        }
+      },
+      "ProxySwapRequest": {
+        "type": "object",
+        "required": [
+          "proxyUrl"
+        ],
+        "properties": {
+          "proxyUrl": {
+            "type": "string",
+            "description": "New proxy URL to hot-swap to",
+            "example": "socks5://new-proxy.example.com:1080"
+          }
+        }
+      },
+      "ProxyConfig": {
+        "type": "object",
+        "properties": {
+          "proxyUrl": {
+            "type": "string",
+            "nullable": true,
+            "description": "Configured proxy URL (credentials masked)"
+          },
+          "proxyEnabled": {
+            "type": "boolean",
+            "description": "Whether proxy is active for this instance"
+          },
+          "healthStatus": {
+            "type": "string",
+            "enum": [
+              "healthy",
+              "unhealthy",
+              "unknown"
+            ],
+            "description": "Current proxy health status"
+          },
+          "lastHealthCheck": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Timestamp of last health check"
+          },
+          "healthFailures": {
+            "type": "integer",
+            "description": "Consecutive health check failures"
+          },
+          "noWebsocket": {
+            "type": "boolean"
+          },
+          "onlyLogin": {
+            "type": "boolean"
+          },
+          "noMedia": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ProxyTestResponse": {
+        "type": "object",
+        "properties": {
+          "reachable": {
+            "type": "boolean",
+            "description": "Whether the proxy can reach WhatsApp servers"
+          },
+          "latencyMs": {
+            "type": "integer",
+            "description": "Round-trip latency in milliseconds"
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message if unreachable"
+          }
+        }
+      },
+      "ProxyHealthResponse": {
+        "type": "object",
+        "properties": {
+          "proxy": {
+            "$ref": "#/components/schemas/ProxyConfig"
+          },
+          "logs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "instanceId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "proxyUrl": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "healthy",
+                    "unhealthy",
+                    "timeout",
+                    "unreachable"
+                  ]
+                },
+                "latencyMs": {
+                  "type": "integer",
+                  "nullable": true
+                },
+                "errorMessage": {
+                  "type": "string",
+                  "nullable": true
+                },
+                "checkedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        }
+      },
       "ErrorResponse": {
         "type": "object",
         "properties": {
@@ -1061,9 +1225,16 @@
               "null"
             ],
             "minimum": 1,
-            "maximum": 15,
-            "description": "Optional delay in seconds before sending (1-15 seconds, default random 1-3)",
+            "description": "Delay in seconds before sending. Any positive integer accepted. Default random 1-3 seconds.",
             "example": 5
+          },
+          "scheduledFor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
           },
           "delayTyping": {
             "type": [
@@ -1168,8 +1339,15 @@
               "null"
             ],
             "minimum": 1,
-            "maximum": 15,
-            "description": "Optional delay in seconds before sending (1-15 seconds)"
+            "description": "Delay in seconds before sending. Any positive integer accepted. For longer scheduling, prefer scheduledFor with an ISO 8601 timestamp."
+          },
+          "scheduledFor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
           },
           "delayTyping": {
             "type": [
@@ -1260,8 +1438,15 @@
               "null"
             ],
             "minimum": 1,
-            "maximum": 15,
-            "description": "Optional delay in seconds before sending (1-15 seconds)"
+            "description": "Delay in seconds before sending. Any positive integer accepted. For longer scheduling, prefer scheduledFor with an ISO 8601 timestamp."
+          },
+          "scheduledFor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
           },
           "delayTyping": {
             "type": [
@@ -1359,8 +1544,15 @@
               "null"
             ],
             "minimum": 1,
-            "maximum": 15,
-            "description": "Optional delay in seconds before sending (1-15 seconds)"
+            "description": "Delay in seconds before sending. Any positive integer accepted. For longer scheduling, prefer scheduledFor with an ISO 8601 timestamp."
+          },
+          "scheduledFor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
           },
           "delayTyping": {
             "type": [
@@ -1426,7 +1618,7 @@
       },
       "SendTextStatusRequest": {
         "type": "object",
-        "description": "Request body for sending text to WhatsApp Status/Stories.\n\n**Status Broadcasting**: Text is automatically broadcast to all contacts\nwho can view your status based on your privacy settings.\n\n**Key Features**:\n- Custom background color (hex or ARGB format)\n- Multiple font styles (0-5)\n- Optional custom message ID for tracking\n- Delayed sending support\n\n**Note**: Unlike regular messages, status messages don't require a phone number.\nThey broadcast to status@broadcast automatically.\n",
+        "description": "Request body for sending text to WhatsApp Status/Stories.\n\n**Status Broadcasting**: Text is automatically broadcast to all contacts\nwho can view your status based on your privacy settings.\n\n**Key Features**:\n- Custom background color (hex or ARGB format)\n- Multiple font styles (0-5)\n- Optional custom message ID for tracking\n- Delayed sending and scheduled delivery support (delayMessage or scheduledFor)\n\n**Note**: Unlike regular messages, status messages don't require a phone number.\nThey broadcast to status@broadcast automatically.\n",
         "properties": {
           "text": {
             "type": "string",
@@ -1465,9 +1657,16 @@
               "null"
             ],
             "minimum": 1,
-            "maximum": 15,
-            "description": "Optional delay in seconds before sending (1-15 seconds).\nUsed to simulate human behavior.\n",
+            "description": "Delay in seconds before sending. Any positive integer accepted.\nFor longer scheduling, prefer scheduledFor with an ISO 8601 timestamp.\n",
             "example": 3
+          },
+          "scheduledFor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
           }
         },
         "required": [
@@ -1506,9 +1705,16 @@
               "null"
             ],
             "minimum": 1,
-            "maximum": 15,
-            "description": "Optional delay in seconds before sending (1-15 seconds).\nUsed to simulate human behavior.\n",
+            "description": "Delay in seconds before sending. Any positive integer accepted.\nFor longer scheduling, prefer scheduledFor with an ISO 8601 timestamp.\n",
             "example": 3
+          },
+          "scheduledFor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
           }
         },
         "required": [
@@ -1539,9 +1745,16 @@
               "null"
             ],
             "minimum": 1,
-            "maximum": 15,
-            "description": "Optional delay in seconds before sending (1-15 seconds).\nUsed to simulate human behavior.\n",
+            "description": "Delay in seconds before sending. Any positive integer accepted.\nFor longer scheduling, prefer scheduledFor with an ISO 8601 timestamp.\n",
             "example": 3
+          },
+          "scheduledFor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
           }
         },
         "required": [
@@ -1580,9 +1793,16 @@
               "null"
             ],
             "minimum": 1,
-            "maximum": 15,
-            "description": "Optional delay in seconds before sending (1-15 seconds).\nUsed to simulate human behavior.\n",
+            "description": "Delay in seconds before sending. Any positive integer accepted.\nFor longer scheduling, prefer scheduledFor with an ISO 8601 timestamp.\n",
             "example": 3
+          },
+          "scheduledFor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
           }
         },
         "required": [
@@ -1592,7 +1812,7 @@
       },
       "SendPTVRequest": {
         "type": "object",
-        "description": "Request body for sending PTV (Push-To-Talk Video) messages.\n\n**PTV Format**: Circular video notes displayed similarly to voice notes but with video content.\n\n**Key Features**:\n- Circular video notes (like voice notes with video)\n- Video URL or base64 data URI support\n- Optional caption/text\n- Reply to messages via messageId\n- Schedule delivery with delayMessage (1-15s)\n- Show typing indicator with delayTyping (1-15s)\n- Ephemeral messages with duration (0, 86400, 604800, 7776000)\n- Mention users (@mentions)\n- Mention groups/communities\n- Mention all participants (@everyone)\n- Private reply in groups\n\n**Message Queue**: Messages are queued per recipient with FIFO ordering.\n\n**WhatsApp Compatibility**: Uses whatsmeow library with full WhatsApp Web protocol support.\n",
+        "description": "Request body for sending PTV (Push-To-Talk Video) messages.\n\n**PTV Format**: Circular video notes displayed similarly to voice notes but with video content.\n\n**Key Features**:\n- Circular video notes (like voice notes with video)\n- Video URL or base64 data URI support\n- Optional caption/text\n- Reply to messages via messageId\n- Schedule delivery with delayMessage or scheduledFor (ISO 8601)\n- Show typing indicator with delayTyping (1-15s)\n- Ephemeral messages with duration (0, 86400, 604800, 7776000)\n- Mention users (@mentions)\n- Mention groups/communities\n- Mention all participants (@everyone)\n- Private reply in groups\n\n**Message Queue**: Messages are queued per recipient with FIFO ordering.\n\n**WhatsApp Compatibility**: Uses whatsmeow library with full WhatsApp Web protocol support.\n",
         "properties": {
           "phone": {
             "type": "string",
@@ -1626,9 +1846,16 @@
               "null"
             ],
             "minimum": 1,
-            "maximum": 15,
-            "description": "Optional delay in seconds before sending the message (1-15 seconds).\nUsed to simulate human behavior and avoid spam detection.\n",
+            "description": "Delay in seconds before sending. Any positive integer accepted.\nFor longer scheduling, prefer scheduledFor with an ISO 8601 timestamp.\n",
             "example": 3
+          },
+          "scheduledFor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
           },
           "delayTyping": {
             "type": [
@@ -1740,8 +1967,15 @@
               "null"
             ],
             "minimum": 1,
-            "maximum": 15,
-            "description": "Optional delay in seconds before sending (1-15 seconds)"
+            "description": "Delay in seconds before sending. Any positive integer accepted. For longer scheduling, prefer scheduledFor with an ISO 8601 timestamp."
+          },
+          "scheduledFor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
           },
           "delayTyping": {
             "type": [
@@ -1802,7 +2036,7 @@
       },
       "SendStickerRequest": {
         "type": "object",
-        "description": "Request body for sending sticker messages.\n\n**Sticker Format**: Accepts URL (http/https) or base64 data URI (data:image/webp;base64,...).\n\n**Key Features**:\n- Animated stickers supported (WebP format)\n- No caption support (stickers are sent without text)\n- Reply to messages via messageId\n- Schedule delivery with delayMessage (1-15s)\n- Show typing indicator with delayTyping (1-15s)\n- Ephemeral messages with duration (0, 86400, 604800, 7776000)\n- Mention users (@mentions)\n- Mention groups/communities\n- Mention all participants (@everyone)\n- Private reply in groups\n\n**Message Queue**: Messages are queued per recipient with FIFO ordering.\n\n**WhatsApp Compatibility**: Uses whatsmeow library with full WhatsApp Web protocol support.\n",
+        "description": "Request body for sending sticker messages.\n\n**Sticker Format**: Accepts URL (http/https) or base64 data URI (data:image/webp;base64,...).\n\n**Key Features**:\n- Animated stickers supported (WebP format)\n- No caption support (stickers are sent without text)\n- Reply to messages via messageId\n- Schedule delivery with delayMessage or scheduledFor (ISO 8601)\n- Show typing indicator with delayTyping (1-15s)\n- Ephemeral messages with duration (0, 86400, 604800, 7776000)\n- Mention users (@mentions)\n- Mention groups/communities\n- Mention all participants (@everyone)\n- Private reply in groups\n\n**Message Queue**: Messages are queued per recipient with FIFO ordering.\n\n**WhatsApp Compatibility**: Uses whatsmeow library with full WhatsApp Web protocol support.\n",
         "properties": {
           "phone": {
             "type": "string",
@@ -1828,9 +2062,16 @@
               "null"
             ],
             "minimum": 1,
-            "maximum": 15,
-            "description": "Optional delay in seconds before sending the message (1-15 seconds).\nUsed to simulate human behavior and avoid spam detection.\n",
+            "description": "Delay in seconds before sending. Any positive integer accepted.\nFor longer scheduling, prefer scheduledFor with an ISO 8601 timestamp.\n",
             "example": 3
+          },
+          "scheduledFor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
           },
           "delayTyping": {
             "type": [
@@ -1896,7 +2137,7 @@
       },
       "SendGifRequest": {
         "type": "object",
-        "description": "Request body for sending GIF messages.\n\n**GIF Format**: Accepts URL (http/https) or base64 data URI (data:image/gif;base64,...).\n\n**Key Features**:\n- Animated GIFs supported\n- Optional caption/text\n- Reply to messages via messageId\n- Schedule delivery with delayMessage (1-15s)\n- Show typing indicator with delayTyping (1-15s)\n- View-once messages with viewOnce flag\n- Ephemeral messages with duration (0, 86400, 604800, 7776000)\n- Mention users (@mentions)\n- Mention groups/communities\n- Mention all participants (@everyone)\n- Private reply in groups\n\n**Message Queue**: Messages are queued per recipient with FIFO ordering.\n\n**WhatsApp Compatibility**: Uses whatsmeow library with full WhatsApp Web protocol support.\n",
+        "description": "Request body for sending GIF messages.\n\n**GIF Format**: Accepts URL (http/https) or base64 data URI (data:image/gif;base64,...).\n\n**Key Features**:\n- Animated GIFs supported\n- Optional caption/text\n- Reply to messages via messageId\n- Schedule delivery with delayMessage or scheduledFor (ISO 8601)\n- Show typing indicator with delayTyping (1-15s)\n- View-once messages with viewOnce flag\n- Ephemeral messages with duration (0, 86400, 604800, 7776000)\n- Mention users (@mentions)\n- Mention groups/communities\n- Mention all participants (@everyone)\n- Private reply in groups\n\n**Message Queue**: Messages are queued per recipient with FIFO ordering.\n\n**WhatsApp Compatibility**: Uses whatsmeow library with full WhatsApp Web protocol support.\n",
         "properties": {
           "phone": {
             "type": "string",
@@ -1930,9 +2171,16 @@
               "null"
             ],
             "minimum": 1,
-            "maximum": 15,
-            "description": "Optional delay in seconds before sending the message (1-15 seconds).\nUsed to simulate human behavior and avoid spam detection.\n",
+            "description": "Delay in seconds before sending. Any positive integer accepted.\nFor longer scheduling, prefer scheduledFor with an ISO 8601 timestamp.\n",
             "example": 3
+          },
+          "scheduledFor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
           },
           "delayTyping": {
             "type": [
@@ -2243,8 +2491,15 @@
               "null"
             ],
             "minimum": 1,
-            "maximum": 15,
-            "description": "Optional delay in seconds before sending"
+            "description": "Delay in seconds before sending. Any positive integer accepted. For longer scheduling, prefer scheduledFor with an ISO 8601 timestamp."
+          },
+          "scheduledFor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
           },
           "delayTyping": {
             "type": [
@@ -2442,8 +2697,15 @@
               "null"
             ],
             "minimum": 1,
-            "maximum": 15,
-            "description": "Optional delay in seconds before sending"
+            "description": "Delay in seconds before sending. Any positive integer accepted. For longer scheduling, prefer scheduledFor with an ISO 8601 timestamp."
+          },
+          "scheduledFor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
           },
           "delayTyping": {
             "type": [
@@ -2725,8 +2987,15 @@
               "null"
             ],
             "minimum": 1,
-            "maximum": 15,
-            "description": "Optional delay in seconds before sending"
+            "description": "Delay in seconds before sending. Any positive integer accepted. For longer scheduling, prefer scheduledFor with an ISO 8601 timestamp."
+          },
+          "scheduledFor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
           },
           "delayTyping": {
             "type": [
@@ -3082,8 +3351,15 @@
           "delayMessage": {
             "type": "integer",
             "minimum": 1,
-            "maximum": 15,
-            "description": "Optional delay in seconds before sending."
+            "description": "Delay in seconds before sending. Any positive integer accepted. For longer scheduling, prefer scheduledFor with an ISO 8601 timestamp."
+          },
+          "scheduledFor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
           },
           "delayTyping": {
             "type": "integer",
@@ -3160,8 +3436,15 @@
           "delayMessage": {
             "type": "integer",
             "minimum": 1,
-            "maximum": 15,
-            "description": "Optional delay in seconds before sending."
+            "description": "Delay in seconds before sending. Any positive integer accepted. For longer scheduling, prefer scheduledFor with an ISO 8601 timestamp."
+          },
+          "scheduledFor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
           }
         },
         "required": [
@@ -3299,8 +3582,15 @@
           "delayMessage": {
             "type": "integer",
             "minimum": 1,
-            "maximum": 15,
-            "description": "Optional delay in seconds before sending."
+            "description": "Delay in seconds before sending. Any positive integer accepted. For longer scheduling, prefer scheduledFor with an ISO 8601 timestamp."
+          },
+          "scheduledFor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
           },
           "delayTyping": {
             "type": "integer",
@@ -3375,8 +3665,15 @@
           "delayMessage": {
             "type": "integer",
             "minimum": 1,
-            "maximum": 15,
-            "description": "Optional delay in seconds before sending."
+            "description": "Delay in seconds before sending. Any positive integer accepted. For longer scheduling, prefer scheduledFor with an ISO 8601 timestamp."
+          },
+          "scheduledFor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
           },
           "delayTyping": {
             "type": "integer",
@@ -5611,9 +5908,16 @@
           "delayMessage": {
             "type": "integer",
             "minimum": 0,
-            "maximum": 15,
-            "description": "Delay in seconds before sending (0-15)",
+            "description": "Delay in seconds before sending. Any non-negative integer accepted. For longer scheduling, prefer scheduledFor with an ISO 8601 timestamp.",
             "example": 0
+          },
+          "scheduledFor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
           },
           "delayTyping": {
             "type": "integer",
@@ -5679,9 +5983,16 @@
           "delayMessage": {
             "type": "integer",
             "minimum": 0,
-            "maximum": 15,
-            "description": "Delay in seconds before sending (0-15)",
+            "description": "Delay in seconds before sending. Any non-negative integer accepted. For longer scheduling, prefer scheduledFor with an ISO 8601 timestamp.",
             "example": 0
+          },
+          "scheduledFor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
           }
         },
         "required": [
@@ -5739,9 +6050,16 @@
           "delayMessage": {
             "type": "integer",
             "minimum": 0,
-            "maximum": 15,
-            "description": "Delay in seconds before sending (0-15)",
+            "description": "Delay in seconds before sending. Any non-negative integer accepted. For longer scheduling, prefer scheduledFor with an ISO 8601 timestamp.",
             "example": 0
+          },
+          "scheduledFor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
           },
           "delayTyping": {
             "type": "integer",
@@ -5806,9 +6124,16 @@
           "delayMessage": {
             "type": "integer",
             "minimum": 0,
-            "maximum": 15,
-            "description": "Delay in seconds before sending (0-15)",
+            "description": "Delay in seconds before sending. Any non-negative integer accepted. For longer scheduling, prefer scheduledFor with an ISO 8601 timestamp.",
             "example": 0
+          },
+          "scheduledFor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
           },
           "delayTyping": {
             "type": "integer",
@@ -5866,9 +6191,16 @@
           "delayMessage": {
             "type": "integer",
             "minimum": 1,
-            "maximum": 15,
-            "description": "Delay in seconds before sending (1-15)",
+            "description": "Delay in seconds before sending. Any positive integer accepted. For longer scheduling, prefer scheduledFor with an ISO 8601 timestamp.",
             "example": 0
+          },
+          "scheduledFor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
           },
           "delayTyping": {
             "type": "integer",
@@ -5926,9 +6258,16 @@
           "delayMessage": {
             "type": "integer",
             "minimum": 1,
-            "maximum": 15,
-            "description": "Delay in seconds before sending (1-15)",
+            "description": "Delay in seconds before sending. Any positive integer accepted. For longer scheduling, prefer scheduledFor with an ISO 8601 timestamp.",
             "example": 0
+          },
+          "scheduledFor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
           },
           "delayTyping": {
             "type": "integer",
@@ -6040,7 +6379,7 @@
                 "name": "Zé da API"
               },
               {
-                "name": "Testeee"
+                "name": "Test"
               }
             ]
           },
@@ -6065,9 +6404,16 @@
               "null"
             ],
             "minimum": 1,
-            "maximum": 15,
-            "description": "Delay in seconds before sending (1-15)",
+            "description": "Delay in seconds before sending. Any positive integer accepted. For longer scheduling, prefer scheduledFor with an ISO 8601 timestamp.",
             "example": 5
+          },
+          "scheduledFor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
           },
           "delayTyping": {
             "type": [
@@ -6184,8 +6530,15 @@
               "null"
             ],
             "minimum": 1,
-            "maximum": 15,
-            "description": "Delay in seconds before sending (1-15)"
+            "description": "Delay in seconds before sending. Any positive integer accepted. For longer scheduling, prefer scheduledFor with an ISO 8601 timestamp."
+          },
+          "scheduledFor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
           },
           "delayTyping": {
             "type": [
@@ -6251,9 +6604,16 @@
               "null"
             ],
             "minimum": 1,
-            "maximum": 15,
-            "description": "Delay in seconds before sending (1-15)",
+            "description": "Delay in seconds before sending. Any positive integer accepted. For longer scheduling, prefer scheduledFor with an ISO 8601 timestamp.",
             "example": 5
+          },
+          "scheduledFor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
           },
           "delayTyping": {
             "type": [
@@ -7710,7 +8070,7 @@
           "Instances"
         ],
         "summary": "Update history sync webhook",
-        "description": "Configures the dedicated webhook endpoint for WhatsApp history sync events. When set, history sync data is delivered to this URL instead of the default received webhook.",
+        "description": "Configures a dedicated webhook endpoint for WhatsApp history sync events. History sync events contain batches of historical messages and are forwarded separately from other event types.",
         "operationId": "updateWebhookHistorySync",
         "security": [
           {
@@ -8097,6 +8457,429 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Instance not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/update-proxy": {
+      "put": {
+        "tags": [
+          "Proxy"
+        ],
+        "summary": "Set or update proxy configuration",
+        "description": "Configures a proxy for this instance's WhatsApp connection.\nSupports HTTP, HTTPS, and SOCKS5 proxies.\nThe proxy is applied to the live client if connected.\n",
+        "operationId": "updateProxy",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProxyUpdateRequest"
+              },
+              "examples": {
+                "http_proxy": {
+                  "summary": "HTTP proxy",
+                  "value": {
+                    "proxyUrl": "http://proxy.example.com:8080"
+                  }
+                },
+                "socks5_proxy": {
+                  "summary": "SOCKS5 proxy with auth",
+                  "value": {
+                    "proxyUrl": "socks5://user:pass@proxy.example.com:1080"
+                  }
+                },
+                "media_only": {
+                  "summary": "Proxy only for media, not websocket",
+                  "value": {
+                    "proxyUrl": "http://media-proxy.example.com:8080",
+                    "noWebsocket": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Proxy configuration updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "boolean"
+                    },
+                    "proxy": {
+                      "$ref": "#/components/schemas/ProxyConfig"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid proxy URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Instance not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/proxy": {
+      "get": {
+        "tags": [
+          "Proxy"
+        ],
+        "summary": "Get proxy configuration",
+        "description": "Returns the current proxy configuration and health status for this instance.",
+        "operationId": "getProxy",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Proxy configuration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "boolean"
+                    },
+                    "proxy": {
+                      "$ref": "#/components/schemas/ProxyConfig"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Instance not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Proxy"
+        ],
+        "summary": "Remove proxy configuration",
+        "description": "Removes the proxy configuration from this instance.\nThe client reverts to direct connection (or environment proxy).\n",
+        "operationId": "removeProxy",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Proxy removed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValueResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Instance not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/proxy/test": {
+      "post": {
+        "tags": [
+          "Proxy"
+        ],
+        "summary": "Test proxy connectivity",
+        "description": "Tests a proxy URL by attempting to connect through it to WhatsApp servers.\nDoes NOT apply the proxy - use update-proxy to apply it.\nReturns reachability status and latency.\n",
+        "operationId": "testProxy",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProxyTestRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Proxy test result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProxyTestResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid proxy URL format",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/proxy/swap": {
+      "post": {
+        "tags": [
+          "Proxy"
+        ],
+        "summary": "Hot-swap proxy on active connection",
+        "description": "Atomically swaps the proxy on an active WhatsApp connection.\nThe new proxy is tested before applying. The client is disconnected\nfrom the current proxy and immediately reconnected through the new one.\nThe WhatsApp session is preserved - only the transport changes.\n\n**Important:** The proxy is validated before swap. If the new proxy\nis unreachable, the swap is rejected and the current connection is maintained.\n",
+        "operationId": "swapProxy",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProxySwapRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Proxy swapped successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "value": {
+                      "type": "boolean"
+                    },
+                    "proxy": {
+                      "$ref": "#/components/schemas/ProxyConfig"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid proxy URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Proxy unreachable - swap rejected",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/instances/{instanceId}/token/{instanceToken}/proxy/health": {
+      "get": {
+        "tags": [
+          "Proxy"
+        ],
+        "summary": "Get proxy health status and history",
+        "description": "Returns the current proxy health status along with recent health check logs.\nUseful for monitoring proxy reliability and diagnosing connectivity issues.\n",
+        "operationId": "getProxyHealth",
+        "security": [
+          {
+            "ClientTokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/InstanceId"
+          },
+          {
+            "$ref": "#/components/parameters/InstanceToken"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Proxy health status and logs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProxyHealthResponse"
                 }
               }
             }
@@ -17207,7 +17990,7 @@
           "Status Cache"
         ],
         "summary": "Query message delivery status",
-        "description": "Query the cached status of message deliveries. Status Cache stores delivery receipts\n(sent, delivered, read, played) for messages, especially useful for group messages\nwhere tracking individual participant statuses is important.\n\n**Query Types:**\n- By `messageId`: Get status for a specific message\n- By `groupId`: Get all message statuses for a group\n- By `phone`: Get all message statuses for a phone number\n\n**Response Formats:**\n- `aggregated` (default): Returns aggregated counts and optionally participant details\n- `raw`: Returns data in Zé da API webhook format for compatibility\n\n**Use Cases:**\n- Check if a message was read by all group participants\n- Get delivery statistics for messages to a specific contact\n- Retrieve batch status updates for UI dashboards\n\n**Note:** Status data is cached with a configurable TTL (default 24h).\n",
+        "description": "Query the cached status of message deliveries. Status Cache stores delivery receipts\n(sent, delivered, read, played) for messages, especially useful for group messages\nwhere tracking individual participant statuses is important.\n\n**Important:** This endpoint works independently of webhook configuration.\nYou can use Status Cache in API-only mode (pull) without configuring any webhooks.\n\n**Query Types:**\n- **No filter**: Get ALL cached statuses for the instance (paginated)\n- By `messageId`: Get status for a specific message\n- By `groupId`: Get all message statuses for a group\n- By `phone`: Get all message statuses for a phone number\n\n**Response Formats:**\n- `aggregated` (default): Returns aggregated counts and optionally participant details\n- `raw`: Returns data in Zé da API webhook format for compatibility\n\n**Use Cases:**\n- Check if a message was read by all group participants\n- Get delivery statistics for messages to a specific contact\n- Retrieve batch status updates for UI dashboards\n- Poll for status updates without webhook configuration\n\n**Note:** Status data is cached with a configurable TTL (default 24h).\n\n**Requirements:**\n- `STATUS_CACHE_ENABLED=true` environment variable\n- `STATUS_CACHE_SCOPE` must include the message type (groups, direct, or both)\n",
         "operationId": "getMessagesStatus",
         "security": [
           {
@@ -17403,6 +18186,93 @@
                       }
                     }
                   },
+                  "allStatuses": {
+                    "summary": "All cached statuses (no filter)",
+                    "description": "When no filter is provided, returns all cached statuses for the instance with pagination",
+                    "value": {
+                      "data": [
+                        {
+                          "messageId": "3EB0A1B2C3D4E5F6",
+                          "instanceId": "550e8400-e29b-41d4-a716-446655440000",
+                          "groupId": "120363182823169824",
+                          "phone": "120363182823169824-group",
+                          "isGroup": true,
+                          "totalParticipants": 50,
+                          "status": {
+                            "sent": 50,
+                            "delivered": 45,
+                            "read": 20,
+                            "played": 0
+                          },
+                          "createdAt": 1703548800000,
+                          "updatedAt": 1703552400000
+                        },
+                        {
+                          "messageId": "3EB0A1B2C3D4E5F7",
+                          "instanceId": "550e8400-e29b-41d4-a716-446655440000",
+                          "phone": "5511999999999",
+                          "isGroup": false,
+                          "totalParticipants": 1,
+                          "status": {
+                            "sent": 1,
+                            "delivered": 1,
+                            "read": 1,
+                            "played": 0
+                          },
+                          "createdAt": 1703548900000,
+                          "updatedAt": 1703549000000
+                        }
+                      ],
+                      "meta": {
+                        "total": 150,
+                        "limit": 100,
+                        "offset": 0
+                      }
+                    }
+                  },
+                  "allStatusesRaw": {
+                    "summary": "All cached statuses in raw/webhook format",
+                    "description": "Use format=raw to get data in EXACT webhook payload format",
+                    "value": {
+                      "data": [
+                        {
+                          "status": "read",
+                          "ids": [
+                            "3EB0A1B2C3D4E5F6"
+                          ],
+                          "momment": 1703548900000,
+                          "phone": "120363182823169824",
+                          "chatLid": "",
+                          "participantLid": "",
+                          "isGroup": true,
+                          "instanceId": "550e8400-e29b-41d4-a716-446655440000",
+                          "type": "MessageStatusCallback",
+                          "fromMe": true,
+                          "senderDevice": 1
+                        },
+                        {
+                          "status": "delivered",
+                          "ids": [
+                            "3EB0A1B2C3D4E5F7"
+                          ],
+                          "momment": 1703549000000,
+                          "phone": "5511999999999",
+                          "chatLid": "",
+                          "participantLid": "",
+                          "isGroup": false,
+                          "instanceId": "550e8400-e29b-41d4-a716-446655440000",
+                          "type": "MessageStatusCallback",
+                          "fromMe": true,
+                          "senderDevice": 1
+                        }
+                      ],
+                      "meta": {
+                        "total": 150,
+                        "limit": 100,
+                        "offset": 0
+                      }
+                    }
+                  },
                   "empty": {
                     "summary": "No cached status found",
                     "value": {
@@ -17419,14 +18289,14 @@
             }
           },
           "400": {
-            "description": "Bad request - missing required parameter",
+            "description": "Bad request - invalid parameters",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
                 },
                 "example": {
-                  "error": "missing required parameter: messageId, groupId, or phone"
+                  "error": "invalid instance id"
                 }
               }
             }
@@ -17460,7 +18330,7 @@
           "Status Cache"
         ],
         "summary": "Flush pending webhooks",
-        "description": "Triggers delivery of suppressed webhooks for cached status events.\n\nWhen `STATUS_CACHE_SUPPRESS_WEBHOOKS=true`, status webhooks are not immediately\nsent but stored for later delivery. This endpoint allows manual triggering\nof those pending webhooks.\n\n**Use Cases:**\n- Force immediate delivery of status updates to webhook endpoints\n- Recover from webhook endpoint downtime\n- Batch process status updates at specific intervals\n\n**Options:**\n- Flush by specific `messageId`: Delivers webhooks for one message\n- Flush all (`all: true`): Delivers all pending webhooks for the instance\n\n**Note:** Flushing is idempotent - already-flushed webhooks won't be re-sent.\n",
+        "description": "Triggers delivery of suppressed webhooks for cached status events.\n\nWhen `STATUS_CACHE_SUPPRESS_WEBHOOKS=true`, status webhooks are not immediately\nsent but stored for later delivery. This endpoint allows manual triggering\nof those pending webhooks.\n\n**Webhook Requirement:** This endpoint REQUIRES a webhook to be configured:\n- Primary: `messageStatusCallbackUrl`\n- Fallback: `deliveryCallbackUrl`\n\nIf no webhook is configured, flush will succeed but no data will be delivered.\nIn API-only mode, use `/messages-status` GET endpoint instead.\n\n**Use Cases:**\n- Force immediate delivery of status updates to webhook endpoints\n- Recover from webhook endpoint downtime\n- Batch process status updates at specific intervals\n\n**Options:**\n- Flush by specific `messageId`: Delivers webhooks for one message\n- Flush all (`all: true`): Delivers all pending webhooks for the instance\n\n**Note:** Flushing is idempotent - already-flushed webhooks won't be re-sent.\n",
         "operationId": "flushMessagesStatus",
         "security": [
           {
@@ -17689,7 +18559,7 @@
           "Status Cache"
         ],
         "summary": "Get cache statistics",
-        "description": "Returns statistics about the status cache for this instance.\n\n**Metrics included:**\n- Total cached entries\n- Entries breakdown by instance\n- Number of pending webhooks awaiting flush\n\n**Use Cases:**\n- Monitor cache usage and storage\n- Determine if flush is needed\n- Debug cache behavior\n",
+        "description": "Returns statistics about the status cache for this instance.\n\n**Important:** This endpoint works independently of webhook configuration.\nUse it to verify that Status Cache is receiving and storing events.\n\n**Metrics included:**\n- Total cached entries\n- Entries breakdown by instance\n- Number of pending webhooks awaiting flush\n\n**Use Cases:**\n- Monitor cache usage and storage\n- Determine if flush is needed\n- Debug cache behavior\n- Verify Status Cache is working (totalEntries > 0)\n\n**Troubleshooting:**\nIf `totalEntries` is 0, check:\n1. `STATUS_CACHE_ENABLED=true` is set\n2. `STATUS_CACHE_SCOPE` matches your message types (groups/direct)\n3. `STATUS_CACHE_TYPES` includes the receipt types you expect (read,delivered,played,sent)\n",
         "operationId": "getMessagesStatusStats",
         "security": [
           {
@@ -18996,7 +19866,7 @@
           "Messages"
         ],
         "summary": "Send text to WhatsApp Status",
-        "description": "Sends a text message to WhatsApp Status/Stories.\n\n**Status Broadcasting**: The text is automatically broadcast to all contacts\nwho can view your status based on your privacy settings. No phone number\nis required - the message is sent to `status@broadcast`.\n\n**Key Features**:\n- Custom background color (hex #RRGGBB or ARGB 0xAARRGGBB)\n- Multiple font styles (0-5)\n- FIFO queue with non-blocking response\n- Optional custom message ID for tracking\n- Delayed sending support (1-15 seconds)\n\n**Font Styles**:\n| Value | Font Name | Description |\n|-------|-----------|-------------|\n| 0 | Sans-serif | Default clean font |\n| 1 | Serif | Classic serif font |\n| 2 | Norican Script | Elegant cursive script |\n| 3 | Bryndan Write | Handwritten style |\n| 4 | Bebasneue Regular | Bold condensed |\n| 5 | Oswald Heavy | Strong impact font |\n\n**Background Color Examples**:\n| Color | Hex Code | Description |\n|-------|----------|-------------|\n| Red | #FF5733 | Vibrant red-orange |\n| Blue | #3498DB | Sky blue |\n| Green | #2ECC71 | Emerald green |\n| Purple | #9B59B6 | Amethyst purple |\n| Orange | #F39C12 | Warm orange |\n| Pink | #E91E63 | Hot pink |\n| Teal | #1ABC9C | Turquoise |\n| Dark | #2C3E50 | Dark blue-gray |\n",
+        "description": "Sends a text message to WhatsApp Status/Stories.\n\n**Status Broadcasting**: The text is automatically broadcast to all contacts\nwho can view your status based on your privacy settings. No phone number\nis required - the message is sent to `status@broadcast`.\n\n**Key Features**:\n- Custom background color (hex #RRGGBB or ARGB 0xAARRGGBB)\n- Multiple font styles (0-5)\n- FIFO queue with non-blocking response\n- Optional custom message ID for tracking\n- Delayed sending and scheduled delivery support (delayMessage or scheduledFor)\n\n**Font Styles**:\n| Value | Font Name | Description |\n|-------|-----------|-------------|\n| 0 | Sans-serif | Default clean font |\n| 1 | Serif | Classic serif font |\n| 2 | Norican Script | Elegant cursive script |\n| 3 | Bryndan Write | Handwritten style |\n| 4 | Bebasneue Regular | Bold condensed |\n| 5 | Oswald Heavy | Strong impact font |\n\n**Background Color Examples**:\n| Color | Hex Code | Description |\n|-------|----------|-------------|\n| Red | #FF5733 | Vibrant red-orange |\n| Blue | #3498DB | Sky blue |\n| Green | #2ECC71 | Emerald green |\n| Purple | #9B59B6 | Amethyst purple |\n| Orange | #F39C12 | Warm orange |\n| Pink | #E91E63 | Hot pink |\n| Teal | #1ABC9C | Turquoise |\n| Dark | #2C3E50 | Dark blue-gray |\n",
         "operationId": "sendTextStatus",
         "security": [
           {
