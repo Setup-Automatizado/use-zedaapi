@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.3.0](https://github.com/Setup-Automatizado/zedaapi/compare/v3.2.1...v3.3.0) (2026-02-17)
+
+### Features
+
+* **messages:** add scheduledFor field and delay resolution helpers ([17a0f71](https://github.com/Setup-Automatizado/zedaapi/commit/17a0f71aace5b6cb66fc35e66f7b7e9dcf28defd))
+* **messages:** add scheduledFor support to remaining handlers and interactive types ([a65f2ee](https://github.com/Setup-Automatizado/zedaapi/commit/a65f2ee9513b5703084ff3a33de8ea2f38f31f62))
+* **docs:** serve embedded favicons and branding on swagger UI ([cc09be5](https://github.com/Setup-Automatizado/zedaapi/commit/cc09be5dd2a3473d6951ecdef39b554d8d0324b1))
+
+### Code Refactoring
+
+* **messages:** use resolveDelay helpers in remaining handlers ([fa5e8b2](https://github.com/Setup-Automatizado/zedaapi/commit/fa5e8b2198ce0eb26752042b21b32c64fd55715c))
+
+### Documentation
+
+* **openapi:** update spec with scheduledFor field across all endpoints ([1477c9e](https://github.com/Setup-Automatizado/zedaapi/commit/1477c9ecc6583fca894d1a8cc891888a65d5477a))
+
 ## [3.2.1](https://github.com/Setup-Automatizado/zedaapi/compare/v3.2.0...v3.2.1) (2026-02-16)
 
 ### Bug Fixes
