@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -14,6 +15,19 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/events/types"
 	"go.mau.fi/whatsmeow/api/internal/observability"
 )
+
+// isPermanentPublishError returns true for errors that will never succeed on retry.
+// These include NATS payload size violations and JSON marshal failures.
+// Transient errors (network timeouts, connection drops) return false.
+func isPermanentPublishError(err error) bool {
+	if err == nil {
+		return false
+	}
+	msg := err.Error()
+	return strings.Contains(msg, "maximum payload exceeded") ||
+		strings.Contains(msg, "message size exceeds maximum allowed") ||
+		strings.Contains(msg, "marshal event envelope")
+}
 
 // MediaTaskPublisher publishes media processing tasks for async handling.
 // This interface decouples capture from media package, allowing the NATSEventWriter
@@ -84,7 +98,8 @@ func (w *NATSEventWriter) WriteEvents(ctx context.Context, events []*types.Inter
 	start := time.Now()
 	successCount := 0
 	skippedCount := 0
-	failureCount := 0
+	failureCount := 0       // transient failures (worth retrying)
+	permanentFailCount := 0 // permanent failures (will never succeed)
 
 	for _, event := range events {
 		// Apply event filters (same as TransactionalWriter)
@@ -122,8 +137,10 @@ func (w *NATSEventWriter) WriteEvents(ctx context.Context, events []*types.Inter
 		// Encode the internal event
 		encodedPayload, err := encoding.EncodeInternalEvent(event)
 		if err != nil {
-			failureCount++
-			w.log.Error("encode internal event",
+			// Encoding the same event data will always produce the same error,
+			// so this is a permanent failure — retrying would be futile.
+			permanentFailCount++
+			w.log.Error("encode internal event (permanent, will not retry)",
 				slog.String("event_id", event.EventID.String()),
 				slog.String("event_type", event.EventType),
 				slog.String("error", err.Error()))
@@ -166,6 +183,24 @@ func (w *NATSEventWriter) WriteEvents(ctx context.Context, events []*types.Inter
 		}
 
 		if err := w.publisher.Publish(ctx, envelope); err != nil {
+			if isPermanentPublishError(err) {
+				// Payload too large or marshal error — retrying won't change the outcome.
+				permanentFailCount++
+				w.log.Error("publish event to NATS (permanent, will not retry)",
+					slog.String("event_id", event.EventID.String()),
+					slog.String("event_type", event.EventType),
+					slog.Int("payload_size", len(encodedPayload)),
+					slog.String("error", err.Error()))
+				if w.metrics != nil {
+					w.metrics.EventsInserted.WithLabelValues(
+						instanceID.String(),
+						event.EventType,
+						"nats_publish_permanent_failed",
+					).Inc()
+				}
+				continue
+			}
+			// Transient error (network, timeout) — worth retrying via buffer.
 			failureCount++
 			w.log.Error("publish event to NATS",
 				slog.String("event_id", event.EventID.String()),
@@ -202,7 +237,7 @@ func (w *NATSEventWriter) WriteEvents(ctx context.Context, events []*types.Inter
 			}
 
 			// DEBUG: Log all media fields at capture time
-			w.log.Info("publishing media task - capture debug",
+			w.log.Debug("publishing media task - capture debug",
 				slog.String("event_id", event.EventID.String()),
 				slog.String("instance_id", event.InstanceID.String()),
 				slog.String("media_type", event.MediaType),
@@ -243,14 +278,17 @@ func (w *NATSEventWriter) WriteEvents(ctx context.Context, events []*types.Inter
 		slog.Int("total", len(events)),
 		slog.Int("success", successCount),
 		slog.Int("skipped", skippedCount),
-		slog.Int("failed", failureCount),
+		slog.Int("failed_transient", failureCount),
+		slog.Int("failed_permanent", permanentFailCount),
 		slog.Duration("duration", duration),
 	)
 
-	// Return error to trigger retry in buffer if any events failed.
+	// Only return error for transient (retryable) failures to trigger retry in buffer.
+	// Permanent failures (encode errors, payload too large) are logged and dropped
+	// because retrying them would produce the same result indefinitely.
 	// Already-published events are safe to retry thanks to JetStream MsgID deduplication.
 	if failureCount > 0 {
-		return fmt.Errorf("%d of %d events failed to publish", failureCount, len(events))
+		return fmt.Errorf("%d of %d events failed to publish (transient)", failureCount, len(events))
 	}
 
 	return nil
