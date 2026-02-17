@@ -1,6 +1,7 @@
 package http
 
 import (
+	"io/fs"
 	"net/http"
 	"time"
 
@@ -16,6 +17,7 @@ import (
 	ourMiddleware "go.mau.fi/whatsmeow/api/internal/http/middleware"
 	"go.mau.fi/whatsmeow/api/internal/observability"
 	proxypool "go.mau.fi/whatsmeow/api/internal/proxy"
+	"go.mau.fi/whatsmeow/api/public"
 )
 
 type RouterDeps struct {
@@ -53,6 +55,18 @@ func NewRouter(deps RouterDeps) http.Handler {
 	if deps.SentryHandler != nil {
 		r.Use(deps.SentryHandler.Handle)
 	}
+
+	// Serve embedded public assets (favicons, manifest, etc.) at root level.
+	// Walk the embedded FS and register an explicit route for each file.
+	staticFS, _ := fs.Sub(public.Assets, ".")
+	fileServer := http.FileServer(http.FS(staticFS))
+	_ = fs.WalkDir(staticFS, ".", func(path string, d fs.DirEntry, err error) error {
+		if err != nil || d.IsDir() {
+			return nil
+		}
+		r.Get("/"+path, fileServer.ServeHTTP)
+		return nil
+	})
 
 	if deps.HealthHandler != nil {
 		r.Get("/health", deps.HealthHandler.Health)
