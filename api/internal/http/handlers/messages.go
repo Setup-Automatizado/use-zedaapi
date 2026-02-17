@@ -3047,14 +3047,9 @@ func (h *MessageHandler) sendButtonList(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	// Convert delays from seconds to milliseconds
-	var delayMessage, delayTyping int64
-	if req.DelayMessage != nil && *req.DelayMessage > 0 {
-		delayMessage = int64(*req.DelayMessage) * 1000
-	}
-	if req.DelayTyping != nil && *req.DelayTyping > 0 {
-		delayTyping = int64(*req.DelayTyping) * 1000
-	}
+	// Resolve delays
+	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Convert buttons to queue format
 	queueButtons := make([]queue.Button, len(req.Buttons))
@@ -3179,14 +3174,9 @@ func (h *MessageHandler) sendButtonActions(w http.ResponseWriter, r *http.Reques
 		}
 	}
 
-	// Convert delays from seconds to milliseconds
-	var delayMessage, delayTyping int64
-	if req.DelayMessage != nil && *req.DelayMessage > 0 {
-		delayMessage = int64(*req.DelayMessage) * 1000
-	}
-	if req.DelayTyping != nil && *req.DelayTyping > 0 {
-		delayTyping = int64(*req.DelayTyping) * 1000
-	}
+	// Resolve delays
+	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Convert buttons to queue format
 	queueButtons := make([]queue.Button, len(req.Buttons))
@@ -3315,14 +3305,9 @@ func (h *MessageHandler) sendOptionList(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	// Convert delays from seconds to milliseconds
-	var delayMessage, delayTyping int64
-	if req.DelayMessage != nil && *req.DelayMessage > 0 {
-		delayMessage = int64(*req.DelayMessage) * 1000
-	}
-	if req.DelayTyping != nil && *req.DelayTyping > 0 {
-		delayTyping = int64(*req.DelayTyping) * 1000
-	}
+	// Resolve delays
+	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Convert sections to queue format
 	queueSections := make([]queue.Section, len(req.Sections))
@@ -3438,14 +3423,9 @@ func (h *MessageHandler) sendButtonPIX(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Convert delays from seconds to milliseconds
-	var delayMessage, delayTyping int64
-	if req.DelayMessage != nil && *req.DelayMessage > 0 {
-		delayMessage = int64(*req.DelayMessage) * 1000
-	}
-	if req.DelayTyping != nil && *req.DelayTyping > 0 {
-		delayTyping = int64(*req.DelayTyping) * 1000
-	}
+	// Resolve delays
+	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Build PIX payment struct
 	pixPayment := &queue.PIXPayment{
@@ -3533,14 +3513,9 @@ func (h *MessageHandler) sendButtonOTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Convert delays from seconds to milliseconds
-	var delayMessage, delayTyping int64
-	if req.DelayMessage != nil && *req.DelayMessage > 0 {
-		delayMessage = int64(*req.DelayMessage) * 1000
-	}
-	if req.DelayTyping != nil && *req.DelayTyping > 0 {
-		delayTyping = int64(*req.DelayTyping) * 1000
-	}
+	// Resolve delays
+	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Build optional header/footer pointers
 	var header, footer *string
@@ -3658,14 +3633,9 @@ func (h *MessageHandler) sendCarousel(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Convert delays from seconds to milliseconds
-	var delayMessage, delayTyping int64
-	if req.DelayMessage != nil && *req.DelayMessage > 0 {
-		delayMessage = int64(*req.DelayMessage) * 1000
-	}
-	if req.DelayTyping != nil && *req.DelayTyping > 0 {
-		delayTyping = int64(*req.DelayTyping) * 1000
-	}
+	// Resolve delays
+	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Convert request cards to queue.CarouselCard
 	carouselCards := make([]queue.CarouselCard, len(req.Cards))
@@ -3826,26 +3796,8 @@ func (h *MessageHandler) sendPoll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Convert delays from seconds to milliseconds with Zé da API defaults
-	delayMessage := int64(0)
-	if req.DelayMessage != nil {
-		seconds := *req.DelayMessage
-		if seconds < 1 {
-			seconds = 1
-		}
-		delayMessage = int64(seconds) * 1000
-	} else {
-		// Default: random 1-3 seconds
-		delayMessage = int64(1000 + (rand.Int63() % 2000))
-	}
-
-	delayTyping := int64(0)
-	if req.DelayTyping != nil {
-		seconds := *req.DelayTyping
-		if seconds < 1 {
-			seconds = 1
-		}
-		delayTyping = int64(seconds) * 1000
-	}
+	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Create message args
 	args := queue.SendMessageArgs{
@@ -3970,26 +3922,8 @@ func (h *MessageHandler) sendEvent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Convert delays from seconds to milliseconds with Zé da API defaults
-	delayMessage := int64(0)
-	if req.DelayMessage != nil {
-		seconds := *req.DelayMessage
-		if seconds < 1 {
-			seconds = 1
-		}
-		delayMessage = int64(seconds) * 1000
-	} else {
-		// Default: random 1-3 seconds
-		delayMessage = int64(1000 + (rand.Int63() % 2000))
-	}
-
-	delayTyping := int64(0)
-	if req.DelayTyping != nil {
-		seconds := *req.DelayTyping
-		if seconds < 1 {
-			seconds = 1
-		}
-		delayTyping = int64(seconds) * 1000
-	}
+	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Create message args
 	args := queue.SendMessageArgs{
@@ -4095,26 +4029,8 @@ func (h *MessageHandler) sendLink(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Convert delays from seconds to milliseconds with Zé da API defaults
-	delayMessage := int64(0)
-	if req.DelayMessage != nil {
-		seconds := *req.DelayMessage
-		if seconds < 1 {
-			seconds = 1
-		}
-		delayMessage = int64(seconds) * 1000
-	} else {
-		// Default: random 1-3 seconds
-		delayMessage = int64(1000 + (rand.Int63() % 2000))
-	}
-
-	delayTyping := int64(0)
-	if req.DelayTyping != nil {
-		seconds := *req.DelayTyping
-		if seconds < 1 {
-			seconds = 1
-		}
-		delayTyping = int64(seconds) * 1000
-	}
+	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Create message args with text content and link preview override
 	args := queue.SendMessageArgs{
@@ -6080,17 +5996,7 @@ func (h *MessageHandler) sendTextStatus(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// Convert delay from seconds to milliseconds
-	delayMessage := int64(0)
-	if req.DelayMessage != nil {
-		seconds := *req.DelayMessage
-		if seconds < 1 {
-			seconds = 1
-		}
-		delayMessage = int64(seconds) * 1000
-	} else {
-		// Default: random 1-3 seconds
-		delayMessage = int64(1000 + (rand.Int63() % 2000))
-	}
+	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
 
 	// Parse font if provided
 	var font *int32
@@ -6176,16 +6082,7 @@ func (h *MessageHandler) sendImageStatus(w http.ResponseWriter, r *http.Request)
 	}
 
 	// Convert delay from seconds to milliseconds
-	delayMessage := int64(0)
-	if req.DelayMessage != nil {
-		seconds := *req.DelayMessage
-		if seconds < 1 {
-			seconds = 1
-		}
-		delayMessage = int64(seconds) * 1000
-	} else {
-		delayMessage = int64(1000 + (rand.Int63() % 2000))
-	}
+	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
 
 	// Create message args for status broadcast
 	caption := strings.TrimSpace(req.Caption)
@@ -6256,16 +6153,7 @@ func (h *MessageHandler) sendAudioStatus(w http.ResponseWriter, r *http.Request)
 	}
 
 	// Convert delay from seconds to milliseconds
-	delayMessage := int64(0)
-	if req.DelayMessage != nil {
-		seconds := *req.DelayMessage
-		if seconds < 1 {
-			seconds = 1
-		}
-		delayMessage = int64(seconds) * 1000
-	} else {
-		delayMessage = int64(1000 + (rand.Int63() % 2000))
-	}
+	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
 
 	// Create message args for status broadcast
 	// Audio status will be processed with waveform generation in StatusProcessor
@@ -6332,16 +6220,7 @@ func (h *MessageHandler) sendVideoStatus(w http.ResponseWriter, r *http.Request)
 	}
 
 	// Convert delay from seconds to milliseconds
-	delayMessage := int64(0)
-	if req.DelayMessage != nil {
-		seconds := *req.DelayMessage
-		if seconds < 1 {
-			seconds = 1
-		}
-		delayMessage = int64(seconds) * 1000
-	} else {
-		delayMessage = int64(1000 + (rand.Int63() % 2000))
-	}
+	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
 
 	// Create message args for status broadcast
 	caption := strings.TrimSpace(req.Caption)
