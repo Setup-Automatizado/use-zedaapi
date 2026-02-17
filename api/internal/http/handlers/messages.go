@@ -179,14 +179,15 @@ type GroupMention struct {
 // SendTextRequest represents the request body for POST /instances/{instanceId}/token/{token}/send-text
 // format
 type SendTextRequest struct {
-	Phone         string `json:"phone"`                   // Phone number (e.g., "5511999999999")
-	Message       string `json:"message"`                 // Text message content
-	MessageID     string `json:"messageId,omitempty"`     // Optional WhatsApp message ID to reply to
-	DelayMessage  *int   `json:"delayMessage,omitempty"`  // Optional delay in seconds (1-15) before sending
-	DelayTyping   *int   `json:"delayTyping,omitempty"`   // Optional typing indicator duration in seconds (1-15)
-	Duration      *int   `json:"duration,omitempty"`      // Ephemeral message duration in seconds (0, 86400, 604800, 7776000)
-	PrivateAnswer bool   `json:"privateAnswer,omitempty"` // For group messages: if true, reply in private to sender (not yourself)
-	LinkPreview   *bool  `json:"linkPreview,omitempty"`   // If nil, auto-detect URLs; if true, force preview; if false, disable preview
+	Phone         string  `json:"phone"`                   // Phone number (e.g., "5511999999999")
+	Message       string  `json:"message"`                 // Text message content
+	MessageID     string  `json:"messageId,omitempty"`     // Optional WhatsApp message ID to reply to
+	DelayMessage  *int    `json:"delayMessage,omitempty"`  // Optional delay in seconds before sending
+	ScheduledFor  *string `json:"scheduledFor,omitempty"`  // ISO 8601 timestamp for scheduled delivery (overrides delayMessage)
+	DelayTyping   *int    `json:"delayTyping,omitempty"`   // Optional typing indicator duration in seconds (1-15)
+	Duration      *int    `json:"duration,omitempty"`      // Ephemeral message duration in seconds (0, 86400, 604800, 7776000)
+	PrivateAnswer bool    `json:"privateAnswer,omitempty"` // For group messages: if true, reply in private to sender (not yourself)
+	LinkPreview   *bool   `json:"linkPreview,omitempty"`   // If nil, auto-detect URLs; if true, force preview; if false, disable preview
 }
 
 // SendImageRequest represents the request body for POST /instances/{instanceId}/token/{token}/send-image
@@ -196,7 +197,8 @@ type SendImageRequest struct {
 	Image          string         `json:"image"`                    // Image URL or base64 data (data:image/png;base64,...)
 	Caption        string         `json:"caption,omitempty"`        // Optional image caption/title
 	MessageID      string         `json:"messageId,omitempty"`      // Optional WhatsApp message ID to reply to
-	DelayMessage   *int           `json:"delayMessage,omitempty"`   // Optional delay in seconds (1-15) before sending
+	DelayMessage   *int           `json:"delayMessage,omitempty"`   // Optional delay in seconds before sending
+	ScheduledFor   *string        `json:"scheduledFor,omitempty"`   // ISO 8601 timestamp for scheduled delivery (overrides delayMessage)
 	DelayTyping    *int           `json:"delayTyping,omitempty"`    // Optional typing indicator duration in seconds (1-15)
 	ViewOnce       bool           `json:"viewOnce,omitempty"`       // If true, image can only be viewed once
 	Duration       *int           `json:"duration,omitempty"`       // Ephemeral message duration in seconds (0, 86400, 604800, 7776000)
@@ -212,7 +214,8 @@ type SendStickerRequest struct {
 	Phone          string         `json:"phone"`                    // Phone number (e.g., "5511999999999")
 	Sticker        string         `json:"sticker"`                  // Sticker URL or base64 data (data:image/webp;base64,...)
 	MessageID      string         `json:"messageId,omitempty"`      // Optional WhatsApp message ID to reply to
-	DelayMessage   *int           `json:"delayMessage,omitempty"`   // Optional delay in seconds (1-15) before sending
+	DelayMessage   *int           `json:"delayMessage,omitempty"`   // Optional delay in seconds before sending
+	ScheduledFor   *string        `json:"scheduledFor,omitempty"`   // ISO 8601 timestamp for scheduled delivery (overrides delayMessage)
 	DelayTyping    *int           `json:"delayTyping,omitempty"`    // Optional typing indicator duration in seconds (1-15)
 	Duration       *int           `json:"duration,omitempty"`       // Ephemeral message duration in seconds (0, 86400, 604800, 7776000)
 	Mentioned      []string       `json:"mentioned,omitempty"`      // Optional array of phone numbers to mention
@@ -227,7 +230,8 @@ type SendAudioRequest struct {
 	Phone          string         `json:"phone"`                    // Phone number (e.g., "5511999999999")
 	Audio          string         `json:"audio"`                    // Audio URL or base64 data (data:audio/ogg;base64,...)
 	MessageID      string         `json:"messageId,omitempty"`      // Optional WhatsApp message ID to reply to
-	DelayMessage   *int           `json:"delayMessage,omitempty"`   // Optional delay in seconds (1-15) before sending
+	DelayMessage   *int           `json:"delayMessage,omitempty"`   // Optional delay in seconds before sending
+	ScheduledFor   *string        `json:"scheduledFor,omitempty"`   // ISO 8601 timestamp for scheduled delivery (overrides delayMessage)
 	DelayTyping    *int           `json:"delayTyping,omitempty"`    // Optional "recording audio" indicator duration in seconds (1-15)
 	ViewOnce       bool           `json:"viewOnce,omitempty"`       // If true, audio can only be played once
 	Duration       *int           `json:"duration,omitempty"`       // Ephemeral message duration in seconds (0, 86400, 604800, 7776000)
@@ -244,7 +248,8 @@ type SendVideoRequest struct {
 	Video          string         `json:"video"`                    // Video URL or base64 data (data:video/mp4;base64,...)
 	Caption        string         `json:"caption,omitempty"`        // Optional video caption/title
 	MessageID      string         `json:"messageId,omitempty"`      // Optional WhatsApp message ID to reply to
-	DelayMessage   *int           `json:"delayMessage,omitempty"`   // Optional delay in seconds (1-15) before sending
+	DelayMessage   *int           `json:"delayMessage,omitempty"`   // Optional delay in seconds before sending
+	ScheduledFor   *string        `json:"scheduledFor,omitempty"`   // ISO 8601 timestamp for scheduled delivery (overrides delayMessage)
 	DelayTyping    *int           `json:"delayTyping,omitempty"`    // Optional typing indicator duration in seconds (1-15)
 	ViewOnce       bool           `json:"viewOnce,omitempty"`       // If true, video can only be viewed once
 	Duration       *int           `json:"duration,omitempty"`       // Ephemeral message duration in seconds (0, 86400, 604800, 7776000)
@@ -261,7 +266,8 @@ type SendPTVRequest struct {
 	Video          string         `json:"video"`                    // Video URL or base64 data (data:video/mp4;base64,...)
 	Caption        string         `json:"caption,omitempty"`        // Optional video caption/title
 	MessageID      string         `json:"messageId,omitempty"`      // Optional WhatsApp message ID to reply to
-	DelayMessage   *int           `json:"delayMessage,omitempty"`   // Optional delay in seconds (1-15) before sending
+	DelayMessage   *int           `json:"delayMessage,omitempty"`   // Optional delay in seconds before sending
+	ScheduledFor   *string        `json:"scheduledFor,omitempty"`   // ISO 8601 timestamp for scheduled delivery (overrides delayMessage)
 	DelayTyping    *int           `json:"delayTyping,omitempty"`    // Optional typing indicator duration in seconds (1-15)
 	ViewOnce       bool           `json:"viewOnce,omitempty"`       // If true, PTV can only be viewed once
 	Duration       *int           `json:"duration,omitempty"`       // Ephemeral message duration in seconds (0, 86400, 604800, 7776000)
@@ -278,7 +284,8 @@ type SendGifRequest struct {
 	Gif            string         `json:"gif"`                      // GIF URL or base64 data (data:image/gif;base64,...)
 	Caption        string         `json:"caption,omitempty"`        // Optional GIF caption/title
 	MessageID      string         `json:"messageId,omitempty"`      // Optional WhatsApp message ID to reply to
-	DelayMessage   *int           `json:"delayMessage,omitempty"`   // Optional delay in seconds (1-15) before sending
+	DelayMessage   *int           `json:"delayMessage,omitempty"`   // Optional delay in seconds before sending
+	ScheduledFor   *string        `json:"scheduledFor,omitempty"`   // ISO 8601 timestamp for scheduled delivery (overrides delayMessage)
 	DelayTyping    *int           `json:"delayTyping,omitempty"`    // Optional typing indicator duration in seconds (1-15)
 	ViewOnce       bool           `json:"viewOnce,omitempty"`       // If true, GIF can only be viewed once
 	Duration       *int           `json:"duration,omitempty"`       // Ephemeral message duration in seconds (0, 86400, 604800, 7776000)
@@ -296,7 +303,8 @@ type SendDocumentRequest struct {
 	FileName       string         `json:"fileName,omitempty"`       // Optional document filename
 	Caption        string         `json:"caption,omitempty"`        // Optional document caption/title
 	MessageID      string         `json:"messageId,omitempty"`      // Optional WhatsApp message ID to reply to
-	DelayMessage   *int           `json:"delayMessage,omitempty"`   // Optional delay in seconds (1-15) before sending
+	DelayMessage   *int           `json:"delayMessage,omitempty"`   // Optional delay in seconds before sending
+	ScheduledFor   *string        `json:"scheduledFor,omitempty"`   // ISO 8601 timestamp for scheduled delivery (overrides delayMessage)
 	DelayTyping    *int           `json:"delayTyping,omitempty"`    // Optional typing indicator duration in seconds (1-15)
 	Duration       *int           `json:"duration,omitempty"`       // Ephemeral message duration in seconds (0, 86400, 604800, 7776000)
 	Mentioned      []string       `json:"mentioned,omitempty"`      // Optional array of phone numbers to mention
@@ -314,7 +322,8 @@ type SendLocationRequest struct {
 	Name           string         `json:"name,omitempty"`           // Optional location name/title
 	Address        string         `json:"address,omitempty"`        // Optional location address
 	MessageID      string         `json:"messageId,omitempty"`      // Optional WhatsApp message ID to reply to
-	DelayMessage   *int           `json:"delayMessage,omitempty"`   // Optional delay in seconds (1-15) before sending
+	DelayMessage   *int           `json:"delayMessage,omitempty"`   // Optional delay in seconds before sending
+	ScheduledFor   *string        `json:"scheduledFor,omitempty"`   // ISO 8601 timestamp for scheduled delivery (overrides delayMessage)
 	DelayTyping    *int           `json:"delayTyping,omitempty"`    // Optional typing indicator duration in seconds (1-15)
 	Duration       *int           `json:"duration,omitempty"`       // Ephemeral message duration in seconds (0, 86400, 604800, 7776000)
 	Mentioned      []string       `json:"mentioned,omitempty"`      // Optional array of phone numbers to mention
@@ -348,7 +357,8 @@ type SendContactRequest struct {
 	Note         *string         `json:"note,omitempty"`         // Additional notes or comments
 
 	MessageID      string         `json:"messageId,omitempty"`      // Optional WhatsApp message ID to reply to
-	DelayMessage   *int           `json:"delayMessage,omitempty"`   // Optional delay in seconds (1-15) before sending
+	DelayMessage   *int           `json:"delayMessage,omitempty"`   // Optional delay in seconds before sending
+	ScheduledFor   *string        `json:"scheduledFor,omitempty"`   // ISO 8601 timestamp for scheduled delivery (overrides delayMessage)
 	DelayTyping    *int           `json:"delayTyping,omitempty"`    // Optional typing indicator duration in seconds (1-15)
 	Duration       *int           `json:"duration,omitempty"`       // Ephemeral message duration in seconds (0, 86400, 604800, 7776000)
 	Mentioned      []string       `json:"mentioned,omitempty"`      // Optional array of phone numbers to mention
@@ -398,7 +408,8 @@ type SendContactsRequest struct {
 	Phone          string         `json:"phone"`                    // Phone number (e.g., "5511999999999")
 	Contacts       []ContactInfo  `json:"contacts"`                 // Array of contacts (1-10)
 	MessageID      string         `json:"messageId,omitempty"`      // Optional WhatsApp message ID to reply to
-	DelayMessage   *int           `json:"delayMessage,omitempty"`   // Optional delay in seconds (1-15) before sending
+	DelayMessage   *int           `json:"delayMessage,omitempty"`   // Optional delay in seconds before sending
+	ScheduledFor   *string        `json:"scheduledFor,omitempty"`   // ISO 8601 timestamp for scheduled delivery (overrides delayMessage)
 	DelayTyping    *int           `json:"delayTyping,omitempty"`    // Optional typing indicator duration in seconds (1-15)
 	Duration       *int           `json:"duration,omitempty"`       // Ephemeral message duration in seconds (0, 86400, 604800, 7776000)
 	Mentioned      []string       `json:"mentioned,omitempty"`      // Optional array of phone numbers to mention
@@ -448,47 +459,50 @@ type Section struct {
 // SendButtonActionsRequest represents the request body for POST /instances/{instanceId}/token/{token}/send-button-actions
 // format for sending interactive button messages with action types (URL, call, copy)
 type SendButtonActionsRequest struct {
-	Phone            string         `json:"phone"`            // Required: recipient phone number
-	Message          string         `json:"message"`          // Required: body text
-	Buttons          []ActionButton `json:"buttons"`          // Required: 1-3 action buttons
-	Title            string         `json:"title"`            // Optional: header text (max 60 chars)
-	Footer           string         `json:"footer"`           // Optional: footer text (max 60 chars)
-	Image            string         `json:"image"`            // Optional: image URL or base64
-	Video            string         `json:"video"`            // Optional: video URL or base64
-	Document         string         `json:"document"`         // Optional: document URL or base64
-	DocumentFilename string         `json:"documentFilename"` // Optional: filename for document
-	MessageID        string         `json:"messageId"`        // Optional: reply to message ID
-	DelayMessage     *int           `json:"delayMessage"`     // Optional: delay in seconds (1-15)
-	DelayTyping      *int           `json:"delayTyping"`      // Optional: typing delay in seconds (1-15)
+	Phone            string         `json:"phone"`                  // Required: recipient phone number
+	Message          string         `json:"message"`                // Required: body text
+	Buttons          []ActionButton `json:"buttons"`                // Required: 1-3 action buttons
+	Title            string         `json:"title"`                  // Optional: header text (max 60 chars)
+	Footer           string         `json:"footer"`                 // Optional: footer text (max 60 chars)
+	Image            string         `json:"image"`                  // Optional: image URL or base64
+	Video            string         `json:"video"`                  // Optional: video URL or base64
+	Document         string         `json:"document"`               // Optional: document URL or base64
+	DocumentFilename string         `json:"documentFilename"`       // Optional: filename for document
+	MessageID        string         `json:"messageId"`              // Optional: reply to message ID
+	DelayMessage     *int           `json:"delayMessage"`           // Optional: delay in seconds
+	ScheduledFor     *string        `json:"scheduledFor,omitempty"` // ISO 8601 timestamp for scheduled delivery (overrides delayMessage)
+	DelayTyping      *int           `json:"delayTyping"`            // Optional: typing delay in seconds (1-15)
 }
 
 // SendButtonListRequest represents the request body for POST /instances/{instanceId}/token/{token}/send-button-list
 // format for sending simple reply button messages
 type SendButtonListRequest struct {
-	Phone        string   `json:"phone"`        // Required: recipient phone number
-	Message      string   `json:"message"`      // Required: body text
-	Buttons      []Button `json:"buttons"`      // Required: 1-3 reply buttons
-	Title        string   `json:"title"`        // Optional: header text (max 60 chars)
-	Footer       string   `json:"footer"`       // Optional: footer text (max 60 chars)
-	Image        string   `json:"image"`        // Optional: image URL or base64
-	Video        string   `json:"video"`        // Optional: video URL or base64
-	MessageID    string   `json:"messageId"`    // Optional: reply to message ID
-	DelayMessage *int     `json:"delayMessage"` // Optional: delay in seconds (1-15)
-	DelayTyping  *int     `json:"delayTyping"`  // Optional: typing delay in seconds (1-15)
+	Phone        string   `json:"phone"`                  // Required: recipient phone number
+	Message      string   `json:"message"`                // Required: body text
+	Buttons      []Button `json:"buttons"`                // Required: 1-3 reply buttons
+	Title        string   `json:"title"`                  // Optional: header text (max 60 chars)
+	Footer       string   `json:"footer"`                 // Optional: footer text (max 60 chars)
+	Image        string   `json:"image"`                  // Optional: image URL or base64
+	Video        string   `json:"video"`                  // Optional: video URL or base64
+	MessageID    string   `json:"messageId"`              // Optional: reply to message ID
+	DelayMessage *int     `json:"delayMessage"`           // Optional: delay in seconds
+	ScheduledFor *string  `json:"scheduledFor,omitempty"` // ISO 8601 timestamp for scheduled delivery (overrides delayMessage)
+	DelayTyping  *int     `json:"delayTyping"`            // Optional: typing delay in seconds (1-15)
 }
 
 // SendOptionListRequest represents the request body for POST /instances/{instanceId}/token/{token}/send-option-list
 // format for sending interactive list/menu messages
 type SendOptionListRequest struct {
-	Phone        string    `json:"phone"`        // Required: recipient phone number
-	Message      string    `json:"message"`      // Required: body text (max 4096 chars)
-	ButtonLabel  string    `json:"buttonLabel"`  // Required: menu button text (max 20 chars)
-	Sections     []Section `json:"sections"`     // Required: 1-10 sections with rows
-	Title        string    `json:"title"`        // Optional: header text (max 60 chars)
-	Footer       string    `json:"footer"`       // Optional: footer text (max 60 chars)
-	MessageID    string    `json:"messageId"`    // Optional: reply to message ID
-	DelayMessage *int      `json:"delayMessage"` // Optional: delay in seconds (1-15)
-	DelayTyping  *int      `json:"delayTyping"`  // Optional: typing delay in seconds (1-15)
+	Phone        string    `json:"phone"`                  // Required: recipient phone number
+	Message      string    `json:"message"`                // Required: body text (max 4096 chars)
+	ButtonLabel  string    `json:"buttonLabel"`            // Required: menu button text (max 20 chars)
+	Sections     []Section `json:"sections"`               // Required: 1-10 sections with rows
+	Title        string    `json:"title"`                  // Optional: header text (max 60 chars)
+	Footer       string    `json:"footer"`                 // Optional: footer text (max 60 chars)
+	MessageID    string    `json:"messageId"`              // Optional: reply to message ID
+	DelayMessage *int      `json:"delayMessage"`           // Optional: delay in seconds
+	ScheduledFor *string   `json:"scheduledFor,omitempty"` // ISO 8601 timestamp for scheduled delivery (overrides delayMessage)
+	DelayTyping  *int      `json:"delayTyping"`            // Optional: typing delay in seconds (1-15)
 }
 
 // SendButtonPIXRequest represents the request body for POST /instances/{instanceId}/token/{token}/send-button-pix
@@ -502,21 +516,23 @@ type SendButtonPIXRequest struct {
 	Amount        *float64 `json:"amount,omitempty"`        // Optional: payment amount
 	TransactionID *string  `json:"transactionId,omitempty"` // Optional: transaction ID
 	MessageID     string   `json:"messageId"`               // Optional: reply to message ID
-	DelayMessage  *int     `json:"delayMessage"`            // Optional: delay in seconds (1-15)
+	DelayMessage  *int     `json:"delayMessage"`            // Optional: delay in seconds
+	ScheduledFor  *string  `json:"scheduledFor,omitempty"`  // ISO 8601 timestamp for scheduled delivery (overrides delayMessage)
 	DelayTyping   *int     `json:"delayTyping"`             // Optional: typing delay in seconds (1-15)
 }
 
 // SendButtonOTPRequest represents the request body for POST /instances/{instanceId}/token/{token}/send-button-otp
 // format for sending OTP (one-time password) copy button messages
 type SendButtonOTPRequest struct {
-	Phone        string `json:"phone"`        // Required: recipient phone number
-	Message      string `json:"message"`      // Required: body text containing OTP context
-	Code         string `json:"code"`         // Required: OTP code to copy (max 20 chars)
-	Title        string `json:"title"`        // Optional: header text (max 60 chars)
-	Footer       string `json:"footer"`       // Optional: footer text (max 60 chars)
-	MessageID    string `json:"messageId"`    // Optional: reply to message ID
-	DelayMessage *int   `json:"delayMessage"` // Optional: delay in seconds (1-15)
-	DelayTyping  *int   `json:"delayTyping"`  // Optional: typing delay in seconds (1-15)
+	Phone        string  `json:"phone"`                  // Required: recipient phone number
+	Message      string  `json:"message"`                // Required: body text containing OTP context
+	Code         string  `json:"code"`                   // Required: OTP code to copy (max 20 chars)
+	Title        string  `json:"title"`                  // Optional: header text (max 60 chars)
+	Footer       string  `json:"footer"`                 // Optional: footer text (max 60 chars)
+	MessageID    string  `json:"messageId"`              // Optional: reply to message ID
+	DelayMessage *int    `json:"delayMessage"`           // Optional: delay in seconds
+	ScheduledFor *string `json:"scheduledFor,omitempty"` // ISO 8601 timestamp for scheduled delivery (overrides delayMessage)
+	DelayTyping  *int    `json:"delayTyping"`            // Optional: typing delay in seconds (1-15)
 }
 
 // SendCarouselRequest represents the request body for POST /instances/{instanceId}/token/{token}/send-carousel
@@ -527,7 +543,8 @@ type SendCarouselRequest struct {
 	Cards        []SendCarouselCard `json:"cards"`                  // Required: 1-10 carousel cards
 	CardType     string             `json:"cardType,omitempty"`     // Optional: HSCROLL_CARDS (default) or ALBUM_IMAGE
 	MessageID    string             `json:"messageId,omitempty"`    // Optional: reply to message ID
-	DelayMessage *int               `json:"delayMessage,omitempty"` // Optional: delay in seconds (1-15)
+	DelayMessage *int               `json:"delayMessage,omitempty"` // Optional: delay in seconds
+	ScheduledFor *string            `json:"scheduledFor,omitempty"` // ISO 8601 timestamp for scheduled delivery (overrides delayMessage)
 	DelayTyping  *int               `json:"delayTyping,omitempty"`  // Optional: typing delay in seconds (1-15)
 }
 
@@ -554,7 +571,8 @@ type SendPollRequest struct {
 	Poll           []PollOption `json:"poll"`                     // Required: poll options array with name field (2-12 options)
 	PollMaxOptions *int         `json:"pollMaxOptions,omitempty"` // Optional: 0 for single choice, 1+ for multiple choice (default: 0)
 	MessageID      string       `json:"messageId,omitempty"`      // Optional: reply to message ID
-	DelayMessage   *int         `json:"delayMessage,omitempty"`   // Optional: delay in seconds (1-15)
+	DelayMessage   *int         `json:"delayMessage,omitempty"`   // Optional: delay in seconds
+	ScheduledFor   *string      `json:"scheduledFor,omitempty"`   // ISO 8601 timestamp for scheduled delivery (overrides delayMessage)
 	DelayTyping    *int         `json:"delayTyping,omitempty"`    // Optional: typing delay in seconds (1-15)
 }
 
@@ -582,7 +600,8 @@ type SendEventRequest struct {
 	Phone        string       `json:"phone"`                  // Required: recipient phone number
 	Event        EventPayload `json:"event"`                  // Required: nested event object
 	MessageID    string       `json:"messageId,omitempty"`    // Optional: reply to message ID
-	DelayMessage *int         `json:"delayMessage,omitempty"` // Optional: delay in seconds (1-15)
+	DelayMessage *int         `json:"delayMessage,omitempty"` // Optional: delay in seconds
+	ScheduledFor *string      `json:"scheduledFor,omitempty"` // ISO 8601 timestamp for scheduled delivery (overrides delayMessage)
 	DelayTyping  *int         `json:"delayTyping,omitempty"`  // Optional: typing delay in seconds (1-15)
 }
 
@@ -590,15 +609,16 @@ type SendEventRequest struct {
 // format for sending link with custom preview
 // Example: {"phone": "5544999999999", "message": "Check this out", "linkUrl": "https://example.com", "title": "Title"}
 type SendLinkRequest struct {
-	Phone           string `json:"phone"`                     // Required: recipient phone number
-	Message         string `json:"message,omitempty"`         // Optional: text before the link
-	Image           string `json:"image,omitempty"`           // Optional: preview image URL
-	LinkUrl         string `json:"linkUrl"`                   // Required: URL to share
-	Title           string `json:"title,omitempty"`           // Optional: link title
-	LinkDescription string `json:"linkDescription,omitempty"` // Optional: link description
-	MessageID       string `json:"messageId,omitempty"`       // Optional: reply to message ID
-	DelayMessage    *int   `json:"delayMessage,omitempty"`    // Optional: delay in seconds (1-15)
-	DelayTyping     *int   `json:"delayTyping,omitempty"`     // Optional: typing delay in seconds (1-15)
+	Phone           string  `json:"phone"`                     // Required: recipient phone number
+	Message         string  `json:"message,omitempty"`         // Optional: text before the link
+	Image           string  `json:"image,omitempty"`           // Optional: preview image URL
+	LinkUrl         string  `json:"linkUrl"`                   // Required: URL to share
+	Title           string  `json:"title,omitempty"`           // Optional: link title
+	LinkDescription string  `json:"linkDescription,omitempty"` // Optional: link description
+	MessageID       string  `json:"messageId,omitempty"`       // Optional: reply to message ID
+	DelayMessage    *int    `json:"delayMessage,omitempty"`    // Optional: delay in seconds
+	ScheduledFor    *string `json:"scheduledFor,omitempty"`    // ISO 8601 timestamp for scheduled delivery (overrides delayMessage)
+	DelayTyping     *int    `json:"delayTyping,omitempty"`     // Optional: typing delay in seconds (1-15)
 }
 
 // ModifyChatRequest represents the request body for POST /instances/{instanceId}/token/{token}/modify-chat
@@ -681,11 +701,12 @@ type SendReactionResponse struct {
 
 // ForwardMessageRequest represents the request body for POST /forward-message
 type ForwardMessageRequest struct {
-	Phone        string `json:"phone"`                  // Target phone number or group JID to forward to
-	MessageID    string `json:"messageId"`              // Original message ID to forward
-	SourceChat   string `json:"sourceChat"`             // Source chat JID where the original message is
-	IsGroup      bool   `json:"isGroup"`                // Whether source is a group
-	DelayMessage *int   `json:"delayMessage,omitempty"` // Optional delay in seconds before sending
+	Phone        string  `json:"phone"`                  // Target phone number or group JID to forward to
+	MessageID    string  `json:"messageId"`              // Original message ID to forward
+	SourceChat   string  `json:"sourceChat"`             // Source chat JID where the original message is
+	IsGroup      bool    `json:"isGroup"`                // Whether source is a group
+	DelayMessage *int    `json:"delayMessage,omitempty"` // Optional delay in seconds before sending
+	ScheduledFor *string `json:"scheduledFor,omitempty"` // ISO 8601 timestamp for scheduled delivery (overrides delayMessage)
 }
 
 // ForwardMessageResponse represents the response for forward message operations
@@ -704,6 +725,7 @@ type SendPollVoteRequest struct {
 	PollSender   string   `json:"pollSender"`             // Phone number of who sent the poll (required for groups)
 	Options      []string `json:"options"`                // Selected option names (exact match required)
 	DelayMessage *int     `json:"delayMessage,omitempty"` // Optional delay in seconds
+	ScheduledFor *string  `json:"scheduledFor,omitempty"` // ISO 8601 timestamp for scheduled delivery (overrides delayMessage)
 }
 
 // SendPollVoteResponse represents the response for poll vote operations
@@ -786,16 +808,17 @@ type UpdateProfileDescriptionResponse struct {
 // SendEditEventRequest represents the request body for POST /send-edit-event
 // Used to update an existing event message
 type SendEditEventRequest struct {
-	Phone        string `json:"phone"`                  // Required: chat where the event was sent
-	EventID      string `json:"eventId"`                // Required: original event message ID
-	Name         string `json:"name,omitempty"`         // Optional: updated event name
-	Description  string `json:"description,omitempty"`  // Optional: updated description
-	StartTime    string `json:"startTime,omitempty"`    // Optional: updated start time (ISO 8601)
-	EndTime      string `json:"endTime,omitempty"`      // Optional: updated end time (ISO 8601)
-	Location     string `json:"location,omitempty"`     // Optional: updated location name
-	Canceled     *bool  `json:"canceled,omitempty"`     // Optional: mark event as canceled
-	DelayMessage *int   `json:"delayMessage,omitempty"` // Optional: delay in seconds (1-15)
-	DelayTyping  *int   `json:"delayTyping,omitempty"`  // Optional: typing delay in seconds (1-15)
+	Phone        string  `json:"phone"`                  // Required: chat where the event was sent
+	EventID      string  `json:"eventId"`                // Required: original event message ID
+	Name         string  `json:"name,omitempty"`         // Optional: updated event name
+	Description  string  `json:"description,omitempty"`  // Optional: updated description
+	StartTime    string  `json:"startTime,omitempty"`    // Optional: updated start time (ISO 8601)
+	EndTime      string  `json:"endTime,omitempty"`      // Optional: updated end time (ISO 8601)
+	Location     string  `json:"location,omitempty"`     // Optional: updated location name
+	Canceled     *bool   `json:"canceled,omitempty"`     // Optional: mark event as canceled
+	DelayMessage *int    `json:"delayMessage,omitempty"` // Optional: delay in seconds
+	ScheduledFor *string `json:"scheduledFor,omitempty"` // ISO 8601 timestamp for scheduled delivery (overrides delayMessage)
+	DelayTyping  *int    `json:"delayTyping,omitempty"`  // Optional: typing delay in seconds (1-15)
 }
 
 // SendEditEventResponse represents the response for send-edit-event
@@ -809,12 +832,13 @@ type SendEditEventResponse struct {
 // SendEventResponseRequest represents the request body for POST /send-event-response
 // Used to respond to an event invitation (going, not_going, maybe)
 type SendEventResponseRequest struct {
-	Phone           string `json:"phone"`                     // Required: chat where the event was sent
-	EventID         string `json:"eventId"`                   // Required: event message ID to respond to
-	Response        string `json:"response"`                  // Required: "going", "not_going", or "maybe"
-	ExtraGuestCount *int   `json:"extraGuestCount,omitempty"` // Optional: number of extra guests
-	DelayMessage    *int   `json:"delayMessage,omitempty"`    // Optional: delay in seconds (1-15)
-	DelayTyping     *int   `json:"delayTyping,omitempty"`     // Optional: typing delay in seconds (1-15)
+	Phone           string  `json:"phone"`                     // Required: chat where the event was sent
+	EventID         string  `json:"eventId"`                   // Required: event message ID to respond to
+	Response        string  `json:"response"`                  // Required: "going", "not_going", or "maybe"
+	ExtraGuestCount *int    `json:"extraGuestCount,omitempty"` // Optional: number of extra guests
+	DelayMessage    *int    `json:"delayMessage,omitempty"`    // Optional: delay in seconds
+	ScheduledFor    *string `json:"scheduledFor,omitempty"`    // ISO 8601 timestamp for scheduled delivery (overrides delayMessage)
+	DelayTyping     *int    `json:"delayTyping,omitempty"`     // Optional: typing delay in seconds (1-15)
 }
 
 // SendEventResponseResponse represents the response for send-event-response
@@ -832,37 +856,41 @@ type SendEventResponseResponse struct {
 // SendTextStatusRequest represents the request body for POST /send-text-status
 // Sends a text message to WhatsApp Status/Stories (broadcasts to all viewers)
 type SendTextStatusRequest struct {
-	Text            string `json:"text"`                      // Required: text content for status
-	BackgroundColor string `json:"backgroundColor,omitempty"` // Optional: hex color #RRGGBB or ARGB 0xAARRGGBB
-	Font            *int   `json:"font,omitempty"`            // Optional: font style 0-5
-	MessageID       string `json:"messageId,omitempty"`       // Optional: custom message ID for tracking
-	DelayMessage    *int   `json:"delayMessage,omitempty"`    // Optional: delay in seconds (1-15) before sending
+	Text            string  `json:"text"`                      // Required: text content for status
+	BackgroundColor string  `json:"backgroundColor,omitempty"` // Optional: hex color #RRGGBB or ARGB 0xAARRGGBB
+	Font            *int    `json:"font,omitempty"`            // Optional: font style 0-5
+	MessageID       string  `json:"messageId,omitempty"`       // Optional: custom message ID for tracking
+	DelayMessage    *int    `json:"delayMessage,omitempty"`    // Optional: delay in seconds before sending
+	ScheduledFor    *string `json:"scheduledFor,omitempty"`    // ISO 8601 timestamp for scheduled delivery (overrides delayMessage)
 }
 
 // SendImageStatusRequest represents the request body for POST /send-image-status
 // Sends an image to WhatsApp Status/Stories (broadcasts to all viewers)
 type SendImageStatusRequest struct {
-	Image        string `json:"image"`                  // Required: image URL or base64 data (data:image/png;base64,...)
-	Caption      string `json:"caption,omitempty"`      // Optional: image caption
-	MessageID    string `json:"messageId,omitempty"`    // Optional: custom message ID for tracking
-	DelayMessage *int   `json:"delayMessage,omitempty"` // Optional: delay in seconds (1-15) before sending
+	Image        string  `json:"image"`                  // Required: image URL or base64 data (data:image/png;base64,...)
+	Caption      string  `json:"caption,omitempty"`      // Optional: image caption
+	MessageID    string  `json:"messageId,omitempty"`    // Optional: custom message ID for tracking
+	DelayMessage *int    `json:"delayMessage,omitempty"` // Optional: delay in seconds before sending
+	ScheduledFor *string `json:"scheduledFor,omitempty"` // ISO 8601 timestamp for scheduled delivery (overrides delayMessage)
 }
 
 // SendAudioStatusRequest represents the request body for POST /send-audio-status
 // Sends an audio/voice note to WhatsApp Status/Stories with waveform visualization
 type SendAudioStatusRequest struct {
-	Audio        string `json:"audio"`                  // Required: audio URL or base64 data (data:audio/ogg;base64,...)
-	MessageID    string `json:"messageId,omitempty"`    // Optional: custom message ID for tracking
-	DelayMessage *int   `json:"delayMessage,omitempty"` // Optional: delay in seconds (1-15) before sending
+	Audio        string  `json:"audio"`                  // Required: audio URL or base64 data (data:audio/ogg;base64,...)
+	MessageID    string  `json:"messageId,omitempty"`    // Optional: custom message ID for tracking
+	DelayMessage *int    `json:"delayMessage,omitempty"` // Optional: delay in seconds before sending
+	ScheduledFor *string `json:"scheduledFor,omitempty"` // ISO 8601 timestamp for scheduled delivery (overrides delayMessage)
 }
 
 // SendVideoStatusRequest represents the request body for POST /send-video-status
 // Sends a video to WhatsApp Status/Stories (broadcasts to all viewers)
 type SendVideoStatusRequest struct {
-	Video        string `json:"video"`                  // Required: video URL or base64 data (data:video/mp4;base64,...)
-	Caption      string `json:"caption,omitempty"`      // Optional: video caption
-	MessageID    string `json:"messageId,omitempty"`    // Optional: custom message ID for tracking
-	DelayMessage *int   `json:"delayMessage,omitempty"` // Optional: delay in seconds (1-15) before sending
+	Video        string  `json:"video"`                  // Required: video URL or base64 data (data:video/mp4;base64,...)
+	Caption      string  `json:"caption,omitempty"`      // Optional: video caption
+	MessageID    string  `json:"messageId,omitempty"`    // Optional: custom message ID for tracking
+	DelayMessage *int    `json:"delayMessage,omitempty"` // Optional: delay in seconds before sending
+	ScheduledFor *string `json:"scheduledFor,omitempty"` // ISO 8601 timestamp for scheduled delivery (overrides delayMessage)
 }
 
 // SendMessageResponse represents the response after enqueuing a message
@@ -978,6 +1006,44 @@ func (h *MessageHandler) toWhatsAppStatus(status *instances.Status) *WhatsAppSta
 	return whatsAppStatus
 }
 
+// resolveDelay converts delayMessage (seconds) and/or scheduledFor (ISO 8601) to milliseconds.
+// If both are provided, scheduledFor takes priority.
+// If neither is provided, returns a random delay of 1-3 seconds.
+func resolveDelay(delayMessage *int, scheduledFor *string) int64 {
+	var delay int64
+	if delayMessage != nil {
+		seconds := *delayMessage
+		if seconds < 1 {
+			seconds = 1
+		}
+		delay = int64(seconds) * 1000
+	} else {
+		delay = int64(1000 + (rand.Int63() % 2000)) // default 1-3s
+	}
+	if scheduledFor != nil && *scheduledFor != "" {
+		if t, err := time.Parse(time.RFC3339, *scheduledFor); err == nil && t.After(time.Now()) {
+			delay = time.Until(t).Milliseconds()
+		}
+	}
+	return delay
+}
+
+// resolveTypingDelay converts delayTyping (seconds) to milliseconds with a 15s cap.
+// Typing indicator >15s makes no sense, so the cap is preserved.
+func resolveTypingDelay(delayTyping *int) int64 {
+	if delayTyping == nil {
+		return 0
+	}
+	seconds := *delayTyping
+	if seconds < 1 {
+		seconds = 1
+	}
+	if seconds > 15 {
+		seconds = 15
+	}
+	return int64(seconds) * 1000
+}
+
 // QueueMessageResponse represents a message in the queue
 type QueueMessageResponse struct {
 	ID           string `json:"_id"`               // Message ID (same as ZaapId for Zé da API compat)
@@ -1058,35 +1124,8 @@ func (h *MessageHandler) sendText(w http.ResponseWriter, r *http.Request) {
 	// Convert delays from seconds to milliseconds with Zé da API defaults
 	// Zé da API: delayMessage range 1-15 seconds, default 1-3 seconds random
 	// Zé da API: delayTyping range 1-15 seconds, default 0
-	delayMessage := int64(0)
-	if req.DelayMessage != nil {
-		seconds := *req.DelayMessage
-		// Validate range (1-15 seconds)
-		if seconds < 1 {
-			seconds = 1
-		}
-		if seconds > 15 {
-			seconds = 15
-		}
-		delayMessage = int64(seconds) * 1000 // Convert to milliseconds
-	} else {
-		// Default: random 1-3 seconds
-		delayMessage = int64(1000 + (rand.Int63() % 2000)) // 1000-3000ms
-	}
-
-	delayTyping := int64(0)
-	if req.DelayTyping != nil {
-		seconds := *req.DelayTyping
-		// Validate range (1-15 seconds)
-		if seconds < 1 {
-			seconds = 1
-		}
-		if seconds > 15 {
-			seconds = 15
-		}
-		delayTyping = int64(seconds) * 1000 // Convert to milliseconds
-	}
-	// Default is 0 (no typing indicator)
+	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Create message args
 	args := queue.SendMessageArgs{
@@ -1185,35 +1224,8 @@ func (h *MessageHandler) sendImage(w http.ResponseWriter, r *http.Request) {
 
 	// Convert delays from seconds to milliseconds with Zé da API defaults
 	// Zé da API: delayMessage range 1-15 seconds, default 1-3 seconds random
-	delayMessage := int64(0)
-	if req.DelayMessage != nil {
-		seconds := *req.DelayMessage
-		// Validate range (1-15 seconds)
-		if seconds < 1 {
-			seconds = 1
-		}
-		if seconds > 15 {
-			seconds = 15
-		}
-		delayMessage = int64(seconds) * 1000 // Convert to milliseconds
-	} else {
-		// Default: random 1-3 seconds
-		delayMessage = int64(1000 + (rand.Int63() % 2000)) // 1000-3000ms
-	}
-
-	// Process delayTyping (typing indicator)
-	delayTyping := int64(0)
-	if req.DelayTyping != nil {
-		seconds := *req.DelayTyping
-		// Validate range (1-15 seconds)
-		if seconds < 1 {
-			seconds = 1
-		}
-		if seconds > 15 {
-			seconds = 15
-		}
-		delayTyping = int64(seconds) * 1000 // Convert to milliseconds
-	}
+	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Prepare caption (optional)
 	caption := strings.TrimSpace(req.Caption)
@@ -1325,31 +1337,8 @@ func (h *MessageHandler) sendSticker(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Convert delays from seconds to milliseconds with Zé da API defaults
-	delayMessage := int64(0)
-	if req.DelayMessage != nil {
-		seconds := *req.DelayMessage
-		if seconds < 1 {
-			seconds = 1
-		}
-		if seconds > 15 {
-			seconds = 15
-		}
-		delayMessage = int64(seconds) * 1000
-	} else {
-		delayMessage = int64(1000 + (rand.Int63() % 2000)) // Default: 1-3 sec
-	}
-
-	delayTyping := int64(0)
-	if req.DelayTyping != nil {
-		seconds := *req.DelayTyping
-		if seconds < 1 {
-			seconds = 1
-		}
-		if seconds > 15 {
-			seconds = 15
-		}
-		delayTyping = int64(seconds) * 1000
-	}
+	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Create message args for sticker (uses dedicated StickerProcessor with WebP conversion)
 	args := queue.SendMessageArgs{
@@ -1450,32 +1439,8 @@ func (h *MessageHandler) sendAudio(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Convert delays from seconds to milliseconds
-	delayMessage := int64(0)
-	if req.DelayMessage != nil {
-		seconds := *req.DelayMessage
-		if seconds < 1 {
-			seconds = 1
-		}
-		if seconds > 15 {
-			seconds = 15
-		}
-		delayMessage = int64(seconds) * 1000
-	} else {
-		delayMessage = int64(1000 + (rand.Int63() % 2000)) // Default: 1-3 sec
-	}
-
-	// DelayTyping for audio = "recording audio" indicator
-	delayTyping := int64(0)
-	if req.DelayTyping != nil {
-		seconds := *req.DelayTyping
-		if seconds < 1 {
-			seconds = 1
-		}
-		if seconds > 15 {
-			seconds = 15
-		}
-		delayTyping = int64(seconds) * 1000
-	}
+	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Create message args
 	args := queue.SendMessageArgs{
@@ -1568,31 +1533,8 @@ func (h *MessageHandler) sendVideo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Convert delays
-	delayMessage := int64(0)
-	if req.DelayMessage != nil {
-		seconds := *req.DelayMessage
-		if seconds < 1 {
-			seconds = 1
-		}
-		if seconds > 15 {
-			seconds = 15
-		}
-		delayMessage = int64(seconds) * 1000
-	} else {
-		delayMessage = int64(1000 + (rand.Int63() % 2000))
-	}
-
-	delayTyping := int64(0)
-	if req.DelayTyping != nil {
-		seconds := *req.DelayTyping
-		if seconds < 1 {
-			seconds = 1
-		}
-		if seconds > 15 {
-			seconds = 15
-		}
-		delayTyping = int64(seconds) * 1000
-	}
+	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Prepare caption
 	caption := strings.TrimSpace(req.Caption)
@@ -1705,31 +1647,8 @@ func (h *MessageHandler) sendPTV(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Convert delays from seconds to milliseconds with Zé da API defaults
-	delayMessage := int64(0)
-	if req.DelayMessage != nil {
-		seconds := *req.DelayMessage
-		if seconds < 1 {
-			seconds = 1
-		}
-		if seconds > 15 {
-			seconds = 15
-		}
-		delayMessage = int64(seconds) * 1000
-	} else {
-		delayMessage = int64(1000 + (rand.Int63() % 2000)) // Default: 1-3 sec
-	}
-
-	delayTyping := int64(0)
-	if req.DelayTyping != nil {
-		seconds := *req.DelayTyping
-		if seconds < 1 {
-			seconds = 1
-		}
-		if seconds > 15 {
-			seconds = 15
-		}
-		delayTyping = int64(seconds) * 1000
-	}
+	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Prepare caption
 	caption := strings.TrimSpace(req.Caption)
@@ -1840,31 +1759,8 @@ func (h *MessageHandler) sendGif(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Convert delays from seconds to milliseconds with Zé da API defaults
-	delayMessage := int64(0)
-	if req.DelayMessage != nil {
-		seconds := *req.DelayMessage
-		if seconds < 1 {
-			seconds = 1
-		}
-		if seconds > 15 {
-			seconds = 15
-		}
-		delayMessage = int64(seconds) * 1000
-	} else {
-		delayMessage = int64(1000 + (rand.Int63() % 2000)) // Default: 1-3 sec
-	}
-
-	delayTyping := int64(0)
-	if req.DelayTyping != nil {
-		seconds := *req.DelayTyping
-		if seconds < 1 {
-			seconds = 1
-		}
-		if seconds > 15 {
-			seconds = 15
-		}
-		delayTyping = int64(seconds) * 1000
-	}
+	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Handle optional caption
 	var captionPtr *string
@@ -1974,31 +1870,8 @@ func (h *MessageHandler) sendDocument(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Convert delays
-	delayMessage := int64(0)
-	if req.DelayMessage != nil {
-		seconds := *req.DelayMessage
-		if seconds < 1 {
-			seconds = 1
-		}
-		if seconds > 15 {
-			seconds = 15
-		}
-		delayMessage = int64(seconds) * 1000
-	} else {
-		delayMessage = int64(1000 + (rand.Int63() % 2000))
-	}
-
-	delayTyping := int64(0)
-	if req.DelayTyping != nil {
-		seconds := *req.DelayTyping
-		if seconds < 1 {
-			seconds = 1
-		}
-		if seconds > 15 {
-			seconds = 15
-		}
-		delayTyping = int64(seconds) * 1000
-	}
+	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Prepare caption and filename
 	caption := strings.TrimSpace(req.Caption)
@@ -2089,31 +1962,8 @@ func (h *MessageHandler) sendLocation(w http.ResponseWriter, r *http.Request) {
 	// Latitude: -90 to 90, Longitude: -180 to 180
 
 	// Convert delays
-	delayMessage := int64(0)
-	if req.DelayMessage != nil {
-		seconds := *req.DelayMessage
-		if seconds < 1 {
-			seconds = 1
-		}
-		if seconds > 15 {
-			seconds = 15
-		}
-		delayMessage = int64(seconds) * 1000
-	} else {
-		delayMessage = int64(1000 + (rand.Int63() % 2000))
-	}
-
-	delayTyping := int64(0)
-	if req.DelayTyping != nil {
-		seconds := *req.DelayTyping
-		if seconds < 1 {
-			seconds = 1
-		}
-		if seconds > 15 {
-			seconds = 15
-		}
-		delayTyping = int64(seconds) * 1000
-	}
+	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Prepare optional fields
 	name := strings.TrimSpace(req.Name)
@@ -2219,31 +2069,8 @@ func (h *MessageHandler) sendContact(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Convert delays
-	delayMessage := int64(0)
-	if req.DelayMessage != nil {
-		seconds := *req.DelayMessage
-		if seconds < 1 {
-			seconds = 1
-		}
-		if seconds > 15 {
-			seconds = 15
-		}
-		delayMessage = int64(seconds) * 1000
-	} else {
-		delayMessage = int64(1000 + (rand.Int63() % 2000))
-	}
-
-	delayTyping := int64(0)
-	if req.DelayTyping != nil {
-		seconds := *req.DelayTyping
-		if seconds < 1 {
-			seconds = 1
-		}
-		if seconds > 15 {
-			seconds = 15
-		}
-		delayTyping = int64(seconds) * 1000
-	}
+	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Build ContactMessage with ALL fields (Zé da API + extended optional fields)
 	contactMsg := &queue.ContactMessage{
@@ -3077,31 +2904,8 @@ func (h *MessageHandler) sendContacts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Convert delays
-	delayMessage := int64(0)
-	if req.DelayMessage != nil {
-		seconds := *req.DelayMessage
-		if seconds < 1 {
-			seconds = 1
-		}
-		if seconds > 15 {
-			seconds = 15
-		}
-		delayMessage = int64(seconds) * 1000
-	} else {
-		delayMessage = int64(1000 + (rand.Int63() % 2000))
-	}
-
-	delayTyping := int64(0)
-	if req.DelayTyping != nil {
-		seconds := *req.DelayTyping
-		if seconds < 1 {
-			seconds = 1
-		}
-		if seconds > 15 {
-			seconds = 15
-		}
-		delayTyping = int64(seconds) * 1000
-	}
+	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Build array of ContactMessage with ALL fields for each contact
 	// This will be sent in ONE WhatsApp message using ContactsArrayMessage
@@ -4028,9 +3832,6 @@ func (h *MessageHandler) sendPoll(w http.ResponseWriter, r *http.Request) {
 		if seconds < 1 {
 			seconds = 1
 		}
-		if seconds > 15 {
-			seconds = 15
-		}
 		delayMessage = int64(seconds) * 1000
 	} else {
 		// Default: random 1-3 seconds
@@ -4042,9 +3843,6 @@ func (h *MessageHandler) sendPoll(w http.ResponseWriter, r *http.Request) {
 		seconds := *req.DelayTyping
 		if seconds < 1 {
 			seconds = 1
-		}
-		if seconds > 15 {
-			seconds = 15
 		}
 		delayTyping = int64(seconds) * 1000
 	}
@@ -4178,9 +3976,6 @@ func (h *MessageHandler) sendEvent(w http.ResponseWriter, r *http.Request) {
 		if seconds < 1 {
 			seconds = 1
 		}
-		if seconds > 15 {
-			seconds = 15
-		}
 		delayMessage = int64(seconds) * 1000
 	} else {
 		// Default: random 1-3 seconds
@@ -4192,9 +3987,6 @@ func (h *MessageHandler) sendEvent(w http.ResponseWriter, r *http.Request) {
 		seconds := *req.DelayTyping
 		if seconds < 1 {
 			seconds = 1
-		}
-		if seconds > 15 {
-			seconds = 15
 		}
 		delayTyping = int64(seconds) * 1000
 	}
@@ -4309,9 +4101,6 @@ func (h *MessageHandler) sendLink(w http.ResponseWriter, r *http.Request) {
 		if seconds < 1 {
 			seconds = 1
 		}
-		if seconds > 15 {
-			seconds = 15
-		}
 		delayMessage = int64(seconds) * 1000
 	} else {
 		// Default: random 1-3 seconds
@@ -4323,9 +4112,6 @@ func (h *MessageHandler) sendLink(w http.ResponseWriter, r *http.Request) {
 		seconds := *req.DelayTyping
 		if seconds < 1 {
 			seconds = 1
-		}
-		if seconds > 15 {
-			seconds = 15
 		}
 		delayTyping = int64(seconds) * 1000
 	}
@@ -5122,9 +4908,6 @@ func (h *MessageHandler) forwardMessage(w http.ResponseWriter, r *http.Request) 
 	// Apply delay if specified
 	if req.DelayMessage != nil && *req.DelayMessage > 0 {
 		delay := *req.DelayMessage
-		if delay > 15 {
-			delay = 15
-		}
 		time.Sleep(time.Duration(delay) * time.Second)
 	}
 
@@ -5260,9 +5043,6 @@ func (h *MessageHandler) sendPollVote(w http.ResponseWriter, r *http.Request) {
 	// Apply delay if specified
 	if req.DelayMessage != nil && *req.DelayMessage > 0 {
 		delay := *req.DelayMessage
-		if delay > 15 {
-			delay = 15
-		}
 		time.Sleep(time.Duration(delay) * time.Second)
 	}
 
@@ -6076,9 +5856,6 @@ func (h *MessageHandler) sendEditEvent(w http.ResponseWriter, r *http.Request) {
 	// Apply delay if specified
 	if req.DelayMessage != nil && *req.DelayMessage > 0 {
 		delay := *req.DelayMessage
-		if delay > 15 {
-			delay = 15
-		}
 		time.Sleep(time.Duration(delay) * time.Second)
 	}
 
@@ -6214,9 +5991,6 @@ func (h *MessageHandler) sendEventResponse(w http.ResponseWriter, r *http.Reques
 	// Apply delay if specified
 	if req.DelayMessage != nil && *req.DelayMessage > 0 {
 		delay := *req.DelayMessage
-		if delay > 15 {
-			delay = 15
-		}
 		time.Sleep(time.Duration(delay) * time.Second)
 	}
 
@@ -6311,9 +6085,6 @@ func (h *MessageHandler) sendTextStatus(w http.ResponseWriter, r *http.Request) 
 		seconds := *req.DelayMessage
 		if seconds < 1 {
 			seconds = 1
-		}
-		if seconds > 15 {
-			seconds = 15
 		}
 		delayMessage = int64(seconds) * 1000
 	} else {
@@ -6411,9 +6182,6 @@ func (h *MessageHandler) sendImageStatus(w http.ResponseWriter, r *http.Request)
 		if seconds < 1 {
 			seconds = 1
 		}
-		if seconds > 15 {
-			seconds = 15
-		}
 		delayMessage = int64(seconds) * 1000
 	} else {
 		delayMessage = int64(1000 + (rand.Int63() % 2000))
@@ -6494,9 +6262,6 @@ func (h *MessageHandler) sendAudioStatus(w http.ResponseWriter, r *http.Request)
 		if seconds < 1 {
 			seconds = 1
 		}
-		if seconds > 15 {
-			seconds = 15
-		}
 		delayMessage = int64(seconds) * 1000
 	} else {
 		delayMessage = int64(1000 + (rand.Int63() % 2000))
@@ -6572,9 +6337,6 @@ func (h *MessageHandler) sendVideoStatus(w http.ResponseWriter, r *http.Request)
 		seconds := *req.DelayMessage
 		if seconds < 1 {
 			seconds = 1
-		}
-		if seconds > 15 {
-			seconds = 15
 		}
 		delayMessage = int64(seconds) * 1000
 	} else {
