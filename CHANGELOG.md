@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.4.0](https://github.com/Setup-Automatizado/zedaapi/compare/v3.3.1...v3.4.0) (2026-02-17)
+
+### Features
+
+* **http:** add instance-aware routing middleware for multi-replica deploys ([db7c096](https://github.com/Setup-Automatizado/zedaapi/commit/db7c096203ca7a0ef76a4c87037613fbc84e890a))
+* **messages:** pre-generate WhatsApp message IDs for end-to-end correlation ([a2a84df](https://github.com/Setup-Automatizado/zedaapi/commit/a2a84df4d3a486fbe0844977d449d7dea6f961c9))
+
+### Bug Fixes
+
+* **nats:** classify permanent vs transient publish errors in event writer ([6a89d08](https://github.com/Setup-Automatizado/zedaapi/commit/6a89d08c11fdb0c95bb534a4728a482952f18d0c))
+* **nats:** use plain NAK for multi-replica client failover ([7a18104](https://github.com/Setup-Automatizado/zedaapi/commit/7a181043a4dbef0453d78a00aebfefaebd05260d))
+
+### Code Refactoring
+
+* **nats:** increase max_payload to 64MB and improve consumer backoff ([0fe799d](https://github.com/Setup-Automatizado/zedaapi/commit/0fe799d03c1c895cb03b89504aae295cc7a61668))
+* **registry:** move NATS worker cleanup to instance reset ([fc2c2f3](https://github.com/Setup-Automatizado/zedaapi/commit/fc2c2f38305d39430245d5e195de745d381cb2ff))
+
 ## [3.3.1](https://github.com/Setup-Automatizado/zedaapi/compare/v3.3.0...v3.3.1) (2026-02-17)
 
 ### Bug Fixes
