@@ -157,11 +157,6 @@ func (p *EventProcessor) transformEvent(ctx context.Context, event *persistence.
 		return nil, fmt.Errorf("decode internal event: %w", err)
 	}
 
-	// TODO: Temporary debug logging for schema verification - remove after validation
-	if debugPayload, _ := json.Marshal(internalEvent); len(debugPayload) > 0 {
-		logger.Debug("debug internal event payload (temporary)", slog.String("payload", string(debugPayload)))
-	}
-
 	if event.MediaURL != nil && *event.MediaURL != "" {
 		if internalEvent.Metadata == nil {
 			internalEvent.Metadata = make(map[string]string)
@@ -183,9 +178,6 @@ func (p *EventProcessor) transformEvent(ctx context.Context, event *persistence.
 	if err != nil {
 		return nil, err
 	}
-
-	// TODO: Temporary debug logging for schema verification - remove after validation
-	logger.Debug("debug zapi payload (temporary)", slog.String("payload", string(payload)))
 
 	logger.Debug("event transformed successfully",
 		slog.Int("payload_size", len(payload)))

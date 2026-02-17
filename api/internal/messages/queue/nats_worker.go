@@ -175,16 +175,20 @@ func (w *NATSWorker) handleMessage(ctx context.Context, msg jetstream.Msg) {
 	// Get WhatsApp client
 	client, ok := w.clientRegistry.GetClient(w.instanceID.String())
 	if !ok {
-		w.log.Warn("whatsapp client not found, NAK with disconnect delay", logFields...)
-		if err := msg.NakWithDelay(w.cfg.DisconnectRetryDelay); err != nil {
-			w.log.Error("failed to nak disconnected message", slog.String("error", err.Error()))
+		// Client not found in this replica's registry. In multi-replica deployments,
+		// the client may be on another replica. Use a short NAK (no explicit delay)
+		// so NATS BackOff handles escalation: 1s → 5s → 30s → 2m → 5m.
+		// This avoids the 30s DisconnectRetryDelay blocking messages on the wrong replica.
+		w.log.Debug("whatsapp client not in local registry, NAK for redelivery", logFields...)
+		if err := msg.Nak(); err != nil {
+			w.log.Error("failed to nak message for redelivery", slog.String("error", err.Error()))
 		}
 		return
 	}
 
 	// Check if client is connected
 	if !client.IsConnected() {
-		w.log.Warn("whatsapp not connected, NAK with disconnect delay", logFields...)
+		w.log.Warn("whatsapp client disconnected, NAK with disconnect delay", logFields...)
 		if err := msg.NakWithDelay(w.cfg.DisconnectRetryDelay); err != nil {
 			w.log.Error("failed to nak disconnected message", slog.String("error", err.Error()))
 		}

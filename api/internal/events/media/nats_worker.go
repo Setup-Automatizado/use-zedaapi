@@ -138,7 +138,7 @@ func (w *NATSMediaWorker) handleMessage(ctx context.Context, msg jetstream.Msg) 
 	}
 
 	// DEBUG: Log full MediaTask details
-	w.log.Info("media task received - debug",
+	w.log.Debug("media task received - debug",
 		slog.String("event_id", task.EventID.String()),
 		slog.String("instance_id", task.InstanceID.String()),
 		slog.String("media_type", task.MediaType),
@@ -153,8 +153,8 @@ func (w *NATSMediaWorker) handleMessage(ctx context.Context, msg jetstream.Msg) 
 	// Get WhatsApp client for downloading
 	client, ok := w.clientProvider.GetClient(w.instanceID)
 	if !ok || client == nil {
-		w.log.Warn("whatsapp client not available for media download, NAK with delay", logFields...)
-		if err := msg.NakWithDelay(30 * time.Second); err != nil {
+		w.log.Debug("whatsapp client not available for media download, NAK for redelivery", logFields...)
+		if err := msg.Nak(); err != nil {
 			w.log.Error("failed to nak media task", slog.String("error", err.Error()))
 		}
 		return
@@ -200,7 +200,7 @@ func (w *NATSMediaWorker) handleMessage(ctx context.Context, msg jetstream.Msg) 
 		if urlable, ok2 := protoMsg.(interface{ GetURL() string }); ok2 {
 			protoURL = urlable.GetURL()
 		}
-		w.log.Info("reconstructed proto message - debug",
+		w.log.Debug("reconstructed proto message - debug",
 			slog.String("event_id", task.EventID.String()),
 			slog.String("proto_type", fmt.Sprintf("%T", protoMsg)),
 			slog.String("direct_path", downloadable.GetDirectPath()),
