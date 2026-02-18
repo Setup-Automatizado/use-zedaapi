@@ -5,6 +5,7 @@ go 1.25.0
 toolchain go1.26.0
 
 require (
+	github.com/MarceloPetrucio/go-scalar-api-reference v0.0.0-20240521013641-ce5d2efe0e06
 	github.com/PuerkitoBio/goquery v1.10.3
 	github.com/avast/retry-go/v4 v4.6.1
 	github.com/aws/aws-sdk-go-v2 v1.39.2
