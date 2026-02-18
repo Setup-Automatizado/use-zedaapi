@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.4.1](https://github.com/Setup-Automatizado/zedaapi/compare/v3.4.0...v3.4.1) (2026-02-18)
+
+### Code Refactoring
+
+* **branding:** rename FunnelChat references to ZedaAPI ([1eca4a1](https://github.com/Setup-Automatizado/zedaapi/commit/1eca4a1f6e02337c73cd588b4c00885d603095c2))
+
 ## [3.4.0](https://github.com/Setup-Automatizado/zedaapi/compare/v3.3.1...v3.4.0) (2026-02-17)
 
 ### Features
