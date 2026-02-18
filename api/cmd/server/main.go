@@ -444,7 +444,7 @@ func main() {
 	}
 
 	logger := logging.New(cfg.Log.Level)
-	logger.Info("starting FunnelChat API", slog.String("env", cfg.AppEnv))
+	logger.Info("starting Zé da API", slog.String("env", cfg.AppEnv))
 	if cfg.Document.MuPDFVersion != "" {
 		logger.Debug("configured MuPDF runtime",
 			slog.String("version", cfg.Document.MuPDFVersion))
@@ -659,7 +659,7 @@ func main() {
 		statusCacheRepo := statuscache.NewRedisRepository(
 			redisClient,
 			cfg.StatusCache.TTL,
-			"funnelchat",
+			"zedaapi",
 		)
 
 		// Create webhook dispatcher for flush operations
