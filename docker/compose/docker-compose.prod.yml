@@ -65,7 +65,7 @@ services:
       - S3_PUBLIC_BASE_URL=https://s3.zedaapi.com
       - S3_URL_EXPIRATION=6d
       - S3_MEDIA_RETENTION=720h
-      - S3_ACL=public-read
+      - S3_ACL=
 
       # =================== MEDIA LOCAL STORAGE (fallback) ===================
       - MEDIA_LOCAL_STORAGE_PATH=/var/zedaapi/media

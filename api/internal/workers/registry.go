@@ -175,12 +175,12 @@ func (r *Registry) beat(ctx context.Context) {
 func (r *Registry) upsertWorker(ctx context.Context) error {
 	_, err := r.pool.Exec(ctx, `
         INSERT INTO worker_sessions (worker_id, hostname, app_env, last_seen, metadata)
-        VALUES ($1, $2, $3, NOW(), jsonb_build_object('advertise_addr', $4))
+        VALUES ($1, $2, $3, NOW(), jsonb_build_object('advertise_addr', $4::text))
         ON CONFLICT (worker_id) DO UPDATE
         SET hostname = EXCLUDED.hostname,
             app_env = EXCLUDED.app_env,
             last_seen = EXCLUDED.last_seen,
-            metadata = jsonb_set(worker_sessions.metadata, '{advertise_addr}', to_jsonb($4::text))
+            metadata = EXCLUDED.metadata
     `, r.workerID, r.hostname, r.appEnv, r.advertiseAddr)
 	return err
 }

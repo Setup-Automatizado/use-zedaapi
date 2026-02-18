@@ -103,6 +103,9 @@ func NewRoutingMiddleware(
 		},
 		done: make(chan struct{}),
 	}
+	m.log.Info("routing middleware initialized",
+		slog.String("self_worker_id", selfWorkerID),
+	)
 	go m.evictExpiredCache()
 	return m
 }
@@ -118,6 +121,10 @@ func (m *RoutingMiddleware) Handler(next http.Handler) http.Handler {
 
 		// Already proxied — handle locally to prevent infinite loops.
 		if proxied != "" {
+			m.log.Info("handling proxied request locally",
+				slog.String("path", r.URL.Path),
+				slog.String("from_worker", proxied),
+			)
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -138,8 +145,25 @@ func (m *RoutingMiddleware) Handler(next http.Handler) http.Handler {
 
 		// Look up owner worker ID (with short-lived cache).
 		ownerID, err := m.cachedLookupOwner(r.Context(), instanceID)
-		if err != nil || ownerID == "" || ownerID == m.selfWorkerID {
-			// Error, no owner, or we are the owner — handle locally.
+		if err != nil {
+			m.log.Warn("owner lookup error, handling locally",
+				slog.String("instance_id", instanceID.String()),
+				slog.String("error", err.Error()),
+			)
+			next.ServeHTTP(w, r)
+			return
+		}
+		if ownerID == "" {
+			m.log.Warn("no owner worker_id for instance, handling locally",
+				slog.String("instance_id", instanceID.String()),
+			)
+			next.ServeHTTP(w, r)
+			return
+		}
+		if ownerID == m.selfWorkerID {
+			m.log.Debug("we are the owner but client not loaded, handling locally",
+				slog.String("instance_id", instanceID.String()),
+			)
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -147,15 +171,21 @@ func (m *RoutingMiddleware) Handler(next http.Handler) http.Handler {
 		// Resolve owner's HTTP address from worker registry.
 		addr, found := m.resolver.ResolveAddr(ownerID)
 		if !found || addr == "" {
-			// Worker offline or no address published — handle locally.
+			m.log.Warn("cannot resolve owner address, handling locally",
+				slog.String("instance_id", instanceID.String()),
+				slog.String("owner_worker_id", ownerID),
+				slog.String("self_worker_id", m.selfWorkerID),
+			)
 			next.ServeHTTP(w, r)
 			return
 		}
 
-		m.log.Debug("routing to owner",
+		m.log.Info("proxying to owner replica",
 			slog.String("instance_id", instanceID.String()),
 			slog.String("target_worker", ownerID),
 			slog.String("target_addr", addr),
+			slog.String("method", r.Method),
+			slog.String("path", r.URL.Path),
 		)
 		m.proxyOrFallback(w, r, addr, next)
 	})

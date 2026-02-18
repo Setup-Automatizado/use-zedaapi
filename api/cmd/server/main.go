@@ -971,7 +971,8 @@ func main() {
 	}()
 
 	advertiseAddr := resolveAdvertiseAddr(registry.WorkerHostname(), cfg.HTTP.Addr, logger)
-	logger.Info("resolved advertise address",
+	logger.Info("worker identity resolved",
+		slog.String("worker_id", registry.WorkerID()),
 		slog.String("hostname", registry.WorkerHostname()),
 		slog.String("advertise_addr", advertiseAddr),
 	)
