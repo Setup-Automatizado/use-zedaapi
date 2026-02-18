@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.4.2](https://github.com/Setup-Automatizado/zedaapi/compare/v3.4.1...v3.4.2) (2026-02-18)
+
+### Bug Fixes
+
+* **workers:** resolve SQLSTATE 42P08 in worker heartbeat upsert ([1e15546](https://github.com/Setup-Automatizado/zedaapi/commit/1e15546341e59cc970b4554cc9903641c80b5db8))
+
 ## [3.4.1](https://github.com/Setup-Automatizado/zedaapi/compare/v3.4.0...v3.4.1) (2026-02-18)
 
 ### Code Refactoring
