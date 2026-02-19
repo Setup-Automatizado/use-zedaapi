@@ -46,6 +46,11 @@ type SendMessageArgs struct {
 	EventContent        *EventMessage        `json:"event_content,omitempty"`
 	TextStatusContent   *TextStatusMessage   `json:"text_status_content,omitempty"` // Text status with styling (for status@broadcast)
 
+	// Action message content (poll vote, edit event, event response)
+	PollVoteContent      *PollVoteMessage      `json:"poll_vote_content,omitempty"`
+	EditEventContent     *EditEventMessage     `json:"edit_event_content,omitempty"`
+	EventResponseContent *EventResponseMessage `json:"event_response_content,omitempty"`
+
 	// Timing configuration
 	DelayMessage int64 `json:"delay_message"` // Delay in milliseconds BEFORE enqueue (affects scheduled_at)
 	DelayTyping  int64 `json:"delay_typing"`  // Typing indicator duration in milliseconds BEFORE send (or "recording audio" for audio)
@@ -110,6 +115,11 @@ const (
 	MessageTypeImageStatus MessageType = "image_status"
 	MessageTypeAudioStatus MessageType = "audio_status"
 	MessageTypeVideoStatus MessageType = "video_status"
+
+	// Action message types (poll vote, edit event, event response)
+	MessageTypePollVote      MessageType = "poll_vote"
+	MessageTypeEditEvent     MessageType = "edit_event"
+	MessageTypeEventResponse MessageType = "event_response"
 )
 
 // TextMessage represents a text message
@@ -307,6 +317,32 @@ type EventLocation struct {
 	Name             string   `json:"name,omitempty"`
 	DegreesLongitude *float64 `json:"degrees_longitude,omitempty"`
 	DegreesLatitude  *float64 `json:"degrees_latitude,omitempty"`
+}
+
+// PollVoteMessage represents a vote on an existing poll
+type PollVoteMessage struct {
+	PollID     string   `json:"poll_id"`
+	PollSender string   `json:"poll_sender"`
+	Options    []string `json:"options"`
+	IsGroup    bool     `json:"is_group"`
+}
+
+// EditEventMessage represents an update to an existing event
+type EditEventMessage struct {
+	EventID     string `json:"event_id"`
+	Name        string `json:"name,omitempty"`
+	Description string `json:"description,omitempty"`
+	StartTime   string `json:"start_time,omitempty"`
+	EndTime     string `json:"end_time,omitempty"`
+	Location    string `json:"location,omitempty"`
+	Canceled    bool   `json:"canceled,omitempty"`
+}
+
+// EventResponseMessage represents a response to an event invitation
+type EventResponseMessage struct {
+	EventID         string `json:"event_id"`
+	Response        string `json:"response"` // "going", "not_going", "maybe"
+	ExtraGuestCount *int   `json:"extra_guest_count,omitempty"`
 }
 
 // InsertOptions holds configuration for job insertion
@@ -508,6 +544,15 @@ func (s *SendMessageArgs) Validate() error {
 	if s.TextStatusContent != nil {
 		contentCount++
 	}
+	if s.PollVoteContent != nil {
+		contentCount++
+	}
+	if s.EditEventContent != nil {
+		contentCount++
+	}
+	if s.EventResponseContent != nil {
+		contentCount++
+	}
 
 	if contentCount == 0 {
 		return ErrNoMessageContent
@@ -589,6 +634,21 @@ func (s *SendMessageArgs) GetContentPreview() string {
 		return "[Audio Status]"
 	case MessageTypeVideoStatus:
 		return "[Video Status]"
+	case MessageTypePollVote:
+		if s.PollVoteContent != nil {
+			return fmt.Sprintf("[Poll Vote] %d options", len(s.PollVoteContent.Options))
+		}
+		return "[Poll Vote]"
+	case MessageTypeEditEvent:
+		if s.EditEventContent != nil {
+			return fmt.Sprintf("[Edit Event] %s", s.EditEventContent.EventID)
+		}
+		return "[Edit Event]"
+	case MessageTypeEventResponse:
+		if s.EventResponseContent != nil {
+			return fmt.Sprintf("[Event Response] %s", s.EventResponseContent.Response)
+		}
+		return "[Event Response]"
 	}
 	return "[Unknown]"
 }

@@ -27,7 +27,6 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/logging"
 	"go.mau.fi/whatsmeow/api/internal/messages/queue"
 	"go.mau.fi/whatsmeow/appstate"
-	"go.mau.fi/whatsmeow/proto/waCommon"
 	"go.mau.fi/whatsmeow/proto/waE2E"
 	"go.mau.fi/whatsmeow/types"
 	"go.mau.fi/whatsmeow/types/events"
@@ -908,6 +907,7 @@ type SendMessageResponse struct {
 	MessageID      string          `json:"messageId"`                // Pre-generated WhatsApp message ID (3EB0xxx format), falls back to zaapId if unavailable
 	ID             string          `json:"id"`                       // Same as messageId (for Zapier compatibility)
 	Status         string          `json:"status"`                   // Queue status (queued, failed, etc.)
+	ScheduledFor   *string         `json:"scheduledFor,omitempty"`   // ISO 8601: when message will be sent
 	WhatsAppStatus *WhatsAppStatus `json:"whatsAppStatus,omitempty"` // Snapshot of WhatsApp connectivity
 }
 
@@ -991,16 +991,17 @@ func (h *MessageHandler) enqueueWithPreGeneratedID(ctx context.Context, instance
 	return zaapID, args.WhatsAppMessageID, err
 }
 
-func (h *MessageHandler) newSendMessageResponse(zaapID, whatsAppMsgID string, status *instances.Status) SendMessageResponse {
+func (h *MessageHandler) newSendMessageResponse(zaapID, whatsAppMsgID string, status *instances.Status, scheduledFor *string) SendMessageResponse {
 	msgID := zaapID
 	if whatsAppMsgID != "" {
 		msgID = whatsAppMsgID
 	}
 	response := SendMessageResponse{
-		ZaapID:    zaapID,
-		MessageID: msgID,
-		ID:        msgID,
-		Status:    "queued",
+		ZaapID:       zaapID,
+		MessageID:    msgID,
+		ID:           msgID,
+		Status:       "queued",
+		ScheduledFor: scheduledFor,
 	}
 	response.WhatsAppStatus = h.toWhatsAppStatus(status)
 	return response
@@ -1044,26 +1045,40 @@ func (h *MessageHandler) toWhatsAppStatus(status *instances.Status) *WhatsAppSta
 	return whatsAppStatus
 }
 
-// resolveDelay converts delayMessage (seconds) and/or scheduledFor (ISO 8601) to milliseconds.
-// If both are provided, scheduledFor takes priority.
-// If neither is provided, returns a random delay of 1-3 seconds.
-func resolveDelay(delayMessage *int, scheduledFor *string) int64 {
-	var delay int64
+// validateAndResolveSchedule validates scheduledFor/delayMessage and returns:
+// - delayMs: delay in milliseconds for queue scheduling
+// - resolvedScheduledFor: ISO 8601 string of when message will be sent (for response)
+// - err: validation error (nil if ok)
+//
+// Priority: scheduledFor > delayMessage > random 1-3s
+// scheduledFor must be RFC3339, must be in the future. No max limit.
+func validateAndResolveSchedule(delayMessage *int, scheduledFor *string) (int64, *string, error) {
+	if scheduledFor != nil && *scheduledFor != "" {
+		t, err := time.Parse(time.RFC3339, *scheduledFor)
+		if err != nil {
+			return 0, nil, fmt.Errorf("scheduledFor must be a valid ISO 8601/RFC3339 timestamp (e.g. 2026-02-18T15:30:00Z)")
+		}
+		if !t.After(time.Now()) {
+			return 0, nil, fmt.Errorf("scheduledFor must be in the future")
+		}
+		delayMs := time.Until(t).Milliseconds()
+		iso := t.UTC().Format(time.RFC3339)
+		return delayMs, &iso, nil
+	}
+
+	var delayMs int64
 	if delayMessage != nil {
 		seconds := *delayMessage
 		if seconds < 1 {
 			seconds = 1
 		}
-		delay = int64(seconds) * 1000
+		delayMs = int64(seconds) * 1000
 	} else {
-		delay = int64(1000 + (rand.Int63() % 2000)) // default 1-3s
+		delayMs = int64(1000 + (rand.Int63() % 2000)) // default 1-3s
 	}
-	if scheduledFor != nil && *scheduledFor != "" {
-		if t, err := time.Parse(time.RFC3339, *scheduledFor); err == nil && t.After(time.Now()) {
-			delay = time.Until(t).Milliseconds()
-		}
-	}
-	return delay
+
+	scheduled := time.Now().Add(time.Duration(delayMs) * time.Millisecond).UTC().Format(time.RFC3339)
+	return delayMs, &scheduled, nil
 }
 
 // resolveTypingDelay converts delayTyping (seconds) to milliseconds with a 15s cap.
@@ -1160,7 +1175,11 @@ func (h *MessageHandler) sendText(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Resolve delays (delayMessage supports any duration; scheduledFor overrides with ISO 8601)
-	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayMessage, scheduledAt, err := validateAndResolveSchedule(req.DelayMessage, req.ScheduledFor)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Create message args
@@ -1192,7 +1211,7 @@ func (h *MessageHandler) sendText(w http.ResponseWriter, r *http.Request) {
 
 	// Return response
 	// messageId = pre-generated WhatsApp ID (3EB0xxx format) for end-to-end correlation
-	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus, scheduledAt)
 
 	// Return 200 OK
 	respondJSON(w, http.StatusOK, response)
@@ -1259,7 +1278,11 @@ func (h *MessageHandler) sendImage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Resolve delays (delayMessage supports any duration; scheduledFor overrides with ISO 8601)
-	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayMessage, scheduledAt, err := validateAndResolveSchedule(req.DelayMessage, req.ScheduledFor)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Prepare caption (optional)
@@ -1306,7 +1329,7 @@ func (h *MessageHandler) sendImage(w http.ResponseWriter, r *http.Request) {
 
 	// Return response
 	// messageId = pre-generated WhatsApp ID (3EB0xxx format) for end-to-end correlation
-	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus, scheduledAt)
 
 	// Return 200 OK
 	respondJSON(w, http.StatusOK, response)
@@ -1372,7 +1395,11 @@ func (h *MessageHandler) sendSticker(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Resolve delays (delayMessage supports any duration; scheduledFor overrides with ISO 8601)
-	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayMessage, scheduledAt, err := validateAndResolveSchedule(req.DelayMessage, req.ScheduledFor)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Create message args for sticker (uses dedicated StickerProcessor with WebP conversion)
@@ -1407,7 +1434,7 @@ func (h *MessageHandler) sendSticker(w http.ResponseWriter, r *http.Request) {
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
 	// Return response
-	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus, scheduledAt)
 
 	// Return 200 OK
 	respondJSON(w, http.StatusOK, response)
@@ -1474,7 +1501,11 @@ func (h *MessageHandler) sendAudio(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Resolve delays (delayMessage supports any duration; scheduledFor overrides with ISO 8601)
-	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayMessage, scheduledAt, err := validateAndResolveSchedule(req.DelayMessage, req.ScheduledFor)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Create message args
@@ -1511,7 +1542,7 @@ func (h *MessageHandler) sendAudio(w http.ResponseWriter, r *http.Request) {
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
 	// Return response
-	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus, scheduledAt)
 
 	respondJSON(w, http.StatusOK, response)
 }
@@ -1568,7 +1599,11 @@ func (h *MessageHandler) sendVideo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Convert delays
-	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayMessage, scheduledAt, err := validateAndResolveSchedule(req.DelayMessage, req.ScheduledFor)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Prepare caption
@@ -1614,7 +1649,7 @@ func (h *MessageHandler) sendVideo(w http.ResponseWriter, r *http.Request) {
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
 	// Return response
-	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus, scheduledAt)
 
 	respondJSON(w, http.StatusOK, response)
 }
@@ -1682,7 +1717,11 @@ func (h *MessageHandler) sendPTV(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Resolve delays (delayMessage supports any duration; scheduledFor overrides with ISO 8601)
-	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayMessage, scheduledAt, err := validateAndResolveSchedule(req.DelayMessage, req.ScheduledFor)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Prepare caption
@@ -1728,7 +1767,7 @@ func (h *MessageHandler) sendPTV(w http.ResponseWriter, r *http.Request) {
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
 	// Return response
-	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus, scheduledAt)
 
 	respondJSON(w, http.StatusOK, response)
 }
@@ -1794,7 +1833,11 @@ func (h *MessageHandler) sendGif(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Resolve delays (delayMessage supports any duration; scheduledFor overrides with ISO 8601)
-	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayMessage, scheduledAt, err := validateAndResolveSchedule(req.DelayMessage, req.ScheduledFor)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Handle optional caption
@@ -1845,7 +1888,7 @@ func (h *MessageHandler) sendGif(w http.ResponseWriter, r *http.Request) {
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
 	// Return response
-	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus, scheduledAt)
 
 	// Return 200 OK
 	respondJSON(w, http.StatusOK, response)
@@ -1905,7 +1948,11 @@ func (h *MessageHandler) sendDocument(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Convert delays
-	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayMessage, scheduledAt, err := validateAndResolveSchedule(req.DelayMessage, req.ScheduledFor)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Prepare caption and filename
@@ -1957,7 +2004,7 @@ func (h *MessageHandler) sendDocument(w http.ResponseWriter, r *http.Request) {
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
 	// Return response
-	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus, scheduledAt)
 
 	respondJSON(w, http.StatusOK, response)
 }
@@ -1997,7 +2044,11 @@ func (h *MessageHandler) sendLocation(w http.ResponseWriter, r *http.Request) {
 	// Latitude: -90 to 90, Longitude: -180 to 180
 
 	// Convert delays
-	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayMessage, scheduledAt, err := validateAndResolveSchedule(req.DelayMessage, req.ScheduledFor)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Prepare optional fields
@@ -2052,7 +2103,7 @@ func (h *MessageHandler) sendLocation(w http.ResponseWriter, r *http.Request) {
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
 	// Return response
-	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus, scheduledAt)
 
 	respondJSON(w, http.StatusOK, response)
 }
@@ -2104,7 +2155,11 @@ func (h *MessageHandler) sendContact(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Convert delays
-	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayMessage, scheduledAt, err := validateAndResolveSchedule(req.DelayMessage, req.ScheduledFor)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Build ContactMessage with ALL fields (Zé da API + extended optional fields)
@@ -2172,7 +2227,7 @@ func (h *MessageHandler) sendContact(w http.ResponseWriter, r *http.Request) {
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
 	// Return response
-	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus, scheduledAt)
 
 	respondJSON(w, http.StatusOK, response)
 }
@@ -2939,7 +2994,11 @@ func (h *MessageHandler) sendContacts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Convert delays
-	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayMessage, scheduledAt, err := validateAndResolveSchedule(req.DelayMessage, req.ScheduledFor)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Build array of ContactMessage with ALL fields for each contact
@@ -3040,7 +3099,7 @@ func (h *MessageHandler) sendContacts(w http.ResponseWriter, r *http.Request) {
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
 	// Return response
-	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus, scheduledAt)
 
 	respondJSON(w, http.StatusOK, response)
 }
@@ -3083,7 +3142,11 @@ func (h *MessageHandler) sendButtonList(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// Resolve delays
-	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayMessage, scheduledAt, err := validateAndResolveSchedule(req.DelayMessage, req.ScheduledFor)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Convert buttons to queue format
@@ -3142,7 +3205,7 @@ func (h *MessageHandler) sendButtonList(w http.ResponseWriter, r *http.Request) 
 		slog.Int("button_count", len(req.Buttons)),
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
-	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus, scheduledAt)
 	respondJSON(w, http.StatusOK, response)
 }
 
@@ -3210,7 +3273,11 @@ func (h *MessageHandler) sendButtonActions(w http.ResponseWriter, r *http.Reques
 	}
 
 	// Resolve delays
-	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayMessage, scheduledAt, err := validateAndResolveSchedule(req.DelayMessage, req.ScheduledFor)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Convert buttons to queue format
@@ -3289,7 +3356,7 @@ func (h *MessageHandler) sendButtonActions(w http.ResponseWriter, r *http.Reques
 		slog.Int("button_count", len(req.Buttons)),
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
-	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus, scheduledAt)
 	respondJSON(w, http.StatusOK, response)
 }
 
@@ -3341,7 +3408,11 @@ func (h *MessageHandler) sendOptionList(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// Resolve delays
-	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayMessage, scheduledAt, err := validateAndResolveSchedule(req.DelayMessage, req.ScheduledFor)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Convert sections to queue format
@@ -3408,7 +3479,7 @@ func (h *MessageHandler) sendOptionList(w http.ResponseWriter, r *http.Request) 
 		slog.Int("total_rows", totalRows),
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
-	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus, scheduledAt)
 	respondJSON(w, http.StatusOK, response)
 }
 
@@ -3459,7 +3530,11 @@ func (h *MessageHandler) sendButtonPIX(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Resolve delays
-	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayMessage, scheduledAt, err := validateAndResolveSchedule(req.DelayMessage, req.ScheduledFor)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Build PIX payment struct
@@ -3507,7 +3582,7 @@ func (h *MessageHandler) sendButtonPIX(w http.ResponseWriter, r *http.Request) {
 		slog.String("pix_key_type", req.KeyType),
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
-	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus, scheduledAt)
 	respondJSON(w, http.StatusOK, response)
 }
 
@@ -3549,7 +3624,11 @@ func (h *MessageHandler) sendButtonOTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Resolve delays
-	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayMessage, scheduledAt, err := validateAndResolveSchedule(req.DelayMessage, req.ScheduledFor)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Build optional header/footer pointers
@@ -3592,7 +3671,7 @@ func (h *MessageHandler) sendButtonOTP(w http.ResponseWriter, r *http.Request) {
 		slog.String("phone", phone),
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
-	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus, scheduledAt)
 	respondJSON(w, http.StatusOK, response)
 }
 
@@ -3669,7 +3748,11 @@ func (h *MessageHandler) sendCarousel(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Resolve delays
-	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayMessage, scheduledAt, err := validateAndResolveSchedule(req.DelayMessage, req.ScheduledFor)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Convert request cards to queue.CarouselCard
@@ -3738,7 +3821,7 @@ func (h *MessageHandler) sendCarousel(w http.ResponseWriter, r *http.Request) {
 		slog.Int("cards_count", len(req.Cards)),
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
-	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus, scheduledAt)
 	respondJSON(w, http.StatusOK, response)
 }
 
@@ -3831,7 +3914,11 @@ func (h *MessageHandler) sendPoll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Resolve delays (delayMessage supports any duration; scheduledFor overrides with ISO 8601)
-	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayMessage, scheduledAt, err := validateAndResolveSchedule(req.DelayMessage, req.ScheduledFor)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Create message args
@@ -3864,7 +3951,7 @@ func (h *MessageHandler) sendPoll(w http.ResponseWriter, r *http.Request) {
 		slog.Int("max_selections", maxSelections),
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
-	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus, scheduledAt)
 	respondJSON(w, http.StatusOK, response)
 }
 
@@ -3957,7 +4044,11 @@ func (h *MessageHandler) sendEvent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Resolve delays (delayMessage supports any duration; scheduledFor overrides with ISO 8601)
-	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayMessage, scheduledAt, err := validateAndResolveSchedule(req.DelayMessage, req.ScheduledFor)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Create message args
@@ -3993,7 +4084,7 @@ func (h *MessageHandler) sendEvent(w http.ResponseWriter, r *http.Request) {
 		slog.Bool("canceled", req.Event.Canceled),
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
-	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus, scheduledAt)
 	respondJSON(w, http.StatusOK, response)
 }
 
@@ -4064,7 +4155,11 @@ func (h *MessageHandler) sendLink(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Resolve delays (delayMessage supports any duration; scheduledFor overrides with ISO 8601)
-	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayMessage, scheduledAt, err := validateAndResolveSchedule(req.DelayMessage, req.ScheduledFor)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 	delayTyping := resolveTypingDelay(req.DelayTyping)
 
 	// Create message args with text content and link preview override
@@ -4104,7 +4199,7 @@ func (h *MessageHandler) sendLink(w http.ResponseWriter, r *http.Request) {
 		slog.String("title", req.Title),
 		slog.Bool("whatsapp_connected", whatsStatus != nil && whatsStatus.Connected))
 
-	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus, scheduledAt)
 	respondJSON(w, http.StatusOK, response)
 }
 
@@ -4856,13 +4951,45 @@ func (h *MessageHandler) forwardMessage(w http.ResponseWriter, r *http.Request) 
 		forwardedMessage.LocationMessage.ContextInfo = contextInfo
 	}
 
-	// Apply delay if specified (scheduledFor overrides delayMessage)
+	// forwardMessage cannot use the queue (needs client.GetMessageForRetry in real time).
+	// Apply delay with safety: cap at 60s, use context-aware wait.
+	const maxForwardDelay = 60 * time.Second
+	var forwardDelay time.Duration
+
 	if req.ScheduledFor != nil && *req.ScheduledFor != "" {
-		if t, err := time.Parse(time.RFC3339, *req.ScheduledFor); err == nil && t.After(time.Now()) {
-			time.Sleep(time.Until(t))
+		t, parseErr := time.Parse(time.RFC3339, *req.ScheduledFor)
+		if parseErr != nil {
+			respondError(w, http.StatusBadRequest, "scheduledFor must be a valid ISO 8601/RFC3339 timestamp (e.g. 2026-02-18T15:30:00Z)")
+			return
 		}
+		if !t.After(time.Now()) {
+			respondError(w, http.StatusBadRequest, "scheduledFor must be in the future")
+			return
+		}
+		if time.Until(t) > maxForwardDelay {
+			respondError(w, http.StatusBadRequest, "scheduledFor for forward messages must be within 60 seconds")
+			return
+		}
+		forwardDelay = time.Until(t)
 	} else if req.DelayMessage != nil && *req.DelayMessage > 0 {
-		time.Sleep(time.Duration(*req.DelayMessage) * time.Second)
+		d := time.Duration(*req.DelayMessage) * time.Second
+		if d > maxForwardDelay {
+			d = maxForwardDelay
+		}
+		forwardDelay = d
+	}
+
+	if forwardDelay > 0 {
+		ctx, cancel := context.WithTimeout(ctx, maxForwardDelay+5*time.Second)
+		defer cancel()
+		timer := time.NewTimer(forwardDelay)
+		select {
+		case <-timer.C:
+		case <-ctx.Done():
+			timer.Stop()
+			respondError(w, http.StatusGatewayTimeout, "Forward message cancelled: timeout")
+			return
+		}
 	}
 
 	// Send the forwarded message
@@ -4891,11 +5018,11 @@ func (h *MessageHandler) forwardMessage(w http.ResponseWriter, r *http.Request) 
 }
 
 // sendPollVote handles POST /instances/{instanceId}/token/{token}/send-poll-vote
-// Sends a vote on an existing poll by constructing MessageInfo and calling BuildPollVote
+// Enqueues a poll vote for async processing via the message queue.
 func (h *MessageHandler) sendPollVote(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	ctx, instanceID, _, ok := h.resolveInstance(ctx, w, r)
+	ctx, instanceID, instStatus, ok := h.resolveInstance(ctx, w, r)
 	if !ok {
 		return
 	}
@@ -4941,104 +5068,44 @@ func (h *MessageHandler) sendPollVote(w http.ResponseWriter, r *http.Request) {
 	phone = normalizePhoneNumber(phone)
 	pollSender = normalizePhoneNumber(pollSender)
 
-	// Get client registry from coordinator
-	clientRegistry, ok := h.coordinator.GetClient(instanceID)
-	if !ok {
-		h.log.ErrorContext(ctx, "client registry not available")
-		respondError(w, http.StatusServiceUnavailable, "WhatsApp client not available")
-		return
-	}
-
-	// Get the whatsmeow client
-	client, ok := clientRegistry.GetClient(instanceID.String())
-	if !ok || client == nil {
-		h.log.WarnContext(ctx, "whatsapp client not connected",
-			slog.String("phone", phone))
-		respondError(w, http.StatusServiceUnavailable, "WhatsApp client not connected")
-		return
-	}
-
-	// Parse chat JID
-	chatJID, err := types.ParseJID(phone)
+	// Resolve delays
+	delayMessage, scheduledAt, err := validateAndResolveSchedule(req.DelayMessage, req.ScheduledFor)
 	if err != nil {
-		h.log.WarnContext(ctx, "invalid phone number format",
-			slog.String("phone", phone),
-			slog.String("error", err.Error()))
-		respondError(w, http.StatusBadRequest, "Invalid phone number format")
+		respondError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	// Parse poll sender JID
-	senderJID, err := types.ParseJID(pollSender)
-	if err != nil {
-		h.log.WarnContext(ctx, "invalid poll sender phone format",
-			slog.String("poll_sender", pollSender),
-			slog.String("error", err.Error()))
-		respondError(w, http.StatusBadRequest, "Invalid poll sender phone format")
-		return
-	}
+	// Determine if group
+	isGroup := strings.HasSuffix(phone, "@g.us")
 
-	// Determine if this is a group chat
-	isGroup := chatJID.Server == types.GroupServer
-
-	// Construct MessageInfo for the poll message
-	// This is required by BuildPollVote to reference the original poll
-	pollInfo := &types.MessageInfo{
-		MessageSource: types.MessageSource{
-			Chat:     chatJID,
-			Sender:   senderJID,
-			IsFromMe: senderJID.User == client.Store.ID.User,
-			IsGroup:  isGroup,
+	// Build queue args
+	args := queue.SendMessageArgs{
+		InstanceID:  instanceID,
+		Phone:       phone,
+		MessageType: queue.MessageTypePollVote,
+		PollVoteContent: &queue.PollVoteMessage{
+			PollID:     pollID,
+			PollSender: pollSender,
+			Options:    req.Options,
+			IsGroup:    isGroup,
 		},
-		ID:        types.MessageID(pollID),
-		Timestamp: time.Now(), // Timestamp is not critical for voting
+		DelayMessage: delayMessage,
 	}
 
-	// Apply delay if specified (scheduledFor overrides delayMessage)
-	if req.ScheduledFor != nil && *req.ScheduledFor != "" {
-		if t, err := time.Parse(time.RFC3339, *req.ScheduledFor); err == nil && t.After(time.Now()) {
-			time.Sleep(time.Until(t))
-		}
-	} else if req.DelayMessage != nil && *req.DelayMessage > 0 {
-		time.Sleep(time.Duration(*req.DelayMessage) * time.Second)
-	}
-
-	// Build the poll vote message
-	voteMsg, err := client.BuildPollVote(ctx, pollInfo, req.Options)
+	// Enqueue message (non-blocking)
+	zaapID, whatsAppMsgID, err := h.enqueueWithPreGeneratedID(ctx, instanceID, &args)
 	if err != nil {
-		h.log.ErrorContext(ctx, "failed to build poll vote",
-			slog.String("phone", phone),
-			slog.String("poll_id", pollID),
-			slog.String("error", err.Error()))
-		respondError(w, http.StatusInternalServerError, "Failed to build poll vote: "+err.Error())
+		h.handleEnqueueError(ctx, w, err)
 		return
 	}
 
-	// Send the poll vote
-	resp, err := client.SendMessage(ctx, chatJID, voteMsg)
-	if err != nil {
-		h.log.ErrorContext(ctx, "failed to send poll vote",
-			slog.String("phone", phone),
-			slog.String("poll_id", pollID),
-			slog.String("error", err.Error()))
-		respondError(w, http.StatusInternalServerError, "Failed to send poll vote: "+err.Error())
-		return
-	}
-
-	h.log.InfoContext(ctx, "poll vote sent successfully",
+	h.log.InfoContext(ctx, "poll vote enqueued successfully",
+		slog.String("zaap_id", zaapID),
 		slog.String("phone", phone),
-		slog.String("poll_id", pollID),
-		slog.Any("options", req.Options),
-		slog.String("response_id", resp.ID))
+		slog.String("poll_id", pollID))
 
-	respondJSON(w, http.StatusOK, SendPollVoteResponse{
-		Success:   true,
-		Phone:     phone,
-		PollID:    pollID,
-		Options:   req.Options,
-		MessageID: resp.ID,
-		Message:   "Poll vote sent successfully",
-	})
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus, scheduledAt)
+	respondJSON(w, http.StatusOK, response)
 }
 
 // pinMessage handles POST /instances/{instanceId}/token/{token}/pin-message
@@ -5701,11 +5768,11 @@ func (h *MessageHandler) downloadImage(ctx context.Context, imageURL string) ([]
 }
 
 // sendEditEvent handles POST /instances/{instanceId}/token/{token}/send-edit-event
-// Sends an updated event message to modify an existing event
+// Enqueues an edit event message for async processing via the message queue.
 func (h *MessageHandler) sendEditEvent(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	ctx, instanceID, _, ok := h.resolveInstance(ctx, w, r)
+	ctx, instanceID, instStatus, ok := h.resolveInstance(ctx, w, r)
 	if !ok {
 		return
 	}
@@ -5736,122 +5803,55 @@ func (h *MessageHandler) sendEditEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get client registry from coordinator
-	clientRegistry, ok := h.coordinator.GetClient(instanceID)
-	if !ok {
-		h.log.ErrorContext(ctx, "client registry not available")
-		respondError(w, http.StatusServiceUnavailable, "WhatsApp client not available")
-		return
-	}
-
-	// Get the whatsmeow client
-	client, ok := clientRegistry.GetClient(instanceID.String())
-	if !ok || client == nil {
-		h.log.WarnContext(ctx, "whatsapp client not connected",
-			slog.String("phone", phone))
-		respondError(w, http.StatusServiceUnavailable, "WhatsApp client not connected")
-		return
-	}
-
-	// Parse recipient JID
-	recipientJID, err := types.ParseJID(phone)
+	// Resolve delays
+	delayMessage, scheduledAt, err := validateAndResolveSchedule(req.DelayMessage, req.ScheduledFor)
 	if err != nil {
-		h.log.WarnContext(ctx, "invalid phone format",
-			slog.String("phone", phone),
-			slog.String("error", err.Error()))
-		respondError(w, http.StatusBadRequest, "Invalid phone number format")
+		respondError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	delayTyping := resolveTypingDelay(req.DelayTyping)
 
-	// Simulate typing if delay specified
-	if req.DelayTyping != nil && *req.DelayTyping > 0 {
-		delay := *req.DelayTyping
-		if delay > 15 {
-			delay = 15
-		}
-		_ = client.SendChatPresence(ctx, recipientJID, types.ChatPresenceComposing, types.ChatPresenceMediaText)
-		time.Sleep(time.Duration(delay) * time.Second)
-		_ = client.SendChatPresence(ctx, recipientJID, types.ChatPresencePaused, types.ChatPresenceMediaText)
-	}
-
-	// Build the updated event message
-	eventMsg := &waE2E.EventMessage{
-		ContextInfo: &waE2E.ContextInfo{
-			StanzaID:    proto.String(eventID),
-			Participant: proto.String(phone),
+	// Build queue args
+	canceled := req.Canceled != nil && *req.Canceled
+	args := queue.SendMessageArgs{
+		InstanceID:  instanceID,
+		Phone:       phone,
+		MessageType: queue.MessageTypeEditEvent,
+		EditEventContent: &queue.EditEventMessage{
+			EventID:     eventID,
+			Name:        req.Name,
+			Description: req.Description,
+			StartTime:   req.StartTime,
+			EndTime:     req.EndTime,
+			Location:    req.Location,
+			Canceled:    canceled,
 		},
+		DelayMessage: delayMessage,
+		DelayTyping:  delayTyping,
 	}
 
-	// Set updated fields if provided
-	if req.Name != "" {
-		eventMsg.Name = proto.String(req.Name)
-	}
-	if req.Description != "" {
-		eventMsg.Description = proto.String(req.Description)
-	}
-	if req.StartTime != "" {
-		startTime, err := time.Parse(time.RFC3339, req.StartTime)
-		if err == nil {
-			eventMsg.StartTime = proto.Int64(startTime.Unix())
-		}
-	}
-	if req.EndTime != "" {
-		endTime, err := time.Parse(time.RFC3339, req.EndTime)
-		if err == nil {
-			eventMsg.EndTime = proto.Int64(endTime.Unix())
-		}
-	}
-	if req.Location != "" {
-		eventMsg.Location = &waE2E.LocationMessage{
-			Name: proto.String(req.Location),
-		}
-	}
-	if req.Canceled != nil && *req.Canceled {
-		eventMsg.IsCanceled = proto.Bool(true)
-	}
-
-	// Apply delay if specified (scheduledFor overrides delayMessage)
-	if req.ScheduledFor != nil && *req.ScheduledFor != "" {
-		if t, err := time.Parse(time.RFC3339, *req.ScheduledFor); err == nil && t.After(time.Now()) {
-			time.Sleep(time.Until(t))
-		}
-	} else if req.DelayMessage != nil && *req.DelayMessage > 0 {
-		time.Sleep(time.Duration(*req.DelayMessage) * time.Second)
-	}
-
-	// Send the edit event message
-	msg := &waE2E.Message{
-		EventMessage: eventMsg,
-	}
-
-	resp, err := client.SendMessage(ctx, recipientJID, msg)
+	// Enqueue message (non-blocking)
+	zaapID, whatsAppMsgID, err := h.enqueueWithPreGeneratedID(ctx, instanceID, &args)
 	if err != nil {
-		h.log.ErrorContext(ctx, "failed to send edit event",
-			slog.String("error", err.Error()),
-			slog.String("event_id", eventID))
-		respondError(w, http.StatusInternalServerError, "Failed to send edit event: "+err.Error())
+		h.handleEnqueueError(ctx, w, err)
 		return
 	}
 
-	h.log.InfoContext(ctx, "edit event sent successfully",
-		slog.String("message_id", resp.ID),
+	h.log.InfoContext(ctx, "edit event enqueued successfully",
+		slog.String("zaap_id", zaapID),
 		slog.String("event_id", eventID),
 		slog.String("phone", phone))
 
-	respondJSON(w, http.StatusOK, SendEditEventResponse{
-		Success:   true,
-		EventID:   eventID,
-		MessageID: resp.ID,
-		Message:   "Event updated successfully",
-	})
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus, scheduledAt)
+	respondJSON(w, http.StatusOK, response)
 }
 
 // sendEventResponse handles POST /instances/{instanceId}/token/{token}/send-event-response
-// Sends a response to an event invitation (going, not_going, maybe)
+// Enqueues an event response for async processing via the message queue.
 func (h *MessageHandler) sendEventResponse(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	ctx, instanceID, _, ok := h.resolveInstance(ctx, w, r)
+	ctx, instanceID, instStatus, ok := h.resolveInstance(ctx, w, r)
 	if !ok {
 		return
 	}
@@ -5882,16 +5882,11 @@ func (h *MessageHandler) sendEventResponse(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	// Validate and parse response type
+	// Validate response type
 	responseStr := strings.ToLower(strings.TrimSpace(req.Response))
-	var responseType waE2E.EventResponseMessage_EventResponseType
 	switch responseStr {
-	case "going":
-		responseType = waE2E.EventResponseMessage_GOING
-	case "not_going":
-		responseType = waE2E.EventResponseMessage_NOT_GOING
-	case "maybe":
-		responseType = waE2E.EventResponseMessage_MAYBE
+	case "going", "not_going", "maybe":
+		// valid
 	default:
 		h.log.WarnContext(ctx, "invalid response type",
 			slog.String("response", responseStr))
@@ -5899,116 +5894,43 @@ func (h *MessageHandler) sendEventResponse(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	// Get client registry from coordinator
-	clientRegistry, ok := h.coordinator.GetClient(instanceID)
-	if !ok {
-		h.log.ErrorContext(ctx, "client registry not available")
-		respondError(w, http.StatusServiceUnavailable, "WhatsApp client not available")
-		return
-	}
-
-	// Get the whatsmeow client
-	client, ok := clientRegistry.GetClient(instanceID.String())
-	if !ok || client == nil {
-		h.log.WarnContext(ctx, "whatsapp client not connected",
-			slog.String("phone", phone))
-		respondError(w, http.StatusServiceUnavailable, "WhatsApp client not connected")
-		return
-	}
-
-	// Parse recipient JID
-	recipientJID, err := types.ParseJID(phone)
+	// Resolve delays
+	delayMessage, scheduledAt, err := validateAndResolveSchedule(req.DelayMessage, req.ScheduledFor)
 	if err != nil {
-		h.log.WarnContext(ctx, "invalid phone format",
-			slog.String("phone", phone),
-			slog.String("error", err.Error()))
-		respondError(w, http.StatusBadRequest, "Invalid phone number format")
+		respondError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	delayTyping := resolveTypingDelay(req.DelayTyping)
 
-	// Simulate typing if delay specified
-	if req.DelayTyping != nil && *req.DelayTyping > 0 {
-		delay := *req.DelayTyping
-		if delay > 15 {
-			delay = 15
-		}
-		_ = client.SendChatPresence(ctx, recipientJID, types.ChatPresenceComposing, types.ChatPresenceMediaText)
-		time.Sleep(time.Duration(delay) * time.Second)
-		_ = client.SendChatPresence(ctx, recipientJID, types.ChatPresencePaused, types.ChatPresenceMediaText)
+	// Build queue args
+	args := queue.SendMessageArgs{
+		InstanceID:  instanceID,
+		Phone:       phone,
+		MessageType: queue.MessageTypeEventResponse,
+		EventResponseContent: &queue.EventResponseMessage{
+			EventID:         eventID,
+			Response:        responseStr,
+			ExtraGuestCount: req.ExtraGuestCount,
+		},
+		DelayMessage: delayMessage,
+		DelayTyping:  delayTyping,
 	}
 
-	// Build the event response message
-	eventResponseMsg := &waE2E.EventResponseMessage{
-		Response:    &responseType,
-		TimestampMS: proto.Int64(time.Now().UnixMilli()),
-	}
-
-	// Add extra guest count if provided
-	if req.ExtraGuestCount != nil && *req.ExtraGuestCount > 0 {
-		eventResponseMsg.ExtraGuestCount = proto.Int32(int32(*req.ExtraGuestCount))
-	}
-
-	// Apply delay if specified (scheduledFor overrides delayMessage)
-	if req.ScheduledFor != nil && *req.ScheduledFor != "" {
-		if t, err := time.Parse(time.RFC3339, *req.ScheduledFor); err == nil && t.After(time.Now()) {
-			time.Sleep(time.Until(t))
-		}
-	} else if req.DelayMessage != nil && *req.DelayMessage > 0 {
-		time.Sleep(time.Duration(*req.DelayMessage) * time.Second)
-	}
-
-	// Marshal the event response for encryption
-	plaintext, err := proto.Marshal(eventResponseMsg)
+	// Enqueue message (non-blocking)
+	zaapID, whatsAppMsgID, err := h.enqueueWithPreGeneratedID(ctx, instanceID, &args)
 	if err != nil {
-		h.log.ErrorContext(ctx, "failed to marshal event response",
-			slog.String("error", err.Error()))
-		respondError(w, http.StatusInternalServerError, "Failed to build event response")
+		h.handleEnqueueError(ctx, w, err)
 		return
 	}
 
-	// Parse event message key from the eventID
-	// The eventID format should be "messageId" or "remoteJid_messageId"
-	eventMsgKey := &waCommon.MessageKey{
-		RemoteJID: proto.String(recipientJID.String()),
-		ID:        proto.String(eventID),
-		FromMe:    proto.Bool(false),
-	}
-
-	// Build encrypted event response message
-	// Note: This requires the original event's message secret to be stored
-	// The encryption uses the EncSecretEventResponse type
-	encEventResponse := &waE2E.EncEventResponseMessage{
-		EventCreationMessageKey: eventMsgKey,
-		EncPayload:              plaintext, // In production, this should be encrypted
-		EncIV:                   nil,       // IV would be set by encryption
-	}
-
-	msg := &waE2E.Message{
-		EncEventResponseMessage: encEventResponse,
-	}
-
-	resp, err := client.SendMessage(ctx, recipientJID, msg)
-	if err != nil {
-		h.log.ErrorContext(ctx, "failed to send event response",
-			slog.String("error", err.Error()),
-			slog.String("event_id", eventID),
-			slog.String("response", responseStr))
-		respondError(w, http.StatusInternalServerError, "Failed to send event response: "+err.Error())
-		return
-	}
-
-	h.log.InfoContext(ctx, "event response sent successfully",
-		slog.String("message_id", resp.ID),
+	h.log.InfoContext(ctx, "event response enqueued successfully",
+		slog.String("zaap_id", zaapID),
 		slog.String("event_id", eventID),
 		slog.String("response", responseStr),
 		slog.String("phone", phone))
 
-	respondJSON(w, http.StatusOK, SendEventResponseResponse{
-		Success:  true,
-		EventID:  eventID,
-		Response: responseStr,
-		Message:  "Event response sent successfully",
-	})
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus, scheduledAt)
+	respondJSON(w, http.StatusOK, response)
 }
 
 // =============================================================================
@@ -6043,7 +5965,11 @@ func (h *MessageHandler) sendTextStatus(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// Resolve delay (delayMessage supports any duration; scheduledFor overrides with ISO 8601)
-	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayMessage, scheduledAt, err := validateAndResolveSchedule(req.DelayMessage, req.ScheduledFor)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 
 	// Parse font if provided
 	var font *int32
@@ -6088,7 +6014,7 @@ func (h *MessageHandler) sendTextStatus(w http.ResponseWriter, r *http.Request) 
 		slog.String("zaap_id", zaapID),
 		slog.String("message_type", "text_status"))
 
-	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus, scheduledAt)
 	respondJSON(w, http.StatusOK, response)
 }
 
@@ -6129,7 +6055,11 @@ func (h *MessageHandler) sendImageStatus(w http.ResponseWriter, r *http.Request)
 	}
 
 	// Resolve delay (delayMessage supports any duration; scheduledFor overrides with ISO 8601)
-	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayMessage, scheduledAt, err := validateAndResolveSchedule(req.DelayMessage, req.ScheduledFor)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 
 	// Create message args for status broadcast
 	caption := strings.TrimSpace(req.Caption)
@@ -6159,7 +6089,7 @@ func (h *MessageHandler) sendImageStatus(w http.ResponseWriter, r *http.Request)
 		slog.String("zaap_id", zaapID),
 		slog.String("message_type", "image_status"))
 
-	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus, scheduledAt)
 	respondJSON(w, http.StatusOK, response)
 }
 
@@ -6200,7 +6130,11 @@ func (h *MessageHandler) sendAudioStatus(w http.ResponseWriter, r *http.Request)
 	}
 
 	// Resolve delay (delayMessage supports any duration; scheduledFor overrides with ISO 8601)
-	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayMessage, scheduledAt, err := validateAndResolveSchedule(req.DelayMessage, req.ScheduledFor)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 
 	// Create message args for status broadcast
 	// Audio status will be processed with waveform generation in StatusProcessor
@@ -6226,7 +6160,7 @@ func (h *MessageHandler) sendAudioStatus(w http.ResponseWriter, r *http.Request)
 		slog.String("zaap_id", zaapID),
 		slog.String("message_type", "audio_status"))
 
-	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus, scheduledAt)
 	respondJSON(w, http.StatusOK, response)
 }
 
@@ -6267,7 +6201,11 @@ func (h *MessageHandler) sendVideoStatus(w http.ResponseWriter, r *http.Request)
 	}
 
 	// Resolve delay (delayMessage supports any duration; scheduledFor overrides with ISO 8601)
-	delayMessage := resolveDelay(req.DelayMessage, req.ScheduledFor)
+	delayMessage, scheduledAt, err := validateAndResolveSchedule(req.DelayMessage, req.ScheduledFor)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
+		return
+	}
 
 	// Create message args for status broadcast
 	caption := strings.TrimSpace(req.Caption)
@@ -6297,6 +6235,6 @@ func (h *MessageHandler) sendVideoStatus(w http.ResponseWriter, r *http.Request)
 		slog.String("zaap_id", zaapID),
 		slog.String("message_type", "video_status"))
 
-	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus)
+	response := h.newSendMessageResponse(zaapID, whatsAppMsgID, instStatus, scheduledAt)
 	respondJSON(w, http.StatusOK, response)
 }

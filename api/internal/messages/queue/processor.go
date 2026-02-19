@@ -28,6 +28,9 @@ type WhatsAppMessageProcessor struct {
 	pollProcessor            *PollProcessor
 	eventProcessor           *EventProcessor
 	statusProcessor          *StatusProcessor
+	pollVoteProcessor        *PollVoteProcessor
+	editEventProcessor       *EditEventProcessor
+	eventResponseProcessor   *EventResponseProcessor
 	echoEmitter              *echo.Emitter
 	log                      *slog.Logger
 }
@@ -50,6 +53,9 @@ func NewWhatsAppMessageProcessor(log *slog.Logger, echoEmitter *echo.Emitter) *W
 		pollProcessor:            NewPollProcessor(log, echoEmitter),
 		eventProcessor:           NewEventProcessor(log, echoEmitter),
 		statusProcessor:          NewStatusProcessor(log, echoEmitter),
+		pollVoteProcessor:        NewPollVoteProcessor(log, echoEmitter),
+		editEventProcessor:       NewEditEventProcessor(log, echoEmitter),
+		eventResponseProcessor:   NewEventResponseProcessor(log, echoEmitter),
 		echoEmitter:              echoEmitter,
 		log:                      log,
 	}
@@ -125,6 +131,14 @@ func (p *WhatsAppMessageProcessor) Process(ctx context.Context, client *wameow.C
 		return p.statusProcessor.ProcessAudio(ctx, client, &args)
 	case MessageTypeVideoStatus:
 		return p.statusProcessor.ProcessVideo(ctx, client, &args)
+
+	// Action message types
+	case MessageTypePollVote:
+		return p.pollVoteProcessor.Process(ctx, client, &args)
+	case MessageTypeEditEvent:
+		return p.editEventProcessor.Process(ctx, client, &args)
+	case MessageTypeEventResponse:
+		return p.eventResponseProcessor.Process(ctx, client, &args)
 
 	default:
 		return fmt.Errorf("unsupported message type: %s", args.MessageType)

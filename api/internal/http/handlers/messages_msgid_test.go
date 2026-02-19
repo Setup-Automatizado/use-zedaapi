@@ -117,7 +117,7 @@ func TestNewSendMessageResponse(t *testing.T) {
 				log: slog.New(slog.NewTextHandler(io.Discard, nil)),
 			}
 
-			resp := h.newSendMessageResponse(tt.zaapID, tt.whatsAppMsgID, nil)
+			resp := h.newSendMessageResponse(tt.zaapID, tt.whatsAppMsgID, nil, nil)
 
 			assert.Equal(t, tt.wantZaapID, resp.ZaapID)
 			assert.Equal(t, tt.wantMessageID, resp.MessageID)

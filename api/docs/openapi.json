@@ -1234,7 +1234,8 @@
               "null"
             ],
             "format": "date-time",
-            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
+            "description": "ISO 8601/RFC3339 timestamp for scheduled delivery. Takes priority over delayMessage if both provided. Must be in the future.",
+            "example": "2026-02-18T15:30:00Z"
           },
           "delayTyping": {
             "type": [
@@ -1347,7 +1348,8 @@
               "null"
             ],
             "format": "date-time",
-            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
+            "description": "ISO 8601/RFC3339 timestamp for scheduled delivery. Takes priority over delayMessage if both provided. Must be in the future.",
+            "example": "2026-02-18T15:30:00Z"
           },
           "delayTyping": {
             "type": [
@@ -1446,7 +1448,8 @@
               "null"
             ],
             "format": "date-time",
-            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
+            "description": "ISO 8601/RFC3339 timestamp for scheduled delivery. Takes priority over delayMessage if both provided. Must be in the future.",
+            "example": "2026-02-18T15:30:00Z"
           },
           "delayTyping": {
             "type": [
@@ -1552,7 +1555,8 @@
               "null"
             ],
             "format": "date-time",
-            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
+            "description": "ISO 8601/RFC3339 timestamp for scheduled delivery. Takes priority over delayMessage if both provided. Must be in the future.",
+            "example": "2026-02-18T15:30:00Z"
           },
           "delayTyping": {
             "type": [
@@ -1666,7 +1670,8 @@
               "null"
             ],
             "format": "date-time",
-            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
+            "description": "ISO 8601/RFC3339 timestamp for scheduled delivery. Takes priority over delayMessage if both provided. Must be in the future.",
+            "example": "2026-02-18T15:30:00Z"
           }
         },
         "required": [
@@ -1714,7 +1719,8 @@
               "null"
             ],
             "format": "date-time",
-            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
+            "description": "ISO 8601/RFC3339 timestamp for scheduled delivery. Takes priority over delayMessage if both provided. Must be in the future.",
+            "example": "2026-02-18T15:30:00Z"
           }
         },
         "required": [
@@ -1754,7 +1760,8 @@
               "null"
             ],
             "format": "date-time",
-            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
+            "description": "ISO 8601/RFC3339 timestamp for scheduled delivery. Takes priority over delayMessage if both provided. Must be in the future.",
+            "example": "2026-02-18T15:30:00Z"
           }
         },
         "required": [
@@ -1802,7 +1809,8 @@
               "null"
             ],
             "format": "date-time",
-            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
+            "description": "ISO 8601/RFC3339 timestamp for scheduled delivery. Takes priority over delayMessage if both provided. Must be in the future.",
+            "example": "2026-02-18T15:30:00Z"
           }
         },
         "required": [
@@ -1855,7 +1863,8 @@
               "null"
             ],
             "format": "date-time",
-            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
+            "description": "ISO 8601/RFC3339 timestamp for scheduled delivery. Takes priority over delayMessage if both provided. Must be in the future.",
+            "example": "2026-02-18T15:30:00Z"
           },
           "delayTyping": {
             "type": [
@@ -1975,7 +1984,8 @@
               "null"
             ],
             "format": "date-time",
-            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
+            "description": "ISO 8601/RFC3339 timestamp for scheduled delivery. Takes priority over delayMessage if both provided. Must be in the future.",
+            "example": "2026-02-18T15:30:00Z"
           },
           "delayTyping": {
             "type": [
@@ -2071,7 +2081,8 @@
               "null"
             ],
             "format": "date-time",
-            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
+            "description": "ISO 8601/RFC3339 timestamp for scheduled delivery. Takes priority over delayMessage if both provided. Must be in the future.",
+            "example": "2026-02-18T15:30:00Z"
           },
           "delayTyping": {
             "type": [
@@ -2180,7 +2191,8 @@
               "null"
             ],
             "format": "date-time",
-            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
+            "description": "ISO 8601/RFC3339 timestamp for scheduled delivery. Takes priority over delayMessage if both provided. Must be in the future.",
+            "example": "2026-02-18T15:30:00Z"
           },
           "delayTyping": {
             "type": [
@@ -2399,6 +2411,15 @@
             "description": "Queue status for the enqueued message (always queued on success)",
             "example": "queued"
           },
+          "scheduledFor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "ISO 8601 timestamp when the message is scheduled to be sent. Present for all enqueued messages.",
+            "example": "2026-02-18T15:30:05Z"
+          },
           "whatsAppStatus": {
             "$ref": "#/components/schemas/WhatsAppStatus"
           }
@@ -2499,7 +2520,8 @@
               "null"
             ],
             "format": "date-time",
-            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
+            "description": "ISO 8601/RFC3339 timestamp for scheduled delivery. Takes priority over delayMessage if both provided. Must be in the future.",
+            "example": "2026-02-18T15:30:00Z"
           },
           "delayTyping": {
             "type": [
@@ -2705,7 +2727,8 @@
               "null"
             ],
             "format": "date-time",
-            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
+            "description": "ISO 8601/RFC3339 timestamp for scheduled delivery. Takes priority over delayMessage if both provided. Must be in the future.",
+            "example": "2026-02-18T15:30:00Z"
           },
           "delayTyping": {
             "type": [
@@ -2995,7 +3018,8 @@
               "null"
             ],
             "format": "date-time",
-            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
+            "description": "ISO 8601/RFC3339 timestamp for scheduled delivery. Takes priority over delayMessage if both provided. Must be in the future.",
+            "example": "2026-02-18T15:30:00Z"
           },
           "delayTyping": {
             "type": [
@@ -3359,7 +3383,8 @@
               "null"
             ],
             "format": "date-time",
-            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
+            "description": "ISO 8601/RFC3339 timestamp for scheduled delivery. Takes priority over delayMessage if both provided. Must be in the future.",
+            "example": "2026-02-18T15:30:00Z"
           },
           "delayTyping": {
             "type": "integer",
@@ -3444,7 +3469,8 @@
               "null"
             ],
             "format": "date-time",
-            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
+            "description": "ISO 8601/RFC3339 timestamp for scheduled delivery. Takes priority over delayMessage if both provided. Must be in the future.",
+            "example": "2026-02-18T15:30:00Z"
           }
         },
         "required": [
@@ -3590,7 +3616,8 @@
               "null"
             ],
             "format": "date-time",
-            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
+            "description": "ISO 8601/RFC3339 timestamp for scheduled delivery. Takes priority over delayMessage if both provided. Must be in the future.",
+            "example": "2026-02-18T15:30:00Z"
           },
           "delayTyping": {
             "type": "integer",
@@ -3673,7 +3700,8 @@
               "null"
             ],
             "format": "date-time",
-            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
+            "description": "ISO 8601/RFC3339 timestamp for scheduled delivery. Takes priority over delayMessage if both provided. Must be in the future.",
+            "example": "2026-02-18T15:30:00Z"
           },
           "delayTyping": {
             "type": "integer",
@@ -5917,7 +5945,8 @@
               "null"
             ],
             "format": "date-time",
-            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
+            "description": "ISO 8601/RFC3339 timestamp for scheduled delivery. Takes priority over delayMessage if both provided. Must be in the future.",
+            "example": "2026-02-18T15:30:00Z"
           },
           "delayTyping": {
             "type": "integer",
@@ -5992,7 +6021,8 @@
               "null"
             ],
             "format": "date-time",
-            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
+            "description": "ISO 8601/RFC3339 timestamp for scheduled delivery. Takes priority over delayMessage if both provided. Must be in the future.",
+            "example": "2026-02-18T15:30:00Z"
           }
         },
         "required": [
@@ -6059,7 +6089,8 @@
               "null"
             ],
             "format": "date-time",
-            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
+            "description": "ISO 8601/RFC3339 timestamp for scheduled delivery. Takes priority over delayMessage if both provided. Must be in the future.",
+            "example": "2026-02-18T15:30:00Z"
           },
           "delayTyping": {
             "type": "integer",
@@ -6133,7 +6164,8 @@
               "null"
             ],
             "format": "date-time",
-            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
+            "description": "ISO 8601/RFC3339 timestamp for scheduled delivery. Takes priority over delayMessage if both provided. Must be in the future.",
+            "example": "2026-02-18T15:30:00Z"
           },
           "delayTyping": {
             "type": "integer",
@@ -6200,7 +6232,8 @@
               "null"
             ],
             "format": "date-time",
-            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
+            "description": "ISO 8601/RFC3339 timestamp for scheduled delivery. Takes priority over delayMessage if both provided. Must be in the future.",
+            "example": "2026-02-18T15:30:00Z"
           },
           "delayTyping": {
             "type": "integer",
@@ -6267,7 +6300,8 @@
               "null"
             ],
             "format": "date-time",
-            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
+            "description": "ISO 8601/RFC3339 timestamp for scheduled delivery. Takes priority over delayMessage if both provided. Must be in the future.",
+            "example": "2026-02-18T15:30:00Z"
           },
           "delayTyping": {
             "type": "integer",
@@ -6413,7 +6447,8 @@
               "null"
             ],
             "format": "date-time",
-            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
+            "description": "ISO 8601/RFC3339 timestamp for scheduled delivery. Takes priority over delayMessage if both provided. Must be in the future.",
+            "example": "2026-02-18T15:30:00Z"
           },
           "delayTyping": {
             "type": [
@@ -6538,7 +6573,8 @@
               "null"
             ],
             "format": "date-time",
-            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
+            "description": "ISO 8601/RFC3339 timestamp for scheduled delivery. Takes priority over delayMessage if both provided. Must be in the future.",
+            "example": "2026-02-18T15:30:00Z"
           },
           "delayTyping": {
             "type": [
@@ -6613,7 +6649,8 @@
               "null"
             ],
             "format": "date-time",
-            "description": "ISO 8601 timestamp for scheduled delivery. Takes priority over delayMessage if both provided."
+            "description": "ISO 8601/RFC3339 timestamp for scheduled delivery. Takes priority over delayMessage if both provided. Must be in the future.",
+            "example": "2026-02-18T15:30:00Z"
           },
           "delayTyping": {
             "type": [
