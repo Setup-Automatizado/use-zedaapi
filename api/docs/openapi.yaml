@@ -1,12 +1,10 @@
 openapi: 3.1.0
 info:
   title: Zé da API (Whatsmeow Bridge)
-  version: 0.1.0
-  description: "REST API, backed by Whatsmeow.
-
-    The specification currently covers the instance management surface implemented in this phase.
-
-    "
+  version: 3.5.0
+  description: |
+    Production WhatsApp Business API built on Whatsmeow.
+    Full-featured REST API for sending messages, managing instances, configuring webhooks, and handling WhatsApp events.
 servers:
   - url: https://api.example.com
     description: Production placeholder
@@ -102,6 +100,17 @@ tags:
   - name: Proxy
     description: |
       Per-instance proxy configuration and health monitoring.
+  - name: Dead Letter Queue
+    description: |
+      Dead Letter Queue (DLQ) management for failed webhook deliveries.
+
+      **Key Features:**
+      - View DLQ statistics per instance (by status, event type, failure reason)
+      - List and inspect individual failed events
+      - Retry single events or bulk retry all pending
+      - Discard events that should not be retried
+      - Purge resolved (success/discarded) events older than N days
+      - NATS JetStream DLQ stream stats when NATS is enabled
 
       **Key Features:**
       - Configure HTTP, HTTPS, or SOCKS5 proxies per instance
@@ -273,6 +282,150 @@ components:
           type: string
       required:
         - error
+
+    DLQStatsResponse:
+      type: object
+      properties:
+        total_events:
+          type: integer
+          description: Total number of DLQ events for the instance
+          example: 42
+        by_status:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Event counts grouped by reprocess status
+          example:
+            pending: 30
+            processing: 2
+            success: 5
+            failed: 3
+            discarded: 2
+        by_event_type:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Event counts grouped by event type
+          example:
+            message: 35
+            receipt: 7
+        by_failure_reason:
+          type: object
+          additionalProperties:
+            type: integer
+          description: Event counts grouped by failure reason
+          example:
+            "HTTP 500": 20
+            "connection refused": 15
+            "timeout": 7
+        nats_stream:
+          type: object
+          nullable: true
+          description: NATS JetStream DLQ stream stats (only present when NATS is enabled)
+          properties:
+            messages:
+              type: integer
+              format: uint64
+            bytes:
+              type: integer
+              format: uint64
+            subjects:
+              type: integer
+              format: uint64
+
+    DLQEventResponse:
+      type: object
+      properties:
+        event_id:
+          type: string
+          format: uuid
+        instance_id:
+          type: string
+          format: uuid
+        event_type:
+          type: string
+          example: message
+        source_lib:
+          type: string
+          example: whatsmeow
+        failure_reason:
+          type: string
+        last_error:
+          type: string
+        total_attempts:
+          type: integer
+        reprocess_status:
+          type: string
+          enum: [pending, processing, success, failed, discarded]
+        reprocess_attempts:
+          type: integer
+        moved_to_dlq_at:
+          type: string
+          format: date-time
+        first_attempt_at:
+          type: string
+          format: date-time
+        last_attempt_at:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        original_payload:
+          description: Original event payload (only included in single-event detail)
+        original_metadata:
+          description: Original event metadata (only included in single-event detail)
+
+    DLQListResponse:
+      type: object
+      properties:
+        events:
+          type: array
+          items:
+            $ref: "#/components/schemas/DLQEventResponse"
+        total:
+          type: integer
+          description: Total number of matching events
+        page:
+          type: integer
+          description: Current page number
+        page_size:
+          type: integer
+          description: Number of events per page
+
+    DLQRetryResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        event_id:
+          type: string
+          format: uuid
+        message:
+          type: string
+
+    DLQRetryAllResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        retried_count:
+          type: integer
+          description: Number of events successfully re-enqueued
+        failed_count:
+          type: integer
+          description: Number of events that failed to re-enqueue
+
+    DLQPurgeResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        deleted_count:
+          type: integer
+          format: int64
+          description: Number of resolved events deleted
+
     HealthStatusResponse:
       type: object
       description: Liveness probe response.
@@ -6936,6 +7089,304 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /instances/{instanceId}/token/{instanceToken}/dlq/stats:
+    get:
+      tags:
+        - Dead Letter Queue
+      summary: Get DLQ statistics
+      description: Returns aggregated DLQ statistics for the instance, including counts by status, event type, and failure reason. If NATS is enabled, also includes JetStream DLQ stream stats.
+      operationId: getDLQStats
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+      responses:
+        "200":
+          description: DLQ statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DLQStatsResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Instance not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /instances/{instanceId}/token/{instanceToken}/dlq/events:
+    get:
+      tags:
+        - Dead Letter Queue
+      summary: List DLQ events
+      description: Returns a paginated list of DLQ events for the instance, with optional filters by status and event type.
+      operationId: listDLQEvents
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+          description: Page number (1-based)
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+          description: Number of events per page (max 100)
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, processing, success, failed, discarded]
+          description: Filter by reprocess status
+        - name: eventType
+          in: query
+          schema:
+            type: string
+          description: Filter by event type (e.g. message, receipt)
+      responses:
+        "200":
+          description: Paginated list of DLQ events
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DLQListResponse"
+        "400":
+          description: Invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Instance not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /instances/{instanceId}/token/{instanceToken}/dlq/events/{eventId}:
+    get:
+      tags:
+        - Dead Letter Queue
+      summary: Get DLQ event detail
+      description: Returns full details of a single DLQ event, including the original payload and metadata.
+      operationId: getDLQEvent
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: DLQ event UUID
+      responses:
+        "200":
+          description: DLQ event details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DLQEventResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Event or instance not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /instances/{instanceId}/token/{instanceToken}/dlq/events/{eventId}/retry:
+    post:
+      tags:
+        - Dead Letter Queue
+      summary: Retry a DLQ event
+      description: Re-enqueues a single DLQ event for delivery. The event must be in "pending" or "failed" state.
+      operationId: retryDLQEvent
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: DLQ event UUID to retry
+      responses:
+        "200":
+          description: Event re-enqueued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DLQRetryResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Event or instance not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Event is not in a retryable state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /instances/{instanceId}/token/{instanceToken}/dlq/events/{eventId}/discard:
+    post:
+      tags:
+        - Dead Letter Queue
+      summary: Discard a DLQ event
+      description: Marks a DLQ event as discarded. Discarded events will not be retried and can be purged.
+      operationId: discardDLQEvent
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: DLQ event UUID to discard
+      responses:
+        "200":
+          description: Event discarded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DLQRetryResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Event or instance not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /instances/{instanceId}/token/{instanceToken}/dlq/retry-all:
+    post:
+      tags:
+        - Dead Letter Queue
+      summary: Retry all retryable DLQ events
+      description: Bulk-retries all retryable (pending and failed) DLQ events for the instance, up to a configurable limit.
+      operationId: retryAllDLQEvents
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+            minimum: 1
+            maximum: 500
+          description: Maximum number of events to retry (default 100, max 500)
+      responses:
+        "200":
+          description: Bulk retry result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DLQRetryAllResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Instance not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /instances/{instanceId}/token/{instanceToken}/dlq/purge:
+    delete:
+      tags:
+        - Dead Letter Queue
+      summary: Purge resolved DLQ events
+      description: Deletes DLQ events with "success" or "discarded" status that are older than the specified number of days. Instance-scoped.
+      operationId: purgeDLQEvents
+      security:
+        - ClientTokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InstanceId"
+        - $ref: "#/components/parameters/InstanceToken"
+        - name: olderThanDays
+          in: query
+          schema:
+            type: integer
+            default: 7
+            minimum: 1
+          description: Delete resolved events older than this many days (default 7)
+      responses:
+        "200":
+          description: Purge result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DLQPurgeResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Instance not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /instances/{instanceId}/token/{instanceToken}/send-text:
     post:
       tags:

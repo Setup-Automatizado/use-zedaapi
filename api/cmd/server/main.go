@@ -620,6 +620,7 @@ func main() {
 			NATSMetrics:       natsMetrics,
 			Logger:            logger,
 		})
+		natsDispatch.SetDLQRepository(dlqRepo)
 		dispatchCoordinator = natsDispatch
 		logger.Info("NATS dispatch coordinator created")
 	} else {
@@ -1312,6 +1313,9 @@ func main() {
 		privacyHandler = handlers.NewPrivacyHandler(messageCoordinator, instanceService, logger)
 	}
 
+	// Create DLQ management handler
+	dlqHandler := handlers.NewDLQHandler(dlqRepo, outboxRepo, instanceService, natsClient, cfg.NATS.Enabled && natsClient != nil, logger)
+
 	if natsClient != nil {
 		healthHandler.SetNATSClient(natsClient)
 	}
@@ -1345,6 +1349,7 @@ func main() {
 		NewslettersHandler: newslettersHandler,
 		StatusCacheHandler: statusCacheHTTPHandler,
 		PrivacyHandler:     privacyHandler,
+		DLQHandler:         dlqHandler,
 		PoolHandler:        poolHandler,
 		PartnerToken:       cfg.Partner.AuthToken,
 		DocsConfig:         docs.Config{BaseURL: cfg.HTTP.BaseURL},

@@ -34,6 +34,7 @@ type RouterDeps struct {
 	NewslettersHandler *handlers.NewslettersHandler
 	StatusCacheHandler *handlers.StatusCacheHandler
 	PrivacyHandler     *handlers.PrivacyHandler
+	DLQHandler         *handlers.DLQHandler
 	PoolHandler        *proxypool.PoolHandler
 	PartnerToken       string
 	DocsConfig         docs.Config
@@ -83,7 +84,7 @@ func NewRouter(deps RouterDeps) http.Handler {
 
 	r.Route("/docs", func(dr chi.Router) {
 		dr.Get("/", func(w http.ResponseWriter, req *http.Request) {
-			docs.UIHandler().ServeHTTP(w, req)
+			docs.UIHandler(deps.DocsConfig).ServeHTTP(w, req)
 		})
 		dr.Get("/openapi.yaml", func(w http.ResponseWriter, req *http.Request) {
 			docs.YAMLHandler(deps.DocsConfig).ServeHTTP(w, req)
@@ -113,6 +114,9 @@ func NewRouter(deps RouterDeps) http.Handler {
 		}
 		if deps.PrivacyHandler != nil {
 			deps.InstanceHandler.SetPrivacyHandler(deps.PrivacyHandler)
+		}
+		if deps.DLQHandler != nil {
+			deps.InstanceHandler.SetDLQHandler(deps.DLQHandler)
 		}
 	}
 

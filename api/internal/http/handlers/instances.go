@@ -23,6 +23,7 @@ type InstanceHandler struct {
 	newslettersHandler *NewslettersHandler
 	statusCacheHandler *StatusCacheHandler
 	privacyHandler     *PrivacyHandler
+	dlqHandler         *DLQHandler
 	poolHandler        interface{ RegisterInstanceRoutes(chi.Router) }
 	log                *slog.Logger
 }
@@ -59,6 +60,11 @@ func (h *InstanceHandler) SetStatusCacheHandler(statusCacheHandler *StatusCacheH
 // SetPrivacyHandler injects the PrivacyHandler for route registration
 func (h *InstanceHandler) SetPrivacyHandler(privacyHandler *PrivacyHandler) {
 	h.privacyHandler = privacyHandler
+}
+
+// SetDLQHandler injects the DLQHandler for route registration
+func (h *InstanceHandler) SetDLQHandler(dlqHandler *DLQHandler) {
+	h.dlqHandler = dlqHandler
 }
 
 // SetPoolHandler injects the PoolHandler for route registration
@@ -128,6 +134,11 @@ func (h *InstanceHandler) Register(r chi.Router) {
 		// Privacy settings routes
 		if h.privacyHandler != nil {
 			h.privacyHandler.RegisterRoutes(r)
+		}
+
+		// DLQ management routes
+		if h.dlqHandler != nil {
+			h.dlqHandler.RegisterRoutes(r)
 		}
 
 		// Pool proxy routes

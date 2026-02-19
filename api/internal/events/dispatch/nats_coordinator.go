@@ -11,6 +11,7 @@ import (
 
 	"go.mau.fi/whatsmeow/api/internal/config"
 	eventsnats "go.mau.fi/whatsmeow/api/internal/events/nats"
+	"go.mau.fi/whatsmeow/api/internal/events/persistence"
 	"go.mau.fi/whatsmeow/api/internal/events/pollstore"
 	"go.mau.fi/whatsmeow/api/internal/events/transport"
 	natsclient "go.mau.fi/whatsmeow/api/internal/nats"
@@ -162,6 +163,13 @@ func (c *NATSDispatchCoordinator) UnregisterInstance(ctx context.Context, instan
 		slog.String("instance_id", instanceID.String()))
 
 	return nil
+}
+
+// SetDLQRepository sets the PostgreSQL DLQ repository on the DLQ handler for dual-write.
+func (c *NATSDispatchCoordinator) SetDLQRepository(repo persistence.DLQRepository) {
+	if c.dlqHandler != nil {
+		c.dlqHandler.SetDLQRepository(repo)
+	}
 }
 
 // SetStatusInterceptor sets the status cache interceptor for all workers.

@@ -16,6 +16,7 @@ import (
 	"go.mau.fi/whatsmeow/api/internal/config"
 	"go.mau.fi/whatsmeow/api/internal/events/encoding"
 	eventsnats "go.mau.fi/whatsmeow/api/internal/events/nats"
+	"go.mau.fi/whatsmeow/api/internal/events/persistence"
 	"go.mau.fi/whatsmeow/api/internal/events/pollstore"
 	transformzapi "go.mau.fi/whatsmeow/api/internal/events/transform/zapi"
 	"go.mau.fi/whatsmeow/api/internal/events/transport"
@@ -598,8 +599,14 @@ func (w *NATSDispatchWorker) waitForMediaResult(ctx context.Context, msg jetstre
 
 // NATSEventDLQHandler publishes failed events to the DLQ stream.
 type NATSEventDLQHandler struct {
-	client *natsclient.Client
-	log    *slog.Logger
+	client  *natsclient.Client
+	dlqRepo persistence.DLQRepository
+	log     *slog.Logger
+}
+
+// SetDLQRepository sets the PostgreSQL DLQ repository for dual-write.
+func (h *NATSEventDLQHandler) SetDLQRepository(repo persistence.DLQRepository) {
+	h.dlqRepo = repo
 }
 
 // NewNATSEventDLQHandler creates a new event DLQ handler.
@@ -620,7 +627,7 @@ type NATSEventDLQEntry struct {
 	FailedAt   time.Time       `json:"failed_at"`
 }
 
-// SendToDLQ publishes a failed event to dlq.events.{instance_id}.
+// SendToDLQ publishes a failed event to dlq.events.{instance_id} and persists to PostgreSQL.
 func (h *NATSEventDLQHandler) SendToDLQ(ctx context.Context, instanceID string, envelope json.RawMessage, eventID string, attempts int, errorMsg string) error {
 	entry := NATSEventDLQEntry{
 		EventID:    eventID,
@@ -647,6 +654,56 @@ func (h *NATSEventDLQHandler) SendToDLQ(ctx context.Context, instanceID string, 
 	_, err := h.client.PublishMsg(ctx, msg, jetstream.WithMsgID(dlqMsgID))
 	if err != nil {
 		return fmt.Errorf("publish to event DLQ %s: %w", subject, err)
+	}
+
+	// Also persist to PostgreSQL for unified DLQ management API
+	if h.dlqRepo != nil {
+		instUUID, parseErr := uuid.Parse(instanceID)
+		if parseErr != nil {
+			h.log.Warn("failed to parse instance ID for PG DLQ write",
+				slog.String("instance_id", instanceID),
+				slog.String("error", parseErr.Error()))
+		} else {
+			evtUUID, parseErr := uuid.Parse(eventID)
+			if parseErr != nil {
+				h.log.Warn("failed to parse event ID for PG DLQ write",
+					slog.String("event_id", eventID),
+					slog.String("error", parseErr.Error()))
+			} else {
+				// Extract event type and source lib from the envelope
+				var envData eventsnats.NATSEventEnvelope
+				eventType := "unknown"
+				sourceLib := "unknown"
+				if jsonErr := json.Unmarshal(envelope, &envData); jsonErr == nil {
+					eventType = envData.EventType
+					sourceLib = envData.SourceLib
+				}
+
+				// Determine failure reason category
+				failureReason := "max_retries_exceeded"
+				if attempts <= 1 {
+					failureReason = "permanent_error"
+				}
+
+				rawEntry := &persistence.RawDLQEntry{
+					InstanceID:    instUUID,
+					EventID:       evtUUID,
+					EventType:     eventType,
+					SourceLib:     sourceLib,
+					Payload:       envelope,
+					FailureReason: failureReason,
+					LastError:     errorMsg,
+					Attempts:      attempts,
+				}
+				if pgErr := h.dlqRepo.InsertRaw(ctx, rawEntry); pgErr != nil {
+					// Log at Error since this means DLQ event is invisible to management API
+					h.log.Error("failed to persist DLQ event to PostgreSQL (event only in NATS DLQ)",
+						slog.String("event_id", eventID),
+						slog.String("instance_id", instanceID),
+						slog.String("error", pgErr.Error()))
+				}
+			}
+		}
 	}
 
 	h.log.Warn("event sent to DLQ",

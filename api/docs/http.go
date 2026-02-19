@@ -91,9 +91,18 @@ func generateDynamicSpec(baseURL string) ([]byte, []byte, error) {
 	return yamlBytes, jsonBytes, nil
 }
 
-func generateScalarHTML() (string, error) {
+func generateScalarHTML(baseURL string) (string, error) {
+	// Generate spec with dynamic servers and version injected
+	specContent := string(specJSONRaw)
+	if baseURL != "" {
+		_, dynamicJSON, err := generateDynamicSpec(baseURL)
+		if err == nil {
+			specContent = string(dynamicJSON)
+		}
+	}
+
 	content, err := scalar.ApiReferenceHTML(&scalar.Options{
-		SpecContent:      string(specJSONRaw),
+		SpecContent:      specContent,
 		Theme:            scalar.ThemeKepler,
 		DarkMode:         true,
 		Layout:           scalar.LayoutModern,
@@ -101,7 +110,7 @@ func generateScalarHTML() (string, error) {
 		SearchHotKey:     "k",
 		WithDefaultFonts: true,
 		CustomOptions: scalar.CustomOptions{
-			PageTitle: "ZedaAPI Documentation",
+			PageTitle: "Zé da API Documentation",
 		},
 	})
 	if err != nil {
@@ -171,10 +180,10 @@ func JSONHandler(cfg Config) http.Handler {
 	})
 }
 
-func UIHandler() http.Handler {
+func UIHandler(cfg Config) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		scalarOnce.Do(func() {
-			scalarHTML, scalarErr = generateScalarHTML()
+			scalarHTML, scalarErr = generateScalarHTML(cfg.BaseURL)
 		})
 		if scalarErr != nil {
 			http.Error(w, fmt.Sprintf("failed to generate docs UI: %v", scalarErr), http.StatusInternalServerError)
