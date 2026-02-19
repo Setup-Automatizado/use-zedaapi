@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.5.1](https://github.com/Setup-Automatizado/zedaapi/compare/v3.5.0...v3.5.1) (2026-02-19)
+
+### Bug Fixes
+
+* **docs:** use embedded spec content for Scalar HTML generation ([b1c4f5a](https://github.com/Setup-Automatizado/zedaapi/commit/b1c4f5a2a26f9cb9db63f9e4732d1b491f09804d))
+
 ## [3.5.0](https://github.com/Setup-Automatizado/zedaapi/compare/v3.4.2...v3.5.0) (2026-02-19)
 
 ### Features
