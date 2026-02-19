@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.5.0](https://github.com/Setup-Automatizado/zedaapi/compare/v3.4.2...v3.5.0) (2026-02-19)
+
+### Features
+
+* **docs:** replace Swagger UI with Scalar API Reference ([c1b0174](https://github.com/Setup-Automatizado/zedaapi/commit/c1b017492c68d9fb5fdd3acf18bb9e7d2753ff11))
+* **api:** robust scheduledFor validation, response field, and handler migration ([bb90750](https://github.com/Setup-Automatizado/zedaapi/commit/bb907504e5e7957240ae7e20cf61120d37eb7f8e))
+
 ## [3.4.2](https://github.com/Setup-Automatizado/zedaapi/compare/v3.4.1...v3.4.2) (2026-02-18)
 
 ### Bug Fixes
