@@ -93,7 +93,7 @@ func generateDynamicSpec(baseURL string) ([]byte, []byte, error) {
 
 func generateScalarHTML() (string, error) {
 	content, err := scalar.ApiReferenceHTML(&scalar.Options{
-		SpecURL:          "/docs/openapi.json",
+		SpecContent:      string(specJSONRaw),
 		Theme:            scalar.ThemeKepler,
 		DarkMode:         true,
 		Layout:           scalar.LayoutModern,
