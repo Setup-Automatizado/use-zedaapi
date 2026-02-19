@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.6.0](https://github.com/Setup-Automatizado/zedaapi/compare/v3.5.1...v3.6.0) (2026-02-19)
+
+### Features
+
+* **api:** add per-instance DLQ management API with 7 endpoints ([3cf8f42](https://github.com/Setup-Automatizado/zedaapi/commit/3cf8f42210943aa8c6f4e61934ba26b26cef1db8))
+
 ## [3.5.1](https://github.com/Setup-Automatizado/zedaapi/compare/v3.5.0...v3.5.1) (2026-02-19)
 
 ### Bug Fixes
