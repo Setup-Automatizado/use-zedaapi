@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.9.0](https://github.com/Setup-Automatizado/zedaapi/compare/v3.8.0...v3.9.0) (2026-02-20)
+
+### Features
+
+* **manager:** overhaul UX/UI for premium SaaS quality ([7d6df1d](https://github.com/Setup-Automatizado/zedaapi/commit/7d6df1df823233dba0cc314ec87d0697af8e379d))
+
 ## [3.8.0](https://github.com/Setup-Automatizado/zedaapi/compare/v3.7.0...v3.8.0) (2026-02-20)
 
 ### Features
