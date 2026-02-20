@@ -4,7 +4,7 @@ import { getAuthSession } from "@/lib/auth-server";
 
 export const metadata: Metadata = {
 	title: "Zé da API Manager",
-	description: "Gerencie suas instancias WhatsApp API",
+	description: "Gerencie suas instâncias WhatsApp API",
 };
 
 export default async function AuthLayout({

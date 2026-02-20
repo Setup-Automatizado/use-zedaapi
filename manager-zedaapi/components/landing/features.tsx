@@ -27,78 +27,78 @@ interface Feature {
 const features: Feature[] = [
 	{
 		icon: Code2,
-		title: "Integre em 5 Minutos",
+		title: "API REST com Swagger UI",
 		description:
-			"Um único curl e você já está enviando mensagens. API REST documentada, compatível com qualquer linguagem — sem SDKs obrigatórios.",
+			"Endpoints documentados com OpenAPI 3.0 e Swagger interativo. Um curl e você envia a primeira mensagem — sem SDK obrigatório.",
 		highlight: true,
 	},
 	{
 		icon: Webhook,
-		title: "Saiba Tudo em Tempo Real",
+		title: "Webhooks com 47ms (p50)",
 		description:
-			"Receba webhooks instantâneos a cada mensagem, leitura e status de entrega. Latência média de 47ms do evento ao seu servidor.",
+			"Cada mensagem, leitura e status de entrega dispara um webhook ao seu servidor. Latência p50 de 47ms, p99 abaixo de 200ms.",
 		highlight: true,
 	},
 	{
 		icon: Infinity,
-		title: "Escale Sem Limites",
+		title: "Preço Fixo por Faixa",
 		description:
-			"Zero cobrança por mensagem, sem teto por instância. Empresas enviam mais de 10 milhões de mensagens por mês conosco — sem custo extra.",
+			"Zero cobrança por mensagem, sem teto por instância. Pague pela faixa de instâncias e envie sem limite — até 10M mensagens/mês comprovados.",
 	},
 	{
 		icon: Smartphone,
-		title: "Gerencie Tudo de Um Só Lugar",
+		title: "Multi-instância Independente",
 		description:
-			"Conecte múltiplas instâncias WhatsApp e controle todas pelo mesmo painel. Cada número opera de forma 100% independente.",
+			"Conecte múltiplas instâncias WhatsApp e controle todas pelo mesmo painel. Cada número opera com fila FIFO isolada e QR Code próprio.",
 		highlight: true,
 	},
 	{
 		icon: ImageIcon,
-		title: "Envie Qualquer Formato",
+		title: "Mídia Assíncrona com S3",
 		description:
-			"Imagens, vídeos, áudios, PDFs, stickers e localização — tudo via API. Processamento assíncrono para nunca travar sua fila.",
+			"Imagens, vídeos, áudios, PDFs e stickers processados de forma assíncrona. Fast path de 5s com fallback para fila — nunca bloqueia eventos.",
 	},
 	{
 		icon: MousePointerClick,
-		title: "Converta com Interatividade",
+		title: "Botões e Listas Interativas",
 		description:
-			"Botões de resposta rápida, listas de seleção e menus interativos que aumentam suas taxas de conversão em até 3x.",
+			"Botões de resposta rápida, listas de seleção e menus interativos via API. Aumente conversão sem depender de templates da Meta.",
 	},
 	{
 		icon: Users,
-		title: "Domine Grupos e Comunidades",
+		title: "Grupos via API Completa",
 		description:
-			"Crie grupos, adicione participantes, defina admins e envie mensagens em massa — tudo automatizado pela API.",
+			"Crie grupos, adicione participantes, defina admins e envie em massa — tudo automatizado com endpoints REST dedicados.",
 	},
 	{
 		icon: BarChart3,
-		title: "Decisões com Dados Reais",
+		title: "Métricas com Prometheus",
 		description:
-			"Dashboard completo com métricas de envio, entrega, leitura e saúde das instâncias. Monitore tudo em tempo real.",
+			"Counters e histogramas exportados para Prometheus. Dashboard de envio, entrega, leitura e saúde de cada instância em tempo real.",
 	},
 	{
 		icon: ShieldCheck,
-		title: "99.9% Online, Sempre",
+		title: "SLA de 99.9% por Contrato",
 		description:
-			"Infraestrutura redundante com monitoramento 24/7 e SLA garantido por contrato. Sua operação nunca para.",
+			"Infraestrutura redundante com monitoramento 24/7, failover automático e SLA formal. Downtime máximo de 43min/mês nos planos Business+.",
 	},
 	{
 		icon: Lock,
-		title: "Segurança Nível Enterprise",
+		title: "TLS 1.3 + AES-256-GCM",
 		description:
-			"TLS 1.3 em trânsito, AES-256 em repouso, tokens rotativos e rate limiting. 100% em conformidade com a LGPD.",
+			"Criptografia em trânsito e em repouso, tokens com hash criptográfico, rate limiting por instância. Conformidade total com a LGPD.",
 	},
 	{
 		icon: BookOpen,
-		title: "Documente-se em Minutos",
+		title: "Docs com Exemplos em 4 Linguagens",
 		description:
-			"Guias passo a passo, exemplos em 8 linguagens, Postman collection pronta e referência interativa da API.",
+			"Guias passo a passo, exemplos em Node.js, Python, PHP e Go, Postman collection pronta e referência Swagger interativa.",
 	},
 	{
 		icon: Headset,
-		title: "Suporte que Fala Sua Língua",
+		title: "Suporte Técnico em Português",
 		description:
-			"Time técnico 100% brasileiro, disponível por e-mail e WhatsApp. Planos avançados têm atendimento dedicado e prioritário.",
+			"Equipe técnica brasileira por e-mail e WhatsApp. Planos Business+ incluem suporte prioritário com SLA de resposta de 4h.",
 	},
 ];
 
@@ -148,9 +148,8 @@ export function Features() {
 						transition={{ duration: 0.5, delay: 0.05 }}
 						className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl"
 					>
-						Resultados que sua concorrência{" "}
-						<span className="text-primary">não consegue</span>{" "}
-						entregar
+						Tudo que sua integração WhatsApp{" "}
+						<span className="text-primary">precisa</span>
 					</motion.h2>
 					<motion.p
 						initial={{ opacity: 0, y: 16 }}
@@ -159,9 +158,8 @@ export function Features() {
 						transition={{ duration: 0.5, delay: 0.1 }}
 						className="mt-4 text-base text-muted-foreground sm:text-lg leading-relaxed"
 					>
-						Enquanto outras APIs travam na escalabilidade, a ZedaAPI
-						processa mais de 10 milhões de mensagens por mês com
-						latência média de 47ms.
+						API REST documentada, webhooks instantâneos, mídia
+						assíncrona e preço fixo sem cobrança por mensagem.
 					</motion.p>
 				</div>
 

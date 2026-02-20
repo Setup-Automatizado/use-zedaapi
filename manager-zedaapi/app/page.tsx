@@ -13,9 +13,9 @@ import { FAQ } from "@/components/landing/faq";
 import { CTA } from "@/components/landing/cta";
 
 export const metadata: Metadata = {
-	title: "Zé da API - A API de WhatsApp #1 do Brasil | Envie Mensagens via API REST",
+	title: "Zé da API - API de WhatsApp para Empresas | Envie Mensagens via API REST",
 	description:
-		"Automatize o WhatsApp da sua empresa com a API mais confiável do Brasil. Envie mensagens, gerencie múltiplas instâncias, webhooks em tempo real e 99.9% de uptime. +500 empresas confiam. Teste grátis por 7 dias.",
+		"Automatize o WhatsApp da sua empresa com a ZedaAPI. Até 10M mensagens/mês, webhooks em tempo real, 99.9% de uptime e preço fixo sem taxa por mensagem. +500 empresas confiam. Teste grátis por 7 dias, sem cartão.",
 	keywords: [
 		"WhatsApp API",
 		"API WhatsApp Brasil",
@@ -29,11 +29,13 @@ export const metadata: Metadata = {
 		"Zé da API",
 		"ZedaAPI",
 		"zedaapi.com",
+		"API WhatsApp preço",
+		"sem taxa por mensagem",
 	],
 	openGraph: {
-		title: "Zé da API - Automatize o WhatsApp da Sua Empresa",
+		title: "Zé da API - API de WhatsApp para Empresas",
 		description:
-			"A API de WhatsApp #1 do Brasil. Envie mensagens, gerencie instâncias e receba webhooks em tempo real. +500 empresas confiam. Teste grátis.",
+			"Envie até 10M mensagens/mês via API REST com 47ms de latência. Webhooks em tempo real, multi-instância e preço fixo. +500 empresas confiam. Teste grátis, sem cartão.",
 		url: "https://zedaapi.com",
 		siteName: "Zé da API",
 		locale: "pt_BR",
@@ -41,9 +43,9 @@ export const metadata: Metadata = {
 	},
 	twitter: {
 		card: "summary_large_image",
-		title: "Zé da API - A API de WhatsApp #1 do Brasil",
+		title: "Zé da API - API de WhatsApp para Empresas",
 		description:
-			"Automatize o WhatsApp da sua empresa. API REST completa, webhooks em tempo real, multi-device. Teste grátis por 7 dias.",
+			"Automatize o WhatsApp da sua empresa. API REST completa, webhooks em tempo real, multi-device. Teste grátis por 7 dias, sem cartão.",
 	},
 	alternates: {
 		canonical: "https://zedaapi.com",

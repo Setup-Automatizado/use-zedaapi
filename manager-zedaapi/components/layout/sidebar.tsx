@@ -28,19 +28,19 @@ import { useAuth } from "@/hooks/use-auth";
 
 const mainNav = [
 	{ name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-	{ name: "Instancias", href: "/dashboard/instances", icon: Smartphone },
-	{ name: "Assinatura", href: "/dashboard/billing", icon: CreditCard },
-	{ name: "Chaves API", href: "/dashboard/api-keys", icon: Key },
+	{ name: "Instâncias", href: "/instances", icon: Smartphone },
+	{ name: "Assinatura", href: "/billing", icon: CreditCard },
+	{ name: "Chaves API", href: "/api-keys", icon: Key },
 ];
 
 const orgNav = [
-	{ name: "Organizacao", href: "/dashboard/organization", icon: Building2 },
+	{ name: "Organização", href: "/organization", icon: Building2 },
 	{
 		name: "Membros",
-		href: "/dashboard/organization/members",
+		href: "/organization/members",
 		icon: Users,
 	},
-	{ name: "Configuracoes", href: "/dashboard/settings", icon: Settings },
+	{ name: "Configurações", href: "/settings", icon: Settings },
 ];
 
 export function Sidebar() {
@@ -133,7 +133,7 @@ export function Sidebar() {
 
 				{!isCollapsed && (
 					<p className="mb-2 mt-6 px-3 text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
-						Organizacao
+						Organização
 					</p>
 				)}
 				{isCollapsed && <Separator className="my-3" />}
@@ -163,7 +163,7 @@ export function Sidebar() {
 					{!isCollapsed && (
 						<div className="flex-1 min-w-0">
 							<p className="truncate text-sm font-medium leading-none">
-								{user?.name ?? "Usuario"}
+								{user?.name ?? "Usuário"}
 							</p>
 							<p className="truncate text-xs text-muted-foreground mt-0.5">
 								{user?.email ?? ""}

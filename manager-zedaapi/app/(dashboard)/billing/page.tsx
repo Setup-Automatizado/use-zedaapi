@@ -9,27 +9,15 @@ import {
 } from "@/components/shared/loading-skeleton";
 import { BillingClient } from "./billing-client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { StatusBadge } from "@/components/shared/status-badge";
+import { PageHeader } from "@/components/shared/page-header";
 import { CreditCard, CheckCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-	title: "Assinatura e Cobranca | Zé da API Manager",
-};
-
-const statusConfig: Record<string, { label: string; className: string }> = {
-	active: { label: "Ativa", className: "bg-primary/10 text-primary" },
-	trialing: { label: "Trial", className: "bg-chart-2/10 text-chart-2" },
-	past_due: {
-		label: "Vencida",
-		className: "bg-destructive/10 text-destructive",
-	},
-	canceled: {
-		label: "Cancelada",
-		className: "bg-muted text-muted-foreground",
-	},
+	title: "Assinatura e Cobrança | Zé da API Manager",
 };
 
 async function SubscriptionSummary() {
@@ -46,17 +34,12 @@ async function SubscriptionSummary() {
 						href="/subscriptions/plans"
 						className="mt-2 inline-block text-sm font-medium text-primary hover:underline"
 					>
-						Ver planos disponiveis
+						Ver planos disponíveis
 					</Link>
 				</CardContent>
 			</Card>
 		);
 	}
-
-	const config = statusConfig[subscription.status] ?? {
-		label: subscription.status,
-		className: "bg-muted text-muted-foreground",
-	};
 
 	const price =
 		typeof subscription.plan.price === "string"
@@ -73,9 +56,11 @@ async function SubscriptionSummary() {
 						<CreditCard className="size-4" />
 						Plano Atual - {subscription.plan.name}
 					</CardTitle>
-					<Badge variant="secondary" className={cn(config.className)}>
-						{config.label}
-					</Badge>
+					<StatusBadge
+						status={subscription.status}
+						type="subscription"
+						showDot={false}
+					/>
 				</div>
 			</CardHeader>
 			<CardContent className="space-y-4">
@@ -93,7 +78,7 @@ async function SubscriptionSummary() {
 
 				{subscription.currentPeriodEnd && (
 					<div className="text-sm text-muted-foreground">
-						Proximo vencimento:{" "}
+						Próximo vencimento:{" "}
 						{new Date(
 							subscription.currentPeriodEnd,
 						).toLocaleDateString("pt-BR")}
@@ -118,18 +103,12 @@ async function SubscriptionSummary() {
 				)}
 
 				<div className="flex gap-2 pt-2">
-					<Link
-						href="/subscriptions/plans"
-						className="inline-flex items-center justify-center rounded-md border border-input bg-background px-3 py-1.5 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground"
-					>
-						Alterar plano
-					</Link>
-					<Link
-						href="/subscriptions"
-						className="inline-flex items-center justify-center rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-					>
-						Gerenciar assinatura
-					</Link>
+					<Button variant="outline" size="sm" asChild>
+						<Link href="/subscriptions/plans">Alterar plano</Link>
+					</Button>
+					<Button variant="ghost" size="sm" asChild>
+						<Link href="/subscriptions">Gerenciar assinatura</Link>
+					</Button>
 				</div>
 			</CardContent>
 		</Card>
@@ -184,14 +163,10 @@ export default async function BillingPage() {
 
 	return (
 		<div className="space-y-6">
-			<div>
-				<h1 className="text-2xl font-bold tracking-tight">
-					Assinatura e Cobranca
-				</h1>
-				<p className="text-sm text-muted-foreground">
-					Gerencie sua assinatura e metodos de pagamento.
-				</p>
-			</div>
+			<PageHeader
+				title="Assinatura e Cobrança"
+				description="Gerencie sua assinatura e métodos de pagamento."
+			/>
 
 			<div className="grid gap-4 lg:grid-cols-3">
 				<Suspense fallback={<CardSkeleton />}>

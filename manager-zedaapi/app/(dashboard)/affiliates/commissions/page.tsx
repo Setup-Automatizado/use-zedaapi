@@ -6,11 +6,12 @@ import {
 } from "@/server/services/affiliate-service";
 import { CommissionTable } from "@/components/affiliates/commission-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/shared/page-header";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-	title: "Comissoes | Zé da API Manager",
+	title: "Comissões | Zé da API Manager",
 };
 
 interface Props {
@@ -33,20 +34,11 @@ export default async function CommissionsPage({ searchParams }: Props) {
 
 	return (
 		<div className="mx-auto max-w-4xl space-y-6 p-6">
-			<div className="flex items-center justify-between">
-				<div>
-					<h1 className="text-2xl font-semibold">Comissões</h1>
-					<p className="text-muted-foreground mt-1">
-						Histórico de comissões geradas pelas suas indicações.
-					</p>
-				</div>
-				<Link
-					href="/affiliates"
-					className="text-sm text-muted-foreground hover:text-foreground"
-				>
-					Voltar
-				</Link>
-			</div>
+			<PageHeader
+				title="Comissões"
+				description="Histórico de comissões geradas pelas suas indicações."
+				backHref="/affiliates"
+			/>
 
 			<Card>
 				<CardHeader>

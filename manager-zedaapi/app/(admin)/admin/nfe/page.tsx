@@ -8,6 +8,7 @@ import {
 	CardsSkeleton,
 	TableSkeleton,
 } from "@/components/shared/loading-skeleton";
+import { PageHeader } from "@/components/shared/page-header";
 
 export const metadata: Metadata = {
 	title: "NFS-e Nacional | Admin Zé da API Manager",
@@ -18,14 +19,10 @@ export default async function NfePage() {
 
 	return (
 		<div className="space-y-6">
-			<div>
-				<h1 className="text-2xl font-bold tracking-tight">
-					NFS-e Nacional
-				</h1>
-				<p className="text-sm text-muted-foreground">
-					Gerenciamento de notas fiscais de servico.
-				</p>
-			</div>
+			<PageHeader
+				title="NFS-e Nacional"
+				description="Gerenciamento de notas fiscais de serviço."
+			/>
 
 			<Suspense
 				fallback={

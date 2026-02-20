@@ -16,6 +16,7 @@ import {
 	CardsSkeleton,
 	TableSkeleton,
 } from "@/components/shared/loading-skeleton";
+import { PageHeader } from "@/components/shared/page-header";
 
 export const metadata: Metadata = {
 	title: "Afiliados | Admin Zé da API Manager",
@@ -52,14 +53,10 @@ export default async function AdminAffiliatesPage() {
 
 	return (
 		<div className="space-y-6">
-			<div>
-				<h1 className="text-2xl font-bold tracking-tight">
-					Gestao de Afiliados
-				</h1>
-				<p className="text-sm text-muted-foreground">
-					Gerencie afiliados, comissoes e pagamentos.
-				</p>
-			</div>
+			<PageHeader
+				title="Gestão de Afiliados"
+				description="Gerencie afiliados, comissões e pagamentos."
+			/>
 
 			<Suspense
 				fallback={
@@ -141,7 +138,7 @@ async function AffiliatesContent() {
 				<Card>
 					<CardHeader className="pb-2">
 						<CardTitle className="text-xs font-medium text-muted-foreground">
-							Comissoes Pendentes
+							Comissões Pendentes
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
@@ -165,9 +162,9 @@ async function AffiliatesContent() {
 						<TableHeader>
 							<TableRow>
 								<TableHead>Afiliado</TableHead>
-								<TableHead>Codigo</TableHead>
+								<TableHead>Código</TableHead>
 								<TableHead>Taxa</TableHead>
-								<TableHead>Indicacoes</TableHead>
+								<TableHead>Indicações</TableHead>
 								<TableHead>Total Ganho</TableHead>
 								<TableHead>Total Pago</TableHead>
 								<TableHead>Status</TableHead>
@@ -227,7 +224,7 @@ async function AffiliatesContent() {
 				<Card>
 					<CardHeader>
 						<CardTitle className="text-sm font-medium">
-							Pagamentos Pendentes de Aprovacao
+							Pagamentos Pendentes de Aprovação
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
@@ -236,7 +233,7 @@ async function AffiliatesContent() {
 								<TableRow>
 									<TableHead>Afiliado</TableHead>
 									<TableHead>Valor</TableHead>
-									<TableHead>Metodo</TableHead>
+									<TableHead>Método</TableHead>
 									<TableHead>Data</TableHead>
 								</TableRow>
 							</TableHeader>

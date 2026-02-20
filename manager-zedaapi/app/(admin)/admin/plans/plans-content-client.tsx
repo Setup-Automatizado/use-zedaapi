@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
+import { PageHeader } from "@/components/shared/page-header";
 import { Plus, Pencil, Loader2 } from "lucide-react";
 import {
 	Dialog,
@@ -120,20 +121,16 @@ export function PlansContentClient({ initialPlans }: PlansContentClientProps) {
 
 	return (
 		<div className="space-y-6">
-			<div className="flex items-center justify-between">
-				<div>
-					<h1 className="text-2xl font-bold tracking-tight">
-						Planos
-					</h1>
-					<p className="text-sm text-muted-foreground">
-						Gerencie os planos de assinatura.
-					</p>
-				</div>
-				<Button onClick={openCreate}>
-					<Plus className="size-4" />
-					Novo Plano
-				</Button>
-			</div>
+			<PageHeader
+				title="Planos"
+				description="Gerencie os planos de assinatura."
+				action={
+					<Button onClick={openCreate}>
+						<Plus className="size-4" />
+						Novo Plano
+					</Button>
+				}
+			/>
 
 			<div className="grid gap-4 lg:grid-cols-3">
 				{plans.map((plan) => (
@@ -164,7 +161,7 @@ export function PlansContentClient({ initialPlans }: PlansContentClientProps) {
 								<span className="text-sm font-normal text-muted-foreground">
 									/
 									{plan.interval === "month"
-										? "mes"
+										? "mês"
 										: plan.interval}
 								</span>
 							</div>
@@ -174,7 +171,7 @@ export function PlansContentClient({ initialPlans }: PlansContentClientProps) {
 							<dl className="space-y-2 text-sm">
 								<div className="flex justify-between">
 									<dt className="text-muted-foreground">
-										Instancias
+										Instâncias
 									</dt>
 									<dd className="font-medium">
 										{plan.maxInstances}
@@ -216,7 +213,7 @@ export function PlansContentClient({ initialPlans }: PlansContentClientProps) {
 						</DialogTitle>
 						<DialogDescription>
 							{editPlan
-								? "Altere as configuracoes do plano."
+								? "Altere as configurações do plano."
 								: "Crie um novo plano de assinatura."}
 						</DialogDescription>
 					</DialogHeader>
@@ -250,7 +247,7 @@ export function PlansContentClient({ initialPlans }: PlansContentClientProps) {
 								/>
 							</div>
 							<div className="space-y-2">
-								<Label>Preco (R$)</Label>
+								<Label>Preço (R$)</Label>
 								<Input
 									type="number"
 									value={form.price}
@@ -264,7 +261,7 @@ export function PlansContentClient({ initialPlans }: PlansContentClientProps) {
 								/>
 							</div>
 							<div className="space-y-2">
-								<Label>Max. Instancias</Label>
+								<Label>Max. Instâncias</Label>
 								<Input
 									type="number"
 									value={form.maxInstances}

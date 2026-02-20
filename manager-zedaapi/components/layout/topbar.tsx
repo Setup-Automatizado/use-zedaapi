@@ -27,16 +27,16 @@ import { Fragment } from "react";
 
 const breadcrumbMap: Record<string, string> = {
 	dashboard: "Dashboard",
-	instances: "Instancias",
+	instances: "Instâncias",
 	billing: "Assinatura",
 	"api-keys": "Chaves API",
-	organization: "Organizacao",
+	organization: "Organização",
 	members: "Membros",
-	settings: "Configuracoes",
+	settings: "Configurações",
 	profile: "Perfil",
-	security: "Seguranca",
+	security: "Segurança",
 	admin: "Admin",
-	users: "Usuarios",
+	users: "Usuários",
 	subscriptions: "Assinaturas",
 	plans: "Planos",
 	invoices: "Faturas",
@@ -108,7 +108,7 @@ export function Topbar({ onMobileMenuToggle }: TopbarProps) {
 			<div className="ml-auto flex items-center gap-2">
 				<Button variant="ghost" size="icon-sm" className="relative">
 					<Bell className="size-4" />
-					<span className="sr-only">Notificacoes</span>
+					<span className="sr-only">Notificações</span>
 				</Button>
 
 				<DropdownMenu>
@@ -128,7 +128,7 @@ export function Topbar({ onMobileMenuToggle }: TopbarProps) {
 					<DropdownMenuContent align="end" className="w-48">
 						<div className="px-2 py-1.5">
 							<p className="text-sm font-medium leading-none">
-								{user?.name ?? "Usuario"}
+								{user?.name ?? "Usuário"}
 							</p>
 							<p className="mt-0.5 text-xs text-muted-foreground">
 								{user?.email ?? ""}
@@ -136,12 +136,10 @@ export function Topbar({ onMobileMenuToggle }: TopbarProps) {
 						</div>
 						<DropdownMenuSeparator />
 						<DropdownMenuItem asChild>
-							<Link href="/dashboard/profile">Perfil</Link>
+							<Link href="/profile">Perfil</Link>
 						</DropdownMenuItem>
 						<DropdownMenuItem asChild>
-							<Link href="/dashboard/settings">
-								Configuracoes
-							</Link>
+							<Link href="/settings">Configurações</Link>
 						</DropdownMenuItem>
 						{isAdmin && (
 							<DropdownMenuItem asChild>

@@ -7,6 +7,7 @@ import {
 import { registerAffiliate } from "@/server/services/affiliate-service";
 import { ReferralLink } from "@/components/affiliates/referral-link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PageHeader } from "@/components/shared/page-header";
 import Link from "next/link";
 
 export const metadata: Metadata = {
@@ -50,16 +51,10 @@ export default async function AffiliatesPage() {
 
 	return (
 		<div className="mx-auto max-w-4xl space-y-6 p-6">
-			<div>
-				<h1 className="text-2xl font-semibold">
-					Programa de Afiliados
-				</h1>
-				<p className="text-muted-foreground mt-1">
-					Indique novos usuários e receba{" "}
-					{(Number(affiliate.commissionRate) * 100).toFixed(0)}% de
-					comissão sobre cada pagamento.
-				</p>
-			</div>
+			<PageHeader
+				title="Programa de Afiliados"
+				description={`Indique novos usuários e receba ${(Number(affiliate.commissionRate) * 100).toFixed(0)}% de comissão sobre cada pagamento.`}
+			/>
 
 			<ReferralLink code={affiliate.code} />
 

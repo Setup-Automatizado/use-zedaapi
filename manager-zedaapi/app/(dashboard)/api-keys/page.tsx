@@ -3,6 +3,7 @@ import { requireAuth } from "@/lib/auth-server";
 import { db } from "@/lib/db";
 import { Suspense } from "react";
 import { TableSkeleton } from "@/components/shared/loading-skeleton";
+import { PageHeader } from "@/components/shared/page-header";
 import { ApiKeysClient } from "./api-keys-client";
 
 export const metadata: Metadata = {
@@ -40,14 +41,10 @@ export default async function ApiKeysPage() {
 
 	return (
 		<div className="space-y-6">
-			<div>
-				<h1 className="text-2xl font-bold tracking-tight">
-					Chaves API
-				</h1>
-				<p className="text-sm text-muted-foreground">
-					Gerencie as chaves de acesso a API.
-				</p>
-			</div>
+			<PageHeader
+				title="Chaves API"
+				description="Gerencie as chaves de acesso à API."
+			/>
 
 			<Suspense fallback={<TableSkeleton rows={3} />}>
 				<ApiKeysList userId={session.user.id} />

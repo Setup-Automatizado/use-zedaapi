@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { requireAdmin } from "@/lib/auth-server";
 import { getAdminSubscriptions } from "@/server/actions/admin";
 import { TableSkeleton } from "@/components/shared/loading-skeleton";
+import { PageHeader } from "@/components/shared/page-header";
 import { SubscriptionsTableClient } from "./subscriptions-table-client";
 
 export const metadata: Metadata = {
@@ -14,14 +15,10 @@ export default async function AdminSubscriptionsPage() {
 
 	return (
 		<div className="space-y-6">
-			<div>
-				<h1 className="text-2xl font-bold tracking-tight">
-					Assinaturas
-				</h1>
-				<p className="text-sm text-muted-foreground">
-					Todas as assinaturas da plataforma.
-				</p>
-			</div>
+			<PageHeader
+				title="Assinaturas"
+				description="Todas as assinaturas da plataforma."
+			/>
 
 			<Suspense fallback={<TableSkeleton />}>
 				<SubscriptionsList />

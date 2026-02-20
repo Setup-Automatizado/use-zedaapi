@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { requireAuth } from "@/lib/auth-server";
 import { ProfileFormSkeleton } from "@/components/shared/loading-skeleton";
+import { PageHeader } from "@/components/shared/page-header";
 import { ProfileForm } from "@/components/profile/profile-form";
 import Link from "next/link";
 
@@ -25,12 +26,10 @@ async function ProfileData() {
 export default async function ProfilePage() {
 	return (
 		<div className="space-y-6">
-			<div>
-				<h1 className="text-2xl font-bold tracking-tight">Perfil</h1>
-				<p className="text-sm text-muted-foreground">
-					Gerencie suas informacoes pessoais.
-				</p>
-			</div>
+			<PageHeader
+				title="Perfil"
+				description="Gerencie suas informações pessoais."
+			/>
 
 			<div className="flex gap-2 text-sm">
 				<Link
@@ -43,7 +42,7 @@ export default async function ProfilePage() {
 					href="/profile/security"
 					className="rounded-lg px-3 py-1.5 text-muted-foreground hover:bg-muted/50"
 				>
-					Seguranca
+					Segurança
 				</Link>
 			</div>
 

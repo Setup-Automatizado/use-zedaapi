@@ -40,15 +40,13 @@ export function CTA() {
 						</div>
 
 						<h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-							Sua concorrência já automatizou.{" "}
-							<span className="text-primary">E você?</span>
+							Comece a enviar em 5 minutos.{" "}
+							<span className="text-primary">Teste grátis.</span>
 						</h2>
 
 						<p className="mt-5 text-base text-muted-foreground sm:text-lg leading-relaxed">
-							Mais de 500 empresas migraram para o Zé da API nos
-							últimos 6 meses e já enviam milhões de mensagens via
-							WhatsApp todos os meses. Comece em 5 minutos — sem
-							cartão, sem contrato.
+							+500 empresas já usam a ZedaAPI em produção. Crie
+							sua conta, conecte pelo QR Code e comece a enviar.
 						</p>
 
 						<div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
@@ -58,7 +56,7 @@ export function CTA() {
 								className="h-12 px-8 text-base shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/25 transition-all duration-300"
 							>
 								<Link href="/sign-up">
-									Começar Agora — 7 Dias Grátis
+									Criar Conta Grátis
 									<ArrowRightIcon
 										data-icon="inline-end"
 										className="size-4"

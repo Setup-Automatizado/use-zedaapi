@@ -66,8 +66,8 @@ export default function ContatoPage() {
 							Entre em Contato
 						</h1>
 						<p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
-							Tem duvidas, quer uma demonstracao ou precisa de
-							suporte? Nossa equipe esta pronta para ajudar.
+							Tem dúvidas, quer uma demonstração ou precisa de
+							suporte? Nossa equipe está pronta para ajudar.
 						</p>
 					</div>
 				</div>
@@ -82,7 +82,7 @@ export default function ContatoPage() {
 							Canais de atendimento
 						</h2>
 						<p className="mt-2 text-sm text-muted-foreground">
-							Escolha o canal mais conveniente para voce.
+							Escolha o canal mais conveniente para você.
 						</p>
 
 						<div className="mt-8 flex flex-col gap-6">

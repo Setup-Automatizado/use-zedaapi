@@ -84,7 +84,7 @@ export function PlansClient({ plans, currentPlanSlug }: PlansClientProps) {
 								style: "currency",
 								currency: "BRL",
 							}).format(selectedPlan.price)}
-							/mes — ate {selectedPlan.maxInstances} instancias
+							/mês — até {selectedPlan.maxInstances} instâncias
 						</p>
 					</CardHeader>
 					<CardContent>

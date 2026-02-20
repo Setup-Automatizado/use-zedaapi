@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { requireAuth } from "@/lib/auth-server";
+import { PageHeader } from "@/components/shared/page-header";
 import { MembersClient } from "./members-client";
 
 export const metadata: Metadata = {
@@ -14,7 +15,7 @@ export default async function MembersPage() {
 	const members = [
 		{
 			id: session.user.id,
-			name: session.user.name ?? "Usuario",
+			name: session.user.name ?? "Usuário",
 			email: session.user.email ?? "",
 			role: "owner" as const,
 			joinedAt: new Date().toISOString(),
@@ -23,12 +24,10 @@ export default async function MembersPage() {
 
 	return (
 		<div className="space-y-6">
-			<div>
-				<h1 className="text-2xl font-bold tracking-tight">Membros</h1>
-				<p className="text-sm text-muted-foreground">
-					Gerencie os membros da sua organizacao.
-				</p>
-			</div>
+			<PageHeader
+				title="Membros"
+				description="Gerencie os membros da sua organização."
+			/>
 
 			<MembersClient members={members} />
 		</div>

@@ -30,8 +30,8 @@ import {
 const SLIDER_RANGE = MAX_INSTANCES - MIN_INSTANCES;
 
 function getSavingsMessage(instanceCount: number): string | null {
-	if (instanceCount >= 100) return "Até 28% mais barato que a concorrência";
-	if (instanceCount >= 10) return "Até 85% mais barato que a concorrência";
+	if (instanceCount >= 100) return "Até 28% mais barato por instância";
+	if (instanceCount >= 10) return "Até 85% mais barato por instância";
 	if (instanceCount >= 2) return "Preço imbatível para começar";
 	return null;
 }
@@ -89,21 +89,29 @@ export function Pricing() {
 						Preços
 					</p>
 					<h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-						Escale sem{" "}
-						<span className="text-primary">surpresas</span>
+						Preço fixo por faixa.{" "}
+						<span className="text-primary">
+							Sem taxa por mensagem.
+						</span>
 					</h2>
 					<p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
-						Preço fixo por faixa. Sem taxa por mensagem. Ajuste suas
-						instâncias e pague apenas pelo que precisa.
+						Ajuste o número de instâncias e pague pela faixa. Todas
+						as funcionalidades incluídas.
 					</p>
 
 					{/* Monthly/Annual Toggle */}
-					<div className="mt-8 inline-flex items-center gap-3 rounded-4xl border border-border bg-muted/50 p-1">
+					<div
+						className="mt-8 inline-flex items-center gap-3 rounded-4xl border border-border bg-muted/50 p-1"
+						role="radiogroup"
+						aria-label="Alternar entre mensal e anual"
+					>
 						<button
 							type="button"
+							role="radio"
+							aria-checked={!annual}
 							onClick={() => setAnnual(false)}
 							className={cn(
-								"rounded-4xl px-4 py-2 text-sm font-medium transition-all duration-200",
+								"rounded-4xl px-4 py-2 text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
 								!annual
 									? "bg-background text-foreground shadow-sm"
 									: "text-muted-foreground hover:text-foreground",
@@ -113,9 +121,11 @@ export function Pricing() {
 						</button>
 						<button
 							type="button"
+							role="radio"
+							aria-checked={annual}
 							onClick={() => setAnnual(true)}
 							className={cn(
-								"flex items-center gap-2 rounded-4xl px-4 py-2 text-sm font-medium transition-all duration-200",
+								"flex items-center gap-2 rounded-4xl px-4 py-2 text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
 								annual
 									? "bg-background text-foreground shadow-sm"
 									: "text-muted-foreground hover:text-foreground",
@@ -278,7 +288,7 @@ export function Pricing() {
 											)
 										}
 										style={sliderStyle}
-										className="range-slider h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-muted transition-all [&::-moz-range-thumb]:size-4 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-primary [&::-moz-range-thumb]:bg-background [&::-moz-range-thumb]:shadow-sm [&::-moz-range-thumb]:transition-transform [&::-moz-range-thumb]:hover:scale-110 [&::-moz-range-track]:rounded-lg [&::-webkit-slider-runnable-track]:rounded-lg [&::-webkit-slider-thumb]:size-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-primary [&::-webkit-slider-thumb]:bg-background [&::-webkit-slider-thumb]:shadow-sm [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:hover:scale-110"
+										className="range-slider h-1.5 w-full cursor-pointer appearance-none rounded-lg bg-muted transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background [&::-moz-range-thumb]:size-4 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-primary [&::-moz-range-thumb]:bg-background [&::-moz-range-thumb]:shadow-sm [&::-moz-range-thumb]:transition-transform [&::-moz-range-thumb]:hover:scale-110 [&::-moz-range-track]:rounded-lg [&::-webkit-slider-runnable-track]:rounded-lg [&::-webkit-slider-thumb]:size-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-primary [&::-webkit-slider-thumb]:bg-background [&::-webkit-slider-thumb]:shadow-sm [&::-webkit-slider-thumb]:transition-transform [&::-webkit-slider-thumb]:hover:scale-110"
 										aria-label="Número de instâncias"
 									/>
 									<div className="mt-1.5 flex justify-between">
@@ -393,7 +403,7 @@ export function Pricing() {
 
 									<p className="text-xs text-muted-foreground">
 										Cobrança {annual ? "anual" : "mensal"},
-										cancele quando quiser.
+										cancele quando quiser, sem multa.
 									</p>
 								</div>
 							</div>
@@ -494,7 +504,7 @@ export function Pricing() {
 										className="w-full shadow-lg shadow-primary/20"
 									>
 										<Link href="/sign-up">
-											Começar Grátis — 7 Dias de Teste
+											Testar 7 Dias Grátis
 											<ArrowRightIcon
 												className="size-4"
 												data-icon="inline-end"

@@ -5,9 +5,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
-import { Loader2, CheckCircle2, ArrowLeft } from "lucide-react";
+import { CheckCircle2, ArrowLeft } from "lucide-react";
 
 import { authClient } from "@/lib/auth-client";
+import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -26,7 +27,7 @@ import {
 } from "@/components/ui/field";
 
 const waitlistSchema = z.object({
-	email: z.string().email("E-mail invalido"),
+	email: z.string().email("E-mail inválido"),
 });
 
 type WaitlistValues = z.infer<typeof waitlistSchema>;
@@ -70,18 +71,18 @@ export function WaitlistForm() {
 						<CheckCircle2 className="size-6" />
 					</div>
 					<CardTitle className="text-xl font-semibold">
-						Voce esta na lista!
+						Você está na lista!
 					</CardTitle>
 					<CardDescription>
 						Avisaremos por e-mail quando sua conta estiver
-						disponivel. Fique de olho na sua caixa de entrada.
+						disponível. Fique de olho na sua caixa de entrada.
 					</CardDescription>
 				</CardHeader>
 				<CardFooter className="justify-center">
 					<Button variant="ghost" size="sm" asChild>
 						<Link href="/">
 							<ArrowLeft className="mr-2 size-4" />
-							Voltar para inicio
+							Voltar para início
 						</Link>
 					</Button>
 				</CardFooter>
@@ -92,11 +93,11 @@ export function WaitlistForm() {
 	return (
 		<Card className="w-full max-w-md">
 			<CardHeader className="space-y-1">
-				<CardTitle className="text-2xl font-bold">
+				<CardTitle className="text-2xl font-bold tracking-tight">
 					Lista de espera
 				</CardTitle>
 				<CardDescription>
-					O Zé da API Manager esta em acesso antecipado. Cadastre seu
+					O Zé da API Manager está em acesso antecipado. Cadastre seu
 					e-mail para receber um convite.
 				</CardDescription>
 			</CardHeader>
@@ -133,13 +134,11 @@ export function WaitlistForm() {
 						size="lg"
 						disabled={isSubmitting}
 					>
-						{isSubmitting && (
-							<Loader2 className="mr-2 size-4 animate-spin" />
-						)}
+						{isSubmitting && <Spinner className="mr-2 size-4" />}
 						Entrar na lista de espera
 					</Button>
 					<p className="text-sm text-muted-foreground">
-						Ja tem um convite?{" "}
+						Já tem um convite?{" "}
 						<Link
 							href="/sign-up"
 							className="text-foreground font-medium hover:underline underline-offset-4"

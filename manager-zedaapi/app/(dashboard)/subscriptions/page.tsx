@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { requireAuth } from "@/lib/auth-server";
 import { getActiveSubscription } from "@/server/services/subscription-service";
 import { CardSkeleton } from "@/components/shared/loading-skeleton";
+import { PageHeader } from "@/components/shared/page-header";
 import { SubscriptionDetails } from "./subscription-details";
 
 export const metadata: Metadata = {
@@ -19,14 +20,10 @@ export default async function SubscriptionsPage() {
 
 	return (
 		<div className="mx-auto max-w-4xl space-y-8">
-			<div>
-				<h1 className="text-2xl font-bold tracking-tight">
-					Assinatura
-				</h1>
-				<p className="text-sm text-muted-foreground mt-1">
-					Gerencie seu plano e assinatura
-				</p>
-			</div>
+			<PageHeader
+				title="Assinatura"
+				description="Gerencie seu plano e assinatura"
+			/>
 
 			<Suspense fallback={<CardSkeleton />}>
 				<SubscriptionData userId={session.user.id} />

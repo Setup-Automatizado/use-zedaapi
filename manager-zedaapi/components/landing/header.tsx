@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -167,7 +167,7 @@ export function Header() {
 						className="group/cta relative h-9 rounded-full px-5 text-[13px] font-semibold shadow-md shadow-primary/20 transition-all duration-300 hover:shadow-lg hover:shadow-primary/30"
 					>
 						<Link href="/sign-up">
-							Começar Grátis
+							Criar Conta Grátis
 							<ArrowRightIcon className="size-3.5 ml-1 transition-transform duration-200 group-hover/cta:translate-x-0.5" />
 						</Link>
 					</Button>
@@ -236,7 +236,7 @@ export function Header() {
 								className="w-full rounded-xl shadow-md shadow-primary/20"
 							>
 								<Link href="/sign-up">
-									Começar Grátis
+									Criar Conta Grátis
 									<ArrowRightIcon
 										className="size-3.5 ml-1"
 										data-icon="inline-end"

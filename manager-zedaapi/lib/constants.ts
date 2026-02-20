@@ -104,11 +104,11 @@ export const ROUTES = {
 
 	// Dashboard
 	DASHBOARD: "/dashboard",
-	INSTANCES: "/dashboard/instances",
-	INSTANCE_DETAIL: (id: string) => `/dashboard/instances/${id}`,
-	BILLING: "/dashboard/billing",
-	SETTINGS: "/dashboard/settings",
-	API_KEYS: "/dashboard/api-keys",
+	INSTANCES: "/instances",
+	INSTANCE_DETAIL: (id: string) => `/instances/${id}`,
+	BILLING: "/billing",
+	SETTINGS: "/settings",
+	API_KEYS: "/api-keys",
 
 	// Admin
 	ADMIN: "/admin",

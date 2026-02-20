@@ -23,7 +23,7 @@ const steps: Step[] = [
 	{
 		number: "01",
 		icon: UserPlusIcon,
-		title: "Crie sua conta em 30 segundos",
+		title: "Crie sua conta grátis",
 		description:
 			"Sem burocracia, sem formulários longos e sem cartão de crédito. Preencha nome, e-mail e senha — pronto. Acesso imediato ao painel completo com 7 dias grátis em qualquer plano.",
 		accent: "from-emerald-500/20 to-emerald-500/0",
@@ -41,7 +41,7 @@ const steps: Step[] = [
 		icon: Code2Icon,
 		title: "Integre e envie a primeira mensagem",
 		description:
-			"Documentação em 4 linguagens (Node.js, Python, PHP e Go), coleção Postman pronta para importar e exemplos copy-paste. Sua primeira mensagem automática em menos de 2 minutos.",
+			"Documentação em 4 linguagens (Node.js, Python, PHP e Go), coleção Postman pronta para importar. Copie, cole, envie. Sua primeira mensagem automática em menos de 2 minutos.",
 		accent: "from-violet-500/20 to-violet-500/0",
 	},
 ];
@@ -139,7 +139,7 @@ export function HowItWorks() {
 						variants={fadeUp}
 						className="mt-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl"
 					>
-						Do zero à primeira mensagem automática{" "}
+						Do cadastro à primeira mensagem automática{" "}
 						<br className="hidden sm:block" />
 						em menos de{" "}
 						<span className="text-primary">5 minutos</span>
@@ -149,8 +149,8 @@ export function HowItWorks() {
 						variants={fadeUp}
 						className="mt-4 max-w-lg text-base text-muted-foreground sm:text-lg"
 					>
-						Três passos — nenhum obstáculo. Enquanto outros cobram
-						setup, aqui você começa sozinho, agora.
+						Três passos — nenhum obstáculo. Sem aprovação manual,
+						sem espera por suporte.
 					</motion.p>
 				</motion.div>
 

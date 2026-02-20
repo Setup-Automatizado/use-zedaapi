@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { requireAuth } from "@/lib/auth-server";
+import { PageHeader } from "@/components/shared/page-header";
 import { SettingsClient } from "./settings-client";
 
 export const metadata: Metadata = {
-	title: "Configuracoes | Zé da API Manager",
+	title: "Configurações | Zé da API Manager",
 };
 
 export default async function SettingsPage() {
@@ -11,14 +12,10 @@ export default async function SettingsPage() {
 
 	return (
 		<div className="space-y-6">
-			<div>
-				<h1 className="text-2xl font-bold tracking-tight">
-					Configuracoes
-				</h1>
-				<p className="text-sm text-muted-foreground">
-					Gerencie as preferencias da sua conta.
-				</p>
-			</div>
+			<PageHeader
+				title="Configurações"
+				description="Gerencie as preferências da sua conta."
+			/>
 
 			<SettingsClient />
 		</div>

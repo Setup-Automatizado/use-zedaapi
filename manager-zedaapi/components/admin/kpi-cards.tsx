@@ -1,11 +1,6 @@
 "use client";
 
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
 	DollarSign,
 	TrendingDown,
@@ -45,7 +40,7 @@ export function KpiCards({ data }: KpiCardsProps) {
 			icon: TrendingDown,
 			color: "text-destructive",
 			bg: "bg-destructive/10",
-			description: "ultimos 30 dias",
+			description: "últimos 30 dias",
 		},
 		{
 			title: "Assinaturas Ativas",
@@ -55,7 +50,7 @@ export function KpiCards({ data }: KpiCardsProps) {
 			bg: "bg-chart-3/10",
 		},
 		{
-			title: "Total Instancias",
+			title: "Total Instâncias",
 			value: data?.totalInstances?.toLocaleString("pt-BR") ?? "--",
 			icon: Smartphone,
 			color: "text-chart-4",
@@ -69,7 +64,7 @@ export function KpiCards({ data }: KpiCardsProps) {
 			bg: "bg-chart-2/10",
 		},
 		{
-			title: "Total Usuarios",
+			title: "Total Usuários",
 			value: data?.totalUsers?.toLocaleString("pt-BR") ?? "--",
 			icon: Users,
 			color: "text-chart-1",
@@ -82,7 +77,7 @@ export function KpiCards({ data }: KpiCardsProps) {
 			{kpis.map((kpi) => (
 				<Card key={kpi.title}>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-xs font-medium text-muted-foreground">
+						<CardTitle className="text-sm font-medium text-muted-foreground">
 							{kpi.title}
 						</CardTitle>
 						<div

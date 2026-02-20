@@ -67,8 +67,8 @@ export function CommissionTable({ commissions }: CommissionTableProps) {
 		return (
 			<EmptyState
 				icon={Coins}
-				title="Nenhuma comissao encontrada"
-				description="Comissoes aparecem quando seus indicados efetuam pagamentos."
+				title="Nenhuma comissão encontrada"
+				description="Comissões aparecem quando seus indicados efetuam pagamentos."
 			/>
 		);
 	}

@@ -2,9 +2,10 @@
 
 import { useState, useRef, useCallback, type KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 
 import { authClient } from "@/lib/auth-client";
+import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -84,7 +85,7 @@ export function TwoFactorForm() {
 
 		if (result.error) {
 			setError(
-				result.error.message ?? "Codigo invalido. Tente novamente.",
+				result.error.message ?? "Código inválido. Tente novamente.",
 			);
 			setCode(Array(CODE_LENGTH).fill(""));
 			inputRefs.current[0]?.focus();
@@ -102,9 +103,9 @@ export function TwoFactorForm() {
 				<div className="mb-2 flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
 					<ShieldCheck className="size-6" />
 				</div>
-				<CardTitle>Verificacao em duas etapas</CardTitle>
+				<CardTitle>Verificação em duas etapas</CardTitle>
 				<CardDescription>
-					Digite o codigo de 6 digitos do seu aplicativo autenticador
+					Digite o código de 6 dígitos do seu aplicativo autenticador
 				</CardDescription>
 			</CardHeader>
 
@@ -145,9 +146,7 @@ export function TwoFactorForm() {
 					}
 					onClick={() => submitCode(code.join(""))}
 				>
-					{isSubmitting && (
-						<Loader2 className="mr-2 size-4 animate-spin" />
-					)}
+					{isSubmitting && <Spinner className="mr-2 size-4" />}
 					Verificar
 				</Button>
 			</CardFooter>

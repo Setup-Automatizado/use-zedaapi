@@ -47,11 +47,7 @@ const statusConfig: Record<
 	},
 };
 
-export function InstanceCard({
-	name,
-	status,
-	phoneNumber,
-}: InstanceCardProps) {
+export function InstanceCard({ name, status, phoneNumber }: InstanceCardProps) {
 	const config = statusConfig[status] ?? {
 		label: status,
 		dot: "bg-muted-foreground",
@@ -59,7 +55,7 @@ export function InstanceCard({
 	};
 
 	return (
-		<div className="flex items-center gap-3">
+		<div className="flex items-center gap-3 transition-all duration-200 hover:-translate-y-0.5">
 			<div className="relative">
 				<div className="flex size-10 items-center justify-center rounded-lg bg-muted">
 					<Smartphone className="size-4 text-muted-foreground" />
@@ -68,6 +64,7 @@ export function InstanceCard({
 					className={cn(
 						"absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-background",
 						config.dot,
+						status === "connected" && "animate-pulse-ring",
 					)}
 				/>
 			</div>

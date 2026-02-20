@@ -6,6 +6,7 @@ import {
 	CardsSkeleton,
 	GridSkeleton,
 } from "@/components/shared/loading-skeleton";
+import { PageHeader } from "@/components/shared/page-header";
 import { StatsCards } from "@/components/dashboard/stats-cards";
 import { InstanceOverview } from "@/components/dashboard/instance-overview";
 
@@ -69,12 +70,10 @@ export default async function DashboardPage() {
 
 	return (
 		<div className="space-y-6">
-			<div>
-				<h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-				<p className="text-sm text-muted-foreground">
-					Bem-vindo, {session.user.name?.split(" ")[0] ?? "Usuario"}
-				</p>
-			</div>
+			<PageHeader
+				title="Dashboard"
+				description={`Bem-vindo, ${session.user.name?.split(" ")[0] ?? "Usuário"}`}
+			/>
 
 			<Suspense fallback={<CardsSkeleton count={4} />}>
 				<DashboardStats userId={session.user.id} />

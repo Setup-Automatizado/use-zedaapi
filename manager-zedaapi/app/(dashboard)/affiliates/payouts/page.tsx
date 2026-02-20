@@ -11,6 +11,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { PageHeader } from "@/components/shared/page-header";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 
@@ -66,21 +67,11 @@ export default async function PayoutsPage({ searchParams }: Props) {
 
 	return (
 		<div className="mx-auto max-w-4xl space-y-6 p-6">
-			<div className="flex items-center justify-between">
-				<div>
-					<h1 className="text-2xl font-semibold">Pagamentos</h1>
-					<p className="text-muted-foreground mt-1">
-						Histórico de saques e pagamentos do programa de
-						afiliados.
-					</p>
-				</div>
-				<Link
-					href="/affiliates"
-					className="text-sm text-muted-foreground hover:text-foreground"
-				>
-					Voltar
-				</Link>
-			</div>
+			<PageHeader
+				title="Pagamentos"
+				description="Histórico de saques e pagamentos do programa de afiliados."
+				backHref="/affiliates"
+			/>
 
 			<Card>
 				<CardHeader>

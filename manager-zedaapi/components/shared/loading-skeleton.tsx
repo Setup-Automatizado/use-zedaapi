@@ -77,9 +77,9 @@ export function FormSkeleton({ fields = 4 }: { fields?: number }) {
 
 export function GridSkeleton({ count = 3 }: { count?: number }) {
 	return (
-		<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+		<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			{Array.from({ length: count }).map((_, i) => (
-				<Skeleton key={i} className="h-20 rounded-xl" />
+				<Skeleton key={i} className="h-[72px] rounded-xl" />
 			))}
 		</div>
 	);

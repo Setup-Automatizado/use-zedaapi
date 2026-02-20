@@ -81,7 +81,7 @@ export function Footer() {
 					<div className="col-span-2 md:col-span-1">
 						<Link
 							href="/"
-							className="flex items-center gap-2.5 transition-opacity duration-200 hover:opacity-80"
+							className="flex items-center gap-2.5 rounded-lg transition-opacity duration-200 hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
 						>
 							<div className="flex size-8 items-center justify-center rounded-xl bg-primary font-bold text-sm text-primary-foreground shadow-sm">
 								Z
@@ -104,7 +104,7 @@ export function Footer() {
 									href={social.href}
 									target="_blank"
 									rel="noopener noreferrer"
-									className="flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors duration-200 hover:bg-muted hover:text-foreground"
+									className="flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors duration-200 hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
 									aria-label={social.label}
 								>
 									<social.icon className="size-4" />
@@ -124,14 +124,14 @@ export function Footer() {
 									{link.href.startsWith("#") ? (
 										<a
 											href={link.href}
-											className="text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground"
+											className="rounded-sm text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
 										>
 											{link.label}
 										</a>
 									) : (
 										<Link
 											href={link.href}
-											className="text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground"
+											className="rounded-sm text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
 										>
 											{link.label}
 										</Link>
@@ -151,7 +151,7 @@ export function Footer() {
 								<li key={link.href}>
 									<Link
 										href={link.href}
-										className="text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground"
+										className="rounded-sm text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
 									>
 										{link.label}
 									</Link>
@@ -170,7 +170,7 @@ export function Footer() {
 								<li key={link.href}>
 									<Link
 										href={link.href}
-										className="text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground"
+										className="rounded-sm text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
 									>
 										{link.label}
 									</Link>
@@ -199,7 +199,7 @@ export function Footer() {
 												? "noopener noreferrer"
 												: undefined
 										}
-										className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground"
+										className="inline-flex items-center gap-2 rounded-sm text-sm text-muted-foreground transition-colors duration-200 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
 									>
 										<item.icon className="size-3.5 shrink-0" />
 										{item.label}
@@ -232,7 +232,7 @@ export function Footer() {
 								new CustomEvent("open-cookie-preferences"),
 							)
 						}
-						className="text-xs text-muted-foreground underline-offset-4 transition-colors duration-200 hover:text-foreground hover:underline"
+						className="rounded-sm text-xs text-muted-foreground underline-offset-4 transition-colors duration-200 hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
 					>
 						Alterar preferências de cookies
 					</button>

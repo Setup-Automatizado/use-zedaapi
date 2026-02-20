@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { requireAdmin } from "@/lib/auth-server";
 import { getAdminInvoices } from "@/server/actions/admin";
 import { TableSkeleton } from "@/components/shared/loading-skeleton";
+import { PageHeader } from "@/components/shared/page-header";
 import { InvoicesTableClient } from "./invoices-table-client";
 
 export const metadata: Metadata = {
@@ -14,12 +15,10 @@ export default async function AdminInvoicesPage() {
 
 	return (
 		<div className="space-y-6">
-			<div>
-				<h1 className="text-2xl font-bold tracking-tight">Faturas</h1>
-				<p className="text-sm text-muted-foreground">
-					Todas as faturas geradas na plataforma.
-				</p>
-			</div>
+			<PageHeader
+				title="Faturas"
+				description="Todas as faturas geradas na plataforma."
+			/>
 
 			<Suspense fallback={<TableSkeleton />}>
 				<InvoicesList />

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { requireAdmin } from "@/lib/auth-server";
 import { getAdminActivityLog } from "@/server/actions/admin";
 import { TableSkeleton } from "@/components/shared/loading-skeleton";
+import { PageHeader } from "@/components/shared/page-header";
 import { ActivityLogClient } from "./activity-log-client";
 
 export const metadata: Metadata = {
@@ -14,14 +15,10 @@ export default async function AdminActivityLogPage() {
 
 	return (
 		<div className="space-y-6">
-			<div>
-				<h1 className="text-2xl font-bold tracking-tight">
-					Log de Atividade
-				</h1>
-				<p className="text-sm text-muted-foreground">
-					Historico de acoes realizadas na plataforma.
-				</p>
-			</div>
+			<PageHeader
+				title="Log de Atividade"
+				description="Histórico de ações realizadas na plataforma."
+			/>
 
 			<Suspense fallback={<TableSkeleton />}>
 				<ActivityLogContent />

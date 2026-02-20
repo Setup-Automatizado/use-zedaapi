@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { requireAdmin } from "@/lib/auth-server";
 import { getWaitlist } from "@/server/actions/admin";
 import { TableSkeleton } from "@/components/shared/loading-skeleton";
+import { PageHeader } from "@/components/shared/page-header";
 import { WaitlistTableClient } from "./waitlist-table-client";
 
 export const metadata: Metadata = {
@@ -14,12 +15,10 @@ export default async function AdminWaitlistPage() {
 
 	return (
 		<div className="space-y-6">
-			<div>
-				<h1 className="text-2xl font-bold tracking-tight">Waitlist</h1>
-				<p className="text-sm text-muted-foreground">
-					Gerencie a lista de espera para acesso a plataforma.
-				</p>
-			</div>
+			<PageHeader
+				title="Waitlist"
+				description="Gerencie a lista de espera para acesso à plataforma."
+			/>
 
 			<Suspense fallback={<TableSkeleton />}>
 				<WaitlistList />

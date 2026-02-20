@@ -182,10 +182,10 @@ jobs:
           fi
 
   # ======================================
-  # Job: Docker Build Test
+  # Job: Docker Build Test (API)
   # ======================================
-  docker-build:
-    name: Docker Build Test
+  docker-build-api:
+    name: Docker Build Test (API)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -195,7 +195,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Build Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: docker/Dockerfile
@@ -208,3 +208,49 @@ jobs:
             VERSION=test
             COMMIT=${{ github.sha }}
             BUILD_TIME=${{ github.event.head_commit.timestamp }}
+
+  # ======================================
+  # Job: Docker Build Test (Manager)
+  # ======================================
+  docker-build-manager:
+    name: Docker Build Test (Manager)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Manager image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./manager-zedaapi
+          file: ./manager-zedaapi/Dockerfile
+          push: false
+          tags: zedaapi-manager:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ======================================
+  # Job: Docker Build Test (Manager Workers)
+  # ======================================
+  docker-build-manager-workers:
+    name: Docker Build Test (Manager Workers)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Manager Workers image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./manager-zedaapi
+          file: ./manager-zedaapi/Dockerfile.workers
+          push: false
+          tags: zedaapi-manager-workers:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

@@ -3,10 +3,11 @@ import type { Metadata } from "next";
 import { requireAdmin } from "@/lib/auth-server";
 import { getAdminInstances } from "@/server/actions/admin";
 import { TableSkeleton } from "@/components/shared/loading-skeleton";
+import { PageHeader } from "@/components/shared/page-header";
 import { InstancesTableClient } from "./instances-table-client";
 
 export const metadata: Metadata = {
-	title: "Instancias | Admin Zé da API Manager",
+	title: "Instâncias | Admin Zé da API Manager",
 };
 
 export default async function AdminInstancesPage() {
@@ -14,14 +15,10 @@ export default async function AdminInstancesPage() {
 
 	return (
 		<div className="space-y-6">
-			<div>
-				<h1 className="text-2xl font-bold tracking-tight">
-					Instancias
-				</h1>
-				<p className="text-sm text-muted-foreground">
-					Todas as instancias de todos os usuarios.
-				</p>
-			</div>
+			<PageHeader
+				title="Instâncias"
+				description="Todas as instâncias de todos os usuários."
+			/>
 
 			<Suspense fallback={<TableSkeleton />}>
 				<InstancesList />

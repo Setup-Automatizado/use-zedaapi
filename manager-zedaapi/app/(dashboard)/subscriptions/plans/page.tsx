@@ -41,7 +41,7 @@ export default async function PlansPage() {
 					Pague conforme escalar
 				</h1>
 				<p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">
-					Escolha o numero de instancias WhatsApp. Ajuste quando
+					Escolha o número de instâncias WhatsApp. Ajuste quando
 					quiser. Sem compromissos.
 				</p>
 			</div>

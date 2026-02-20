@@ -6,9 +6,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
-import { Loader2 } from "lucide-react";
-
 import { signUp } from "@/lib/auth-client";
+import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -29,7 +28,7 @@ import {
 const signUpSchema = z
 	.object({
 		name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
-		email: z.string().email("E-mail invalido"),
+		email: z.string().email("E-mail inválido"),
 		password: z.string().min(8, "Senha deve ter pelo menos 8 caracteres"),
 		confirmPassword: z.string(),
 		terms: z.literal(true, {
@@ -37,7 +36,7 @@ const signUpSchema = z
 		}),
 	})
 	.refine((data) => data.password === data.confirmPassword, {
-		message: "As senhas nao conferem",
+		message: "As senhas não conferem",
 		path: ["confirmPassword"],
 	});
 
@@ -84,7 +83,9 @@ export function SignUpForm() {
 	return (
 		<Card className="w-full max-w-md">
 			<CardHeader className="space-y-1">
-				<CardTitle className="text-2xl font-bold">Criar conta</CardTitle>
+				<CardTitle className="text-2xl font-bold tracking-tight">
+					Criar conta
+				</CardTitle>
 				<CardDescription>
 					Preencha os dados abaixo para criar sua conta
 				</CardDescription>
@@ -193,7 +194,7 @@ export function SignUpForm() {
 								className="text-foreground underline underline-offset-4"
 								target="_blank"
 							>
-								politica de privacidade
+								política de privacidade
 							</Link>
 						</span>
 					</label>
@@ -209,13 +210,11 @@ export function SignUpForm() {
 						size="lg"
 						disabled={isSubmitting}
 					>
-						{isSubmitting && (
-							<Loader2 className="mr-2 size-4 animate-spin" />
-						)}
+						{isSubmitting && <Spinner className="mr-2 size-4" />}
 						Criar conta
 					</Button>
 					<p className="text-sm text-muted-foreground">
-						Ja tem uma conta?{" "}
+						Já tem uma conta?{" "}
 						<Link
 							href="/sign-in"
 							className="text-foreground font-medium hover:underline underline-offset-4"

@@ -28,8 +28,8 @@ const methods: Array<{
 }> = [
 	{
 		id: "stripe",
-		label: "Cartao de credito",
-		description: "Pagamento recorrente via cartao. Aprovacao imediata.",
+		label: "Cartão de crédito",
+		description: "Pagamento recorrente via cartão. Aprovação imediata.",
 		icon: CreditCard,
 	},
 	{

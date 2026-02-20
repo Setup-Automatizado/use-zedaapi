@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { requireAdmin } from "@/lib/auth-server";
 import { getFeatureFlags } from "@/server/actions/admin";
 import { CardsSkeleton } from "@/components/shared/loading-skeleton";
+import { PageHeader } from "@/components/shared/page-header";
 import { FeatureFlagsClient } from "./feature-flags-client";
 
 export const metadata: Metadata = {
@@ -14,14 +15,10 @@ export default async function AdminFeatureFlagsPage() {
 
 	return (
 		<div className="space-y-6">
-			<div>
-				<h1 className="text-2xl font-bold tracking-tight">
-					Feature Flags
-				</h1>
-				<p className="text-sm text-muted-foreground">
-					Controle funcionalidades da plataforma.
-				</p>
-			</div>
+			<PageHeader
+				title="Feature Flags"
+				description="Controle funcionalidades da plataforma."
+			/>
 
 			<Suspense fallback={<CardsSkeleton count={3} />}>
 				<FeatureFlagsContent />

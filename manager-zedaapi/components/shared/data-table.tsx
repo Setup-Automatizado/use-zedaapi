@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
 	Table,
 	TableBody,
@@ -11,11 +11,18 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ChevronLeft, ChevronRight, Search } from "lucide-react";
+import {
+	ChevronLeft,
+	ChevronRight,
+	ChevronUp,
+	ChevronDown,
+	ChevronsUpDown,
+	Search,
+} from "lucide-react";
 import { TableSkeleton } from "@/components/shared/loading-skeleton";
 import { EmptyState } from "@/components/shared/empty-state";
-import { useDebounce } from "@/hooks/use-debounce";
 import type { LucideIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export interface Column<T> {
 	key: string;
@@ -44,6 +51,8 @@ interface DataTableProps<T> {
 	headerAction?: React.ReactNode;
 }
 
+type SortDirection = "asc" | "desc";
+
 export function DataTable<T extends { id?: string | number }>({
 	columns,
 	data,
@@ -62,12 +71,47 @@ export function DataTable<T extends { id?: string | number }>({
 	headerAction,
 }: DataTableProps<T>) {
 	const [searchQuery, setSearchQuery] = useState("");
-	const debouncedSearch = useDebounce(searchQuery, 300);
+	const [sortKey, setSortKey] = useState<string | null>(null);
+	const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
 	const handleSearchChange = (value: string) => {
 		setSearchQuery(value);
 		onSearch?.(value);
 	};
+
+	const handleSort = (key: string) => {
+		if (sortKey === key) {
+			setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+		} else {
+			setSortKey(key);
+			setSortDirection("asc");
+		}
+	};
+
+	const sortedData = useMemo(() => {
+		// Only sort client-side when not using server-side pagination
+		if (!sortKey || onPageChange) return data;
+
+		return [...data].sort((a, b) => {
+			const aVal = (a as Record<string, unknown>)[sortKey];
+			const bVal = (b as Record<string, unknown>)[sortKey];
+
+			if (aVal == null && bVal == null) return 0;
+			if (aVal == null) return 1;
+			if (bVal == null) return -1;
+
+			let comparison = 0;
+			if (typeof aVal === "string" && typeof bVal === "string") {
+				comparison = aVal.localeCompare(bVal);
+			} else if (typeof aVal === "number" && typeof bVal === "number") {
+				comparison = aVal - bVal;
+			} else {
+				comparison = String(aVal).localeCompare(String(bVal));
+			}
+
+			return sortDirection === "asc" ? comparison : -comparison;
+		});
+	}, [data, sortKey, sortDirection, onPageChange]);
 
 	if (loading) {
 		return <TableSkeleton rows={pageSize > 10 ? 10 : pageSize} />;
@@ -101,7 +145,7 @@ export function DataTable<T extends { id?: string | number }>({
 				</div>
 			)}
 
-			{data.length === 0 ? (
+			{sortedData.length === 0 ? (
 				emptyIcon ? (
 					<EmptyState
 						icon={emptyIcon}
@@ -113,9 +157,7 @@ export function DataTable<T extends { id?: string | number }>({
 				) : (
 					<div className="flex min-h-[300px] items-center justify-center rounded-xl border border-dashed border-border">
 						<div className="text-center">
-							<p className="text-sm font-medium">
-								{emptyTitle}
-							</p>
+							<p className="text-sm font-medium">{emptyTitle}</p>
 							<p className="mt-1 text-xs text-muted-foreground">
 								{emptyDescription}
 							</p>
@@ -126,22 +168,48 @@ export function DataTable<T extends { id?: string | number }>({
 				<div className="overflow-hidden rounded-xl border">
 					<Table>
 						<TableHeader>
-							<TableRow className="bg-muted/30 hover:bg-muted/30">
+							<TableRow className="sticky top-0 z-10 bg-card bg-muted/30 hover:bg-muted/30">
 								{columns.map((col) => (
 									<TableHead
 										key={col.key}
-										className={`text-xs font-medium uppercase tracking-wide ${col.className ?? ""}`}
+										className={cn(
+											"text-xs font-medium uppercase tracking-wide",
+											col.sortable &&
+												"cursor-pointer select-none hover:text-foreground",
+											col.className,
+										)}
+										onClick={
+											col.sortable
+												? () => handleSort(col.key)
+												: undefined
+										}
 									>
-										{col.header}
+										<span className="inline-flex items-center gap-1">
+											{col.header}
+											{col.sortable && (
+												<span className="inline-flex size-4 items-center justify-center">
+													{sortKey === col.key ? (
+														sortDirection ===
+														"asc" ? (
+															<ChevronUp className="size-3.5" />
+														) : (
+															<ChevronDown className="size-3.5" />
+														)
+													) : (
+														<ChevronsUpDown className="size-3.5 text-muted-foreground/50" />
+													)}
+												</span>
+											)}
+										</span>
 									</TableHead>
 								))}
 							</TableRow>
 						</TableHeader>
 						<TableBody>
-							{data.map((row, i) => (
+							{sortedData.map((row, i) => (
 								<TableRow
 									key={row.id ?? i}
-									className="transition-colors duration-100"
+									className="transition-colors duration-100 hover:bg-muted/50"
 								>
 									{columns.map((col) => (
 										<TableCell
@@ -171,7 +239,7 @@ export function DataTable<T extends { id?: string | number }>({
 							disabled={page <= 1}
 						>
 							<ChevronLeft className="size-4" />
-							<span className="sr-only">Pagina anterior</span>
+							<span className="sr-only">Página anterior</span>
 						</Button>
 						<Button
 							variant="outline"
@@ -180,7 +248,7 @@ export function DataTable<T extends { id?: string | number }>({
 							disabled={page >= totalPages}
 						>
 							<ChevronRight className="size-4" />
-							<span className="sr-only">Proxima pagina</span>
+							<span className="sr-only">Próxima página</span>
 						</Button>
 					</div>
 				</div>

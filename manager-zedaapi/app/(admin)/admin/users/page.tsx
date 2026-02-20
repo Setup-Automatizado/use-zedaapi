@@ -3,10 +3,11 @@ import type { Metadata } from "next";
 import { requireAdmin } from "@/lib/auth-server";
 import { getAdminUsers } from "@/server/actions/admin";
 import { TableSkeleton } from "@/components/shared/loading-skeleton";
+import { PageHeader } from "@/components/shared/page-header";
 import { UsersTableClient } from "./users-table-client";
 
 export const metadata: Metadata = {
-	title: "Usuarios | Admin Zé da API Manager",
+	title: "Usuários | Admin Zé da API Manager",
 };
 
 export default async function AdminUsersPage() {
@@ -14,12 +15,10 @@ export default async function AdminUsersPage() {
 
 	return (
 		<div className="space-y-6">
-			<div>
-				<h1 className="text-2xl font-bold tracking-tight">Usuarios</h1>
-				<p className="text-sm text-muted-foreground">
-					Gerencie todos os usuarios da plataforma.
-				</p>
-			</div>
+			<PageHeader
+				title="Usuários"
+				description="Gerencie todos os usuários da plataforma."
+			/>
 
 			<Suspense fallback={<TableSkeleton />}>
 				<UsersList />

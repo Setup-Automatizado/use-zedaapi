@@ -39,7 +39,7 @@ const faqItems = [
 	},
 	{
 		question: "Vocês são parceiros oficiais da Meta/WhatsApp?",
-		answer: "Transparência total: hoje o Zé da API opera via whatsmeow, uma biblioteca de código aberto amplamente utilizada no mercado. Paralelamente, estamos em fase avançada de integração com a Cloud API oficial da Meta, prevista para 2026 — o que trará suporte a funcionalidades exclusivas como templates oficiais, WhatsApp Flows e Business-Scoped User IDs. O usuário é responsável por cumprir as políticas de uso do WhatsApp/Meta, e oferecemos orientações claras sobre boas práticas na nossa documentação.",
+		answer: "Transparência total: hoje o Zé da API opera via whatsmeow, uma biblioteca de código aberto amplamente utilizada no mercado. Paralelamente, estamos em fase avançada de integração com a Cloud API oficial da Meta (v24.0), o que trará suporte a funcionalidades exclusivas como templates oficiais, WhatsApp Flows e Business-Scoped User IDs. O usuário é responsável por cumprir as políticas de uso do WhatsApp/Meta, e oferecemos orientações claras sobre boas práticas na nossa documentação.",
 	},
 	{
 		question: "Como funciona o suporte técnico?",
@@ -70,7 +70,7 @@ export function FAQ() {
 						Perguntas Frequentes
 					</h2>
 					<p className="mt-4 text-base text-muted-foreground sm:text-lg leading-relaxed">
-						Respostas diretas para as dúvidas mais comuns. Não
+						Respostas objetivas para as dúvidas mais comuns. Não
 						encontrou a sua?{" "}
 						<a
 							href="#contato"

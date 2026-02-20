@@ -1,5 +1,9 @@
+"use client";
+
 import type { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AnimateIn } from "@/components/shared/motion";
+import { cn } from "@/lib/utils";
 
 interface EmptyStateProps {
 	icon: LucideIcon;
@@ -7,6 +11,8 @@ interface EmptyStateProps {
 	description: string;
 	actionLabel?: string;
 	onAction?: () => void;
+	secondaryAction?: { label: string; onClick: () => void };
+	variant?: "zero" | "no-results";
 }
 
 export function EmptyState({
@@ -15,23 +21,65 @@ export function EmptyState({
 	description,
 	actionLabel,
 	onAction,
+	secondaryAction,
+	variant = "zero",
 }: EmptyStateProps) {
+	const isNoResults = variant === "no-results";
+
 	return (
-		<div className="flex min-h-[400px] flex-col items-center justify-center gap-6 rounded-xl border border-dashed border-border py-16 px-8 text-center">
-			<div className="flex size-14 items-center justify-center rounded-2xl bg-muted/50">
-				<Icon className="size-6 text-muted-foreground" />
+		<AnimateIn>
+			<div
+				className={cn(
+					"flex flex-col items-center justify-center gap-6 rounded-xl border border-dashed border-border text-center",
+					isNoResults
+						? "min-h-[200px] bg-muted/30 py-8 px-6"
+						: "min-h-[400px] py-16 px-8",
+				)}
+			>
+				<div
+					className={cn(
+						"flex items-center justify-center rounded-2xl",
+						isNoResults
+							? "size-10 bg-muted/50"
+							: "size-14 bg-muted/50",
+					)}
+				>
+					<Icon
+						className={cn(
+							"text-muted-foreground",
+							isNoResults ? "size-5" : "size-6",
+						)}
+					/>
+				</div>
+				<div className="space-y-1.5">
+					<h3
+						className={cn(
+							"font-semibold tracking-tight",
+							isNoResults ? "text-base" : "text-lg",
+						)}
+					>
+						{title}
+					</h3>
+					<p className="max-w-[320px] text-sm text-muted-foreground">
+						{description}
+					</p>
+				</div>
+				{!isNoResults && (actionLabel || secondaryAction) && (
+					<div className="flex items-center gap-3">
+						{actionLabel && onAction && (
+							<Button onClick={onAction}>{actionLabel}</Button>
+						)}
+						{secondaryAction && (
+							<Button
+								variant="ghost"
+								onClick={secondaryAction.onClick}
+							>
+								{secondaryAction.label}
+							</Button>
+						)}
+					</div>
+				)}
 			</div>
-			<div className="space-y-1.5">
-				<h3 className="text-lg font-semibold tracking-tight">
-					{title}
-				</h3>
-				<p className="max-w-[320px] text-sm text-muted-foreground">
-					{description}
-				</p>
-			</div>
-			{actionLabel && onAction && (
-				<Button onClick={onAction}>{actionLabel}</Button>
-			)}
-		</div>
+		</AnimateIn>
 	);
 }

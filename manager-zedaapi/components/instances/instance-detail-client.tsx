@@ -9,11 +9,12 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { StatusBadge } from "@/components/shared/status-badge";
+import { INSTANCE_STATUS_CONFIG } from "@/lib/design-tokens";
 import { cn } from "@/lib/utils";
 import {
 	ArrowLeft,
@@ -38,68 +39,28 @@ interface InstanceDetailClientProps {
 	instance: InstanceData;
 }
 
-const statusConfig: Record<
-	string,
-	{ label: string; className: string; dot: string }
-> = {
-	connected: {
-		label: "Conectado",
-		className: "bg-primary/10 text-primary",
-		dot: "bg-primary",
-	},
-	connecting: {
-		label: "Conectando",
-		className: "bg-chart-2/10 text-chart-2",
-		dot: "bg-chart-2",
-	},
-	disconnected: {
-		label: "Desconectado",
-		className: "bg-muted text-muted-foreground",
-		dot: "bg-muted-foreground",
-	},
-	creating: {
-		label: "Criando",
-		className: "bg-chart-2/10 text-chart-2",
-		dot: "bg-chart-2",
-	},
-	error: {
-		label: "Erro",
-		className: "bg-destructive/10 text-destructive",
-		dot: "bg-destructive",
-	},
-	banned: {
-		label: "Banido",
-		className: "bg-destructive/10 text-destructive",
-		dot: "bg-destructive",
-	},
-};
-
 export function InstanceDetailClient({ instance }: InstanceDetailClientProps) {
 	const router = useRouter();
 	const [deleteDialog, setDeleteDialog] = useState(false);
 	const [deleteLoading, setDeleteLoading] = useState(false);
 
-	const config = statusConfig[instance.status] ?? {
-		label: instance.status,
-		className: "bg-muted text-muted-foreground",
-		dot: "bg-muted-foreground",
-	};
+	const config = INSTANCE_STATUS_CONFIG[instance.status];
 
 	const isConnected = instance.status === "connected";
 
 	function copyToClipboard(text: string) {
 		navigator.clipboard.writeText(text);
-		toast.success("Copiado para a area de transferencia");
+		toast.success("Copiado para a área de transferência");
 	}
 
 	async function handleDelete() {
 		setDeleteLoading(true);
 		try {
 			// TODO: Wire to real delete action
-			toast.success("Instancia excluida");
-			router.push("/dashboard/instances");
+			toast.success("Instância excluída");
+			router.push("/instances");
 		} catch {
-			toast.error("Erro ao excluir instancia");
+			toast.error("Erro ao excluir instância");
 		} finally {
 			setDeleteLoading(false);
 			setDeleteDialog(false);
@@ -110,7 +71,7 @@ export function InstanceDetailClient({ instance }: InstanceDetailClientProps) {
 		<div className="space-y-6">
 			<div className="flex items-center gap-4">
 				<Button variant="ghost" size="icon-sm" asChild>
-					<Link href="/dashboard/instances">
+					<Link href="/instances">
 						<ArrowLeft className="size-4" />
 					</Link>
 				</Button>
@@ -119,18 +80,7 @@ export function InstanceDetailClient({ instance }: InstanceDetailClientProps) {
 						<h1 className="text-2xl font-bold tracking-tight">
 							{instance.name}
 						</h1>
-						<Badge
-							variant="secondary"
-							className={cn(config.className)}
-						>
-							<span
-								className={cn(
-									"mr-1.5 inline-block size-2 rounded-full",
-									config.dot,
-								)}
-							/>
-							{config.label}
-						</Badge>
+						<StatusBadge status={instance.status} type="instance" />
 					</div>
 					<p className="text-sm text-muted-foreground">
 						ID: {instance.id}
@@ -158,9 +108,9 @@ export function InstanceDetailClient({ instance }: InstanceDetailClientProps) {
 			<div className="grid gap-6 md:grid-cols-2">
 				<Card>
 					<CardHeader>
-						<CardTitle className="text-base">Informacoes</CardTitle>
+						<CardTitle className="text-base">Informações</CardTitle>
 						<CardDescription>
-							Detalhes da instancia WhatsApp
+							Detalhes da instância WhatsApp
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-4">
@@ -170,7 +120,7 @@ export function InstanceDetailClient({ instance }: InstanceDetailClientProps) {
 							</Label>
 							<div className="flex items-center gap-2">
 								<p className="text-sm font-medium">
-									{instance.phone ?? "Nao conectado"}
+									{instance.phone ?? "Não conectado"}
 								</p>
 								{instance.phone && (
 									<Button
@@ -190,7 +140,7 @@ export function InstanceDetailClient({ instance }: InstanceDetailClientProps) {
 
 						<div className="space-y-2">
 							<Label className="text-muted-foreground">
-								Ultimo sync
+								Último sync
 							</Label>
 							<p className="text-sm font-medium">
 								{instance.lastSyncAt
@@ -205,7 +155,7 @@ export function InstanceDetailClient({ instance }: InstanceDetailClientProps) {
 
 						<div className="space-y-2">
 							<Label className="text-muted-foreground">
-								ID da Instancia
+								ID da Instância
 							</Label>
 							<div className="flex items-center gap-2">
 								<code className="text-xs bg-muted px-2 py-1 rounded-md font-mono">
@@ -227,7 +177,7 @@ export function InstanceDetailClient({ instance }: InstanceDetailClientProps) {
 					<CardHeader>
 						<CardTitle className="text-base">Status</CardTitle>
 						<CardDescription>
-							Status da conexao WhatsApp
+							Status da conexão WhatsApp
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-4">
@@ -235,15 +185,15 @@ export function InstanceDetailClient({ instance }: InstanceDetailClientProps) {
 							<span
 								className={cn(
 									"inline-block size-3 rounded-full",
-									config.dot,
+									config?.dot ?? "bg-muted-foreground",
 								)}
 							/>
 							<span className="text-sm font-medium">
-								{config.label}
+								{config?.label ?? instance.status}
 							</span>
 						</div>
 						<p className="text-xs text-muted-foreground">
-							A configuracao de webhooks e feita diretamente na
+							A configuração de webhooks é feita diretamente na
 							API Zé da API.
 						</p>
 					</CardContent>
@@ -256,7 +206,7 @@ export function InstanceDetailClient({ instance }: InstanceDetailClientProps) {
 						Zona de Perigo
 					</CardTitle>
 					<CardDescription>
-						Acoes irreversiveis para esta instancia.
+						Ações irreversíveis para esta instância.
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
@@ -266,7 +216,7 @@ export function InstanceDetailClient({ instance }: InstanceDetailClientProps) {
 						onClick={() => setDeleteDialog(true)}
 					>
 						<Trash2 className="mr-2 size-4" />
-						Excluir Instancia
+						Excluir Instância
 					</Button>
 				</CardContent>
 			</Card>
@@ -274,8 +224,8 @@ export function InstanceDetailClient({ instance }: InstanceDetailClientProps) {
 			<ConfirmDialog
 				open={deleteDialog}
 				onOpenChange={setDeleteDialog}
-				title="Excluir instancia"
-				description="Tem certeza que deseja excluir esta instancia? Esta acao nao pode ser desfeita. Todos os dados e historico de mensagens serao perdidos."
+				title="Excluir instância"
+				description="Tem certeza que deseja excluir esta instância? Esta ação não pode ser desfeita. Todos os dados e histórico de mensagens serão perdidos."
 				confirmLabel="Excluir"
 				destructive
 				loading={deleteLoading}

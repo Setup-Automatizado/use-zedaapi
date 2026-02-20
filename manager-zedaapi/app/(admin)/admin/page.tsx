@@ -14,6 +14,7 @@ import {
 	CardsSkeleton,
 	ChartSkeleton,
 } from "@/components/shared/loading-skeleton";
+import { PageHeader } from "@/components/shared/page-header";
 import { Activity } from "lucide-react";
 import { AdminChartsClient } from "./admin-charts-client";
 
@@ -26,14 +27,10 @@ export default async function AdminDashboardPage() {
 
 	return (
 		<div className="space-y-6">
-			<div>
-				<h1 className="text-2xl font-bold tracking-tight">
-					Painel Admin
-				</h1>
-				<p className="text-sm text-muted-foreground">
-					Visao geral do sistema.
-				</p>
-			</div>
+			<PageHeader
+				title="Painel Admin"
+				description="Visão geral do sistema."
+			/>
 
 			<Suspense fallback={<CardsSkeleton count={6} />}>
 				<AdminStats />

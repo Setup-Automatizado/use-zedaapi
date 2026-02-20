@@ -73,12 +73,12 @@ const BASE_FEATURES = [
 	"Envio e recebimento ilimitado",
 	"Webhooks em tempo real",
 	"API REST completa",
-	"Botoes interativos",
+	"Botões interativos",
 	"Gerenciamento de grupos",
 	"Multi-dispositivo",
-	"Metricas e analytics",
+	"Métricas e analytics",
 	"Nodes community n8n",
-	"Documentacao completa",
+	"Documentação completa",
 	"Suporte por e-mail e WhatsApp",
 ];
 

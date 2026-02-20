@@ -3,10 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { EmptyState } from "@/components/shared/empty-state";
-import { cn } from "@/lib/utils";
+import { StatusBadge } from "@/components/shared/status-badge";
 import { Smartphone, Search } from "lucide-react";
 
 interface Instance {
@@ -21,42 +20,6 @@ interface InstancesClientProps {
 	instances: Instance[];
 }
 
-const statusConfig: Record<
-	string,
-	{ label: string; className: string; dot: string }
-> = {
-	connected: {
-		label: "Conectado",
-		className: "bg-primary/10 text-primary",
-		dot: "bg-primary",
-	},
-	connecting: {
-		label: "Conectando",
-		className: "bg-chart-2/10 text-chart-2",
-		dot: "bg-chart-2",
-	},
-	disconnected: {
-		label: "Desconectado",
-		className: "bg-muted text-muted-foreground",
-		dot: "bg-muted-foreground",
-	},
-	creating: {
-		label: "Criando",
-		className: "bg-chart-2/10 text-chart-2",
-		dot: "bg-chart-2",
-	},
-	error: {
-		label: "Erro",
-		className: "bg-destructive/10 text-destructive",
-		dot: "bg-destructive",
-	},
-	banned: {
-		label: "Banido",
-		className: "bg-destructive/10 text-destructive",
-		dot: "bg-destructive",
-	},
-};
-
 export function InstancesClient({ instances }: InstancesClientProps) {
 	const [search, setSearch] = useState("");
 
@@ -70,9 +33,9 @@ export function InstancesClient({ instances }: InstancesClientProps) {
 		return (
 			<EmptyState
 				icon={Smartphone}
-				title="Nenhuma instancia"
-				description="Crie sua primeira instancia WhatsApp para comecar."
-				actionLabel="Criar Instancia"
+				title="Nenhuma instância"
+				description="Crie sua primeira instância WhatsApp para começar."
+				actionLabel="Criar Instância"
 				onAction={() => {}}
 			/>
 		);
@@ -83,7 +46,7 @@ export function InstancesClient({ instances }: InstancesClientProps) {
 			<div className="relative max-w-sm">
 				<Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
 				<Input
-					placeholder="Buscar instancias..."
+					placeholder="Buscar instâncias..."
 					value={search}
 					onChange={(e) => setSearch(e.target.value)}
 					className="pl-9"
@@ -91,56 +54,37 @@ export function InstancesClient({ instances }: InstancesClientProps) {
 			</div>
 
 			<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-				{filtered.map((instance) => {
-					const config = statusConfig[instance.status] ?? {
-						label: instance.status,
-						className: "bg-muted text-muted-foreground",
-						dot: "bg-muted-foreground",
-					};
-
-					return (
-						<Link
-							key={instance.id}
-							href={`/dashboard/instances/${instance.id}`}
-						>
-							<Card className="transition-colors hover:bg-accent/50 cursor-pointer">
-								<CardContent className="flex items-center gap-3 py-4">
-									<div className="flex size-10 items-center justify-center rounded-lg bg-muted">
-										<Smartphone className="size-5 text-muted-foreground" />
-									</div>
-									<div className="flex-1 min-w-0">
-										<p className="truncate text-sm font-medium">
-											{instance.name}
-										</p>
-										<p className="text-xs text-muted-foreground">
-											{instance.phone ?? "Sem telefone"}
-										</p>
-									</div>
-									<Badge
-										variant="secondary"
-										className={cn(
-											"shrink-0",
-											config.className,
-										)}
-									>
-										<span
-											className={cn(
-												"mr-1.5 inline-block size-2 rounded-full",
-												config.dot,
-											)}
-										/>
-										{config.label}
-									</Badge>
-								</CardContent>
-							</Card>
-						</Link>
-					);
-				})}
+				{filtered.map((instance) => (
+					<Link
+						key={instance.id}
+						href={`/dashboard/instances/${instance.id}`}
+					>
+						<Card className="transition-colors hover:bg-accent/50 cursor-pointer">
+							<CardContent className="flex items-center gap-3 py-4">
+								<div className="flex size-10 items-center justify-center rounded-lg bg-muted">
+									<Smartphone className="size-5 text-muted-foreground" />
+								</div>
+								<div className="flex-1 min-w-0">
+									<p className="truncate text-sm font-medium">
+										{instance.name}
+									</p>
+									<p className="text-xs text-muted-foreground">
+										{instance.phone ?? "Sem telefone"}
+									</p>
+								</div>
+								<StatusBadge
+									status={instance.status}
+									type="instance"
+								/>
+							</CardContent>
+						</Card>
+					</Link>
+				))}
 			</div>
 
 			{filtered.length === 0 && search && (
 				<p className="text-center text-sm text-muted-foreground py-8">
-					Nenhuma instancia encontrada para &ldquo;{search}&rdquo;
+					Nenhuma instância encontrada para &ldquo;{search}&rdquo;
 				</p>
 			)}
 		</div>

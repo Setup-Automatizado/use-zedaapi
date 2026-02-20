@@ -33,7 +33,7 @@ export default function Error({
 			<div className="flex gap-3">
 				<Button onClick={reset}>Tentar novamente</Button>
 				<Button variant="outline" asChild>
-					<Link href="/">Voltar ao inicio</Link>
+					<Link href="/">Voltar ao início</Link>
 				</Button>
 			</div>
 		</div>

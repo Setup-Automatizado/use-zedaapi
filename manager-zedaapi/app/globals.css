@@ -22,6 +22,9 @@
   --color-chart-3: var(--chart-3);
   --color-chart-2: var(--chart-2);
   --color-chart-1: var(--chart-1);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -80,6 +83,19 @@
   --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.705 0.015 286.067);
+
+  /* Semantic status */
+  --success: oklch(0.65 0.18 132);
+  --warning: oklch(0.75 0.18 85);
+  --info: oklch(0.65 0.15 250);
+
+  /* Elevation shadows */
+  --shadow-card: 0 1px 2px oklch(0 0 0 / 5%);
+  --shadow-card-hover: 0 4px 12px oklch(0 0 0 / 8%), 0 1px 3px oklch(0 0 0 / 5%);
+  --shadow-float: 0 8px 24px oklch(0 0 0 / 12%);
+
+  /* Glow */
+  --glow-primary: oklch(0.65 0.18 132 / 12%);
 }
 
 .dark {
@@ -114,6 +130,12 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.552 0.016 285.938);
+
+  --surface-elevated: oklch(0.24 0.006 285.885);
+  --shadow-card: 0 1px 2px oklch(0 0 0 / 20%);
+  --shadow-card-hover: 0 4px 12px oklch(0 0 0 / 30%), 0 1px 3px oklch(0 0 0 / 20%);
+  --shadow-float: 0 8px 24px oklch(0 0 0 / 40%);
+  --glow-primary: oklch(0.77 0.20 131 / 15%);
 }
 
 @layer base {
@@ -166,4 +188,59 @@
   .tabular-nums {
     font-variant-numeric: tabular-nums;
   }
+}
+
+/* Shimmer skeleton animation */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    oklch(0.95 0 0 / 50%) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+.dark .animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    oklch(0.3 0 0 / 30%) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus visible global */
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Connected status pulse */
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 var(--glow-primary); }
+  70% { box-shadow: 0 0 0 4px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }

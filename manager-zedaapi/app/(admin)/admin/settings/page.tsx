@@ -4,10 +4,11 @@ import { requireAdmin } from "@/lib/auth-server";
 import { getSystemSettings } from "@/server/actions/admin";
 import { Card, CardContent } from "@/components/ui/card";
 import { FormSkeleton } from "@/components/shared/loading-skeleton";
+import { PageHeader } from "@/components/shared/page-header";
 import { SettingsFormClient } from "./settings-form-client";
 
 export const metadata: Metadata = {
-	title: "Configuracoes | Admin Zé da API Manager",
+	title: "Configurações | Admin Zé da API Manager",
 };
 
 export default async function AdminSettingsPage() {
@@ -15,14 +16,10 @@ export default async function AdminSettingsPage() {
 
 	return (
 		<div className="space-y-6">
-			<div>
-				<h1 className="text-2xl font-bold tracking-tight">
-					Configuracoes do Sistema
-				</h1>
-				<p className="text-sm text-muted-foreground">
-					Configuracoes globais da plataforma.
-				</p>
-			</div>
+			<PageHeader
+				title="Configurações do Sistema"
+				description="Configurações globais da plataforma."
+			/>
 
 			<Suspense
 				fallback={
@@ -48,7 +45,7 @@ async function SettingsContent() {
 			<Card>
 				<CardContent className="py-12 text-center">
 					<p className="text-sm text-muted-foreground">
-						Nenhuma configuracao encontrada.
+						Nenhuma configuração encontrada.
 					</p>
 				</CardContent>
 			</Card>

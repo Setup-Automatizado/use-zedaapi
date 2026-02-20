@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 const deletionSchema = z.object({
 	nome: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
-	email: z.string().email("E-mail invalido"),
+	email: z.string().email("E-mail inválido"),
 	cpf_cnpj: z.string().min(11).max(18).optional(),
 	motivo: z.string().min(5).optional(),
 });

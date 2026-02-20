@@ -132,7 +132,7 @@ function CodeBlock() {
 					<div className="mb-3 flex items-center gap-2">
 						<div className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
 						<p className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">
-							Resposta &mdash; 47ms
+							Resposta &mdash; 47ms (p50)
 						</p>
 					</div>
 					<pre className="text-[13px] leading-relaxed">
@@ -214,7 +214,7 @@ export function Hero() {
 								className="mb-7 gap-2 px-4 py-1.5 text-sm font-medium border-primary/20 bg-primary/5 text-primary"
 							>
 								<SparklesIcon className="size-3.5" />
-								Nova versão 3.6 disponível
+								Novo: versão 3.7 com NATS JetStream
 							</Badge>
 						</motion.div>
 
@@ -226,12 +226,13 @@ export function Hero() {
 							animate="visible"
 							className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl xl:text-7xl"
 						>
-							+500 empresas já enviam{" "}
+							Envie pelo WhatsApp com{" "}
 							<br className="hidden sm:block" />
-							pelo WhatsApp com{" "}
 							<span className="text-primary">
 								47ms de latência
 							</span>
+							. <br className="hidden sm:block" />
+							+500 empresas já confiam.
 						</motion.h1>
 
 						{/* Subtitle */}
@@ -242,14 +243,10 @@ export function Hero() {
 							animate="visible"
 							className="mt-6 max-w-2xl text-lg text-muted-foreground sm:text-xl leading-relaxed"
 						>
-							Sua equipe ainda depende de ferramentas lentas e
-							instáveis para integrar o WhatsApp? Com a ZedaAPI,
-							você conecta em minutos, escala sem limites e nunca
-							mais perde uma mensagem.{" "}
-							<span className="font-medium text-foreground">
-								10 milhões de mensagens por mês
-							</span>{" "}
-							não mentem.
+							Uma API REST que conecta em 5 minutos, escala até
+							10M mensagens/mês e nunca perde um evento. Sem SDKs
+							obrigatórios — qualquer linguagem que fale HTTP,
+							funciona.
 						</motion.p>
 
 						{/* CTAs */}
@@ -266,7 +263,7 @@ export function Hero() {
 								className="h-12 px-7 text-base shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/25 transition-all duration-300"
 							>
 								<Link href="/sign-up">
-									Começar Grátis — Vagas Limitadas
+									Criar Conta Grátis — Sem Cartão
 									<ArrowRightIcon
 										className="size-4"
 										data-icon="inline-end"
@@ -279,7 +276,7 @@ export function Hero() {
 								asChild
 								className="h-12 px-7 text-base"
 							>
-								<Link href="#precos">Comparar Planos</Link>
+								<Link href="#precos">Ver Preços</Link>
 							</Button>
 						</motion.div>
 
@@ -293,19 +290,19 @@ export function Hero() {
 						>
 							<span className="flex items-center gap-1.5">
 								<span className="size-1.5 rounded-full bg-emerald-500" />
-								Pronto em 30 segundos
+								Primeira mensagem em 5 minutos
 							</span>
 							<span className="flex items-center gap-1.5">
 								<span className="size-1.5 rounded-full bg-emerald-500" />
-								Sem cartão de crédito
+								7 dias grátis, sem cartão
 							</span>
 							<span className="flex items-center gap-1.5">
 								<span className="size-1.5 rounded-full bg-emerald-500" />
-								99.9% de uptime garantido
+								SLA de 99.9% por contrato
 							</span>
 							<span className="flex items-center gap-1.5">
 								<span className="size-1.5 rounded-full bg-emerald-500" />
-								Suporte 100% brasileiro
+								Suporte técnico em português
 							</span>
 						</motion.div>
 					</div>

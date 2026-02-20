@@ -6,9 +6,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
-import { Loader2 } from "lucide-react";
-
 import { signIn } from "@/lib/auth-client";
+import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -27,8 +26,8 @@ import {
 } from "@/components/ui/field";
 
 const signInSchema = z.object({
-	email: z.string().email("E-mail invalido"),
-	password: z.string().min(1, "Senha obrigatoria"),
+	email: z.string().email("E-mail inválido"),
+	password: z.string().min(1, "Senha obrigatória"),
 });
 
 type SignInValues = z.infer<typeof signInSchema>;
@@ -70,7 +69,9 @@ export function SignInForm() {
 	return (
 		<Card className="w-full max-w-md">
 			<CardHeader className="space-y-1">
-				<CardTitle className="text-2xl font-bold">Entrar</CardTitle>
+				<CardTitle className="text-2xl font-bold tracking-tight">
+					Entrar
+				</CardTitle>
 				<CardDescription>
 					Entre com seu e-mail e senha para acessar sua conta
 				</CardDescription>
@@ -136,13 +137,11 @@ export function SignInForm() {
 						size="lg"
 						disabled={isSubmitting}
 					>
-						{isSubmitting && (
-							<Loader2 className="mr-2 size-4 animate-spin" />
-						)}
+						{isSubmitting && <Spinner className="mr-2 size-4" />}
 						Entrar
 					</Button>
 					<p className="text-sm text-muted-foreground">
-						Nao tem uma conta?{" "}
+						Não tem uma conta?{" "}
 						<Link
 							href="/sign-up"
 							className="text-foreground font-medium hover:underline underline-offset-4"

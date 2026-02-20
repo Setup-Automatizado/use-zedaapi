@@ -126,7 +126,7 @@ export function InvoiceTable({
 							Valor
 						</TableHead>
 						<TableHead className="text-xs font-medium uppercase tracking-wide">
-							Metodo
+							Método
 						</TableHead>
 						<TableHead className="text-xs font-medium uppercase tracking-wide">
 							Status

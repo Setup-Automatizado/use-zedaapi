@@ -5,9 +5,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
-import { Loader2, ArrowLeft, MailCheck } from "lucide-react";
+import { ArrowLeft, MailCheck } from "lucide-react";
 
 import { authClient } from "@/lib/auth-client";
+import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -26,7 +27,7 @@ import {
 } from "@/components/ui/field";
 
 const forgotPasswordSchema = z.object({
-	email: z.string().email("E-mail invalido"),
+	email: z.string().email("E-mail inválido"),
 });
 
 type ForgotPasswordValues = z.infer<typeof forgotPasswordSchema>;
@@ -72,7 +73,7 @@ export function ForgotPasswordForm() {
 					</div>
 					<CardTitle>E-mail enviado</CardTitle>
 					<CardDescription>
-						Se esse e-mail estiver cadastrado, voce recebera um link
+						Se esse e-mail estiver cadastrado, você receberá um link
 						para redefinir sua senha.
 					</CardDescription>
 				</CardHeader>
@@ -91,9 +92,11 @@ export function ForgotPasswordForm() {
 	return (
 		<Card className="w-full max-w-md">
 			<CardHeader className="space-y-1">
-				<CardTitle className="text-2xl font-bold">Esqueceu a senha?</CardTitle>
+				<CardTitle className="text-2xl font-bold tracking-tight">
+					Esqueceu a senha?
+				</CardTitle>
 				<CardDescription>
-					Informe seu e-mail para receber o link de recuperacao
+					Informe seu e-mail para receber o link de recuperação
 				</CardDescription>
 			</CardHeader>
 			<form onSubmit={handleSubmit(onSubmit)}>
@@ -129,10 +132,8 @@ export function ForgotPasswordForm() {
 						size="lg"
 						disabled={isSubmitting}
 					>
-						{isSubmitting && (
-							<Loader2 className="mr-2 size-4 animate-spin" />
-						)}
-						Enviar link de recuperacao
+						{isSubmitting && <Spinner className="mr-2 size-4" />}
+						Enviar link de recuperação
 					</Button>
 					<Button variant="ghost" size="sm" asChild>
 						<Link href="/sign-in">

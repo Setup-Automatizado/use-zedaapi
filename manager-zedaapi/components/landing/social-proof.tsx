@@ -77,7 +77,7 @@ const stats = [
 	{
 		value: 500,
 		suffix: "+",
-		label: "Empresas Confiam em Nós",
+		label: "Empresas em Produção",
 		description: "De startups a grandes operações",
 	},
 	{
@@ -89,8 +89,8 @@ const stats = [
 	{
 		value: 99,
 		suffix: ".9%",
-		label: "Disponibilidade Garantida",
-		description: "SLA por contrato, sem surpresas",
+		label: "Uptime Comprovado",
+		description: "SLA por contrato, p99 < 200ms",
 	},
 	{
 		value: 5000,

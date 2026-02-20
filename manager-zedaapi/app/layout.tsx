@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
 	title: "Zé da API Manager",
-	description: "Gerencie suas instancias WhatsApp API",
+	description: "Gerencie suas instâncias WhatsApp API",
 };
 
 export default function RootLayout({

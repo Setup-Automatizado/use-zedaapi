@@ -10,14 +10,14 @@ export default function NotFound() {
 			</div>
 			<div className="text-center">
 				<h2 className="text-xl font-bold tracking-tight">
-					Pagina nao encontrada
+					Página não encontrada
 				</h2>
 				<p className="mt-2 max-w-sm text-sm text-muted-foreground">
-					A pagina que voce procura nao existe ou foi removida.
+					A página que você procura não existe ou foi removida.
 				</p>
 			</div>
 			<Button asChild>
-				<Link href="/">Voltar ao inicio</Link>
+				<Link href="/">Voltar ao início</Link>
 			</Button>
 		</div>
 	);
