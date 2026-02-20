@@ -1,6 +1,9 @@
 import type { Job } from "bullmq";
 import type { AffiliatePayoutJobData } from "@/lib/queue/types";
+import type { db as dbClient } from "@/lib/db";
 import { createLogger } from "@/lib/queue/logger";
+
+type DbClient = typeof dbClient;
 
 const log = createLogger("processor:affiliate-payout");
 
@@ -79,7 +82,7 @@ async function processStripeTransfer(
 	},
 	payout: { id: string },
 	amount: number,
-	db: Awaited<ReturnType<typeof getDb>>,
+	db: DbClient,
 ): Promise<void> {
 	if (!affiliate.stripeConnectAccountId) {
 		log.error("Affiliate has no Stripe Connect account", {
@@ -126,7 +129,7 @@ async function processStripeTransfer(
 
 async function processManualPayout(
 	payout: { id: string },
-	db: Awaited<ReturnType<typeof getDb>>,
+	db: DbClient,
 ): Promise<void> {
 	// Manual payouts are just marked as pending_manual for admin to process
 	await db.payout.update({
@@ -137,9 +140,4 @@ async function processManualPayout(
 	log.info("Manual payout marked for admin processing", {
 		payoutId: payout.id,
 	});
-}
-
-async function getDb() {
-	const { db } = await import("@/lib/db");
-	return db;
 }

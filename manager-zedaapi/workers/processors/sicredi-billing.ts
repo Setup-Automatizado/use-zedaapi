@@ -1,6 +1,9 @@
 import type { Job } from "bullmq";
 import type { SicrediBillingJobData } from "@/lib/queue/types";
+import type { db as dbClient } from "@/lib/db";
 import { createLogger } from "@/lib/queue/logger";
+
+type DbClient = typeof dbClient;
 
 const log = createLogger("processor:sicredi-billing");
 
@@ -92,7 +95,7 @@ export async function processSicrediBillingJob(
 
 async function createPixCharge(
 	invoice: Record<string, unknown>,
-	db: Awaited<ReturnType<typeof getDb>>,
+	db: DbClient,
 ): Promise<void> {
 	const userId = invoice.userId as string;
 	const amount = Number(invoice.amount);
@@ -161,7 +164,7 @@ async function createPixCharge(
 
 async function createBoletoCharge(
 	invoice: Record<string, unknown>,
-	db: Awaited<ReturnType<typeof getDb>>,
+	db: DbClient,
 ): Promise<void> {
 	const userId = invoice.userId as string;
 	const amount = Number(invoice.amount);
@@ -238,7 +241,7 @@ async function createBoletoCharge(
 
 async function checkChargeStatus(
 	charge: Record<string, unknown>,
-	db: Awaited<ReturnType<typeof getDb>>,
+	db: DbClient,
 ): Promise<void> {
 	const chargeId = charge.id as string;
 	const txid = charge.txid as string | null;
@@ -331,9 +334,4 @@ async function checkChargeStatus(
 			{ delay: 5 * 60 * 1000 },
 		);
 	}
-}
-
-async function getDb() {
-	const { db } = await import("@/lib/db");
-	return db;
 }

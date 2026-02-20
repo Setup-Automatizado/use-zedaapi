@@ -1,6 +1,9 @@
 import type { Job } from "bullmq";
 import type { InstanceSyncJobData } from "@/lib/queue/types";
+import type { db as dbClient } from "@/lib/db";
 import { createLogger } from "@/lib/queue/logger";
+
+type DbClient = typeof dbClient;
 
 const log = createLogger("processor:instance-sync");
 
@@ -35,7 +38,7 @@ export async function processInstanceSyncJob(
 
 async function syncSingleInstance(
 	instanceId: string,
-	db: Awaited<ReturnType<typeof getDb>>,
+	db: DbClient,
 ): Promise<void> {
 	const instance = await db.instance.findUnique({
 		where: { id: instanceId },
@@ -49,10 +52,7 @@ async function syncSingleInstance(
 	await fetchAndUpdateStatus(instance, db);
 }
 
-async function syncUserInstances(
-	userId: string,
-	db: Awaited<ReturnType<typeof getDb>>,
-): Promise<void> {
+async function syncUserInstances(userId: string, db: DbClient): Promise<void> {
 	const instances = await db.instance.findMany({
 		where: { userId },
 	});
@@ -64,9 +64,7 @@ async function syncUserInstances(
 	}
 }
 
-async function syncAllInstances(
-	db: Awaited<ReturnType<typeof getDb>>,
-): Promise<void> {
+async function syncAllInstances(db: DbClient): Promise<void> {
 	const instances = await db.instance.findMany();
 
 	log.info("Syncing all instances", { count: instances.length });
@@ -78,7 +76,7 @@ async function syncAllInstances(
 
 async function fetchAndUpdateStatus(
 	instance: { id: string; zedaapiInstanceId: string; status: string },
-	db: Awaited<ReturnType<typeof getDb>>,
+	db: DbClient,
 ): Promise<void> {
 	const baseUrl = process.env.ZEDAAPI_BASE_URL;
 	const token = process.env.ZEDAAPI_CLIENT_TOKEN;
@@ -160,9 +158,4 @@ async function fetchAndUpdateStatus(
 			error: error instanceof Error ? error.message : "Unknown error",
 		});
 	}
-}
-
-async function getDb() {
-	const { db } = await import("@/lib/db");
-	return db;
 }

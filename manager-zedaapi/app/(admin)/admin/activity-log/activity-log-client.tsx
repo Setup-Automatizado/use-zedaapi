@@ -1,12 +1,11 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useRef } from "react";
 import { DataTable, type Column } from "@/components/shared/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Activity } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getAdminActivityLog } from "@/server/actions/admin";
-import { useDebounce } from "@/hooks/use-debounce";
 
 interface ActivityEntry {
 	id: string;
@@ -68,26 +67,31 @@ export function ActivityLogClient({
 	const [page, setPage] = useState(1);
 	const [total, setTotal] = useState(initialTotal);
 	const [search, setSearch] = useState("");
-	const debouncedSearch = useDebounce(search, 300);
+	const searchTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-	const load = useCallback(async () => {
+	async function fetchData(pageNum: number, searchTerm?: string) {
 		setLoading(true);
-		const res = await getAdminActivityLog(
-			page,
-			debouncedSearch || undefined,
-		);
+		const res = await getAdminActivityLog(pageNum, searchTerm || undefined);
 		if (res.success && res.data) {
 			setData(res.data.items);
 			setTotal(res.data.total);
 		}
 		setLoading(false);
-	}, [page, debouncedSearch]);
+	}
 
-	useEffect(() => {
-		if (page > 1 || debouncedSearch) {
-			load();
-		}
-	}, [load, page, debouncedSearch]);
+	function handlePageChange(newPage: number) {
+		setPage(newPage);
+		fetchData(newPage, search);
+	}
+
+	function handleSearch(value: string) {
+		setSearch(value);
+		clearTimeout(searchTimeoutRef.current);
+		searchTimeoutRef.current = setTimeout(() => {
+			setPage(1);
+			fetchData(1, value);
+		}, 300);
+	}
 
 	const columns: Column<ActivityEntry>[] = [
 		{
@@ -153,12 +157,12 @@ export function ActivityLogClient({
 			emptyIcon={Activity}
 			emptyTitle="Nenhuma atividade"
 			emptyDescription="Nenhuma atividade registrada."
-			onSearch={setSearch}
+			onSearch={handleSearch}
 			searchPlaceholder="Buscar no log..."
 			page={page}
 			pageSize={20}
 			totalCount={total}
-			onPageChange={setPage}
+			onPageChange={handlePageChange}
 		/>
 	);
 }

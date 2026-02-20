@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import {
 	Dialog,
 	DialogContent,
@@ -45,10 +46,13 @@ export function QrCodeDialog({
 					) : qrCode ? (
 						<div className="rounded-xl border bg-white p-4">
 							{/* QR code image will be rendered here */}
-							<img
+							<Image
 								src={`data:image/png;base64,${qrCode}`}
 								alt="QR Code WhatsApp"
+								width={224}
+								height={224}
 								className="size-56"
+								unoptimized
 							/>
 						</div>
 					) : (

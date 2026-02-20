@@ -20,6 +20,7 @@ interface OrganizationFormProps {
 	};
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function OrganizationForm({ user }: OrganizationFormProps) {
 	const [saving, setSaving] = useState(false);
 
@@ -49,17 +50,11 @@ export function OrganizationForm({ user }: OrganizationFormProps) {
 							<Label htmlFor="org-name">
 								Nome da Organizacao
 							</Label>
-							<Input
-								id="org-name"
-								placeholder="Minha Empresa"
-							/>
+							<Input id="org-name" placeholder="Minha Empresa" />
 						</div>
 						<div className="space-y-2">
 							<Label htmlFor="org-slug">Slug</Label>
-							<Input
-								id="org-slug"
-								placeholder="minha-empresa"
-							/>
+							<Input id="org-slug" placeholder="minha-empresa" />
 							<p className="text-xs text-muted-foreground">
 								Identificador unico da organizacao.
 							</p>

@@ -13,15 +13,6 @@ export async function generateInvoiceNumber(): Promise<string> {
 	const year = new Date().getFullYear();
 	const prefix = `INV-${year}-`;
 
-	// Find last invoice number for this year
-	const lastInvoice = await db.invoice.findFirst({
-		where: {
-			id: { startsWith: "" }, // all invoices
-		},
-		orderBy: { createdAt: "desc" },
-		select: { id: true },
-	});
-
 	// Simple counter based on total count
 	const totalCount = await db.invoice.count();
 	const nextSequence = totalCount + 1;

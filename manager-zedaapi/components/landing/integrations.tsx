@@ -2,7 +2,7 @@
 
 import type { ComponentType, SVGProps } from "react";
 import { motion, type Variants } from "framer-motion";
-import { Globe, Webhook } from "lucide-react";
+import { Globe } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import N8nIcon from "@/components/icons/n8n";
 import MakeIcon from "@/components/icons/make";

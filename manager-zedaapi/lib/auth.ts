@@ -18,25 +18,12 @@ export const auth = betterAuth({
 	emailAndPassword: {
 		enabled: true,
 		requireEmailVerification: false,
-		sendResetPassword: async ({
-			user,
-			url,
-		}: {
-			user: { email: string };
-			url: string;
-		}) => {
+
+		sendResetPassword: async () => {
 			// TODO: Send via SMTP email service
-			// Do NOT log sensitive URLs
 		},
-		sendVerificationEmail: async ({
-			user,
-			url,
-		}: {
-			user: { email: string };
-			url: string;
-		}) => {
+		sendVerificationEmail: async () => {
 			// TODO: Send via SMTP email service
-			// Do NOT log sensitive URLs
 		},
 	},
 

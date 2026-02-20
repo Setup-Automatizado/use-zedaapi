@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState } from "react";
 import { DataTable, type Column } from "@/components/shared/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Receipt } from "lucide-react";
@@ -65,21 +65,20 @@ export function InvoicesTableClient({
 	const [page, setPage] = useState(1);
 	const [total, setTotal] = useState(initialTotal);
 
-	const load = useCallback(async () => {
+	async function fetchData(pageNum: number) {
 		setLoading(true);
-		const res = await getAdminInvoices(page);
+		const res = await getAdminInvoices(pageNum);
 		if (res.success && res.data) {
 			setData(res.data.items);
 			setTotal(res.data.total);
 		}
 		setLoading(false);
-	}, [page]);
+	}
 
-	useEffect(() => {
-		if (page > 1) {
-			load();
-		}
-	}, [load, page]);
+	function handlePageChange(newPage: number) {
+		setPage(newPage);
+		if (newPage > 1) fetchData(newPage);
+	}
 
 	const columns: Column<Invoice>[] = [
 		{
@@ -169,7 +168,7 @@ export function InvoicesTableClient({
 			page={page}
 			pageSize={20}
 			totalCount={total}
-			onPageChange={setPage}
+			onPageChange={handlePageChange}
 		/>
 	);
 }

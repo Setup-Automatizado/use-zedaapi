@@ -1,10 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import {
-	createPixCharge,
-	createPixChargeWithTxid,
-} from "@/lib/services/sicredi/pix";
+import { createPixChargeWithTxid } from "@/lib/services/sicredi/pix";
 import { createBoletoHibrido } from "@/lib/services/sicredi/boleto-hibrido";
 import { generateTxid, calculateDueDate } from "@/lib/services/sicredi/utils";
 

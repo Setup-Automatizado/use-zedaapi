@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState } from "react";
 import { DataTable, type Column } from "@/components/shared/data-table";
 import { Badge } from "@/components/ui/badge";
 import { CreditCard } from "lucide-react";
@@ -51,21 +51,20 @@ export function SubscriptionsTableClient({
 	const [page, setPage] = useState(1);
 	const [total, setTotal] = useState(initialTotal);
 
-	const load = useCallback(async () => {
+	async function fetchData(pageNum: number) {
 		setLoading(true);
-		const res = await getAdminSubscriptions(page);
+		const res = await getAdminSubscriptions(pageNum);
 		if (res.success && res.data) {
 			setData(res.data.items);
 			setTotal(res.data.total);
 		}
 		setLoading(false);
-	}, [page]);
+	}
 
-	useEffect(() => {
-		if (page > 1) {
-			load();
-		}
-	}, [load, page]);
+	function handlePageChange(newPage: number) {
+		setPage(newPage);
+		if (newPage > 1) fetchData(newPage);
+	}
 
 	const columns: Column<Subscription>[] = [
 		{
@@ -129,7 +128,7 @@ export function SubscriptionsTableClient({
 			page={page}
 			pageSize={20}
 			totalCount={total}
-			onPageChange={setPage}
+			onPageChange={handlePageChange}
 		/>
 	);
 }

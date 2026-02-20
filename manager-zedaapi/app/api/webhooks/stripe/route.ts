@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { constructWebhookEvent, stripe } from "@/lib/stripe";
+import { constructWebhookEvent } from "@/lib/stripe";
 import { db } from "@/lib/db";
-import {
-	handleStripePayment,
-	handleSicrediPayment,
-} from "@/server/services/billing-service";
+import { handleStripePayment } from "@/server/services/billing-service";
 import { syncSubscription } from "@/server/services/stripe-service";
 import type Stripe from "stripe";
 

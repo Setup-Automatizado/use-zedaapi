@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useRef } from "react";
 import { DataTable, type Column } from "@/components/shared/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,6 @@ import {
 	unbanUser,
 	setUserRole,
 } from "@/server/actions/admin";
-import { useDebounce } from "@/hooks/use-debounce";
 
 interface User {
 	id: string;
@@ -51,7 +50,7 @@ export function UsersTableClient({
 	const [page, setPage] = useState(1);
 	const [total, setTotal] = useState(initialTotal);
 	const [search, setSearch] = useState("");
-	const debouncedSearch = useDebounce(search, 300);
+	const searchTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 	const [banDialog, setBanDialog] = useState<{
 		open: boolean;
 		userId: string | null;
@@ -59,21 +58,29 @@ export function UsersTableClient({
 	}>({ open: false, userId: null, action: "ban" });
 	const [banLoading, setBanLoading] = useState(false);
 
-	const loadUsers = useCallback(async () => {
+	async function fetchData(pageNum: number, searchTerm?: string) {
 		setLoading(true);
-		const res = await getAdminUsers(page, debouncedSearch || undefined);
+		const res = await getAdminUsers(pageNum, searchTerm || undefined);
 		if (res.success && res.data) {
 			setUsers(res.data.items);
 			setTotal(res.data.total);
 		}
 		setLoading(false);
-	}, [page, debouncedSearch]);
+	}
 
-	useEffect(() => {
-		if (page > 1 || debouncedSearch) {
-			loadUsers();
-		}
-	}, [loadUsers, page, debouncedSearch]);
+	function handlePageChange(newPage: number) {
+		setPage(newPage);
+		fetchData(newPage, search);
+	}
+
+	function handleSearch(value: string) {
+		setSearch(value);
+		clearTimeout(searchTimeoutRef.current);
+		searchTimeoutRef.current = setTimeout(() => {
+			setPage(1);
+			fetchData(1, value);
+		}, 300);
+	}
 
 	const handleBanConfirm = async () => {
 		if (!banDialog.userId) return;
@@ -89,7 +96,7 @@ export function UsersTableClient({
 					? "Usuario banido"
 					: "Usuario desbanido",
 			);
-			loadUsers();
+			fetchData(page, search);
 		} else {
 			toast.error("Erro ao atualizar usuario");
 		}
@@ -100,7 +107,7 @@ export function UsersTableClient({
 		const res = await setUserRole(userId, "admin");
 		if (res.success) {
 			toast.success("Usuario promovido a admin");
-			loadUsers();
+			fetchData(page, search);
 		} else {
 			toast.error(res.error ?? "Erro ao atualizar funcao");
 		}
@@ -217,12 +224,12 @@ export function UsersTableClient({
 				emptyIcon={Users}
 				emptyTitle="Nenhum usuario"
 				emptyDescription="Nenhum usuario cadastrado na plataforma."
-				onSearch={setSearch}
+				onSearch={handleSearch}
 				searchPlaceholder="Buscar usuarios..."
 				page={page}
 				pageSize={20}
 				totalCount={total}
-				onPageChange={setPage}
+				onPageChange={handlePageChange}
 			/>
 
 			<ConfirmDialog

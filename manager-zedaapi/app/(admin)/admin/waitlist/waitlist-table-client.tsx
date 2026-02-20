@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useRef } from "react";
 import { DataTable, type Column } from "@/components/shared/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,6 @@ import {
 	approveWaitlist,
 	rejectWaitlist,
 } from "@/server/actions/admin";
-import { useDebounce } from "@/hooks/use-debounce";
 
 interface WaitlistEntry {
 	id: string;
@@ -46,7 +45,7 @@ export function WaitlistTableClient({
 	const [page, setPage] = useState(1);
 	const [total, setTotal] = useState(initialTotal);
 	const [search, setSearch] = useState("");
-	const debouncedSearch = useDebounce(search, 300);
+	const searchTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 	const [approveDialog, setApproveDialog] = useState<{
 		open: boolean;
 		entryId: string | null;
@@ -57,21 +56,29 @@ export function WaitlistTableClient({
 	}>({ open: false, entryId: null });
 	const [actionLoading, setActionLoading] = useState(false);
 
-	const load = useCallback(async () => {
+	async function fetchData(pageNum: number, searchTerm?: string) {
 		setLoading(true);
-		const res = await getWaitlist(page, debouncedSearch || undefined);
+		const res = await getWaitlist(pageNum, searchTerm || undefined);
 		if (res.success && res.data) {
 			setData(res.data.items);
 			setTotal(res.data.total);
 		}
 		setLoading(false);
-	}, [page, debouncedSearch]);
+	}
 
-	useEffect(() => {
-		if (page > 1 || debouncedSearch) {
-			load();
-		}
-	}, [load, page, debouncedSearch]);
+	function handlePageChange(newPage: number) {
+		setPage(newPage);
+		fetchData(newPage, search);
+	}
+
+	function handleSearch(value: string) {
+		setSearch(value);
+		clearTimeout(searchTimeoutRef.current);
+		searchTimeoutRef.current = setTimeout(() => {
+			setPage(1);
+			fetchData(1, value);
+		}, 300);
+	}
 
 	const handleApprove = async () => {
 		if (!approveDialog.entryId) return;
@@ -80,7 +87,7 @@ export function WaitlistTableClient({
 		setActionLoading(false);
 		if (res.success) {
 			toast.success("Solicitacao aprovada");
-			load();
+			fetchData(page, search);
 		} else {
 			toast.error("Erro ao aprovar");
 		}
@@ -94,7 +101,7 @@ export function WaitlistTableClient({
 		setActionLoading(false);
 		if (res.success) {
 			toast.success("Solicitacao rejeitada");
-			load();
+			fetchData(page, search);
 		} else {
 			toast.error("Erro ao rejeitar");
 		}
@@ -183,12 +190,12 @@ export function WaitlistTableClient({
 				emptyIcon={Clock}
 				emptyTitle="Waitlist vazia"
 				emptyDescription="Nenhuma solicitacao pendente."
-				onSearch={setSearch}
+				onSearch={handleSearch}
 				searchPlaceholder="Buscar na waitlist..."
 				page={page}
 				pageSize={20}
 				totalCount={total}
-				onPageChange={setPage}
+				onPageChange={handlePageChange}
 			/>
 
 			<ConfirmDialog

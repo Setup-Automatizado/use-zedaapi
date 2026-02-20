@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useSearchParams } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { motion, AnimatePresence } from "framer-motion";
@@ -86,29 +86,22 @@ export function ContactForm() {
 	);
 	const [serverError, setServerError] = useState<string | null>(null);
 
-	const [utmParams, setUtmParams] = useState({
-		utm_source: "",
-		utm_medium: "",
-		utm_campaign: "",
-		utm_term: "",
-		utm_content: "",
-	});
-
-	useEffect(() => {
-		setUtmParams({
+	const utmParams = useMemo(
+		() => ({
 			utm_source: searchParams.get("utm_source") ?? "",
 			utm_medium: searchParams.get("utm_medium") ?? "",
 			utm_campaign: searchParams.get("utm_campaign") ?? "",
 			utm_term: searchParams.get("utm_term") ?? "",
 			utm_content: searchParams.get("utm_content") ?? "",
-		});
-	}, [searchParams]);
+		}),
+		[searchParams],
+	);
 
 	const {
 		register,
 		handleSubmit,
 		setValue,
-		watch,
+		control,
 		reset,
 		formState: { errors },
 	} = useForm<ContactFormValues>({
@@ -124,8 +117,8 @@ export function ContactForm() {
 		},
 	});
 
-	const assuntoValue = watch("assunto");
-	const preferenciaValue = watch("preferencia_contato");
+	const assuntoValue = useWatch({ control, name: "assunto" });
+	const preferenciaValue = useWatch({ control, name: "preferencia_contato" });
 
 	function onSubmit(data: ContactFormValues) {
 		setServerError(null);

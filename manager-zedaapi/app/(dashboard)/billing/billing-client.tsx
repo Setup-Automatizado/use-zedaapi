@@ -52,7 +52,7 @@ export function BillingClient({
 		type: "pix" | "boleto_hibrido",
 	) {
 		try {
-			const result = await requestSicrediPayment(invoiceId, type);
+			await requestSicrediPayment(invoiceId, type);
 			// Refresh to show the new charge data
 			router.refresh();
 		} catch (err) {
