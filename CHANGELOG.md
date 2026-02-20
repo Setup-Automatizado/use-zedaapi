@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.9.1](https://github.com/Setup-Automatizado/zedaapi/compare/v3.9.0...v3.9.1) (2026-02-20)
+
+### Bug Fixes
+
+* **manager:** resolve all ESLint errors and warnings (0 issues) ([20db3d3](https://github.com/Setup-Automatizado/zedaapi/commit/20db3d38a772bbaa6898a52e19937f6dfbb758fb))
+
 ## [3.9.0](https://github.com/Setup-Automatizado/zedaapi/compare/v3.8.0...v3.9.0) (2026-02-20)
 
 ### Features
