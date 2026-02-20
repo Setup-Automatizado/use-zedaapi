@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.8.0](https://github.com/Setup-Automatizado/zedaapi/compare/v3.7.0...v3.8.0) (2026-02-20)
+
+### Features
+
+* **manager:** add SaaS management dashboard for ZedaAPI ([47d7920](https://github.com/Setup-Automatizado/zedaapi/commit/47d7920a6226bb168de8a0af1d083c66ff55ce9b))
+
 ## [3.7.0](https://github.com/Setup-Automatizado/zedaapi/compare/v3.6.0...v3.7.0) (2026-02-20)
 
 ### Features
