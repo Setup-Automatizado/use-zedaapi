@@ -73,6 +73,11 @@ func NewRouter(deps RouterDeps) http.Handler {
 		return nil
 	})
 
+	// Landing page at root
+	r.Get("/", func(w http.ResponseWriter, req *http.Request) {
+		docs.LandingHandler(deps.DocsConfig).ServeHTTP(w, req)
+	})
+
 	if deps.HealthHandler != nil {
 		r.Get("/health", deps.HealthHandler.Health)
 		r.Get("/ready", deps.HealthHandler.Ready)
@@ -85,6 +90,10 @@ func NewRouter(deps RouterDeps) http.Handler {
 	r.Route("/docs", func(dr chi.Router) {
 		dr.Get("/", func(w http.ResponseWriter, req *http.Request) {
 			docs.UIHandler(deps.DocsConfig).ServeHTTP(w, req)
+		})
+		dr.Get("/swagger", http.RedirectHandler("/docs/swagger/", http.StatusMovedPermanently).ServeHTTP)
+		dr.Get("/swagger/", func(w http.ResponseWriter, req *http.Request) {
+			docs.SwaggerUIHandler(deps.DocsConfig).ServeHTTP(w, req)
 		})
 		dr.Get("/openapi.yaml", func(w http.ResponseWriter, req *http.Request) {
 			docs.YAMLHandler(deps.DocsConfig).ServeHTTP(w, req)

@@ -117,8 +117,8 @@ func generateScalarHTML(baseURL string) (string, error) {
 		return "", fmt.Errorf("failed to generate Scalar HTML: %w", err)
 	}
 
-	// Inject favicon and meta tags into the <head> section
-	faviconMeta := strings.Join([]string{
+	// Inject favicon, meta tags, and nav CSS into <head>
+	headInjection := strings.Join([]string{
 		`<link rel="icon" type="image/x-icon" href="/favicon.ico">`,
 		`<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">`,
 		`<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">`,
@@ -126,8 +126,17 @@ func generateScalarHTML(baseURL string) (string, error) {
 		`<link rel="manifest" href="/manifest.json">`,
 		`<meta name="theme-color" content="#1a1a2e">`,
 	}, "\n    ")
+	headInjection += "\n    " + navHeaderCSS()
 
-	content = strings.Replace(content, "</head>", "    "+faviconMeta+"\n  </head>", 1)
+	content = strings.Replace(content, "</head>", "    "+headInjection+"\n  </head>", 1)
+
+	// Inject navigation bar after <body>
+	content = strings.Replace(content, "<body>", "<body>\n  "+navHeaderHTML("scalar"), 1)
+
+	// Inject preferred authentication scheme into Scalar data-configuration.
+	// The library escapes JSON quotes as &quot; in the HTML attribute.
+	authConfig := `&quot;authentication&quot;:{&quot;preferredSecurityScheme&quot;:&quot;ClientTokenAuth&quot;},`
+	content = strings.Replace(content, `{&quot;theme&quot;`, `{`+authConfig+`&quot;theme&quot;`, 1)
 
 	return content, nil
 }
