@@ -1,0 +1,635 @@
+// =============================================================================
+// ZedaAPI Manager - Prisma Schema (Prisma 7 + Better Auth)
+// SaaS Manager for WhatsApp API instances
+// =============================================================================
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// =============================================================================
+// Better Auth Core
+// =============================================================================
+
+model User {
+  id               String    @id @default(cuid())
+  name             String
+  email            String    @unique
+  emailVerified    Boolean   @default(false)
+  image            String?
+  role             String    @default("user")
+  banned           Boolean   @default(false)
+  banReason        String?
+  banExpires       DateTime?
+  twoFactorEnabled Boolean?  @default(false)
+  cpfCnpj          String?
+  phone            String?
+  address          String?
+  city             String?
+  state            String?
+  zipCode          String?
+  country          String    @default("BR")
+  stripeCustomerId String?   @unique
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  sessions               Session[]
+  accounts               Account[]
+  twoFactor              TwoFactor?
+  members                Member[]
+  invitations            Invitation[]
+  subscriptions          Subscription[]
+  instances              Instance[]
+  invoices               Invoice[]
+  paymentMethods         PaymentMethod[]
+  affiliate              Affiliate?
+  referral               Referral?
+  notifications          Notification[]
+  notificationPreference NotificationPreference?
+  activityLogs           ActivityLog[]
+  apiKeys                ApiKey[]
+  sicrediCharges         SicrediCharge[]
+
+  @@map("user")
+}
+
+model Session {
+  id                   String   @id @default(cuid())
+  expiresAt            DateTime
+  token                String   @unique
+  ipAddress            String?
+  userAgent            String?
+  userId               String
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  impersonatedBy       String?
+  activeOrganizationId String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@unique([providerId, accountId])
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+model TwoFactor {
+  id          String @id @default(cuid())
+  secret      String
+  backupCodes String
+  userId      String @unique
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("twoFactor")
+}
+
+model Waitlist {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  name            String?
+  status          String    @default("pending")
+  inviteCode      String?   @unique
+  inviteExpiresAt DateTime?
+  position        Int?
+  referredBy      String?
+  metadata        String?
+  approvedAt      DateTime?
+  rejectedAt      DateTime?
+  registeredAt    DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@map("waitlist")
+}
+
+// =============================================================================
+// Organization - Better Auth organization plugin
+// =============================================================================
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  logo      String?
+  metadata  String?
+  createdAt DateTime @default(now())
+
+  members       Member[]
+  invitations   Invitation[]
+  subscriptions Subscription[]
+  instances     Instance[]
+
+  @@map("organization")
+}
+
+model Member {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role           String       @default("member")
+  createdAt      DateTime     @default(now())
+
+  @@unique([organizationId, userId])
+  @@index([organizationId])
+  @@index([userId])
+  @@map("member")
+}
+
+model Invitation {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  email          String
+  role           String?      @default("member")
+  status         String       @default("pending")
+  inviterId      String
+  user           User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
+  expiresAt      DateTime
+  createdAt      DateTime     @default(now())
+
+  @@index([organizationId])
+  @@index([email])
+  @@map("invitation")
+}
+
+// =============================================================================
+// Subscription & Billing
+// =============================================================================
+
+model Plan {
+  id            String   @id @default(cuid())
+  name          String
+  slug          String   @unique
+  description   String?
+  stripePriceId String?  @unique
+  price         Decimal
+  currency      String   @default("BRL")
+  interval      String   @default("month")
+  maxInstances  Int
+  features      Json
+  active        Boolean  @default(true)
+  sortOrder     Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  subscriptions Subscription[]
+
+  @@map("plans")
+}
+
+model Subscription {
+  id                   String        @id @default(cuid())
+  userId               String
+  user                 User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  planId               String
+  plan                 Plan          @relation(fields: [planId], references: [id], onDelete: Restrict)
+  organizationId       String?
+  organization         Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  stripeSubscriptionId String?       @unique
+  stripeStatus         String?
+  paymentMethod        String        @default("stripe")
+  status               String        @default("active")
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean       @default(false)
+  canceledAt           DateTime?
+  trialEnd             DateTime?
+  referralId           String?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+
+  instances      Instance[]
+  invoices       Invoice[]
+  usageRecords   UsageRecord[]
+  sicrediCharges SicrediCharge[]
+  referrals      Referral[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([stripeSubscriptionId])
+  @@map("subscriptions")
+}
+
+model Invoice {
+  id              String        @id @default(cuid())
+  userId          String
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscriptionId  String?
+  subscription    Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  stripeInvoiceId String?       @unique
+  amount          Decimal
+  currency        String        @default("BRL")
+  status          String        @default("draft")
+  paidAt          DateTime?
+  dueDate         DateTime?
+  pdfUrl          String?
+  paymentMethod   String?
+  sicrediChargeId String?
+  nfseStatus      String?
+  nfseNumber      String?
+  nfseProtocol    String?
+  nfseXmlUrl      String?
+  nfsePdfUrl      String?
+  nfseIssuedAt    DateTime?
+  nfseError       String?
+  nfseCanceledAt  DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  sicrediCharge SicrediCharge?
+  commissions   Commission[]
+
+  @@index([userId])
+  @@index([subscriptionId])
+  @@index([status])
+  @@index([nfseStatus])
+  @@map("invoices")
+}
+
+model PaymentMethod {
+  id                    String   @id @default(cuid())
+  userId                String
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type                  String
+  provider              String
+  stripePaymentMethodId String?
+  last4                 String?
+  brand                 String?
+  isDefault             Boolean  @default(false)
+  createdAt             DateTime @default(now())
+
+  @@index([userId])
+  @@map("payment_methods")
+}
+
+model UsageRecord {
+  id             String       @id @default(cuid())
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  instanceId     String?
+  metric         String
+  quantity       Int
+  recordedAt     DateTime     @default(now())
+  createdAt      DateTime     @default(now())
+
+  @@index([subscriptionId])
+  @@map("usage_records")
+}
+
+model SicrediCharge {
+  id             String        @id @default(cuid())
+  userId         String
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  invoiceId      String?       @unique
+  invoice        Invoice?      @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  subscriptionId String?
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  type           String
+  txid           String?       @unique
+  endToEndId     String?
+  codigoBarras   String?
+  linhaDigitavel String?
+  pixCopiaECola  String?
+  amount         Decimal
+  status         String        @default("ATIVA")
+  paidAt         DateTime?
+  expiresAt      DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([txid])
+  @@index([status])
+  @@map("sicredi_charges")
+}
+
+// =============================================================================
+// Instance Management (somente tracking - config de webhook fica no ZedaAPI)
+// =============================================================================
+
+model Instance {
+  id                String        @id @default(cuid())
+  userId            String
+  user              User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscriptionId    String?
+  subscription      Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  organizationId    String?
+  organization      Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  zedaapiInstanceId String        @unique
+  zedaapiToken      String
+  name              String
+  phone             String?
+  status            String        @default("disconnected")
+  whatsappConnected Boolean       @default(false)
+  profilePicUrl     String?
+  profileName       String?
+  lastSyncAt        DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([zedaapiInstanceId])
+  @@map("instances")
+}
+
+// =============================================================================
+// Affiliate
+// =============================================================================
+
+model Affiliate {
+  id                     String   @id @default(cuid())
+  userId                 String   @unique
+  user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  code                   String   @unique
+  stripeConnectAccountId String?
+  commissionRate         Decimal  @default(0.20)
+  status                 String   @default("pending")
+  totalEarnings          Decimal  @default(0)
+  totalPaid              Decimal  @default(0)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  referrals   Referral[]
+  commissions Commission[]
+  payouts     Payout[]
+
+  @@map("affiliates")
+}
+
+model Referral {
+  id             String        @id @default(cuid())
+  affiliateId    String
+  affiliate      Affiliate     @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+  referredUserId String        @unique
+  referredUser   User          @relation(fields: [referredUserId], references: [id], onDelete: Cascade)
+  subscriptionId String?
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  status         String        @default("pending")
+  convertedAt    DateTime?
+  createdAt      DateTime      @default(now())
+
+  commissions Commission[]
+
+  @@index([affiliateId])
+  @@map("referrals")
+}
+
+model Commission {
+  id          String    @id @default(cuid())
+  affiliateId String
+  affiliate   Affiliate @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+  referralId  String
+  referral    Referral  @relation(fields: [referralId], references: [id], onDelete: Cascade)
+  invoiceId   String?
+  invoice     Invoice?  @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  amount      Decimal
+  currency    String    @default("BRL")
+  status      String    @default("pending")
+  paidAt      DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([affiliateId])
+  @@index([status])
+  @@map("commissions")
+}
+
+model Payout {
+  id               String    @id @default(cuid())
+  affiliateId      String
+  affiliate        Affiliate @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+  amount           Decimal
+  currency         String    @default("BRL")
+  method           String
+  stripeTransferId String?
+  status           String    @default("pending")
+  processedAt      DateTime?
+  createdAt        DateTime  @default(now())
+
+  @@index([affiliateId])
+  @@map("payouts")
+}
+
+// =============================================================================
+// Notifications
+// =============================================================================
+
+model EmailTemplate {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  subject   String
+  body      String
+  variables Json?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("email_templates")
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  channel   String
+  subject   String?
+  body      String
+  status    String    @default("pending")
+  sentAt    DateTime?
+  error     String?
+  metadata  Json?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([status])
+  @@map("notifications")
+}
+
+model NotificationPreference {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  emailEnabled     Boolean  @default(true)
+  whatsappEnabled  Boolean  @default(false)
+  marketingEnabled Boolean  @default(false)
+  billingAlerts    Boolean  @default(true)
+  securityAlerts   Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("notification_preferences")
+}
+
+// =============================================================================
+// NFS-e
+// =============================================================================
+
+model NfseConfig {
+  id                       String   @id @default(cuid())
+  active                   Boolean  @default(false)
+  cnpj                     String   @unique
+  inscricaoMunicipal       String   @default("")
+  codigoMunicipio          String   @default("")
+  uf                       String   @default("")
+  certificatePfxUrl        String
+  certificatePassword      String
+  certificateExpiresAt     DateTime
+  codigoServico            String
+  codigoServicoMunicipal   String   @default("")
+  codigoNbs                String   @default("")
+  cnae                     String
+  aliquotaIss              Float
+  descricaoServico         String
+  codigoServicoPf          String   @default("")
+  codigoServicoMunicipalPf String   @default("")
+  codigoNbsPf              String   @default("")
+  cnaePf                   String   @default("")
+  aliquotaIssPf            Float    @default(0)
+  descricaoServicoPf       String   @default("")
+  opSimpNac                Int      @default(3)
+  regApTribSN              Int      @default(0)
+  regEspTrib               Int      @default(0)
+  ambiente                 String   @default("HOMOLOGACAO")
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  @@map("nfse_configs")
+}
+
+model NfseSequence {
+  id         String   @id @default(cuid())
+  cnpj       String   @unique
+  lastNumber Int      @default(0)
+  year       Int
+  updatedAt  DateTime @updatedAt
+
+  @@map("nfse_sequences")
+}
+
+// =============================================================================
+// Admin/System
+// =============================================================================
+
+model ActivityLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action     String
+  resource   String
+  resourceId String?
+  metadata   Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([action])
+  @@map("activity_logs")
+}
+
+model SystemSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  description String?
+  updatedAt   DateTime @updatedAt
+  updatedBy   String?
+
+  @@map("system_settings")
+}
+
+model FeatureFlag {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  enabled     Boolean  @default(false)
+  description String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("feature_flags")
+}
+
+model StripeWebhookEvent {
+  id            String    @id @default(cuid())
+  stripeEventId String    @unique
+  type          String
+  status        String    @default("pending")
+  error         String?
+  processedAt   DateTime?
+  payload       Json
+  createdAt     DateTime  @default(now())
+
+  @@map("stripe_webhook_events")
+}
+
+model ApiKey {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name       String
+  key        String    @unique
+  hashedKey  String    @unique
+  lastUsedAt DateTime?
+  expiresAt  DateTime?
+  active     Boolean   @default(true)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("api_keys")
+}
+
+model SicrediWebhookEvent {
+  id          String    @id @default(cuid())
+  txid        String
+  type        String
+  status      String    @default("pending")
+  error       String?
+  processedAt DateTime?
+  payload     Json
+  createdAt   DateTime  @default(now())
+
+  @@index([txid])
+  @@map("sicredi_webhook_events")
+}

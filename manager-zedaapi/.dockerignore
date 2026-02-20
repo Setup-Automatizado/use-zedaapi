@@ -1,0 +1,40 @@
+# Dependencies (rebuilt in Docker)
+node_modules
+.next
+generated
+
+# Source control
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Environment (secrets NEVER baked into image)
+.env
+.env.local
+.env.*.local
+
+# Build artifacts
+dist
+out
+coverage
+*.tsbuildinfo
+
+# Docker (avoid recursive context)
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Dev/tooling
+*.md
+LICENSE
+.claude
+.aim
+.editorconfig
+scripts
+.husky
+.github

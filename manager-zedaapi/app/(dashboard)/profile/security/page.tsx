@@ -1,0 +1,40 @@
+import type { Metadata } from "next";
+import { requireAuth } from "@/lib/auth-server";
+import { SecurityClient } from "@/components/profile/security-client";
+import Link from "next/link";
+
+export const metadata: Metadata = {
+	title: "Seguranca | Zé da API Manager",
+};
+
+export default async function SecurityPage() {
+	await requireAuth();
+
+	return (
+		<div className="space-y-6">
+			<div>
+				<h1 className="text-2xl font-bold tracking-tight">Seguranca</h1>
+				<p className="text-sm text-muted-foreground">
+					Gerencie a seguranca da sua conta.
+				</p>
+			</div>
+
+			<div className="flex gap-2 text-sm">
+				<Link
+					href="/profile"
+					className="rounded-lg px-3 py-1.5 text-muted-foreground hover:bg-muted/50"
+				>
+					Geral
+				</Link>
+				<Link
+					href="/profile/security"
+					className="rounded-lg bg-muted px-3 py-1.5 font-medium"
+				>
+					Seguranca
+				</Link>
+			</div>
+
+			<SecurityClient />
+		</div>
+	);
+}
