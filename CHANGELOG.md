@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.7.0](https://github.com/Setup-Automatizado/zedaapi/compare/v3.6.0...v3.7.0) (2026-02-20)
+
+### Features
+
+* **docs:** add branded landing page, Swagger UI, and docs navigation ([81179cf](https://github.com/Setup-Automatizado/zedaapi/commit/81179cf56b7aedbbf91268f47add49fbd719aee1))
+
 ## [3.6.0](https://github.com/Setup-Automatizado/zedaapi/compare/v3.5.1...v3.6.0) (2026-02-19)
 
 ### Features
