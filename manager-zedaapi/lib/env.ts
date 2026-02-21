@@ -29,6 +29,7 @@ const envSchema = z.object({
 	SICREDI_WEBHOOK_SECRET: z.string().optional(),
 
 	// Sicredi Parceiro (Boleto)
+	SICREDI_PARCEIRO_AUTH_URL: z.string().url().optional(),
 	SICREDI_PARCEIRO_BASE_URL: z.string().url().optional(),
 	SICREDI_PARCEIRO_API_KEY: z.string().optional(),
 	SICREDI_PARCEIRO_USERNAME: z.string().optional(),
@@ -71,6 +72,14 @@ const envSchema = z.object({
 		.default("development"),
 	NEXT_PUBLIC_APP_URL: z.string().url().default("http://localhost:3000"),
 	ADMIN_EMAIL: z.string().email().optional(),
+	ADMIN_PASSWORD: z.string().optional(),
+
+	// Contact / Landing Page
+	CONTACT_WEBHOOK_URL: z.string().url().optional(),
+	NEXT_PUBLIC_CONTACT_WHATSAPP: z.string().optional(),
+
+	// Content API
+	CONTENT_API_KEY: z.string().min(32).optional(),
 
 	// Waitlist
 	WAITLIST_ENABLED: z.string().default("true"),
@@ -94,6 +103,8 @@ export const clientEnv = {
 		process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
 	NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:
 		process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "",
+	NEXT_PUBLIC_CONTACT_WHATSAPP:
+		process.env.NEXT_PUBLIC_CONTACT_WHATSAPP || "",
 };
 
 export type Env = z.infer<typeof envSchema>;

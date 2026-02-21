@@ -75,7 +75,7 @@ function buildConfirmationEmail(nome: string, assuntoLabel: string): string {
 <tr><td align="center">
 <table width="560" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
   <tr><td style="background-color:#16a34a;padding:24px 32px;">
-    <h1 style="margin:0;color:#ffffff;font-size:18px;font-weight:600;letter-spacing:-0.02em;">Ze da API</h1>
+    <h1 style="margin:0;color:#ffffff;font-size:18px;font-weight:600;letter-spacing:-0.02em;">Zé da API</h1>
   </td></tr>
   <tr><td style="padding:32px;">
     <h2 style="margin:0 0 16px;color:#18181b;font-size:20px;font-weight:600;">Ola, ${nome}!</h2>
@@ -92,7 +92,7 @@ function buildConfirmationEmail(nome: string, assuntoLabel: string): string {
   <tr><td style="padding:0 32px 32px;">
     <hr style="border:none;border-top:1px solid #e4e4e7;margin:0 0 16px;" />
     <p style="margin:0;color:#a1a1aa;font-size:12px;line-height:1.5;">
-      Equipe Ze da API &mdash; contato@zedaapi.com
+      Equipe Zé da API &mdash; contato@zedaapi.com
     </p>
   </td></tr>
 </table>
@@ -168,7 +168,7 @@ export async function submitContactForm(
 		const assuntoLabel = ASSUNTO_LABELS[data.assunto] ?? data.assunto;
 		await sendEmail(
 			data.email,
-			"Recebemos seu contato - Ze da API",
+			"Recebemos seu contato - Zé da API",
 			buildConfirmationEmail(data.nome, assuntoLabel),
 		);
 	} catch {
