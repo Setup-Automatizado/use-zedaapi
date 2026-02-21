@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.12.0](https://github.com/Setup-Automatizado/zedaapi/compare/v3.11.1...v3.12.0) (2026-02-21)
+
+### Features
+
+* **email:** add 39 transactional email templates with auth and worker integration ([3c97bf0](https://github.com/Setup-Automatizado/zedaapi/commit/3c97bf02d002f2c5ada7d8861b05e2fcab3ce5bd))
+* **infra:** add docker entrypoint with auto-seed on deploy ([c54df56](https://github.com/Setup-Automatizado/zedaapi/commit/c54df56379d3bd03c6f16835e6577cce698dc6b1))
+* **auth:** add invite code flow for waitlist approval ([e958257](https://github.com/Setup-Automatizado/zedaapi/commit/e9582576cc34101b2484f61d25a99cf2f6ed8a46))
+* **logging:** add structured logger for server and client ([a6fe80e](https://github.com/Setup-Automatizado/zedaapi/commit/a6fe80e1684f9699662375a598573790665dd0b3))
+* **seed:** rewrite database seed with 12 plans, Stripe sync and webhooks ([a91481a](https://github.com/Setup-Automatizado/zedaapi/commit/a91481a17fff9352d61e2a369e1e08b549f77495))
+
+### Bug Fixes
+
+* **stripe:** fix flow stripe ([8d79f4f](https://github.com/Setup-Automatizado/zedaapi/commit/8d79f4f20b55dc7e786eb2d16aa2cc4bec64d38a))
+
+### Code Refactoring
+
+* **logging:** migrate all application code to structured logger ([114e215](https://github.com/Setup-Automatizado/zedaapi/commit/114e215a086ffa7e58724b2511b3e62e604345c4))
+
 ## [3.11.1](https://github.com/Setup-Automatizado/zedaapi/compare/v3.11.0...v3.11.1) (2026-02-21)
 
 ### Bug Fixes
