@@ -9,6 +9,23 @@ import { CheckCircle2, ArrowLeft } from "lucide-react";
 
 import { authClient } from "@/lib/auth-client";
 import { Spinner } from "@/components/ui/spinner";
+
+/** Map English error messages from Better Auth / waitlist plugin to Portuguese */
+const errorTranslations: Record<string, string> = {
+	"This email is already on the waitlist":
+		"Este e-mail já está na lista de espera",
+	"The waitlist is currently full": "A lista de espera está cheia no momento",
+	"Invalid email": "E-mail inválido",
+};
+
+function translateError(message: string): string {
+	if (errorTranslations[message]) return errorTranslations[message];
+	const lowerMessage = message.toLowerCase();
+	for (const [key, value] of Object.entries(errorTranslations)) {
+		if (lowerMessage.includes(key.toLowerCase())) return value;
+	}
+	return message;
+}
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -54,8 +71,10 @@ export function WaitlistForm() {
 
 		if (result.error) {
 			setError(
-				result.error.message ??
-					"Erro ao entrar na lista de espera. Tente novamente.",
+				translateError(
+					result.error.message ??
+						"Erro ao entrar na lista de espera. Tente novamente.",
+				),
 			);
 			return;
 		}

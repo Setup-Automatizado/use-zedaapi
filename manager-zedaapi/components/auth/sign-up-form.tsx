@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -25,12 +25,46 @@ import {
 	FieldLabel,
 } from "@/components/ui/field";
 
+/** Map English error messages from Better Auth / waitlist plugin to Portuguese */
+const errorTranslations: Record<string, string> = {
+	"This email is already on the waitlist":
+		"Este e-mail já está na lista de espera",
+	"Waitlist entry not found": "Entrada na lista de espera não encontrada",
+	"You must be approved from the waitlist to register":
+		"Você precisa ser aprovado na lista de espera para se cadastrar",
+	"Invalid or expired invite code": "Código de convite inválido ou expirado",
+	"An invite code is required to register":
+		"Um código de convite é necessário para se cadastrar",
+	"This waitlist entry has already been used for registration":
+		"Este convite já foi utilizado para cadastro",
+	"The waitlist is currently full": "A lista de espera está cheia no momento",
+	"User already exists": "Este e-mail já está cadastrado",
+	"Email already in use": "Este e-mail já está em uso",
+	"Password is too short": "A senha é muito curta",
+	"Invalid email": "E-mail inválido",
+	"Invalid email or password": "E-mail ou senha inválidos",
+};
+
+function translateError(message: string): string {
+	// Check exact match first
+	if (errorTranslations[message]) return errorTranslations[message];
+
+	// Check partial match (case-insensitive)
+	const lowerMessage = message.toLowerCase();
+	for (const [key, value] of Object.entries(errorTranslations)) {
+		if (lowerMessage.includes(key.toLowerCase())) return value;
+	}
+
+	return message;
+}
+
 const signUpSchema = z
 	.object({
 		name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
 		email: z.string().email("E-mail inválido"),
 		password: z.string().min(8, "Senha deve ter pelo menos 8 caracteres"),
 		confirmPassword: z.string(),
+		inviteCode: z.string().optional(),
 		terms: z.literal(true, {
 			errorMap: () => ({ message: "Aceite os termos para continuar" }),
 		}),
@@ -44,6 +78,8 @@ type SignUpValues = z.infer<typeof signUpSchema>;
 
 export function SignUpForm() {
 	const router = useRouter();
+	const searchParams = useSearchParams();
+	const inviteFromUrl = searchParams.get("invite") ?? "";
 	const [error, setError] = useState<string | null>(null);
 
 	const {
@@ -57,6 +93,7 @@ export function SignUpForm() {
 			email: "",
 			password: "",
 			confirmPassword: "",
+			inviteCode: inviteFromUrl,
 			terms: undefined,
 		},
 	});
@@ -68,11 +105,15 @@ export function SignUpForm() {
 			name: values.name,
 			email: values.email,
 			password: values.password,
+			inviteCode: values.inviteCode || undefined,
 		});
 
 		if (result.error) {
 			setError(
-				result.error.message ?? "Erro ao criar conta. Tente novamente.",
+				translateError(
+					result.error.message ??
+						"Erro ao criar conta. Tente novamente.",
+				),
 			);
 			return;
 		}
@@ -97,6 +138,31 @@ export function SignUpForm() {
 							{error}
 						</div>
 					)}
+
+					<Field>
+						<FieldLabel htmlFor="inviteCode">
+							Código de convite
+						</FieldLabel>
+						<FieldContent>
+							<Input
+								id="inviteCode"
+								type="text"
+								placeholder="Ex: abc-123-def"
+								autoComplete="off"
+								disabled={isSubmitting}
+								{...register("inviteCode")}
+							/>
+							{errors.inviteCode && (
+								<FieldError>
+									{errors.inviteCode.message}
+								</FieldError>
+							)}
+							<p className="text-xs text-muted-foreground">
+								Recebido por e-mail ao ser aprovado na lista de
+								espera
+							</p>
+						</FieldContent>
+					</Field>
 
 					<Field>
 						<FieldLabel htmlFor="name">Nome</FieldLabel>
@@ -213,6 +279,15 @@ export function SignUpForm() {
 						{isSubmitting && <Spinner className="mr-2 size-4" />}
 						Criar conta
 					</Button>
+					<p className="text-sm text-muted-foreground">
+						Não tem um convite?{" "}
+						<Link
+							href="/lista-de-espera"
+							className="text-foreground font-medium hover:underline underline-offset-4"
+						>
+							Entrar na lista de espera
+						</Link>
+					</p>
 					<p className="text-sm text-muted-foreground">
 						Já tem uma conta?{" "}
 						<Link

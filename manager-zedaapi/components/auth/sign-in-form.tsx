@@ -8,6 +8,24 @@ import { z } from "zod";
 import Link from "next/link";
 import { signIn } from "@/lib/auth-client";
 import { Spinner } from "@/components/ui/spinner";
+
+const errorTranslations: Record<string, string> = {
+	"Invalid email or password": "E-mail ou senha inválidos",
+	"Invalid email": "E-mail inválido",
+	"User not found": "Usuário não encontrado",
+	"Too many requests": "Muitas tentativas. Aguarde e tente novamente",
+	"Account is banned": "Conta suspensa",
+	"Email not verified": "E-mail não verificado",
+};
+
+function translateError(message: string): string {
+	if (errorTranslations[message]) return errorTranslations[message];
+	const lowerMessage = message.toLowerCase();
+	for (const [key, value] of Object.entries(errorTranslations)) {
+		if (lowerMessage.includes(key.toLowerCase())) return value;
+	}
+	return message;
+}
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -57,7 +75,10 @@ export function SignInForm() {
 
 		if (result.error) {
 			setError(
-				result.error.message ?? "Erro ao fazer login. Tente novamente.",
+				translateError(
+					result.error.message ??
+						"Erro ao fazer login. Tente novamente.",
+				),
 			);
 			return;
 		}

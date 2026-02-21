@@ -86,7 +86,7 @@ export function WaitlistTableClient({
 		const res = await approveWaitlist(approveDialog.entryId);
 		setActionLoading(false);
 		if (res.success) {
-			toast.success("Solicitacao aprovada");
+			toast.success("Solicitação aprovada");
 			fetchData(page, search);
 		} else {
 			toast.error("Erro ao aprovar");
@@ -100,7 +100,7 @@ export function WaitlistTableClient({
 		const res = await rejectWaitlist(rejectDialog.entryId);
 		setActionLoading(false);
 		if (res.success) {
-			toast.success("Solicitacao rejeitada");
+			toast.success("Solicitação rejeitada");
 			fetchData(page, search);
 		} else {
 			toast.error("Erro ao rejeitar");
@@ -189,7 +189,7 @@ export function WaitlistTableClient({
 				loading={loading}
 				emptyIcon={Clock}
 				emptyTitle="Waitlist vazia"
-				emptyDescription="Nenhuma solicitacao pendente."
+				emptyDescription="Nenhuma solicitação pendente."
 				onSearch={handleSearch}
 				searchPlaceholder="Buscar na waitlist..."
 				page={page}
@@ -203,8 +203,8 @@ export function WaitlistTableClient({
 				onOpenChange={(open) =>
 					setApproveDialog({ open, entryId: null })
 				}
-				title="Aprovar solicitacao"
-				description="O usuario recebera um email com instrucoes para criar sua conta."
+				title="Aprovar solicitação"
+				description="O usuário receberá um e-mail com o código de convite para criar sua conta."
 				confirmLabel="Aprovar"
 				loading={actionLoading}
 				onConfirm={handleApprove}
@@ -215,8 +215,8 @@ export function WaitlistTableClient({
 				onOpenChange={(open) =>
 					setRejectDialog({ open, entryId: null })
 				}
-				title="Rejeitar solicitacao"
-				description="O usuario sera notificado que sua solicitacao foi rejeitada."
+				title="Rejeitar solicitação"
+				description="O usuário será notificado que sua solicitação foi rejeitada."
 				confirmLabel="Rejeitar"
 				destructive
 				loading={actionLoading}
