@@ -21,7 +21,7 @@ export async function issueNfse(invoiceId: string) {
 		const result = await emitNfse(invoiceId);
 
 		revalidatePath("/admin/nfe");
-		revalidatePath(`/admin/invoices/${invoiceId}`);
+		revalidatePath(`/admin/faturas/${invoiceId}`);
 
 		return { success: true as const, data: result };
 	} catch (error) {
@@ -49,7 +49,7 @@ export async function cancelNfseAction(
 		const result = await cancelNfse(invoiceId, motivo);
 
 		revalidatePath("/admin/nfe");
-		revalidatePath(`/admin/invoices/${invoiceId}`);
+		revalidatePath(`/admin/faturas/${invoiceId}`);
 
 		return { success: true as const, data: result };
 	} catch (error) {
@@ -165,7 +165,7 @@ export async function retryNfse(invoiceId: string) {
 		const result = await emitNfse(invoiceId);
 
 		revalidatePath("/admin/nfe");
-		revalidatePath(`/admin/invoices/${invoiceId}`);
+		revalidatePath(`/admin/faturas/${invoiceId}`);
 
 		return { success: true as const, data: result };
 	} catch (error) {

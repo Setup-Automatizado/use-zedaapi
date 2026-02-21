@@ -58,7 +58,7 @@ export function InstanceDetailClient({ instance }: InstanceDetailClientProps) {
 		try {
 			// TODO: Wire to real delete action
 			toast.success("Instância excluída");
-			router.push("/instances");
+			router.push("/instancias");
 		} catch {
 			toast.error("Erro ao excluir instância");
 		} finally {
@@ -71,7 +71,7 @@ export function InstanceDetailClient({ instance }: InstanceDetailClientProps) {
 		<div className="space-y-6">
 			<div className="flex items-center gap-4">
 				<Button variant="ghost" size="icon-sm" asChild>
-					<Link href="/instances">
+					<Link href="/instancias">
 						<ArrowLeft className="size-4" />
 					</Link>
 				</Button>

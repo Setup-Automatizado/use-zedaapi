@@ -26,16 +26,16 @@ import { signOut } from "@/lib/auth-client";
 import { useAuth } from "@/hooks/use-auth";
 
 const mainNav = [
-	{ name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-	{ name: "Instâncias", href: "/instances", icon: Smartphone },
-	{ name: "Assinatura", href: "/billing", icon: CreditCard },
-	{ name: "Chaves API", href: "/api-keys", icon: Key },
+	{ name: "Painel", href: "/painel", icon: LayoutDashboard },
+	{ name: "Instâncias", href: "/instancias", icon: Smartphone },
+	{ name: "Assinatura", href: "/faturamento", icon: CreditCard },
+	{ name: "Chaves API", href: "/chaves-api", icon: Key },
 ];
 
 const orgNav = [
-	{ name: "Organização", href: "/organization", icon: Building2 },
-	{ name: "Membros", href: "/organization/members", icon: Users },
-	{ name: "Configurações", href: "/settings", icon: Settings },
+	{ name: "Organização", href: "/organizacao", icon: Building2 },
+	{ name: "Membros", href: "/organizacao/membros", icon: Users },
+	{ name: "Configurações", href: "/configuracoes", icon: Settings },
 ];
 
 interface MobileNavProps {
@@ -50,7 +50,7 @@ export function MobileNav({ open, onOpenChange }: MobileNavProps) {
 	function renderNavItem(item: (typeof mainNav)[number]) {
 		const isActive =
 			pathname === item.href ||
-			(item.href !== "/dashboard" && pathname.startsWith(item.href));
+			(item.href !== "/painel" && pathname.startsWith(item.href));
 
 		return (
 			<Link

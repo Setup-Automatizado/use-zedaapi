@@ -55,10 +55,7 @@ export function InstancesClient({ instances }: InstancesClientProps) {
 
 			<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
 				{filtered.map((instance) => (
-					<Link
-						key={instance.id}
-						href={`/dashboard/instances/${instance.id}`}
-					>
+					<Link key={instance.id} href={`/instancias/${instance.id}`}>
 						<Card className="transition-colors hover:bg-accent/50 cursor-pointer">
 							<CardContent className="flex items-center gap-3 py-4">
 								<div className="flex size-10 items-center justify-center rounded-lg bg-muted">

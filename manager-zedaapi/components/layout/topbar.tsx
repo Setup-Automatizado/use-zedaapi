@@ -136,10 +136,10 @@ export function Topbar({ onMobileMenuToggle }: TopbarProps) {
 						</div>
 						<DropdownMenuSeparator />
 						<DropdownMenuItem asChild>
-							<Link href="/profile">Perfil</Link>
+							<Link href="/perfil">Perfil</Link>
 						</DropdownMenuItem>
 						<DropdownMenuItem asChild>
-							<Link href="/settings">Configurações</Link>
+							<Link href="/configuracoes">Configurações</Link>
 						</DropdownMenuItem>
 						{isAdmin && (
 							<DropdownMenuItem asChild>

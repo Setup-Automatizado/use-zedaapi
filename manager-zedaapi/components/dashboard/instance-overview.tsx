@@ -38,15 +38,12 @@ export function InstanceOverview({ instances }: InstanceOverviewProps) {
 			<div className="flex items-center justify-between">
 				<h2 className="text-base font-semibold">Suas Instâncias</h2>
 				<Button asChild size="sm" variant="outline">
-					<Link href="/instances">Ver todas</Link>
+					<Link href="/instancias">Ver todas</Link>
 				</Button>
 			</div>
 			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 				{instances.slice(0, 6).map((instance) => (
-					<Link
-						key={instance.id}
-						href={`/dashboard/instances/${instance.id}`}
-					>
+					<Link key={instance.id} href={`/instancias/${instance.id}`}>
 						<Card className="transition-all duration-200 hover:shadow-sm hover:bg-accent/50 cursor-pointer">
 							<CardContent className="flex items-center gap-3 py-3">
 								<div className="relative">

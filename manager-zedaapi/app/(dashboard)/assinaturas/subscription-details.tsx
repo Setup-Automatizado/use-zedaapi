@@ -92,7 +92,7 @@ export function SubscriptionDetails({
 					<p className="text-sm text-muted-foreground mb-6">
 						Escolha um plano para comecar a usar o Zé da API
 					</p>
-					<Button onClick={() => router.push("/subscriptions/plans")}>
+					<Button onClick={() => router.push("/assinaturas/planos")}>
 						Ver planos
 					</Button>
 				</CardContent>
@@ -224,7 +224,7 @@ export function SubscriptionDetails({
 				<CardFooter className="pt-4 gap-3">
 					<Button
 						variant="outline"
-						onClick={() => router.push("/subscriptions/plans")}
+						onClick={() => router.push("/assinaturas/planos")}
 					>
 						Trocar plano
 					</Button>

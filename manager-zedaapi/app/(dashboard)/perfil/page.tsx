@@ -33,13 +33,13 @@ export default async function ProfilePage() {
 
 			<div className="flex gap-2 text-sm">
 				<Link
-					href="/profile"
+					href="/perfil"
 					className="rounded-lg bg-muted px-3 py-1.5 font-medium"
 				>
 					Geral
 				</Link>
 				<Link
-					href="/profile/security"
+					href="/perfil/seguranca"
 					className="rounded-lg px-3 py-1.5 text-muted-foreground hover:bg-muted/50"
 				>
 					Segurança

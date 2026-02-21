@@ -146,7 +146,7 @@ export async function sendWelcomeEmail(userId: string): Promise<void> {
 		body: `Olá ${user?.name}, sua conta foi criada com sucesso.`,
 		templateSlug: "welcome",
 		templateData: {
-			dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
+			dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/painel`,
 		},
 	});
 }
@@ -289,7 +289,7 @@ export async function sendPaymentFailedEmail(
 			invoiceId: invoice.id,
 			amount,
 			dueDate: invoice.dueDate?.toISOString(),
-			retryUrl: `${process.env.NEXT_PUBLIC_APP_URL}/billing`,
+			retryUrl: `${process.env.NEXT_PUBLIC_APP_URL}/faturamento`,
 		},
 		metadata: { invoiceId },
 	});
@@ -309,7 +309,7 @@ export async function sendWaitlistApprovedEmail(
 		await send(email, "waitlist-approved", {
 			userName: name,
 			subject: "Sua conta foi aprovada! — Zé da API Manager",
-			signUpUrl: `${process.env.NEXT_PUBLIC_APP_URL}/sign-up`,
+			signUpUrl: `${process.env.NEXT_PUBLIC_APP_URL}/cadastro`,
 		});
 	} catch (error) {
 		console.error(

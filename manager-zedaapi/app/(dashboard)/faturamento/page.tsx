@@ -31,7 +31,7 @@ async function SubscriptionSummary() {
 						Nenhuma assinatura ativa.
 					</p>
 					<Link
-						href="/subscriptions/plans"
+						href="/assinaturas/planos"
 						className="mt-2 inline-block text-sm font-medium text-primary hover:underline"
 					>
 						Ver planos disponíveis
@@ -104,10 +104,10 @@ async function SubscriptionSummary() {
 
 				<div className="flex gap-2 pt-2">
 					<Button variant="outline" size="sm" asChild>
-						<Link href="/subscriptions/plans">Alterar plano</Link>
+						<Link href="/assinaturas/planos">Alterar plano</Link>
 					</Button>
 					<Button variant="ghost" size="sm" asChild>
-						<Link href="/subscriptions">Gerenciar assinatura</Link>
+						<Link href="/assinaturas">Gerenciar assinatura</Link>
 					</Button>
 				</div>
 			</CardContent>

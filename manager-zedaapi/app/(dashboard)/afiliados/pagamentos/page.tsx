@@ -56,7 +56,7 @@ export default async function PayoutsPage({ searchParams }: Props) {
 	const affiliate = await getAffiliate(session.user.id);
 
 	if (!affiliate) {
-		redirect("/affiliates");
+		redirect("/afiliados");
 	}
 
 	const params = await searchParams;
@@ -70,7 +70,7 @@ export default async function PayoutsPage({ searchParams }: Props) {
 			<PageHeader
 				title="Pagamentos"
 				description="Histórico de saques e pagamentos do programa de afiliados."
-				backHref="/affiliates"
+				backHref="/afiliados"
 			/>
 
 			<Card>
@@ -140,7 +140,7 @@ export default async function PayoutsPage({ searchParams }: Props) {
 						<div className="flex justify-center gap-2 mt-4">
 							{page > 1 && (
 								<Link
-									href={`/affiliates/payouts?page=${page - 1}`}
+									href={`/afiliados/pagamentos?page=${page - 1}`}
 									className="text-sm px-3 py-1 rounded border hover:bg-muted"
 								>
 									Anterior
@@ -151,7 +151,7 @@ export default async function PayoutsPage({ searchParams }: Props) {
 							</span>
 							{page < totalPages && (
 								<Link
-									href={`/affiliates/payouts?page=${page + 1}`}
+									href={`/afiliados/pagamentos?page=${page + 1}`}
 									className="text-sm px-3 py-1 rounded border hover:bg-muted"
 								>
 									Próxima

@@ -51,9 +51,9 @@ The app runs as two separate processes:
 
 ### Route Groups (App Router)
 
-- `app/(auth)/` — Sign-in, sign-up, waitlist, forgot-password, two-factor, verify-email. Unauthenticated.
-- `app/(dashboard)/` — Main user area. Protected via `requireAuth()` in layout. Instances, billing, subscriptions, profile, settings, affiliates, API keys.
-- `app/(admin)/admin/` — Admin panel. Protected via `requireAdmin()`. Users, instances, subscriptions, plans, feature flags, invoices, NFS-e, waitlist, activity logs, affiliates.
+- `app/(auth)/` — Login, cadastro, lista-de-espera, esqueci-senha, dois-fatores, verificar-email. Unauthenticated.
+- `app/(dashboard)/` — Main user area. Protected via `requireAuth()` in layout. Routes: `/painel`, `/instancias`, `/faturamento`, `/assinaturas`, `/perfil`, `/configuracoes`, `/organizacao`, `/afiliados`, `/chaves-api`.
+- `app/(admin)/admin/` — Admin panel. Protected via `requireAdmin()`. Routes: `/admin/usuarios`, `/admin/instancias`, `/admin/assinaturas`, `/admin/planos`, `/admin/faturas`, `/admin/funcionalidades`, `/admin/configuracoes`, `/admin/lista-de-espera`, `/admin/afiliados`, `/admin/registro-atividades`, `/admin/nfe`, `/admin/blog`, `/admin/suporte`, `/admin/glossario`.
 - `app/api/` — Route handlers for auth (`[...all]`), webhooks (Stripe, Sicredi), health check, data-deletion, and Brazil API proxies (CEP, CNPJ).
 
 ### Server-Side Pattern
@@ -66,7 +66,7 @@ Server Actions (server/actions/*.ts)
 
 - **Server Actions** (`server/actions/`): Thin `"use server"` layer called from client components. Each action calls `requireAuth()`, validates input with Zod, delegates to a service, and returns `ActionResult<T>`. Calls `revalidatePath()` on mutations.
 - **Services** (`server/services/`): Business logic. Instance provisioning/deprovisioning, subscription lifecycle, billing, affiliates, notifications. Also marked `"use server"`.
-- **Auth helpers** (`lib/auth-server.ts`): `requireAuth()` redirects to `/sign-in`; `requireAdmin()` redirects to `/dashboard`.
+- **Auth helpers** (`lib/auth-server.ts`): `requireAuth()` redirects to `/login`; `requireAdmin()` redirects to `/painel`.
 
 ### Auth Split
 

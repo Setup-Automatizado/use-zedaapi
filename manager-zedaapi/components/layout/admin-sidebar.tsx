@@ -36,11 +36,11 @@ import { useAuth } from "@/hooks/use-auth";
 
 const mainNav = [
 	{ name: "Painel Admin", href: "/admin", icon: LayoutDashboard },
-	{ name: "Usuarios", href: "/admin/users", icon: Users },
-	{ name: "Assinaturas", href: "/admin/subscriptions", icon: CreditCard },
-	{ name: "Planos", href: "/admin/plans", icon: Layers },
-	{ name: "Instancias", href: "/admin/instances", icon: Smartphone },
-	{ name: "Faturas", href: "/admin/invoices", icon: Receipt },
+	{ name: "Usuarios", href: "/admin/usuarios", icon: Users },
+	{ name: "Assinaturas", href: "/admin/assinaturas", icon: CreditCard },
+	{ name: "Planos", href: "/admin/planos", icon: Layers },
+	{ name: "Instancias", href: "/admin/instancias", icon: Smartphone },
+	{ name: "Faturas", href: "/admin/faturas", icon: Receipt },
 ];
 
 const contentNav = [
@@ -50,11 +50,15 @@ const contentNav = [
 ];
 
 const systemNav = [
-	{ name: "Waitlist", href: "/admin/waitlist", icon: Clock },
-	{ name: "Afiliados", href: "/admin/affiliates", icon: UserCheck },
-	{ name: "Feature Flags", href: "/admin/feature-flags", icon: Flag },
-	{ name: "Log de Atividade", href: "/admin/activity-log", icon: Activity },
-	{ name: "Configuracoes", href: "/admin/settings", icon: Settings },
+	{ name: "Lista de Espera", href: "/admin/lista-de-espera", icon: Clock },
+	{ name: "Afiliados", href: "/admin/afiliados", icon: UserCheck },
+	{ name: "Funcionalidades", href: "/admin/funcionalidades", icon: Flag },
+	{
+		name: "Log de Atividade",
+		href: "/admin/registro-atividades",
+		icon: Activity,
+	},
+	{ name: "Configuracoes", href: "/admin/configuracoes", icon: Settings },
 ];
 
 export function AdminSidebar() {
@@ -146,17 +150,17 @@ export function AdminSidebar() {
 				)}
 			</div>
 
-			{/* Back to Dashboard */}
+			{/* Back to Painel */}
 			{!isCollapsed && (
 				<div className="px-3 pt-3">
-					<Link href="/dashboard">
+					<Link href="/painel">
 						<Button
 							variant="ghost"
 							size="sm"
 							className="w-full justify-start gap-2 text-muted-foreground"
 						>
 							<ArrowLeft className="size-4" />
-							Voltar ao Dashboard
+							Voltar ao Painel
 						</Button>
 					</Link>
 				</div>

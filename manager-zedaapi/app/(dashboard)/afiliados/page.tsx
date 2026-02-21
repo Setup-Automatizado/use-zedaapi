@@ -114,7 +114,7 @@ export default async function AffiliatesPage() {
 			</div>
 
 			<div className="grid gap-4 sm:grid-cols-2">
-				<Link href="/affiliates/commissions">
+				<Link href="/afiliados/comissoes">
 					<Card className="transition-colors hover:bg-muted/50 cursor-pointer">
 						<CardHeader>
 							<CardTitle className="text-sm">Comissões</CardTitle>
@@ -127,7 +127,7 @@ export default async function AffiliatesPage() {
 						</CardContent>
 					</Card>
 				</Link>
-				<Link href="/affiliates/payouts">
+				<Link href="/afiliados/pagamentos">
 					<Card className="transition-colors hover:bg-muted/50 cursor-pointer">
 						<CardHeader>
 							<CardTitle className="text-sm">

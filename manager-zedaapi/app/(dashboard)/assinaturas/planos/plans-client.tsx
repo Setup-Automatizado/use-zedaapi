@@ -50,7 +50,7 @@ export function PlansClient({ plans, currentPlanSlug }: PlansClientProps) {
 			if (result.success && result.data?.url) {
 				window.location.href = result.data.url;
 			} else if (result.success) {
-				router.push("/billing");
+				router.push("/faturamento");
 			} else {
 				console.error("Checkout failed:", result.error);
 			}

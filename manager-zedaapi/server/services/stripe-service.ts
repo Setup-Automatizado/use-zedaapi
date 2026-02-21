@@ -84,8 +84,8 @@ export async function createCheckoutSession(
 				quantity: 1,
 			},
 		],
-		success_url: `${appUrl}/subscriptions?success=true&session_id={CHECKOUT_SESSION_ID}`,
-		cancel_url: `${appUrl}/subscriptions/plans?canceled=true`,
+		success_url: `${appUrl}/assinaturas?success=true&session_id={CHECKOUT_SESSION_ID}`,
+		cancel_url: `${appUrl}/assinaturas/planos?canceled=true`,
 		metadata: {
 			userId,
 			planId,
@@ -117,7 +117,7 @@ export async function createBillingPortalSession(
 
 	const session = await stripe.billingPortal.sessions.create({
 		customer: customerId,
-		return_url: `${appUrl}/billing`,
+		return_url: `${appUrl}/faturamento`,
 	});
 
 	return session.url;

@@ -27,20 +27,20 @@ import { signOut } from "@/lib/auth-client";
 import { useAuth } from "@/hooks/use-auth";
 
 const mainNav = [
-	{ name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-	{ name: "Instâncias", href: "/instances", icon: Smartphone },
-	{ name: "Assinatura", href: "/billing", icon: CreditCard },
-	{ name: "Chaves API", href: "/api-keys", icon: Key },
+	{ name: "Painel", href: "/painel", icon: LayoutDashboard },
+	{ name: "Instâncias", href: "/instancias", icon: Smartphone },
+	{ name: "Assinatura", href: "/faturamento", icon: CreditCard },
+	{ name: "Chaves API", href: "/chaves-api", icon: Key },
 ];
 
 const orgNav = [
-	{ name: "Organização", href: "/organization", icon: Building2 },
+	{ name: "Organização", href: "/organizacao", icon: Building2 },
 	{
 		name: "Membros",
-		href: "/organization/members",
+		href: "/organizacao/membros",
 		icon: Users,
 	},
-	{ name: "Configurações", href: "/settings", icon: Settings },
+	{ name: "Configurações", href: "/configuracoes", icon: Settings },
 ];
 
 export function Sidebar() {
@@ -51,7 +51,7 @@ export function Sidebar() {
 	function renderNavItem(item: (typeof mainNav)[number]) {
 		const isActive =
 			pathname === item.href ||
-			(item.href !== "/dashboard" && pathname.startsWith(item.href));
+			(item.href !== "/painel" && pathname.startsWith(item.href));
 
 		const link = (
 			<Link
@@ -99,7 +99,7 @@ export function Sidebar() {
 				)}
 			>
 				{!isCollapsed && (
-					<Link href="/dashboard" className="flex items-center gap-2">
+					<Link href="/painel" className="flex items-center gap-2">
 						<div className="flex size-8 items-center justify-center rounded-xl bg-primary text-primary-foreground text-sm font-bold">
 							Z
 						</div>
@@ -109,7 +109,7 @@ export function Sidebar() {
 					</Link>
 				)}
 				{isCollapsed && (
-					<Link href="/dashboard">
+					<Link href="/painel">
 						<div className="flex size-8 items-center justify-center rounded-xl bg-primary text-primary-foreground text-sm font-bold">
 							Z
 						</div>

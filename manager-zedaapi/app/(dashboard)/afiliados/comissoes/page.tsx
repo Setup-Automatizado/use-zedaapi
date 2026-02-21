@@ -23,7 +23,7 @@ export default async function CommissionsPage({ searchParams }: Props) {
 	const affiliate = await getAffiliate(session.user.id);
 
 	if (!affiliate) {
-		redirect("/affiliates");
+		redirect("/afiliados");
 	}
 
 	const params = await searchParams;
@@ -37,7 +37,7 @@ export default async function CommissionsPage({ searchParams }: Props) {
 			<PageHeader
 				title="Comissões"
 				description="Histórico de comissões geradas pelas suas indicações."
-				backHref="/affiliates"
+				backHref="/afiliados"
 			/>
 
 			<Card>
@@ -54,7 +54,7 @@ export default async function CommissionsPage({ searchParams }: Props) {
 						<div className="flex justify-center gap-2 mt-4">
 							{page > 1 && (
 								<Link
-									href={`/affiliates/commissions?page=${page - 1}`}
+									href={`/afiliados/comissoes?page=${page - 1}`}
 									className="text-sm px-3 py-1 rounded border hover:bg-muted"
 								>
 									Anterior
@@ -65,7 +65,7 @@ export default async function CommissionsPage({ searchParams }: Props) {
 							</span>
 							{page < totalPages && (
 								<Link
-									href={`/affiliates/commissions?page=${page + 1}`}
+									href={`/afiliados/comissoes?page=${page + 1}`}
 									className="text-sm px-3 py-1 rounded border hover:bg-muted"
 								>
 									Próxima

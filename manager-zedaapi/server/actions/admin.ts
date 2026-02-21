@@ -395,7 +395,7 @@ export async function banUser(userId: string): Promise<ActionResult> {
 			data: { banned: true },
 		});
 
-		revalidatePath("/admin/users");
+		revalidatePath("/admin/usuarios");
 		return { success: true };
 	} catch (error) {
 		if (error instanceof Error && error.message === "NEXT_REDIRECT")
@@ -413,7 +413,7 @@ export async function unbanUser(userId: string): Promise<ActionResult> {
 			data: { banned: false, banReason: null, banExpires: null },
 		});
 
-		revalidatePath("/admin/users");
+		revalidatePath("/admin/usuarios");
 		return { success: true };
 	} catch (error) {
 		if (error instanceof Error && error.message === "NEXT_REDIRECT")
@@ -438,7 +438,7 @@ export async function setUserRole(
 			data: { role },
 		});
 
-		revalidatePath("/admin/users");
+		revalidatePath("/admin/usuarios");
 		return { success: true };
 	} catch (error) {
 		if (error instanceof Error && error.message === "NEXT_REDIRECT")
@@ -528,7 +528,7 @@ export async function approveWaitlist(entryId: string): Promise<ActionResult> {
 			data: { status: "approved", approvedAt: new Date() },
 		});
 
-		revalidatePath("/admin/waitlist");
+		revalidatePath("/admin/lista-de-espera");
 		return { success: true };
 	} catch (error) {
 		if (error instanceof Error && error.message === "NEXT_REDIRECT")
@@ -546,7 +546,7 @@ export async function rejectWaitlist(entryId: string): Promise<ActionResult> {
 			data: { status: "rejected" },
 		});
 
-		revalidatePath("/admin/waitlist");
+		revalidatePath("/admin/lista-de-espera");
 		return { success: true };
 	} catch (error) {
 		if (error instanceof Error && error.message === "NEXT_REDIRECT")
@@ -754,7 +754,7 @@ export async function updateSystemSetting(
 			update: { value, updatedBy: session.user.id },
 		});
 
-		revalidatePath("/admin/settings");
+		revalidatePath("/admin/configuracoes");
 		return { success: true };
 	} catch (error) {
 		if (error instanceof Error && error.message === "NEXT_REDIRECT")
@@ -814,7 +814,7 @@ export async function toggleFeatureFlag(key: string): Promise<ActionResult> {
 			data: { enabled: !flag.enabled },
 		});
 
-		revalidatePath("/admin/feature-flags");
+		revalidatePath("/admin/funcionalidades");
 		return { success: true };
 	} catch (error) {
 		if (error instanceof Error && error.message === "NEXT_REDIRECT")
@@ -904,7 +904,7 @@ export async function createPlan(data: {
 			},
 		});
 
-		revalidatePath("/admin/plans");
+		revalidatePath("/admin/planos");
 		return { success: true };
 	} catch (error) {
 		if (error instanceof Error && error.message === "NEXT_REDIRECT")
@@ -930,7 +930,7 @@ export async function updatePlan(
 			data,
 		});
 
-		revalidatePath("/admin/plans");
+		revalidatePath("/admin/planos");
 		return { success: true };
 	} catch (error) {
 		if (error instanceof Error && error.message === "NEXT_REDIRECT")
