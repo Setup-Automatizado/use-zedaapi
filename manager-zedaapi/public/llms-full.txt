@@ -1,0 +1,153 @@
+# Zé da API (ZedaAPI) - Documentacao Completa
+
+> API profissional de WhatsApp para empresas e desenvolvedores brasileiros.
+
+## Visao Geral
+
+Zé da API e uma plataforma SaaS brasileira que fornece uma API REST completa para integracao com WhatsApp. A plataforma permite que empresas de qualquer tamanho automatizem sua comunicacao via WhatsApp, enviem mensagens em escala e gerenciem multiplas conexoes WhatsApp simultaneamente.
+
+## Funcionalidades Principais
+
+### Envio de Mensagens
+- Texto simples e formatado
+- Imagens (JPEG, PNG, WebP)
+- Videos (MP4, 3GP)
+- Audio (MP3, OGG, AAC)
+- Documentos (PDF, DOC, XLS, etc.)
+- Localizacao (coordenadas GPS)
+- Contatos (vCard)
+- Stickers (WebP animados e estaticos)
+- Reacoes (emojis em mensagens)
+- Botoes interativos
+- Listas de selecao
+- Mensagens com link preview
+
+### Recebimento de Mensagens (Webhooks)
+- Recebimento em tempo real via webhooks HTTP
+- Suporte a todos os tipos de mensagem
+- Status de entrega (enviado, entregue, lido)
+- Notificacao de presenca (digitando, online)
+- Configuracao de URL por tipo de evento
+
+### Gerenciamento de Instancias
+- Criar e remover instancias via API
+- Conectar via QR Code
+- Monitorar status de conexao
+- Reconexao automatica
+- Multiplas instancias simultaneas
+
+### API REST
+- Autenticacao via Bearer Token (admin) ou Client-Token (instancia)
+- Formato JSON
+- Rate limiting configuravel
+- Retry automatico com backoff exponencial
+- Circuit breaker para alta disponibilidade
+
+## Especificacoes Tecnicas
+
+- Latencia media: 47ms
+- Throughput: ate 10M mensagens/mes
+- Uptime SLA: 99.9%
+- Servidores: Brasil (baixa latencia para clientes brasileiros)
+- Protocolo: HTTPS (TLS 1.2+)
+- Formato: JSON
+- Webhooks: HTTP POST com retry e dead letter queue
+
+## Planos e Precos
+
+### Starter
+- 1 instancia WhatsApp
+- Webhooks em tempo real
+- Suporte por email
+- Ideal para: pequenos negocios, MVPs, testes
+
+### Professional
+- Ate 5 instancias
+- Webhooks em tempo real
+- Suporte prioritario
+- Ideal para: PMEs, startups em crescimento
+
+### Business
+- Ate 15 instancias
+- Webhooks em tempo real
+- Suporte dedicado
+- SLA garantido
+- Ideal para: empresas de medio porte
+
+### Enterprise
+- Instancias ilimitadas
+- Webhooks em tempo real
+- Suporte 24/7
+- SLA personalizado
+- Infraestrutura dedicada
+- Ideal para: grandes operacoes, ISVs
+
+Todos os planos incluem preco fixo sem cobranca por mensagem enviada.
+
+## Integracao
+
+### Autenticacao
+Dois modos de autenticacao:
+1. Partner Token (Bearer): para operacoes administrativas (criar/remover instancias)
+2. Client Token: para operacoes por instancia (enviar mensagens, configurar webhooks)
+
+### Endpoints Principais
+- POST /send-text - Enviar mensagem de texto
+- POST /send-image - Enviar imagem
+- POST /send-video - Enviar video
+- POST /send-audio - Enviar audio
+- POST /send-document - Enviar documento
+- POST /send-location - Enviar localizacao
+- POST /send-contact - Enviar contato
+- POST /send-sticker - Enviar sticker
+- POST /send-reaction - Enviar reacao
+- POST /send-button - Enviar botoes
+- POST /send-list - Enviar lista
+- GET /instance/status - Status da instancia
+- GET /instance/qrcode - Obter QR Code
+- POST /instance/disconnect - Desconectar
+- POST /instance/restart - Reiniciar
+
+### Webhooks
+Configure URLs de webhook para receber eventos:
+- ReceivedURL: mensagens recebidas
+- MessageStatusURL: status de entrega
+- ChatPresenceURL: presenca (digitando)
+- ReceivedDeliveryURL: confirmacao de entrega de mensagens enviadas via API
+
+## Perguntas Frequentes
+
+### O que e a Zé da API?
+E uma plataforma que oferece API REST para integracao com WhatsApp, permitindo automacao de mensagens e gerenciamento de multiplas instancias.
+
+### Preciso de um numero WhatsApp Business?
+Nao. A Zé da API funciona com numeros WhatsApp comuns. Voce conecta seu numero via QR Code.
+
+### Quantas mensagens posso enviar?
+Nao ha limite de mensagens no plano. O limite e por instancia (conexao WhatsApp), nao por volume.
+
+### A API e compativel com Z-API?
+Sim. A Zé da API oferece compatibilidade com o formato de webhooks da Z-API, facilitando migracoes.
+
+### Como funciona o suporte?
+Oferecemos suporte por email, WhatsApp e documentacao completa. Planos superiores incluem suporte prioritario e dedicado.
+
+### Posso testar antes de assinar?
+Sim. Oferecemos 7 dias de teste gratuito sem necessidade de cartao de credito.
+
+## Contato
+
+- Site: https://zedaapi.com
+- Email comercial: contato@zedaapi.com
+- Suporte tecnico: suporte@zedaapi.com
+- WhatsApp: +55 21 97153-2700
+- Horario: Segunda a Sexta, 9h as 18h (BRT)
+
+## Links Uteis
+
+- Pagina inicial: https://zedaapi.com
+- Blog: https://zedaapi.com/blog
+- Central de Suporte: https://zedaapi.com/suporte
+- Glossario: https://zedaapi.com/glossario
+- Termos de Uso: https://zedaapi.com/termos-de-uso
+- Politica de Privacidade: https://zedaapi.com/politica-de-privacidade
