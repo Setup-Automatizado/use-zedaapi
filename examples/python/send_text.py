@@ -11,18 +11,20 @@ import sys
 
 import requests
 
-BASE_URL = os.getenv("ZEDAAPI_URL", "https://sua-instancia.zedaapi.com")
-CLIENT_TOKEN = os.getenv("ZEDAAPI_TOKEN", "seu-token-aqui")
+# Configuração — substitua pelos seus dados
+HOST = os.getenv("ZEDAAPI_HOST", "https://sua-instancia.zedaapi.com")
+INSTANCE_ID = os.getenv("ZEDAAPI_INSTANCE_ID", "sua-instancia")
+INSTANCE_TOKEN = os.getenv("ZEDAAPI_INSTANCE_TOKEN", "seu-token-aqui")
+
+# URL base com autenticação embutida na rota
+BASE_URL = f"{HOST}/instances/{INSTANCE_ID}/token/{INSTANCE_TOKEN}"
 
 
 def send_text(phone: str, message: str) -> dict:
     """Envia uma mensagem de texto via Zé da API."""
     response = requests.post(
         f"{BASE_URL}/send-text",
-        headers={
-            "Content-Type": "application/json",
-            "Client-Token": CLIENT_TOKEN,
-        },
+        headers={"Content-Type": "application/json"},
         json={"phone": phone, "message": message},
         timeout=30,
     )

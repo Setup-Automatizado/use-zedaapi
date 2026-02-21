@@ -11,8 +11,13 @@ import sys
 
 import requests
 
-BASE_URL = os.getenv("ZEDAAPI_URL", "https://sua-instancia.zedaapi.com")
-CLIENT_TOKEN = os.getenv("ZEDAAPI_TOKEN", "seu-token-aqui")
+# Configuração — substitua pelos seus dados
+HOST = os.getenv("ZEDAAPI_HOST", "https://sua-instancia.zedaapi.com")
+INSTANCE_ID = os.getenv("ZEDAAPI_INSTANCE_ID", "sua-instancia")
+INSTANCE_TOKEN = os.getenv("ZEDAAPI_INSTANCE_TOKEN", "seu-token-aqui")
+
+# URL base com autenticação embutida na rota
+BASE_URL = f"{HOST}/instances/{INSTANCE_ID}/token/{INSTANCE_TOKEN}"
 
 
 def send_image(phone: str, image_url: str, caption: str | None = None) -> dict:
@@ -23,10 +28,7 @@ def send_image(phone: str, image_url: str, caption: str | None = None) -> dict:
 
     response = requests.post(
         f"{BASE_URL}/send-image",
-        headers={
-            "Content-Type": "application/json",
-            "Client-Token": CLIENT_TOKEN,
-        },
+        headers={"Content-Type": "application/json"},
         json=payload,
         timeout=30,
     )

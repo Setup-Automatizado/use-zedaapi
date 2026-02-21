@@ -5,8 +5,13 @@
  * Uso: npx tsx send-text.ts
  */
 
-const BASE_URL = process.env.ZEDAAPI_URL || "https://sua-instancia.zedaapi.com";
-const CLIENT_TOKEN = process.env.ZEDAAPI_TOKEN || "seu-token-aqui";
+// Configuração — substitua pelos seus dados
+const HOST = process.env.ZEDAAPI_HOST || "https://sua-instancia.zedaapi.com";
+const INSTANCE_ID = process.env.ZEDAAPI_INSTANCE_ID || "sua-instancia";
+const INSTANCE_TOKEN = process.env.ZEDAAPI_INSTANCE_TOKEN || "seu-token-aqui";
+
+// URL base com autenticação embutida na rota
+const BASE_URL = `${HOST}/instances/${INSTANCE_ID}/token/${INSTANCE_TOKEN}`;
 
 interface SendTextResponse {
   key?: {
@@ -24,10 +29,7 @@ async function sendText(
 ): Promise<SendTextResponse> {
   const response = await fetch(`${BASE_URL}/send-text`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Client-Token": CLIENT_TOKEN,
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ phone, message }),
   });
 

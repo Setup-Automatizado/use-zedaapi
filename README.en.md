@@ -34,16 +34,20 @@ Here you'll find the OpenAPI specification, Postman collection, n8n node, code e
 Send your first message in 30 seconds:
 
 ```bash
-curl -X POST https://your-instance.zedaapi.com/send-text \
+# Replace with your actual credentials
+HOST="https://your-instance.zedaapi.com"
+INSTANCE_ID="your-instance"
+INSTANCE_TOKEN="your-token-here"
+
+curl -X POST "${HOST}/instances/${INSTANCE_ID}/token/${INSTANCE_TOKEN}/send-text" \
   -H "Content-Type: application/json" \
-  -H "Client-Token: YOUR_TOKEN" \
   -d '{
     "phone": "5511999999999",
     "message": "Hello! Message sent via Ze da API."
   }'
 ```
 
-> Replace `your-instance.zedaapi.com` with your instance URL and `YOUR_TOKEN` with your Client Token.
+> Authentication is done via **Instance ID** and **Instance Token** directly in the URL. Check the dashboard for your credentials.
 
 ---
 
@@ -53,9 +57,10 @@ Import the full collection into Postman to test all API routes:
 
 1. Download [`zedaapi-latest.postman.json`](postman/zedaapi-latest.postman.json)
 2. In Postman, click **Import** and select the file
-3. Set up the variables:
-   - `baseUrl`: Your instance URL (e.g., `https://your-instance.zedaapi.com`)
-   - `clientToken`: Your Client Token
+3. Set up the collection variables:
+   - `baseUrl`: Server URL (e.g., `https://your-instance.zedaapi.com`)
+   - `instanceId`: Your instance ID
+   - `instanceToken`: Your instance token
 
 The collection includes all routes organized by category: System, Instance, Messages, Webhooks, Contacts, Groups, Media, and more.
 

@@ -34,16 +34,20 @@ Aquí encontrarás la especificación OpenAPI, colección Postman, nodo n8n, eje
 Envía tu primer mensaje en 30 segundos:
 
 ```bash
-curl -X POST https://tu-instancia.zedaapi.com/send-text \
+# Reemplaza con tus datos reales
+HOST="https://tu-instancia.zedaapi.com"
+INSTANCE_ID="tu-instancia"
+INSTANCE_TOKEN="tu-token-aqui"
+
+curl -X POST "${HOST}/instances/${INSTANCE_ID}/token/${INSTANCE_TOKEN}/send-text" \
   -H "Content-Type: application/json" \
-  -H "Client-Token: TU_TOKEN" \
   -d '{
     "phone": "5511999999999",
     "message": "¡Hola! Mensaje enviado vía Zé da API."
   }'
 ```
 
-> Reemplaza `tu-instancia.zedaapi.com` con la URL de tu instancia y `TU_TOKEN` con tu Client Token.
+> La autenticación se hace mediante **Instance ID** e **Instance Token** directamente en la URL. Consulta el dashboard para obtener tus datos.
 
 ---
 
@@ -53,9 +57,10 @@ Importa la colección completa en Postman para probar todas las rutas de la API:
 
 1. Descarga el archivo [`zedaapi-latest.postman.json`](postman/zedaapi-latest.postman.json)
 2. En Postman, haz clic en **Import** y selecciona el archivo
-3. Configura las variables:
-   - `baseUrl`: URL de tu instancia (ej: `https://tu-instancia.zedaapi.com`)
-   - `clientToken`: Tu Client Token
+3. Configura las variables de la colección:
+   - `baseUrl`: URL del servidor (ej: `https://tu-instancia.zedaapi.com`)
+   - `instanceId`: ID de tu instancia
+   - `instanceToken`: Token de tu instancia
 
 La colección incluye todas las rutas organizadas por categoría: System, Instance, Messages, Webhooks, Contacts, Groups, Media y más.
 
