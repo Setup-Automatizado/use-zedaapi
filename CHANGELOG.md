@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.10.2](https://github.com/Setup-Automatizado/zedaapi/compare/v3.10.1...v3.10.2) (2026-02-21)
+
+### Bug Fixes
+
+* **i18n:** corrigir genero dos artigos antes de "Zé da API" ([b871e0a](https://github.com/Setup-Automatizado/zedaapi/commit/b871e0a16a76a5c5dc6f50051f4ce30732794a85))
+
 ## [3.10.1](https://github.com/Setup-Automatizado/zedaapi/compare/v3.10.0...v3.10.1) (2026-02-21)
 
 ### Bug Fixes
