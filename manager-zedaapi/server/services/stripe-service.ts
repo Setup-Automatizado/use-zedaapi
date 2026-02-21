@@ -77,6 +77,30 @@ export async function createCheckoutSession(
 				? ["card", "boleto"]
 				: ["card"];
 
+	// Check if trial should be applied
+	let trialPeriodDays: number | undefined;
+	try {
+		const { getFeatureFlag, getSystemSetting } =
+			await import("@/lib/settings");
+		const trialEnabled = await getFeatureFlag("trial_enabled");
+		if (trialEnabled) {
+			// Only give trial to users who never had a subscription
+			const previousSub = await db.subscription.findFirst({
+				where: { userId },
+				select: { id: true },
+			});
+			if (!previousSub) {
+				const trialDaysStr = await getSystemSetting("trial_days");
+				const trialDays = trialDaysStr ? parseInt(trialDaysStr, 10) : 0;
+				if (trialDays > 0) {
+					trialPeriodDays = trialDays;
+				}
+			}
+		}
+	} catch {
+		// If settings lookup fails, proceed without trial
+	}
+
 	const session = await stripe.checkout.sessions.create({
 		customer: customerId,
 		mode: "subscription",
@@ -100,6 +124,9 @@ export async function createCheckoutSession(
 				planId,
 				planSlug: plan.slug,
 			},
+			...(trialPeriodDays && {
+				trial_period_days: trialPeriodDays,
+			}),
 		},
 		allow_promotion_codes: true,
 		billing_address_collection: "required",

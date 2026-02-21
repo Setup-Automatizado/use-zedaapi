@@ -228,7 +228,16 @@ export async function handleSicrediPayment(txid: string, paidAt?: Date) {
 		if (charge.subscription.currentPeriodEnd > now) {
 			// Keep existing period end
 		} else {
-			periodEnd.setMonth(periodEnd.getMonth() + 1);
+			// Fetch plan interval to determine correct period
+			const subPlan = await db.subscription.findUnique({
+				where: { id: charge.subscription.id },
+				select: { plan: { select: { interval: true } } },
+			});
+			if (subPlan?.plan?.interval === "year") {
+				periodEnd.setFullYear(periodEnd.getFullYear() + 1);
+			} else {
+				periodEnd.setMonth(periodEnd.getMonth() + 1);
+			}
 		}
 
 		await db.subscription.update({

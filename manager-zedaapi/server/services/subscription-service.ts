@@ -157,7 +157,7 @@ export async function changeSubscription(
 		throw new Error("Assinatura não encontrada");
 	}
 
-	if (subscription.status !== "active") {
+	if (!["active", "trialing"].includes(subscription.status)) {
 		throw new Error("Somente assinaturas ativas podem ser alteradas");
 	}
 
@@ -167,6 +167,20 @@ export async function changeSubscription(
 
 	if (!newPlan?.stripePriceId) {
 		throw new Error("Novo plano não encontrado ou sem preço configurado");
+	}
+
+	// Check if downgrade would exceed instance limit
+	const activeInstances = await db.instance.count({
+		where: {
+			subscription: { id: subscriptionId },
+			status: { not: "deleted" },
+		},
+	});
+
+	if (newPlan.maxInstances !== -1 && activeInstances > newPlan.maxInstances) {
+		throw new Error(
+			`Não é possível trocar para este plano. Você possui ${activeInstances} instâncias ativas, mas o plano permite no máximo ${newPlan.maxInstances}. Remova instâncias antes de fazer o downgrade.`,
+		);
 	}
 
 	// Stripe-managed subscription

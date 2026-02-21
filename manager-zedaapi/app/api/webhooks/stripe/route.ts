@@ -207,37 +207,60 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 		where: { stripeSubscriptionId },
 	});
 
+	// Fetch real subscription data from Stripe for accurate period and status
+	const { getStripe } = await import("@/lib/stripe");
+	const stripe = getStripe();
+	const stripeSub = await stripe.subscriptions.retrieve(stripeSubscriptionId);
+	const firstItem = stripeSub.items.data[0];
+	const periodStart = firstItem
+		? new Date(firstItem.current_period_start * 1000)
+		: new Date();
+	const periodEnd = firstItem
+		? new Date(firstItem.current_period_end * 1000)
+		: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+	const stripeStatus = stripeSub.status;
+	const localStatus =
+		stripeStatus === "trialing"
+			? "trialing"
+			: stripeStatus === "active"
+				? "active"
+				: "incomplete";
+	const trialEnd = stripeSub.trial_end
+		? new Date(stripeSub.trial_end * 1000)
+		: null;
+
 	if (existingSub) {
 		// Update existing
 		await db.subscription.update({
 			where: { id: existingSub.id },
 			data: {
-				status: "active",
-				stripeStatus: "active",
+				status: localStatus,
+				stripeStatus,
 				planId,
+				currentPeriodStart: periodStart,
+				currentPeriodEnd: periodEnd,
+				trialEnd,
 			},
 		});
 	} else {
 		// Create new subscription
-		const now = new Date();
-		const periodEnd = new Date(now);
-		periodEnd.setMonth(periodEnd.getMonth() + 1);
-
 		await db.subscription.create({
 			data: {
 				userId,
 				planId,
 				stripeSubscriptionId,
-				stripeStatus: "active",
+				stripeStatus,
 				paymentMethod: "stripe",
-				status: "active",
-				currentPeriodStart: now,
+				status: localStatus,
+				currentPeriodStart: periodStart,
 				currentPeriodEnd: periodEnd,
+				trialEnd,
 			},
 		});
 	}
 
-	// Send subscription confirmation email
+	// Send appropriate email notification
 	const user = await db.user.findUnique({
 		where: { id: userId },
 		select: { email: true, name: true },
@@ -253,11 +276,19 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 			currency: "BRL",
 		}).format(Number(plan?.price || 0));
 
-		await sendEmailNotification(user.email, "subscription-upgraded", {
+		const emailTemplate =
+			localStatus === "trialing"
+				? "trial-started"
+				: "subscription-upgraded";
+
+		await sendEmailNotification(user.email, emailTemplate, {
 			userName: user.name || "Usuário",
 			userId,
 			planName: plan?.name || "Plano",
 			price,
+			...(trialEnd && {
+				trialEndDate: trialEnd.toLocaleDateString("pt-BR"),
+			}),
 			dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/painel`,
 		});
 	}
@@ -279,6 +310,16 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
 		? new Date(firstItem.current_period_end * 1000)
 		: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
+	const localStatus =
+		subscription.status === "trialing"
+			? "trialing"
+			: subscription.status === "active"
+				? "active"
+				: "incomplete";
+	const trialEnd = subscription.trial_end
+		? new Date(subscription.trial_end * 1000)
+		: null;
+
 	const existing = await db.subscription.findUnique({
 		where: { stripeSubscriptionId: subscription.id },
 	});
@@ -288,10 +329,10 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
 			where: { id: existing.id },
 			data: {
 				stripeStatus: subscription.status,
-				status:
-					subscription.status === "active" ? "active" : "incomplete",
+				status: localStatus,
 				currentPeriodStart: periodStart,
 				currentPeriodEnd: periodEnd,
+				trialEnd,
 			},
 		});
 		return;
@@ -304,13 +345,14 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
 			stripeSubscriptionId: subscription.id,
 			stripeStatus: subscription.status,
 			paymentMethod: "stripe",
-			status: subscription.status === "active" ? "active" : "incomplete",
+			status: localStatus,
 			currentPeriodStart: periodStart,
 			currentPeriodEnd: periodEnd,
+			trialEnd,
 		},
 	});
 
-	// Send subscription created email
+	// Send appropriate email
 	const user = await db.user.findUnique({
 		where: { id: userId },
 		select: { email: true, name: true },
@@ -326,13 +368,21 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
 			currency: "BRL",
 		}).format(Number(plan?.price || 0));
 
-		await sendEmailNotification(user.email, "subscription-upgraded", {
+		const emailTemplate =
+			localStatus === "trialing"
+				? "trial-started"
+				: "subscription-upgraded";
+
+		await sendEmailNotification(user.email, emailTemplate, {
 			userName: user.name || "Usuário",
 			userId,
 			planName: plan?.name || "Plano",
 			price,
 			maxInstances: plan?.maxInstances || 1,
 			nextBillingDate: periodEnd.toLocaleDateString("pt-BR"),
+			...(trialEnd && {
+				trialEndDate: trialEnd.toLocaleDateString("pt-BR"),
+			}),
 			dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/painel`,
 		});
 	}

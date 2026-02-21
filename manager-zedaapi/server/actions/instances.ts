@@ -52,7 +52,7 @@ export async function createInstance(
 		where: {
 			id: subscriptionId,
 			userId: session.user.id,
-			status: "active",
+			status: { in: ["active", "trialing"] },
 		},
 		include: {
 			plan: true,

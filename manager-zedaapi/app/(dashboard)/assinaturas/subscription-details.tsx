@@ -15,9 +15,16 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
 	cancelSubscription,
+	resumeSubscription,
 	getBillingPortal,
 } from "@/server/actions/subscriptions";
-import { CreditCard, Calendar, Layers, AlertTriangle } from "lucide-react";
+import {
+	CreditCard,
+	Calendar,
+	Layers,
+	AlertTriangle,
+	Info,
+} from "lucide-react";
 import { createClientLogger } from "@/lib/client-logger";
 
 const log = createClientLogger("subscription");
@@ -31,6 +38,7 @@ interface SubscriptionDetailsProps {
 		currentPeriodStart: Date;
 		currentPeriodEnd: Date;
 		stripeSubscriptionId: string | null;
+		trialEnd: Date | null;
 		plan: {
 			id: string;
 			name: string;
@@ -84,6 +92,7 @@ export function SubscriptionDetails({
 }: SubscriptionDetailsProps) {
 	const router = useRouter();
 	const [cancelLoading, setCancelLoading] = useState(false);
+	const [resumeLoading, setResumeLoading] = useState(false);
 	const [portalLoading, setPortalLoading] = useState(false);
 
 	if (!subscription) {
@@ -127,6 +136,20 @@ export function SubscriptionDetails({
 			});
 		} finally {
 			setCancelLoading(false);
+		}
+	}
+
+	async function handleResume() {
+		setResumeLoading(true);
+		try {
+			await resumeSubscription(subscription!.id);
+			router.refresh();
+		} catch (err) {
+			log.error("Resume subscription failed", {
+				error: err instanceof Error ? err.message : String(err),
+			});
+		} finally {
+			setResumeLoading(false);
 		}
 	}
 
@@ -212,16 +235,43 @@ export function SubscriptionDetails({
 						</div>
 					</div>
 
+					{subscription.status === "trialing" &&
+						subscription.trialEnd && (
+							<div className="flex items-center gap-2 rounded-lg bg-blue-500/10 border border-blue-500/30 px-4 py-3 text-sm">
+								<Info className="size-4 text-blue-500 shrink-0" />
+								<p className="text-foreground">
+									Seu periodo de teste termina em{" "}
+									<strong>
+										{formatDate(subscription.trialEnd)}
+									</strong>
+									. Apos isso, a cobranca sera ativada
+									automaticamente.
+								</p>
+							</div>
+						)}
+
 					{subscription.cancelAtPeriodEnd && (
-						<div className="flex items-center gap-2 rounded-lg bg-chart-2/10 border border-chart-2/30 px-4 py-3 text-sm">
-							<AlertTriangle className="size-4 text-chart-2 shrink-0" />
-							<p className="text-foreground">
-								Sua assinatura sera cancelada em{" "}
-								<strong>
-									{formatDate(subscription.currentPeriodEnd)}
-								</strong>
-								.
-							</p>
+						<div className="flex items-center justify-between gap-2 rounded-lg bg-chart-2/10 border border-chart-2/30 px-4 py-3 text-sm">
+							<div className="flex items-center gap-2">
+								<AlertTriangle className="size-4 text-chart-2 shrink-0" />
+								<p className="text-foreground">
+									Sua assinatura sera cancelada em{" "}
+									<strong>
+										{formatDate(
+											subscription.currentPeriodEnd,
+										)}
+									</strong>
+									.
+								</p>
+							</div>
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={handleResume}
+								disabled={resumeLoading}
+							>
+								{resumeLoading ? "Reativando..." : "Reativar"}
+							</Button>
 						</div>
 					)}
 				</CardContent>
@@ -248,8 +298,21 @@ export function SubscriptionDetails({
 						</Button>
 					)}
 
-					{subscription.status === "active" &&
-						!subscription.cancelAtPeriodEnd && (
+					{subscription.cancelAtPeriodEnd ? (
+						<Button
+							variant="outline"
+							className="ml-auto"
+							onClick={handleResume}
+							disabled={resumeLoading}
+						>
+							{resumeLoading
+								? "Reativando..."
+								: "Reativar assinatura"}
+						</Button>
+					) : (
+						["active", "trialing"].includes(
+							subscription.status,
+						) && (
 							<Button
 								variant="ghost"
 								className="text-destructive hover:text-destructive ml-auto"
@@ -260,7 +323,8 @@ export function SubscriptionDetails({
 									? "Cancelando..."
 									: "Cancelar assinatura"}
 							</Button>
-						)}
+						)
+					)}
 				</CardFooter>
 			</Card>
 		</div>

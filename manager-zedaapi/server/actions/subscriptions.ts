@@ -9,6 +9,7 @@ import {
 	getActiveSubscription as getActiveSub,
 	getBillingPortalUrl,
 } from "@/server/services/subscription-service";
+import { resumeStripeSubscription } from "@/server/services/stripe-service";
 import type { ActionResult } from "@/types";
 
 /**
@@ -132,6 +133,61 @@ export async function changePlan(
 				error instanceof Error
 					? error.message
 					: "Failed to change plan",
+		};
+	}
+}
+
+/**
+ * Resume a subscription that was scheduled for cancellation.
+ */
+export async function resumeSubscription(
+	subscriptionId: string,
+): Promise<ActionResult> {
+	try {
+		const session = await requireAuth();
+
+		const subscription = await db.subscription.findFirst({
+			where: {
+				id: subscriptionId,
+				userId: session.user.id,
+			},
+		});
+
+		if (!subscription) {
+			return { success: false, error: "Subscription not found" };
+		}
+
+		if (!subscription.cancelAtPeriodEnd) {
+			return {
+				success: false,
+				error: "Subscription is not scheduled for cancellation",
+			};
+		}
+
+		if (!subscription.stripeSubscriptionId) {
+			return {
+				success: false,
+				error: "Only Stripe subscriptions can be resumed",
+			};
+		}
+
+		await resumeStripeSubscription(subscription.stripeSubscriptionId);
+
+		await db.subscription.update({
+			where: { id: subscriptionId },
+			data: { cancelAtPeriodEnd: false },
+		});
+
+		return { success: true };
+	} catch (error) {
+		if (error instanceof Error && error.message === "NEXT_REDIRECT")
+			throw error;
+		return {
+			success: false,
+			error:
+				error instanceof Error
+					? error.message
+					: "Failed to resume subscription",
 		};
 	}
 }

@@ -155,9 +155,11 @@ async function handleSubscriptionChange(
 		data: {
 			stripeStatus: status,
 			status:
-				status === "active" || status === "trialing"
+				status === "active"
 					? "active"
-					: "inactive",
+					: status === "trialing"
+						? "trialing"
+						: "inactive",
 			currentPeriodStart: new Date(periodStart * 1000),
 			currentPeriodEnd: new Date(periodEnd * 1000),
 			cancelAtPeriodEnd: cancelAtEnd ?? false,
