@@ -3,7 +3,10 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { requireContentApiKey } from "@/lib/api-auth";
 import { db } from "@/lib/db";
+import { createLogger } from "@/lib/logger";
 import { slugify } from "@/lib/slugify";
+
+const log = createLogger("api:support");
 
 export async function PATCH(
 	req: NextRequest,
@@ -67,7 +70,7 @@ export async function PATCH(
 		revalidatePath("/suporte");
 		return NextResponse.json(category);
 	} catch (error) {
-		console.error("Failed to update support category:", error);
+		log.error("Failed to update support category", { error });
 		return NextResponse.json(
 			{ error: "Failed to update category" },
 			{ status: 500 },
@@ -111,7 +114,7 @@ export async function DELETE(
 		revalidatePath("/suporte");
 		return NextResponse.json({ success: true });
 	} catch (error) {
-		console.error("Failed to delete support category:", error);
+		log.error("Failed to delete support category", { error });
 		return NextResponse.json(
 			{ error: "Failed to delete category" },
 			{ status: 500 },

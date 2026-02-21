@@ -3,6 +3,9 @@
 import { getStripe } from "@/lib/stripe";
 import { db } from "@/lib/db";
 import type Stripe from "stripe";
+import { createLogger } from "@/lib/logger";
+
+const log = createLogger("service:stripe");
 
 /**
  * Get or create a Stripe customer for the given user.
@@ -137,9 +140,7 @@ export async function syncSubscription(
 	});
 
 	if (!subscription) {
-		console.warn(
-			`[stripe-service] No local subscription for ${stripeSubscriptionId}`,
-		);
+		log.warn("No local subscription found", { stripeSubscriptionId });
 		return;
 	}
 

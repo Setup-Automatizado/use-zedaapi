@@ -3,7 +3,10 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { requireContentApiKey } from "@/lib/api-auth";
 import { db } from "@/lib/db";
+import { createLogger } from "@/lib/logger";
 import { slugify } from "@/lib/slugify";
+
+const log = createLogger("api:support");
 
 export async function GET(
 	req: NextRequest,
@@ -29,7 +32,7 @@ export async function GET(
 
 		return NextResponse.json(article);
 	} catch (error) {
-		console.error("Failed to get support article:", error);
+		log.error("Failed to get support article", { error });
 		return NextResponse.json(
 			{ error: "Failed to get article" },
 			{ status: 500 },
@@ -101,7 +104,7 @@ export async function PATCH(
 		revalidatePath("/suporte");
 		return NextResponse.json(article);
 	} catch (error) {
-		console.error("Failed to update support article:", error);
+		log.error("Failed to update support article", { error });
 		return NextResponse.json(
 			{ error: "Failed to update article" },
 			{ status: 500 },
@@ -132,7 +135,7 @@ export async function DELETE(
 		revalidatePath("/suporte");
 		return NextResponse.json({ success: true });
 	} catch (error) {
-		console.error("Failed to delete support article:", error);
+		log.error("Failed to delete support article", { error });
 		return NextResponse.json(
 			{ error: "Failed to delete article" },
 			{ status: 500 },

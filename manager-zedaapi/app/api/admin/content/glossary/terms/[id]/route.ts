@@ -3,7 +3,10 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { requireContentApiKey } from "@/lib/api-auth";
 import { db } from "@/lib/db";
+import { createLogger } from "@/lib/logger";
 import { slugify } from "@/lib/slugify";
+
+const log = createLogger("api:glossary");
 
 export async function GET(
 	req: NextRequest,
@@ -26,7 +29,7 @@ export async function GET(
 
 		return NextResponse.json(term);
 	} catch (error) {
-		console.error("Failed to get glossary term:", error);
+		log.error("Failed to get glossary term", { error });
 		return NextResponse.json(
 			{ error: "Failed to get term" },
 			{ status: 500 },
@@ -96,7 +99,7 @@ export async function PATCH(
 		revalidatePath("/glossario");
 		return NextResponse.json(term);
 	} catch (error) {
-		console.error("Failed to update glossary term:", error);
+		log.error("Failed to update glossary term", { error });
 		return NextResponse.json(
 			{ error: "Failed to update term" },
 			{ status: 500 },
@@ -127,7 +130,7 @@ export async function DELETE(
 		revalidatePath("/glossario");
 		return NextResponse.json({ success: true });
 	} catch (error) {
-		console.error("Failed to delete glossary term:", error);
+		log.error("Failed to delete glossary term", { error });
 		return NextResponse.json(
 			{ error: "Failed to delete term" },
 			{ status: 500 },

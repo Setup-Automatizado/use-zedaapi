@@ -3,7 +3,10 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { requireContentApiKey } from "@/lib/api-auth";
 import { db } from "@/lib/db";
+import { createLogger } from "@/lib/logger";
 import { slugify } from "@/lib/slugify";
+
+const log = createLogger("api:blog-posts");
 
 // GET /api/admin/content/blog/posts/[id]
 export async function GET(
@@ -35,7 +38,7 @@ export async function GET(
 
 		return NextResponse.json(post);
 	} catch (error) {
-		console.error("Failed to get blog post:", error);
+		log.error("Failed to get blog post", { error });
 		return NextResponse.json(
 			{ error: "Failed to get blog post" },
 			{ status: 500 },
@@ -138,7 +141,7 @@ export async function PATCH(
 
 		return NextResponse.json(post);
 	} catch (error) {
-		console.error("Failed to update blog post:", error);
+		log.error("Failed to update blog post", { error });
 		return NextResponse.json(
 			{ error: "Failed to update blog post" },
 			{ status: 500 },
@@ -173,7 +176,7 @@ export async function DELETE(
 
 		return NextResponse.json({ success: true });
 	} catch (error) {
-		console.error("Failed to delete blog post:", error);
+		log.error("Failed to delete blog post", { error });
 		return NextResponse.json(
 			{ error: "Failed to delete blog post" },
 			{ status: 500 },

@@ -3,7 +3,10 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { requireContentApiKey, parsePaginationParams } from "@/lib/api-auth";
 import { db } from "@/lib/db";
+import { createLogger } from "@/lib/logger";
 import { slugify } from "@/lib/slugify";
+
+const log = createLogger("api:blog-posts");
 
 // GET /api/admin/content/blog/posts?page=1&search=&categoryId=&status=
 export async function GET(req: NextRequest) {
@@ -45,7 +48,7 @@ export async function GET(req: NextRequest) {
 			totalPages: Math.ceil(total / pageSize),
 		});
 	} catch (error) {
-		console.error("Failed to list blog posts:", error);
+		log.error("Failed to list blog posts", { error });
 		return NextResponse.json(
 			{ error: "Failed to list blog posts" },
 			{ status: 500 },
@@ -144,7 +147,7 @@ export async function POST(req: NextRequest) {
 
 		return NextResponse.json(post, { status: 201 });
 	} catch (error) {
-		console.error("Failed to create blog post:", error);
+		log.error("Failed to create blog post", { error });
 		return NextResponse.json(
 			{ error: "Failed to create blog post" },
 			{ status: 500 },

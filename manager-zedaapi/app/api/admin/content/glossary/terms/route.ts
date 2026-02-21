@@ -3,7 +3,10 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { requireContentApiKey, parsePaginationParams } from "@/lib/api-auth";
 import { db } from "@/lib/db";
+import { createLogger } from "@/lib/logger";
 import { slugify } from "@/lib/slugify";
+
+const log = createLogger("api:glossary");
 
 const PAGE_SIZE = 20;
 
@@ -57,7 +60,7 @@ export async function GET(req: NextRequest) {
 			},
 		});
 	} catch (error) {
-		console.error("Failed to list glossary terms:", error);
+		log.error("Failed to list glossary terms", { error });
 		return NextResponse.json(
 			{ error: "Failed to list terms" },
 			{ status: 500 },
@@ -113,7 +116,7 @@ export async function POST(req: NextRequest) {
 		revalidatePath("/glossario");
 		return NextResponse.json(term, { status: 201 });
 	} catch (error) {
-		console.error("Failed to create glossary term:", error);
+		log.error("Failed to create glossary term", { error });
 		return NextResponse.json(
 			{ error: "Failed to create term" },
 			{ status: 500 },

@@ -1,4 +1,7 @@
 import { sicrediPix } from "./client";
+import { createLogger } from "@/lib/logger";
+
+const log = createLogger("service:sicredi-webhook");
 
 // =============================================================================
 // SICREDI WEBHOOK MANAGEMENT (via API PIX mTLS)
@@ -56,5 +59,5 @@ export async function registerSicrediWebhook(): Promise<void> {
 	const webhookUrl = `${baseUrl}/api/webhooks/sicredi`;
 	await registerWebhook(pixKey, webhookUrl);
 
-	console.log(`Sicredi webhook registered: ${webhookUrl}`);
+	log.info("Sicredi webhook registered", { webhookUrl });
 }

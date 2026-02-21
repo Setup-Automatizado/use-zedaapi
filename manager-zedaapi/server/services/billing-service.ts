@@ -4,6 +4,9 @@ import { db } from "@/lib/db";
 import { createPixChargeWithTxid } from "@/lib/services/sicredi/pix";
 import { createBoletoHibrido } from "@/lib/services/sicredi/boleto-hibrido";
 import { generateTxid, calculateDueDate } from "@/lib/services/sicredi/utils";
+import { createLogger } from "@/lib/logger";
+
+const log = createLogger("service:billing");
 
 /**
  * Create a Sicredi charge (PIX or Boleto Hibrido) for an invoice.
@@ -154,7 +157,7 @@ export async function handleStripePayment(
 	});
 
 	if (!subscription) {
-		console.warn(`[billing] No subscription for ${stripeSubscriptionId}`);
+		log.warn("No subscription found", { stripeSubscriptionId });
 		return;
 	}
 
@@ -201,7 +204,7 @@ export async function handleSicrediPayment(txid: string, paidAt?: Date) {
 	});
 
 	if (!charge) {
-		console.warn(`[billing] No Sicredi charge for txid: ${txid}`);
+		log.warn("No Sicredi charge found", { txid });
 		return;
 	}
 

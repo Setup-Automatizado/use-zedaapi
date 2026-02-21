@@ -3,7 +3,10 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { requireContentApiKey } from "@/lib/api-auth";
 import { db } from "@/lib/db";
+import { createLogger } from "@/lib/logger";
 import { slugify } from "@/lib/slugify";
+
+const log = createLogger("api:support");
 
 export async function GET(req: NextRequest) {
 	const authError = requireContentApiKey(req);
@@ -19,7 +22,7 @@ export async function GET(req: NextRequest) {
 
 		return NextResponse.json({ data: categories });
 	} catch (error) {
-		console.error("Failed to list support categories:", error);
+		log.error("Failed to list support categories", { error });
 		return NextResponse.json(
 			{ error: "Failed to list categories" },
 			{ status: 500 },
@@ -75,7 +78,7 @@ export async function POST(req: NextRequest) {
 		revalidatePath("/suporte");
 		return NextResponse.json(category, { status: 201 });
 	} catch (error) {
-		console.error("Failed to create support category:", error);
+		log.error("Failed to create support category", { error });
 		return NextResponse.json(
 			{ error: "Failed to create category" },
 			{ status: 500 },

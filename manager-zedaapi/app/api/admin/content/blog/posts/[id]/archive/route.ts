@@ -3,6 +3,9 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { requireContentApiKey } from "@/lib/api-auth";
 import { db } from "@/lib/db";
+import { createLogger } from "@/lib/logger";
+
+const log = createLogger("api:blog-posts");
 
 // POST /api/admin/content/blog/posts/[id]/archive
 export async function POST(
@@ -45,7 +48,7 @@ export async function POST(
 
 		return NextResponse.json(post);
 	} catch (error) {
-		console.error("Failed to archive blog post:", error);
+		log.error("Failed to archive blog post", { error });
 		return NextResponse.json(
 			{ error: "Failed to archive blog post" },
 			{ status: 500 },

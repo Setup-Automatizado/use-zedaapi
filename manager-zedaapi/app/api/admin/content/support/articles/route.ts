@@ -3,7 +3,10 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { requireContentApiKey, parsePaginationParams } from "@/lib/api-auth";
 import { db } from "@/lib/db";
+import { createLogger } from "@/lib/logger";
 import { slugify } from "@/lib/slugify";
+
+const log = createLogger("api:support");
 
 const PAGE_SIZE = 20;
 
@@ -49,7 +52,7 @@ export async function GET(req: NextRequest) {
 			},
 		});
 	} catch (error) {
-		console.error("Failed to list support articles:", error);
+		log.error("Failed to list support articles", { error });
 		return NextResponse.json(
 			{ error: "Failed to list articles" },
 			{ status: 500 },
@@ -112,7 +115,7 @@ export async function POST(req: NextRequest) {
 		revalidatePath("/suporte");
 		return NextResponse.json(article, { status: 201 });
 	} catch (error) {
-		console.error("Failed to create support article:", error);
+		log.error("Failed to create support article", { error });
 		return NextResponse.json(
 			{ error: "Failed to create article" },
 			{ status: 500 },

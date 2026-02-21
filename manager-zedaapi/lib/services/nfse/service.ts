@@ -4,6 +4,7 @@
 
 import { gunzipSync } from "node:zlib";
 import { db } from "@/lib/db";
+import { createLogger } from "@/lib/logger";
 import { loadCertificate } from "./certificate";
 import { buildDpsXml } from "./xml-builder";
 import { signDpsXml } from "./signer";
@@ -17,6 +18,8 @@ import {
 import type { NfseConfigData, NfseEmitResult, Tomador } from "./types";
 import { validateTomadorForNfse, parseSefinErrorToFriendly } from "./types";
 import { fetchCnpjData } from "@/lib/services/brasil-api/cnpj";
+
+const log = createLogger("service:nfse");
 
 /**
  * Get active NFS-e configuration from database.
@@ -237,9 +240,15 @@ export async function emitNfse(invoiceId: string): Promise<NfseEmitResult> {
 		const codigoUsado = isPJ
 			? config.codigoServico
 			: config.codigoServicoPf;
-		console.log(
-			`[nfse:emit] Invoice ${invoiceId}: dpsNumber=${dpsNumber}, amount=${amountCents}c, tomador=${tomador.cpfCnpj} (${tipoPessoa}), nome="${tomador.nome}", codigo=${codigoUsado}`,
-		);
+		log.info("Preparing DPS submission", {
+			invoiceId,
+			dpsNumber,
+			amountCents,
+			tomadorCpfCnpj: tomador.cpfCnpj,
+			tipoPessoa,
+			codigoServico: codigoUsado,
+			tomadorNome: tomador.nome,
+		});
 
 		// 7. Build DPS XML
 		const dpsXml = buildDpsXml({
@@ -257,12 +266,12 @@ export async function emitNfse(invoiceId: string): Promise<NfseEmitResult> {
 		const dpsXmlUrl = await uploadDpsXmlToS3(signedXml, invoiceId);
 
 		// 10. Submit to SEFIN
-		console.log(`[nfse:emit] Invoice ${invoiceId}: submitting to SEFIN...`);
+		log.info("Submitting to SEFIN", { invoiceId });
 		const response = await submitDps(signedXml, certPem, keyPem, config);
-		console.log(
-			`[nfse:emit] Invoice ${invoiceId}: SEFIN response ->`,
-			JSON.stringify(response),
-		);
+		log.info("SEFIN response received", {
+			invoiceId,
+			response,
+		});
 
 		// 11. Process response
 		if (response.chaveAcesso) {
@@ -274,13 +283,15 @@ export async function emitNfse(invoiceId: string): Promise<NfseEmitResult> {
 						response.nfseXmlGZipB64,
 						invoiceId,
 					);
-					console.log(
-						`[nfse:emit] Invoice ${invoiceId}: official NFS-e XML saved to S3`,
-					);
+					log.info("Official NFS-e XML saved to S3", { invoiceId });
 				} catch (xmlError) {
-					console.error(
-						`[nfse:emit] Failed to save NFS-e XML: ${xmlError instanceof Error ? xmlError.message : "unknown"}`,
-					);
+					log.error("Failed to save NFS-e XML", {
+						invoiceId,
+						error:
+							xmlError instanceof Error
+								? xmlError.message
+								: "unknown",
+					});
 				}
 			}
 
@@ -295,18 +306,21 @@ export async function emitNfse(invoiceId: string): Promise<NfseEmitResult> {
 				);
 				if (pdfBuffer) {
 					pdfUrl = await uploadPdfToS3(pdfBuffer, invoiceId);
-					console.log(
-						`[nfse:emit] Invoice ${invoiceId}: DANFSE PDF saved to S3 (${pdfBuffer.length} bytes)`,
-					);
+					log.info("DANFSE PDF saved to S3", {
+						invoiceId,
+						sizeBytes: pdfBuffer.length,
+					});
 				} else {
-					console.warn(
-						`[nfse:emit] Invoice ${invoiceId}: DANFSE PDF not available yet`,
-					);
+					log.warn("DANFSE PDF not available yet", { invoiceId });
 				}
 			} catch (pdfError) {
-				console.warn(
-					`[nfse:emit] Failed to fetch DANFSE PDF: ${pdfError instanceof Error ? pdfError.message : "unknown"}`,
-				);
+				log.warn("Failed to fetch DANFSE PDF", {
+					invoiceId,
+					error:
+						pdfError instanceof Error
+							? pdfError.message
+							: "unknown",
+				});
 			}
 
 			const danfseUrl =
@@ -351,9 +365,10 @@ export async function emitNfse(invoiceId: string): Promise<NfseEmitResult> {
 			},
 		});
 
-		console.error(
-			`[nfse:emit] Invoice ${invoiceId}: SEFIN rejected -> ${response.mensagemStatus}`,
-		);
+		log.error("SEFIN rejected submission", {
+			invoiceId,
+			mensagemStatus: response.mensagemStatus,
+		});
 		return { success: false, error: friendlyError };
 	} catch (error) {
 		const rawMessage =
@@ -532,10 +547,10 @@ export async function queryNfseStatus(invoiceId: string): Promise<void> {
 			});
 		}
 	} catch (error) {
-		console.error(
-			`[nfse] Query status error for invoice ${invoiceId}:`,
-			error,
-		);
+		log.error("Query status error", {
+			invoiceId,
+			error: error instanceof Error ? error.message : String(error),
+		});
 	}
 }
 
@@ -561,15 +576,13 @@ async function tryFetchMissingPdf(
 				where: { id: invoiceId },
 				data: { nfsePdfUrl: pdfUrl },
 			});
-			console.log(
-				`[nfse] Backfilled DANFSE PDF for invoice ${invoiceId}`,
-			);
+			log.info("Backfilled DANFSE PDF", { invoiceId });
 		}
 	} catch (error) {
-		console.warn(
-			`[nfse] Failed to backfill PDF for invoice ${invoiceId}:`,
-			error instanceof Error ? error.message : "unknown",
-		);
+		log.warn("Failed to backfill PDF", {
+			invoiceId,
+			error: error instanceof Error ? error.message : "unknown",
+		});
 	}
 }
 

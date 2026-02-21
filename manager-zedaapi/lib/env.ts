@@ -1,4 +1,7 @@
 import { z } from "zod";
+import { createLogger } from "@/lib/logger";
+
+const log = createLogger("env");
 
 const envSchema = z.object({
 	// Database
@@ -89,10 +92,9 @@ const envSchema = z.object({
 export function getEnv() {
 	const parsed = envSchema.safeParse(process.env);
 	if (!parsed.success) {
-		console.error(
-			"Invalid environment variables:",
-			parsed.error.flatten().fieldErrors,
-		);
+		log.error("Invalid environment variables", {
+			fieldErrors: parsed.error.flatten().fieldErrors,
+		});
 		throw new Error("Invalid environment variables");
 	}
 	return parsed.data;

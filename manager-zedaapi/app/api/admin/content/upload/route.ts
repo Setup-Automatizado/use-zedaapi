@@ -2,7 +2,10 @@ import crypto from "node:crypto";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { requireContentApiKey } from "@/lib/api-auth";
+import { createLogger } from "@/lib/logger";
 import { uploadFile } from "@/lib/services/storage/s3-client";
+
+const log = createLogger("api:upload");
 
 const IMAGE_EXTENSIONS = new Set(["jpg", "jpeg", "png", "webp", "gif", "svg"]);
 const VIDEO_EXTENSIONS = new Set(["mp4", "webm"]);
@@ -223,7 +226,7 @@ export async function POST(req: NextRequest) {
 			filename,
 		});
 	} catch (error) {
-		console.error("Content upload failed:", error);
+		log.error("Content upload failed", { error });
 		return NextResponse.json({ error: "Upload failed" }, { status: 500 });
 	}
 }

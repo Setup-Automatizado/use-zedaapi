@@ -3,7 +3,10 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { requireContentApiKey } from "@/lib/api-auth";
 import { db } from "@/lib/db";
+import { createLogger } from "@/lib/logger";
 import { slugify } from "@/lib/slugify";
+
+const log = createLogger("api:blog-categories");
 
 // GET /api/admin/content/blog/categories
 export async function GET(req: NextRequest) {
@@ -20,7 +23,7 @@ export async function GET(req: NextRequest) {
 
 		return NextResponse.json(categories);
 	} catch (error) {
-		console.error("Failed to list blog categories:", error);
+		log.error("Failed to list blog categories", { error });
 		return NextResponse.json(
 			{ error: "Failed to list blog categories" },
 			{ status: 500 },
@@ -75,7 +78,7 @@ export async function POST(req: NextRequest) {
 
 		return NextResponse.json(category, { status: 201 });
 	} catch (error) {
-		console.error("Failed to create blog category:", error);
+		log.error("Failed to create blog category", { error });
 		return NextResponse.json(
 			{ error: "Failed to create blog category" },
 			{ status: 500 },

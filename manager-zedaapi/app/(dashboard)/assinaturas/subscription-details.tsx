@@ -18,6 +18,9 @@ import {
 	getBillingPortal,
 } from "@/server/actions/subscriptions";
 import { CreditCard, Calendar, Layers, AlertTriangle } from "lucide-react";
+import { createClientLogger } from "@/lib/client-logger";
+
+const log = createClientLogger("subscription");
 
 interface SubscriptionDetailsProps {
 	subscription: {
@@ -119,7 +122,9 @@ export function SubscriptionDetails({
 			await cancelSubscription(subscription!.id);
 			router.refresh();
 		} catch (err) {
-			console.error("Cancel error:", err);
+			log.error("Cancel subscription failed", {
+				error: err instanceof Error ? err.message : String(err),
+			});
 		} finally {
 			setCancelLoading(false);
 		}
@@ -133,7 +138,9 @@ export function SubscriptionDetails({
 				window.location.href = result.data.url;
 			}
 		} catch (err) {
-			console.error("Portal error:", err);
+			log.error("Billing portal failed", {
+				error: err instanceof Error ? err.message : String(err),
+			});
 		} finally {
 			setPortalLoading(false);
 		}

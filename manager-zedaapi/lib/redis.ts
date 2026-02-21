@@ -1,4 +1,7 @@
 import IORedis from "ioredis";
+import { createLogger } from "@/lib/logger";
+
+const log = createLogger("redis");
 
 const globalForRedis = globalThis as unknown as {
 	redis: IORedis | undefined;
@@ -16,7 +19,7 @@ function createClient(): IORedis {
 	});
 
 	conn.on("error", (err) => {
-		console.error("[redis] connection error:", err.message);
+		log.error("Connection error", { error: err.message });
 	});
 
 	return conn;

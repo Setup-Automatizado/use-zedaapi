@@ -1,5 +1,8 @@
 import { db } from "@/lib/db";
+import { createLogger } from "@/lib/logger";
 import { generateInvoicePdf } from "./pdf-generator";
+
+const log = createLogger("service:invoice");
 
 // =============================================================================
 // INVOICE NUMBER GENERATION
@@ -94,13 +97,13 @@ async function generateAndUploadPdf(invoiceId: string): Promise<void> {
 			data: { pdfUrl },
 		});
 
-		console.log(`[invoice] PDF generated: ${pdfUrl}`);
+		log.info("PDF generated", { pdfUrl });
 	} catch (error) {
 		// PDF generation failure should NOT break the payment flow
-		console.error(
-			`[invoice] Failed to generate PDF for invoice ${invoiceId}:`,
-			error,
-		);
+		log.error("Failed to generate PDF for invoice", {
+			invoiceId,
+			error: error instanceof Error ? error.message : String(error),
+		});
 	}
 }
 
@@ -151,7 +154,10 @@ export async function createSubscriptionInvoice(opts: CreateInvoiceOptions) {
 
 	// Generate PDF receipt asynchronously (non-blocking)
 	generateAndUploadPdf(invoice.id).catch((err) =>
-		console.error("[invoice] PDF generation error:", err),
+		log.error("PDF generation error", {
+			invoiceId: invoice.id,
+			error: err instanceof Error ? err.message : String(err),
+		}),
 	);
 
 	return invoice;

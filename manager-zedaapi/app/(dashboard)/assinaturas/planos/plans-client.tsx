@@ -8,6 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { checkout } from "@/server/actions/subscriptions";
 import { ArrowLeft } from "lucide-react";
+import { createClientLogger } from "@/lib/client-logger";
+
+const log = createClientLogger("checkout");
 
 interface Plan {
 	id: string;
@@ -52,10 +55,12 @@ export function PlansClient({ plans, currentPlanSlug }: PlansClientProps) {
 			} else if (result.success) {
 				router.push("/faturamento");
 			} else {
-				console.error("Checkout failed:", result.error);
+				log.error("Checkout failed", { error: result.error });
 			}
 		} catch (err) {
-			console.error("Checkout error:", err);
+			log.error("Checkout error", {
+				error: err instanceof Error ? err.message : String(err),
+			});
 		} finally {
 			setLoading(false);
 		}

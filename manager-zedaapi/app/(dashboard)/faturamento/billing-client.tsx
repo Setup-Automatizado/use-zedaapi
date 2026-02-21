@@ -10,6 +10,9 @@ import {
 	createBillingPortal,
 } from "@/server/actions/billing";
 import { ExternalLink } from "lucide-react";
+import { createClientLogger } from "@/lib/client-logger";
+
+const log = createClientLogger("billing");
 
 interface BillingClientProps {
 	initialInvoices: Array<{
@@ -56,7 +59,9 @@ export function BillingClient({
 			// Refresh to show the new charge data
 			router.refresh();
 		} catch (err) {
-			console.error("Payment request error:", err);
+			log.error("Payment request failed", {
+				error: err instanceof Error ? err.message : String(err),
+			});
 		}
 	}
 
@@ -68,7 +73,9 @@ export function BillingClient({
 				window.location.href = result.data.url;
 			}
 		} catch (err) {
-			console.error("Portal error:", err);
+			log.error("Billing portal failed", {
+				error: err instanceof Error ? err.message : String(err),
+			});
 		} finally {
 			setPortalLoading(false);
 		}

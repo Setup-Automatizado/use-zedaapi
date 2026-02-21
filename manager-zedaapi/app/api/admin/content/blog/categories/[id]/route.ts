@@ -3,7 +3,10 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { requireContentApiKey } from "@/lib/api-auth";
 import { db } from "@/lib/db";
+import { createLogger } from "@/lib/logger";
 import { slugify } from "@/lib/slugify";
+
+const log = createLogger("api:blog-categories");
 
 // PATCH /api/admin/content/blog/categories/[id]
 export async function PATCH(
@@ -63,7 +66,7 @@ export async function PATCH(
 
 		return NextResponse.json(category);
 	} catch (error) {
-		console.error("Failed to update blog category:", error);
+		log.error("Failed to update blog category", { error });
 		return NextResponse.json(
 			{ error: "Failed to update blog category" },
 			{ status: 500 },
@@ -109,7 +112,7 @@ export async function DELETE(
 
 		return NextResponse.json({ success: true });
 	} catch (error) {
-		console.error("Failed to delete blog category:", error);
+		log.error("Failed to delete blog category", { error });
 		return NextResponse.json(
 			{ error: "Failed to delete blog category" },
 			{ status: 500 },

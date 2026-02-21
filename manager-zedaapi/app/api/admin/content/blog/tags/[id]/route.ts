@@ -3,6 +3,9 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { requireContentApiKey } from "@/lib/api-auth";
 import { db } from "@/lib/db";
+import { createLogger } from "@/lib/logger";
+
+const log = createLogger("api:blog-tags");
 
 // DELETE /api/admin/content/blog/tags/[id]
 export async function DELETE(
@@ -29,7 +32,7 @@ export async function DELETE(
 
 		return NextResponse.json({ success: true });
 	} catch (error) {
-		console.error("Failed to delete blog tag:", error);
+		log.error("Failed to delete blog tag", { error });
 		return NextResponse.json(
 			{ error: "Failed to delete blog tag" },
 			{ status: 500 },

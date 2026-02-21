@@ -3,7 +3,10 @@
 // =============================================================================
 
 import { gzipSync } from "node:zlib";
+import { createLogger } from "@/lib/logger";
 import type { NfseConfigData, NfseSefinResponse } from "./types";
+
+const log = createLogger("service:nfse-client");
 
 const SEFIN_URLS = {
 	HOMOLOGACAO: "https://sefin.producaorestrita.nfse.gov.br/SefinNacional",
@@ -137,7 +140,7 @@ export async function cancelNfseRequest(
 	const compressed = gzipSync(Buffer.from(signedXml, "utf-8"));
 	const base64Payload = compressed.toString("base64");
 
-	console.log(`[nfse:cancel] Sending cancel event for chave=[REDACTED]`);
+	log.info("Sending cancel event", { chaveAcesso: "[REDACTED]" });
 
 	const response = await fetch(`${baseUrl}/nfse/${chaveAcesso}/eventos`, {
 		method: "POST",
@@ -168,7 +171,7 @@ export async function cancelNfseRequest(
 	}
 
 	const data = await response.json();
-	console.log("[nfse:cancel] SEFIN response:", JSON.stringify(data));
+	log.info("SEFIN cancel response", { response: data });
 
 	// Success: SEFIN returns eventoXmlGZipB64 when event is registered
 	if (data.eventoXmlGZipB64) {
@@ -205,7 +208,7 @@ export async function fetchDanfsePdf(
 		DANFSE_URLS.HOMOLOGACAO;
 
 	const url = `${danfseBaseUrl}/${chaveAcesso}`;
-	console.log(`[nfse:danfse] Fetching DANFSE PDF from ${url}`);
+	log.info("Fetching DANFSE PDF", { url });
 
 	try {
 		const response = await fetch(url, {
@@ -220,9 +223,10 @@ export async function fetchDanfsePdf(
 		} as RequestInit);
 
 		if (!response.ok) {
-			console.warn(
-				`[nfse:danfse] DANFSE fetch failed: ${response.status} ${response.statusText}`,
-			);
+			log.warn("DANFSE fetch failed", {
+				status: response.status,
+				statusText: response.statusText,
+			});
 			return null;
 		}
 
@@ -232,19 +236,20 @@ export async function fetchDanfsePdf(
 
 		// Validate we got something reasonable (at least 1KB for a PDF)
 		if (buffer.length < 1024) {
-			console.warn(
-				`[nfse:danfse] DANFSE response too small (${buffer.length} bytes), may not be valid PDF`,
-			);
+			log.warn("DANFSE response too small, may not be valid PDF", {
+				sizeBytes: buffer.length,
+			});
 		}
 
-		console.log(
-			`[nfse:danfse] DANFSE PDF fetched successfully | size=${buffer.length} bytes, contentType=${contentType}`,
-		);
+		log.info("DANFSE PDF fetched successfully", {
+			sizeBytes: buffer.length,
+			contentType,
+		});
 		return buffer;
 	} catch (error) {
-		console.warn(
-			`[nfse:danfse] Failed to fetch DANFSE PDF: ${error instanceof Error ? error.message : "unknown error"}`,
-		);
+		log.warn("Failed to fetch DANFSE PDF", {
+			error: error instanceof Error ? error.message : "unknown error",
+		});
 		return null;
 	}
 }

@@ -3,6 +3,9 @@
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
+import { createClientLogger } from "@/lib/client-logger";
+
+const log = createClientLogger("error:dashboard");
 
 export default function Error({
 	error,
@@ -12,7 +15,10 @@ export default function Error({
 	reset: () => void;
 }) {
 	useEffect(() => {
-		console.error(error);
+		log.error("Unhandled error", {
+			message: error.message,
+			digest: error.digest,
+		});
 	}, [error]);
 
 	return (
@@ -21,7 +27,9 @@ export default function Error({
 				<AlertTriangle className="size-8 text-destructive" />
 			</div>
 			<div className="text-center">
-				<h2 className="text-xl font-bold tracking-tight">Algo deu errado</h2>
+				<h2 className="text-xl font-bold tracking-tight">
+					Algo deu errado
+				</h2>
 				<p className="mt-2 max-w-sm text-sm text-muted-foreground">
 					Ocorreu um erro inesperado. Tente novamente.
 				</p>

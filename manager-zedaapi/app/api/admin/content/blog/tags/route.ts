@@ -3,7 +3,10 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { requireContentApiKey } from "@/lib/api-auth";
 import { db } from "@/lib/db";
+import { createLogger } from "@/lib/logger";
 import { slugify } from "@/lib/slugify";
+
+const log = createLogger("api:blog-tags");
 
 // GET /api/admin/content/blog/tags
 export async function GET(req: NextRequest) {
@@ -20,7 +23,7 @@ export async function GET(req: NextRequest) {
 
 		return NextResponse.json(tags);
 	} catch (error) {
-		console.error("Failed to list blog tags:", error);
+		log.error("Failed to list blog tags", { error });
 		return NextResponse.json(
 			{ error: "Failed to list blog tags" },
 			{ status: 500 },
@@ -66,7 +69,7 @@ export async function POST(req: NextRequest) {
 
 		return NextResponse.json(tag, { status: 201 });
 	} catch (error) {
-		console.error("Failed to create blog tag:", error);
+		log.error("Failed to create blog tag", { error });
 		return NextResponse.json(
 			{ error: "Failed to create blog tag" },
 			{ status: 500 },

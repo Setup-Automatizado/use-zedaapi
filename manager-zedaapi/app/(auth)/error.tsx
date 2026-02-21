@@ -3,6 +3,9 @@
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle } from "lucide-react";
+import { createClientLogger } from "@/lib/client-logger";
+
+const log = createClientLogger("error:auth");
 
 export default function Error({
 	error,
@@ -12,7 +15,10 @@ export default function Error({
 	reset: () => void;
 }) {
 	useEffect(() => {
-		console.error(error);
+		log.error("Unhandled error", {
+			message: error.message,
+			digest: error.digest,
+		});
 	}, [error]);
 
 	return (

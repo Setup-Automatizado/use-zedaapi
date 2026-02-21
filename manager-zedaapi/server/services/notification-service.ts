@@ -2,6 +2,9 @@
 
 import { db } from "@/lib/db";
 import { sendTemplateEmail, sendEmail } from "@/lib/email";
+import { createLogger } from "@/lib/logger";
+
+const log = createLogger("service:notification");
 
 // =============================================================================
 // Notification Service
@@ -312,9 +315,9 @@ export async function sendWaitlistApprovedEmail(
 			signUpUrl: `${process.env.NEXT_PUBLIC_APP_URL}/cadastro`,
 		});
 	} catch (error) {
-		console.error(
-			"[notification] Failed to send waitlist approved email:",
-			error,
-		);
+		log.error("Failed to send waitlist approved email", {
+			email,
+			error: error instanceof Error ? error.message : String(error),
+		});
 	}
 }
