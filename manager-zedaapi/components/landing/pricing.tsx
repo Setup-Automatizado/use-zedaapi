@@ -42,7 +42,7 @@ export function Pricing() {
 				>
 					<PricingCard
 						showAnnualToggle
-						ctaHref="/sign-up"
+						ctaHref="/cadastro"
 						ctaContent={
 							<>
 								Testar 7 Dias Grátis

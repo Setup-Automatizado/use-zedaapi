@@ -5,24 +5,33 @@ const publicRoutes = [
 	"/",
 	"/blog",
 	"/suporte",
+	"/glossario",
 	"/contato",
-	"/sign-in",
-	"/sign-up",
-	"/forgot-password",
-	"/reset-password",
-	"/verify-email",
-	"/waitlist",
+	"/termos-de-uso",
+	"/politica-de-privacidade",
+	"/politica-de-cookies",
+	"/lgpd",
+	"/exclusao-de-dados",
+	"/login",
+	"/cadastro",
+	"/esqueci-senha",
+	"/redefinir-senha",
+	"/verificar-email",
+	"/lista-de-espera",
 	"/api/auth",
 	"/api/webhooks",
 	"/api/health",
+	"/api/brasil",
+	"/api/admin/content",
+	"/api/data-deletion",
 ];
 
 const authRoutes = [
-	"/sign-in",
-	"/sign-up",
-	"/forgot-password",
-	"/reset-password",
-	"/verify-email",
+	"/login",
+	"/cadastro",
+	"/esqueci-senha",
+	"/redefinir-senha",
+	"/verificar-email",
 ];
 
 function isPublicRoute(pathname: string): boolean {
@@ -44,7 +53,7 @@ export async function proxy(request: NextRequest) {
 
 	// Redirect authenticated users away from auth pages to dashboard
 	if (isAuthRoute(pathname) && sessionCookie) {
-		return NextResponse.redirect(new URL("/dashboard", request.url));
+		return NextResponse.redirect(new URL("/painel", request.url));
 	}
 
 	if (isPublicRoute(pathname)) {
@@ -52,7 +61,7 @@ export async function proxy(request: NextRequest) {
 	}
 
 	if (!sessionCookie) {
-		const signInUrl = new URL("/sign-in", request.url);
+		const signInUrl = new URL("/login", request.url);
 		signInUrl.searchParams.set("callbackUrl", pathname);
 		return NextResponse.redirect(signInUrl);
 	}

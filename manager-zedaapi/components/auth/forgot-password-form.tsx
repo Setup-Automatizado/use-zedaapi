@@ -50,7 +50,7 @@ export function ForgotPasswordForm() {
 
 		const result = await authClient.requestPasswordReset({
 			email: values.email,
-			redirectTo: "/reset-password",
+			redirectTo: "/redefinir-senha",
 		});
 
 		if (result.error) {
@@ -79,7 +79,7 @@ export function ForgotPasswordForm() {
 				</CardHeader>
 				<CardFooter className="justify-center">
 					<Button variant="ghost" size="sm" asChild>
-						<Link href="/sign-in">
+						<Link href="/login">
 							<ArrowLeft className="mr-2 size-4" />
 							Voltar para login
 						</Link>
@@ -136,7 +136,7 @@ export function ForgotPasswordForm() {
 						Enviar link de recuperação
 					</Button>
 					<Button variant="ghost" size="sm" asChild>
-						<Link href="/sign-in">
+						<Link href="/login">
 							<ArrowLeft className="mr-2 size-4" />
 							Voltar para login
 						</Link>

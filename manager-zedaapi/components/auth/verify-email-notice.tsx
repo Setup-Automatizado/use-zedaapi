@@ -23,7 +23,9 @@ export function VerifyEmailNotice() {
 				<div className="mb-2 flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
 					<MailCheck className="size-6" />
 				</div>
-				<CardTitle className="text-xl font-semibold">Verifique seu e-mail</CardTitle>
+				<CardTitle className="text-xl font-semibold">
+					Verifique seu e-mail
+				</CardTitle>
 				<CardDescription>
 					{isRegistered
 						? "Sua conta foi criada. Enviamos um link de verificacao para o seu e-mail. Verifique sua caixa de entrada e spam."
@@ -32,7 +34,7 @@ export function VerifyEmailNotice() {
 			</CardHeader>
 			<CardFooter className="justify-center">
 				<Button variant="ghost" size="sm" asChild>
-					<Link href="/sign-in">
+					<Link href="/login">
 						<ArrowLeft className="mr-2 size-4" />
 						Ir para login
 					</Link>

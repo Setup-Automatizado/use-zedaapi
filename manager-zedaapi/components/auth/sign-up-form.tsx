@@ -77,7 +77,7 @@ export function SignUpForm() {
 			return;
 		}
 
-		router.push("/verify-email?registered=true");
+		router.push("/verificar-email?registered=true");
 	}
 
 	return (
@@ -182,7 +182,7 @@ export function SignUpForm() {
 						<span className="text-muted-foreground leading-snug">
 							Li e aceito os{" "}
 							<Link
-								href="/terms"
+								href="/termos-de-uso"
 								className="text-foreground underline underline-offset-4"
 								target="_blank"
 							>
@@ -190,7 +190,7 @@ export function SignUpForm() {
 							</Link>{" "}
 							e a{" "}
 							<Link
-								href="/privacy"
+								href="/politica-de-privacidade"
 								className="text-foreground underline underline-offset-4"
 								target="_blank"
 							>
@@ -216,7 +216,7 @@ export function SignUpForm() {
 					<p className="text-sm text-muted-foreground">
 						Já tem uma conta?{" "}
 						<Link
-							href="/sign-in"
+							href="/login"
 							className="text-foreground font-medium hover:underline underline-offset-4"
 						>
 							Entrar

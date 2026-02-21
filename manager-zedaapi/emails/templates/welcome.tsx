@@ -18,7 +18,7 @@ interface WelcomeEmailProps {
 
 export default function WelcomeEmail({
 	userName = "Usuário",
-	dashboardUrl = "https://manager.zedaapi.com/dashboard",
+	dashboardUrl = "https://zedaapi.com/painel",
 }: WelcomeEmailProps) {
 	return (
 		<Html>
@@ -54,7 +54,7 @@ export default function WelcomeEmail({
 
 					<Section style={ctaSection}>
 						<Link href={dashboardUrl} style={ctaButton}>
-							Acessar Dashboard
+							Acessar Painel
 						</Link>
 					</Section>
 

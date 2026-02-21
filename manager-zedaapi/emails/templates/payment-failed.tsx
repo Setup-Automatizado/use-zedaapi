@@ -22,7 +22,7 @@ export default function PaymentFailedEmail({
 	userName = "Usuário",
 	amount = "R$ 0,00",
 	dueDate,
-	retryUrl = "https://manager.zedaapi.com/billing",
+	retryUrl = "https://zedaapi.com/faturamento",
 }: PaymentFailedEmailProps) {
 	const formattedDate = dueDate
 		? new Date(dueDate).toLocaleDateString("pt-BR")

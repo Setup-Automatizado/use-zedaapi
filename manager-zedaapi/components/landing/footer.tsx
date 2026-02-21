@@ -197,7 +197,7 @@ export function Footer() {
 							asChild
 							className="h-9 px-5 text-sm font-medium shadow-lg shadow-primary/20"
 						>
-							<Link href="/sign-up">
+							<Link href="/cadastro">
 								Criar Conta
 								<ArrowRightIcon className="ml-1.5 size-3.5" />
 							</Link>

@@ -93,7 +93,7 @@ export function TwoFactorForm() {
 			return;
 		}
 
-		router.push("/dashboard");
+		router.push("/painel");
 		router.refresh();
 	}
 

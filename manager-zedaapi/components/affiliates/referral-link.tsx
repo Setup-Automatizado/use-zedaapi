@@ -14,11 +14,11 @@ interface ReferralLinkProps {
 
 export function ReferralLink({
 	code,
-	baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://manager.zedaapi.com",
+	baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://zedaapi.com",
 }: ReferralLinkProps) {
 	const [copied, setCopied] = useState(false);
 
-	const referralUrl = `${baseUrl}/sign-up?ref=${code}&utm_source=affiliate&utm_medium=referral&utm_campaign=${code}`;
+	const referralUrl = `${baseUrl}/cadastro?ref=${code}&utm_source=affiliate&utm_medium=referral&utm_campaign=${code}`;
 
 	async function handleCopy() {
 		try {

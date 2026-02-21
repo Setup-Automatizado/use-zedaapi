@@ -161,14 +161,14 @@ export function Header() {
 						asChild
 						className="text-[13px] font-medium text-muted-foreground hover:text-foreground"
 					>
-						<Link href="/sign-in">Entrar</Link>
+						<Link href="/login">Entrar</Link>
 					</Button>
 					<Button
 						size="sm"
 						asChild
 						className="group/cta relative h-9 rounded-full px-5 text-[13px] font-semibold shadow-md shadow-primary/20 transition-all duration-300 hover:shadow-lg hover:shadow-primary/30"
 					>
-						<Link href="/sign-up">
+						<Link href="/cadastro">
 							Criar Conta Grátis
 							<ArrowRightIcon className="size-3.5 ml-1 transition-transform duration-200 group-hover/cta:translate-x-0.5" />
 						</Link>
@@ -237,13 +237,13 @@ export function Header() {
 								asChild
 								className="w-full rounded-xl"
 							>
-								<Link href="/sign-in">Entrar</Link>
+								<Link href="/login">Entrar</Link>
 							</Button>
 							<Button
 								asChild
 								className="w-full rounded-xl shadow-md shadow-primary/20"
 							>
-								<Link href="/sign-up">
+								<Link href="/cadastro">
 									Criar Conta Grátis
 									<ArrowRightIcon
 										className="size-3.5 ml-1"

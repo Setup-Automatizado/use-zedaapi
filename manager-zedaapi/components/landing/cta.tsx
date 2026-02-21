@@ -215,7 +215,7 @@ export function CTA() {
 									asChild
 									className="group/btn relative h-13 px-8 text-base font-semibold shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/30 transition-all duration-300"
 								>
-									<Link href="/sign-up">
+									<Link href="/cadastro">
 										<span className="relative z-10 flex items-center gap-2">
 											Criar Conta Grátis
 											<ArrowRightIcon className="size-4 transition-transform duration-200 group-hover/btn:translate-x-0.5" />

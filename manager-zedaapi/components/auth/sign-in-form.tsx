@@ -35,7 +35,7 @@ type SignInValues = z.infer<typeof signInSchema>;
 export function SignInForm() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
-	const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
+	const callbackUrl = searchParams.get("callbackUrl") ?? "/painel";
 	const [error, setError] = useState<string | null>(null);
 
 	const {
@@ -122,7 +122,7 @@ export function SignInForm() {
 
 					<div className="flex justify-end">
 						<Link
-							href="/forgot-password"
+							href="/esqueci-senha"
 							className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-150"
 						>
 							Esqueceu a senha?
@@ -143,7 +143,7 @@ export function SignInForm() {
 					<p className="text-sm text-muted-foreground">
 						Não tem uma conta?{" "}
 						<Link
-							href="/sign-up"
+							href="/cadastro"
 							className="text-foreground font-medium hover:underline underline-offset-4"
 						>
 							Criar conta

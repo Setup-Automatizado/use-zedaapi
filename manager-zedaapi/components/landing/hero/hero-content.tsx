@@ -78,7 +78,7 @@ export function HeroContent({ reducedMotion }: HeroContentProps) {
 						asChild
 						className="h-12 px-7 text-base shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/25 transition-all duration-300"
 					>
-						<Link href="/sign-up">
+						<Link href="/cadastro">
 							Criar Conta Grátis
 							<ArrowRightIcon
 								className="size-4"

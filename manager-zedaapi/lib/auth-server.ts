@@ -12,7 +12,7 @@ export async function getAuthSession() {
 export async function requireAuth() {
 	const session = await getAuthSession();
 	if (!session) {
-		redirect("/sign-in");
+		redirect("/login");
 	}
 	return session;
 }
@@ -20,7 +20,7 @@ export async function requireAuth() {
 export async function requireAdmin() {
 	const session = await requireAuth();
 	if (session.user.role !== "admin") {
-		redirect("/dashboard");
+		redirect("/painel");
 	}
 	return session;
 }

@@ -18,7 +18,7 @@ interface WaitlistApprovedEmailProps {
 
 export default function WaitlistApprovedEmail({
 	userName = "Usuário",
-	signUpUrl = "https://manager.zedaapi.com/sign-up",
+	signUpUrl = "https://zedaapi.com/cadastro",
 }: WaitlistApprovedEmailProps) {
 	return (
 		<Html>

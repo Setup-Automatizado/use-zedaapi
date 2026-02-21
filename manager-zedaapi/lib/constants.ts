@@ -96,28 +96,28 @@ export type AffiliateStatus =
 export const ROUTES = {
 	HOME: "/",
 	LOGIN: "/login",
-	REGISTER: "/register",
-	FORGOT_PASSWORD: "/forgot-password",
-	RESET_PASSWORD: "/reset-password",
-	VERIFY_EMAIL: "/verify-email",
-	WAITLIST: "/waitlist",
+	REGISTER: "/cadastro",
+	FORGOT_PASSWORD: "/esqueci-senha",
+	RESET_PASSWORD: "/redefinir-senha",
+	VERIFY_EMAIL: "/verificar-email",
+	WAITLIST: "/lista-de-espera",
 
 	// Dashboard
-	DASHBOARD: "/dashboard",
-	INSTANCES: "/instances",
-	INSTANCE_DETAIL: (id: string) => `/instances/${id}`,
-	BILLING: "/billing",
-	SETTINGS: "/settings",
-	API_KEYS: "/api-keys",
+	DASHBOARD: "/painel",
+	INSTANCES: "/instancias",
+	INSTANCE_DETAIL: (id: string) => `/instancias/${id}`,
+	BILLING: "/faturamento",
+	SETTINGS: "/configuracoes",
+	API_KEYS: "/chaves-api",
 
 	// Admin
 	ADMIN: "/admin",
-	ADMIN_USERS: "/admin/users",
-	ADMIN_INSTANCES: "/admin/instances",
-	ADMIN_SUBSCRIPTIONS: "/admin/subscriptions",
-	ADMIN_AFFILIATES: "/admin/affiliates",
-	ADMIN_NFSE: "/admin/nfse",
-	ADMIN_WAITLIST: "/admin/waitlist",
+	ADMIN_USERS: "/admin/usuarios",
+	ADMIN_INSTANCES: "/admin/instancias",
+	ADMIN_SUBSCRIPTIONS: "/admin/assinaturas",
+	ADMIN_AFFILIATES: "/admin/afiliados",
+	ADMIN_NFSE: "/admin/nfe",
+	ADMIN_WAITLIST: "/admin/lista-de-espera",
 } as const;
 
 // Cookie names

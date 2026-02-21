@@ -140,7 +140,7 @@ export function WaitlistForm() {
 					<p className="text-sm text-muted-foreground">
 						Já tem um convite?{" "}
 						<Link
-							href="/sign-up"
+							href="/cadastro"
 							className="text-foreground font-medium hover:underline underline-offset-4"
 						>
 							Criar conta
