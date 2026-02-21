@@ -1,13 +1,24 @@
 import Stripe from "stripe";
 
-if (!process.env.STRIPE_SECRET_KEY) {
-	throw new Error("STRIPE_SECRET_KEY is not set");
-}
+let _stripe: Stripe | undefined;
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-	apiVersion: "2025-08-27.basil",
-	typescript: true,
-});
+/**
+ * Lazy-initialized Stripe client.
+ * Defers creation until first call so module evaluation
+ * doesn't throw during Next.js build (Docker without env vars).
+ */
+export function getStripe(): Stripe {
+	if (!_stripe) {
+		if (!process.env.STRIPE_SECRET_KEY) {
+			throw new Error("STRIPE_SECRET_KEY is not set");
+		}
+		_stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+			apiVersion: "2025-08-27.basil",
+			typescript: true,
+		});
+	}
+	return _stripe;
+}
 
 export async function constructWebhookEvent(
 	body: string,
@@ -17,5 +28,5 @@ export async function constructWebhookEvent(
 	if (!secret) {
 		throw new Error("STRIPE_WEBHOOK_SECRET is not set");
 	}
-	return stripe.webhooks.constructEvent(body, signature, secret);
+	return getStripe().webhooks.constructEvent(body, signature, secret);
 }

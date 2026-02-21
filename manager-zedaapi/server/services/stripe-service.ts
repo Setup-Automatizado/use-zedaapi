@@ -1,6 +1,6 @@
 "use server";
 
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 import { db } from "@/lib/db";
 import type Stripe from "stripe";
 
@@ -9,6 +9,7 @@ import type Stripe from "stripe";
  * Links stripe customer ID to user record.
  */
 export async function createOrGetCustomer(userId: string): Promise<string> {
+	const stripe = getStripe();
 	const user = await db.user.findUnique({
 		where: { id: userId },
 		select: {
@@ -52,6 +53,7 @@ export async function createCheckoutSession(
 	planId: string,
 	paymentMethod: "stripe" | "pix" | "boleto" = "stripe",
 ): Promise<Stripe.Checkout.Session> {
+	const stripe = getStripe();
 	const plan = await db.plan.findUnique({
 		where: { id: planId },
 		select: { stripePriceId: true, name: true, slug: true },
@@ -110,6 +112,7 @@ export async function createCheckoutSession(
 export async function createBillingPortalSession(
 	customerId: string,
 ): Promise<string> {
+	const stripe = getStripe();
 	const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
 	const session = await stripe.billingPortal.sessions.create({
@@ -126,6 +129,7 @@ export async function createBillingPortalSession(
 export async function syncSubscription(
 	stripeSubscriptionId: string,
 ): Promise<void> {
+	const stripe = getStripe();
 	const stripeSub = await stripe.subscriptions.retrieve(stripeSubscriptionId);
 
 	const subscription = await db.subscription.findUnique({
@@ -181,6 +185,7 @@ export async function cancelStripeSubscription(
 	stripeSubscriptionId: string,
 	immediately = false,
 ): Promise<Stripe.Subscription> {
+	const stripe = getStripe();
 	if (immediately) {
 		return stripe.subscriptions.cancel(stripeSubscriptionId);
 	}
@@ -196,6 +201,7 @@ export async function cancelStripeSubscription(
 export async function resumeStripeSubscription(
 	stripeSubscriptionId: string,
 ): Promise<Stripe.Subscription> {
+	const stripe = getStripe();
 	return stripe.subscriptions.update(stripeSubscriptionId, {
 		cancel_at_period_end: false,
 	});
@@ -208,6 +214,7 @@ export async function updateStripeSubscription(
 	stripeSubscriptionId: string,
 	newPriceId: string,
 ): Promise<Stripe.Subscription> {
+	const stripe = getStripe();
 	const subscription =
 		await stripe.subscriptions.retrieve(stripeSubscriptionId);
 
@@ -233,6 +240,7 @@ export async function updateStripeSubscription(
 export async function getCheckoutSession(
 	sessionId: string,
 ): Promise<Stripe.Checkout.Session> {
+	const stripe = getStripe();
 	return stripe.checkout.sessions.retrieve(sessionId, {
 		expand: ["subscription", "customer"],
 	});
