@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.11.0](https://github.com/Setup-Automatizado/zedaapi/compare/v3.10.2...v3.11.0) (2026-02-21)
+
+### Features
+
+* **ci:** add public repo sync job to CD pipeline ([3ad33a4](https://github.com/Setup-Automatizado/zedaapi/commit/3ad33a4e3cf173c8ba90b022bc5b6f22ecae9506))
+
+### Code Refactoring
+
+* **i18n:** rename auth routes and landing links to Portuguese ([57b9d63](https://github.com/Setup-Automatizado/zedaapi/commit/57b9d63d98e036e1e2d16a081e4803d04720c28b))
+* **i18n:** rename dashboard and admin routes to Portuguese ([895b8f5](https://github.com/Setup-Automatizado/zedaapi/commit/895b8f5070de75827a75ac00fb3055e4f9209ab4))
+
 ## [3.10.2](https://github.com/Setup-Automatizado/zedaapi/compare/v3.10.1...v3.10.2) (2026-02-21)
 
 ### Bug Fixes
