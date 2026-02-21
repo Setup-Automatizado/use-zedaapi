@@ -65,12 +65,26 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# ---------------------------------------------------------------------------
+# Seed environment: /seed dir with Prisma CLI + schema + seed script
+# Runs on startup BEFORE Next.js — safe to fail (server still starts)
+# ---------------------------------------------------------------------------
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules /seed/node_modules
+COPY --from=deps --chown=nextjs:nodejs /app/generated /seed/generated
+COPY --from=builder --chown=nextjs:nodejs /app/prisma /seed/prisma
+COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts /seed/prisma.config.ts
+COPY --from=builder --chown=nextjs:nodejs /app/package.json /seed/package.json
+COPY --from=builder --chown=nextjs:nodejs /app/tsconfig.json /seed/tsconfig.json
+
+# Entrypoint: db push + seed + server
+COPY --chown=nextjs:nodejs docker-entrypoint.sh ./
+RUN chmod +x docker-entrypoint.sh
+
 USER nextjs
 
 EXPOSE 3000
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
   CMD wget -qO- http://localhost:3000/api/health || exit 1
 
-# --bun: ensures any Node.js subprocesses spawned by Next.js also use Bun
-CMD ["bun", "--bun", "run", "server.js"]
+ENTRYPOINT ["./docker-entrypoint.sh"]

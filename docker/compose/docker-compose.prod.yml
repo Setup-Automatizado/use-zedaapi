@@ -5,7 +5,7 @@
 services:
   # =================== ZÉ DA API SERVER (Go WhatsApp API) ===================
   zedaapi_server:
-    image: setupautomatizado/zedaapi:latest
+    image: setupautomatizado/zedaapi:v3.11.1
     networks:
       - network_public
     environment:
@@ -22,7 +22,7 @@ services:
       - HTTP_MAX_HEADER_BYTES=1048576
 
       # =================== LOGGING ===================
-      - LOG_LEVEL=INFO
+      - LOG_LEVEL=DEBUG
 
       # =================== POSTGRESQL — Application Database ===================
       - POSTGRES_DSN=postgres://zedaapi:922GAvaUvxw4dSZoWAdtGFpKclNHkz@postgres_zedaapi:5432/zedaapi_app?sslmode=disable
@@ -621,7 +621,8 @@ services:
       - MINIO_HOST=https://s3.zedaapi.com
       - MINIO_ACCESS_KEY=tzDw52ICssgjYmmt1E7s
       - MINIO_SECRET_KEY=Sq1pnzf9SMl8k9tqOyEfqiZ7i1TVAxP1vwlmeemu
-      - BUCKET_NAME=zedaapi-media
+      - BUCKET_MEDIA=zedaapi-media
+      - BUCKET_MANAGER=manager-zedaapi
     entrypoint:
       - sh
       - -c
@@ -631,7 +632,7 @@ services:
         echo "Waiting for MinIO at $$MINIO_HOST..."
         MAX_RETRIES=30
         retries=0
-        until mc mb myminio/$$BUCKET_NAME --ignore-existing --insecure 2>&1; do
+        until mc mb myminio/$$BUCKET_MEDIA --ignore-existing --insecure 2>&1; do
           retries=$$((retries + 1))
           if [ "$$retries" -ge "$$MAX_RETRIES" ]; then
             echo "ERROR: MinIO not available after $$MAX_RETRIES attempts"
@@ -641,8 +642,14 @@ services:
           sleep 5
           mc alias set myminio $$MINIO_HOST $$MINIO_ACCESS_KEY $$MINIO_SECRET_KEY --api S3v4 --insecure 2>/dev/null
         done
-        mc anonymous set download myminio/$$BUCKET_NAME --insecure
-        echo "Bucket $$BUCKET_NAME created successfully with public-read policy"
+        mc anonymous set download myminio/$$BUCKET_MEDIA --insecure
+        echo "Bucket $$BUCKET_MEDIA created successfully"
+
+        # Create Manager Bucket
+        mc mb myminio/$$BUCKET_MANAGER --ignore-existing --insecure
+        mc anonymous set download myminio/$$BUCKET_MANAGER --insecure
+        echo "Bucket $$BUCKET_MANAGER created successfully"
+
         exit 0
     deploy:
       mode: replicated
@@ -659,6 +666,225 @@ services:
         limits:
           cpus: "0.25"
           memory: 128M
+
+  # =================== MANAGER ZEDAAPI (Next.js) ===================
+  manager_zedaapi:
+    image: setupautomatizado/zedaapi-manager:v3.11.1
+    networks:
+      - network_public
+    environment:
+      # --- Database & Auth ---
+      - DATABASE_URL=postgresql://zedaapi:922GAvaUvxw4dSZoWAdtGFpKclNHkz@postgres_zedaapi:5432/manager_zedaapi?schema=public
+      - BETTER_AUTH_SECRET=QMU1M3dgELAoMf3ZS5Nqb5clL2SsqL3O
+      - BETTER_AUTH_URL=https://zedaapi.com
+      - BETTER_AUTH_TRUSTED_ORIGINS=https://zedaapi.com
+
+      # --- ZedaAPI Integration ---
+      - ZEDAAPI_BASE_URL=http://zedaapi_server:8080
+      - ZEDAAPI_PARTNER_TOKEN=zJXERlneHxncXRtgRA9GkDz9waORrcKQ
+      - ZEDAAPI_CLIENT_TOKEN=GC5QyQjYMXXpzismHktRafDEI41dJ0IQ
+      - ZEDAAPI_WEBHOOK_SECRET=change-me-webhook-secret
+
+      # --- Stripe ---
+      - STRIPE_SECRET_KEY=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
+      - STRIPE_WEBHOOK_SECRET=whsec_C2PkqbHtHiynAHtmqbaZ80Dxp4O75vFq
+      - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_51QKqL3DaOjCaIn7nZggjKtpeM1SsmNj3CpmzQrbT9dsrKnKaOqpXhoTuFP8RIQty7NR68e76suIGAFYzlEy5ah3R00XE2E9b1P
+
+      # --- Sicredi ---
+      - SICREDI_PIX_BASIC_AUTH=TlRReU5EWTBOek13TURBeE1EQTZNREF3TVRwbE0xVTpSU1kwU2prNWVYWnVjVVFwS1VwMw==
+      - SICREDI_PIX_KEY=54246473000100
+      - SICREDI_CERT_PATH=certs/54246473000100.cer
+      - SICREDI_KEY_PATH=certs/api-pix-setupautomatizadopix-sem-senha.key
+      - SICREDI_CHAIN_PATH=certs/CadeiaCompletaSicredi.cer
+      - SICREDI_WEBHOOK_SECRET=
+      - SICREDI_PARCEIRO_AUTH_URL=https://api-parceiro.sicredi.com.br/auth/openapi/token
+      - SICREDI_PARCEIRO_BASE_URL=https://cobrancaonline.sicredi.com.br/sicredi-cobranca-ws-ecomm-api/ecomm
+      - SICREDI_PARCEIRO_API_KEY=25be9d81-8225-4135-85c5-f36d92d67408
+      - SICREDI_PARCEIRO_USERNAME=368560728
+      - SICREDI_PARCEIRO_PASSWORD=309813F8F65CA7BA11311872B9D90CE0DF166C68EA913248D53416751F38587B
+      - SICREDI_PARCEIRO_COOPERATIVA=0728
+      - SICREDI_PARCEIRO_POSTO=34
+      - SICREDI_BENEFICIARIO_CNPJ=54246473000100
+      - SICREDI_BENEFICIARIO_NOME=SETUP AUTOMATIZADO LTDA
+
+      # --- Redis ---
+      - REDIS_URL=redis://:t8ccMAHqZMybCy8WxctXJLcKcDpvQlq@redis_zedaapi:6379
+
+      # --- S3 / MinIO ---
+      - S3_ENDPOINT=http://minio_zedaapi:9000
+      - S3_REGION=us-east-1
+      - S3_ACCESS_KEY_ID=tzDw52ICssgjYmmt1E7s
+      - S3_SECRET_ACCESS_KEY=Sq1pnzf9SMl8k9tqOyEfqiZ7i1TVAxP1vwlmeemu
+      - S3_BUCKET=manager-zedaapi
+      - S3_PUBLIC_URL=https://s3.zedaapi.com
+      - S3_PATH_STYLE=true
+
+      # --- Encryption ---
+      - ENCRYPTION_KEY=a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2
+
+      # --- Email ---
+      - SMTP_HOST=smtp-relay.brevo.com
+      - SMTP_PORT=587
+      - SMTP_USER=a1e26a001@smtp-brevo.com
+      - SMTP_PASSWORD=xsmtpsib-7100e7f27b47845be346476432fd2d6b160214babac80eb965821b49560b519b-tnRrnWjUZrP1DwsN
+      - SMTP_FROM=noreply@zedaapi.com
+
+      # --- Logging ---
+      - LOG_LEVEL=INFO
+      - WORKER_LOG_LEVEL=INFO
+
+      # --- Application ---
+      - NODE_ENV=production
+      - NEXT_PUBLIC_APP_URL=https://zedaapi.com
+      - ADMIN_EMAIL=admin@zedaapi.com
+      - ADMIN_PASSWORD=zJXERlneHxncXRtgRA9GkDz9waORrcKQ
+      - CONTACT_WEBHOOK_URL=https://hook.prod.setupautomatizado.com.br/webhook/zedaapi-form-contact
+      - NEXT_PUBLIC_CONTACT_WHATSAPP=5521971532700
+      - CONTENT_API_KEY=ea80c76d99d21db4799b7f1b30b972de5839760364fd9ef6ab976a4f7e1ca66d
+      - WAITLIST_ENABLED=true
+      - WAITLIST_REQUIRE_APPROVAL=true
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+        window: 300s
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: "1"
+          memory: 2G
+        reservations:
+          cpus: "0.25"
+          memory: 512M
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.manager_zedaapi.rule=Host(`zedaapi.com`)
+        - traefik.http.routers.manager_zedaapi.entrypoints=websecure
+        - traefik.http.routers.manager_zedaapi.tls.certresolver=letsencryptresolver
+        - traefik.http.routers.manager_zedaapi.service=manager_zedaapi
+        - traefik.http.services.manager_zedaapi.loadbalancer.server.port=3000
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # =================== MANAGER ZEDAAPI WORKER (BullMQ) ===================
+  worker_zedaapi:
+    image: setupautomatizado/zedaapi-manager-workers:v3.11.1
+    networks:
+      - network_public
+    environment:
+      # --- Database & Auth ---
+      - DATABASE_URL=postgresql://zedaapi:922GAvaUvxw4dSZoWAdtGFpKclNHkz@postgres_zedaapi:5432/manager_zedaapi?schema=public
+      - BETTER_AUTH_SECRET=QMU1M3dgELAoMf3ZS5Nqb5clL2SsqL3O
+      - BETTER_AUTH_URL=https://zedaapi.com
+      - BETTER_AUTH_TRUSTED_ORIGINS=https://zedaapi.com
+
+      # --- ZedaAPI Integration ---
+      - ZEDAAPI_BASE_URL=http://zedaapi_server:8080
+      - ZEDAAPI_PARTNER_TOKEN=zJXERlneHxncXRtgRA9GkDz9waORrcKQ
+      - ZEDAAPI_CLIENT_TOKEN=GC5QyQjYMXXpzismHktRafDEI41dJ0IQ
+      - ZEDAAPI_WEBHOOK_SECRET=change-me-webhook-secret
+
+      # --- Stripe ---
+      - STRIPE_SECRET_KEY=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
+      - STRIPE_WEBHOOK_SECRET=whsec_C2PkqbHtHiynAHtmqbaZ80Dxp4O75vFq
+      - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_51QKqL3DaOjCaIn7nZggjKtpeM1SsmNj3CpmzQrbT9dsrKnKaOqpXhoTuFP8RIQty7NR68e76suIGAFYzlEy5ah3R00XE2E9b1P
+
+      # --- Sicredi ---
+      - SICREDI_PIX_BASIC_AUTH=TlRReU5EWTBOek13TURBeE1EQTZNREF3TVRwbE0xVTpSU1kwU2prNWVYWnVjVVFwS1VwMw==
+      - SICREDI_PIX_KEY=54246473000100
+      - SICREDI_CERT_PATH=certs/54246473000100.cer
+      - SICREDI_KEY_PATH=certs/api-pix-setupautomatizadopix-sem-senha.key
+      - SICREDI_CHAIN_PATH=certs/CadeiaCompletaSicredi.cer
+      - SICREDI_WEBHOOK_SECRET=
+      - SICREDI_PARCEIRO_AUTH_URL=https://api-parceiro.sicredi.com.br/auth/openapi/token
+      - SICREDI_PARCEIRO_BASE_URL=https://cobrancaonline.sicredi.com.br/sicredi-cobranca-ws-ecomm-api/ecomm
+      - SICREDI_PARCEIRO_API_KEY=25be9d81-8225-4135-85c5-f36d92d67408
+      - SICREDI_PARCEIRO_USERNAME=368560728
+      - SICREDI_PARCEIRO_PASSWORD=309813F8F65CA7BA11311872B9D90CE0DF166C68EA913248D53416751F38587B
+      - SICREDI_PARCEIRO_COOPERATIVA=0728
+      - SICREDI_PARCEIRO_POSTO=34
+      - SICREDI_BENEFICIARIO_CNPJ=54246473000100
+      - SICREDI_BENEFICIARIO_NOME=SETUP AUTOMATIZADO LTDA
+
+      # --- Redis ---
+      - REDIS_URL=redis://:t8ccMAHqZMybCy8WxctXJLcKcDpvQlq@redis_zedaapi:6379
+
+      # --- S3 / MinIO ---
+      - S3_ENDPOINT=http://minio_zedaapi:9000
+      - S3_REGION=us-east-1
+      - S3_ACCESS_KEY_ID=tzDw52ICssgjYmmt1E7s
+      - S3_SECRET_ACCESS_KEY=Sq1pnzf9SMl8k9tqOyEfqiZ7i1TVAxP1vwlmeemu
+      - S3_BUCKET=manager-zedaapi
+      - S3_PUBLIC_URL=https://s3.zedaapi.com
+      - S3_PATH_STYLE=true
+
+      # --- Encryption ---
+      - ENCRYPTION_KEY=a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2
+
+      # --- Email ---
+      - SMTP_HOST=smtp-relay.brevo.com
+      - SMTP_PORT=587
+      - SMTP_USER=a1e26a001@smtp-brevo.com
+      - SMTP_PASSWORD=xsmtpsib-7100e7f27b47845be346476432fd2d6b160214babac80eb965821b49560b519b-tnRrnWjUZrP1DwsN
+      - SMTP_FROM=noreply@zedaapi.com
+
+      # --- Logging ---
+      - LOG_LEVEL=INFO
+      - WORKER_LOG_LEVEL=INFO
+
+      # --- Application ---
+      - NODE_ENV=production
+      - NEXT_PUBLIC_APP_URL=https://zedaapi.com
+      - ADMIN_EMAIL=admin@zedaapi.com
+      - ADMIN_PASSWORD=zJXERlneHxncXRtgRA9GkDz9waORrcKQ
+      - CONTACT_WEBHOOK_URL=https://hook.prod.setupautomatizado.com.br/webhook/zedaapi-form-contact
+      - NEXT_PUBLIC_CONTACT_WHATSAPP=5521971532700
+      - CONTENT_API_KEY=ea80c76d99d21db4799b7f1b30b972de5839760364fd9ef6ab976a4f7e1ca66d
+      - WAITLIST_ENABLED=true
+      - WAITLIST_REQUIRE_APPROVAL=true
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+        window: 300s
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1G
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    healthcheck:
+      test: ["CMD-SHELL", "ps aux | grep -v grep | grep -q 'bun' || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 # =================== VOLUMES (external — create before deploy) ===================
 volumes:
