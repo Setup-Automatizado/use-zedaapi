@@ -7,6 +7,23 @@ type DbClient = typeof dbClient;
 
 const log = createLogger("processor:sicredi-billing");
 
+async function sendEmailNotification(
+	to: string,
+	template: string,
+	data: Record<string, unknown>,
+): Promise<void> {
+	try {
+		const { enqueueEmailSending } = await import("@/lib/queue/producers");
+		await enqueueEmailSending({ to, template, data });
+	} catch (error) {
+		log.error("Failed to enqueue email notification", {
+			template,
+			to,
+			error: error instanceof Error ? error.message : "Unknown error",
+		});
+	}
+}
+
 export async function processSicrediBillingJob(
 	job: Job<SicrediBillingJobData>,
 ): Promise<void> {
@@ -154,6 +171,27 @@ async function createPixCharge(
 		pixCopiaECola: !!pixResponse.pixCopiaECola,
 	});
 
+	// Send PIX charge created email
+	const userEmail = user?.email as string | undefined;
+	if (userEmail) {
+		const formattedAmount = new Intl.NumberFormat("pt-BR", {
+			style: "currency",
+			currency: "BRL",
+		}).format(amount);
+
+		await sendEmailNotification(userEmail, "pix-charge-created", {
+			userName: (user?.name as string) || "Usuário",
+			userId,
+			invoiceId,
+			amount: formattedAmount,
+			pixCopiaECola: pixResponse.pixCopiaECola || "",
+			expiresAt: new Date(
+				Date.now() + 24 * 60 * 60 * 1000,
+			).toLocaleString("pt-BR"),
+			dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/faturamento`,
+		});
+	}
+
 	// Schedule status check after 5 minutes
 	const { enqueueSicrediBilling } = await import("@/lib/queue/producers");
 	await enqueueSicrediBilling(
@@ -231,6 +269,27 @@ async function createBoletoCharge(
 		amount,
 	});
 
+	// Send boleto charge created email
+	const userEmail = user?.email as string | undefined;
+	if (userEmail) {
+		const formattedAmount = new Intl.NumberFormat("pt-BR", {
+			style: "currency",
+			currency: "BRL",
+		}).format(amount);
+
+		await sendEmailNotification(userEmail, "boleto-charge-created", {
+			userName: (user?.name as string) || "Usuário",
+			userId,
+			invoiceId,
+			amount: formattedAmount,
+			linhaDigitavel: boletoResponse.linhaDigitavel || "",
+			codigoBarras: boletoResponse.codigoBarras || "",
+			pixCopiaECola: boletoResponse.qrCode || "",
+			dueDate: new Date(dueDate).toLocaleDateString("pt-BR"),
+			dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/faturamento`,
+		});
+	}
+
 	// Schedule status check after 5 minutes
 	const { enqueueSicrediBilling } = await import("@/lib/queue/producers");
 	await enqueueSicrediBilling(
@@ -247,6 +306,7 @@ async function checkChargeStatus(
 	const txid = charge.txid as string | null;
 	const chargeType = charge.type as string;
 	const invoiceId = charge.invoiceId as string | null;
+	const userId = charge.userId as string | null;
 
 	log.info("Checking charge status", { chargeId, txid, type: chargeType });
 
@@ -269,6 +329,11 @@ async function checkChargeStatus(
 				chargeId,
 				txid,
 			});
+
+			// Send payment confirmation email
+			if (userId && invoiceId) {
+				await sendPaymentConfirmationEmail(userId, invoiceId, db);
+			}
 			return;
 		}
 
@@ -299,6 +364,11 @@ async function checkChargeStatus(
 				txid,
 				situacao: rawSituacao,
 			});
+
+			// Send payment confirmation email
+			if (userId && invoiceId) {
+				await sendPaymentConfirmationEmail(userId, invoiceId, db);
+			}
 			return;
 		}
 
@@ -334,4 +404,32 @@ async function checkChargeStatus(
 			{ delay: 5 * 60 * 1000 },
 		);
 	}
+}
+
+async function sendPaymentConfirmationEmail(
+	userId: string,
+	invoiceId: string,
+	db: DbClient,
+): Promise<void> {
+	const invoice = await db.invoice.findUnique({
+		where: { id: invoiceId },
+		include: { user: { select: { email: true, name: true } } },
+	});
+
+	if (!invoice?.user?.email) return;
+
+	const amount = new Intl.NumberFormat("pt-BR", {
+		style: "currency",
+		currency: "BRL",
+	}).format(Number(invoice.amount));
+
+	await sendEmailNotification(invoice.user.email, "invoice", {
+		userName: invoice.user.name || "Usuário",
+		userId,
+		invoiceId,
+		amount,
+		paidAt: new Date().toLocaleDateString("pt-BR"),
+		paymentMethod: invoice.paymentMethod || "sicredi",
+		dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/faturamento`,
+	});
 }

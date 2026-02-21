@@ -19,11 +19,21 @@ export const auth = betterAuth({
 		enabled: true,
 		requireEmailVerification: false,
 
-		sendResetPassword: async () => {
-			// TODO: Send via SMTP email service
+		sendResetPassword: async ({ user, url }) => {
+			const { sendTemplateEmail } = await import("@/lib/email");
+			await sendTemplateEmail(user.email, "magic-link", {
+				userName: user.name || "Usuário",
+				resetUrl: url,
+				subject: "Redefinição de senha — Zé da API Manager",
+			});
 		},
-		sendVerificationEmail: async () => {
-			// TODO: Send via SMTP email service
+		sendVerificationEmail: async ({ user, url }) => {
+			const { sendTemplateEmail } = await import("@/lib/email");
+			await sendTemplateEmail(user.email, "magic-link", {
+				userName: user.name || "Usuário",
+				verifyUrl: url,
+				subject: "Verifique seu e-mail — Zé da API Manager",
+			});
 		},
 	},
 
@@ -52,6 +62,16 @@ export const auth = betterAuth({
 			enabled: process.env.WAITLIST_ENABLED !== "false",
 			requireInviteCode:
 				process.env.WAITLIST_REQUIRE_APPROVAL !== "false",
+			sendInviteEmail: async ({ email, inviteCode }) => {
+				const { sendTemplateEmail } = await import("@/lib/email");
+				const signUpUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/cadastro`;
+				await sendTemplateEmail(email, "waitlist-approved", {
+					userName: email.split("@")[0] || "Usuário",
+					inviteCode,
+					signUpUrl,
+					subject: "Sua conta foi aprovada! — Zé da API Manager",
+				});
+			},
 		}),
 		nextCookies(),
 	],

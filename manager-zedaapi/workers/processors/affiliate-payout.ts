@@ -7,6 +7,23 @@ type DbClient = typeof dbClient;
 
 const log = createLogger("processor:affiliate-payout");
 
+async function sendEmailNotification(
+	to: string,
+	template: string,
+	data: Record<string, unknown>,
+): Promise<void> {
+	try {
+		const { enqueueEmailSending } = await import("@/lib/queue/producers");
+		await enqueueEmailSending({ to, template, data });
+	} catch (error) {
+		log.error("Failed to enqueue email notification", {
+			template,
+			to,
+			error: error instanceof Error ? error.message : "Unknown error",
+		});
+	}
+}
+
 export async function processAffiliatePayoutJob(
 	job: Job<AffiliatePayoutJobData>,
 ): Promise<void> {
@@ -69,6 +86,26 @@ export async function processAffiliatePayoutJob(
 			payoutId: payout.id,
 			error: error instanceof Error ? error.message : "Unknown error",
 		});
+
+		// Send payout failed email
+		const affiliateUser = affiliate.user as
+			| Record<string, unknown>
+			| undefined;
+		const userEmail = affiliateUser?.email as string | undefined;
+		if (userEmail) {
+			const formattedAmount = new Intl.NumberFormat("pt-BR", {
+				style: "currency",
+				currency: "BRL",
+			}).format(amount);
+
+			await sendEmailNotification(userEmail, "payout-failed", {
+				userName: (affiliateUser?.name as string) || "Afiliado",
+				userId: affiliateUser?.id as string,
+				amount: formattedAmount,
+				method,
+				dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/afiliados`,
+			});
+		}
 
 		throw error;
 	}

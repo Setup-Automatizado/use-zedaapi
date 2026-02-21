@@ -3,9 +3,29 @@ import { constructWebhookEvent } from "@/lib/stripe";
 import { db } from "@/lib/db";
 import { handleStripePayment } from "@/server/services/billing-service";
 import { syncSubscription } from "@/server/services/stripe-service";
+import { createLogger } from "@/lib/logger";
 import type Stripe from "stripe";
 
+const log = createLogger("webhook:stripe");
+
 export const dynamic = "force-dynamic";
+
+async function sendEmailNotification(
+	to: string,
+	template: string,
+	data: Record<string, unknown>,
+): Promise<void> {
+	try {
+		const { enqueueEmailSending } = await import("@/lib/queue/producers");
+		await enqueueEmailSending({ to, template, data });
+	} catch (error) {
+		log.error("Failed to enqueue email notification", {
+			template,
+			to,
+			error: error instanceof Error ? error.message : "Unknown error",
+		});
+	}
+}
 
 export async function POST(request: NextRequest) {
 	const body = await request.text();
@@ -23,7 +43,9 @@ export async function POST(request: NextRequest) {
 	try {
 		event = await constructWebhookEvent(body, signature);
 	} catch (err) {
-		console.error("[stripe-webhook] Signature verification failed:", err);
+		log.error("Signature verification failed", {
+			error: err instanceof Error ? err.message : String(err),
+		});
 		return NextResponse.json(
 			{ error: "Webhook signature verification failed" },
 			{ status: 400 },
@@ -67,9 +89,7 @@ export async function POST(request: NextRequest) {
 
 			case "checkout.session.expired": {
 				const session = event.data.object as Stripe.Checkout.Session;
-				console.log(
-					`[stripe-webhook] Checkout session expired: ${session.id}`,
-				);
+				log.info("Checkout session expired", { sessionId: session.id });
 				break;
 			}
 
@@ -121,19 +141,19 @@ export async function POST(request: NextRequest) {
 			// === Connect ===
 			case "account.updated": {
 				const account = event.data.object as Stripe.Account;
-				console.log(`[stripe-webhook] Account updated: ${account.id}`);
+				log.info("Account updated", { accountId: account.id });
 				break;
 			}
 
 			case "transfer.created":
 			case "transfer.updated":
 			case "transfer.reversed": {
-				console.log(`[stripe-webhook] Transfer event: ${event.type}`);
+				log.info("Transfer event", { eventType: event.type });
 				break;
 			}
 
 			default:
-				console.log(`[stripe-webhook] Unhandled event: ${event.type}`);
+				log.info("Unhandled event", { eventType: event.type });
 		}
 
 		// Mark event as processed
@@ -144,7 +164,9 @@ export async function POST(request: NextRequest) {
 
 		return NextResponse.json({ received: true });
 	} catch (err) {
-		console.error("[stripe-webhook] Handler error:", err);
+		log.error("Handler error", {
+			error: err instanceof Error ? err.message : String(err),
+		});
 
 		await db.stripeWebhookEvent.update({
 			where: { stripeEventId: event.id },
@@ -166,7 +188,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 	const planId = session.metadata?.planId;
 
 	if (!userId || !planId) {
-		console.error("[stripe-webhook] Missing metadata in checkout session");
+		log.error("Missing metadata in checkout session");
 		return;
 	}
 
@@ -176,7 +198,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 			: session.subscription?.id;
 
 	if (!stripeSubscriptionId) {
-		console.error("[stripe-webhook] No subscription in checkout session");
+		log.error("No subscription in checkout session");
 		return;
 	}
 
@@ -195,26 +217,50 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 				planId,
 			},
 		});
-		return;
+	} else {
+		// Create new subscription
+		const now = new Date();
+		const periodEnd = new Date(now);
+		periodEnd.setMonth(periodEnd.getMonth() + 1);
+
+		await db.subscription.create({
+			data: {
+				userId,
+				planId,
+				stripeSubscriptionId,
+				stripeStatus: "active",
+				paymentMethod: "stripe",
+				status: "active",
+				currentPeriodStart: now,
+				currentPeriodEnd: periodEnd,
+			},
+		});
 	}
 
-	// Create new subscription
-	const now = new Date();
-	const periodEnd = new Date(now);
-	periodEnd.setMonth(periodEnd.getMonth() + 1);
-
-	await db.subscription.create({
-		data: {
-			userId,
-			planId,
-			stripeSubscriptionId,
-			stripeStatus: "active",
-			paymentMethod: "stripe",
-			status: "active",
-			currentPeriodStart: now,
-			currentPeriodEnd: periodEnd,
-		},
+	// Send subscription confirmation email
+	const user = await db.user.findUnique({
+		where: { id: userId },
+		select: { email: true, name: true },
 	});
+	const plan = await db.plan.findUnique({
+		where: { id: planId },
+		select: { name: true, price: true },
+	});
+
+	if (user?.email) {
+		const price = new Intl.NumberFormat("pt-BR", {
+			style: "currency",
+			currency: "BRL",
+		}).format(Number(plan?.price || 0));
+
+		await sendEmailNotification(user.email, "subscription-upgraded", {
+			userName: user.name || "Usuário",
+			userId,
+			planName: plan?.name || "Plano",
+			price,
+			dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/painel`,
+		});
+	}
 }
 
 async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
@@ -263,12 +309,45 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
 			currentPeriodEnd: periodEnd,
 		},
 	});
+
+	// Send subscription created email
+	const user = await db.user.findUnique({
+		where: { id: userId },
+		select: { email: true, name: true },
+	});
+	const plan = await db.plan.findUnique({
+		where: { id: planId },
+		select: { name: true, price: true, maxInstances: true },
+	});
+
+	if (user?.email) {
+		const price = new Intl.NumberFormat("pt-BR", {
+			style: "currency",
+			currency: "BRL",
+		}).format(Number(plan?.price || 0));
+
+		await sendEmailNotification(user.email, "subscription-upgraded", {
+			userName: user.name || "Usuário",
+			userId,
+			planName: plan?.name || "Plano",
+			price,
+			maxInstances: plan?.maxInstances || 1,
+			nextBillingDate: periodEnd.toLocaleDateString("pt-BR"),
+			dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/painel`,
+		});
+	}
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 	const localSub = await db.subscription.findUnique({
 		where: { stripeSubscriptionId: subscription.id },
-		select: { id: true, instances: { select: { id: true } } },
+		select: {
+			id: true,
+			userId: true,
+			instances: { select: { id: true } },
+			user: { select: { email: true, name: true } },
+			plan: { select: { name: true } },
+		},
 	});
 
 	if (!localSub) return;
@@ -282,10 +361,23 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 		},
 	});
 
-	// TODO: Optionally disconnect/deactivate instances via ZedaAPI
-	// for (const instance of localSub.instances) {
-	//   await deactivateInstance(instance.id);
-	// }
+	// Send cancellation email
+	if (localSub.user?.email) {
+		await sendEmailNotification(
+			localSub.user.email,
+			"subscription-change",
+			{
+				userName: localSub.user.name || "Usuário",
+				userId: localSub.userId,
+				action: "cancel",
+				oldPlan: localSub.plan?.name || "Plano",
+				newPlan: "",
+				effectiveDate: new Date().toLocaleDateString("pt-BR"),
+				newPrice: "R$ 0,00",
+				dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/assinaturas`,
+			},
+		);
+	}
 }
 
 async function handleInvoicePaid(invoice: Stripe.Invoice) {
@@ -311,8 +403,38 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
 	// Sync subscription state
 	await syncSubscription(subscriptionId);
 
-	// TODO: Queue NFSe emission via BullMQ
-	// await nfseQueue.add('emit-nfse', { invoiceId: invoice.id });
+	// Queue NFS-e emission
+	const localInvoice = await db.invoice.findUnique({
+		where: { stripeInvoiceId: invoice.id },
+		include: { user: { select: { email: true, name: true } } },
+	});
+
+	if (localInvoice) {
+		const { enqueueNfseIssuance } = await import("@/lib/queue/producers");
+		await enqueueNfseIssuance({
+			invoiceId: localInvoice.id,
+			action: "emit",
+		});
+
+		// Send invoice paid email
+		if (localInvoice.user?.email) {
+			const amount = new Intl.NumberFormat("pt-BR", {
+				style: "currency",
+				currency: "BRL",
+			}).format(Number(localInvoice.amount));
+
+			await sendEmailNotification(localInvoice.user.email, "invoice", {
+				userName: localInvoice.user.name || "Usuário",
+				userId: localInvoice.userId,
+				invoiceId: localInvoice.id,
+				amount,
+				paidAt: new Date().toLocaleDateString("pt-BR"),
+				paymentMethod: "stripe",
+				pdfUrl: invoice.hosted_invoice_url || "",
+				dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/faturamento`,
+			});
+		}
+	}
 }
 
 async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
@@ -333,13 +455,73 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
 		},
 	});
 
-	// TODO: Send payment failed notification
+	// Send payment failed notification
+	if (invoice.id) {
+		const localInvoice = await db.invoice.findUnique({
+			where: { stripeInvoiceId: invoice.id },
+			include: { user: { select: { email: true, name: true } } },
+		});
+
+		if (localInvoice?.user?.email) {
+			const amount = new Intl.NumberFormat("pt-BR", {
+				style: "currency",
+				currency: "BRL",
+			}).format(Number(localInvoice.amount));
+
+			await sendEmailNotification(
+				localInvoice.user.email,
+				"payment-failed",
+				{
+					userName: localInvoice.user.name || "Usuário",
+					userId: localInvoice.userId,
+					invoiceId: localInvoice.id,
+					amount,
+					dueDate:
+						localInvoice.dueDate?.toLocaleDateString("pt-BR") || "",
+					retryUrl: `${process.env.NEXT_PUBLIC_APP_URL}/faturamento`,
+				},
+			);
+		}
+	}
 }
 
 async function handleChargeRefunded(charge: Stripe.Charge) {
-	console.log(
-		`[stripe-webhook] Charge refunded: ${charge.id}, amount: ${charge.amount_refunded}`,
-	);
+	log.info("Charge refunded", {
+		chargeId: charge.id,
+		amountRefunded: charge.amount_refunded,
+	});
 
-	// TODO: Handle refund logic (reverse commission, update invoice status)
+	// Send refund notification
+	if (charge.amount_refunded && charge.invoice) {
+		const stripeInvoiceId =
+			typeof charge.invoice === "string"
+				? charge.invoice
+				: charge.invoice.id;
+
+		const localInvoice = await db.invoice.findUnique({
+			where: { stripeInvoiceId },
+			include: {
+				user: { select: { email: true, name: true, id: true } },
+			},
+		});
+
+		if (localInvoice?.user?.email) {
+			const amount = new Intl.NumberFormat("pt-BR", {
+				style: "currency",
+				currency: "BRL",
+			}).format(charge.amount_refunded / 100);
+
+			await sendEmailNotification(
+				localInvoice.user.email,
+				"charge-refunded",
+				{
+					userName: localInvoice.user.name || "Usuário",
+					userId: localInvoice.user.id,
+					amount,
+					chargeId: charge.id,
+					dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/faturamento`,
+				},
+			);
+		}
+	}
 }

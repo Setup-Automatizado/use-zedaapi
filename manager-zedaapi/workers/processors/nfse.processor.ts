@@ -4,6 +4,23 @@ import { createLogger } from "@/lib/queue/logger";
 
 const log = createLogger("processor:nfse");
 
+async function sendEmailNotification(
+	to: string,
+	template: string,
+	data: Record<string, unknown>,
+): Promise<void> {
+	try {
+		const { enqueueEmailSending } = await import("@/lib/queue/producers");
+		await enqueueEmailSending({ to, template, data });
+	} catch (error) {
+		log.error("Failed to enqueue email notification", {
+			template,
+			to,
+			error: error instanceof Error ? error.message : "Unknown error",
+		});
+	}
+}
+
 /**
  * Process NFS-e jobs -- emit, cancel, or query status.
  * Delegates to the NFS-e service layer.
@@ -56,6 +73,27 @@ export async function processNfseJob(
 						chaveAcesso: result.chaveAcesso ?? "?",
 						numero: result.numero ?? "?",
 					});
+
+					// Send NFS-e issued email to user
+					if (invoice.user?.email) {
+						const amount = new Intl.NumberFormat("pt-BR", {
+							style: "currency",
+							currency: "BRL",
+						}).format(Number(invoice.amount));
+
+						await sendEmailNotification(
+							invoice.user.email,
+							"nfse-issued",
+							{
+								userName: invoice.user.name || "Usuário",
+								userId: invoice.userId,
+								nfseNumber: result.numero ?? "",
+								amount,
+								pdfUrl: invoice.nfsePdfUrl || "",
+								dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/faturamento`,
+							},
+						);
+					}
 				} else {
 					log.error("NFS-e emission failed", {
 						invoiceId,
@@ -77,6 +115,22 @@ export async function processNfseJob(
 					where: { id: invoiceId },
 					data: { nfseStatus: "error", nfseError: msg },
 				});
+
+				// Notify admin about NFS-e error
+				const adminEmail = process.env.ADMIN_EMAIL;
+				if (adminEmail) {
+					await sendEmailNotification(
+						adminEmail,
+						"admin-nfse-error",
+						{
+							invoiceId,
+							error: msg,
+							userName: invoice.user?.name || "Desconhecido",
+							userEmail: invoice.user?.email || "",
+							dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/admin/faturas`,
+						},
+					);
+				}
 				throw error;
 			}
 			break;

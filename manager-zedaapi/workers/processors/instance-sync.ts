@@ -7,6 +7,23 @@ type DbClient = typeof dbClient;
 
 const log = createLogger("processor:instance-sync");
 
+async function sendEmailNotification(
+	to: string,
+	template: string,
+	data: Record<string, unknown>,
+): Promise<void> {
+	try {
+		const { enqueueEmailSending } = await import("@/lib/queue/producers");
+		await enqueueEmailSending({ to, template, data });
+	} catch (error) {
+		log.error("Failed to enqueue email notification", {
+			template,
+			to,
+			error: error instanceof Error ? error.message : "Unknown error",
+		});
+	}
+}
+
 export async function processInstanceSyncJob(
 	job: Job<InstanceSyncJobData>,
 ): Promise<void> {
@@ -146,6 +163,34 @@ async function fetchAndUpdateStatus(
 				from: instance.status,
 				to: newStatus,
 			});
+
+			// Send notification when instance disconnects
+			if (
+				newStatus === "disconnected" &&
+				instance.status === "connected"
+			) {
+				const fullInstance = await db.instance.findUnique({
+					where: { id: instance.id },
+					include: {
+						user: { select: { email: true, name: true } },
+					},
+				});
+
+				if (fullInstance?.user?.email) {
+					await sendEmailNotification(
+						fullInstance.user.email,
+						"instance-connected",
+						{
+							userName: fullInstance.user.name || "Usuário",
+							userId: fullInstance.userId,
+							instanceName: fullInstance.name,
+							phone: fullInstance.phone || "",
+							status: "disconnected",
+							reconnectUrl: `${process.env.NEXT_PUBLIC_APP_URL}/instancias`,
+						},
+					);
+				}
+			}
 		} else {
 			log.debug("Instance status unchanged", {
 				instanceId: instance.id,

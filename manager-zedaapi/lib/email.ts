@@ -67,6 +67,7 @@ export async function sendTemplateEmail(
 		string,
 		() => Promise<{ default: React.FC<Record<string, unknown>> }>
 	> = {
+		// Existing templates
 		welcome: () => import("@/emails/templates/welcome"),
 		invoice: () => import("@/emails/templates/invoice"),
 		"subscription-change": () =>
@@ -75,6 +76,79 @@ export async function sendTemplateEmail(
 		"payment-failed": () => import("@/emails/templates/payment-failed"),
 		"waitlist-approved": () =>
 			import("@/emails/templates/waitlist-approved"),
+
+		// Auth & Security
+		"magic-link": () => import("@/emails/templates/magic-link"),
+		"two-factor-enabled": () =>
+			import("@/emails/templates/two-factor-enabled"),
+		"two-factor-code": () => import("@/emails/templates/two-factor-code"),
+		"password-changed": () => import("@/emails/templates/password-changed"),
+		"email-changed": () => import("@/emails/templates/email-changed"),
+		"login-new-device": () => import("@/emails/templates/login-new-device"),
+		"account-deactivated": () =>
+			import("@/emails/templates/account-deactivated"),
+
+		// Subscription Lifecycle
+		"subscription-renewed": () =>
+			import("@/emails/templates/subscription-renewed"),
+		"subscription-upgraded": () =>
+			import("@/emails/templates/subscription-upgraded"),
+		"subscription-downgraded": () =>
+			import("@/emails/templates/subscription-downgraded"),
+		"subscription-resumed": () =>
+			import("@/emails/templates/subscription-resumed"),
+		"trial-started": () => import("@/emails/templates/trial-started"),
+		"trial-ending": () => import("@/emails/templates/trial-ending"),
+
+		// Payment & Billing
+		"charge-refunded": () => import("@/emails/templates/charge-refunded"),
+		"pix-charge-created": () =>
+			import("@/emails/templates/pix-charge-created"),
+		"boleto-charge-created": () =>
+			import("@/emails/templates/boleto-charge-created"),
+		"pix-expired": () => import("@/emails/templates/pix-expired"),
+		"invoice-created": () => import("@/emails/templates/invoice-created"),
+		"upcoming-renewal": () => import("@/emails/templates/upcoming-renewal"),
+		"payment-method-updated": () =>
+			import("@/emails/templates/payment-method-updated"),
+
+		// Instance Management
+		"instance-created": () => import("@/emails/templates/instance-created"),
+		"instance-connected": () =>
+			import("@/emails/templates/instance-connected"),
+		"instance-deleted": () => import("@/emails/templates/instance-deleted"),
+
+		// Affiliate System
+		"affiliate-registered": () =>
+			import("@/emails/templates/affiliate-registered"),
+		"commission-earned": () =>
+			import("@/emails/templates/commission-earned"),
+		"referral-converted": () =>
+			import("@/emails/templates/referral-converted"),
+		"payout-failed": () => import("@/emails/templates/payout-failed"),
+
+		// Organization
+		"member-invited": () => import("@/emails/templates/member-invited"),
+		"member-joined": () => import("@/emails/templates/member-joined"),
+		"member-removed": () => import("@/emails/templates/member-removed"),
+
+		// API Keys
+		"api-key-created": () => import("@/emails/templates/api-key-created"),
+		"api-key-revoked": () => import("@/emails/templates/api-key-revoked"),
+
+		// Admin
+		"admin-new-user": () => import("@/emails/templates/admin-new-user"),
+		"admin-new-subscription": () =>
+			import("@/emails/templates/admin-new-subscription"),
+		"admin-nfse-error": () => import("@/emails/templates/admin-nfse-error"),
+
+		// System
+		"data-deletion-requested": () =>
+			import("@/emails/templates/data-deletion-requested"),
+		"contact-form-received": () =>
+			import("@/emails/templates/contact-form-received"),
+		"maintenance-scheduled": () =>
+			import("@/emails/templates/maintenance-scheduled"),
 	};
 
 	const loader = templates[templateSlug];

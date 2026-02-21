@@ -3,6 +3,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { handleSicrediPayment } from "@/server/services/billing-service";
 import { parseSicrediAmount } from "@/lib/services/sicredi/utils";
+import { createLogger } from "@/lib/logger";
+
+const log = createLogger("webhook:sicredi");
 
 export const dynamic = "force-dynamic";
 
@@ -32,9 +35,7 @@ interface SicrediWebhookBody {
 export async function POST(request: NextRequest) {
 	// Webhook secret validation
 	if (!WEBHOOK_SECRET) {
-		console.error(
-			"[sicredi-webhook] SICREDI_WEBHOOK_SECRET not configured",
-		);
+		log.error("SICREDI_WEBHOOK_SECRET not configured");
 		return NextResponse.json(
 			{ error: "Webhook not configured" },
 			{ status: 503 },
@@ -51,7 +52,7 @@ export async function POST(request: NextRequest) {
 			Buffer.from(WEBHOOK_SECRET),
 		);
 	if (!isValid) {
-		console.warn("[sicredi-webhook] Invalid webhook secret");
+		log.warn("Invalid webhook secret");
 		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 	}
 
@@ -116,9 +117,7 @@ export async function POST(request: NextRequest) {
 								});
 
 							if (boletoMatch) {
-								console.log(
-									`[sicredi-webhook] Boleto hibrido fallback match: txid=${txid} -> chargeId=${boletoMatch.id}`,
-								);
+								log.info("Boleto hibrido fallback match", { txid, chargeId: boletoMatch.id });
 
 								await tx.sicrediCharge.update({
 									where: { id: boletoMatch.id },
@@ -133,7 +132,7 @@ export async function POST(request: NextRequest) {
 							}
 						}
 
-						console.warn(`[sicredi-webhook] Unknown txid: ${txid}`);
+						log.warn("Unknown txid", { txid });
 						return "unknown_txid";
 					}
 
@@ -153,9 +152,7 @@ export async function POST(request: NextRequest) {
 					);
 
 					if (paidCents > 0 && paidCents !== expectedCents) {
-						console.error(
-							`[sicredi-webhook] Amount mismatch for txid=${txid}: expected=${expectedCents}, received=${paidCents}`,
-						);
+						log.error("Amount mismatch", { txid, expectedCents, receivedCents: paidCents });
 
 						// Revert status
 						await tx.sicrediCharge.update({
@@ -195,10 +192,7 @@ export async function POST(request: NextRequest) {
 
 			results.push({ txid, status: result });
 		} catch (error) {
-			console.error(
-				`[sicredi-webhook] Error processing txid=${txid}:`,
-				error,
-			);
+			log.error("Error processing PIX payment", { txid, error: error instanceof Error ? error.message : String(error) });
 			results.push({ txid, status: "error" });
 		}
 	}

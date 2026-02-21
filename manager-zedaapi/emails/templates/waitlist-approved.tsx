@@ -14,12 +14,18 @@ import {
 interface WaitlistApprovedEmailProps {
 	userName?: string;
 	signUpUrl?: string;
+	inviteCode?: string;
 }
 
 export default function WaitlistApprovedEmail({
 	userName = "Usuário",
 	signUpUrl = "https://zedaapi.com/cadastro",
+	inviteCode,
 }: WaitlistApprovedEmailProps) {
+	const signUpWithCode = inviteCode
+		? `${signUpUrl}?invite=${encodeURIComponent(inviteCode)}`
+		: signUpUrl;
+
 	return (
 		<Html>
 			<Head />
@@ -36,8 +42,20 @@ export default function WaitlistApprovedEmail({
 						conta e começar a gerenciar suas instâncias WhatsApp.
 					</Text>
 
+					{inviteCode && (
+						<Section style={inviteCodeSection}>
+							<Text style={inviteCodeLabel}>
+								Seu código de convite:
+							</Text>
+							<Text style={inviteCodeValue}>{inviteCode}</Text>
+							<Text style={inviteCodeHint}>
+								Use este código ao criar sua conta
+							</Text>
+						</Section>
+					)}
+
 					<Section style={ctaSection}>
-						<Link href={signUpUrl} style={ctaButton}>
+						<Link href={signUpWithCode} style={ctaButton}>
 							Criar Minha Conta
 						</Link>
 					</Section>
@@ -137,6 +155,39 @@ const feature = {
 	lineHeight: "26px",
 	margin: "0",
 	paddingLeft: "8px",
+};
+
+const inviteCodeSection = {
+	backgroundColor: "#eff6ff",
+	borderRadius: "8px",
+	padding: "20px 24px",
+	margin: "24px 0",
+	border: "1px solid #bfdbfe",
+	textAlign: "center" as const,
+};
+
+const inviteCodeLabel = {
+	color: "#1e40af",
+	fontSize: "13px",
+	fontWeight: "500" as const,
+	margin: "0 0 8px",
+	textTransform: "uppercase" as const,
+	letterSpacing: "0.5px",
+};
+
+const inviteCodeValue = {
+	color: "#1e3a8a",
+	fontSize: "24px",
+	fontWeight: "700" as const,
+	fontFamily: "monospace",
+	margin: "0 0 8px",
+	letterSpacing: "2px",
+};
+
+const inviteCodeHint = {
+	color: "#3b82f6",
+	fontSize: "12px",
+	margin: "0",
 };
 
 const hr = {

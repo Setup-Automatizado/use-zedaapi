@@ -523,9 +523,21 @@ export async function approveWaitlist(entryId: string): Promise<ActionResult> {
 	try {
 		await requireAdmin();
 
-		await db.waitlist.update({
+		// Look up the entry to get the email
+		const entry = await db.waitlist.findUnique({
 			where: { id: entryId },
-			data: { status: "approved", approvedAt: new Date() },
+			select: { email: true, name: true },
+		});
+
+		if (!entry) {
+			return { success: false, error: "Entrada não encontrada" };
+		}
+
+		// Use the Better Auth waitlist plugin API to approve
+		// This generates an invite code and triggers sendInviteEmail callback
+		const { auth } = await import("@/lib/auth");
+		await auth.api.approveEntry({
+			body: { email: entry.email },
 		});
 
 		revalidatePath("/admin/lista-de-espera");
@@ -533,7 +545,10 @@ export async function approveWaitlist(entryId: string): Promise<ActionResult> {
 	} catch (error) {
 		if (error instanceof Error && error.message === "NEXT_REDIRECT")
 			throw error;
-		return { success: false, error: "Failed to approve waitlist entry" };
+		return {
+			success: false,
+			error: "Falha ao aprovar entrada da waitlist",
+		};
 	}
 }
 
@@ -541,9 +556,20 @@ export async function rejectWaitlist(entryId: string): Promise<ActionResult> {
 	try {
 		await requireAdmin();
 
-		await db.waitlist.update({
+		// Look up the entry to get the email
+		const entry = await db.waitlist.findUnique({
 			where: { id: entryId },
-			data: { status: "rejected" },
+			select: { email: true },
+		});
+
+		if (!entry) {
+			return { success: false, error: "Entrada não encontrada" };
+		}
+
+		// Use the Better Auth waitlist plugin API to reject
+		const { auth } = await import("@/lib/auth");
+		await auth.api.rejectEntry({
+			body: { email: entry.email },
 		});
 
 		revalidatePath("/admin/lista-de-espera");
@@ -551,7 +577,10 @@ export async function rejectWaitlist(entryId: string): Promise<ActionResult> {
 	} catch (error) {
 		if (error instanceof Error && error.message === "NEXT_REDIRECT")
 			throw error;
-		return { success: false, error: "Failed to reject waitlist entry" };
+		return {
+			success: false,
+			error: "Falha ao rejeitar entrada da waitlist",
+		};
 	}
 }
 
