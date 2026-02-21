@@ -1,19 +1,19 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
 import {
-	MailIcon,
-	PhoneIcon,
-	HeadphonesIcon,
-	GithubIcon,
-	LinkedinIcon,
-	TwitterIcon,
-	ArrowUpRightIcon,
-	MapPinIcon,
-	ShieldCheckIcon,
 	ArrowRightIcon,
+	ArrowUpRightIcon,
+	GithubIcon,
+	HeadphonesIcon,
+	LinkedinIcon,
+	MailIcon,
+	MapPinIcon,
+	PhoneIcon,
+	ShieldCheckIcon,
+	TwitterIcon,
 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 // ── Link data ──────────────────────────
@@ -39,7 +39,11 @@ const productLinks: FooterLink[] = [
 		href: "https://api.zedaapi.com/docs",
 		external: true,
 	},
-	{ label: "Status", href: "/status" },
+	{
+		label: "Status",
+		href: "https://status.zedaapi.com",
+		external: true,
+	},
 ];
 
 const resourceLinks: FooterLink[] = [
