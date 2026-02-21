@@ -172,3 +172,43 @@ export type ApiKey = Prisma.ApiKeyModel
  * 
  */
 export type SicrediWebhookEvent = Prisma.SicrediWebhookEventModel
+/**
+ * Model BlogPost
+ * 
+ */
+export type BlogPost = Prisma.BlogPostModel
+/**
+ * Model BlogCategory
+ * 
+ */
+export type BlogCategory = Prisma.BlogCategoryModel
+/**
+ * Model BlogTag
+ * 
+ */
+export type BlogTag = Prisma.BlogTagModel
+/**
+ * Model BlogPostTag
+ * 
+ */
+export type BlogPostTag = Prisma.BlogPostTagModel
+/**
+ * Model BlogMedia
+ * 
+ */
+export type BlogMedia = Prisma.BlogMediaModel
+/**
+ * Model SupportCategory
+ * 
+ */
+export type SupportCategory = Prisma.SupportCategoryModel
+/**
+ * Model SupportArticle
+ * 
+ */
+export type SupportArticle = Prisma.SupportArticleModel
+/**
+ * Model GlossaryTerm
+ * 
+ */
+export type GlossaryTerm = Prisma.GlossaryTermModel

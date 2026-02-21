@@ -81,7 +81,15 @@ export const ModelName = {
   FeatureFlag: 'FeatureFlag',
   StripeWebhookEvent: 'StripeWebhookEvent',
   ApiKey: 'ApiKey',
-  SicrediWebhookEvent: 'SicrediWebhookEvent'
+  SicrediWebhookEvent: 'SicrediWebhookEvent',
+  BlogPost: 'BlogPost',
+  BlogCategory: 'BlogCategory',
+  BlogTag: 'BlogTag',
+  BlogPostTag: 'BlogPostTag',
+  BlogMedia: 'BlogMedia',
+  SupportCategory: 'SupportCategory',
+  SupportArticle: 'SupportArticle',
+  GlossaryTerm: 'GlossaryTerm'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -613,6 +621,128 @@ export const SicrediWebhookEventScalarFieldEnum = {
 } as const
 
 export type SicrediWebhookEventScalarFieldEnum = (typeof SicrediWebhookEventScalarFieldEnum)[keyof typeof SicrediWebhookEventScalarFieldEnum]
+
+
+export const BlogPostScalarFieldEnum = {
+  id: 'id',
+  slug: 'slug',
+  title: 'title',
+  excerpt: 'excerpt',
+  content: 'content',
+  coverImageUrl: 'coverImageUrl',
+  status: 'status',
+  authorId: 'authorId',
+  categoryId: 'categoryId',
+  seoTitle: 'seoTitle',
+  seoDescription: 'seoDescription',
+  seoKeywords: 'seoKeywords',
+  publishedAt: 'publishedAt',
+  viewCount: 'viewCount',
+  readingTimeMin: 'readingTimeMin',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BlogPostScalarFieldEnum = (typeof BlogPostScalarFieldEnum)[keyof typeof BlogPostScalarFieldEnum]
+
+
+export const BlogCategoryScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  slug: 'slug',
+  description: 'description',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BlogCategoryScalarFieldEnum = (typeof BlogCategoryScalarFieldEnum)[keyof typeof BlogCategoryScalarFieldEnum]
+
+
+export const BlogTagScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  slug: 'slug',
+  createdAt: 'createdAt'
+} as const
+
+export type BlogTagScalarFieldEnum = (typeof BlogTagScalarFieldEnum)[keyof typeof BlogTagScalarFieldEnum]
+
+
+export const BlogPostTagScalarFieldEnum = {
+  id: 'id',
+  postId: 'postId',
+  tagId: 'tagId'
+} as const
+
+export type BlogPostTagScalarFieldEnum = (typeof BlogPostTagScalarFieldEnum)[keyof typeof BlogPostTagScalarFieldEnum]
+
+
+export const BlogMediaScalarFieldEnum = {
+  id: 'id',
+  url: 'url',
+  s3Key: 's3Key',
+  type: 'type',
+  filename: 'filename',
+  mimeType: 'mimeType',
+  sizeBytes: 'sizeBytes',
+  alt: 'alt',
+  caption: 'caption',
+  postId: 'postId',
+  createdAt: 'createdAt'
+} as const
+
+export type BlogMediaScalarFieldEnum = (typeof BlogMediaScalarFieldEnum)[keyof typeof BlogMediaScalarFieldEnum]
+
+
+export const SupportCategoryScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  slug: 'slug',
+  description: 'description',
+  icon: 'icon',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SupportCategoryScalarFieldEnum = (typeof SupportCategoryScalarFieldEnum)[keyof typeof SupportCategoryScalarFieldEnum]
+
+
+export const SupportArticleScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  slug: 'slug',
+  content: 'content',
+  excerpt: 'excerpt',
+  categoryId: 'categoryId',
+  status: 'status',
+  sortOrder: 'sortOrder',
+  viewCount: 'viewCount',
+  seoTitle: 'seoTitle',
+  seoDescription: 'seoDescription',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SupportArticleScalarFieldEnum = (typeof SupportArticleScalarFieldEnum)[keyof typeof SupportArticleScalarFieldEnum]
+
+
+export const GlossaryTermScalarFieldEnum = {
+  id: 'id',
+  term: 'term',
+  slug: 'slug',
+  definition: 'definition',
+  content: 'content',
+  status: 'status',
+  seoTitle: 'seoTitle',
+  seoDescription: 'seoDescription',
+  relatedSlugs: 'relatedSlugs',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type GlossaryTermScalarFieldEnum = (typeof GlossaryTermScalarFieldEnum)[keyof typeof GlossaryTermScalarFieldEnum]
 
 
 export const SortOrder = {

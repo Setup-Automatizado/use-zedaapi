@@ -54,6 +54,7 @@ model User {
   activityLogs           ActivityLog[]
   apiKeys                ApiKey[]
   sicrediCharges         SicrediCharge[]
+  blogPosts              BlogPost[]
 
   @@map("user")
 }
@@ -632,4 +633,159 @@ model SicrediWebhookEvent {
 
   @@index([txid])
   @@map("sicredi_webhook_events")
+}
+
+// =============================================================================
+// Blog
+// =============================================================================
+
+model BlogPost {
+  id              String    @id @default(cuid())
+  slug            String    @unique
+  title           String
+  excerpt         String?
+  content         String
+  coverImageUrl   String?
+  status          String    @default("draft") // draft, published, archived
+  authorId        String
+  author          User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  categoryId      String?
+  category        BlogCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  seoTitle        String?
+  seoDescription  String?
+  seoKeywords     String?
+  publishedAt     DateTime?
+  viewCount       Int       @default(0)
+  readingTimeMin  Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  tags  BlogPostTag[]
+  media BlogMedia[]
+
+  @@index([slug])
+  @@index([status, publishedAt])
+  @@index([categoryId])
+  @@index([authorId])
+  @@map("blog_posts")
+}
+
+model BlogCategory {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  posts BlogPost[]
+
+  @@index([slug])
+  @@map("blog_categories")
+}
+
+model BlogTag {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+
+  posts BlogPostTag[]
+
+  @@index([slug])
+  @@map("blog_tags")
+}
+
+model BlogPostTag {
+  id     String   @id @default(cuid())
+  postId String
+  post   BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tagId  String
+  tag    BlogTag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, tagId])
+  @@map("blog_post_tags")
+}
+
+model BlogMedia {
+  id        String    @id @default(cuid())
+  url       String
+  s3Key     String?
+  type      String    // image, video, audio, youtube
+  filename  String?
+  mimeType  String?
+  sizeBytes Int?
+  alt       String?
+  caption   String?
+  postId    String?
+  post      BlogPost? @relation(fields: [postId], references: [id], onDelete: SetNull)
+  createdAt DateTime  @default(now())
+
+  @@index([postId])
+  @@map("blog_media")
+}
+
+// =============================================================================
+// Support / Help Center
+// =============================================================================
+
+model SupportCategory {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  icon        String?
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  articles SupportArticle[]
+
+  @@index([slug])
+  @@map("support_categories")
+}
+
+model SupportArticle {
+  id             String          @id @default(cuid())
+  title          String
+  slug           String          @unique
+  content        String
+  excerpt        String?
+  categoryId     String
+  category       SupportCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  status         String          @default("draft") // draft, published
+  sortOrder      Int             @default(0)
+  viewCount      Int             @default(0)
+  seoTitle       String?
+  seoDescription String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([slug])
+  @@index([categoryId])
+  @@index([status])
+  @@map("support_articles")
+}
+
+// =============================================================================
+// Glossary
+// =============================================================================
+
+model GlossaryTerm {
+  id             String   @id @default(cuid())
+  term           String
+  slug           String   @unique
+  definition     String   // short definition
+  content        String?  // rich/expanded content
+  status         String   @default("draft") // draft, published
+  seoTitle       String?
+  seoDescription String?
+  relatedSlugs   Json?    // string[] of related term slugs
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([slug])
+  @@index([status])
+  @@map("glossary_terms")
 }
