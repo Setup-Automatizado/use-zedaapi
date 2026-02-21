@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.11.1](https://github.com/Setup-Automatizado/zedaapi/compare/v3.11.0...v3.11.1) (2026-02-21)
+
+### Bug Fixes
+
+* status/ footer ([38c5dbe](https://github.com/Setup-Automatizado/zedaapi/commit/38c5dbe8ddc2d749af49ceca6b1f9478247e3ad2))
+
 ## [3.11.0](https://github.com/Setup-Automatizado/zedaapi/compare/v3.10.2...v3.11.0) (2026-02-21)
 
 ### Features
