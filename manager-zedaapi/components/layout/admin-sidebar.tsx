@@ -19,6 +19,9 @@ import {
 	ArrowLeft,
 	Layers,
 	UserCheck,
+	BookOpen,
+	HelpCircle,
+	BookA,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -38,6 +41,12 @@ const mainNav = [
 	{ name: "Planos", href: "/admin/plans", icon: Layers },
 	{ name: "Instancias", href: "/admin/instances", icon: Smartphone },
 	{ name: "Faturas", href: "/admin/invoices", icon: Receipt },
+];
+
+const contentNav = [
+	{ name: "Blog", href: "/admin/blog", icon: BookOpen },
+	{ name: "Suporte", href: "/admin/suporte", icon: HelpCircle },
+	{ name: "Glossario", href: "/admin/glossario", icon: BookA },
 ];
 
 const systemNav = [
@@ -156,6 +165,14 @@ export function AdminSidebar() {
 			{/* Navigation */}
 			<nav className="flex-1 overflow-y-auto p-3">
 				<div className="space-y-1">{mainNav.map(renderNavItem)}</div>
+
+				{!isCollapsed && (
+					<p className="mb-2 mt-6 px-3 text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
+						Conteudo
+					</p>
+				)}
+				{isCollapsed && <Separator className="my-3" />}
+				<div className="space-y-1">{contentNav.map(renderNavItem)}</div>
 
 				{!isCollapsed && (
 					<p className="mb-2 mt-6 px-3 text-[11px] font-medium uppercase tracking-widest text-muted-foreground">
