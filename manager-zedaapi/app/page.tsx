@@ -11,6 +11,7 @@ import { Pricing } from "@/components/landing/pricing";
 import { Integrations } from "@/components/landing/integrations";
 import { FAQ } from "@/components/landing/faq";
 import { CTA } from "@/components/landing/cta";
+import { ScrollToTop } from "@/components/shared/scroll-to-top";
 
 export const metadata: Metadata = {
 	title: "Zé da API - API de WhatsApp para Empresas | Envie Mensagens via API REST",
@@ -63,9 +64,80 @@ export const metadata: Metadata = {
 	},
 };
 
+const organizationJsonLd = {
+	"@context": "https://schema.org",
+	"@type": "Organization",
+	name: "Zé da API",
+	alternateName: "ZedaAPI",
+	url: "https://zedaapi.com",
+	logo: "https://zedaapi.com/logo.png",
+	description:
+		"API profissional de WhatsApp para empresas e desenvolvedores brasileiros.",
+	contactPoint: [
+		{
+			"@type": "ContactPoint",
+			telephone: "+55-21-97153-2700",
+			contactType: "customer service",
+			availableLanguage: "Portuguese",
+			areaServed: "BR",
+		},
+		{
+			"@type": "ContactPoint",
+			email: "suporte@zedaapi.com",
+			contactType: "technical support",
+			availableLanguage: "Portuguese",
+		},
+	],
+	address: {
+		"@type": "PostalAddress",
+		addressLocality: "Rio de Janeiro",
+		addressRegion: "RJ",
+		addressCountry: "BR",
+	},
+	sameAs: [],
+};
+
+const softwareJsonLd = {
+	"@context": "https://schema.org",
+	"@type": "SoftwareApplication",
+	name: "Zé da API - WhatsApp API",
+	applicationCategory: "BusinessApplication",
+	operatingSystem: "Web",
+	description:
+		"API REST completa para integracao com WhatsApp. Envie mensagens, gerencie instancias e automatize comunicacao.",
+	url: "https://zedaapi.com",
+	offers: {
+		"@type": "AggregateOffer",
+		priceCurrency: "BRL",
+		lowPrice: "97",
+		highPrice: "997",
+		offerCount: "4",
+	},
+	featureList: [
+		"API REST para WhatsApp",
+		"Webhooks em tempo real",
+		"Multi-instancia",
+		"Envio de texto, imagem, video, audio, documentos",
+		"99.9% uptime SLA",
+		"Preco fixo sem taxa por mensagem",
+	],
+};
+
 export default function LandingPage() {
 	return (
 		<div className="flex min-h-svh flex-col">
+			<script
+				type="application/ld+json"
+				dangerouslySetInnerHTML={{
+					__html: JSON.stringify(organizationJsonLd),
+				}}
+			/>
+			<script
+				type="application/ld+json"
+				dangerouslySetInnerHTML={{
+					__html: JSON.stringify(softwareJsonLd),
+				}}
+			/>
 			<Header />
 			<main className="flex-1">
 				<Hero />
@@ -78,6 +150,7 @@ export default function LandingPage() {
 				<CTA />
 			</main>
 			<Footer />
+			<ScrollToTop />
 			<WhatsAppWidget />
 			<CookieConsent />
 		</div>

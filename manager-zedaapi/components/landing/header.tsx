@@ -15,6 +15,7 @@ import {
 	SheetClose,
 } from "@/components/ui/sheet";
 import { MenuIcon, ArrowRightIcon } from "lucide-react";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
 
 const navLinks = [
 	{ label: "Recursos", href: "#recursos" },
@@ -152,7 +153,8 @@ export function Header() {
 				</nav>
 
 				{/* Desktop CTA */}
-				<div className="hidden items-center gap-3 md:flex">
+				<div className="hidden items-center gap-2 md:flex">
+					<ThemeToggle />
 					<Button
 						variant="ghost"
 						size="sm"
@@ -205,7 +207,13 @@ export function Header() {
 								</div>
 							</SheetTitle>
 						</SheetHeader>
-						<nav className="flex flex-col gap-1 px-6 pt-4">
+						<div className="flex items-center justify-between px-6 pt-4">
+							<span className="text-xs font-medium uppercase tracking-wider text-muted-foreground/60">
+								Menu
+							</span>
+							<ThemeToggle />
+						</div>
+						<nav className="flex flex-col gap-1 px-6 pt-2">
 							{navLinks.map((link) => (
 								<SheetClose key={link.href} asChild>
 									<a

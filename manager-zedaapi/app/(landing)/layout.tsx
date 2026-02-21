@@ -3,6 +3,7 @@ import { Header } from "@/components/landing/header";
 import { Footer } from "@/components/landing/footer";
 import { WhatsAppWidget } from "@/components/landing/whatsapp-widget";
 import { CookieConsent } from "@/components/landing/cookie-consent";
+import { ScrollToTop } from "@/components/shared/scroll-to-top";
 
 export const metadata: Metadata = {
 	title: "Zé da API - WhatsApp API para Desenvolvedores",
@@ -35,6 +36,7 @@ export default function LandingLayout({
 			<Header />
 			<main className="flex-1">{children}</main>
 			<Footer />
+			<ScrollToTop />
 			<WhatsAppWidget />
 			<CookieConsent />
 		</div>

@@ -90,7 +90,7 @@ const stats = [
 		value: 99,
 		suffix: ".9%",
 		label: "Uptime Comprovado",
-		description: "SLA por contrato, p99 < 200ms",
+		description: "Monitoramento 24/7",
 	},
 	{
 		value: 5000,
