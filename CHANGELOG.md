@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.9.2](https://github.com/Setup-Automatizado/zedaapi/compare/v3.9.1...v3.9.2) (2026-02-21)
+
+### Bug Fixes
+
+* **manager:** lazy-init Stripe client to fix Docker build failure ([d7cd161](https://github.com/Setup-Automatizado/zedaapi/commit/d7cd16141522bb6e8d0eccd25dd7100706a02a40))
+
 ## [3.9.1](https://github.com/Setup-Automatizado/zedaapi/compare/v3.9.0...v3.9.1) (2026-02-20)
 
 ### Bug Fixes
