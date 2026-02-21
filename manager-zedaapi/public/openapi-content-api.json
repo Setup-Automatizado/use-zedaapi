@@ -1,0 +1,3106 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Zé da API - Content Management API",
+    "description": "API completa para gerenciamento externo de conteudo da plataforma Zé da API.\n\nTodos os endpoints requerem autenticacao via header `Authorization: Bearer <CONTENT_API_KEY>`.\n\nA chave e definida na variavel de ambiente `CONTENT_API_KEY` do servidor.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Zé da API",
+      "url": "https://zedaapi.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Desenvolvimento local"
+    },
+    {
+      "url": "https://app.zedaapi.com",
+      "description": "Producao"
+    }
+  ],
+  "security": [
+    {
+      "BearerAuth": []
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "CONTENT_API_KEY definida no .env do servidor. Minimo 32 caracteres."
+      }
+    },
+    "schemas": {
+      "BlogPost": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "cuid",
+            "example": "cm5abc123def456"
+          },
+          "title": {
+            "type": "string",
+            "example": "Como integrar WhatsApp API em 5 minutos"
+          },
+          "slug": {
+            "type": "string",
+            "example": "como-integrar-whatsapp-api-em-5-minutos"
+          },
+          "content": {
+            "type": "string",
+            "example": "<h2>Introducao</h2><p>Neste artigo voce vai aprender...</p>"
+          },
+          "excerpt": {
+            "type": "string",
+            "nullable": true,
+            "example": "Aprenda a integrar a WhatsApp API rapidamente com a Zé da API."
+          },
+          "coverImageUrl": {
+            "type": "string",
+            "nullable": true,
+            "example": "https://s3.example.com/blog/2026/02/cover.webp"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "published",
+              "archived"
+            ],
+            "example": "draft"
+          },
+          "seoTitle": {
+            "type": "string",
+            "nullable": true,
+            "example": "Integrar WhatsApp API - Guia Completo 2026"
+          },
+          "seoDescription": {
+            "type": "string",
+            "nullable": true,
+            "example": "Guia passo a passo para integrar a WhatsApp Business API usando a Zé da API."
+          },
+          "seoKeywords": {
+            "type": "string",
+            "nullable": true,
+            "example": "whatsapp api, integracao, tutorial, webhook"
+          },
+          "readingTimeMin": {
+            "type": "integer",
+            "example": 5
+          },
+          "viewCount": {
+            "type": "integer",
+            "example": 142
+          },
+          "publishedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "authorId": {
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "string",
+            "nullable": true
+          },
+          "category": {
+            "$ref": "#/components/schemas/BlogCategory"
+          },
+          "author": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string",
+                "example": "Admin"
+              }
+            }
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "tagId": {
+                  "type": "string"
+                },
+                "postId": {
+                  "type": "string"
+                },
+                "tag": {
+                  "$ref": "#/components/schemas/BlogTag"
+                }
+              }
+            }
+          }
+        }
+      },
+      "BlogCategory": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "cuid",
+            "example": "cm5cat001"
+          },
+          "name": {
+            "type": "string",
+            "example": "Tutoriais"
+          },
+          "slug": {
+            "type": "string",
+            "example": "tutoriais"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "example": "Guias passo a passo para usar a plataforma"
+          },
+          "sortOrder": {
+            "type": "integer",
+            "example": 0
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "_count": {
+            "type": "object",
+            "properties": {
+              "posts": {
+                "type": "integer",
+                "example": 12
+              }
+            }
+          }
+        }
+      },
+      "BlogTag": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "cuid",
+            "example": "cm5tag001"
+          },
+          "name": {
+            "type": "string",
+            "example": "WhatsApp"
+          },
+          "slug": {
+            "type": "string",
+            "example": "whatsapp"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "_count": {
+            "type": "object",
+            "properties": {
+              "posts": {
+                "type": "integer",
+                "example": 8
+              }
+            }
+          }
+        }
+      },
+      "SupportArticle": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "cuid",
+            "example": "cm5art001"
+          },
+          "title": {
+            "type": "string",
+            "example": "Como criar minha primeira instancia"
+          },
+          "slug": {
+            "type": "string",
+            "example": "como-criar-minha-primeira-instancia"
+          },
+          "content": {
+            "type": "string",
+            "example": "<p>Para criar sua primeira instancia, acesse o painel...</p>"
+          },
+          "excerpt": {
+            "type": "string",
+            "nullable": true,
+            "example": "Passo a passo para criar e configurar sua instancia WhatsApp."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "published"
+            ],
+            "example": "published"
+          },
+          "sortOrder": {
+            "type": "integer",
+            "example": 1
+          },
+          "viewCount": {
+            "type": "integer",
+            "example": 89
+          },
+          "seoTitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "seoDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "categoryId": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "category": {
+            "$ref": "#/components/schemas/SupportCategory"
+          }
+        }
+      },
+      "SupportCategory": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "cuid",
+            "example": "cm5scat001"
+          },
+          "name": {
+            "type": "string",
+            "example": "Primeiros Passos"
+          },
+          "slug": {
+            "type": "string",
+            "example": "primeiros-passos"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "example": "Artigos para quem esta comecando na plataforma"
+          },
+          "icon": {
+            "type": "string",
+            "nullable": true,
+            "example": "book-open"
+          },
+          "sortOrder": {
+            "type": "integer",
+            "example": 0
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "_count": {
+            "type": "object",
+            "properties": {
+              "articles": {
+                "type": "integer",
+                "example": 5
+              }
+            }
+          }
+        }
+      },
+      "GlossaryTerm": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "cuid",
+            "example": "cm5gls001"
+          },
+          "term": {
+            "type": "string",
+            "example": "Webhook"
+          },
+          "slug": {
+            "type": "string",
+            "example": "webhook"
+          },
+          "definition": {
+            "type": "string",
+            "example": "Mecanismo de notificacao HTTP que envia dados em tempo real quando um evento ocorre."
+          },
+          "content": {
+            "type": "string",
+            "nullable": true,
+            "example": "<p>Webhooks sao callbacks HTTP que permitem...</p>"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "published"
+            ],
+            "example": "published"
+          },
+          "seoTitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "seoDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "relatedSlugs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "api",
+              "http",
+              "callback"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "UploadResult": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "example": "https://s3.example.com/blog/2026/02/uuid-imagem.webp"
+          },
+          "s3Key": {
+            "type": "string",
+            "nullable": true,
+            "example": "blog/2026/02/uuid-imagem.webp"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "image",
+              "video",
+              "audio",
+              "youtube",
+              "url"
+            ],
+            "example": "image"
+          },
+          "mimeType": {
+            "type": "string",
+            "nullable": true,
+            "example": "image/webp"
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "nullable": true,
+            "example": 245760
+          },
+          "filename": {
+            "type": "string",
+            "nullable": true,
+            "example": "imagem.webp"
+          }
+        }
+      },
+      "PaginatedResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {}
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "page": {
+                "type": "integer",
+                "example": 1
+              },
+              "pageSize": {
+                "type": "integer",
+                "example": 20
+              },
+              "total": {
+                "type": "integer",
+                "example": 47
+              },
+              "totalPages": {
+                "type": "integer",
+                "example": 3
+              }
+            }
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "example": "Mensagem de erro"
+          }
+        }
+      }
+    },
+    "responses": {
+      "Unauthorized": {
+        "description": "API key ausente ou invalida",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "examples": {
+              "missing": {
+                "summary": "Header ausente",
+                "value": {
+                  "error": "Missing Authorization header"
+                }
+              },
+              "invalid": {
+                "summary": "Chave invalida",
+                "value": {
+                  "error": "Invalid API key"
+                }
+              }
+            }
+          }
+        }
+      },
+      "NotConfigured": {
+        "description": "CONTENT_API_KEY nao configurada no servidor",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "Content API is not configured"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Recurso nao encontrado",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "Not found"
+            }
+          }
+        }
+      },
+      "Conflict": {
+        "description": "Conflito (slug duplicado)",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "error": "A post with this slug already exists"
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Blog Posts",
+      "description": "CRUD completo de posts do blog"
+    },
+    {
+      "name": "Blog Categories",
+      "description": "Gerenciamento de categorias do blog"
+    },
+    {
+      "name": "Blog Tags",
+      "description": "Gerenciamento de tags do blog"
+    },
+    {
+      "name": "Support Articles",
+      "description": "CRUD de artigos da central de suporte"
+    },
+    {
+      "name": "Support Categories",
+      "description": "Gerenciamento de categorias de suporte"
+    },
+    {
+      "name": "Glossary Terms",
+      "description": "CRUD de termos do glossario"
+    },
+    {
+      "name": "Upload",
+      "description": "Upload de midias (imagem, video, audio, YouTube, URL)"
+    }
+  ],
+  "paths": {
+    "/api/admin/content/blog/posts": {
+      "get": {
+        "tags": [
+          "Blog Posts"
+        ],
+        "summary": "Listar posts do blog",
+        "description": "Retorna lista paginada de posts com filtros opcionais por busca, categoria e status.",
+        "operationId": "listBlogPosts",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Numero da pagina (comeca em 1)",
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "minimum": 1
+            },
+            "example": 1
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Busca por titulo (case-insensitive)",
+            "schema": {
+              "type": "string"
+            },
+            "example": "whatsapp"
+          },
+          {
+            "name": "categoryId",
+            "in": "query",
+            "description": "Filtrar por ID da categoria",
+            "schema": {
+              "type": "string"
+            },
+            "example": "cm5cat001"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "description": "Filtrar por status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "draft",
+                "published",
+                "archived"
+              ]
+            },
+            "example": "published"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de posts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/BlogPost"
+                      }
+                    },
+                    "total": {
+                      "type": "integer",
+                      "example": 47
+                    },
+                    "page": {
+                      "type": "integer",
+                      "example": 1
+                    },
+                    "pageSize": {
+                      "type": "integer",
+                      "example": 20
+                    },
+                    "totalPages": {
+                      "type": "integer",
+                      "example": 3
+                    }
+                  }
+                },
+                "example": {
+                  "items": [
+                    {
+                      "id": "cm5abc123def456",
+                      "title": "Como integrar WhatsApp API em 5 minutos",
+                      "slug": "como-integrar-whatsapp-api-em-5-minutos",
+                      "content": "<h2>Introducao</h2><p>Neste artigo...</p>",
+                      "excerpt": "Aprenda a integrar rapidamente.",
+                      "coverImageUrl": "https://s3.example.com/blog/2026/02/cover.webp",
+                      "status": "published",
+                      "readingTimeMin": 5,
+                      "viewCount": 142,
+                      "publishedAt": "2026-02-15T10:00:00.000Z",
+                      "createdAt": "2026-02-15T09:30:00.000Z",
+                      "updatedAt": "2026-02-15T10:00:00.000Z",
+                      "category": {
+                        "id": "cm5cat001",
+                        "name": "Tutoriais",
+                        "slug": "tutoriais"
+                      },
+                      "author": {
+                        "id": "cm5usr001",
+                        "name": "Admin"
+                      },
+                      "tags": [
+                        {
+                          "tagId": "cm5tag001",
+                          "postId": "cm5abc123def456",
+                          "tag": {
+                            "id": "cm5tag001",
+                            "name": "WhatsApp",
+                            "slug": "whatsapp"
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "total": 47,
+                  "page": 1,
+                  "pageSize": 20,
+                  "totalPages": 3
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "503": {
+            "$ref": "#/components/responses/NotConfigured"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Blog Posts"
+        ],
+        "summary": "Criar post no blog",
+        "description": "Cria um novo post. O slug e gerado automaticamente a partir do titulo. O autor e atribuido ao primeiro admin do sistema. Tags sao vinculadas por ID.",
+        "operationId": "createBlogPost",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "title",
+                  "content"
+                ],
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "Titulo do post",
+                    "example": "Como usar webhooks na Zé da API"
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "Conteudo HTML do post",
+                    "example": "<h2>O que sao webhooks?</h2><p>Webhooks permitem receber notificacoes em tempo real...</p><h2>Configurando</h2><p>Acesse o painel e vá em Configuracoes > Webhooks...</p>"
+                  },
+                  "excerpt": {
+                    "type": "string",
+                    "description": "Resumo curto para listagens",
+                    "example": "Aprenda a configurar webhooks para receber mensagens em tempo real."
+                  },
+                  "coverImageUrl": {
+                    "type": "string",
+                    "description": "URL da imagem de capa (use /upload primeiro)",
+                    "example": "https://s3.example.com/blog/2026/02/uuid-cover.webp"
+                  },
+                  "categoryId": {
+                    "type": "string",
+                    "description": "ID da categoria",
+                    "example": "cm5cat001"
+                  },
+                  "tagIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "IDs das tags a vincular",
+                    "example": [
+                      "cm5tag001",
+                      "cm5tag002"
+                    ]
+                  },
+                  "seoTitle": {
+                    "type": "string",
+                    "description": "Titulo SEO (meta title)",
+                    "example": "Webhooks WhatsApp API - Guia Completo | Zé da API"
+                  },
+                  "seoDescription": {
+                    "type": "string",
+                    "description": "Descricao SEO (meta description)",
+                    "example": "Guia completo sobre como configurar e usar webhooks na Zé da API para receber mensagens WhatsApp em tempo real."
+                  },
+                  "seoKeywords": {
+                    "type": "string",
+                    "description": "Palavras-chave SEO separadas por virgula",
+                    "example": "webhook, whatsapp api, notificacao, tempo real"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "draft",
+                      "published"
+                    ],
+                    "description": "Status inicial (default: draft)",
+                    "example": "draft"
+                  }
+                }
+              },
+              "examples": {
+                "rascunho": {
+                  "summary": "Criar como rascunho",
+                  "value": {
+                    "title": "Como usar webhooks na Zé da API",
+                    "content": "<h2>O que sao webhooks?</h2><p>Webhooks permitem receber notificacoes em tempo real quando uma mensagem chega no seu numero WhatsApp.</p><h2>Configurando</h2><p>1. Acesse o painel</p><p>2. Va em Configuracoes > Webhooks</p><p>3. Insira a URL do seu servidor</p>",
+                    "excerpt": "Aprenda a configurar webhooks para receber mensagens em tempo real.",
+                    "categoryId": "cm5cat001",
+                    "tagIds": [
+                      "cm5tag001",
+                      "cm5tag002"
+                    ],
+                    "seoTitle": "Webhooks WhatsApp API - Guia Completo | Zé da API",
+                    "seoDescription": "Guia completo sobre como configurar webhooks na Zé da API.",
+                    "seoKeywords": "webhook, whatsapp api, notificacao"
+                  }
+                },
+                "publicar-direto": {
+                  "summary": "Criar e publicar direto",
+                  "value": {
+                    "title": "Novidades da Zé da API - Fevereiro 2026",
+                    "content": "<h2>O que ha de novo</h2><p>Neste mes lancamos diversas melhorias...</p>",
+                    "excerpt": "Confira as novidades de fevereiro 2026.",
+                    "coverImageUrl": "https://s3.example.com/blog/2026/02/cover-novidades.webp",
+                    "categoryId": "cm5cat002",
+                    "status": "published",
+                    "seoTitle": "Novidades Fevereiro 2026 | Zé da API",
+                    "seoDescription": "Veja tudo que lancamos em fevereiro 2026 na Zé da API."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Post criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlogPost"
+                },
+                "example": {
+                  "id": "cm5newpost001",
+                  "title": "Como usar webhooks na Zé da API",
+                  "slug": "como-usar-webhooks-na-ze-da-api",
+                  "content": "<h2>O que sao webhooks?</h2><p>Webhooks permitem...</p>",
+                  "excerpt": "Aprenda a configurar webhooks para receber mensagens em tempo real.",
+                  "coverImageUrl": null,
+                  "status": "draft",
+                  "readingTimeMin": 3,
+                  "viewCount": 0,
+                  "publishedAt": null,
+                  "createdAt": "2026-02-21T12:00:00.000Z",
+                  "updatedAt": "2026-02-21T12:00:00.000Z",
+                  "category": {
+                    "id": "cm5cat001",
+                    "name": "Tutoriais",
+                    "slug": "tutoriais"
+                  },
+                  "tags": [
+                    {
+                      "tagId": "cm5tag001",
+                      "postId": "cm5newpost001",
+                      "tag": {
+                        "id": "cm5tag001",
+                        "name": "WhatsApp",
+                        "slug": "whatsapp"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Campos obrigatorios faltando",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "title and content are required"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "409": {
+            "description": "Slug duplicado",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "A post with this slug already exists"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/content/blog/posts/{id}": {
+      "get": {
+        "tags": [
+          "Blog Posts"
+        ],
+        "summary": "Obter post por ID",
+        "description": "Retorna um post com todas as relacoes (categoria, autor, tags, midias).",
+        "operationId": "getBlogPost",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "cm5abc123def456"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Post encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlogPost"
+                },
+                "example": {
+                  "id": "cm5abc123def456",
+                  "title": "Como integrar WhatsApp API em 5 minutos",
+                  "slug": "como-integrar-whatsapp-api-em-5-minutos",
+                  "content": "<h2>Introducao</h2><p>Neste artigo voce vai aprender como integrar a WhatsApp Business API usando a Ze da API em apenas 5 minutos.</p><h2>Pre-requisitos</h2><ul><li>Conta na Ze da API</li><li>Numero WhatsApp</li></ul><h2>Passo 1</h2><p>Acesse o painel e clique em Nova Instancia...</p>",
+                  "excerpt": "Aprenda a integrar a WhatsApp API rapidamente com a Ze da API.",
+                  "coverImageUrl": "https://s3.example.com/blog/2026/02/cover-whatsapp-api.webp",
+                  "status": "published",
+                  "seoTitle": "Integrar WhatsApp API - Guia Completo 2026",
+                  "seoDescription": "Guia passo a passo para integrar a WhatsApp Business API usando a Ze da API.",
+                  "seoKeywords": "whatsapp api, integracao, tutorial, webhook",
+                  "readingTimeMin": 5,
+                  "viewCount": 142,
+                  "publishedAt": "2026-02-15T10:00:00.000Z",
+                  "createdAt": "2026-02-15T09:30:00.000Z",
+                  "updatedAt": "2026-02-18T14:20:00.000Z",
+                  "authorId": "cm5usr001",
+                  "categoryId": "cm5cat001",
+                  "category": {
+                    "id": "cm5cat001",
+                    "name": "Tutoriais",
+                    "slug": "tutoriais",
+                    "description": "Guias passo a passo",
+                    "sortOrder": 0
+                  },
+                  "author": {
+                    "id": "cm5usr001",
+                    "name": "Admin"
+                  },
+                  "tags": [
+                    {
+                      "tagId": "cm5tag001",
+                      "postId": "cm5abc123def456",
+                      "tag": {
+                        "id": "cm5tag001",
+                        "name": "WhatsApp",
+                        "slug": "whatsapp"
+                      }
+                    },
+                    {
+                      "tagId": "cm5tag003",
+                      "postId": "cm5abc123def456",
+                      "tag": {
+                        "id": "cm5tag003",
+                        "name": "API",
+                        "slug": "api"
+                      }
+                    }
+                  ],
+                  "media": [
+                    {
+                      "id": "cm5med001",
+                      "postId": "cm5abc123def456",
+                      "url": "https://s3.example.com/blog/2026/02/screenshot1.png",
+                      "s3Key": "blog/2026/02/screenshot1.png",
+                      "type": "image",
+                      "mimeType": "image/png",
+                      "sizeBytes": 245760,
+                      "filename": "screenshot1.png"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Blog Posts"
+        ],
+        "summary": "Atualizar post",
+        "description": "Atualiza parcialmente um post. Apenas os campos enviados serao alterados. Se o titulo mudar, o slug e recalculado automaticamente. Tags sao substituidas (nao adicionadas).",
+        "operationId": "updateBlogPost",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "cm5abc123def456"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string"
+                  },
+                  "content": {
+                    "type": "string"
+                  },
+                  "excerpt": {
+                    "type": "string"
+                  },
+                  "coverImageUrl": {
+                    "type": "string"
+                  },
+                  "categoryId": {
+                    "type": "string"
+                  },
+                  "tagIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "seoTitle": {
+                    "type": "string"
+                  },
+                  "seoDescription": {
+                    "type": "string"
+                  },
+                  "seoKeywords": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "draft",
+                      "published",
+                      "archived"
+                    ]
+                  }
+                }
+              },
+              "examples": {
+                "atualizar-titulo": {
+                  "summary": "Atualizar apenas o titulo",
+                  "value": {
+                    "title": "Novo titulo do post atualizado"
+                  }
+                },
+                "atualizar-conteudo-e-seo": {
+                  "summary": "Atualizar conteudo e SEO",
+                  "value": {
+                    "content": "<h2>Conteudo atualizado</h2><p>Nova versao do artigo...</p>",
+                    "seoTitle": "Titulo SEO Atualizado | Zé da API",
+                    "seoDescription": "Descricao SEO atualizada para melhor ranking."
+                  }
+                },
+                "trocar-tags": {
+                  "summary": "Substituir todas as tags",
+                  "value": {
+                    "tagIds": [
+                      "cm5tag003",
+                      "cm5tag004",
+                      "cm5tag005"
+                    ]
+                  }
+                },
+                "atualizar-cover": {
+                  "summary": "Atualizar imagem de capa",
+                  "value": {
+                    "coverImageUrl": "https://s3.example.com/blog/2026/02/nova-cover.webp"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Post atualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlogPost"
+                },
+                "example": {
+                  "id": "cm5abc123def456",
+                  "title": "Novo titulo do post atualizado",
+                  "slug": "novo-titulo-do-post-atualizado",
+                  "content": "<h2>Conteudo atualizado</h2><p>Nova versao do artigo com melhorias...</p>",
+                  "excerpt": "Aprenda a integrar rapidamente.",
+                  "coverImageUrl": "https://s3.example.com/blog/2026/02/cover-whatsapp-api.webp",
+                  "status": "published",
+                  "seoTitle": "Titulo SEO Atualizado | Ze da API",
+                  "seoDescription": "Descricao SEO atualizada para melhor ranking.",
+                  "seoKeywords": "whatsapp api, integracao",
+                  "readingTimeMin": 4,
+                  "viewCount": 142,
+                  "publishedAt": "2026-02-15T10:00:00.000Z",
+                  "createdAt": "2026-02-15T09:30:00.000Z",
+                  "updatedAt": "2026-02-21T16:00:00.000Z",
+                  "category": {
+                    "id": "cm5cat001",
+                    "name": "Tutoriais",
+                    "slug": "tutoriais"
+                  },
+                  "author": {
+                    "id": "cm5usr001",
+                    "name": "Admin"
+                  },
+                  "tags": [
+                    {
+                      "tagId": "cm5tag003",
+                      "postId": "cm5abc123def456",
+                      "tag": {
+                        "id": "cm5tag003",
+                        "name": "API",
+                        "slug": "api"
+                      }
+                    },
+                    {
+                      "tagId": "cm5tag004",
+                      "postId": "cm5abc123def456",
+                      "tag": {
+                        "id": "cm5tag004",
+                        "name": "Tutorial",
+                        "slug": "tutorial"
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Blog Posts"
+        ],
+        "summary": "Excluir post",
+        "description": "Exclui permanentemente um post e suas relacoes (tags, midias).",
+        "operationId": "deleteBlogPost",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "cm5abc123def456"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Post excluido",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/api/admin/content/blog/posts/{id}/publish": {
+      "post": {
+        "tags": [
+          "Blog Posts"
+        ],
+        "summary": "Publicar post",
+        "description": "Altera o status do post para 'published' e define publishedAt como a data/hora atual. Retorna erro se ja estiver publicado.",
+        "operationId": "publishBlogPost",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "cm5abc123def456"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Post publicado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlogPost"
+                },
+                "example": {
+                  "id": "cm5abc123def456",
+                  "title": "Como usar webhooks na Zé da API",
+                  "slug": "como-usar-webhooks-na-ze-da-api",
+                  "status": "published",
+                  "publishedAt": "2026-02-21T14:30:00.000Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Post ja esta publicado",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Post is already published"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/api/admin/content/blog/posts/{id}/archive": {
+      "post": {
+        "tags": [
+          "Blog Posts"
+        ],
+        "summary": "Arquivar post",
+        "description": "Altera o status do post para 'archived'. Retorna erro se ja estiver arquivado.",
+        "operationId": "archiveBlogPost",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "cm5abc123def456"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Post arquivado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlogPost"
+                },
+                "example": {
+                  "id": "cm5abc123def456",
+                  "status": "archived"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Post ja esta arquivado",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Post is already archived"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/api/admin/content/blog/categories": {
+      "get": {
+        "tags": [
+          "Blog Categories"
+        ],
+        "summary": "Listar categorias do blog",
+        "description": "Retorna todas as categorias ordenadas por sortOrder, com contagem de posts.",
+        "operationId": "listBlogCategories",
+        "responses": {
+          "200": {
+            "description": "Lista de categorias",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BlogCategory"
+                  }
+                },
+                "example": [
+                  {
+                    "id": "cm5cat001",
+                    "name": "Tutoriais",
+                    "slug": "tutoriais",
+                    "description": "Guias passo a passo",
+                    "sortOrder": 0,
+                    "_count": {
+                      "posts": 12
+                    }
+                  },
+                  {
+                    "id": "cm5cat002",
+                    "name": "Novidades",
+                    "slug": "novidades",
+                    "description": "Lancamentos e updates",
+                    "sortOrder": 1,
+                    "_count": {
+                      "posts": 8
+                    }
+                  },
+                  {
+                    "id": "cm5cat003",
+                    "name": "Casos de Uso",
+                    "slug": "casos-de-uso",
+                    "description": null,
+                    "sortOrder": 2,
+                    "_count": {
+                      "posts": 5
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Blog Categories"
+        ],
+        "summary": "Criar categoria do blog",
+        "description": "Cria uma nova categoria. O slug e gerado automaticamente a partir do nome.",
+        "operationId": "createBlogCategory",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Integracoes"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Artigos sobre integracoes com sistemas externos"
+                  },
+                  "sortOrder": {
+                    "type": "integer",
+                    "example": 3
+                  }
+                }
+              },
+              "example": {
+                "name": "Integracoes",
+                "description": "Artigos sobre integracoes com sistemas externos",
+                "sortOrder": 3
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Categoria criada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlogCategory"
+                },
+                "example": {
+                  "id": "cm5cat004",
+                  "name": "Integracoes",
+                  "slug": "integracoes",
+                  "description": "Artigos sobre integracoes com sistemas externos",
+                  "sortOrder": 3,
+                  "_count": {
+                    "posts": 0
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Nome obrigatorio",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "name is required"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/api/admin/content/blog/categories/{id}": {
+      "patch": {
+        "tags": [
+          "Blog Categories"
+        ],
+        "summary": "Atualizar categoria do blog",
+        "description": "Atualiza parcialmente uma categoria. Se o nome mudar, o slug e recalculado.",
+        "operationId": "updateBlogCategory",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "cm5cat001"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "sortOrder": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "example": {
+                "name": "Tutoriais e Guias",
+                "sortOrder": 0
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Categoria atualizada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlogCategory"
+                },
+                "example": {
+                  "id": "cm5cat001",
+                  "name": "Tutoriais e Guias",
+                  "slug": "tutoriais-e-guias",
+                  "description": "Guias passo a passo para usar a plataforma",
+                  "sortOrder": 0,
+                  "createdAt": "2026-01-10T08:00:00.000Z",
+                  "updatedAt": "2026-02-21T16:00:00.000Z",
+                  "_count": {
+                    "posts": 12
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Blog Categories"
+        ],
+        "summary": "Excluir categoria do blog",
+        "description": "Exclui uma categoria. Falha se houver posts vinculados — mova ou exclua os posts primeiro.",
+        "operationId": "deleteBlogCategory",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "cm5cat001"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Categoria excluida",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "Categoria tem posts vinculados",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Cannot delete category with 12 post(s). Reassign or delete posts first."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/content/blog/tags": {
+      "get": {
+        "tags": [
+          "Blog Tags"
+        ],
+        "summary": "Listar tags do blog",
+        "description": "Retorna todas as tags ordenadas por nome, com contagem de posts.",
+        "operationId": "listBlogTags",
+        "responses": {
+          "200": {
+            "description": "Lista de tags",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BlogTag"
+                  }
+                },
+                "example": [
+                  {
+                    "id": "cm5tag001",
+                    "name": "WhatsApp",
+                    "slug": "whatsapp",
+                    "_count": {
+                      "posts": 15
+                    }
+                  },
+                  {
+                    "id": "cm5tag002",
+                    "name": "Webhook",
+                    "slug": "webhook",
+                    "_count": {
+                      "posts": 8
+                    }
+                  },
+                  {
+                    "id": "cm5tag003",
+                    "name": "API",
+                    "slug": "api",
+                    "_count": {
+                      "posts": 20
+                    }
+                  },
+                  {
+                    "id": "cm5tag004",
+                    "name": "Tutorial",
+                    "slug": "tutorial",
+                    "_count": {
+                      "posts": 10
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Blog Tags"
+        ],
+        "summary": "Criar tag do blog",
+        "description": "Cria uma nova tag. O slug e gerado automaticamente a partir do nome.",
+        "operationId": "createBlogTag",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Automacao"
+                  }
+                }
+              },
+              "example": {
+                "name": "Automacao"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Tag criada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlogTag"
+                },
+                "example": {
+                  "id": "cm5tag005",
+                  "name": "Automacao",
+                  "slug": "automacao",
+                  "_count": {
+                    "posts": 0
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Nome obrigatorio",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "name is required"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/api/admin/content/blog/tags/{id}": {
+      "delete": {
+        "tags": [
+          "Blog Tags"
+        ],
+        "summary": "Excluir tag do blog",
+        "description": "Exclui permanentemente uma tag. Os posts que usavam esta tag continuam existindo, apenas perdem a associacao.",
+        "operationId": "deleteBlogTag",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "cm5tag001"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tag excluida",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/api/admin/content/support/articles": {
+      "get": {
+        "tags": [
+          "Support Articles"
+        ],
+        "summary": "Listar artigos de suporte",
+        "description": "Retorna lista paginada de artigos de suporte com filtros opcionais.",
+        "operationId": "listSupportArticles",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "example": 1
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Busca por titulo",
+            "schema": {
+              "type": "string"
+            },
+            "example": "instancia"
+          },
+          {
+            "name": "categoryId",
+            "in": "query",
+            "description": "Filtrar por categoria",
+            "schema": {
+              "type": "string"
+            },
+            "example": "cm5scat001"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de artigos",
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": [
+                    {
+                      "id": "cm5art001",
+                      "title": "Como criar minha primeira instancia",
+                      "slug": "como-criar-minha-primeira-instancia",
+                      "content": "<p>Para criar sua primeira instancia...</p>",
+                      "excerpt": "Passo a passo para criar e configurar.",
+                      "status": "published",
+                      "sortOrder": 1,
+                      "viewCount": 89,
+                      "categoryId": "cm5scat001",
+                      "category": {
+                        "id": "cm5scat001",
+                        "name": "Primeiros Passos",
+                        "slug": "primeiros-passos"
+                      }
+                    }
+                  ],
+                  "pagination": {
+                    "page": 1,
+                    "pageSize": 20,
+                    "total": 15,
+                    "totalPages": 1
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Support Articles"
+        ],
+        "summary": "Criar artigo de suporte",
+        "description": "Cria um novo artigo de suporte. Requer titulo, conteudo e categoryId. O slug e gerado automaticamente.",
+        "operationId": "createSupportArticle",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "title",
+                  "content",
+                  "categoryId"
+                ],
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "example": "Como conectar meu numero WhatsApp"
+                  },
+                  "content": {
+                    "type": "string",
+                    "example": "<h2>Conectando seu numero</h2><p>1. Acesse o painel</p><p>2. Clique em 'Nova Instancia'</p><p>3. Escaneie o QR Code com seu WhatsApp</p>"
+                  },
+                  "excerpt": {
+                    "type": "string",
+                    "example": "Tutorial para conectar seu numero WhatsApp a plataforma."
+                  },
+                  "categoryId": {
+                    "type": "string",
+                    "example": "cm5scat001"
+                  },
+                  "seoTitle": {
+                    "type": "string",
+                    "example": "Conectar WhatsApp - Suporte Zé da API"
+                  },
+                  "seoDescription": {
+                    "type": "string",
+                    "example": "Aprenda a conectar seu numero WhatsApp na Zé da API em poucos passos."
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "draft",
+                      "published"
+                    ],
+                    "default": "draft",
+                    "example": "draft"
+                  },
+                  "sortOrder": {
+                    "type": "integer",
+                    "default": 0,
+                    "example": 2
+                  }
+                }
+              },
+              "example": {
+                "title": "Como conectar meu numero WhatsApp",
+                "content": "<h2>Conectando seu numero</h2><p>1. Acesse o painel</p><p>2. Clique em 'Nova Instancia'</p><p>3. Escaneie o QR Code com seu WhatsApp</p>",
+                "excerpt": "Tutorial para conectar seu numero WhatsApp a plataforma.",
+                "categoryId": "cm5scat001",
+                "status": "published",
+                "sortOrder": 2
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Artigo criado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportArticle"
+                },
+                "example": {
+                  "id": "cm5art002",
+                  "title": "Como conectar meu numero WhatsApp",
+                  "slug": "como-conectar-meu-numero-whatsapp",
+                  "content": "<h2>Conectando seu numero</h2><p>1. Acesse o painel</p><p>2. Clique em 'Nova Instancia'</p><p>3. Escaneie o QR Code com seu WhatsApp</p>",
+                  "excerpt": "Tutorial para conectar seu numero WhatsApp a plataforma.",
+                  "status": "published",
+                  "sortOrder": 2,
+                  "viewCount": 0,
+                  "seoTitle": "Conectar WhatsApp - Suporte Ze da API",
+                  "seoDescription": "Aprenda a conectar seu numero WhatsApp na Ze da API em poucos passos.",
+                  "categoryId": "cm5scat001",
+                  "createdAt": "2026-02-21T16:00:00.000Z",
+                  "updatedAt": "2026-02-21T16:00:00.000Z",
+                  "category": {
+                    "id": "cm5scat001",
+                    "name": "Primeiros Passos",
+                    "slug": "primeiros-passos",
+                    "icon": "book-open",
+                    "sortOrder": 0
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Campos obrigatorios faltando",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Missing required fields: title, content, categoryId"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/api/admin/content/support/articles/{id}": {
+      "get": {
+        "tags": [
+          "Support Articles"
+        ],
+        "summary": "Obter artigo de suporte por ID",
+        "operationId": "getSupportArticle",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "cm5art001"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Artigo encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportArticle"
+                },
+                "example": {
+                  "id": "cm5art001",
+                  "title": "Como criar minha primeira instancia",
+                  "slug": "como-criar-minha-primeira-instancia",
+                  "content": "<p>Para criar sua primeira instancia, acesse o painel e siga os passos abaixo:</p><ol><li>Faca login no dashboard</li><li>Clique em 'Nova Instancia'</li><li>Escolha seu plano</li><li>Escaneie o QR Code</li></ol><p>Pronto! Sua instancia estara ativa em segundos.</p>",
+                  "excerpt": "Passo a passo para criar e configurar sua instancia WhatsApp.",
+                  "status": "published",
+                  "sortOrder": 1,
+                  "viewCount": 89,
+                  "seoTitle": "Criar Instancia WhatsApp - Suporte Ze da API",
+                  "seoDescription": "Aprenda a criar sua primeira instancia WhatsApp na Ze da API.",
+                  "categoryId": "cm5scat001",
+                  "createdAt": "2026-01-20T10:00:00.000Z",
+                  "updatedAt": "2026-02-10T14:30:00.000Z",
+                  "category": {
+                    "id": "cm5scat001",
+                    "name": "Primeiros Passos",
+                    "slug": "primeiros-passos",
+                    "icon": "book-open",
+                    "sortOrder": 0
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Support Articles"
+        ],
+        "summary": "Atualizar artigo de suporte",
+        "description": "Atualiza parcialmente um artigo. Se o titulo mudar, o slug e recalculado.",
+        "operationId": "updateSupportArticle",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "cm5art001"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string"
+                  },
+                  "content": {
+                    "type": "string"
+                  },
+                  "excerpt": {
+                    "type": "string"
+                  },
+                  "categoryId": {
+                    "type": "string"
+                  },
+                  "seoTitle": {
+                    "type": "string"
+                  },
+                  "seoDescription": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "draft",
+                      "published"
+                    ]
+                  },
+                  "sortOrder": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "examples": {
+                "publicar": {
+                  "summary": "Publicar artigo rascunho",
+                  "value": {
+                    "status": "published"
+                  }
+                },
+                "atualizar-conteudo": {
+                  "summary": "Atualizar conteudo e titulo",
+                  "value": {
+                    "title": "Como conectar WhatsApp - Guia Atualizado",
+                    "content": "<h2>Novo guia</h2><p>Processo simplificado...</p>"
+                  }
+                },
+                "mover-categoria": {
+                  "summary": "Mover para outra categoria",
+                  "value": {
+                    "categoryId": "cm5scat002"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Artigo atualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportArticle"
+                },
+                "example": {
+                  "id": "cm5art001",
+                  "title": "Como conectar WhatsApp - Guia Atualizado",
+                  "slug": "como-conectar-whatsapp-guia-atualizado",
+                  "content": "<h2>Novo guia</h2><p>Processo simplificado para conectar seu WhatsApp...</p>",
+                  "excerpt": "Guia atualizado para conectar WhatsApp.",
+                  "status": "published",
+                  "sortOrder": 1,
+                  "viewCount": 89,
+                  "seoTitle": null,
+                  "seoDescription": null,
+                  "categoryId": "cm5scat001",
+                  "createdAt": "2026-01-20T10:00:00.000Z",
+                  "updatedAt": "2026-02-21T16:30:00.000Z",
+                  "category": {
+                    "id": "cm5scat001",
+                    "name": "Primeiros Passos",
+                    "slug": "primeiros-passos",
+                    "icon": "book-open",
+                    "sortOrder": 0
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Support Articles"
+        ],
+        "summary": "Excluir artigo de suporte",
+        "operationId": "deleteSupportArticle",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "cm5art001"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Artigo excluido",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/api/admin/content/support/categories": {
+      "get": {
+        "tags": [
+          "Support Categories"
+        ],
+        "summary": "Listar categorias de suporte",
+        "description": "Retorna todas as categorias de suporte com contagem de artigos.",
+        "operationId": "listSupportCategories",
+        "responses": {
+          "200": {
+            "description": "Lista de categorias",
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": [
+                    {
+                      "id": "cm5scat001",
+                      "name": "Primeiros Passos",
+                      "slug": "primeiros-passos",
+                      "description": "Para quem esta comecando",
+                      "icon": "book-open",
+                      "sortOrder": 0,
+                      "_count": {
+                        "articles": 5
+                      }
+                    },
+                    {
+                      "id": "cm5scat002",
+                      "name": "Configuracoes",
+                      "slug": "configuracoes",
+                      "description": "Ajustes e personalizacoes",
+                      "icon": "settings",
+                      "sortOrder": 1,
+                      "_count": {
+                        "articles": 8
+                      }
+                    },
+                    {
+                      "id": "cm5scat003",
+                      "name": "Cobranca",
+                      "slug": "cobranca",
+                      "description": "Planos, faturas e pagamentos",
+                      "icon": "credit-card",
+                      "sortOrder": 2,
+                      "_count": {
+                        "articles": 3
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Support Categories"
+        ],
+        "summary": "Criar categoria de suporte",
+        "description": "Cria uma nova categoria. Icones disponiveis: help-circle, book-open, settings, zap, credit-card, shield, message-square.",
+        "operationId": "createSupportCategory",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Seguranca"
+                  },
+                  "slug": {
+                    "type": "string",
+                    "description": "Slug customizado (opcional, auto-gerado se omitido)",
+                    "example": "seguranca"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Artigos sobre seguranca e privacidade"
+                  },
+                  "icon": {
+                    "type": "string",
+                    "enum": [
+                      "help-circle",
+                      "book-open",
+                      "settings",
+                      "zap",
+                      "credit-card",
+                      "shield",
+                      "message-square"
+                    ],
+                    "example": "shield"
+                  },
+                  "sortOrder": {
+                    "type": "integer",
+                    "example": 4
+                  }
+                }
+              },
+              "example": {
+                "name": "Seguranca",
+                "description": "Artigos sobre seguranca e privacidade",
+                "icon": "shield",
+                "sortOrder": 4
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Categoria criada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportCategory"
+                },
+                "example": {
+                  "id": "cm5scat004",
+                  "name": "Seguranca",
+                  "slug": "seguranca",
+                  "description": "Artigos sobre seguranca e privacidade",
+                  "icon": "shield",
+                  "sortOrder": 4,
+                  "createdAt": "2026-02-21T16:00:00.000Z",
+                  "updatedAt": "2026-02-21T16:00:00.000Z",
+                  "_count": {
+                    "articles": 0
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Nome obrigatorio",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Missing required field: name"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/api/admin/content/support/categories/{id}": {
+      "patch": {
+        "tags": [
+          "Support Categories"
+        ],
+        "summary": "Atualizar categoria de suporte",
+        "operationId": "updateSupportCategory",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "cm5scat001"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "slug": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "icon": {
+                    "type": "string"
+                  },
+                  "sortOrder": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "example": {
+                "name": "Primeiros Passos - Atualizado",
+                "icon": "zap",
+                "sortOrder": 0
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Categoria atualizada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportCategory"
+                },
+                "example": {
+                  "id": "cm5scat001",
+                  "name": "Primeiros Passos - Atualizado",
+                  "slug": "primeiros-passos-atualizado",
+                  "description": "Para quem esta comecando na plataforma",
+                  "icon": "zap",
+                  "sortOrder": 0,
+                  "createdAt": "2026-01-05T08:00:00.000Z",
+                  "updatedAt": "2026-02-21T16:30:00.000Z",
+                  "_count": {
+                    "articles": 5
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Support Categories"
+        ],
+        "summary": "Excluir categoria de suporte",
+        "description": "Exclui uma categoria. Falha se houver artigos vinculados.",
+        "operationId": "deleteSupportCategory",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "cm5scat001"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Categoria excluida",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Categoria tem artigos vinculados",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Cannot delete category with 5 article(s). Move or delete them first."
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/api/admin/content/glossary/terms": {
+      "get": {
+        "tags": [
+          "Glossary Terms"
+        ],
+        "summary": "Listar termos do glossario",
+        "description": "Retorna lista paginada de termos com filtros por busca e letra inicial.",
+        "operationId": "listGlossaryTerms",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "example": 1
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Busca por nome do termo",
+            "schema": {
+              "type": "string"
+            },
+            "example": "webhook"
+          },
+          {
+            "name": "letter",
+            "in": "query",
+            "description": "Filtrar por letra inicial (A-Z)",
+            "schema": {
+              "type": "string",
+              "maxLength": 1
+            },
+            "example": "W"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de termos",
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": [
+                    {
+                      "id": "cm5gls001",
+                      "term": "Webhook",
+                      "slug": "webhook",
+                      "definition": "Mecanismo de notificacao HTTP que envia dados em tempo real quando um evento ocorre.",
+                      "content": "<p>Webhooks sao callbacks HTTP que permitem...</p>",
+                      "status": "published",
+                      "relatedSlugs": [
+                        "api",
+                        "http",
+                        "callback"
+                      ]
+                    },
+                    {
+                      "id": "cm5gls002",
+                      "term": "WhatsApp Business API",
+                      "slug": "whatsapp-business-api",
+                      "definition": "Interface de programacao que permite empresas enviarem e receberem mensagens pelo WhatsApp.",
+                      "content": null,
+                      "status": "published",
+                      "relatedSlugs": [
+                        "webhook",
+                        "api"
+                      ]
+                    }
+                  ],
+                  "pagination": {
+                    "page": 1,
+                    "pageSize": 20,
+                    "total": 2,
+                    "totalPages": 1
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Glossary Terms"
+        ],
+        "summary": "Criar termo no glossario",
+        "description": "Cria um novo termo. O slug e gerado automaticamente. relatedSlugs aceita array de slugs de termos relacionados.",
+        "operationId": "createGlossaryTerm",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "term",
+                  "definition"
+                ],
+                "properties": {
+                  "term": {
+                    "type": "string",
+                    "example": "API Key"
+                  },
+                  "definition": {
+                    "type": "string",
+                    "example": "Chave de autenticacao unica que identifica e autoriza aplicacoes a acessar uma API."
+                  },
+                  "content": {
+                    "type": "string",
+                    "description": "Conteudo HTML expandido (opcional)",
+                    "example": "<h2>O que e uma API Key?</h2><p>Uma API Key (chave de API) e um identificador unico...</p><h2>Tipos de API Key</h2><p>Existem dois tipos principais...</p>"
+                  },
+                  "seoTitle": {
+                    "type": "string",
+                    "example": "API Key - O que e e como usar | Glossario Zé da API"
+                  },
+                  "seoDescription": {
+                    "type": "string",
+                    "example": "Entenda o que e uma API Key, como funciona e como usar na Zé da API."
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "draft",
+                      "published"
+                    ],
+                    "default": "draft",
+                    "example": "published"
+                  },
+                  "relatedSlugs": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Slugs de termos relacionados no glossario",
+                    "example": [
+                      "api",
+                      "webhook",
+                      "autenticacao"
+                    ]
+                  }
+                }
+              },
+              "examples": {
+                "termo-simples": {
+                  "summary": "Termo simples (so definicao)",
+                  "value": {
+                    "term": "QR Code",
+                    "definition": "Codigo bidimensional que pode ser escaneado para conectar rapidamente um dispositivo ao WhatsApp.",
+                    "status": "published",
+                    "relatedSlugs": [
+                      "whatsapp-business-api",
+                      "instancia"
+                    ]
+                  }
+                },
+                "termo-completo": {
+                  "summary": "Termo com conteudo expandido e SEO",
+                  "value": {
+                    "term": "API Key",
+                    "definition": "Chave de autenticacao unica que identifica e autoriza aplicacoes a acessar uma API.",
+                    "content": "<h2>O que e uma API Key?</h2><p>Uma API Key e um identificador unico usado para autenticar requisicoes a uma API. Ela funciona como uma senha que identifica sua aplicacao.</p><h2>Boas praticas</h2><ul><li>Nunca compartilhe sua API Key publicamente</li><li>Use variaveis de ambiente para armazenar</li><li>Rotacione as chaves periodicamente</li></ul>",
+                    "seoTitle": "API Key - O que e e como usar | Glossario Zé da API",
+                    "seoDescription": "Entenda o que e uma API Key, como funciona e as melhores praticas de seguranca.",
+                    "status": "published",
+                    "relatedSlugs": [
+                      "api",
+                      "webhook",
+                      "autenticacao"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Termo criado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlossaryTerm"
+                },
+                "example": {
+                  "id": "cm5gls003",
+                  "term": "API Key",
+                  "slug": "api-key",
+                  "definition": "Chave de autenticacao unica que identifica e autoriza aplicacoes a acessar uma API.",
+                  "content": "<h2>O que e uma API Key?</h2><p>...</p>",
+                  "status": "published",
+                  "relatedSlugs": [
+                    "api",
+                    "webhook",
+                    "autenticacao"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Campos obrigatorios faltando",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Missing required fields: term, definition"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      }
+    },
+    "/api/admin/content/glossary/terms/{id}": {
+      "get": {
+        "tags": [
+          "Glossary Terms"
+        ],
+        "summary": "Obter termo do glossario por ID",
+        "operationId": "getGlossaryTerm",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "cm5gls001"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Termo encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlossaryTerm"
+                },
+                "example": {
+                  "id": "cm5gls001",
+                  "term": "Webhook",
+                  "slug": "webhook",
+                  "definition": "Mecanismo de notificacao HTTP que envia dados em tempo real quando um evento ocorre.",
+                  "content": "<p>Webhooks sao callbacks HTTP que permitem que aplicacoes recebam notificacoes em tempo real. Quando um evento ocorre (por exemplo, uma mensagem WhatsApp recebida), o servidor envia automaticamente um POST HTTP para a URL configurada.</p><h2>Como funciona</h2><ol><li>Voce configura uma URL de callback</li><li>Um evento ocorre no WhatsApp</li><li>A Ze da API envia um POST com os dados do evento</li><li>Seu servidor processa e responde com 200 OK</li></ol>",
+                  "status": "published",
+                  "seoTitle": "Webhook - O que e | Glossario Ze da API",
+                  "seoDescription": "Entenda o que sao webhooks e como usa-los na Ze da API.",
+                  "relatedSlugs": [
+                    "api",
+                    "http",
+                    "callback"
+                  ],
+                  "createdAt": "2026-01-15T10:00:00.000Z",
+                  "updatedAt": "2026-02-10T14:00:00.000Z"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Glossary Terms"
+        ],
+        "summary": "Atualizar termo do glossario",
+        "description": "Atualiza parcialmente um termo. Se o nome mudar, o slug e recalculado.",
+        "operationId": "updateGlossaryTerm",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "cm5gls001"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "term": {
+                    "type": "string"
+                  },
+                  "definition": {
+                    "type": "string"
+                  },
+                  "content": {
+                    "type": "string"
+                  },
+                  "seoTitle": {
+                    "type": "string"
+                  },
+                  "seoDescription": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "draft",
+                      "published"
+                    ]
+                  },
+                  "relatedSlugs": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "examples": {
+                "publicar": {
+                  "summary": "Publicar termo rascunho",
+                  "value": {
+                    "status": "published"
+                  }
+                },
+                "atualizar-definicao": {
+                  "summary": "Atualizar definicao e termos relacionados",
+                  "value": {
+                    "definition": "Nova definicao mais clara e completa do termo.",
+                    "relatedSlugs": [
+                      "api",
+                      "http",
+                      "callback",
+                      "endpoint"
+                    ]
+                  }
+                },
+                "adicionar-conteudo": {
+                  "summary": "Adicionar conteudo expandido",
+                  "value": {
+                    "content": "<h2>Explicacao detalhada</h2><p>Este termo refere-se a...</p>",
+                    "seoTitle": "Webhook - Definicao Completa | Glossario",
+                    "seoDescription": "Entenda o que sao webhooks e como usa-los."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Termo atualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlossaryTerm"
+                },
+                "example": {
+                  "id": "cm5gls001",
+                  "term": "Webhook",
+                  "slug": "webhook",
+                  "definition": "Nova definicao mais clara e completa do termo.",
+                  "content": "<h2>Explicacao detalhada</h2><p>Este termo refere-se a um mecanismo de callback HTTP...</p>",
+                  "status": "published",
+                  "seoTitle": "Webhook - Definicao Completa | Glossario",
+                  "seoDescription": "Entenda o que sao webhooks e como usa-los.",
+                  "relatedSlugs": [
+                    "api",
+                    "http",
+                    "callback",
+                    "endpoint"
+                  ],
+                  "createdAt": "2026-01-15T10:00:00.000Z",
+                  "updatedAt": "2026-02-21T17:00:00.000Z"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Glossary Terms"
+        ],
+        "summary": "Excluir termo do glossario",
+        "operationId": "deleteGlossaryTerm",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "cm5gls001"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Termo excluido",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/api/admin/content/upload": {
+      "post": {
+        "tags": [
+          "Upload"
+        ],
+        "summary": "Upload de midia",
+        "description": "Faz upload de midias para o S3. Suporta 4 modos:\n\n1. **Multipart file upload** — envia arquivo diretamente\n2. **Base64** — envia dados em base64 via JSON\n3. **YouTube** — registra video do YouTube (retorna URL formatada)\n4. **URL** — registra URL externa de midia\n\n**Tipos aceitos:**\n- Imagens: jpg, jpeg, png, webp, gif, svg (max 10MB)\n- Videos: mp4, webm (max 50MB)\n- Audio: mp3, wav, ogg (max 10MB)",
+        "operationId": "uploadMedia",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Arquivo de midia (imagem, video ou audio)"
+                  }
+                }
+              }
+            },
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "type"
+                ],
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "base64",
+                      "youtube",
+                      "url"
+                    ],
+                    "description": "Modo de upload"
+                  },
+                  "data": {
+                    "type": "string",
+                    "description": "Dados em base64 (obrigatorio para type=base64)"
+                  },
+                  "filename": {
+                    "type": "string",
+                    "description": "Nome do arquivo com extensao (obrigatorio para type=base64)"
+                  },
+                  "mimeType": {
+                    "type": "string",
+                    "description": "MIME type do arquivo (obrigatorio para type=base64)"
+                  },
+                  "url": {
+                    "type": "string",
+                    "description": "URL do video/midia (obrigatorio para type=youtube e type=url)"
+                  }
+                }
+              },
+              "examples": {
+                "base64-imagem": {
+                  "summary": "Upload de imagem via base64",
+                  "value": {
+                    "type": "base64",
+                    "data": "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQ...",
+                    "filename": "screenshot.png",
+                    "mimeType": "image/png"
+                  }
+                },
+                "youtube": {
+                  "summary": "Registrar video do YouTube",
+                  "value": {
+                    "type": "youtube",
+                    "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                  }
+                },
+                "youtube-short": {
+                  "summary": "YouTube com URL curta",
+                  "value": {
+                    "type": "youtube",
+                    "url": "https://youtu.be/dQw4w9WgXcQ"
+                  }
+                },
+                "url-externa": {
+                  "summary": "Referencia a URL externa",
+                  "value": {
+                    "type": "url",
+                    "url": "https://images.unsplash.com/photo-123456?w=1200"
+                  }
+                },
+                "base64-audio": {
+                  "summary": "Upload de audio via base64",
+                  "value": {
+                    "type": "base64",
+                    "data": "SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4...",
+                    "filename": "podcast-ep1.mp3",
+                    "mimeType": "audio/mpeg"
+                  }
+                },
+                "base64-video": {
+                  "summary": "Upload de video via base64",
+                  "value": {
+                    "type": "base64",
+                    "data": "AAAAGGZ0eXBpc29tAAACAGlzb21pc28y...",
+                    "filename": "demo.mp4",
+                    "mimeType": "video/mp4"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Upload realizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadResult"
+                },
+                "examples": {
+                  "imagem-s3": {
+                    "summary": "Imagem enviada ao S3",
+                    "value": {
+                      "url": "https://s3.example.com/blog/2026/02/a1b2c3d4-screenshot.png",
+                      "s3Key": "blog/2026/02/a1b2c3d4-screenshot.png",
+                      "type": "image",
+                      "mimeType": "image/png",
+                      "sizeBytes": 245760,
+                      "filename": "screenshot.png"
+                    }
+                  },
+                  "youtube": {
+                    "summary": "Video YouTube registrado",
+                    "value": {
+                      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                      "s3Key": null,
+                      "type": "youtube",
+                      "mimeType": null,
+                      "sizeBytes": null,
+                      "filename": null
+                    }
+                  },
+                  "url-externa": {
+                    "summary": "URL externa registrada",
+                    "value": {
+                      "url": "https://images.unsplash.com/photo-123456?w=1200",
+                      "s3Key": null,
+                      "type": "url",
+                      "mimeType": null,
+                      "sizeBytes": null,
+                      "filename": null
+                    }
+                  },
+                  "video-s3": {
+                    "summary": "Video enviado ao S3",
+                    "value": {
+                      "url": "https://s3.example.com/blog/2026/02/e5f6g7h8-demo.mp4",
+                      "s3Key": "blog/2026/02/e5f6g7h8-demo.mp4",
+                      "type": "video",
+                      "mimeType": "video/mp4",
+                      "sizeBytes": 15728640,
+                      "filename": "demo.mp4"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erro de validacao",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "tipo-invalido": {
+                    "summary": "Tipo de arquivo nao suportado",
+                    "value": {
+                      "error": "Unsupported file type: .pdf. Supported: jpg, jpeg, png, webp, gif, svg, mp4, webm, mp3, wav, ogg"
+                    }
+                  },
+                  "muito-grande": {
+                    "summary": "Arquivo excede o limite",
+                    "value": {
+                      "error": "File too large. Maximum video size: 50MB"
+                    }
+                  },
+                  "campos-faltando": {
+                    "summary": "Campos obrigatorios para base64",
+                    "value": {
+                      "error": "Missing required fields for base64 upload: data, filename, mimeType"
+                    }
+                  },
+                  "youtube-invalido": {
+                    "summary": "URL YouTube invalida",
+                    "value": {
+                      "error": "Invalid YouTube URL"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    }
+  }
+}
