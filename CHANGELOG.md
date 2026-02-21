@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.10.0](https://github.com/Setup-Automatizado/zedaapi/compare/v3.9.2...v3.10.0) (2026-02-21)
+
+### Features
+
+* **db:** add blog, support, and glossary content models ([0d78277](https://github.com/Setup-Automatizado/zedaapi/commit/0d782774d4c2f76e0cba1df86c4e4a9c618fd704))
+* **content:** add blog, support, and glossary with admin CRUD ([76ba1cc](https://github.com/Setup-Automatizado/zedaapi/commit/76ba1ccd59c077684a15304826ba5cb826a88f8e))
+* **api:** add content management REST API with OpenAPI spec ([8e035e8](https://github.com/Setup-Automatizado/zedaapi/commit/8e035e8f1658d182592c892c404c629a6760a481))
+* **seo:** add dynamic sitemap, robots.txt, and LLMs.txt ([00209bc](https://github.com/Setup-Automatizado/zedaapi/commit/00209bca4991874c9fc934e0bbc0d6db4ac1a748))
+* **landing:** redesign landing page with modular hero and new components ([db95532](https://github.com/Setup-Automatizado/zedaapi/commit/db955327db8c4986ca52e5a40a1cd63f370741e8))
+
 ## [3.9.2](https://github.com/Setup-Automatizado/zedaapi/compare/v3.9.1...v3.9.2) (2026-02-21)
 
 ### Bug Fixes
