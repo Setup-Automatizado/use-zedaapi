@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.10.1](https://github.com/Setup-Automatizado/zedaapi/compare/v3.10.0...v3.10.1) (2026-02-21)
+
+### Bug Fixes
+
+* **api:** correct app name encoding in manifest.json ([19ae6f1](https://github.com/Setup-Automatizado/zedaapi/commit/19ae6f1d2db5c39150790f7eb7f31b69173f0c6f))
+
 ## [3.10.0](https://github.com/Setup-Automatizado/zedaapi/compare/v3.9.2...v3.10.0) (2026-02-21)
 
 ### Features
