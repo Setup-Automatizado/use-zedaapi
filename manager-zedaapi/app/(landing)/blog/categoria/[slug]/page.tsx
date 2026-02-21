@@ -25,7 +25,7 @@ export async function generateMetadata({
 		title: `${category.name} - Blog Zé da API`,
 		description:
 			category.description ??
-			`Artigos sobre ${category.name} no blog da Zé da API.`,
+			`Artigos sobre ${category.name} no blog do Zé da API.`,
 		alternates: {
 			canonical: `https://zedaapi.com/blog/categoria/${category.slug}`,
 		},

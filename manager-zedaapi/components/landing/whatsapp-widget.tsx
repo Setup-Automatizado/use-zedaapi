@@ -22,7 +22,7 @@ import { submitWidgetForm } from "@/server/actions/contact";
 
 const WHATSAPP_NUMBER =
 	process.env.NEXT_PUBLIC_CONTACT_WHATSAPP ?? "5521971532700";
-const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Olá! Vim pelo site da Zé da API e gostaria de saber mais sobre a plataforma.")}`;
+const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("Olá! Vim pelo site do Zé da API e gostaria de saber mais sobre a plataforma.")}`;
 
 type WidgetView = "closed" | "menu" | "form" | "success";
 

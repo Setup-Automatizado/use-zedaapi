@@ -15,11 +15,11 @@ import { db } from "@/lib/db";
 export const metadata: Metadata = {
 	title: "Central de Suporte - Zé da API",
 	description:
-		"Encontre respostas para suas duvidas sobre a Zé da API. Artigos de suporte, tutoriais e guias para usar a plataforma.",
+		"Encontre respostas para suas duvidas sobre o Zé da API. Artigos de suporte, tutoriais e guias para usar a plataforma.",
 	openGraph: {
 		title: "Central de Suporte - Zé da API",
 		description:
-			"Central de suporte com artigos e tutoriais para a Zé da API.",
+			"Central de suporte com artigos e tutoriais para o Zé da API.",
 		url: "https://zedaapi.com/suporte",
 	},
 	alternates: {

@@ -4,7 +4,7 @@ import { LegalLayout } from "@/components/landing/legal-layout";
 export const metadata: Metadata = {
 	title: "LGPD - Direitos do Titular - Zé da API",
 	description:
-		"Conheça seus direitos como titular de dados pessoais segundo a LGPD (Lei 13.709/2018). Saiba como exercer seus direitos na plataforma Zé da API.",
+		"Conheça seus direitos como titular de dados pessoais segundo a LGPD (Lei 13.709/2018). Saiba como exercer seus direitos na plataforma do Zé da API.",
 };
 
 export default function LGPDPage() {
@@ -48,13 +48,13 @@ export default function LGPDPage() {
 				2. Lista Completa de Direitos (Arts. 17 a 22 da LGPD)
 			</h2>
 			<p>
-				Como titular de dados pessoais tratados pela Zé da API, você tem
+				Como titular de dados pessoais tratados pelo Zé da API, você tem
 				direito a:
 			</p>
 
 			<h3>2.1. Confirmação de Tratamento (Art. 18, I)</h3>
 			<p>
-				Você tem o direito de obter a confirmação de que a Zé da API
+				Você tem o direito de obter a confirmação de que o Zé da API
 				realiza tratamento de seus dados pessoais. Mediante solicitação,
 				informaremos se possuímos dados pessoais seus em nossas bases e
 				quais categorias de dados são tratadas.
@@ -165,7 +165,7 @@ export default function LGPDPage() {
 			<p>
 				Você tem o direito de ser informado sobre a possibilidade de não
 				fornecer consentimento e sobre as consequências da negativa. No
-				caso da Zé da API:
+				caso do Zé da API:
 			</p>
 			<ul>
 				<li>
@@ -343,7 +343,7 @@ export default function LGPDPage() {
 			</p>
 			<p>
 				<strong>5.2.</strong> Caso o titular não esteja satisfeito com a
-				resposta da Zé da API a uma solicitação de exercício de
+				resposta do Zé da API a uma solicitação de exercício de
 				direitos, ou acredite que seus dados pessoais estejam sendo
 				tratados em desconformidade com a LGPD, ele pode apresentar
 				petição à ANPD:

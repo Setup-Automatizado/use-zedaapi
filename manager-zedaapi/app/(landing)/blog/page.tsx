@@ -37,7 +37,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
 				<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 					<div className="mx-auto max-w-2xl text-center">
 						<h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-							Blog da Zé da API
+							Blog do Zé da API
 						</h1>
 						<p className="mt-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
 							Artigos, tutoriais e novidades sobre WhatsApp API,
@@ -82,7 +82,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
 					__html: JSON.stringify({
 						"@context": "https://schema.org",
 						"@type": "Blog",
-						name: "Blog da Zé da API",
+						name: "Blog do Zé da API",
 						description:
 							"Artigos sobre WhatsApp API e automação de mensagens.",
 						url: "https://zedaapi.com/blog",

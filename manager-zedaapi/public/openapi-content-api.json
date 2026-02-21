@@ -56,7 +56,7 @@
           "excerpt": {
             "type": "string",
             "nullable": true,
-            "example": "Aprenda a integrar a WhatsApp API rapidamente com a Zé da API."
+            "example": "Aprenda a integrar a WhatsApp API rapidamente com o Zé da API."
           },
           "coverImageUrl": {
             "type": "string",
@@ -80,7 +80,7 @@
           "seoDescription": {
             "type": "string",
             "nullable": true,
-            "example": "Guia passo a passo para integrar a WhatsApp Business API usando a Zé da API."
+            "example": "Guia passo a passo para integrar a WhatsApp Business API usando o Zé da API."
           },
           "seoKeywords": {
             "type": "string",
@@ -740,7 +740,7 @@
                   "title": {
                     "type": "string",
                     "description": "Titulo do post",
-                    "example": "Como usar webhooks na Zé da API"
+                    "example": "Como usar webhooks no Zé da API"
                   },
                   "content": {
                     "type": "string",
@@ -781,7 +781,7 @@
                   "seoDescription": {
                     "type": "string",
                     "description": "Descricao SEO (meta description)",
-                    "example": "Guia completo sobre como configurar e usar webhooks na Zé da API para receber mensagens WhatsApp em tempo real."
+                    "example": "Guia completo sobre como configurar e usar webhooks no Zé da API para receber mensagens WhatsApp em tempo real."
                   },
                   "seoKeywords": {
                     "type": "string",
@@ -803,7 +803,7 @@
                 "rascunho": {
                   "summary": "Criar como rascunho",
                   "value": {
-                    "title": "Como usar webhooks na Zé da API",
+                    "title": "Como usar webhooks no Zé da API",
                     "content": "<h2>O que sao webhooks?</h2><p>Webhooks permitem receber notificacoes em tempo real quando uma mensagem chega no seu numero WhatsApp.</p><h2>Configurando</h2><p>1. Acesse o painel</p><p>2. Va em Configuracoes > Webhooks</p><p>3. Insira a URL do seu servidor</p>",
                     "excerpt": "Aprenda a configurar webhooks para receber mensagens em tempo real.",
                     "categoryId": "cm5cat001",
@@ -812,21 +812,21 @@
                       "cm5tag002"
                     ],
                     "seoTitle": "Webhooks WhatsApp API - Guia Completo | Zé da API",
-                    "seoDescription": "Guia completo sobre como configurar webhooks na Zé da API.",
+                    "seoDescription": "Guia completo sobre como configurar webhooks no Zé da API.",
                     "seoKeywords": "webhook, whatsapp api, notificacao"
                   }
                 },
                 "publicar-direto": {
                   "summary": "Criar e publicar direto",
                   "value": {
-                    "title": "Novidades da Zé da API - Fevereiro 2026",
+                    "title": "Novidades do Zé da API - Fevereiro 2026",
                     "content": "<h2>O que ha de novo</h2><p>Neste mes lancamos diversas melhorias...</p>",
                     "excerpt": "Confira as novidades de fevereiro 2026.",
                     "coverImageUrl": "https://s3.example.com/blog/2026/02/cover-novidades.webp",
                     "categoryId": "cm5cat002",
                     "status": "published",
                     "seoTitle": "Novidades Fevereiro 2026 | Zé da API",
-                    "seoDescription": "Veja tudo que lancamos em fevereiro 2026 na Zé da API."
+                    "seoDescription": "Veja tudo que lancamos em fevereiro 2026 no Zé da API."
                   }
                 }
               }
@@ -843,7 +843,7 @@
                 },
                 "example": {
                   "id": "cm5newpost001",
-                  "title": "Como usar webhooks na Zé da API",
+                  "title": "Como usar webhooks no Zé da API",
                   "slug": "como-usar-webhooks-na-ze-da-api",
                   "content": "<h2>O que sao webhooks?</h2><p>Webhooks permitem...</p>",
                   "excerpt": "Aprenda a configurar webhooks para receber mensagens em tempo real.",
@@ -931,12 +931,12 @@
                   "id": "cm5abc123def456",
                   "title": "Como integrar WhatsApp API em 5 minutos",
                   "slug": "como-integrar-whatsapp-api-em-5-minutos",
-                  "content": "<h2>Introducao</h2><p>Neste artigo voce vai aprender como integrar a WhatsApp Business API usando a Ze da API em apenas 5 minutos.</p><h2>Pre-requisitos</h2><ul><li>Conta na Ze da API</li><li>Numero WhatsApp</li></ul><h2>Passo 1</h2><p>Acesse o painel e clique em Nova Instancia...</p>",
-                  "excerpt": "Aprenda a integrar a WhatsApp API rapidamente com a Ze da API.",
+                  "content": "<h2>Introducao</h2><p>Neste artigo voce vai aprender como integrar a WhatsApp Business API usando o Zé da API em apenas 5 minutos.</p><h2>Pre-requisitos</h2><ul><li>Conta no Zé da API</li><li>Numero WhatsApp</li></ul><h2>Passo 1</h2><p>Acesse o painel e clique em Nova Instancia...</p>",
+                  "excerpt": "Aprenda a integrar a WhatsApp API rapidamente com o Zé da API.",
                   "coverImageUrl": "https://s3.example.com/blog/2026/02/cover-whatsapp-api.webp",
                   "status": "published",
                   "seoTitle": "Integrar WhatsApp API - Guia Completo 2026",
-                  "seoDescription": "Guia passo a passo para integrar a WhatsApp Business API usando a Ze da API.",
+                  "seoDescription": "Guia passo a passo para integrar a WhatsApp Business API usando o Zé da API.",
                   "seoKeywords": "whatsapp api, integracao, tutorial, webhook",
                   "readingTimeMin": 5,
                   "viewCount": 142,
@@ -1116,7 +1116,7 @@
                   "excerpt": "Aprenda a integrar rapidamente.",
                   "coverImageUrl": "https://s3.example.com/blog/2026/02/cover-whatsapp-api.webp",
                   "status": "published",
-                  "seoTitle": "Titulo SEO Atualizado | Ze da API",
+                  "seoTitle": "Titulo SEO Atualizado | Zé da API",
                   "seoDescription": "Descricao SEO atualizada para melhor ranking.",
                   "seoKeywords": "whatsapp api, integracao",
                   "readingTimeMin": 4,
@@ -1235,7 +1235,7 @@
                 },
                 "example": {
                   "id": "cm5abc123def456",
-                  "title": "Como usar webhooks na Zé da API",
+                  "title": "Como usar webhooks no Zé da API",
                   "slug": "como-usar-webhooks-na-ze-da-api",
                   "status": "published",
                   "publishedAt": "2026-02-21T14:30:00.000Z"
@@ -1863,7 +1863,7 @@
                   },
                   "seoDescription": {
                     "type": "string",
-                    "example": "Aprenda a conectar seu numero WhatsApp na Zé da API em poucos passos."
+                    "example": "Aprenda a conectar seu numero WhatsApp no Zé da API em poucos passos."
                   },
                   "status": {
                     "type": "string",
@@ -1909,8 +1909,8 @@
                   "status": "published",
                   "sortOrder": 2,
                   "viewCount": 0,
-                  "seoTitle": "Conectar WhatsApp - Suporte Ze da API",
-                  "seoDescription": "Aprenda a conectar seu numero WhatsApp na Ze da API em poucos passos.",
+                  "seoTitle": "Conectar WhatsApp - Suporte Zé da API",
+                  "seoDescription": "Aprenda a conectar seu numero WhatsApp no Zé da API em poucos passos.",
                   "categoryId": "cm5scat001",
                   "createdAt": "2026-02-21T16:00:00.000Z",
                   "updatedAt": "2026-02-21T16:00:00.000Z",
@@ -1979,8 +1979,8 @@
                   "status": "published",
                   "sortOrder": 1,
                   "viewCount": 89,
-                  "seoTitle": "Criar Instancia WhatsApp - Suporte Ze da API",
-                  "seoDescription": "Aprenda a criar sua primeira instancia WhatsApp na Ze da API.",
+                  "seoTitle": "Criar Instancia WhatsApp - Suporte Zé da API",
+                  "seoDescription": "Aprenda a criar sua primeira instancia WhatsApp no Zé da API.",
                   "categoryId": "cm5scat001",
                   "createdAt": "2026-01-20T10:00:00.000Z",
                   "updatedAt": "2026-02-10T14:30:00.000Z",
@@ -2578,7 +2578,7 @@
                   },
                   "seoDescription": {
                     "type": "string",
-                    "example": "Entenda o que e uma API Key, como funciona e como usar na Zé da API."
+                    "example": "Entenda o que e uma API Key, como funciona e como usar no Zé da API."
                   },
                   "status": {
                     "type": "string",
@@ -2710,10 +2710,10 @@
                   "term": "Webhook",
                   "slug": "webhook",
                   "definition": "Mecanismo de notificacao HTTP que envia dados em tempo real quando um evento ocorre.",
-                  "content": "<p>Webhooks sao callbacks HTTP que permitem que aplicacoes recebam notificacoes em tempo real. Quando um evento ocorre (por exemplo, uma mensagem WhatsApp recebida), o servidor envia automaticamente um POST HTTP para a URL configurada.</p><h2>Como funciona</h2><ol><li>Voce configura uma URL de callback</li><li>Um evento ocorre no WhatsApp</li><li>A Ze da API envia um POST com os dados do evento</li><li>Seu servidor processa e responde com 200 OK</li></ol>",
+                  "content": "<p>Webhooks sao callbacks HTTP que permitem que aplicacoes recebam notificacoes em tempo real. Quando um evento ocorre (por exemplo, uma mensagem WhatsApp recebida), o servidor envia automaticamente um POST HTTP para a URL configurada.</p><h2>Como funciona</h2><ol><li>Voce configura uma URL de callback</li><li>Um evento ocorre no WhatsApp</li><li>A Zé da API envia um POST com os dados do evento</li><li>Seu servidor processa e responde com 200 OK</li></ol>",
                   "status": "published",
-                  "seoTitle": "Webhook - O que e | Glossario Ze da API",
-                  "seoDescription": "Entenda o que sao webhooks e como usa-los na Ze da API.",
+                  "seoTitle": "Webhook - O que e | Glossario Zé da API",
+                  "seoDescription": "Entenda o que sao webhooks e como usa-los no Zé da API.",
                   "relatedSlugs": [
                     "api",
                     "http",

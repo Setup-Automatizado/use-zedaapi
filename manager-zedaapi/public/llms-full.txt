@@ -117,17 +117,17 @@ Configure URLs de webhook para receber eventos:
 
 ## Perguntas Frequentes
 
-### O que e a Zé da API?
+### O que e o Zé da API?
 E uma plataforma que oferece API REST para integracao com WhatsApp, permitindo automacao de mensagens e gerenciamento de multiplas instancias.
 
 ### Preciso de um numero WhatsApp Business?
-Nao. A Zé da API funciona com numeros WhatsApp comuns. Voce conecta seu numero via QR Code.
+Nao. O Zé da API funciona com numeros WhatsApp comuns. Voce conecta seu numero via QR Code.
 
 ### Quantas mensagens posso enviar?
 Nao ha limite de mensagens no plano. O limite e por instancia (conexao WhatsApp), nao por volume.
 
 ### A API e compativel com Z-API?
-Sim. A Zé da API oferece compatibilidade com o formato de webhooks da Z-API, facilitando migracoes.
+Sim. O Zé da API oferece compatibilidade com o formato de webhooks da Z-API, facilitando migracoes.
 
 ### Como funciona o suporte?
 Oferecemos suporte por email, WhatsApp e documentacao completa. Planos superiores incluem suporte prioritario e dedicado.

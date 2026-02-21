@@ -12,11 +12,11 @@ import { ContactForm } from "@/components/landing/contact-form";
 export const metadata: Metadata = {
 	title: "Contato - Zé da API",
 	description:
-		"Entre em contato com a equipe da Zé da API. Estamos prontos para ajudar com duvidas comerciais, suporte tecnico e parcerias.",
+		"Entre em contato com a equipe do Zé da API. Estamos prontos para ajudar com duvidas comerciais, suporte tecnico e parcerias.",
 	openGraph: {
 		title: "Contato - Zé da API",
 		description:
-			"Entre em contato com a equipe da Zé da API. Suporte comercial e tecnico.",
+			"Entre em contato com a equipe do Zé da API. Suporte comercial e tecnico.",
 		url: "https://zedaapi.com/contato",
 	},
 	alternates: {
