@@ -541,12 +541,14 @@ async function handleChargeRefunded(charge: Stripe.Charge) {
 		amountRefunded: charge.amount_refunded,
 	});
 
+	const invoiceRef = (
+		charge as Stripe.Charge & { invoice?: string | Stripe.Invoice | null }
+	).invoice;
+
 	// Send refund notification
-	if (charge.amount_refunded && charge.invoice) {
+	if (charge.amount_refunded && invoiceRef) {
 		const stripeInvoiceId =
-			typeof charge.invoice === "string"
-				? charge.invoice
-				: charge.invoice.id;
+			typeof invoiceRef === "string" ? invoiceRef : invoiceRef.id;
 
 		const localInvoice = await db.invoice.findUnique({
 			where: { stripeInvoiceId },
