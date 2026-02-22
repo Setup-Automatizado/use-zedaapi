@@ -1,0 +1,44 @@
+name: Feature Request
+description: Sugerir uma nova funcionalidade ou melhoria
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Tem uma ideia para melhorar o Zé da API? Adoramos ouvir sugestões!
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Descrição da Funcionalidade
+      description: Descreva a funcionalidade que você gostaria de ver.
+      placeholder: Eu gostaria que a API pudesse...
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Caso de Uso
+      description: Em que situação essa funcionalidade seria útil para você?
+      placeholder: No meu projeto, preciso...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativas Consideradas
+      description: Você já tentou alguma alternativa ou workaround?
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Prioridade para você
+      options:
+        - Baixa — seria legal ter
+        - Média — me ajudaria bastante
+        - Alta — bloqueia meu projeto
+    validations:
+      required: true
