@@ -105,7 +105,9 @@ export function SignUpForm() {
 			name: values.name,
 			email: values.email,
 			password: values.password,
-			inviteCode: values.inviteCode || undefined,
+			fetchOptions: values.inviteCode
+				? { headers: { "x-invite-code": values.inviteCode } }
+				: undefined,
 		});
 
 		if (result.error) {
