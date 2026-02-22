@@ -34,7 +34,7 @@ export default function TrialEndingEmail({
 		<Html>
 			<Head />
 			<Preview>
-				Seu teste encerra em {daysRemaining} dias — Zé da API Manager
+				{`Seu teste encerra em ${daysRemaining} dias — Zé da API Manager`}
 			</Preview>
 			<Body style={main}>
 				<Container style={container}>
