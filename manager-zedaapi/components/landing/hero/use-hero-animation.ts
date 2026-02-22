@@ -114,7 +114,9 @@ export function useHeroAnimation(enabled: boolean) {
 	const charTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 	// Ref to read chatMessages without including in useEffect deps (avoids infinite loop)
 	const chatMessagesRef = useRef(state.chatMessages);
-	chatMessagesRef.current = state.chatMessages;
+	useEffect(() => {
+		chatMessagesRef.current = state.chatMessages;
+	}, [state.chatMessages]);
 
 	const clearTimers = useCallback(() => {
 		if (timerRef.current) {
