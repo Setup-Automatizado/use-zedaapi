@@ -19,7 +19,13 @@ export const auth = betterAuth({
 		enabled: true,
 		requireEmailVerification: false,
 
-		sendResetPassword: async ({ user, url }) => {
+		sendResetPassword: async ({
+			user,
+			url,
+		}: {
+			user: { email: string; name?: string | null };
+			url: string;
+		}) => {
 			const { sendTemplateEmail } = await import("@/lib/email");
 			await sendTemplateEmail(user.email, "magic-link", {
 				userName: user.name || "Usuário",
@@ -27,7 +33,13 @@ export const auth = betterAuth({
 				subject: "Redefinição de senha — Zé da API Manager",
 			});
 		},
-		sendVerificationEmail: async ({ user, url }) => {
+		sendVerificationEmail: async ({
+			user,
+			url,
+		}: {
+			user: { email: string; name?: string | null };
+			url: string;
+		}) => {
 			const { sendTemplateEmail } = await import("@/lib/email");
 			await sendTemplateEmail(user.email, "magic-link", {
 				userName: user.name || "Usuário",
