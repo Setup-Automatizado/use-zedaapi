@@ -325,6 +325,61 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  # =================== POSTGRES INIT (extra databases) ===================
+  postgres_init_zedaapi:
+    image: postgres:17-alpine
+    networks:
+      - network_public
+    environment:
+      - PGPASSWORD=922GAvaUvxw4dSZoWAdtGFpKclNHkz
+      - TZ=America/Sao_Paulo
+    entrypoint:
+      - sh
+      - -c
+      - |
+        echo "Waiting for Postgres at postgres_zedaapi:5432..."
+        MAX_RETRIES=30
+        retries=0
+        until pg_isready -h postgres_zedaapi -p 5432 -U zedaapi -d zedaapi_app >/dev/null 2>&1; do
+          retries=$$((retries + 1))
+          if [ "$$retries" -ge "$$MAX_RETRIES" ]; then
+            echo "ERROR: Postgres not available after $$MAX_RETRIES attempts"
+            exit 1
+          fi
+          echo "Waiting for Postgres... (attempt $$retries/$$MAX_RETRIES)"
+          sleep 2
+        done
+
+        create_db() {
+          DB_NAME=$$1
+          echo "Ensuring database $$DB_NAME exists..."
+          psql -h postgres_zedaapi -p 5432 -U zedaapi -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname='$$DB_NAME'" | grep -q 1 \
+            && echo "  Database $$DB_NAME already exists" \
+            || psql -h postgres_zedaapi -p 5432 -U zedaapi -d postgres -c "CREATE DATABASE $$DB_NAME"
+        }
+
+        create_db zedaapi_app
+        create_db zedaapi_store
+        create_db manager_zedaapi
+
+        echo "Postgres databases verified."
+        exit 0
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 5
+        window: 120s
+      placement:
+        constraints:
+          - node.role == manager
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 128M
+
   # =================== REDIS 7 ===================
   redis_zedaapi:
     image: redis:7-alpine
