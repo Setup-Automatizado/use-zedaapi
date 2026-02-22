@@ -76,8 +76,9 @@ async function syncStripePrice(
 		}
 
 		return price.id;
-	} catch (error: any) {
-		console.log(`  ❌ Stripe Sync Error (${plan.slug}):`, error.message);
+	} catch (error: unknown) {
+		const message = error instanceof Error ? error.message : String(error);
+		console.log(`  ❌ Stripe Sync Error (${plan.slug}):`, message);
 		return null;
 	}
 }
@@ -151,8 +152,9 @@ async function ensureStripeWebhook(stripe: Stripe): Promise<string | null> {
 		}
 
 		return endpoint.secret ?? null;
-	} catch (error: any) {
-		console.log(`  ❌ Webhook Error:`, error.message);
+	} catch (error: unknown) {
+		const message = error instanceof Error ? error.message : String(error);
+		console.log(`  ❌ Webhook Error:`, message);
 		return null;
 	}
 }
