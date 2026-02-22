@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.12.1](https://github.com/Setup-Automatizado/zedaapi/compare/v3.12.0...v3.12.1) (2026-02-22)
+
+### Bug Fixes
+
+* **stripe:** handle optional charge invoice ([bb9c2db](https://github.com/Setup-Automatizado/zedaapi/commit/bb9c2db954cecfed44e70ed7c4ef752e702b9ab9))
+* **auth:** pass invite code via header ([23a59b6](https://github.com/Setup-Automatizado/zedaapi/commit/23a59b65b25ded1b55c35f91cdec6f2a4d9dc3b3))
+* **email:** render preview as string ([f000ed8](https://github.com/Setup-Automatizado/zedaapi/commit/f000ed85f2835f36f48527f8dec64101a7d3503f))
+* **auth:** type email callback params ([5425ebc](https://github.com/Setup-Automatizado/zedaapi/commit/5425ebc1a7fa0d17717a42f41b6407ec9e788c10))
+* **landing:** update refs outside render ([b1cb129](https://github.com/Setup-Automatizado/zedaapi/commit/b1cb1291d24f54c7631ee7b8400b691a82e81ab4))
+
+### Code Refactoring
+
+* **theme:** avoid setState in effect ([45bc53e](https://github.com/Setup-Automatizado/zedaapi/commit/45bc53e09325df5ba50adaa88d54f5f0d896086c))
+* **blog:** use next/image for media ([7edc914](https://github.com/Setup-Automatizado/zedaapi/commit/7edc914cf06d8695aa3265a6dd837b2055e2086d))
+
 ## [3.12.0](https://github.com/Setup-Automatizado/zedaapi/compare/v3.11.1...v3.12.0) (2026-02-21)
 
 ### Features
