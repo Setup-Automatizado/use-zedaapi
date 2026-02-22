@@ -193,7 +193,6 @@ async function BlogContent({
 							excerpt={post.excerpt}
 							coverImageUrl={post.coverImageUrl}
 							categoryName={post.category?.name ?? null}
-							categorySlug={post.category?.slug ?? null}
 							authorName={post.author.name}
 							publishedAt={post.publishedAt}
 							readingTimeMin={post.readingTimeMin}

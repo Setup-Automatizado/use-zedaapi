@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 interface MediaRendererProps {
 	type: string;
 	url: string;
@@ -70,11 +72,13 @@ export function MediaRenderer({ type, url, alt, caption }: MediaRendererProps) {
 
 	return (
 		<figure className="my-6">
-			<img
+			<Image
 				src={url}
 				alt={alt ?? ""}
-				className="w-full rounded-xl"
-				loading="lazy"
+				width={1200}
+				height={800}
+				className="h-auto w-full rounded-xl"
+				unoptimized
 			/>
 			{caption && (
 				<figcaption className="mt-2 text-center text-sm text-muted-foreground">

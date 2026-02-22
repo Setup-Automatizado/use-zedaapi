@@ -1,6 +1,7 @@
 import { ArrowLeft, Calendar, Clock, Eye } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { MediaRenderer } from "@/components/blog/media-renderer";
 import { PostCard } from "@/components/blog/post-card";
@@ -139,10 +140,13 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 			{/* Cover Hero */}
 			{post.coverImageUrl && (
 				<section className="relative h-64 overflow-hidden sm:h-80 lg:h-96">
-					<img
+					<Image
 						src={post.coverImageUrl}
 						alt={post.title}
-						className="size-full object-cover"
+						fill
+						sizes="100vw"
+						className="object-cover"
+						unoptimized
 					/>
 					<div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
 				</section>
@@ -191,10 +195,13 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 							<div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
 								<div className="flex items-center gap-2">
 									{post.author.image ? (
-										<img
+										<Image
 											src={post.author.image}
 											alt={post.author.name}
-											className="size-7 rounded-full"
+											width={28}
+											height={28}
+											className="rounded-full"
+											unoptimized
 										/>
 									) : (
 										<div className="flex size-7 items-center justify-center rounded-full bg-primary/10 text-xs font-medium text-primary">
@@ -284,9 +291,6 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 										coverImageUrl={related.coverImageUrl}
 										categoryName={
 											related.category?.name ?? null
-										}
-										categorySlug={
-											related.category?.slug ?? null
 										}
 										authorName={related.author.name}
 										publishedAt={related.publishedAt}

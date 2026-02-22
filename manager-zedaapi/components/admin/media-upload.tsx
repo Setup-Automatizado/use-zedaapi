@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import Image from "next/image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -168,10 +169,13 @@ export function MediaUpload({
 							<CardContent>
 								<div className="flex items-center gap-3">
 									{uploadedFile.type.startsWith("image/") ? (
-										<img
+										<Image
 											src={uploadedFile.url}
 											alt={uploadedFile.filename}
-											className="size-16 rounded-lg border object-cover"
+											width={64}
+											height={64}
+											className="rounded-lg border object-cover"
+											unoptimized
 										/>
 									) : (
 										<div className="flex size-16 items-center justify-center rounded-lg border bg-muted">

@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -450,11 +451,16 @@ export function BlogFormClient({
 						<CardContent className="space-y-4">
 							{coverImageUrl ? (
 								<div className="relative">
-									<img
-										src={coverImageUrl}
-										alt="Capa do post"
-										className="aspect-video w-full rounded-lg border object-cover"
-									/>
+									<div className="relative aspect-video w-full overflow-hidden rounded-lg border">
+										<Image
+											src={coverImageUrl}
+											alt="Capa do post"
+											fill
+											sizes="(min-width: 1024px) 60vw, 100vw"
+											className="object-cover"
+											unoptimized
+										/>
+									</div>
 									<Button
 										type="button"
 										variant="destructive"
