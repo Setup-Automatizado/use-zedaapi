@@ -1,15 +1,21 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 import { useTheme } from "next-themes";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
+function useMounted(): boolean {
+	return useSyncExternalStore(
+		() => () => undefined,
+		() => true,
+		() => false,
+	);
+}
+
 export function ThemeToggle({ className }: { className?: string }) {
 	const { resolvedTheme, setTheme } = useTheme();
-	const [mounted, setMounted] = useState(false);
-
-	useEffect(() => setMounted(true), []);
+	const mounted = useMounted();
 
 	const toggle = useCallback(() => {
 		setTheme(resolvedTheme === "dark" ? "light" : "dark");
