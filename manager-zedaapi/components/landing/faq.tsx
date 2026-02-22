@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useRef, useCallback } from "react";
 import Link from "next/link";
-import { motion, useInView, AnimatePresence } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import {
 	SearchIcon,
 	RocketIcon,

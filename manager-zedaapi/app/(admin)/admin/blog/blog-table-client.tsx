@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useTransition, useMemo } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
 	Plus,
@@ -80,7 +79,6 @@ export function BlogTableClient({
 	initialItems,
 	initialTotal,
 }: BlogTableClientProps) {
-	const router = useRouter();
 	const [items, setItems] = useState<BlogPost[]>(initialItems);
 	const [total, setTotal] = useState(initialTotal);
 	const [page, setPage] = useState(1);
